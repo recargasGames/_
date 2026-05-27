@@ -113,7 +113,10 @@ async function enviarPedido(){
     }
 
     try {
+        alert("Paso 1: Iniciando el proceso. Datos cargados:\nID: " + jugadorId + "\nJuego: " + juego + "\nProducto: " + producto);
+
         // 1. Guardar directo en Firebase
+        alert("Paso 2: Conectando con Firebase...");
         await db.collection("pedidos").add({
             usuario: jugadorId,
             juego: juego,
@@ -125,9 +128,10 @@ async function enviarPedido(){
         });
 
         // 2. Formatear y mandar el mensaje a Telegram
+        alert("Paso 3: Guardado en Firebase con éxito. Enviando a Telegram...");
         const mensajeTexto = `🛒 NUEVO PEDIDO RECIBIDO\n\n🎮 Juego: ${juego}\n👤 Cliente/ID: ${jugadorId}\n💎 Producto: ${producto}\n💵 Precio: $${precioUsd}\n💳 Vía de Pago: ${metodoPago}\n📄 Referencia: ${referencia}`;
 
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        const respuesta = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -135,16 +139,24 @@ async function enviarPedido(){
                 text: mensajeTexto
             })
         });
+        
+        const resultadoLog = await respuesta.json();
+        
+        if(!resultadoLog.ok) {
+            alert("Telegram dio un error interno: " + resultadoLog.description);
+        }
 
         alert("¡Tu pedido ha sido enviado con éxito! ✅ Tu recarga se procesará en minutos.");
         
         localStorage.clear();
-        window.location.href = "freefire.html"; // Redirige al inicio
+        window.location.href = "freefire.html";
 
     } catch (error) {
-        console.error(error);
-        alert("Hubo un error al procesar el envío.");
+        // SI ALGO SE ROMPE, ESTA ALERTA TE MOSTRARÁ EL ERROR EN LA PANTALLA DEL MÓVIL
+        alert("🚨 ERROR DETECTADO: " + error.message);
     }
+}
+    
 }
 </script>
 </body>
