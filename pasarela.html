@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pasarela de Pago</title>
+<style>
+body{background:#030712;color:white;font-family:sans-serif;padding:20px;margin:0;}
+.card{background:#0b1220;border:1px solid #1f2937;border-radius:20px;padding:20px;margin-bottom:20px;}
+.title{font-size:22px;font-weight:bold;margin-bottom:15px;}
+.text-row{display:flex;justify-content:space-between;align-items:center;background:#111827;padding:12px 15px;border-radius:12px;margin-bottom:10px;border:1px solid #1f2937;}
+.text-info{color:#d1d5db;font-size:16px;}
+.btn-copy{background:#1e3a8a;color:#60a5fa;border:none;padding:8px 15px;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;}
+.btn-copy:active{background:#2563eb;color:white;}
+.input{width:100%;height:55px;border:none;border-radius:14px;background:#111827;color:white;padding:15px;font-size:18px;box-sizing:border-box;margin-top:10px;border:1px solid #1f2937;}
+.btn{width:100%;height:55px;border:none;border-radius:14px;background:#2563eb;color:white;font-size:22px;font-weight:bold;margin-top:20px;cursor:pointer;}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div class="card">
+    <div class="title">💳 Datos de Transferencia</div>
+    <div id="metodoSeleccionado" style="font-weight:bold; color:#60a5fa; margin-bottom:15px; font-size:18px;"></div>
+    
+    <div id="datosPago">
+        <div class="text-row">
+            <span class="text-info">Banco: <b>Venezuela</b></span>
+        </div>
+        <div class="text-row">
+            <span class="text-info">Teléfono: <b id="telData">04228242411</b></span>
+            <button class="btn-copy" onclick="copiarTexto('04228242411')">📋 Copiar</button>
+        </div>
+        <div class="text-row">
+            <span class="text-info">Cédula: <b id="ciData">32824869</b></span>
+            <button class="btn-copy" onclick="copiarTexto('32824869')">📋 Copiar</button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="title">📄 Confirmar Reporte</div>
+    <input type="text" class="input" id="referencia" placeholder="Ingresa los números de la referencia">
+    <button class="btn" onclick="enviarPedido()">✅ Completar pedido</button>
+</div>
+
+<script>
+// Configuración de tu Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+    authDomain: "recargasgames-14c38.firebaseapp.com",
+    projectId: "recargasgames-14c38",
+    storageBucket: "recargasgames-14c38.firebasestorage.app",
+    messagingSenderId: "370952235234",
+    appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+};
+
+// Inicializar Firebase tradicional
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Credenciales fijas de tu Bot de Telegram
+const TELEGRAM_TOKEN = "8507458446:AAELLs-vpfikmyWFVJT7vJG7T4N0yXJ8FyY";
+const TELEGRAM_CHAT_ID = "8452807558";
+
+// Recuperar los datos guardados de la pantalla del juego
+const jugadorId = localStorage.getItem('id_jugador') || "Desconocido";
+const juego = localStorage.getItem('juego_seleccionado') || "No especificado";
+const producto = localStorage.getItem('producto_seleccionado') || "No especificado";
+const precioUsd = localStorage.getItem('precio_usd') || "0.00";
+const metodoPago = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
+
+document.getElementById('metodoSeleccionado').innerText = `Método Elegido: ${metodoPago}`;
+
+// Si eligió Binance, cambia los datos y los botones de copiar automáticamente
+if(metodoPago.includes("BINANCE")){
+    document.getElementById('datosPago').innerHTML = `
+        <div class="text-row">
+            <span class="text-info">Red: <b>Binance Pay (Pay ID)</b></span>
+        </div>
+        <div class="text-row">
+            <span class="text-info">ID de Pago: <b>370952235</b></span>
+            <button class="btn-copy" onclick="copiarTexto('370952235')">📋 Copiar</button>
+        </div>
+        <div class="text-row">
+            <span class="text-info">Correo: <b>transacciones@recargasgames.com</b></span>
+            <button class="btn-copy" onclick="copiarTexto('transacciones@recargasgames.com')">📋 Copiar</button>
+        </div>
+    `;
+}
+
+// Función especial para copiar datos directo en teléfonos móviles
+function copiarTexto(texto) {
+    const inputTemporal = document.createElement("input");
+    inputTemporal.setAttribute("value", texto);
+    document.body.appendChild(inputTemporal);
+    inputTemporal.select();
+    inputTemporal.setSelectionRange(0, 99999); // Para teléfonos
+    document.execCommand("copy");
+    document.body.removeChild(inputTemporal);
+    alert("¡Copiado al portapapeles! 📋: " + texto);
+}
+
+// Función principal de envío
+async function enviarPedido(){
+    let referencia = document.getElementById("referencia").value.trim();
+
+    if(referencia === ""){
+        alert("Por favor, ingresa el número de referencia para validar tu pago.");
+        return;
+    }
+
+    try {
+        // 1. Guardar directo en Firebase
+        await db.collection("pedidos").add({
+            usuario: jugadorId,
+            juego: juego,
+            producto: producto,
+            precio: precioUsd,
+            referencia: referencia,
+            estado: "Pendiente",
+            fecha: new Date()
+        });
+
+        // 2. Formatear y mandar el mensaje a Telegram
+        const mensajeTexto = `🛒 NUEVO PEDIDO RECIBIDO\n\n🎮 Juego: ${juego}\n👤 Cliente/ID: ${jugadorId}\n💎 Producto: ${producto}\n💵 Precio: $${precioUsd}\n💳 Vía de Pago: ${metodoPago}\n📄 Referencia: ${referencia}`;
+
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CHAT_ID,
+                text: mensajeTexto
+            })
+        });
+
+        alert("¡Tu pedido ha sido enviado con éxito! ✅ Tu recarga se procesará en minutos.");
+        
+        localStorage.clear();
+        window.location.href = "freefire.html"; // Redirige al inicio
+
+    } catch (error) {
+        console.error(error);
+        alert("Hubo un error al procesar el envío.");
+    }
+}
+</script>
+</body>
+</html>
