@@ -21,67 +21,118 @@
             background: rgba(11, 18, 32, 0.95); 
             padding: 35px; 
             border-radius: 24px; 
-            border: 1px solid #1f2937; 
+            border: 1px solid #dc2626; 
             width: 90%; 
             max-width: 350px; 
             text-align: center; 
             backdrop-filter: blur(10px);
         }
-        h2 { 
-            color: #f97316; 
-            margin-bottom: 25px; 
+        h2 { color: #dc2626; margin-bottom: 25px; }
+        
+        .input-group {
+            position: relative;
+            margin: 12px 0;
         }
         input { 
             width: 100%; 
             height: 50px; 
-            margin: 10px 0; 
             border-radius: 12px; 
             border: 1px solid #1f2937; 
             background: #0b1220; 
             color: white; 
-            padding: 15px; 
+            padding: 15px;
             box-sizing: border-box; 
             font-size: 16px; 
+            text-align: center;
         }
+        input:focus { 
+            outline: none; 
+            border-color: #dc2626; 
+        }
+        
         button { 
             width: 100%; 
             height: 50px; 
-            background: #f97316; 
+            background: #dc2626; 
             color: white; 
-            border: none; 
+            border: none;
             border-radius: 12px; 
             cursor: pointer; 
             font-weight: bold; 
             margin-top: 15px; 
-            font-size: 16px; 
-            transition: 0.2s; 
+            font-size: 16px;
+            transition: 0.2s;
         }
-        button:hover { 
-            background: #ea580c; 
-        }
-        .register-link { 
+        button:hover { background: #b91c1c; }
+        
+        .register-link, .forgot-link { 
             color: #60a5fa; 
             text-decoration: none; 
             display: block; 
-            margin-top: 20px; 
-            font-size: 14px;
+            margin-top: 15px; 
+            font-size: 14px; 
         }
-        .register-link:hover {
-            text-decoration: underline;
+        .register-link:hover, .forgot-link:hover { text-decoration: underline; }
+        
+        .error-msg { 
+            color: #ef4444; 
+            font-size: 14px; 
+            margin-top: 10px; 
+            display: none; 
         }
-        .error-msg {
-            color: #ef4444;
-            font-size: 14px;
-            margin-top: 10px;
+        
+        .logo { margin-bottom: 20px; }
+        .logo img { height: 50px; width: auto; }
+        
+        .modal {
             display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
         }
-        .logo {
-            margin-bottom: 20px;
+        .modal-content {
+            background: #111827;
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 380px;
+            width: 90%;
+            border: 1px solid #dc2626;
+            text-align: center;
         }
-        .logo img {
-            height: 50px;
-            width: auto;
+        .modal-content h3 { color: #dc2626; margin-bottom: 15px; }
+        .modal-content p { color: #9ca3af; font-size: 13px; margin-bottom: 15px; }
+        .modal-content input { width: 100%; margin: 10px 0; height: 45px; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .modal-buttons button { margin-top: 0; flex: 1; }
+        .close-modal { background: #1f2937; color: white; }
+        .close-modal:hover { background: #374151; }
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-top: 2px solid #dc2626;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .info-box {
+            background: #1f2937;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .info-box p { margin: 5px 0; font-size: 12px; color: #cbd5e1; }
+        .info-box .highlight { color: #f97316; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -92,73 +143,43 @@
     </div>
     <h2>🔐 Iniciar Sesión</h2>
     
-    <input type="email" id="email" placeholder="Correo electrónico">
-    <input type="password" id="password" placeholder="Contraseña">
+    <div class="input-group">
+        <input type="text" id="usuario" placeholder="Usuario / Correo electrónico" autocomplete="username">
+    </div>
     
-    <button id="loginBtn">Ingresar</button>
+    <div class="input-group">
+        <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
+    </div>
+    
+    <button id="loginBtn">Iniciar Sesión</button>
     
     <div id="errorMsg" class="error-msg"></div>
     
+    <a href="#" class="forgot-link" onclick="abrirModalRecuperar(); return false;">¿Olvidaste tu contraseña?</a>
     <a href="register.html" class="register-link">📝 ¿No tienes cuenta? Regístrate aquí</a>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-        authDomain: "recargasgames-14c38.firebaseapp.com",
-        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-        projectId: "recargasgames-14c38",
-        storageBucket: "recargasgames-14c38.firebasestorage.app",
-        messagingSenderId: "370952235234",
-        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    
-    const loginBtn = document.getElementById("loginBtn");
-    const errorMsg = document.getElementById("errorMsg");
-    
-    loginBtn.addEventListener("click", async () => {
-        errorMsg.style.display = "none";
-        
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-        
-        if (!email || !password) {
-            errorMsg.textContent = "❌ Completa todos los campos";
-            errorMsg.style.display = "block";
-            return;
-        }
-        
-        loginBtn.textContent = "Ingresando...";
-        loginBtn.disabled = true;
-        
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            window.location.href = "perfil.html";
-        } catch (error) {
-            if (error.code === 'auth/invalid-credential') {
-                errorMsg.textContent = "❌ Correo o contraseña incorrectos";
-            } else if (error.code === 'auth/user-not-found') {
-                errorMsg.textContent = "❌ Usuario no encontrado. Regístrate primero";
-            } else {
-                errorMsg.textContent = "❌ Error: " + error.message;
-            }
-            errorMsg.style.display = "block";
-        } finally {
-            loginBtn.textContent = "Ingresar";
-            loginBtn.disabled = false;
-        }
-    });
-    
-    document.getElementById("password").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") loginBtn.click();
-    });
-</script>
+<div id="modalRecuperar" class="modal">
+    <div class="modal-content">
+        <h3>🔐 Recuperar Contraseña</h3>
+        <p>Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña</p>
+        <input type="email" id="resetEmail" placeholder="Tu correo electrónico">
+        <div class="modal-buttons">
+            <button onclick="enviarRecuperacion()">Enviar</button>
+            <button class="close-modal" onclick="cerrarModalRecuperar()">Cancelar</button>
+        </div>
+        <div id="resetSpinner" class="spinner"></div>
+        <div id="resetMsg" style="font-size: 12px; margin-top: 10px; display: none;"></div>
+        <div id="infoBox" class="info-box" style="display: none;">
+            <p>✅ <strong>¡Correo enviado!</strong></p>
+            <p>📧 Revisa tu <span class="highlight">BANDEJA DE ENTRADA</span></p>
+            <p>⚠️ Si no lo encuentras, revisa la carpeta de <span class="highlight">SPAM o CORREO NO DESEADO</span></p>
+            <p>📩 Agrega <span class="highlight">noreply@recargasgames-14c38.firebaseapp.com</span> a tus contactos</p>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="login.js"></script>
 
 </body>
 </html>

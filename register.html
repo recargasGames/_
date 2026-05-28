@@ -1,69 +1,123 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro - RECARGASGAMES</title>
-<style>
-body{ background: #0b1220; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
-.card{ background: #111827; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid #1f2937; }
-h2{ text-align: center; margin-bottom: 20px; }
-input{ width: 100%; height: 50px; margin-bottom: 15px; border: none; border-radius: 12px; padding: 15px; background: #0b1220; color: white; box-sizing: border-box; border: 1px solid #1f2937; }
-button{ width: 100%; height: 50px; border: none; border-radius: 12px; background: #2563eb; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
-a{ color: #60a5fa; text-decoration: none; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - RECARGASGAMES</title>
+    <style>
+        body { 
+            background-image: url('fondo.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .register-box { 
+            background: rgba(11, 18, 32, 0.95); 
+            padding: 30px; 
+            border-radius: 24px; 
+            border: 1px solid #dc2626; 
+            width: 90%; 
+            max-width: 380px; 
+            text-align: center; 
+            backdrop-filter: blur(10px);
+        }
+        h2 { color: #dc2626; margin-bottom: 20px; }
+        
+        .input-group {
+            margin: 12px 0;
+        }
+        input { 
+            width: 100%; 
+            height: 48px; 
+            border-radius: 12px; 
+            border: 1px solid #1f2937; 
+            background: #0b1220; 
+            color: white; 
+            padding: 12px;
+            box-sizing: border-box; 
+            font-size: 14px; 
+            text-align: center;
+        }
+        input:focus { 
+            outline: none; 
+            border-color: #dc2626; 
+        }
+        
+        button { 
+            width: 100%; 
+            height: 48px; 
+            background: #dc2626; 
+            color: white; 
+            border: none;
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin-top: 15px; 
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        button:hover { background: #b91c1c; }
+        
+        a { 
+            color: #60a5fa; 
+            text-decoration: none; 
+            display: block; 
+            margin-top: 15px; 
+            font-size: 14px; 
+        }
+        a:hover { text-decoration: underline; }
+        
+        .error-msg { 
+            color: #ef4444; 
+            font-size: 13px; 
+            margin-top: 10px; 
+            display: none; 
+        }
+        
+        .logo { margin-bottom: 20px; }
+        .logo img { height: 50px; width: auto; }
+    </style>
 </head>
 <body>
-<div class="card">
-<h2>Crear Cuenta</h2>
-<input type="text" id="nombre" placeholder="Nombre completo">
-<input type="email" id="email" placeholder="Correo electrónico">
-<input type="password" id="password" placeholder="Contraseña">
-<button id="registerBtn">Registrarme</button>
-<p style="text-align:center;margin-top:15px;">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+
+<div class="register-box">
+    <div class="logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+    </div>
+    <h2>📝 Crear Cuenta</h2>
+    
+    <form id="registerForm">
+        <div class="input-group">
+            <input type="text" id="nombre" placeholder="Nombre completo" autocomplete="name" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Correo electrónico" autocomplete="email" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" autocomplete="new-password" required>
+        </div>
+        
+        <button type="submit">Registrarme</button>
+    </form>
+    
+    <div id="errorMsg" class="error-msg"></div>
+    
+    <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-        authDomain: "recargasgames-14c38.firebaseapp.com",
-        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-        projectId: "recargasgames-14c38",
-        storageBucket: "recargasgames-14c38.firebasestorage.app",
-        messagingSenderId: "370952235234",
-        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    
-    document.getElementById("registerBtn").addEventListener("click", async () => {
-        const nombre = document.getElementById("nombre").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-        
-        if (!nombre || !email || !password) {
-            alert("Completa todos los campos");
-            return;
-        }
-        
-        if (password.length < 6) {
-            alert("La contraseña debe tener al menos 6 caracteres");
-            return;
-        }
-        
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            await updateProfile(userCredential.user, { displayName: nombre });
-            alert("Cuenta creada exitosamente");
-            window.location.href = "login.html";
-        } catch (error) {
-            alert("Error: " + error.message);
-        }
-    });
-</script>
+<script type="module" src="register.js"></script>
+
 </body>
 </html>
