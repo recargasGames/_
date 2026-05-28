@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - RECARGASGAMES</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-image: url('fondo.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        /* Pantalla de login */
+        .login-admin {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-box {
+            background: rgba(11, 18, 32, 0.95);
+            border: 1px solid #dc2626;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+        }
+        .login-box h2 { color: #dc2626; margin-bottom: 20px; }
+        .login-box input {
+            width: 100%; height: 45px; margin: 10px 0; border-radius: 10px;
+            border: 1px solid #1f2937; background: #111827; color: white; padding: 10px;
+        }
+        .login-box button {
+            width: 100%; height: 45px; background: #dc2626; color: white;
+            border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;
+        }
+        .error { color: #ef4444; margin-top: 10px; display: none; }
+        
+        /* Panel Admin */
+        .header {
+            background: rgba(11, 18, 32, 0.95);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dc2626;
+        }
+        .brand { font-size: 18px; font-weight: bold; color: #dc2626; }
+        .main { padding: 15px; max-width: 100%; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .stat-card {
+            background: rgba(11, 18, 32, 0.9);
+            border: 1px solid #1f2937;
+            border-radius: 14px;
+            padding: 10px;
+            text-align: center;
+        }
+        .stat-number { font-size: 22px; font-weight: bold; color: #dc2626; }
+        .stat-label { font-size: 11px; color: #9ca3af; }
+        .filters {
+            background: rgba(11, 18, 32, 0.85);
+            border: 1px solid #1f2937;
+            border-radius: 14px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-select, .filter-search {
+            background: #111827;
+            border: 1px solid #1f2937;
+            color: white;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        .filter-search { flex: 1; min-width: 150px; }
+        .refresh-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .table-container {
+            background: rgba(11, 18, 32, 0.85);
+            border: 1px solid #1f2937;
+            border-radius: 14px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 700px; }
+        th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #1f2937; }
+        th { background: #1f2937; color: #dc2626; }
+        .badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; display: inline-block; }
+        .badge-pendiente { background: #f97316; }
+        .badge-completado { background: #22c55e; }
+        .btn-complete { background: #22c55e; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; margin: 2px; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; margin: 2px; }
+        .no-pedidos { text-align: center; color: #9ca3af; padding: 30px; }
+        .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 15px; flex-wrap: wrap; }
+        .page-btn { background: #111827; border: 1px solid #1f2937; color: white; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+        .page-btn.active { background: #dc2626; }
+        .logout-btn {
+            background: #dc2626;
+            margin-top: 20px;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            justify-content: center; align-items: center;
+        }
+        .modal-content { background: #111827; padding: 20px; border-radius: 16px; max-width: 90%; width: 400px; border: 1px solid #dc2626; }
+        .modal-detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1f2937; font-size: 12px; }
+        .close-modal { background: #dc2626; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<!-- PANTALLA DE LOGIN -->
+<div class="login-admin" id="loginPanel">
+    <div class="login-box">
+        <h2>🔐 Acceso Administrador</h2>
+        <input type="email" id="adminEmail" placeholder="Correo autorizado">
+        <input type="password" id="adminPassword" placeholder="Contraseña">
+        <button onclick="verificarAcceso()">Ingresar al Panel</button>
+        <div id="errorMsg" class="error"></div>
+    </div>
+</div>
+
+<!-- PANEL ADMIN (oculto hasta login) -->
+<div id="adminContent" style="display: none;">
+    <div class="header">
+        <div class="brand">⚙️ PANEL ADMIN - RECARGASGAMES</div>
+    </div>
+
+    <div class="main">
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number" id="totalPedidos">0</div><div class="stat-label">Total</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalPendientes">0</div><div class="stat-label">Pendientes</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalCompletados">0</div><div class="stat-label">Completados</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalGanado">0</div><div class="stat-label">💰 Ganado</div></div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <select id="filtroEstado" class="filter-select">
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="completado">Completados</option>
+            </select>
+            <input type="text" id="searchInput" class="filter-search" placeholder="Buscar por usuario o referencia...">
+            <button class="refresh-btn" onclick="recargar()">🔄 Actualizar</button>
+        </div>
+
+        <!-- Tabla -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>#</th><th>Usuario</th><th>Juego</th><th>Producto</th><th>Monto</th><th>Referencia</th><th>Estado</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="listaPedidos"><tr><td colspan="8" class="no-pedidos">Cargando...</td></tr></tbody>
+            </table>
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <!-- Cerrar sesión -->
+        <div class="logout-btn" onclick="cerrarSesionAdmin()">🚪 Cerrar Sesión Admin</div>
+    </div>
+</div>
+
+<!-- Modal detalles -->
+<div id="modalDetalles" class="modal">
+    <div class="modal-content">
+        <h3>📋 Detalles del Pedido</h3>
+        <div id="modalBody"></div>
+        <button class="close-modal" onclick="cerrarModal()">Cerrar</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // ⚠️ CAMBIA ESTE CORREO POR EL TUYO ⚠️
+    const ADMIN_EMAIL = "aa3964063@gmail.com";
+
+    let pedidos = [];
+    let currentPage = 1;
+    const porPagina = 10;
+
+    // Verificar acceso
+    window.verificarAcceso = async () => {
+        const email = document.getElementById("adminEmail").value.trim();
+        const password = document.getElementById("adminPassword").value;
+        const errorMsg = document.getElementById("errorMsg");
+        
+        if (email !== ADMIN_EMAIL) {
+            errorMsg.textContent = "❌ Correo no autorizado";
+            errorMsg.style.display = "block";
+            return;
+        }
+        
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            document.getElementById("loginPanel").style.display = "none";
+            document.getElementById("adminContent").style.display = "block";
+            cargarPedidos();
+        } catch (error) {
+            errorMsg.textContent = "❌ Contraseña incorrecta";
+            errorMsg.style.display = "block";
+        }
+    };
+
+    window.cerrarSesionAdmin = () => {
+        signOut(auth).then(() => {
+            document.getElementById("loginPanel").style.display = "flex";
+            document.getElementById("adminContent").style.display = "none";
+        });
+    };
+
+    // Cargar pedidos
+    function cargarPedidos() {
+        onValue(ref(db, 'pedidos'), (snapshot) => {
+            const data = snapshot.val();
+            pedidos = [];
+            if (data) for (let id in data) pedidos.push({ id, ...data[id] });
+            pedidos.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+            renderizar();
+        });
+    }
+
+    function filtrar() {
+        const estado = document.getElementById('filtroEstado').value;
+        const busqueda = document.getElementById('searchInput').value.toLowerCase();
+        let f = pedidos;
+        if (estado === 'pendiente') f = f.filter(p => p.estado !== 'Completado');
+        if (estado === 'completado') f = f.filter(p => p.estado === 'Completado');
+        if (busqueda) f = f.filter(p => 
+            (p.usuario && p.usuario.toLowerCase().includes(busqueda)) || 
+            (p.referencia && p.referencia.toLowerCase().includes(busqueda))
+        );
+        return f;
+    }
+
+    function actualizarStats() {
+        const f = filtrar();
+        const pendientes = f.filter(p => p.estado !== 'Completado').length;
+        const completados = f.filter(p => p.estado === 'Completado').length;
+        let ganado = 0;
+        f.forEach(p => { if (p.estado === 'Completado' && p.precio) ganado += parseFloat(p.precio.replace('Bs','')) || 0; });
+        document.getElementById('totalPedidos').innerText = f.length;
+        document.getElementById('totalPendientes').innerText = pendientes;
+        document.getElementById('totalCompletados').innerText = completados;
+        document.getElementById('totalGanado').innerText = ganado.toLocaleString('es-VE');
+    }
+
+    function renderizar() {
+        const filtrados = filtrar();
+        actualizarStats();
+        const totalPages = Math.ceil(filtrados.length / porPagina);
+        const start = (currentPage-1)*porPagina;
+        const paginados = filtrados.slice(start, start+porPagina);
+        const tbody = document.getElementById('listaPedidos');
+        
+        if (paginados.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="no-pedidos">Sin pedidos</td></tr>';
+            document.getElementById('pagination').innerHTML = '';
+            return;
+        }
+        
+        let html = '';
+        paginados.forEach((p, i) => {
+            const badge = p.estado === 'Completado' ? 'badge-completado' : 'badge-pendiente';
+            html += `<tr>
+                <td>${start+i+1}</td>
+                <td>${p.usuario || 'Anónimo'}</td>
+                <td>${p.juego || 'N/A'}</td>
+                <td>${p.producto || 'N/A'}</td>
+                <td>${p.precio || '0 Bs'}</td>
+                <td>${p.referencia || 'N/A'}</td>
+                <td><span class="badge ${badge}">${p.estado || 'Pendiente'}</span></td>
+                <td>
+                    <button class="btn-complete" onclick="verDetalle('${p.id}')" style="background:#2563eb;">👁️</button>
+                    <button class="btn-complete" onclick="completarPedido('${p.id}')" ${p.estado === 'Completado' ? 'disabled' : ''}>✅</button>
+                    <button class="btn-delete" onclick="eliminarPedido('${p.id}')">🗑️</button>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+        
+        let pages = '';
+        for (let i=1; i<=totalPages; i++) pages += `<button class="page-btn ${i===currentPage?'active':''}" onclick="irPagina(${i})">${i}</button>`;
+        document.getElementById('pagination').innerHTML = pages;
+    }
+
+    window.verDetalle = (id) => {
+        const p = pedidos.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('modalBody').innerHTML = `
+            <div class="modal-detail-row"><strong>Usuario:</strong> ${p.usuario || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Juego:</strong> ${p.juego || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Producto:</strong> ${p.producto || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Monto:</strong> ${p.precio || '0 Bs'}</div>
+            <div class="modal-detail-row"><strong>ID/Jugador:</strong> ${p.jugadorId || p.jugador || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Referencia:</strong> ${p.referencia || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Fecha:</strong> ${p.fecha || new Date(p.timestamp).toLocaleString()}</div>
+        `;
+        document.getElementById('modalDetalles').style.display = 'flex';
+    };
+    
+    window.cerrarModal = () => document.getElementById('modalDetalles').style.display = 'none';
+    
+    window.completarPedido = (id) => {
+        if (confirm('¿Marcar este pedido como COMPLETADO?')) {
+            update(ref(db, 'pedidos/'+id), { estado: 'Completado', fecha_completado: new Date().toLocaleString() });
+        }
+    };
+    
+    window.eliminarPedido = (id) => {
+        if (confirm('¿Eliminar este pedido permanentemente?')) {
+            remove(ref(db, 'pedidos/'+id));
+        }
+    };
+    
+    window.recargar = () => { currentPage = 1; renderizar(); };
+    window.irPagina = (page) => { currentPage = page; renderizar(); };
+    
+    document.getElementById('filtroEstado').onchange = () => { currentPage = 1; renderizar(); };
+    document.getElementById('searchInput').onkeyup = () => { currentPage = 1; renderizar(); };
+    
+    // Mantener sesión
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.email === ADMIN_EMAIL) {
+            document.getElementById("loginPanel").style.display = "none";
+            document.getElementById("adminContent").style.display = "block";
+            cargarPedidos();
+        }
+    });
+</script>
+</body>
+</html>
