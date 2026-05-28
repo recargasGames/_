@@ -5,103 +5,426 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pasarela de Pago - RECARGASGAMES</title>
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            background-image: url('fondo.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            background-attachment: fixed; 
-            color: white; 
-            font-family: 'Segoe UI', sans-serif; 
-            padding: 15px; 
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b1220;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        .container { width: 100%; max-width: 450px; background: rgba(11, 18, 32, 0.9); border: 2px solid #2563eb; border-radius: 20px; padding: 20px; }
-        
-        h2 { text-align: center; color: white; background: #2563eb; padding: 10px; border-radius: 10px; margin-bottom: 20px; font-size: 18px; }
 
-        .neon-card { border: 2px solid #a855f7; box-shadow: 0 0 10px #a855f7; background: #0b1220; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
-        .info-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .info-text { font-size: 13px; font-weight: bold; color: #cbd5e1; }
-        .info-value { font-size: 16px; color: #fff; display: block; margin-top: 5px; }
-        
-        .copy-btn { background: #1f2937; border: 1px solid #6366f1; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .copy-btn.copied { background: #22c55e !important; border-color: #22c55e !important; }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: rgba(11, 18, 32, 0.95);
+            border: 2px solid #2563eb;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+        }
 
-        .instrucciones { border: 2px solid #06b6d4; box-shadow: 0 0 10px #06b6d4; background: #0b1220; padding: 15px; border-radius: 15px; margin-bottom: 15px; text-align: center; font-size: 13px; }
-        .monto-box { border: 2px solid #22c55e; box-shadow: 0 0 10px #22c55e; background: #0b1220; padding: 15px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        
-        .input-box { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #374151; background: #0b1220; color: white; margin-bottom: 10px; text-align: center; font-size: 14px; }
-        .complete-btn { width: 100%; padding: 15px; background: #22c55e; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
+        h2 {
+            text-align: center;
+            color: white;
+            background: #2563eb;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        /* Tarjeta neón */
+        .neon-card {
+            border: 2px solid #a855f7;
+            box-shadow: 0 0 10px #a855f7;
+            background: #0b1220;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-text {
+            font-size: 13px;
+            font-weight: bold;
+            color: #cbd5e1;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #fff;
+            font-family: monospace;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .copy-btn {
+            background: #1f2937;
+            border: 1px solid #6366f1;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+        }
+
+        .copy-btn:hover {
+            background: #6366f1;
+        }
+
+        .copy-btn.copied {
+            background: #22c55e !important;
+            border-color: #22c55e !important;
+        }
+
+        /* Instrucciones neón */
+        .instrucciones {
+            border: 2px solid #06b6d4;
+            box-shadow: 0 0 10px #06b6d4;
+            background: #0b1220;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .instrucciones strong {
+            color: #06b6d4;
+        }
+
+        .example {
+            font-family: monospace;
+            font-size: 16px;
+            margin-top: 8px;
+            color: #06b6d4;
+        }
+
+        /* Monto neón */
+        .monto-box {
+            border: 2px solid #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+            background: #0b1220;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .monto-text {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .monto-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #22c55e;
+        }
+
+        /* Inputs */
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #374151;
+            background: #0b1220;
+            color: white;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .input-box:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        /* Botón completar */
+        .complete-btn {
+            width: 100%;
+            padding: 14px;
+            background: #22c55e;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            margin-top: 5px;
+        }
+
+        .complete-btn:hover {
+            background: #16a34a;
+            transform: scale(1.02);
+        }
+
+        .complete-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Toast */
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 9999;
+            animation: fadeOut 1.5s ease forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            70% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); display: none; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>💳 Método de Pago</h2>
-    
+
+    <!-- Tarjeta neón morada -->
     <div class="neon-card">
         <div class="info-row">
-            <div><span class="info-text">TELEFONO:</span><span class="info-value">04228242411</span></div>
-            <button class="copy-btn" onclick="copiar('04228242411', this)">☐</button>
+            <div>
+                <div class="info-text">🏦 BANCO:</div>
+                <div class="info-value">0102</div>
+            </div>
+            <button class="copy-btn" onclick="copiarTexto('0102', this)">☐</button>
         </div>
         <div class="info-row">
-            <div><span class="info-text">CEDULA:</span><span class="info-value">32824869</span></div>
-            <button class="copy-btn" onclick="copiar('32824869', this)">☐</button>
+            <div>
+                <div class="info-text">CÉDULA:</div>
+                <div class="info-value">32824869</div>
+            </div>
+            <button class="copy-btn" onclick="copiarTexto('32824869', this)">☐</button>
         </div>
         <div class="info-row">
-            <div><span class="info-text">BANCO:</span><span class="info-value">0102 BDV</span></div>
-            <button class="copy-btn" onclick="copiar('0102', this)">☐</button>
+            <div>
+                <div class="info-text">TELÉFONO:</div>
+                <div class="info-value">04228242411</div>
+            </div>
+            <button class="copy-btn" onclick="copiarTexto('04228242411', this)">☐</button>
         </div>
     </div>
 
+    <!-- Instrucciones neón celeste -->
     <div class="instrucciones">
-        ℹ️ REALIZA TU PAGO Y CARGA LA REFERENCIA<br>
-        EJEMPLO: 001432808801
+        ℹ️ <strong>REALIZA TU PAGO Y CARGA LA REFERENCIA</strong><br>
+        EJEMPLO: <span class="example">001432808801</span>
     </div>
 
+    <!-- Monto neón verde -->
     <div class="monto-box">
-        <div><span class="info-text">Monto a enviar:</span><br><span id="montoDisplay" style="color:#22c55e; font-size: 20px; font-weight: bold;">Bs 708.10</span></div>
-        <button class="copy-btn" onclick="copiar(document.getElementById('montoDisplay').innerText, this)">☐</button>
+        <div>
+            <div class="monto-text">💸 Monto a enviar:</div>
+            <div class="monto-value" id="montoMostrar">Bs 0.00</div>
+        </div>
+        <button class="copy-btn" onclick="copiarTexto(document.getElementById('montoMostrar').innerText, this)">☐</button>
     </div>
 
-    <input type="text" id="codigoDesc" class="input-box" placeholder="¿Código de descuento? " oninput="aplicarDesc()">
+    <!-- Código de descuento -->
+    <input type="text" id="codigoDescuento" class="input-box" placeholder="🎟️ ¿Código de descuento? " oninput="aplicarDescuento()">
+
+    <!-- Referencia -->
     <input type="text" id="referencia" class="input-box" placeholder="🧾 Ingresa tu Referencia">
 
-    <button class="complete-btn" onclick="completar()">✅ COMPLETAR PEDIDO</button>
+    <!-- Botón completar -->
+    <button class="complete-btn" onclick="completarPedido()">✅ COMPLETAR PEDIDO</button>
 </div>
 
+<script src="telegram.js"></script>
 <script>
-    function copiar(texto, btn) {
+    // Obtener datos del producto desde localStorage
+    let producto = localStorage.getItem('producto_seleccionado') || "Producto";
+    let precioOriginal = localStorage.getItem('precio_usd') || "0 Bs";
+    let jugador = localStorage.getItem('id_jugador') || "No especificado";
+    let metodo = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
+    let juego = localStorage.getItem('juego_seleccionado') || "JUEGO";
+    
+    // Mostrar el monto
+    let montoActual = precioOriginal;
+    document.getElementById("montoMostrar").innerHTML = precioOriginal;
+    
+    // Función para aplicar descuento
+    function aplicarDescuento() {
+        let codigo = document.getElementById("codigoDescuento").value.trim().toUpperCase();
+        let montoDisplay = document.getElementById("montoMostrar");
+        
+        if (codigo === "GAMES") {
+            let montoNumerico = parseFloat(precioOriginal.replace('Bs', '').replace('USDT', '').trim());
+            let descuento = montoNumerico * 0.15;
+            let nuevoMonto = montoNumerico - descuento;
+            montoActual = Math.round(nuevoMonto) + " Bs";
+            montoDisplay.innerHTML = montoActual;
+            montoDisplay.style.color = "#a855f7";
+            mostrarToast("🎉 Código aplicado: 15% de descuento");
+        } else if (codigo === "") {
+            montoActual = precioOriginal;
+            montoDisplay.innerHTML = precioOriginal;
+            montoDisplay.style.color = "#22c55e";
+        }
+    }
+    
+    // Función para copiar texto
+    function copiarTexto(texto, boton) {
         navigator.clipboard.writeText(texto).then(() => {
-            btn.innerText = "✓";
-            btn.classList.add("copied");
+            const textoOriginal = boton.innerText;
+            boton.innerText = "✓";
+            boton.classList.add("copied");
+            mostrarToast("✓ Copiado");
+            
             setTimeout(() => {
-                btn.innerText = "☐";
-                btn.classList.remove("copied");
-            }, 1500);
+                boton.innerText = textoOriginal;
+                boton.classList.remove("copied");
+            }, 1000);
+        }).catch(() => {
+            mostrarToast("❌ Error al copiar", "error");
         });
     }
     
-    function aplicarDesc() {
-        let cod = document.getElementById('codigoDesc').value.toUpperCase();
-        let display = document.getElementById('montoDisplay');
-        if(cod === "GAMES") {
-            display.innerText = "Bs 697.48";
-            display.style.color = "#a855f7";
-        } else {
-            display.innerText = "Bs 708.10";
-            display.style.color = "#22c55e";
+    // Mostrar notificación flotante
+    function mostrarToast(mensaje, tipo = "success") {
+        const toast = document.createElement("div");
+        toast.className = "copy-toast";
+        toast.innerText = mensaje;
+        if (tipo === "error") {
+            toast.style.background = "#ef4444";
+        }
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+    
+    // Función para completar el pedido
+    async function completarPedido() {
+        let referencia = document.getElementById("referencia").value.trim();
+        
+        if(referencia === "") {
+            mostrarToast("❌ Ingresa la referencia de pago", "error");
+            return;
+        }
+        
+        // Guardar referencia en localStorage
+        localStorage.setItem('referencia_pago', referencia);
+        localStorage.setItem('fecha_pedido', new Date().toLocaleString());
+        
+        const btn = document.querySelector(".complete-btn");
+        const textoOriginal = btn.innerText;
+        btn.innerText = "⏳ Enviando...";
+        btn.disabled = true;
+        
+        // Enviar a Telegram
+        await enviarTelegram(
+            producto,
+            montoActual,
+            jugador,
+            metodo,
+            juego,
+            referencia
+        );
+        
+        // Guardar pedido en Firebase
+        await guardarPedidoEnFirebase();
+        
+        btn.innerText = textoOriginal;
+        btn.disabled = false;
+        
+        // Redirigir al perfil
+        window.location.href = "perfil.html";
+    }
+    
+    // Función para guardar en Firebase
+    async function guardarPedidoEnFirebase() {
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+            const { getDatabase, ref, push, set } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+            const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+            
+            const firebaseConfig = {
+                apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+                authDomain: "recargasgames-14c38.firebaseapp.com",
+                databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+                projectId: "recargasgames-14c38",
+                storageBucket: "recargasgames-14c38.firebasestorage.app",
+                messagingSenderId: "370952235234",
+                appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+            };
+            
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const auth = getAuth(app);
+            
+            const user = await new Promise((resolve) => {
+                const unsubscribe = auth.onAuthStateChanged((user) => {
+                    unsubscribe();
+                    resolve(user);
+                });
+            });
+            
+            if (user) {
+                const pedidosRef = ref(db, 'pedidos');
+                const nuevoPedidoRef = push(pedidosRef);
+                
+                const pedidoData = {
+                    userId: user.uid,
+                    usuario: user.displayName || user.email,
+                    juego: juego,
+                    producto: producto,
+                    precio: montoActual,
+                    metodo: metodo,
+                    jugadorId: jugador,
+                    referencia: document.getElementById("referencia").value.trim(),
+                    estado: "Pendiente",
+                    fecha: new Date().toLocaleString(),
+                    timestamp: Date.now()
+                };
+                
+                await set(nuevoPedidoRef, pedidoData);
+                console.log("✅ Pedido guardado en Firebase");
+            }
+        } catch (error) {
+            console.error("❌ Error al guardar:", error);
         }
     }
-
-    function completar() {
-        let ref = document.getElementById('referencia').value;
-        if(!ref) { alert("¡Por favor, ingresa tu referencia de pago!"); return; }
-        alert("Pedido procesado con referencia: " + ref);
-    }
+    
+    // Funciones globales
+    window.copiarTexto = copiarTexto;
+    window.completarPedido = completarPedido;
+    window.aplicarDescuento = aplicarDescuento;
 </script>
+
 </body>
 </html>
