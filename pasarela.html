@@ -3,161 +3,382 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pasarela de Pago</title>
+<title>Pasarela de Pago - RECARGASGAMES</title>
 <style>
-body{background:#030712;color:white;font-family:sans-serif;padding:20px;margin:0;}
-.card{background:#0b1220;border:1px solid #1f2937;border-radius:20px;padding:20px;margin-bottom:20px;}
-.title{font-size:22px;font-weight:bold;margin-bottom:15px;}
-.text-row{display:flex;justify-content:space-between;align-items:center;background:#111827;padding:12px 15px;border-radius:12px;margin-bottom:10px;border:1px solid #1f2937;}
-.text-info{color:#d1d5db;font-size:16px;}
-.btn-copy{background:#1e3a8a;color:#60a5fa;border:none;padding:8px 15px;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;}
-.btn-copy:active{background:#2563eb;color:white;}
-.input{width:100%;height:55px;border:none;border-radius:14px;background:#111827;color:white;padding:15px;font-size:18px;box-sizing:border-box;margin-top:10px;border:1px solid #1f2937;}
-.btn{width:100%;height:55px;border:none;border-radius:14px;background:#2563eb;color:white;font-size:22px;font-weight:bold;margin-top:20px;cursor:pointer;}
-</style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+body {
+    background-image: url('fondo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.payment-card {
+    background: rgba(11, 18, 32, 0.95);
+    border: 1px solid #1f2937;
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #f97316;
+}
+
+.method-title {
+    background: #f97316;
+    display: inline-block;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #1f2937;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: 18px;
+}
+
+.info-value {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.copy-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.copy-btn.copied {
+    background: #22c55e;
+}
+
+.instruction {
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    background: rgba(249, 115, 22, 0.1);
+    border-radius: 12px;
+}
+
+.instruction p {
+    margin: 5px 0;
+}
+
+.example {
+    background: #1f2937;
+    padding: 8px;
+    border-radius: 8px;
+    text-align: center;
+    font-family: monospace;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.amount-box {
+    background: #1f2937;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.amount-label {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.amount-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #22c55e;
+}
+
+.reference-box {
+    margin: 20px 0;
+}
+
+.reference-box label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #f97316;
+}
+
+.reference-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #1f2937;
+    background: #111827;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    font-family: monospace;
+}
+
+.complete-btn {
+    width: 100%;
+    padding: 14px;
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.footer-text {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 11px;
+    margin-top: 15px;
+}
+
+.copy-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #22c55e;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    z-index: 9999;
+    animation: fadeOut 1.5s ease forwards;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { opacity: 0; display: none; }
+}
+</style>
 </head>
 <body>
 
-<div class="card">
-    <div class="title">💳 Datos de Transferencia</div>
-    <div id="metodoSeleccionado" style="font-weight:bold; color:#60a5fa; margin-bottom:15px; font-size:18px;"></div>
-    
-    <div id="datosPago">
-        <div class="text-row">
-            <span class="text-info">Banco: <b>Venezuela</b></span>
+<div class="container">
+    <div class="payment-card">
+        
+        <h1>💳 Método de Pago</h1>
+
+        <div style="text-align: center;">
+            <div class="method-title">💵 PAGO MOVIL</div>
         </div>
-        <div class="text-row">
-            <span class="text-info">Teléfono: <b id="telData">04228242411</b></span>
-            <button class="btn-copy" onclick="copiarTexto('04228242411')">📋 Copiar</button>
+
+        <div class="info-row">
+            <span class="info-label">🏦</span>
+            <span class="info-value">0102</span>
+            <button class="copy-btn" onclick="copiarTexto('0102', this)">Copiar</button>
         </div>
-        <div class="text-row">
-            <span class="text-info">Cédula: <b id="ciData">32824869</b></span>
-            <button class="btn-copy" onclick="copiarTexto('32824869')">📋 Copiar</button>
+        <div class="info-row">
+            <span class="info-label">🪪</span>
+            <span class="info-value">32824869</span>
+            <button class="copy-btn" onclick="copiarTexto('32824869', this)">Copiar</button>
         </div>
+        <div class="info-row">
+            <span class="info-label">📲</span>
+            <span class="info-value">04228242411</span>
+            <button class="copy-btn" onclick="copiarTexto('04228242411', this)">Copiar</button>
+        </div>
+
+        <div class="instruction">
+            <p>💰 <strong>REALIZA TU PAGO Y CARGA LA REFERENCIA</strong></p>
+            <p style="font-size: 12px;">EJEMPLO:</p>
+            <div class="example">001432808801</div>
+        </div>
+
+        <div class="amount-box">
+            <div class="amount-label">💸 Monto a enviar:</div>
+            <div class="amount-value" id="montoMostrar">Bs 0.00</div>
+        </div>
+
+        <div class="reference-box">
+            <label>🧾 REFERENCIA DE PAGO</label>
+            <input type="text" id="referencia" class="reference-input" placeholder="Ej: 001432808801">
+        </div>
+
+        <button class="complete-btn" onclick="completarPedido()">
+            ✅ COMPLETAR PEDIDO
+        </button>
+
+        <div class="footer-text">
+            Después de pagar, ingresa la referencia y presiona completar
+        </div>
+
     </div>
 </div>
 
-<div class="card">
-    <div class="title">📄 Confirmar Reporte</div>
-    <input type="text" class="input" id="referencia" placeholder="Ingresa los números de la referencia">
-    <button class="btn" onclick="enviarPedido()">✅ Completar pedido</button>
-</div>
-
+<script src="telegram.js"></script>
 <script>
-// Configuración de tu Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-    authDomain: "recargasgames-14c38.firebaseapp.com",
-    projectId: "recargasgames-14c38",
-    storageBucket: "recargasgames-14c38.firebasestorage.app",
-    messagingSenderId: "370952235234",
-    appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-};
-
-// Inicializar Firebase tradicional
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// Credenciales fijas de tu Bot de Telegram
-const TELEGRAM_TOKEN = "8507458446:AAELLs-vpfikmyWFVJT7vJG7T4N0yXJ8FyY";
-const TELEGRAM_CHAT_ID = "8452807558";
-
-// Recuperar los datos guardados de la pantalla del juego
-const jugadorId = localStorage.getItem('id_jugador') || "Desconocido";
-const juego = localStorage.getItem('juego_seleccionado') || "No especificado";
-const producto = localStorage.getItem('producto_seleccionado') || "No especificado";
-const precioUsd = localStorage.getItem('precio_usd') || "0.00";
-const metodoPago = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
-
-document.getElementById('metodoSeleccionado').innerText = `Método Elegido: ${metodoPago}`;
-
-// Si eligió Binance, cambia los datos y los botones de copiar automáticamente
-if(metodoPago.includes("BINANCE")){
-    document.getElementById('datosPago').innerHTML = `
-        <div class="text-row">
-            <span class="text-info">Red: <b>Binance Pay (Pay ID)</b></span>
-        </div>
-        <div class="text-row">
-            <span class="text-info">ID de Pago: <b>370952235</b></span>
-            <button class="btn-copy" onclick="copiarTexto('370952235')">📋 Copiar</button>
-        </div>
-        <div class="text-row">
-            <span class="text-info">Correo: <b>transacciones@recargasgames.com</b></span>
-            <button class="btn-copy" onclick="copiarTexto('transacciones@recargasgames.com')">📋 Copiar</button>
-        </div>
-    `;
-}
-
-// Función especial para copiar datos directo en teléfonos móviles
-function copiarTexto(texto) {
-    const inputTemporal = document.createElement("input");
-    inputTemporal.setAttribute("value", texto);
-    document.body.appendChild(inputTemporal);
-    inputTemporal.select();
-    inputTemporal.setSelectionRange(0, 99999); // Para teléfonos
-    document.execCommand("copy");
-    document.body.removeChild(inputTemporal);
-    alert("¡Copiado al portapapeles! 📋: " + texto);
-}
-
-// Función principal de envío
-async function enviarPedido(){
-    let referencia = document.getElementById("referencia").value.trim();
-
-    if(referencia === ""){
-        alert("Por favor, ingresa el número de referencia para validar tu pago.");
-        return;
-    }
-
-    try {
-        alert("Paso 1: Iniciando el proceso. Datos cargados:\nID: " + jugadorId + "\nJuego: " + juego + "\nProducto: " + producto);
-
-        // 1. Guardar directo en Firebase
-        alert("Paso 2: Conectando con Firebase...");
-        await db.collection("pedidos").add({
-            usuario: jugadorId,
-            juego: juego,
-            producto: producto,
-            precio: precioUsd,
-            referencia: referencia,
-            estado: "Pendiente",
-            fecha: new Date()
-        });
-
-        // 2. Formatear y mandar el mensaje a Telegram
-        alert("Paso 3: Guardado en Firebase con éxito. Enviando a Telegram...");
-        const mensajeTexto = `🛒 NUEVO PEDIDO RECIBIDO\n\n🎮 Juego: ${juego}\n👤 Cliente/ID: ${jugadorId}\n💎 Producto: ${producto}\n💵 Precio: $${precioUsd}\n💳 Vía de Pago: ${metodoPago}\n📄 Referencia: ${referencia}`;
-
-        const respuesta = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CHAT_ID,
-                text: mensajeTexto
-            })
-        });
-        
-        const resultadoLog = await respuesta.json();
-        
-        if(!resultadoLog.ok) {
-            alert("Telegram dio un error interno: " + resultadoLog.description);
-        }
-
-        alert("¡Tu pedido ha sido enviado con éxito! ✅ Tu recarga se procesará en minutos.");
-        
-        localStorage.clear();
-        window.location.href = "freefire.html";
-
-    } catch (error) {
-        // SI ALGO SE ROMPE, ESTA ALERTA TE MOSTRARÁ EL ERROR EN LA PANTALLA DEL MÓVIL
-        alert("🚨 ERROR DETECTADO: " + error.message);
-    }
-}
+    const producto = localStorage.getItem('producto_seleccionado') || "Producto";
+    const precio = localStorage.getItem('precio_usd') || "0 Bs";
+    const jugador = localStorage.getItem('id_jugador') || "No especificado";
+    const metodo = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
+    const juego = localStorage.getItem('juego_seleccionado') || "JUEGO";
     
-}
+    document.getElementById("montoMostrar").innerHTML = precio;
+    
+    console.log("Datos del pedido:", {producto, precio, jugador, metodo, juego});
+    
+    function copiarTexto(texto, boton) {
+        navigator.clipboard.writeText(texto).then(() => {
+            const textoOriginal = boton.innerText;
+            boton.innerText = "✓";
+            boton.classList.add("copied");
+            
+            setTimeout(() => {
+                boton.innerText = textoOriginal;
+                boton.classList.remove("copied");
+            }, 1000);
+        });
+    }
+    
+    function mostrarToast(mensaje) {
+        const toast = document.createElement("div");
+        toast.className = "copy-toast";
+        toast.innerText = mensaje;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1500);
+    }
+    
+    async function guardarPedidoEnFirebase(producto, precio, jugador, metodo, juego, referencia) {
+        try {
+            // Importar Firebase
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+            const { getDatabase, ref, push, set } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+            const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+            
+            const firebaseConfig = {
+                apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+                authDomain: "recargasgames-14c38.firebaseapp.com",
+                databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+                projectId: "recargasgames-14c38",
+                storageBucket: "recargasgames-14c38.firebasestorage.app",
+                messagingSenderId: "370952235234",
+                appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+            };
+            
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const auth = getAuth(app);
+            
+            // Esperar a que el usuario esté autenticado
+            const user = await new Promise((resolve) => {
+                const unsubscribe = auth.onAuthStateChanged((user) => {
+                    unsubscribe();
+                    resolve(user);
+                });
+            });
+            
+            if (user) {
+                const pedidosRef = ref(db, 'pedidos');
+                const nuevoPedidoRef = push(pedidosRef);
+                
+                const pedidoData = {
+                    userId: user.uid,
+                    usuario: user.displayName || user.email,
+                    juego: juego,
+                    producto: producto,
+                    precio: precio,
+                    metodo: metodo,
+                    jugadorId: jugador,
+                    referencia: referencia,
+                    estado: "Pendiente",
+                    fecha: new Date().toLocaleString(),
+                    timestamp: Date.now()
+                };
+                
+                await set(nuevoPedidoRef, pedidoData);
+                console.log("✅ Pedido guardado en Firebase:", pedidoData);
+                mostrarToast("✅ Pedido guardado correctamente");
+                return true;
+            } else {
+                console.log("⚠️ Usuario no logueado, no se guardó en Firebase");
+                mostrarToast("⚠️ Inicia sesión para guardar tu historial");
+                return false;
+            }
+        } catch (error) {
+            console.error("❌ Error al guardar en Firebase:", error);
+            mostrarToast("❌ Error al guardar el pedido");
+            return false;
+        }
+    }
+    
+    async function completarPedido() {
+        let referencia = document.getElementById("referencia").value.trim();
+        if(referencia === "") {
+            mostrarToast("❌ Ingresa la referencia");
+            return;
+        }
+        
+        const btn = document.querySelector(".complete-btn");
+        btn.innerText = "⏳ Guardando...";
+        btn.disabled = true;
+        
+        // Guardar en Firebase primero
+        const guardado = await guardarPedidoEnFirebase(producto, precio, jugador, metodo, juego, referencia);
+        
+        if (guardado) {
+            // Enviar a Telegram
+            await enviarTelegram(producto, precio, jugador, metodo, juego, referencia);
+            
+            // Limpiar localStorage
+            localStorage.removeItem('producto_seleccionado');
+            localStorage.removeItem('precio_usd');
+            localStorage.removeItem('id_jugador');
+            localStorage.removeItem('metodo_pago');
+            localStorage.removeItem('juego_seleccionado');
+            
+            // Redirigir al perfil
+            window.location.href = "perfil.html";
+        } else {
+            btn.innerText = "✅ COMPLETAR PEDIDO";
+            btn.disabled = false;
+        }
+    }
+    
+    window.copiarTexto = copiarTexto;
+    window.completarPedido = completarPedido;
 </script>
+
 </body>
 </html>

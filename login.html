@@ -1,28 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
-<style>
-body{background:#030712;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;color:white;}
-.card{background:#0b1220;padding:30px;border-radius:20px;width:90%;max-width:400px;border:1px solid #1f2937;}
-h2{text-align:center;margin-bottom:20px;}
-input{width:100%;height:50px;margin-bottom:15px;border:none;border-radius:12px;padding:15px;background:#111827;color:white;box-sizing:border-box;}
-button{width:100%;height:50px;border:none;border-radius:12px;background:#2563eb;color:white;font-size:18px;font-weight:bold;cursor:pointer;}
-a{color:#60a5fa;text-decoration:none;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RECARGASGAMES</title>
+    <style>
+        body { 
+            background-image: url('fondo.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .login-box { 
+            background: rgba(11, 18, 32, 0.95); 
+            padding: 35px; 
+            border-radius: 24px; 
+            border: 1px solid #1f2937; 
+            width: 90%; 
+            max-width: 350px; 
+            text-align: center; 
+            backdrop-filter: blur(10px);
+        }
+        h2 { 
+            color: #f97316; 
+            margin-bottom: 25px; 
+        }
+        input { 
+            width: 100%; 
+            height: 50px; 
+            margin: 10px 0; 
+            border-radius: 12px; 
+            border: 1px solid #1f2937; 
+            background: #0b1220; 
+            color: white; 
+            padding: 15px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        button { 
+            width: 100%; 
+            height: 50px; 
+            background: #f97316; 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin-top: 15px; 
+            font-size: 16px; 
+            transition: 0.2s; 
+        }
+        button:hover { 
+            background: #ea580c; 
+        }
+        .register-link { 
+            color: #60a5fa; 
+            text-decoration: none; 
+            display: block; 
+            margin-top: 20px; 
+            font-size: 14px;
+        }
+        .register-link:hover {
+            text-decoration: underline;
+        }
+        .error-msg {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+    </style>
 </head>
 <body>
-<div class="card">
-<h2>Iniciar Sesión</h2>
-<form id="loginForm">
-<input type="email" id="email" placeholder="Correo electrónico" required>
-<input type="password" id="password" placeholder="Contraseña" required>
-<button type="submit">Ingresar</button>
-</form>
-<p style="text-align:center;margin-top:15px;">¿No tienes cuenta? <a href="register.html">Regístrate</a></p>
+
+<div class="login-box">
+    <div class="logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+    </div>
+    <h2>🔐 Iniciar Sesión</h2>
+    
+    <input type="email" id="email" placeholder="Correo electrónico">
+    <input type="password" id="password" placeholder="Contraseña">
+    
+    <button id="loginBtn">Ingresar</button>
+    
+    <div id="errorMsg" class="error-msg"></div>
+    
+    <a href="register.html" class="register-link">📝 ¿No tienes cuenta? Regístrate aquí</a>
 </div>
-<script type="module" src="scripts/login.js"></script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    const loginBtn = document.getElementById("loginBtn");
+    const errorMsg = document.getElementById("errorMsg");
+    
+    loginBtn.addEventListener("click", async () => {
+        errorMsg.style.display = "none";
+        
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        
+        if (!email || !password) {
+            errorMsg.textContent = "❌ Completa todos los campos";
+            errorMsg.style.display = "block";
+            return;
+        }
+        
+        loginBtn.textContent = "Ingresando...";
+        loginBtn.disabled = true;
+        
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            window.location.href = "perfil.html";
+        } catch (error) {
+            if (error.code === 'auth/invalid-credential') {
+                errorMsg.textContent = "❌ Correo o contraseña incorrectos";
+            } else if (error.code === 'auth/user-not-found') {
+                errorMsg.textContent = "❌ Usuario no encontrado. Regístrate primero";
+            } else {
+                errorMsg.textContent = "❌ Error: " + error.message;
+            }
+            errorMsg.style.display = "block";
+        } finally {
+            loginBtn.textContent = "Ingresar";
+            loginBtn.disabled = false;
+        }
+    });
+    
+    document.getElementById("password").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") loginBtn.click();
+    });
+</script>
+
 </body>
 </html>

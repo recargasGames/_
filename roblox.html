@@ -5,112 +5,465 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Roblox</title>
 <style>
-body{background:#030712;background-image:url('img/fondo.jpg');background-size:cover;background-position:center;background-attachment:fixed;color:white;font-family:sans-serif;margin:0;padding:0;}
-.navbar{background:#0b1220;padding:18px;font-size:22px;font-weight:bold;border-bottom:1px solid #1f2937;}
-.games-menu{display:flex;gap:10px;overflow-x:auto;padding:15px;background:#0b1220;border-bottom:1px solid #1f2937;}
-.games-menu::-webkit-scrollbar{display:none;}
-.games-menu a{text-decoration:none;color:white;background:#111827;padding:10px 18px;border-radius:14px;font-size:15px;font-weight:bold;white-space:nowrap;border:1px solid #1f2937;}
-.games-menu a.active{background:#2563eb;}
-.main{padding:20px;}
-.card-panel{background:#0b1220;border:1px solid #1f2937;border-radius:20px;padding:20px;margin-bottom:20px;}
-.panel-title{font-size:20px;font-weight:bold;margin-bottom:15px;}
-.form-input{width:100%;height:55px;background:#111827;border:none;border-radius:14px;padding:15px;color:white;font-size:18px;box-sizing:border-box;margin-bottom:12px;}
-.payment-title{font-size:15px;font-weight:bold;color:#d1d5db;margin:20px 0 10px;}
-.pay-box{display:flex;align-items:center;gap:15px;background:#030712;border:2px solid #1e3a8a;border-radius:18px;padding:18px;margin-bottom:15px;cursor:pointer;}
-.pay-box.active{border:2px solid #2563eb;}
-.pay-name{font-size:20px;font-weight:bold;}
-.product-card{background:#0b1220;border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:15px;}
-.product-title{font-size:22px;font-weight:bold;margin-bottom:10px;}
-.product-status{color:#9ca3af;margin-bottom:12px;}
-.product-price{font-size:34px;font-weight:bold;color:#00d084;margin-bottom:12px;}
-.btn-buy{width:100%;height:45px;border:none;border-radius:12px;background:#2563eb;color:white;font-size:18px;font-weight:bold;cursor:pointer;}
+body {
+    background-image: url('fondo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.header {
+    background: rgba(11, 18, 32, 0.95);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #dc2626;
+}
+.brand {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.brand img {
+    height: 30px;
+    width: auto;
+}
+.brand span {
+    color: #dc2626;
+}
+.menu-btn {
+    font-size: 24px;
+    cursor: pointer;
+    color: white;
+    background: rgba(0,0,0,0.3);
+    padding: 5px 12px;
+    border-radius: 30px;
+}
+.games-menu {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    background: rgba(11, 18, 32, 0.95);
+    padding: 10px 15px;
+    border-bottom: 1px solid #1f2937;
+    justify-content: center;
+}
+.games-menu a {
+    text-decoration: none;
+    color: white;
+    background: #111827;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    border: 1px solid #1f2937;
+    transition: 0.2s;
+}
+.games-menu a:hover {
+    background: #dc2626;
+}
+.games-menu a.active {
+    background: #dc2626;
+}
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1001;
+    top: 0;
+    right: 0;
+    background: #0b1220;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+    border-left: 1px solid #1f2937;
+}
+.sidebar a {
+    padding: 12px 20px;
+    text-decoration: none;
+    font-size: 15px;
+    color: white;
+    display: block;
+    border-bottom: 1px solid #1f2937;
+}
+.sidebar a:hover {
+    background: #dc2626;
+}
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 32px;
+    cursor: pointer;
+}
+.main {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    flex: 1;
+}
+.card-panel {
+    background: rgba(11, 18, 32, 0.85);
+    border: 1px solid #1f2937;
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(5px);
+}
+.panel-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 12px;
+    color: #dc2626;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #9ca3af;
+    font-size: 13px;
+}
+.form-input {
+    width: 100%;
+    height: 50px;
+    border: none;
+    border-radius: 14px;
+    background: #111827;
+    color: white;
+    padding: 12px;
+    font-size: 15px;
+    box-sizing: border-box;
+    border: 1px solid #1f2937;
+}
+.payment-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.pay-box {
+    background: #111827;
+    border: 2px solid #1f2937;
+    border-radius: 16px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+.pay-box.active {
+    border-color: #dc2626;
+    background: #1e293b;
+}
+.product-card {
+    background: rgba(11, 18, 32, 0.85);
+    border: 1px solid #1f2937;
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 20px;
+}
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #1f2937;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+.game-icon {
+    background: #1a2333;
+    padding: 8px;
+    border-radius: 12px;
+    font-size: 18px;
+}
+.product-title {
+    font-size: 17px;
+    font-weight: bold;
+}
+.product-desc {
+    color: #9ca3af;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+.product-price {
+    font-size: 24px;
+    font-weight: bold;
+    color: #22c55e;
+}
+.btn-buy {
+    background: #dc2626;
+    color: white;
+    border: none;
+    width: 100%;
+    height: 45px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-buy:hover {
+    background: #b91c1c;
+}
+.section-divider {
+    margin: 25px 0 10px 0;
+    text-align: center;
+}
+.section-divider span {
+    background: #dc2626;
+    padding: 6px 18px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: bold;
+}
+/* FOOTER */
+.footer {
+    background: rgba(11, 18, 32, 0.95);
+    border-top: 1px solid #1f2937;
+    padding: 20px;
+    text-align: center;
+    margin-top: 30px;
+}
+.footer p {
+    color: #9ca3af;
+    font-size: 12px;
+    margin: 5px 0;
+}
+.footer .copyright {
+    color: #dc2626;
+    font-weight: bold;
+    font-size: 13px;
+}
+.footer a {
+    color: #dc2626;
+    text-decoration: none;
+}
+.footer a:hover {
+    text-decoration: underline;
+}
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+.social-links a {
+    color: #9ca3af;
+    font-size: 14px;
+    transition: 0.2s;
+}
+.social-links a:hover {
+    color: #dc2626;
+}
 </style>
 </head>
 <body>
 
-<div class="navbar">RECARGASGAMES</div>
+<div class="header">
+    <div class="brand">
+        <img src="logo.png" alt="Logo">
+        <span>RECARGASGAMES</span>
+    </div>
+    <div class="menu-btn" onclick="toggleNav()">☰</div>
+</div>
 
 <div class="games-menu">
-<a href="freefire.html">🔥 Free Fire</a>
-<a href="bloodstrike.html">🪖 Blood Strike</a>
-<a href="roblox.html" class="active">🤖 Roblox</a>
+    <a href="index.html">🏠 Inicio</a>
+    <a href="freefire.html">🔥 Free Fire</a>
+    <a href="bloodstrike.html">🪖 Blood Strike</a>
+    <a href="roblox.html" class="active">🤖 Roblox</a>
+    <a href="ml.html">👑 MLBB</a>
+</div>
+
+<div id="mySidebar" class="sidebar">
+    <div class="close-btn" onclick="toggleNav()">×</div>
+    <a href="index.html">🏠 Inicio</a>
+    <a href="perfil.html">👤 Mi Perfil</a>
+    <a href="freefire.html">🔥 Free Fire</a>
+    <a href="bloodstrike.html">🪖 Blood Strike</a>
+    <a href="roblox.html">🤖 Roblox</a>
+    <a href="ml.html">👑 MLBB</a>
+    <a href="#" id="logoutSidebarBtn">🚪 Cerrar Sesión</a>
 </div>
 
 <div class="main">
-<div class="card-panel">
-<div class="panel-title">🤖 Datos Roblox</div>
-<input type="text" class="form-input" id="rbxUser" placeholder="Usuario Roblox">
-<input type="email" class="form-input" id="rbxEmail" placeholder="Correo electrónico">
-<input type="number" class="form-input" id="rbxPhone" placeholder="Número de teléfono">
+    <div class="card-panel">
+        <div class="panel-title" style="margin-top:0; color:#9ca3af;">👤 Datos para la Recarga</div>
+        
+        <div class="form-group">
+            <label>📧 Correo Electrónico</label>
+            <input type="email" class="form-input" id="robloxEmail" placeholder="ejemplo@correo.com">
+        </div>
+
+        <div class="form-group">
+            <label>📱 Número de WhatsApp</label>
+            <input type="tel" class="form-input" id="robloxWhatsapp" placeholder="Ej: 04121234567">
+        </div>
+    </div>
+
+    <div class="card-panel">
+        <div class="panel-title" style="margin-top:0; color:#9ca3af;">💳 Método de Pago</div>
+        <div class="payment-methods">
+            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div>
+            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div>
+        </div>
+    </div>
+
+    <div class="section-divider"><span>🤖 ROBUX DISPONIBLES 🤖</span></div>
+
+    <div class="product-card">
+        <div class="card-header"><div class="game-icon">💰</div><div class="product-title">400 Robux</div></div>
+        <div class="product-desc">Carga directa a la cuenta 🔒</div>
+        <div class="product-price" data-usd="4.99">$4.99</div>
+        <button class="btn-buy" onclick="comprarProducto('400 Robux 🤖', '4.99')">🛍️ Comprar</button>
+    </div>
+
+    <div class="product-card">
+        <div class="card-header"><div class="game-icon">💰</div><div class="product-title">800 Robux</div></div>
+        <div class="product-desc">Carga directa a la cuenta 🔒</div>
+        <div class="product-price" data-usd="9.99">$9.99</div>
+        <button class="btn-buy" onclick="comprarProducto('800 Robux 🤖', '9.99')">🛍️ Comprar</button>
+    </div>
+
+    <div class="product-card">
+        <div class="card-header"><div class="game-icon">💰</div><div class="product-title">2000 Robux</div></div>
+        <div class="product-desc">Carga directa a la cuenta 🔒</div>
+        <div class="product-price" data-usd="24.99">$24.99</div>
+        <button class="btn-buy" onclick="comprarProducto('2000 Robux 🤖', '24.99')">🛍️ Comprar</button>
+    </div>
 </div>
 
-<div class="card-panel">
-<div class="panel-title">💳 Método de pago</div>
-<div class="payment-title">BS BOLIVARES</div>
-<div class="pay-box active" onclick="seleccionarPago('bs', this)">
-<div class="pay-name">💳 PAGO MOVIL</div>
-</div>
-<div class="payment-title">$ DOLAR (USDT)</div>
-<div class="pay-box" onclick="seleccionarPago('usdt', this)">
-<div class="pay-name">🔶 BINANCE</div>
-</div>
-</div>
-
-<div class="product-card">
-<div class="product-title">80 Robux🤖</div>
-<div class="product-status">Entrega rápida ⚡</div>
-<div class="product-price" data-usd="0.99">$0.99</div>
-<button class="btn-buy">🔒 Comprar</button>
+<!-- FOOTER -->
+<div class="footer">
+    <p class="copyright">© 2026 RECARGASGAMES</p>
+    <p>Todos los derechos reservados</p>
+    <p>💰 Recargas instantáneas | 🔒 Pago seguro | ⚡ Entrega rápida</p>
+    <div class="social-links">
+        <a href="https://wa.me/04228242411" target="_blank">📱 WhatsApp</a>
+        <a href="mailto:recargasgames@gmail.com">📧 Correo</a>
+        <a href="#">📷 Instagram</a>
+    </div>
 </div>
 
-<div class="product-card">
-<div class="product-title">400 Robux🤖</div>
-<div class="product-status">Entrega rápida ⚡</div>
-<div class="product-price" data-usd="4.99">$4.99</div>
-<button class="btn-buy">🔒 Comprar</button>
-</div>
-</div>
-
-<script>
-function seleccionarPago(tipo, elemento){
-document.querySelectorAll('.pay-box').forEach(box=>{box.classList.remove('active');});
-elemento.classList.add('active');
-let tasa = 690;
-document.querySelectorAll('.product-price').forEach(precio=>{
-let usd = parseFloat(precio.dataset.usd);
-if(tipo=="bs"){precio.innerHTML = (usd*tasa).toFixed(0) + " Bs";}
-else{precio.innerHTML = "$"+usd.toFixed(2);}
-});
-}
-
-document.querySelectorAll('.product-card').forEach(card => {
-    const btn = card.querySelector('.btn-buy');
-    btn.addEventListener('click', function(){
-        const user = document.getElementById('rbxUser').value.trim();
-        const email = document.getElementById('rbxEmail').value.trim();
-        const phone = document.getElementById('rbxPhone').value.trim();
-
-        if(user === "" || email === "" || phone === ""){
-            alert("Por favor, completa todos tus datos de Roblox.");
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    
+    let usuarioLogueado = false;
+    let metodoSeleccionado = "PAGO MOVIL";
+    let TASA_DOLAR = 735;
+    
+    async function cargarTasa() {
+        const tasaRef = ref(db, 'configuracion/tasa_dolar');
+        const snapshot = await get(tasaRef);
+        if (snapshot.exists()) {
+            TASA_DOLAR = snapshot.val();
+            actualizarVisualizacionPrecios();
+        }
+    }
+    
+    onAuthStateChanged(auth, (user) => {
+        usuarioLogueado = !!user;
+    });
+    
+    document.getElementById("logoutSidebarBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => window.location.href = "index.html");
+    });
+    
+    function actualizarVisualizacionPrecios() {
+        document.querySelectorAll('.product-price').forEach(el => {
+            let usd = parseFloat(el.getAttribute('data-usd'));
+            if (metodoSeleccionado === "PAGO MOVIL") {
+                el.innerText = Math.round(usd * TASA_DOLAR) + " Bs";
+            } else {
+                el.innerText = usd.toFixed(2) + " USDT";
+            }
+        });
+    }
+    
+    window.seleccionarPago = function(metodo, elemento) {
+        document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
+        elemento.classList.add('active');
+        metodoSeleccionado = metodo;
+        actualizarVisualizacionPrecios();
+    };
+    
+    window.comprarProducto = function(producto, precioUsd) {
+        if (!usuarioLogueado) {
+            alert("❌ Debes iniciar sesión para comprar");
+            window.location.href = "login.html";
             return;
         }
-
-        const datosCompletos = `User: ${user} | Correo: ${email} | Tel: ${phone}`;
-        const juego = "Roblox";
-        const producto = card.querySelector('.product-title').innerText;
-        const precioUsd = card.querySelector('.product-price').dataset.usd;
-        const metodoPago = document.querySelector('.pay-box.active .pay-name').innerText.trim();
-
-        localStorage.setItem('id_jugador', datosCompletos);
-        localStorage.setItem('juego_seleccionado', juego);
+        
+        let email = document.getElementById("robloxEmail").value.trim();
+        let whatsapp = document.getElementById("robloxWhatsapp").value.trim();
+        
+        if(email === "") {
+            alert("❌ Por favor, ingresa tu correo electrónico.");
+            return;
+        }
+        
+        if(whatsapp === "") {
+            alert("❌ Por favor, ingresa tu número de WhatsApp.");
+            return;
+        }
+        
+        if(!email.includes("@") || !email.includes(".")) {
+            alert("❌ Ingresa un correo electrónico válido.");
+            return;
+        }
+        
+        if(whatsapp.length < 10) {
+            alert("❌ Ingresa un número de WhatsApp válido (Ej: 04121234567)");
+            return;
+        }
+        
+        let precioParaGuardar = metodoSeleccionado === "PAGO MOVIL" ? Math.round(parseFloat(precioUsd) * TASA_DOLAR) + " Bs" : parseFloat(precioUsd).toFixed(2) + " USDT";
+        
+        localStorage.setItem('id_jugador', `📧 ${email} | 📱 ${whatsapp}`);
+        localStorage.setItem('juego_seleccionado', 'ROBLOX 🤖');
         localStorage.setItem('producto_seleccionado', producto);
-        localStorage.setItem('precio_usd', precioUsd);
-        localStorage.setItem('metodo_pago', metodoPago);
-
-        window.location.href = 'pasarela.html';
-    });
-});
-seleccionarPago('bs', document.querySelector('.pay-box'));
+        localStorage.setItem('precio_usd', precioParaGuardar);
+        localStorage.setItem('metodo_pago', metodoSeleccionado);
+        
+        window.location.href = "pasarela.html";
+    };
+    
+    window.toggleNav = function() {
+        const sidebar = document.getElementById("mySidebar");
+        sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px";
+    };
+    
+    cargarTasa();
+    window.onload = actualizarVisualizacionPrecios;
 </script>
 </body>
 </html>

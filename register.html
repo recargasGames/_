@@ -3,26 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro</title>
+<title>Registro - RECARGASGAMES</title>
 <style>
-body{background:#030712;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;color:white;}
-.card{background:#0b1220;padding:30px;border-radius:20px;width:90%;max-width:400px;border:1px solid #1f2937;}
-h2{text-align:center;margin-bottom:20px;}
-input{width:100%;height:50px;margin-bottom:15px;border:none;border-radius:12px;padding:15px;background:#111827;color:white;box-sizing:border-box;}
-button{width:100%;height:50px;border:none;border-radius:12px;background:#2563eb;color:white;font-size:18px;font-weight:bold;cursor:pointer;}
-a{color:#60a5fa;text-decoration:none;}
+body{ background: #0b1220; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+.card{ background: #111827; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; border: 1px solid #1f2937; }
+h2{ text-align: center; margin-bottom: 20px; }
+input{ width: 100%; height: 50px; margin-bottom: 15px; border: none; border-radius: 12px; padding: 15px; background: #0b1220; color: white; box-sizing: border-box; border: 1px solid #1f2937; }
+button{ width: 100%; height: 50px; border: none; border-radius: 12px; background: #2563eb; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+a{ color: #60a5fa; text-decoration: none; }
 </style>
 </head>
 <body>
 <div class="card">
 <h2>Crear Cuenta</h2>
-<form id="registerForm">
-<input type="email" id="email" placeholder="Correo electrónico" required>
-<input type="password" id="password" placeholder="Contraseña" required>
-<button type="submit">Registrarme</button>
-</form>
+<input type="text" id="nombre" placeholder="Nombre completo">
+<input type="email" id="email" placeholder="Correo electrónico">
+<input type="password" id="password" placeholder="Contraseña">
+<button id="registerBtn">Registrarme</button>
 <p style="text-align:center;margin-top:15px;">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
 </div>
-<script type="module" src="scripts/register.js"></script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    document.getElementById("registerBtn").addEventListener("click", async () => {
+        const nombre = document.getElementById("nombre").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        
+        if (!nombre || !email || !password) {
+            alert("Completa todos los campos");
+            return;
+        }
+        
+        if (password.length < 6) {
+            alert("La contraseña debe tener al menos 6 caracteres");
+            return;
+        }
+        
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await updateProfile(userCredential.user, { displayName: nombre });
+            alert("Cuenta creada exitosamente");
+            window.location.href = "login.html";
+        } catch (error) {
+            alert("Error: " + error.message);
+        }
+    });
+</script>
 </body>
 </html>

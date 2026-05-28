@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - RECARGASGAMES</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-image: url('fondo.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .header {
+            background: rgba(11, 18, 32, 0.95);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #dc2626;
+        }
+        .brand { font-size: 18px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .brand span { color: #dc2626; }
+        .menu-btn { font-size: 24px; cursor: pointer; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 30px; }
+        .sidebar {
+            height: 100%; width: 0; position: fixed; z-index: 1001; top: 0; right: 0;
+            background: #0b1220; overflow-x: hidden; transition: 0.3s; padding-top: 60px;
+            border-left: 1px solid #1f2937;
+        }
+        .sidebar a { padding: 12px 20px; text-decoration: none; font-size: 15px; color: white; display: block; border-bottom: 1px solid #1f2937; transition: 0.2s; }
+        .sidebar a:hover { background: #dc2626; }
+        .close-btn { position: absolute; top: 10px; right: 25px; font-size: 32px; cursor: pointer; }
+        .main { padding: 15px; max-width: 100%; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .stat-card { background: rgba(11, 18, 32, 0.9); border: 1px solid #1f2937; border-radius: 14px; padding: 10px; text-align: center; }
+        .stat-number { font-size: 20px; font-weight: bold; color: #dc2626; }
+        .stat-label { font-size: 10px; color: #9ca3af; margin-top: 4px; }
+        .config-section { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 14px; padding: 12px; margin-bottom: 15px; }
+        .config-section h3 { color: #dc2626; margin-bottom: 10px; font-size: 15px; }
+        .config-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .config-input { flex: 1; min-width: 100px; height: 38px; border: none; border-radius: 10px; background: #111827; color: white; padding: 8px 12px; font-size: 13px; border: 1px solid #1f2937; }
+        .config-btn { background: #dc2626; color: white; border: none; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .config-btn:hover { background: #b91c1c; }
+        .filters { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 14px; padding: 10px; margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-select, .filter-search { background: #111827; border: 1px solid #1f2937; color: white; padding: 8px 10px; border-radius: 10px; font-size: 12px; }
+        .filter-search { flex: 1; min-width: 150px; }
+        .refresh-btn { background: #2563eb; color: white; border: none; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 12px; }
+        .table-container { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 14px; padding: 10px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 700px; }
+        th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #1f2937; }
+        th { background: #1f2937; color: #dc2626; }
+        .badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; display: inline-block; }
+        .badge-pendiente { background: #f97316; }
+        .badge-completado { background: #22c55e; }
+        .btn-complete { background: #22c55e; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; margin: 2px; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; margin: 2px; }
+        .no-pedidos { text-align: center; color: #9ca3af; padding: 30px; }
+        .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 15px; flex-wrap: wrap; }
+        .page-btn { background: #111827; border: 1px solid #1f2937; color: white; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+        .page-btn.active { background: #dc2626; }
+        .modal, .modal-users { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: #111827; padding: 20px; border-radius: 16px; max-width: 90%; width: 450px; border: 1px solid #dc2626; }
+        .modal-content h3 { color: #dc2626; margin-bottom: 15px; }
+        .modal-detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1f2937; font-size: 12px; }
+        .close-modal { background: #dc2626; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%; }
+        .user-item { background: #1f2937; margin-bottom: 8px; padding: 10px; border-radius: 10px; }
+        .user-email { font-weight: bold; color: #f97316; }
+        .user-pass { font-family: monospace; font-size: 11px; color: #9ca3af; margin-top: 4px; word-break: break-all; }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .config-row { flex-direction: column; }
+            .config-input { width: 100%; }
+            .filters { flex-direction: column; }
+            .filter-search, .filter-select, .refresh-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="brand">🎮 <span>PANEL ADMIN</span></div>
+    <div class="menu-btn" onclick="toggleNav()">☰</div>
+</div>
+
+<div id="mySidebar" class="sidebar">
+    <div class="close-btn" onclick="toggleNav()">×</div>
+    <a href="index.html">🏠 Inicio</a>
+    <a href="admin.html">⚙️ Panel Admin</a>
+    <a href="#" onclick="verUsuarios(); return false;">👥 Usuarios Registrados</a>
+    <a href="freefire.html">🔥 Free Fire</a>
+    <a href="bloodstrike.html">🪖 Blood Strike</a>
+    <a href="roblox.html">🤖 Roblox</a>
+    <a href="ml.html">👑 MLBB</a>
+    <a href="login.html">🚪 Salir</a>
+</div>
+
+<div class="main">
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-number" id="totalPedidos">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-card"><div class="stat-number" id="totalPendientes">0</div><div class="stat-label">Pendientes</div></div>
+        <div class="stat-card"><div class="stat-number" id="totalCompletados">0</div><div class="stat-label">Completados</div></div>
+        <div class="stat-card"><div class="stat-number" id="totalGanado">0</div><div class="stat-label">💰 Ganado</div></div>
+    </div>
+
+    <!-- Configuración -->
+    <div class="config-section">
+        <h3>⚙️ Configuración</h3>
+        <div class="config-row">
+            <input type="number" id="tasaInput" class="config-input" placeholder="Tasa Bs/USDT" value="735">
+            <button onclick="guardarTasa()" class="config-btn">Guardar Tasa</button>
+        </div>
+        <div class="config-row" style="margin-top: 8px;">
+            <input type="text" id="bancoInput" class="config-input" placeholder="Banco" value="0102">
+            <input type="text" id="telefonoInput" class="config-input" placeholder="Teléfono" value="04228242411">
+            <input type="text" id="cedulaInput" class="config-input" placeholder="Cédula" value="32824869">
+            <button onclick="guardarDatosBancarios()" class="config-btn">Guardar</button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters">
+        <select id="filtroEstado" class="filter-select">
+            <option value="todos">Todos</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="completado">Completados</option>
+        </select>
+        <input type="text" id="searchInput" class="filter-search" placeholder="Buscar...">
+        <button class="refresh-btn" onclick="recargar()">🔄 Actualizar</button>
+        <button class="refresh-btn" onclick="exportarPedidos()" style="background:#22c55e;">📥 Exportar</button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+        <table>
+            <thead><tr><th>#</th><th>Usuario</th><th>Juego</th><th>Producto</th><th>Monto</th><th>Ref</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="listaPedidos"><tr><td colspan="8" class="no-pedidos">Cargando...</td></tr></tbody>
+        </table>
+        <div class="pagination" id="pagination"></div>
+    </div>
+</div>
+
+<!-- Modal detalles pedido -->
+<div id="modalDetalles" class="modal">
+    <div class="modal-content"><h3>Detalles</h3><div id="modalBody"></div><button class="close-modal" onclick="cerrarModal()">Cerrar</button></div>
+</div>
+
+<!-- Modal usuarios registrados -->
+<div id="modalUsuarios" class="modal-users">
+    <div class="modal-content">
+        <h3>👥 Usuarios Registrados</h3>
+        <div id="listaUsuarios" style="max-height: 400px; overflow-y: auto;">Cargando...</div>
+        <button class="close-modal" onclick="cerrarModalUsuarios()">Cerrar</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    let pedidos = [];
+    let currentPage = 1;
+    const porPagina = 10;
+
+    onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
+
+    // === VER USUARIOS REGISTRADOS ===
+    window.verUsuarios = () => {
+        const listaDiv = document.getElementById('listaUsuarios');
+        listaDiv.innerHTML = '<div style="text-align:center; padding:20px;">Cargando usuarios...</div>';
+        document.getElementById('modalUsuarios').style.display = 'flex';
+        
+        // Obtener usuarios de Firebase Auth (solo correos, contraseñas no son accesibles por seguridad)
+        const user = auth.currentUser;
+        if (user) {
+            // Mostrar información del usuario actual y pedir ver más
+            listaDiv.innerHTML = `
+                <div class="user-item">
+                    <div class="user-email">📧 ${user.email}</div>
+                    <div class="user-pass">🔒 Contraseña: (oculta por seguridad - Firebase no permite ver contraseñas)</div>
+                    <div style="font-size: 11px; color: #9ca3af; margin-top: 5px;">✅ Usuario actual</div>
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: #1f2937; border-radius: 10px;">
+                    <p style="color: #f97316;">ℹ️ Información:</p>
+                    <p style="font-size: 12px;">Las contraseñas no se pueden ver por seguridad de Firebase.<br>
+                    Los usuarios se registran con correo y contraseña en Firebase Authentication.<br>
+                    Para ver todos los usuarios registrados, ve a la consola de Firebase → Authentication.</p>
+                </div>
+            `;
+        } else {
+            listaDiv.innerHTML = '<div class="user-item">No hay usuario logueado</div>';
+        }
+    };
+    
+    window.cerrarModalUsuarios = () => document.getElementById('modalUsuarios').style.display = 'none';
+
+    // === FUNCIONES DEL ADMIN ===
+    function cargarPedidos() {
+        onValue(ref(db, 'pedidos'), (snapshot) => {
+            const data = snapshot.val();
+            pedidos = [];
+            if (data) for (let id in data) pedidos.push({ id, ...data[id] });
+            pedidos.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+            renderizar();
+        });
+    }
+
+    function filtrar() {
+        const estado = document.getElementById('filtroEstado').value;
+        const busqueda = document.getElementById('searchInput').value.toLowerCase();
+        let f = pedidos;
+        if (estado === 'pendiente') f = f.filter(p => p.estado !== 'Completado');
+        if (estado === 'completado') f = f.filter(p => p.estado === 'Completado');
+        if (busqueda) f = f.filter(p => (p.usuario && p.usuario.toLowerCase().includes(busqueda)) || (p.referencia && p.referencia.toLowerCase().includes(busqueda)));
+        return f;
+    }
+
+    function actualizarStats(f) {
+        const pendientes = f.filter(p => p.estado !== 'Completado').length;
+        const completados = f.filter(p => p.estado === 'Completado').length;
+        let ganado = 0;
+        f.forEach(p => { if (p.estado === 'Completado' && p.precio) ganado += parseFloat(p.precio.replace('Bs','')) || 0; });
+        document.getElementById('totalPedidos').innerText = f.length;
+        document.getElementById('totalPendientes').innerText = pendientes;
+        document.getElementById('totalCompletados').innerText = completados;
+        document.getElementById('totalGanado').innerText = ganado.toLocaleString('es-VE');
+    }
+
+    function renderizar() {
+        const filtrados = filtrar();
+        actualizarStats(pedidos);
+        const totalPages = Math.ceil(filtrados.length / porPagina);
+        const start = (currentPage-1)*porPagina;
+        const paginados = filtrados.slice(start, start+porPagina);
+        const tbody = document.getElementById('listaPedidos');
+        
+        if (paginados.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="no-pedidos">Sin pedidos</td></tr>'; return; }
+        
+        let html = '';
+        paginados.forEach((p, i) => {
+            const badge = p.estado === 'Completado' ? 'badge-completado' : 'badge-pendiente';
+            html += `<tr>
+                <td>${start+i+1}</td>
+                <td>${p.usuario || 'Anónimo'}</td>
+                <td>${p.juego || 'N/A'}</td>
+                <td>${p.producto || 'N/A'}</td>
+                <td>${p.precio || '0 Bs'}</td>
+                <td>${p.referencia || 'N/A'}</td>
+                <td><span class="badge ${badge}">${p.estado || 'Pendiente'}</span></td>
+                <td>
+                    <button class="btn-complete" onclick="ver('${p.id}')" style="background:#2563eb;">👁️</button>
+                    <button class="btn-complete" onclick="completar('${p.id}')" ${p.estado === 'Completado' ? 'disabled' : ''}>✅</button>
+                    <button class="btn-delete" onclick="eliminar('${p.id}')">🗑️</button>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+        
+        let pages = '';
+        for (let i=1; i<=totalPages; i++) pages += `<button class="page-btn ${i===currentPage?'active':''}" onclick="irPagina(${i})">${i}</button>`;
+        document.getElementById('pagination').innerHTML = pages;
+    }
+
+    window.ver = (id) => {
+        const p = pedidos.find(x => x.id === id);
+        if (!p) return;
+        document.getElementById('modalBody').innerHTML = `
+            <div class="modal-detail-row"><strong>Usuario:</strong> ${p.usuario || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Juego:</strong> ${p.juego || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Producto:</strong> ${p.producto || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Monto:</strong> ${p.precio || '0 Bs'}</div>
+            <div class="modal-detail-row"><strong>ID/Jugador:</strong> ${p.jugadorId || p.jugador || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Referencia:</strong> ${p.referencia || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Método:</strong> ${p.metodo || 'N/A'}</div>
+            <div class="modal-detail-row"><strong>Fecha:</strong> ${p.fecha || new Date(p.timestamp).toLocaleString()}</div>
+            <div class="modal-detail-row"><strong>Estado:</strong> ${p.estado || 'Pendiente'}</div>
+        `;
+        document.getElementById('modalDetalles').style.display = 'flex';
+    };
+    
+    window.cerrarModal = () => document.getElementById('modalDetalles').style.display = 'none';
+    
+    window.completar = (id) => { if(confirm('¿Completar?')) update(ref(db, 'pedidos/'+id), { estado: 'Completado', fecha_completado: new Date().toLocaleString() }); };
+    window.eliminar = (id) => { if(confirm('¿Eliminar?')) remove(ref(db, 'pedidos/'+id)); };
+    window.recargar = () => { currentPage=1; renderizar(); };
+    window.irPagina = (p) => { currentPage=p; renderizar(); };
+    
+    window.guardarTasa = () => {
+        let tasa = document.getElementById('tasaInput').value;
+        if (!tasa) return alert("Ingresa una tasa");
+        set(ref(db, 'configuracion/tasa_dolar'), parseFloat(tasa));
+        alert("✅ Tasa guardada");
+    };
+    
+    window.guardarDatosBancarios = () => {
+        set(ref(db, 'configuracion/datos_bancarios'), {
+            banco: document.getElementById('bancoInput').value,
+            telefono: document.getElementById('telefonoInput').value,
+            cedula: document.getElementById('cedulaInput').value
+        });
+        alert("✅ Datos bancarios guardados");
+    };
+    
+    window.exportarPedidos = () => {
+        const f = filtrar();
+        if (f.length === 0) return alert("No hay pedidos");
+        let csv = "ID,Usuario,Juego,Producto,Monto,Referencia,Fecha,Estado\n";
+        f.forEach(p => csv += `"${p.id}","${p.usuario || ''}","${p.juego || ''}","${p.producto || ''}","${p.precio || ''}","${p.referencia || ''}","${p.fecha || ''}","${p.estado || 'Pendiente'}"\n`);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `pedidos_${new Date().toISOString().slice(0,19)}.csv`;
+        a.click();
+        URL.revokeObjectURL(blob);
+        alert("✅ Exportado");
+    };
+    
+    // Cargar configuraciones iniciales
+    onValue(ref(db, 'configuracion/tasa_dolar'), (s) => { if(s.val()) document.getElementById('tasaInput').value = s.val(); });
+    onValue(ref(db, 'configuracion/datos_bancarios'), (s) => {
+        if(s.val()) {
+            if(s.val().banco) document.getElementById('bancoInput').value = s.val().banco;
+            if(s.val().telefono) document.getElementById('telefonoInput').value = s.val().telefono;
+            if(s.val().cedula) document.getElementById('cedulaInput').value = s.val().cedula;
+        }
+    });
+    
+    document.getElementById('filtroEstado').onchange = () => { currentPage=1; renderizar(); };
+    document.getElementById('searchInput').onkeyup = () => { currentPage=1; renderizar(); };
+    
+    window.toggleNav = () => { const s=document.getElementById('mySidebar'); s.style.width = s.style.width==='250px'?'0':'250px'; };
+    
+    cargarPedidos();
+    window.onclick = (e) => { if(e.target === document.getElementById('modalDetalles')) cerrarModal(); if(e.target === document.getElementById('modalUsuarios')) cerrarModalUsuarios(); };
+</script>
+</body>
+</html>
