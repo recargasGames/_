@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - RECARGASGAMES</title>
+    <style>
+        body {
+            background-image: url('fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .edit-box {
+            background: rgba(11, 18, 32, 0.95);
+            padding: 35px;
+            border-radius: 24px;
+            border: 1px solid #10b981;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        h2 { color: #10b981; margin-bottom: 25px; }
+        input {
+            width: 100%;
+            height: 50px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            background: #0b1220;
+            color: white;
+            padding: 15px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            height: 50px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        button:hover { background: #059669; }
+        .back-link {
+            color: #60a5fa;
+            text-decoration: none;
+            display: block;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .error-msg, .success-msg {
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-msg { color: #ef4444; }
+        .success-msg { color: #10b981; }
+        .logo { margin-bottom: 20px; }
+        .logo img { height: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="edit-box">
+    <div class="logo"><img src="logo.png" alt="Logo"></div>
+    <h2>✏️ Editar Perfil</h2>
+    
+    <input type="text" id="nombre" placeholder="Nuevo nombre">
+    <input type="password" id="passwordActual" placeholder="Contraseña actual">
+    <input type="password" id="nuevaPassword" placeholder="Nueva contraseña (opcional)">
+    <input type="password" id="confirmarPassword" placeholder="Confirmar nueva contraseña">
+    
+    <button id="guardarBtn">Guardar Cambios</button>
+    
+    <div id="errorMsg" class="error-msg"></div>
+    <div id="successMsg" class="success-msg"></div>
+    
+    <a href="index.html" class="back-link">← Volver al inicio</a>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    
+    const guardarBtn = document.getElementById("guardarBtn");
+    const errorMsg = document.getElementById("errorMsg");
+    const successMsg = document.getElementById("successMsg");
+    
+    let usuarioActual = null;
+    
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            usuarioActual = user;
+            document.getElementById("nombre").placeholder = user.displayName || "Nombre actual";
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+    
+    guardarBtn.addEventListener("click", async () => {
+        errorMsg.style.display = "none";
+        successMsg.style.display = "none";
+        
+        const nuevoNombre = document.getElementById("nombre").value.trim();
+        const passwordActual = document.getElementById("passwordActual").value;
+        const nuevaPassword = document.getElementById("nuevaPassword").value;
+        const confirmarPassword = document.getElementById("confirmarPassword").value;
+        
+        if (!passwordActual) {
+            errorMsg.textContent = "❌ Ingresa tu contraseña actual para confirmar los cambios";
+            errorMsg.style.display = "block";
+            return;
+        }
+        
+        guardarBtn.textContent = "Guardando...";
+        guardarBtn.disabled = true;
+        
+        try {
+            const credential = EmailAuthProvider.credential(usuarioActual.email, passwordActual);
+            await reauthenticateWithCredential(usuarioActual, credential);
+            
+            if (nuevoNombre) {
+                await updateProfile(usuarioActual, { displayName: nuevoNombre });
+                const userRef = ref(db, 'usuarios/' + usuarioActual.uid);
+                await update(userRef, { nombre: nuevoNombre });
+                successMsg.textContent = "✅ Nombre actualizado correctamente\n";
+            }
+            
+            if (nuevaPassword) {
+                if (nuevaPassword !== confirmarPassword) {
+                    errorMsg.textContent = "❌ Las nuevas contraseñas no coinciden";
+                    errorMsg.style.display = "block";
+                    guardarBtn.textContent = "Guardar Cambios";
+                    guardarBtn.disabled = false;
+                    return;
+                }
+                if (nuevaPassword.length < 6) {
+                    errorMsg.textContent = "❌ La nueva contraseña debe tener al menos 6 caracteres";
+                    errorMsg.style.display = "block";
+                    guardarBtn.textContent = "Guardar Cambios";
+                    guardarBtn.disabled = false;
+                    return;
+                }
+                await updatePassword(usuarioActual, nuevaPassword);
+                successMsg.textContent += "✅ Contraseña actualizada correctamente";
+            }
+            
+            if (!nuevoNombre && !nuevaPassword) {
+                successMsg.textContent = "✅ No se realizaron cambios";
+            }
+            
+            successMsg.style.display = "block";
+            
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 2000);
+            
+        } catch (error) {
+            if (error.code === 'auth/wrong-password') {
+                errorMsg.textContent = "❌ Contraseña actual incorrecta";
+            } else {
+                errorMsg.textContent = "❌ Error: " + error.message;
+            }
+            errorMsg.style.display = "block";
+        } finally {
+            guardarBtn.textContent = "Guardar Cambios";
+            guardarBtn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>

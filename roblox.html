@@ -5,188 +5,89 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Roblox</title>
 <style>
-body {
-    background-image: url('fondo.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
-}
-.header {
-    background: rgba(11, 18, 32, 0.95);
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #f97316;
-}
-.brand {
-    font-size: 20px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+:root { --color-principal: #10b981; --color-hover: #059669; }
+body { background-image: url('fondo.jpg'); background-size: cover; background-position: center; background-attachment: fixed; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+.header { background: rgba(11, 18, 32, 0.95); padding: 15px 20px; display: flex; justify-content: flex-end; align-items: center; border-bottom: 2px solid var(--color-principal); }
+.brand { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-right: auto; }
 .brand img { height: 35px; width: auto; }
-.brand span { color: #f97316; }
-.menu-btn {
-    font-size: 26px;
-    cursor: pointer;
-    color: white;
-    background: rgba(0,0,0,0.3);
-    padding: 5px 12px;
-    border-radius: 30px;
-}
-
-.games-menu {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    background: rgba(11, 18, 32, 0.95);
-    padding: 12px 15px;
-    border-bottom: 1px solid #1f2937;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
-}
+.brand span { color: var(--color-principal); }
+.header-buttons { display: flex; align-items: center; gap: 15px; position: relative; }
+.icon-btn { background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; color: white; font-size: 20px; position: relative; }
+.icon-btn:hover { background: var(--color-principal); transform: scale(1.05); }
+.notification-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.profile-dropdown { position: relative; }
+.dropdown-menu { position: absolute; top: 50px; right: 0; background: #0b1220; border: 1px solid #1f2937; border-radius: 12px; width: 200px; z-index: 1000; display: none; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+.dropdown-menu a { display: block; padding: 12px 16px; color: white; text-decoration: none; transition: 0.2s; font-size: 14px; }
+.dropdown-menu a:hover { background: var(--color-principal); }
+.dropdown-menu .logout-item { color: #ef4444; border-top: 1px solid #1f2937; }
+.dropdown-menu .logout-item:hover { background: #ef4444; color: white; }
+.games-menu { display: flex; gap: 8px; overflow-x: auto; background: rgba(11, 18, 32, 0.95); padding: 12px 15px; border-bottom: 1px solid #1f2937; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
 .games-menu::-webkit-scrollbar { height: 4px; }
 .games-menu::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
-.games-menu::-webkit-scrollbar-thumb { background: #f97316; border-radius: 10px; }
-.games-menu a {
-    text-decoration: none;
-    color: white;
-    background: transparent;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    white-space: nowrap;
-    transition: 0.2s;
-}
-.games-menu a:hover { color: #f97316; }
-.games-menu a.active { color: #f97316; border-bottom: 2px solid #f97316; border-radius: 0; }
-
-.sidebar {
-    height: 100%; width: 0; position: fixed; z-index: 1001; top: 0; right: 0;
-    background: #0b1220; overflow-x: hidden; transition: 0.3s; padding-top: 60px;
-    border-left: 1px solid #1f2937;
-}
-.sidebar a {
-    padding: 15px 25px; text-decoration: none; font-size: 16px;
-    color: white; display: block; border-bottom: 1px solid #1f2937;
-}
-.sidebar a:hover { background: #f97316; }
-.close-btn {
-    position: absolute; top: 10px; right: 25px; font-size: 36px; cursor: pointer;
-}
+.games-menu::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 10px; }
+.games-menu a { text-decoration: none; color: white; background: transparent; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; white-space: nowrap; transition: 0.2s; }
+.games-menu a:hover { color: var(--color-principal); }
+.games-menu a.active { color: var(--color-principal); border-bottom: 2px solid var(--color-principal); border-radius: 0; }
 .main { padding: 20px; max-width: 600px; margin: 0 auto; }
-.card-panel {
-    background: rgba(11, 18, 32, 0.85);
-    border: 1px solid #1f2937;
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 20px;
-    backdrop-filter: blur(5px);
-}
-.panel-title {
-    font-size: 15px;
-    font-weight: bold;
-    margin-top: 20px;
-    margin-bottom: 12px;
-    color: #f97316;
-}
+.card-panel { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 18px; margin-bottom: 20px; backdrop-filter: blur(5px); }
+.panel-title { font-size: 15px; font-weight: bold; margin-top: 20px; margin-bottom: 12px; color: var(--color-principal); }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 8px; color: #9ca3af; font-size: 13px; }
-.form-input {
-    width: 100%;
-    height: 50px;
-    border: none;
-    border-radius: 14px;
-    background: #111827;
-    color: white;
-    padding: 12px;
-    font-size: 15px;
-    box-sizing: border-box;
-    border: 1px solid #1f2937;
-}
-.payment-methods {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-.pay-box {
-    background: #111827;
-    border: 2px solid #1f2937;
-    border-radius: 16px;
-    padding: 12px;
-    text-align: center;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-}
-.pay-box.active {
-    border-color: #f97316;
-    background: #1e293b;
-}
-.product-card {
-    background: rgba(11, 18, 32, 0.85);
-    border: 1px solid #1f2937;
-    border-radius: 20px;
-    padding: 18px;
-    margin-bottom: 20px;
-}
-.card-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border-bottom: 1px solid #1f2937;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-}
-.game-icon {
-    background: #1a2333;
-    padding: 8px;
-    border-radius: 12px;
-    font-size: 18px;
-}
+.form-input { width: 100%; height: 50px; border: none; border-radius: 14px; background: #111827; color: white; padding: 12px; font-size: 15px; box-sizing: border-box; border: 1px solid #1f2937; }
+.payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.pay-box { background: #111827; border: 2px solid #1f2937; border-radius: 16px; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; }
+.pay-box.active { border-color: var(--color-principal); background: #1e293b; }
+.product-card { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 18px; margin-bottom: 20px; }
+.card-header { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; padding-bottom: 12px; margin-bottom: 12px; }
+.game-icon { background: #1a2333; padding: 8px; border-radius: 12px; font-size: 18px; }
 .product-title { font-size: 17px; font-weight: bold; }
 .product-desc { color: #9ca3af; font-size: 13px; margin-bottom: 12px; }
 .product-price { font-size: 24px; font-weight: bold; color: #22c55e; }
-.btn-buy {
-    background: #f97316;
-    color: white;
-    border: none;
-    width: 100%;
-    height: 45px;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-}
-.btn-buy:hover { background: #ea580c; }
-.section-divider {
-    margin: 25px 0 10px 0;
-    text-align: center;
-}
-.section-divider span {
-    background: #f97316;
-    padding: 6px 18px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: bold;
-}
+.btn-buy { background: var(--color-principal); color: white; border: none; width: 100%; height: 45px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; }
+.btn-buy:hover { background: var(--color-hover); }
+.section-divider { margin: 25px 0 10px 0; text-align: center; }
+.section-divider span { background: var(--color-principal); padding: 6px 18px; border-radius: 30px; font-size: 14px; font-weight: bold; }
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+.modal-content { background: #111827; border-radius: 20px; max-width: 350px; width: 90%; border: 1px solid var(--color-principal); overflow: hidden; }
+.modal-header { background: var(--color-principal); padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { color: white; margin: 0; }
+.modal-header .close-modal { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+.modal-body { padding: 20px; max-height: 400px; overflow-y: auto; }
+.notification-item { padding: 12px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; gap: 12px; }
+.notification-icon { font-size: 24px; }
+.notification-text { flex: 1; }
+.notification-title { font-weight: bold; margin-bottom: 4px; }
+.notification-date { font-size: 11px; color: #9ca3af; }
+.empty-notifications { text-align: center; color: #9ca3af; padding: 30px; }
+.whatsapp-float { position: fixed; bottom: 20px; right: 20px; background: #25D366; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; font-size: 28px; }
+.back-to-top { position: fixed; bottom: 90px; right: 20px; background: var(--color-principal); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.back-to-top.show { opacity: 1; visibility: visible; }
+.back-to-top:hover { background: var(--color-hover); transform: scale(1.1); }
+@media (max-width: 500px) { .brand { font-size: 18px; } .icon-btn { width: 35px; height: 35px; font-size: 18px; } }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="brand">
-        <img src="logo.png" alt="Logo">
-        <span>RECARGASGAMES</span>
+    <div class="brand"><img src="logo.png" alt="Logo"><span>RECARGASGAMES</span></div>
+    <div class="header-buttons">
+        <button class="icon-btn" id="notificacionBtn" onclick="abrirNotificaciones()">🔔<span class="notification-badge" id="notifCount">0</span></button>
+        <div class="profile-dropdown">
+            <button class="icon-btn" id="profileBtn">👤</button>
+            <div class="dropdown-menu" id="profileDropdown">
+                <a href="editar-perfil.html">✏️ Mi Perfil</a>
+                <a href="perfil.html">📋 Mis Pedidos</a>
+                <a href="#" id="logoutDropdownBtn" class="logout-item">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
     </div>
-    <div class="menu-btn" onclick="toggleNav()">☰</div>
+</div>
+
+<div id="notificacionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h3>🔔 Notificaciones</h3><button class="close-modal" onclick="cerrarNotificaciones()">×</button></div>
+        <div class="modal-body" id="notificacionesList"><div class="empty-notifications">No tienes notificaciones</div></div>
+    </div>
 </div>
 
 <div class="games-menu">
@@ -198,39 +99,21 @@ body {
     <a href="cod.html">🎮 COD Mobile</a>
 </div>
 
-<div id="mySidebar" class="sidebar">
-    <div class="close-btn" onclick="toggleNav()">×</div>
-    <a href="index.html">🏠 Inicio</a>
-    <a href="perfil.html">👤 Mi Perfil</a>
-    <a href="freefire.html">🔥 Free Fire</a>
-    <a href="bloodstrike.html">🪖 Blood Strike</a>
-    <a href="roblox.html">🤖 Roblox</a>
-    <a href="ml.html">👑 MLBB</a>
-    <a href="cod.html">🎮 COD Mobile</a>
-    <a href="#" id="logoutSidebarBtn">🚪 Cerrar Sesión</a>
-</div>
-
 <div class="main">
     <div class="card-panel">
         <div class="panel-title" style="margin-top:0; color:#9ca3af;">👤 Datos para la Recarga</div>
         <div class="form-group"><label>📧 Correo Electrónico</label><input type="email" class="form-input" id="robloxEmail" placeholder="ejemplo@correo.com"></div>
         <div class="form-group"><label>📱 Número de WhatsApp</label><input type="tel" class="form-input" id="robloxWhatsapp" placeholder="Ej: 04121234567"></div>
     </div>
-
-    <div class="card-panel">
-        <div class="panel-title" style="margin-top:0; color:#9ca3af;">💳 Método de Pago</div>
-        <div class="payment-methods">
-            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div>
-            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div>
-        </div>
-    </div>
-
+    <div class="card-panel"><div class="panel-title" style="margin-top:0; color:#9ca3af;">💳 Método de Pago</div><div class="payment-methods"><div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div><div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div></div></div>
     <div class="section-divider"><span>🤖 ROBUX DISPONIBLES 🤖</span></div>
-
     <div class="product-card"><div class="card-header"><div class="game-icon">💰</div><div class="product-title">400 Robux</div></div><div class="product-desc">Carga directa a la cuenta 🔒</div><div class="product-price" data-usd="4.99">$4.99</div><button class="btn-buy" onclick="comprarProducto('400 Robux 🤖', '4.99')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">💰</div><div class="product-title">800 Robux</div></div><div class="product-desc">Carga directa a la cuenta 🔒</div><div class="product-price" data-usd="9.99">$9.99</div><button class="btn-buy" onclick="comprarProducto('800 Robux 🤖', '9.99')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">💰</div><div class="product-title">2000 Robux</div></div><div class="product-desc">Carga directa a la cuenta 🔒</div><div class="product-price" data-usd="24.99">$24.99</div><button class="btn-buy" onclick="comprarProducto('2000 Robux 🤖', '24.99')">🛍️ Comprar</button></div>
 </div>
+
+<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
+<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -258,23 +141,16 @@ body {
     async function cargarTasa() {
         const tasaRef = ref(db, 'configuracion/tasa_dolar');
         const snapshot = await get(tasaRef);
-        if (snapshot.exists()) {
-            TASA_DOLAR = snapshot.val();
-            actualizarVisualizacionPrecios();
-        }
+        if (snapshot.exists()) { TASA_DOLAR = snapshot.val(); actualizarVisualizacionPrecios(); }
     }
     
     onAuthStateChanged(auth, (user) => { usuarioLogueado = !!user; });
-    document.getElementById("logoutSidebarBtn")?.addEventListener("click", (e) => { e.preventDefault(); signOut(auth).then(() => window.location.href = "index.html"); });
     
     function actualizarVisualizacionPrecios() {
         document.querySelectorAll('.product-price').forEach(el => {
             let usd = parseFloat(el.getAttribute('data-usd'));
-            if (metodoSeleccionado === "PAGO MOVIL") {
-                el.innerText = Math.round(usd * TASA_DOLAR) + " Bs";
-            } else {
-                el.innerText = usd.toFixed(2) + " USDT";
-            }
+            if (metodoSeleccionado === "PAGO MOVIL") { el.innerText = Math.round(usd * TASA_DOLAR) + " Bs"; }
+            else { el.innerText = usd.toFixed(2) + " USDT"; }
         });
     }
     
@@ -302,9 +178,49 @@ body {
         window.location.href = "pasarela.html";
     };
     
-    window.toggleNav = function() { const sidebar = document.getElementById("mySidebar"); sidebar.style.width = sidebar.style.width === "250px" ? "0" : "250px"; };
     cargarTasa();
     window.onload = actualizarVisualizacionPrecios;
+    
+    let notificaciones = [];
+    function cargarNotificaciones() {
+        const notifStorage = localStorage.getItem('notificaciones');
+        if (notifStorage) { notificaciones = JSON.parse(notifStorage); }
+        else { notificaciones = [{ id: 1, titulo: "🎉 ¡Bienvenido!", mensaje: "Gracias por visitar RECARGASGAMES", fecha: new Date().toLocaleString(), leida: false }]; guardarNotificaciones(); }
+        actualizarContador();
+    }
+    function guardarNotificaciones() { localStorage.setItem('notificaciones', JSON.stringify(notificaciones)); }
+    function actualizarContador() {
+        const noLeidas = notificaciones.filter(n => !n.leida).length;
+        const badge = document.getElementById('notifCount');
+        if (badge) { badge.textContent = noLeidas; badge.style.display = noLeidas > 0 ? 'flex' : 'none'; }
+    }
+    window.abrirNotificaciones = function() {
+        const modal = document.getElementById('notificacionModal');
+        const listaDiv = document.getElementById('notificacionesList');
+        if (notificaciones.length === 0) { listaDiv.innerHTML = '<div class="empty-notifications">No tienes notificaciones</div>'; }
+        else {
+            let html = '';
+            notificaciones.forEach(notif => {
+                html += `<div class="notification-item"><div class="notification-icon">🔔</div><div class="notification-text"><div class="notification-title">${notif.titulo}</div><div style="font-size:12px;">${notif.mensaje}</div><div class="notification-date">${notif.fecha}</div></div></div>`;
+                notif.leida = true;
+            });
+            listaDiv.innerHTML = html;
+            guardarNotificaciones();
+            actualizarContador();
+        }
+        modal.style.display = 'flex';
+    };
+    window.cerrarNotificaciones = function() { document.getElementById('notificacionModal').style.display = 'none'; };
+    
+    const profileBtn = document.getElementById('profileBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn) { profileBtn.addEventListener('click', (e) => { e.stopPropagation(); profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block'; }); }
+    document.addEventListener('click', () => { if (profileDropdown) profileDropdown.style.display = 'none'; });
+    document.getElementById("logoutDropdownBtn")?.addEventListener("click", (e) => { e.preventDefault(); signOut(auth).then(() => window.location.href = "login.html"); });
+    
+    window.addEventListener('scroll', function() { const backToTop = document.getElementById('backToTop'); if (window.scrollY > 300) backToTop.classList.add('show'); else backToTop.classList.remove('show'); });
+    window.onclick = function(event) { const modal = document.getElementById('notificacionModal'); if (event.target === modal) cerrarNotificaciones(); };
+    cargarNotificaciones();
 </script>
 </body>
 </html>
