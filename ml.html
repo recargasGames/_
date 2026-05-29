@@ -118,7 +118,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     
     const firebaseConfig = {
         apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
@@ -137,6 +137,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     let usuarioLogueado = false;
     let metodoSeleccionado = "PAGO MOVIL";
     let TASA_DOLAR = 735;
+    let notificaciones = [];
     
     async function cargarTasa() {
         const tasaRef = ref(db, 'configuracion/tasa_dolar');
@@ -177,27 +178,35 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     cargarTasa();
     window.onload = actualizarVisualizacionPrecios;
     
-    let notificaciones = [];
-    function cargarNotificaciones() {
-        const notifStorage = localStorage.getItem('notificaciones');
-        if (notifStorage) { notificaciones = JSON.parse(notifStorage); }
-        else { notificaciones = [{ id: 1, titulo: "🎉 ¡Bienvenido!", mensaje: "Gracias por visitar RECARGASGAMES", fecha: new Date().toLocaleString(), leida: false }]; guardarNotificaciones(); }
-        actualizarContador();
-    }
     function guardarNotificaciones() { localStorage.setItem('notificaciones', JSON.stringify(notificaciones)); }
     function actualizarContador() {
         const noLeidas = notificaciones.filter(n => !n.leida).length;
         const badge = document.getElementById('notifCount');
         if (badge) { badge.textContent = noLeidas; badge.style.display = noLeidas > 0 ? 'flex' : 'none'; }
     }
+    
+    function cargarNotificacionesFirebase(userId) {
+        if (!userId) return;
+        const notificacionesRef = ref(db, `notificaciones/${userId}`);
+        onValue(notificacionesRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                notificaciones = Object.values(data);
+                notificaciones.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                guardarNotificaciones();
+                actualizarContador();
+            }
+        });
+    }
+    
     window.abrirNotificaciones = function() {
         const modal = document.getElementById('notificacionModal');
         const listaDiv = document.getElementById('notificacionesList');
-        if (notificaciones.length === 0) { listaDiv.innerHTML = '<div class="empty-notifications">No tienes notificaciones</div>'; }
+        if (!notificaciones.length) { listaDiv.innerHTML = '<div class="empty-notifications">No tienes notificaciones</div>'; }
         else {
             let html = '';
             notificaciones.forEach(notif => {
-                html += `<div class="notification-item"><div class="notification-icon">🔔</div><div class="notification-text"><div class="notification-title">${notif.titulo}</div><div style="font-size:12px;">${notif.mensaje}</div><div class="notification-date">${notif.fecha}</div></div></div>`;
+                html += `<div class="notification-item"><div class="notification-icon">${notif.titulo.includes('Completado') ? '✅' : '🔔'}</div><div class="notification-text"><div class="notification-title">${notif.titulo}</div><div style="font-size:12px;">${notif.mensaje}</div><div class="notification-date">${notif.fecha}</div></div></div>`;
                 notif.leida = true;
             });
             listaDiv.innerHTML = html;
@@ -206,17 +215,26 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
         }
         modal.style.display = 'flex';
     };
+    
     window.cerrarNotificaciones = function() { document.getElementById('notificacionModal').style.display = 'none'; };
     
     const profileBtn = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
-    if (profileBtn) { profileBtn.addEventListener('click', (e) => { e.stopPropagation(); profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block'; }); }
+    if (profileBtn) {
+        profileBtn.addEventListener('click', (e) => { e.stopPropagation(); profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block'; });
+    }
     document.addEventListener('click', () => { if (profileDropdown) profileDropdown.style.display = 'none'; });
-    document.getElementById("logoutDropdownBtn")?.addEventListener("click", (e) => { e.preventDefault(); signOut(auth).then(() => window.location.href = "login.html"); });
+    
+    document.getElementById("logoutDropdownBtn")?.addEventListener("click", (e) => {
+        e.preventDefault(); localStorage.clear(); signOut(auth).then(() => window.location.href = "login.html");
+    });
     
     window.addEventListener('scroll', function() { const backToTop = document.getElementById('backToTop'); if (window.scrollY > 300) backToTop.classList.add('show'); else backToTop.classList.remove('show'); });
     window.onclick = function(event) { const modal = document.getElementById('notificacionModal'); if (event.target === modal) cerrarNotificaciones(); };
-    cargarNotificaciones();
+    
+    onAuthStateChanged(auth, (user) => {
+        if (user) { cargarNotificacionesFirebase(user.uid); }
+    });
 </script>
 </body>
 </html>
