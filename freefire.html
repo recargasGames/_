@@ -158,9 +158,9 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     let idVerificado = false;
     let nombreVerificado = "";
     
-    // ========== API CON PROXY (SOLUCIÓN DEFINITIVA) ==========
+    // ========== CONFIGURACIÓN API FREE FIRE (PROXY SIN ACTIVACIÓN) ==========
     const API_KEY = "ffc_momryhse_nixuxcj9ztm2eoytiytspe";
-    const REGION = "br";  // br = Brasil/LATAM (cambia a "na" si es USA)
+    const REGION = "br";
     const PROXY = "https://api.allorigins.win/raw?url=";
     
     async function verificarIdFreeFire(idJugador) {
@@ -168,7 +168,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
             const urlOriginal = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${idJugador}&key=${API_KEY}`;
             const urlConProxy = PROXY + encodeURIComponent(urlOriginal);
             
-            console.log("📡 Verificando a través de proxy...");
+            console.log("📡 Verificando ID en Free Fire...");
             
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -206,10 +206,11 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
             return {
                 valido: false,
                 nombre: "",
-                mensaje: `⚠️ Error: ${error.message}`
+                mensaje: `⚠️ Error de conexión: ${error.message}`
             };
         }
-    }    
+    }
+    
     // ========== TASA DE CAMBIO ==========
     async function cargarTasa() {
         const tasaRef = ref(db, 'configuracion/tasa_dolar');
@@ -272,8 +273,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
                 nombreVerificado = "";
             }
         }, 800);
-    });
-    
+    });    
     // ========== FUNCIÓN DE COMPRA ==========
     window.comprarProducto = async function(producto, precioUsd) {
         if (!usuarioLogueado) {
