@@ -50,9 +50,9 @@
         <div class="method-title">💵 PAGO MOVIL</div>
 
         <div class="info-box">
-            <div class="info-row"><span class="info-label">BANCO:</span><span class="info-value">0102</span><button class="copy-btn" onclick="copiarTexto('0102', this)">☐</button></div>
-            <div class="info-row"><span class="info-label">CÉDULA:</span><span class="info-value">32824869</span><button class="copy-btn" onclick="copiarTexto('32824869', this)">☐</button></div>
-            <div class="info-row"><span class="info-label">TELÉFONO:</span><span class="info-value">04228242411</span><button class="copy-btn" onclick="copiarTexto('04228242411', this)">☐</button></div>
+            <div class="info-row"><span class="info-label">BANCO:</span><span class="info-value">0102</span><button class="copy-btn" onclick="copiarTexto('0102', this)">📋</button></div>
+            <div class="info-row"><span class="info-label">CÉDULA:</span><span class="info-value">32824869</span><button class="copy-btn" onclick="copiarTexto('32824869', this)">📋</button></div>
+            <div class="info-row"><span class="info-label">TELÉFONO:</span><span class="info-value">04228242411</span><button class="copy-btn" onclick="copiarTexto('04228242411', this)">📋</button></div>
         </div>
 
         <div class="instruction"><p>💰 <strong>REALIZA TU PAGO Y CARGA LA REFERENCIA</strong></p><p style="font-size: 12px;">EJEMPLO:</p><div class="example">001432808801</div></div>
@@ -60,7 +60,7 @@
         <div class="amount-box"><div class="amount-label">💸 Monto a enviar:</div><div class="amount-value" id="montoMostrar">Bs 0.00</div></div>
 
         <div class="discount-box">
-            <input type="text" id="codigoDescuento" class="discount-input" placeholder="¿CODIGO DE DESCUENTO?">
+            <input type="text" id="codigoDescuento" class="discount-input" placeholder="🎟️ Código GAMES = 1.5% OFF">
             <button class="discount-btn" onclick="aplicarDescuento()">Aplicar</button>
         </div>
         <div id="discountInfo" class="discount-info"></div>
@@ -74,64 +74,37 @@
 
 <script src="telegram.js"></script>
 <script>
+    // ========== OBTENER DATOS DEL localStorage (YA CALCULADOS POR EL JUEGO) ==========
     let producto = localStorage.getItem('producto_seleccionado') || "Producto";
-    let precioUSD = parseFloat(localStorage.getItem('precio_usd')) || 0.97;
+    let precioUSD = parseFloat(localStorage.getItem('precio_usd')) || 0;
+    let precioEnBsOriginal = parseInt(localStorage.getItem('precio_en_bs')) || 0;
     let jugador = localStorage.getItem('id_jugador') || "No especificado";
     let metodo = "PAGO MOVIL";
     let juego = localStorage.getItem('juego_seleccionado') || "JUEGO";
     
-    // TASA (debe coincidir con la del juego, se carga desde Firebase)
-    let TASA = 735;
-    let montoOriginalBs = 0;
-    let montoActualBs = 0;
+    // Si no hay precio_en_bs (por compatibilidad con pedidos viejos), lo calculamos con tasa por defecto
+    let TASA_POR_DEFECTO = 735;
+    if (precioEnBsOriginal === 0 && precioUSD > 0) {
+        precioEnBsOriginal = Math.round(precioUSD * TASA_POR_DEFECTO);
+    }
+    
+    let montoActualBs = precioEnBsOriginal;
     let descuentoAplicado = false;
     let descuentoPorcentaje = 0;
     
-    // Cargar tasa desde Firebase
-    async function cargarTasa() {
-        try {
-            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-            const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-            
-            const firebaseConfig = {
-                apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-                authDomain: "recargasgames-14c38.firebaseapp.com",
-                databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-                projectId: "recargasgames-14c38",
-                storageBucket: "recargasgames-14c38.firebasestorage.app",
-                messagingSenderId: "370952235234",
-                appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-            };
-            
-            const app = initializeApp(firebaseConfig);
-            const db = getDatabase(app);
-            const tasaRef = ref(db, 'configuracion/tasa_dolar');
-            const snapshot = await get(tasaRef);
-            if (snapshot.exists()) {
-                TASA = snapshot.val();
-            }
-            calcularMonto();
-        } catch (error) {
-            console.error("Error cargando tasa:", error);
-            calcularMonto();
-        }
-    }
+    // Mostrar el monto original
+    const montoDisplay = document.getElementById("montoMostrar");
+    montoDisplay.innerHTML = montoActualBs.toLocaleString("es-VE") + " Bs";
     
-    function calcularMonto() {
-        montoOriginalBs = Math.round(precioUSD * TASA);
-        montoActualBs = montoOriginalBs;
-        document.getElementById("montoMostrar").innerHTML = montoOriginalBs.toLocaleString("es-VE") + " Bs";
-    }
-    
+    // Aplicar descuento (1.5% con código GAMES)
     window.aplicarDescuento = function() {
         let codigo = document.getElementById("codigoDescuento").value.trim().toUpperCase();
         let discountInfo = document.getElementById("discountInfo");
-        let montoDisplay = document.getElementById("montoMostrar");
         
         if (codigo === "GAMES") {
             if (!descuentoAplicado) {
-                let descuento = montoOriginalBs * 0.015;
-                let nuevoMonto = montoOriginalBs - descuento;
+                let descuento = precioEnBsOriginal * 0.015;
+                let nuevoMonto = precioEnBsOriginal - descuento;
                 montoActualBs = Math.round(nuevoMonto);
                 montoDisplay.innerHTML = montoActualBs.toLocaleString("es-VE") + " Bs";
                 descuentoAplicado = true;
@@ -144,8 +117,8 @@
             }
         } else if (codigo === "") {
             if (descuentoAplicado) {
-                montoActualBs = montoOriginalBs;
-                montoDisplay.innerHTML = montoOriginalBs.toLocaleString("es-VE") + " Bs";
+                montoActualBs = precioEnBsOriginal;
+                montoDisplay.innerHTML = montoActualBs.toLocaleString("es-VE") + " Bs";
                 descuentoAplicado = false;
                 discountInfo.style.display = "none";
                 mostrarToast("🔄 Descuento eliminado");
@@ -217,7 +190,6 @@
                 messagingSenderId: "370952235234",
                 appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
             };
-            
             const app = initializeApp(firebaseConfig);
             const db = getDatabase(app);
             const auth = getAuth(app);
@@ -248,20 +220,19 @@
                     fecha: new Date().toLocaleString(),
                     timestamp: Date.now(),
                     descuento_aplicado: descuentoAplicado,
-                    descuento_porcentaje: descuentoPorcentaje
+                    descuento_porcentaje: descuentoPorcentaje,
+                    precio_usd_original: precioUSD,
+                    precio_bs_original: precioEnBsOriginal
                 });
-                console.log("✅ Pedido guardado");
+                console.log("✅ Pedido guardado en Firebase");
             }
-        } catch (error) {
-            console.error("Error:", error);
+        } catch (error) { 
+            console.error("Error guardando en Firebase:", error); 
         }
     }
     
     window.copiarTexto = copiarTexto;
     window.completarPedido = completarPedido;
-    
-    // Iniciar
-    cargarTasa();
 </script>
 </body>
 </html>

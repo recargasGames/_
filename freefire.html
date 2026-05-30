@@ -122,7 +122,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
     
     const firebaseConfig = {
         apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
@@ -142,20 +142,28 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     let metodoSeleccionado = "PAGO MOVIL";
     let TASA_DOLAR = 735;
     let notificaciones = [];
-    
+    let userIdActual = null;    
+    // ========== TASA DE CAMBIO ==========
     async function cargarTasa() {
         const tasaRef = ref(db, 'configuracion/tasa_dolar');
         const snapshot = await get(tasaRef);
-        if (snapshot.exists()) { TASA_DOLAR = snapshot.val(); actualizarVisualizacionPrecios(); }
+        if (snapshot.exists()) {
+            TASA_DOLAR = snapshot.val();
+            actualizarVisualizacionPrecios();
+        }
     }
-    
-    onAuthStateChanged(auth, (user) => { usuarioLogueado = !!user; });
     
     function actualizarVisualizacionPrecios() {
         document.querySelectorAll('.product-price').forEach(el => {
             let usd = parseFloat(el.getAttribute('data-usd'));
-            if (metodoSeleccionado === "PAGO MOVIL") { el.innerText = Math.round(usd * TASA_DOLAR) + " Bs"; }
-            else { el.innerText = usd.toFixed(2) + " USDT"; }
+            if (metodoSeleccionado === "PAGO MOVIL") {
+                let bs = Math.round(usd * TASA_DOLAR);
+                el.innerText = bs.toLocaleString("es-VE") + " Bs";
+                el.setAttribute('data-bs', bs);
+            } else {
+                el.innerText = usd.toFixed(2) + " USDT";
+                el.setAttribute('data-bs', '0');
+            }
         });
     }
     
@@ -167,60 +175,143 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     };
     
     window.comprarProducto = function(producto, precioUsd) {
-        if (!usuarioLogueado) { alert("❌ Debes iniciar sesión para comprar"); window.location.href = "login.html"; return; }
+        if (!usuarioLogueado) {
+            alert("❌ Debes iniciar sesión para comprar");
+            window.location.href = "login.html";
+            return;
+        }
+        
         let idInput = document.getElementById("jugadorId").value.trim();
-        if(idInput === "") { alert("❌ Por favor, ingresa tu ID de jugador."); return; }
-        let precioParaGuardar = metodoSeleccionado === "PAGO MOVIL" ? Math.round(parseFloat(precioUsd) * TASA_DOLAR) + " Bs" : parseFloat(precioUsd).toFixed(2) + " USDT";
+        if(idInput === "") {
+            alert("❌ Por favor, ingresa tu ID de jugador.");
+            return;
+        }
+        
+        // Obtener el precio en Bs correcto (el que se muestra actualmente)
+        let precioEnBs = 0;
+        const productCards = document.querySelectorAll('.product-card');
+        for (let card of productCards) {
+            const titleEl = card.querySelector('.product-title');
+            if (titleEl && titleEl.innerText === producto) {
+                const priceEl = card.querySelector('.product-price');
+                if (priceEl && metodoSeleccionado === "PAGO MOVIL") {
+                    let bsText = priceEl.innerText.replace(' Bs', '').replace(/\./g, '');
+                    precioEnBs = parseInt(bsText);
+                } else if (metodoSeleccionado === "PAGO MOVIL" && priceEl && priceEl.getAttribute('data-bs')) {
+                    precioEnBs = parseInt(priceEl.getAttribute('data-bs'));
+                }
+                break;
+            }
+        }
+        
+        // Si no se encontró, calcular con la tasa actual
+        if (precioEnBs === 0 && metodoSeleccionado === "PAGO MOVIL") {
+            precioEnBs = Math.round(parseFloat(precioUsd) * TASA_DOLAR);
+        }
+        
         localStorage.setItem('id_jugador', idInput);
         localStorage.setItem('juego_seleccionado', 'FREE FIRE 🔥');
         localStorage.setItem('producto_seleccionado', producto);
-        localStorage.setItem('precio_usd', precioParaGuardar);
+        localStorage.setItem('precio_usd', precioUsd);
+        localStorage.setItem('precio_en_bs', precioEnBs);
         localStorage.setItem('metodo_pago', metodoSeleccionado);
+        
         window.location.href = "pasarela.html";
     };
     
+    onAuthStateChanged(auth, (user) => { usuarioLogueado = !!user; });
     cargarTasa();
     window.onload = actualizarVisualizacionPrecios;
     
-    // Notificaciones
-    function guardarNotificaciones() { localStorage.setItem('notificaciones', JSON.stringify(notificaciones)); }
+    // ========== NOTIFICACIONES ==========
+    function guardarNotificacionesLocal() { localStorage.setItem('notificaciones', JSON.stringify(notificaciones)); }
     function actualizarContador() {
         const noLeidas = notificaciones.filter(n => !n.leida).length;
         const badge = document.getElementById('notifCount');
         if (badge) { badge.textContent = noLeidas; badge.style.display = noLeidas > 0 ? 'flex' : 'none'; }
     }
-    
+    function mostrarToast(mensaje) {
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.bottom = '100px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = '#10b981';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '30px';
+        toast.style.fontSize = '14px';
+        toast.style.zIndex = '2000';
+        toast.style.animation = 'fadeOut 3s ease forwards';
+        toast.textContent = mensaje;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    async function marcarTodasComoLeidas() {
+        if (!userIdActual) return;
+        try {
+            for (const notif of notificaciones) {
+                if (!notif.leida) {
+                    const notifRef = ref(db, `notificaciones/${userIdActual}/${notif.id}`);
+                    await update(notifRef, { leida: true });
+                }
+            }
+        } catch (error) { console.error("Error:", error); }
+    }
     function cargarNotificacionesFirebase(userId) {
         if (!userId) return;
+        userIdActual = userId;
         const notificacionesRef = ref(db, `notificaciones/${userId}`);
         onValue(notificacionesRef, (snapshot) => {
             const data = snapshot.val();
+            const notificacionesAntes = notificaciones.map(n => n.id);
             if (data) {
-                notificaciones = Object.values(data);
-                notificaciones.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                guardarNotificaciones();
+                let nuevasNotificaciones = [];
+                for (let id in data) nuevasNotificaciones.push({ id, ...data[id] });
+                nuevasNotificaciones.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                let hayNuevas = false;
+                for (let notif of nuevasNotificaciones) {
+                    if (!notificacionesAntes.includes(notif.id) && !notif.leida) { hayNuevas = true; break; }
+                }
+                notificaciones = nuevasNotificaciones;
+                guardarNotificacionesLocal();
+                actualizarContador();
+                if (hayNuevas && !localStorage.getItem('notif_toast')) {
+                    const noLeidas = notificaciones.filter(n => !n.leida).length;
+                    mostrarToast(`🔔 Tienes ${noLeidas} notificación(es) nueva(s)`);
+                    localStorage.setItem('notif_toast', 'true');
+                    setTimeout(() => localStorage.removeItem('notif_toast'), 5000);
+                }
+            } else {
+                notificaciones = [];
+                guardarNotificacionesLocal();
                 actualizarContador();
             }
         });
     }
-    
-    window.abrirNotificaciones = function() {
+    window.abrirNotificaciones = async function() {
         const modal = document.getElementById('notificacionModal');
         const listaDiv = document.getElementById('notificacionesList');
-        if (!notificaciones.length) { listaDiv.innerHTML = '<div class="empty-notifications">No tienes notificaciones</div>'; }
-        else {
+        if (!notificaciones.length) {
+            listaDiv.innerHTML = '<div class="empty-notifications">No tienes notificaciones</div>';
+        } else {
             let html = '';
-            notificaciones.forEach(notif => {
-                html += `<div class="notification-item"><div class="notification-icon">${notif.titulo.includes('Completado') ? '✅' : '🔔'}</div><div class="notification-text"><div class="notification-title">${notif.titulo}</div><div style="font-size:12px;">${notif.mensaje}</div><div class="notification-date">${notif.fecha}</div></div></div>`;
+            for (const notif of notificaciones) {
+                html += `<div class="notification-item"><div class="notification-icon">${notif.titulo && notif.titulo.includes('Completado') ? '✅' : '🔔'}</div><div class="notification-text"><div class="notification-title">${notif.titulo || 'Notificación'}</div><div style="font-size:12px;">${notif.mensaje || ''}</div><div class="notification-date">${notif.fecha || ''}</div></div></div>`;
+                if (notif.id) {
+                    try {
+                        const notifRef = ref(db, `notificaciones/${userIdActual}/${notif.id}`);
+                        await update(notifRef, { leida: true });
+                    } catch(e) {}
+                }
                 notif.leida = true;
-            });
+            }
             listaDiv.innerHTML = html;
-            guardarNotificaciones();
+            guardarNotificacionesLocal();
             actualizarContador();
         }
         modal.style.display = 'flex';
     };
-    
     window.cerrarNotificaciones = function() { document.getElementById('notificacionModal').style.display = 'none'; };
     
     const profileBtn = document.getElementById('profileBtn');
