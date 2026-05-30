@@ -5,271 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pasarela de Pago - RECARGASGAMES</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-image: url('fondo.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 450px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .payment-card {
-            background: rgba(11, 18, 32, 0.95);
-            border: 1px solid #10b981;
-            border-radius: 24px;
-            padding: 25px;
-            backdrop-filter: blur(10px);
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 22px;
-            margin-bottom: 20px;
-            color: #10b981;
-        }
-
-        .method-title {
-            background: #10b981;
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .info-box {
-            background: #0b1220;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #1f2937;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #1f2937;
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            font-weight: bold;
-            color: #10b981;
-            font-size: 14px;
-        }
-
-        .info-value {
-            font-family: monospace;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .copy-btn {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: 0.2s;
-        }
-
-        .copy-btn:hover {
-            background: #3b82f6;
-        }
-
-        .copy-btn.copied {
-            background: #22c55e;
-        }
-
-        .instruction {
-            background: rgba(16, 185, 129, 0.15);
-            border-left: 4px solid #10b981;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .instruction p {
-            margin: 5px 0;
-            font-size: 13px;
-        }
-
-        .example {
-            background: #1f2937;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            font-family: monospace;
-            font-size: 16px;
-            margin: 10px 0;
-            letter-spacing: 2px;
-        }
-
-        .amount-box {
-            background: #1f2937;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .amount-label {
-            font-size: 13px;
-            color: #9ca3af;
-        }
-
-        .amount-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: #22c55e;
-        }
-
-        /* Descuento */
-        .discount-box {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .discount-input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid #1f2937;
-            background: #111827;
-            color: white;
-            font-size: 14px;
-            text-align: center;
-            text-transform: uppercase;
-        }
-        .discount-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 0 20px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .discount-btn:hover {
-            background: #059669;
-        }
-        .discount-info {
-            font-size: 12px;
-            color: #f97316;
-            text-align: center;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .reference-box {
-            margin: 20px 0;
-        }
-
-        .reference-box label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #10b981;
-            font-size: 14px;
-        }
-
-        .reference-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid #1f2937;
-            background: #111827;
-            color: white;
-            font-size: 16px;
-            text-align: center;
-            font-family: monospace;
-            letter-spacing: 2px;
-        }
-
-        .reference-input:focus {
-            outline: none;
-            border-color: #10b981;
-        }
-
-        .complete-btn {
-            width: 100%;
-            padding: 15px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-top: 10px;
-        }
-
-        .complete-btn:hover {
-            background: #059669;
-        }
-
-        .complete-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
-
-        .footer-text {
-            text-align: center;
-            color: #9ca3af;
-            font-size: 11px;
-            margin-top: 20px;
-        }
-
-        .copy-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #22c55e;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            z-index: 9999;
-            animation: fadeOut 1.5s ease forwards;
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            70% { opacity: 1; }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); display: none; }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-image: url('fondo.jpg'); background-size: cover; background-position: center; background-attachment: fixed; color: white; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { max-width: 450px; width: 100%; margin: 0 auto; }
+        .payment-card { background: rgba(11, 18, 32, 0.95); border: 1px solid #10b981; border-radius: 24px; padding: 25px; backdrop-filter: blur(10px); }
+        h1 { text-align: center; font-size: 22px; margin-bottom: 20px; color: #10b981; }
+        .method-title { background: #10b981; display: inline-block; padding: 8px 20px; border-radius: 30px; font-size: 16px; font-weight: bold; margin-bottom: 20px; text-align: center; width: 100%; }
+        .info-box { background: #0b1220; border-radius: 16px; padding: 15px; margin-bottom: 20px; border: 1px solid #1f2937; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1f2937; }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-weight: bold; color: #10b981; font-size: 14px; }
+        .info-value { font-family: monospace; font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+        .copy-btn { background: #2563eb; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; transition: 0.2s; }
+        .copy-btn:hover { background: #3b82f6; }
+        .copy-btn.copied { background: #22c55e; }
+        .instruction { background: rgba(16, 185, 129, 0.15); border-left: 4px solid #10b981; padding: 15px; border-radius: 12px; margin: 20px 0; text-align: center; }
+        .instruction p { margin: 5px 0; font-size: 13px; }
+        .example { background: #1f2937; padding: 10px; border-radius: 10px; text-align: center; font-family: monospace; font-size: 16px; margin: 10px 0; letter-spacing: 2px; }
+        .amount-box { background: #1f2937; padding: 15px; border-radius: 12px; text-align: center; margin: 20px 0; }
+        .amount-label { font-size: 13px; color: #9ca3af; }
+        .amount-value { font-size: 32px; font-weight: bold; color: #22c55e; }
+        .discount-box { display: flex; gap: 10px; margin: 15px 0; }
+        .discount-input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #1f2937; background: #111827; color: white; font-size: 14px; text-align: center; text-transform: uppercase; }
+        .discount-btn { background: #10b981; color: white; border: none; padding: 0 20px; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .discount-btn:hover { background: #059669; }
+        .discount-info { font-size: 12px; color: #f97316; text-align: center; margin-top: 5px; display: none; }
+        .reference-box { margin: 20px 0; }
+        .reference-box label { display: block; margin-bottom: 8px; font-weight: bold; color: #10b981; font-size: 14px; }
+        .reference-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #1f2937; background: #111827; color: white; font-size: 16px; text-align: center; font-family: monospace; letter-spacing: 2px; }
+        .reference-input:focus { outline: none; border-color: #10b981; }
+        .complete-btn { width: 100%; padding: 15px; background: #10b981; color: white; border: none; border-radius: 14px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .complete-btn:hover { background: #059669; }
+        .complete-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        .footer-text { text-align: center; color: #9ca3af; font-size: 11px; margin-top: 20px; }
+        .copy-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; z-index: 9999; animation: fadeOut 1.5s ease forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; transform: translateX(-50%) translateY(0); } 70% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); display: none; } }
     </style>
 </head>
 <body>
@@ -277,100 +47,105 @@
 <div class="container">
     <div class="payment-card">
         <h1>💳 Método de Pago</h1>
-
         <div class="method-title">💵 PAGO MOVIL</div>
 
-        <!-- DATOS BANCARIOS -->
         <div class="info-box">
-            <div class="info-row">
-                <span class="info-label"></span>
-                <span class="info-value">🏦: 0102</span>
-                <button class="copy-btn" onclick="copiarTexto('0102', this)">☐</button>
-            </div>
-            <div class="info-row">
-                <span class="info-label"></span>
-                <span class="info-value">🪪:32824869</span>
-                <button class="copy-btn" onclick="copiarTexto('32824869', this)">☐</button>
-            </div>
-            <div class="info-row">
-                <span class="info-label"></span>
-                <span class="info-value">📞:04228242411</span>
-                <button class="copy-btn" onclick="copiarTexto('04228242411', this)">‍☐￶</button>
-            </div>
+            <div class="info-row"><span class="info-label">BANCO:</span><span class="info-value">0102</span><button class="copy-btn" onclick="copiarTexto('0102', this)">☐</button></div>
+            <div class="info-row"><span class="info-label">CÉDULA:</span><span class="info-value">32824869</span><button class="copy-btn" onclick="copiarTexto('32824869', this)">☐</button></div>
+            <div class="info-row"><span class="info-label">TELÉFONO:</span><span class="info-value">04228242411</span><button class="copy-btn" onclick="copiarTexto('04228242411', this)">☐</button></div>
         </div>
 
-        <div class="instruction">
-            <p>💰 <strong>REALIZA TU PAGO Y CARGA LA REFERENCIA</strong></p>
-            <p style="font-size: 12px;">EJEMPLO:</p>
-            <div class="example">001432808801</div>
-        </div>
+        <div class="instruction"><p>💰 <strong>REALIZA TU PAGO Y CARGA LA REFERENCIA</strong></p><p style="font-size: 12px;">EJEMPLO:</p><div class="example">001432808801</div></div>
 
-        <div class="amount-box">
-            <div class="amount-label">💸 Monto a enviar:</div>
-            <div class="amount-value" id="montoMostrar">Bs 0.00</div>
-        </div>
+        <div class="amount-box"><div class="amount-label">💸 Monto a enviar:</div><div class="amount-value" id="montoMostrar">Bs 0.00</div></div>
 
-        <!-- CÓDIGO DE DESCUENTO -->
         <div class="discount-box">
-            <input type="text" id="codigoDescuento" class="discount-input" placeholder="🎟️ Código Descuento?">
+            <input type="text" id="codigoDescuento" class="discount-input" placeholder="¿CODIGO DE DESCUENTO?">
             <button class="discount-btn" onclick="aplicarDescuento()">Aplicar</button>
         </div>
         <div id="discountInfo" class="discount-info"></div>
 
-        <!-- REFERENCIA -->
-        <div class="reference-box">
-            <label>🧾 REFERENCIA DE PAGO</label>
-            <input type="text" id="referencia" class="reference-input" placeholder="Ej: 001432808801">
-        </div>
+        <div class="reference-box"><label>🧾 REFERENCIA DE PAGO</label><input type="text" id="referencia" class="reference-input" placeholder="Ej: 001432808801"></div>
 
-        <button class="complete-btn" onclick="completarPedido()">
-            ✅ COMPLETAR PEDIDO
-        </button>
-
-        <div class="footer-text">
-            Después de pagar, ingresa la referencia y presiona completar
-        </div>
+        <button class="complete-btn" onclick="completarPedido()">✅ COMPLETAR PEDIDO</button>
+        <div class="footer-text">Después de pagar, ingresa la referencia y presiona completar</div>
     </div>
 </div>
 
 <script src="telegram.js"></script>
 <script>
-    // Obtener datos del producto desde localStorage
     let producto = localStorage.getItem('producto_seleccionado') || "Producto";
-    let precioOriginal = localStorage.getItem('precio_usd') || "0 Bs";
+    let precioUSD = parseFloat(localStorage.getItem('precio_usd')) || 0.97;
     let jugador = localStorage.getItem('id_jugador') || "No especificado";
     let metodo = "PAGO MOVIL";
     let juego = localStorage.getItem('juego_seleccionado') || "JUEGO";
     
-    let montoActual = precioOriginal;
+    // TASA (debe coincidir con la del juego, se carga desde Firebase)
+    let TASA = 735;
+    let montoOriginalBs = 0;
+    let montoActualBs = 0;
     let descuentoAplicado = false;
+    let descuentoPorcentaje = 0;
     
-    // Mostrar el monto
-    document.getElementById("montoMostrar").innerHTML = precioOriginal;
+    // Cargar tasa desde Firebase
+    async function cargarTasa() {
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+            const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+            
+            const firebaseConfig = {
+                apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+                authDomain: "recargasgames-14c38.firebaseapp.com",
+                databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+                projectId: "recargasgames-14c38",
+                storageBucket: "recargasgames-14c38.firebasestorage.app",
+                messagingSenderId: "370952235234",
+                appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+            };
+            
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
+            const tasaRef = ref(db, 'configuracion/tasa_dolar');
+            const snapshot = await get(tasaRef);
+            if (snapshot.exists()) {
+                TASA = snapshot.val();
+            }
+            calcularMonto();
+        } catch (error) {
+            console.error("Error cargando tasa:", error);
+            calcularMonto();
+        }
+    }
     
-    // Aplicar descuento
+    function calcularMonto() {
+        montoOriginalBs = Math.round(precioUSD * TASA);
+        montoActualBs = montoOriginalBs;
+        document.getElementById("montoMostrar").innerHTML = montoOriginalBs.toLocaleString("es-VE") + " Bs";
+    }
+    
     window.aplicarDescuento = function() {
         let codigo = document.getElementById("codigoDescuento").value.trim().toUpperCase();
         let discountInfo = document.getElementById("discountInfo");
+        let montoDisplay = document.getElementById("montoMostrar");
         
         if (codigo === "GAMES") {
             if (!descuentoAplicado) {
-                let montoNumerico = parseFloat(precioOriginal.replace('Bs', '').replace('USDT', '').trim());
-                let descuento = montoNumerico * 0.01; // 1% de descuento
-                let nuevoMonto = montoNumerico - descuento;
-                montoActual = Math.round(nuevoMonto) + " Bs";
-                document.getElementById("montoMostrar").innerHTML = montoActual;
+                let descuento = montoOriginalBs * 0.015;
+                let nuevoMonto = montoOriginalBs - descuento;
+                montoActualBs = Math.round(nuevoMonto);
+                montoDisplay.innerHTML = montoActualBs.toLocaleString("es-VE") + " Bs";
                 descuentoAplicado = true;
-                discountInfo.innerHTML = "🎉 ¡Código GAMES aplicado! 1% de descuento";
+                descuentoPorcentaje = 1.5;
+                discountInfo.innerHTML = `🎉 ¡Código GAMES aplicado! ${descuentoPorcentaje}% de descuento. Total: ${montoActualBs.toLocaleString("es-VE")} Bs`;
                 discountInfo.style.display = "block";
-                mostrarToast("✅ Código GAMES aplicado - 1% de descuento");
+                mostrarToast(`✅ 1.5% de descuento aplicado. Total: ${montoActualBs.toLocaleString("es-VE")} Bs`);
             } else {
                 mostrarToast("⚠️ El descuento ya fue aplicado", "error");
             }
         } else if (codigo === "") {
             if (descuentoAplicado) {
-                montoActual = precioOriginal;
-                document.getElementById("montoMostrar").innerHTML = precioOriginal;
+                montoActualBs = montoOriginalBs;
+                montoDisplay.innerHTML = montoOriginalBs.toLocaleString("es-VE") + " Bs";
                 descuentoAplicado = false;
                 discountInfo.style.display = "none";
                 mostrarToast("🔄 Descuento eliminado");
@@ -380,20 +155,16 @@
         }
     };
     
-    // Copiar texto
     function copiarTexto(texto, boton) {
         navigator.clipboard.writeText(texto).then(() => {
             const textoOriginal = boton.innerText;
             boton.innerText = "✓";
             boton.classList.add("copied");
             mostrarToast("✓ Copiado: " + texto);
-            
             setTimeout(() => {
                 boton.innerText = textoOriginal;
                 boton.classList.remove("copied");
             }, 1000);
-        }).catch(() => {
-            mostrarToast("❌ Error al copiar", "error");
         });
     }
     
@@ -401,19 +172,15 @@
         const toast = document.createElement("div");
         toast.className = "copy-toast";
         toast.innerText = mensaje;
-        if (tipo === "error") {
-            toast.style.background = "#ef4444";
-        }
+        if (tipo === "error") toast.style.background = "#ef4444";
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2000);
     }
     
-    // Completar pedido
     async function completarPedido() {
         let referencia = document.getElementById("referencia").value.trim();
-        
         if(referencia === "") {
-            mostrarToast("❌ Ingresa la referencia de pago", "error");
+            mostrarToast("❌ Ingresa la referencia", "error");
             return;
         }
         
@@ -421,28 +188,20 @@
         localStorage.setItem('fecha_pedido', new Date().toLocaleString());
         
         const btn = document.querySelector(".complete-btn");
-        const textoOriginal = btn.innerText;
         btn.innerText = "⏳ Enviando...";
         btn.disabled = true;
         
-        await enviarTelegram(
-            producto,
-            montoActual,
-            jugador,
-            metodo,
-            juego,
-            referencia
-        );
+        let precioFinalTexto = montoActualBs.toLocaleString("es-VE") + " Bs";
+        if (descuentoAplicado) precioFinalTexto += ` (${descuentoPorcentaje}% descuento)`;
         
+        await enviarTelegram(producto, precioFinalTexto, jugador, metodo, juego, referencia);
         await guardarPedidoEnFirebase();
         
-        btn.innerText = textoOriginal;
+        btn.innerText = "✅ COMPLETAR PEDIDO";
         btn.disabled = false;
-        
         window.location.href = "perfil.html";
     }
     
-    // Guardar en Firebase
     async function guardarPedidoEnFirebase() {
         try {
             const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
@@ -473,30 +232,36 @@
             if (user) {
                 const pedidosRef = ref(db, 'pedidos');
                 const nuevoPedidoRef = push(pedidosRef);
+                let precioFinalTexto = montoActualBs.toLocaleString("es-VE") + " Bs";
+                if (descuentoAplicado) precioFinalTexto += ` (${descuentoPorcentaje}% descuento)`;
                 
                 await set(nuevoPedidoRef, {
                     userId: user.uid,
                     usuario: user.displayName || user.email,
                     juego: juego,
                     producto: producto,
-                    precio: montoActual,
+                    precio: precioFinalTexto,
                     metodo: metodo,
                     jugadorId: jugador,
                     referencia: document.getElementById("referencia").value.trim(),
                     estado: "Pendiente",
                     fecha: new Date().toLocaleString(),
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    descuento_aplicado: descuentoAplicado,
+                    descuento_porcentaje: descuentoPorcentaje
                 });
-                console.log("✅ Pedido guardado en Firebase");
+                console.log("✅ Pedido guardado");
             }
         } catch (error) {
-            console.error("❌ Error al guardar:", error);
+            console.error("Error:", error);
         }
     }
     
     window.copiarTexto = copiarTexto;
     window.completarPedido = completarPedido;
+    
+    // Iniciar
+    cargarTasa();
 </script>
-
 </body>
 </html>
