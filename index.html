@@ -30,7 +30,6 @@
         .main { padding: 20px; max-width: 600px; margin: 0 auto; }
         .welcome-text { text-align: center; margin: 20px 0; padding: 15px; background: rgba(11, 18, 32, 0.7); border-radius: 20px; }
         .welcome-text h2 { color: var(--color-principal); font-size: 20px; }
-        .welcome-text p { color: #9ca3af; font-size: 14px; }
         .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .game-link { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 0; text-decoration: none; color: white; text-align: center; transition: 0.3s; overflow: hidden; position: relative; }
         .game-link:hover { transform: translateY(-5px); border-color: var(--color-principal); }
@@ -119,7 +118,7 @@
 
     <div class="payment-section">
         <h3>💳 Métodos de Pago</h3>
-        <div class="payment-methods-list"><div class="payment-method">💵 Pago Móvil</div><div class="payment-method binance">🔶 Binance (USDT)</div></div>
+        <div class="payment-methods-list"><div class="payment-method">💵 Pago Móvil</div></div>
         <div class="support-info">📞 <strong>¿Necesitas ayuda?</strong> Contáctanos por WhatsApp al <a href="https://wa.me/582428242411" target="_blank">04228242411</a></div>
     </div>
 
@@ -128,7 +127,7 @@
         <details><summary>⏱️ ¿Cuánto tarda la recarga?</summary><p>La recarga es <strong>instantánea</strong> una vez confirmado tu pago.</p></details>
         <details><summary>🎮 ¿Cómo recibo mis diamantes/oros?</summary><p>Se entregan directamente a tu cuenta del juego usando el ID que nos proporcionas.</p></details>
         <details><summary>🔒 ¿Es seguro comprar aquí?</summary><p>¡Sí! Tenemos años de experiencia y cientos de clientes satisfechos.</p></details>
-        <details><summary>💸 ¿Qué métodos de pago aceptan?</summary><p>Aceptamos: <strong>Pago Móvil</strong> y <strong>Binance (USDT)</strong>.</p></details>
+        <details><summary>💸 ¿Qué métodos de pago aceptan?</summary><p>Aceptamos: <strong>Pago Móvil</strong>.</p></details>
         <details><summary>🔄 ¿Puedo cancelar mi pedido?</summary><p>Sí, antes de que sea procesado. Contáctanos por WhatsApp inmediatamente.</p></details>
     </div>
 </div>
@@ -167,13 +166,31 @@
     const db = getDatabase(app);
     
     let notificaciones = [];
-    let usuarioActual = null;
     
     function guardarNotificaciones() { localStorage.setItem('notificaciones', JSON.stringify(notificaciones)); }
+    
     function actualizarContador() {
         const noLeidas = notificaciones.filter(n => !n.leida).length;
         const badge = document.getElementById('notifCount');
         if (badge) { badge.textContent = noLeidas; badge.style.display = noLeidas > 0 ? 'flex' : 'none'; }
+    }
+    
+    function mostrarToast(mensaje) {
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.bottom = '100px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = '#10b981';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '30px';
+        toast.style.fontSize = '14px';
+        toast.style.zIndex = '2000';
+        toast.style.animation = 'fadeOut 3s ease forwards';
+        toast.textContent = mensaje;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
     
     function cargarNotificacionesFirebase(userId) {
@@ -182,10 +199,25 @@
         onValue(notificacionesRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
+                const nuevas = [];
+                const anteriores = notificaciones.map(n => n.id);
                 notificaciones = Object.values(data);
                 notificaciones.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                
+                notificaciones.forEach(n => {
+                    if (!anteriores.includes(n.id) && !n.leida) {
+                        nuevas.push(n);
+                    }
+                });
+                
                 guardarNotificaciones();
                 actualizarContador();
+                
+                if (nuevas.length > 0 && !localStorage.getItem('notif_toast')) {
+                    mostrarToast(`🎉 Tienes ${nuevas.length} notificación(es) nueva(s)`);
+                    localStorage.setItem('notif_toast', 'true');
+                    setTimeout(() => localStorage.removeItem('notif_toast'), 5000);
+                }
             }
         });
     }
@@ -223,7 +255,6 @@
     
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            usuarioActual = user;
             cargarNotificacionesFirebase(user.uid);
         }
     });
