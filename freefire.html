@@ -22,9 +22,6 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
 .dropdown-menu .logout-item { color: #ef4444; border-top: 1px solid #1f2937; }
 .dropdown-menu .logout-item:hover { background: #ef4444; color: white; }
 .games-menu { display: flex; gap: 8px; overflow-x: auto; background: rgba(11, 18, 32, 0.95); padding: 12px 15px; border-bottom: 1px solid #1f2937; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
-.games-menu::-webkit-scrollbar { height: 4px; }
-.games-menu::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
-.games-menu::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 10px; }
 .games-menu a { text-decoration: none; color: white; background: transparent; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; white-space: nowrap; transition: 0.2s; }
 .games-menu a:hover { color: var(--color-principal); }
 .games-menu a.active { color: var(--color-principal); border-bottom: 2px solid var(--color-principal); border-radius: 0; }
@@ -43,6 +40,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
 .product-price { font-size: 24px; font-weight: bold; color: #22c55e; }
 .btn-buy { background: var(--color-principal); color: white; border: none; width: 100%; height: 45px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; }
 .btn-buy:hover { background: var(--color-hover); }
+.btn-buy:disabled { background: #9ca3af; cursor: not-allowed; }
 .section-divider { margin: 25px 0 10px 0; text-align: center; }
 .section-divider span { background: var(--color-principal); padding: 6px 18px; border-radius: 30px; font-size: 14px; font-weight: bold; }
 .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
@@ -61,6 +59,16 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
 .back-to-top { position: fixed; bottom: 90px; right: 20px; background: var(--color-principal); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 .back-to-top.show { opacity: 1; visibility: visible; }
 .back-to-top:hover { background: var(--color-hover); transform: scale(1.1); }
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid white;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @media (max-width: 500px) { .brand { font-size: 18px; } .icon-btn { width: 35px; height: 35px; font-size: 18px; } }
 </style>
 </head>
@@ -98,22 +106,26 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
 </div>
 
 <div class="main">
-    <div class="card-panel"><div class="panel-title" style="margin-top:0; color:#9ca3af;">👤 ID del Jugador</div><input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire"></div>
+    <div class="card-panel">
+        <div class="panel-title" style="margin-top:0; color:#9ca3af;">👤 ID del Jugador</div>
+        <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire">
+        <div id="verificacionStatus" style="margin-top: 8px;"></div>
+    </div>
     <div class="card-panel"><div class="panel-title" style="margin-top:0; color:#9ca3af;">💳 Método de Pago</div><div class="payment-methods"><div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div><div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div></div></div>
     <div class="section-divider"><span>💎 DIAMANTES 💎</span></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">110 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="0.97">$0.97</div><button class="btn-buy" onclick="comprarProducto('110 Diamantes 💎', '0.97')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">220 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="1.96">$1.96</div><button class="btn-buy" onclick="comprarProducto('220 Diamantes 💎', '1.96')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">341 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="3.20">$3.20</div><button class="btn-buy" onclick="comprarProducto('341 Diamantes 💎', '3.20')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">572 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="4.89">$4.89</div><button class="btn-buy" onclick="comprarProducto('572 Diamantes 💎', '4.89')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">1166 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="9.00">$9.00</div><button class="btn-buy" onclick="comprarProducto('1166 Diamantes 💎', '9.00')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">2398 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="19.00">$19.00</div><button class="btn-buy" onclick="comprarProducto('2398 Diamantes 💎', '19.00')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">6160 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="48.00">$48.00</div><button class="btn-buy" onclick="comprarProducto('6160 Diamantes 💎', '48.00')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">110 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="0.97">$0.97</div><button class="btn-buy" data-diamantes="110" onclick="comprarProducto('110 Diamantes 💎', '0.97')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">220 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="1.96">$1.96</div><button class="btn-buy" data-diamantes="220" onclick="comprarProducto('220 Diamantes 💎', '1.96')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">341 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="3.20">$3.20</div><button class="btn-buy" data-diamantes="341" onclick="comprarProducto('341 Diamantes 💎', '3.20')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">572 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="4.89">$4.89</div><button class="btn-buy" data-diamantes="572" onclick="comprarProducto('572 Diamantes 💎', '4.89')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">1166 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="9.00">$9.00</div><button class="btn-buy" data-diamantes="1166" onclick="comprarProducto('1166 Diamantes 💎', '9.00')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">2398 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="19.00">$19.00</div><button class="btn-buy" data-diamantes="2398" onclick="comprarProducto('2398 Diamantes 💎', '19.00')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">6160 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="48.00">$48.00</div><button class="btn-buy" data-diamantes="6160" onclick="comprarProducto('6160 Diamantes 💎', '48.00')">🛍️ Comprar</button></div>
     <div class="section-divider"><span>🎫 TARJETAS Y PASES 🎫</span></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Semanal Básica</div></div><div class="product-desc">Activa tu pase semanal ⚡</div><div class="product-price" data-usd="0.73">$0.73</div><button class="btn-buy" onclick="comprarProducto('Tarjeta Semanal Básica 📅', '0.73')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Semanal</div></div><div class="product-desc">Activa tu pase semanal ⚡</div><div class="product-price" data-usd="2.50">$2.50</div><button class="btn-buy" onclick="comprarProducto('Tarjeta Semanal 📅', '2.50')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Mensual</div></div><div class="product-desc">Activa tu pase mensual ⚡</div><div class="product-price" data-usd="11.00">$11.00</div><button class="btn-buy" onclick="comprarProducto('Tarjeta Mensual 📅', '11.00')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">🎯</div><div class="product-title">Pase Booyah</div></div><div class="product-desc">Pase exclusivo Booyah ⚡</div><div class="product-price" data-usd="3.50">$3.50</div><button class="btn-buy" onclick="comprarProducto('Pase Booyah 🎯', '3.50')">🛍️ Comprar</button></div>
-    <div class="product-card"><div class="card-header"><div class="game-icon">⬆️</div><div class="product-title">Pase de Nivel</div></div><div class="product-desc">Sube de nivel al instante ⚡</div><div class="product-price" data-usd="4.00">$4.00</div><button class="btn-buy" onclick="comprarProducto('Pase de Nivel ⬆️', '4.00')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Semanal Básica</div></div><div class="product-desc">Activa tu pase semanal ⚡</div><div class="product-price" data-usd="0.73">$0.73</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Tarjeta Semanal Básica 📅', '0.73')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Semanal</div></div><div class="product-desc">Activa tu pase semanal ⚡</div><div class="product-price" data-usd="2.50">$2.50</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Tarjeta Semanal 📅', '2.50')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Mensual</div></div><div class="product-desc">Activa tu pase mensual ⚡</div><div class="product-price" data-usd="11.00">$11.00</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Tarjeta Mensual 📅', '11.00')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎯</div><div class="product-title">Pase Booyah</div></div><div class="product-desc">Pase exclusivo Booyah ⚡</div><div class="product-price" data-usd="3.50">$3.50</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Pase Booyah 🎯', '3.50')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">⬆️</div><div class="product-title">Pase de Nivel</div></div><div class="product-desc">Sube de nivel al instante ⚡</div><div class="product-price" data-usd="4.00">$4.00</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Pase de Nivel ⬆️', '4.00')">🛍️ Comprar</button></div>
 </div>
 
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
@@ -142,18 +154,88 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     let metodoSeleccionado = "PAGO MOVIL";
     let TASA_DOLAR = 735;
     let notificaciones = [];
-    let userIdActual = null;    
+    let userIdActual = null;
+    let idVerificado = false;
+    let nombreVerificado = "";
+    
+    // ========== CONFIGURACIÓN API FREE FIRE ==========
+    const API_KEY = "ffc_momryhse_nixuxcj9ztm2eoytiytspe";
+    const REGION = "br";  // br = Brasil/LATAM
+    
+    // ¡IMPORTANTE! Cambia a false cuando subas a GitHub Pages
+    const USAR_MODO_SIMULACION = false;
+    
+    async function verificarIdFreeFire(idJugador) {
+        // MODO SIMULACIÓN (solo para pruebas locales)
+        if (USAR_MODO_SIMULACION) {
+            console.log("🔧 Modo simulación - Verificando ID:", idJugador);
+            if (idJugador.length >= 8 && /^\d+$/.test(idJugador)) {
+                return {
+                    valido: true,
+                    nombre: `Jugador_${idJugador}`,
+                    nivel: "75",
+                    mensaje: `✅ ID válido (modo prueba)`
+                };
+            } else {
+                return {
+                    valido: false,
+                    nombre: "",
+                    mensaje: "❌ ID inválido (debe tener al menos 8 dígitos)"
+                };
+            }
+        }
+        
+        // MODO REAL (para GitHub Pages)
+        try {
+            const url = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${idJugador}&key=${API_KEY}`;
+            console.log("📡 Verificando en Free Fire API:", url);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log("📥 Respuesta:", data);
+            
+            if (data && (data.name || data.nickname || data.username)) {
+                return {
+                    valido: true,
+                    nombre: data.name || data.nickname || data.username,
+                    nivel: data.level || "N/A",
+                    mensaje: `✅ ID válido - ${data.name || data.nickname || data.username}`
+                };
+            } else {
+                return {
+                    valido: false,
+                    nombre: "",
+                    mensaje: "❌ ID no encontrado en Free Fire"
+                };
+            }
+        } catch (error) {
+            console.error("❌ Error:", error);
+            if (error.name === 'AbortError') {
+                return { valido: false, nombre: "", mensaje: "⏰ Tiempo de espera agotado" };
+            }
+            return { valido: false, nombre: "", mensaje: `⚠️ Error: ${error.message}` };
+        }
+    }    
     // ========== TASA DE CAMBIO ==========
     async function cargarTasa() {
         const tasaRef = ref(db, 'configuracion/tasa_dolar');
         const snapshot = await get(tasaRef);
         if (snapshot.exists()) {
             TASA_DOLAR = snapshot.val();
-            actualizarVisualizacionPrecios();
+            actualizarPrecios();
         }
     }
     
-    function actualizarVisualizacionPrecios() {
+    function actualizarPrecios() {
         document.querySelectorAll('.product-price').forEach(el => {
             let usd = parseFloat(el.getAttribute('data-usd'));
             if (metodoSeleccionado === "PAGO MOVIL") {
@@ -171,10 +253,44 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
         document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
         elemento.classList.add('active');
         metodoSeleccionado = metodo;
-        actualizarVisualizacionPrecios();
+        actualizarPrecios();
     };
     
-    window.comprarProducto = function(producto, precioUsd) {
+    // ========== VERIFICAR MIENTRAS ESCRIBE ==========
+    let timeoutVerificacion;
+    const inputId = document.getElementById("jugadorId");
+    const statusDiv = document.getElementById("verificacionStatus");
+    
+    inputId.addEventListener("input", function() {
+        clearTimeout(timeoutVerificacion);
+        const id = this.value.trim();
+        
+        if (id.length < 5) {
+            statusDiv.innerHTML = "";
+            idVerificado = false;
+            nombreVerificado = "";
+            return;
+        }
+        
+        statusDiv.innerHTML = '<span style="color: #f59e0b;"><span class="spinner"></span> Verificando ID en Free Fire...</span>';
+        
+        timeoutVerificacion = setTimeout(async () => {
+            const resultado = await verificarIdFreeFire(id);
+            
+            if (resultado.valido) {
+                statusDiv.innerHTML = `<span style="color: #22c55e;">✅ ${resultado.mensaje} | Nivel: ${resultado.nivel}</span>`;
+                idVerificado = true;
+                nombreVerificado = resultado.nombre;
+            } else {
+                statusDiv.innerHTML = `<span style="color: #ef4444;">❌ ${resultado.mensaje}</span>`;
+                idVerificado = false;
+                nombreVerificado = "";
+            }
+        }, 800);
+    });
+    
+    // ========== COMPRA ==========
+    window.comprarProducto = async function(producto, precioUsd) {
         if (!usuarioLogueado) {
             alert("❌ Debes iniciar sesión para comprar");
             window.location.href = "login.html";
@@ -183,11 +299,15 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
         
         let idInput = document.getElementById("jugadorId").value.trim();
         if(idInput === "") {
-            alert("❌ Por favor, ingresa tu ID de jugador.");
+            alert("❌ Ingresa tu ID de jugador.");
             return;
         }
         
-        // Obtener el precio en Bs correcto (el que se muestra actualmente)
+        if (!idVerificado) {
+            alert("❌ Espera a que verifiquemos tu ID.");
+            return;
+        }
+        
         let precioEnBs = 0;
         const productCards = document.querySelectorAll('.product-card');
         for (let card of productCards) {
@@ -197,19 +317,24 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
                 if (priceEl && metodoSeleccionado === "PAGO MOVIL") {
                     let bsText = priceEl.innerText.replace(' Bs', '').replace(/\./g, '');
                     precioEnBs = parseInt(bsText);
-                } else if (metodoSeleccionado === "PAGO MOVIL" && priceEl && priceEl.getAttribute('data-bs')) {
-                    precioEnBs = parseInt(priceEl.getAttribute('data-bs'));
                 }
                 break;
             }
         }
         
-        // Si no se encontró, calcular con la tasa actual
         if (precioEnBs === 0 && metodoSeleccionado === "PAGO MOVIL") {
             precioEnBs = Math.round(parseFloat(precioUsd) * TASA_DOLAR);
         }
         
+        let diamantes = 0;
+        const btn = event.target;
+        if (btn.getAttribute('data-diamantes')) {
+            diamantes = btn.getAttribute('data-diamantes');
+        }
+        
         localStorage.setItem('id_jugador', idInput);
+        localStorage.setItem('nombre_verificado', nombreVerificado);
+        localStorage.setItem('diamantes', diamantes);
         localStorage.setItem('juego_seleccionado', 'FREE FIRE 🔥');
         localStorage.setItem('producto_seleccionado', producto);
         localStorage.setItem('precio_usd', precioUsd);
@@ -221,7 +346,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     
     onAuthStateChanged(auth, (user) => { usuarioLogueado = !!user; });
     cargarTasa();
-    window.onload = actualizarVisualizacionPrecios;
+    window.onload = actualizarPrecios;
     
     // ========== NOTIFICACIONES ==========
     function guardarNotificacionesLocal() { localStorage.setItem('notificaciones', JSON.stringify(notificaciones)); }
@@ -264,24 +389,13 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
         const notificacionesRef = ref(db, `notificaciones/${userId}`);
         onValue(notificacionesRef, (snapshot) => {
             const data = snapshot.val();
-            const notificacionesAntes = notificaciones.map(n => n.id);
             if (data) {
                 let nuevasNotificaciones = [];
                 for (let id in data) nuevasNotificaciones.push({ id, ...data[id] });
                 nuevasNotificaciones.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                let hayNuevas = false;
-                for (let notif of nuevasNotificaciones) {
-                    if (!notificacionesAntes.includes(notif.id) && !notif.leida) { hayNuevas = true; break; }
-                }
                 notificaciones = nuevasNotificaciones;
                 guardarNotificacionesLocal();
                 actualizarContador();
-                if (hayNuevas && !localStorage.getItem('notif_toast')) {
-                    const noLeidas = notificaciones.filter(n => !n.leida).length;
-                    mostrarToast(`🔔 Tienes ${noLeidas} notificación(es) nueva(s)`);
-                    localStorage.setItem('notif_toast', 'true');
-                    setTimeout(() => localStorage.removeItem('notif_toast'), 5000);
-                }
             } else {
                 notificaciones = [];
                 guardarNotificacionesLocal();
@@ -299,10 +413,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
             for (const notif of notificaciones) {
                 html += `<div class="notification-item"><div class="notification-icon">${notif.titulo && notif.titulo.includes('Completado') ? '✅' : '🔔'}</div><div class="notification-text"><div class="notification-title">${notif.titulo || 'Notificación'}</div><div style="font-size:12px;">${notif.mensaje || ''}</div><div class="notification-date">${notif.fecha || ''}</div></div></div>`;
                 if (notif.id) {
-                    try {
-                        const notifRef = ref(db, `notificaciones/${userIdActual}/${notif.id}`);
-                        await update(notifRef, { leida: true });
-                    } catch(e) {}
+                    try { await update(ref(db, `notificaciones/${userIdActual}/${notif.id}`), { leida: true }); } catch(e) {}
                 }
                 notif.leida = true;
             }
