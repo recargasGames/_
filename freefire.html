@@ -158,42 +158,26 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
     let idVerificado = false;
     let nombreVerificado = "";
     
-    // ========== CONFIGURACIÓN API FREE FIRE ==========
+    // ========== API CON PROXY (SOLUCIÓN DEFINITIVA) ==========
     const API_KEY = "ffc_momryhse_nixuxcj9ztm2eoytiytspe";
-    const REGION = "br";  // br = Brasil/LATAM
-    
-    // ¡IMPORTANTE! Cambia a false cuando subas a GitHub Pages
-    const USAR_MODO_SIMULACION = false;
+    const REGION = "br";  // br = Brasil/LATAM (cambia a "na" si es USA)
+    const PROXY = "https://api.allorigins.win/raw?url=";
     
     async function verificarIdFreeFire(idJugador) {
-        // MODO SIMULACIÓN (solo para pruebas locales)
-        if (USAR_MODO_SIMULACION) {
-            console.log("🔧 Modo simulación - Verificando ID:", idJugador);
-            if (idJugador.length >= 8 && /^\d+$/.test(idJugador)) {
-                return {
-                    valido: true,
-                    nombre: `Jugador_${idJugador}`,
-                    nivel: "75",
-                    mensaje: `✅ ID válido (modo prueba)`
-                };
-            } else {
-                return {
-                    valido: false,
-                    nombre: "",
-                    mensaje: "❌ ID inválido (debe tener al menos 8 dígitos)"
-                };
-            }
-        }
-        
-        // MODO REAL (para GitHub Pages)
         try {
-            const url = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${idJugador}&key=${API_KEY}`;
-            console.log("📡 Verificando en Free Fire API:", url);
+            const urlOriginal = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${idJugador}&key=${API_KEY}`;
+            const urlConProxy = PROXY + encodeURIComponent(urlOriginal);
+            
+            console.log("📡 Verificando a través de proxy...");
             
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
             
-            const response = await fetch(url, { signal: controller.signal });
+            const response = await fetch(urlConProxy, {
+                method: 'GET',
+                signal: controller.signal
+            });
+            
             clearTimeout(timeoutId);
             
             if (!response.ok) {
@@ -208,7 +192,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
                     valido: true,
                     nombre: data.name || data.nickname || data.username,
                     nivel: data.level || "N/A",
-                    mensaje: `✅ ID válido - ${data.name || data.nickname || data.username}`
+                    mensaje: `✅ ${data.name || data.nickname || data.username}`
                 };
             } else {
                 return {
@@ -219,10 +203,11 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
             }
         } catch (error) {
             console.error("❌ Error:", error);
-            if (error.name === 'AbortError') {
-                return { valido: false, nombre: "", mensaje: "⏰ Tiempo de espera agotado" };
-            }
-            return { valido: false, nombre: "", mensaje: `⚠️ Error: ${error.message}` };
+            return {
+                valido: false,
+                nombre: "",
+                mensaje: `⚠️ Error: ${error.message}`
+            };
         }
     }    
     // ========== TASA DE CAMBIO ==========
@@ -289,7 +274,7 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
         }, 800);
     });
     
-    // ========== COMPRA ==========
+    // ========== FUNCIÓN DE COMPRA ==========
     window.comprarProducto = async function(producto, precioUsd) {
         if (!usuarioLogueado) {
             alert("❌ Debes iniciar sesión para comprar");
@@ -299,12 +284,12 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
         
         let idInput = document.getElementById("jugadorId").value.trim();
         if(idInput === "") {
-            alert("❌ Ingresa tu ID de jugador.");
+            alert("❌ Por favor, ingresa tu ID de jugador.");
             return;
         }
         
         if (!idVerificado) {
-            alert("❌ Espera a que verifiquemos tu ID.");
+            alert("❌ Espera a que verifiquemos tu ID. Asegúrate de que sea correcto.");
             return;
         }
         
@@ -340,6 +325,13 @@ body { background-image: url('fondo.jpg'); background-size: cover; background-po
         localStorage.setItem('precio_usd', precioUsd);
         localStorage.setItem('precio_en_bs', precioEnBs);
         localStorage.setItem('metodo_pago', metodoSeleccionado);
+        
+        console.log("✅ Pedido guardado:", {
+            id: idInput,
+            nombre: nombreVerificado,
+            producto: producto,
+            precio: precioEnBs
+        });
         
         window.location.href = "pasarela.html";
     };
