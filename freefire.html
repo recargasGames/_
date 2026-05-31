@@ -26,7 +26,8 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .main{padding:20px;max-width:600px;margin:0 auto}
 .card-panel{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px}
 .panel-title{font-size:15px;font-weight:700;margin:20px 0 12px;color:var(--color-principal)}
-.form-input{width:100%;height:50px;border-radius:14px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;box-sizing:border-box}
+.form-input{width:100%;height:50px;border-radius:14px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;box-sizing:border-box;font-size:16px}
+.form-input:focus{outline:none;border-color:var(--color-principal)}
 .payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .pay-box{background:#111827;border:2px solid #1f2937;border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700}
 .pay-box.active{border-color:var(--color-principal);background:#1e293b}
@@ -57,9 +58,10 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .back-to-top.show{opacity:1;visibility:visible}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.reintentar-btn{background:#f59e0b;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;margin-left:10px}
-.reintentar-btn:hover{background:#d97706}
-.error-container{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.auto-retry-info{font-size:11px;color:#6b7280;margin-top:5px;text-align:center}
+.status-success{color:#22c55e}
+.status-error{color:#ef4444}
+.status-warning{color:#f59e0b}
 @media(max-width:500px){.brand{font-size:18px}.icon-btn{width:35px;height:35px;font-size:18px}}
 </style>
 </head>
@@ -92,6 +94,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
         <div class="panel-title" style="margin-top:0;color:#9ca3af">👤 ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire">
         <div id="verificacionStatus" style="margin-top:8px"></div>
+        <div class="auto-retry-info">🔄 La verificación es automática - Solo escribe tu ID</div>
     </div>
     <div class="card-panel"><div class="panel-title" style="margin-top:0;color:#9ca3af">💳 Método de Pago</div><div class="payment-methods"><div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div><div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div></div></div>
     
@@ -113,9 +116,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
     <div class="product-card"><div class="card-header"><div class="game-icon">🎯</div><div class="product-title">Pase Booyah</div></div><div class="product-desc">Pase exclusivo Booyah ⚡</div><div class="product-price" data-usd="3.50">$3.50</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Pase Booyah', '3.50')">🛍️ Comprar</button></div>
 </div>
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
-<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
-
-<script type="module">
+<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a><script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import{getDatabase,ref,get,onValue,update}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -123,24 +124,74 @@ const fbConfig={apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",authDomain:"rec
 const app=initializeApp(fbConfig),auth=getAuth(app),db=getDatabase(app);
 let logueado=false,metodo="PAGO MOVIL",tasa=735,notis=[],uidActual=null,idOk=false,nombreOk="";
 const API_KEY="ffc_momryhse_nixuxcj9ztm2eoytiytspe",REGION="br";
-// PROXY QUE NO NECESITA ACTIVACIÓN
 const PROXY="https://api.allorigins.win/raw?url=";
 
-async function verificarId(id){
-    if(!/^\d{8,12}$/.test(id))return{ok:false,nombre:"",msg:"❌ ID inválido"};
+let reintentosActivos = false;
+let timeoutReintento = null;
+
+async function verificarId(id, esReintento = false){
+    if(!/^\d{8,12}$/.test(id)) return {ok:false, nombre:"", msg:"❌ ID inválido (debe tener 8-12 dígitos)"};
+    
     try{
         const url=PROXY+encodeURIComponent(`https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${id}&key=${API_KEY}`);
-        const c=new AbortController;
-        setTimeout(()=>c.abort(),5000);
+        const c=new AbortController();
+        setTimeout(()=>c.abort(),8000);
         const r=await fetch(url,{signal:c.signal});
-        if(!r.ok)throw new Error();
+        if(!r.ok) throw new Error(`HTTP ${r.status}`);
         const d=await r.json();
-        if(d.basicInfo?.nickname) return{ok:true,nombre:d.basicInfo.nickname,msg:` ${d.basicInfo.nickname}`};
-        return{ok:false,nombre:"",msg:"❌ ID no existe"};
+        if(d.basicInfo?.nickname) return {ok:true, nombre:d.basicInfo.nickname, msg:` ${d.basicInfo.nickname}`};
+        return {ok:false, nombre:"", msg:"❌ ID no encontrado en servidores LATAM"};
     }catch(e){
-        return{ok:false,nombre:"",msg:"⚠️ Error - Reintenta",error:true};
+        if(!esReintento){
+            return {ok:false, nombre:"", msg:"⚠️ Error de conexión - Reintentando automáticamente...", error:true, reintentar:true};
+        }
+        return {ok:false, nombre:"", msg:"⚠️ Error de conexión - Reintentando...", error:true, reintentar:true};
     }
-}async function cargarTasa(){
+}
+
+async function iniciarVerificacionAuto(id, reintento = false){
+    if(!id || id.length < 8){
+        statusDiv.innerHTML = "";
+        idOk = false;
+        nombreOk = "";
+        return;
+    }
+    
+    if(!reintento){
+        statusDiv.innerHTML = '<span class="status-warning"><span class="spinner"></span> Verificando ID en LATAM...</span>';
+    }else{
+        statusDiv.innerHTML = '<span class="status-warning"><span class="spinner"></span> Reintentando verificación en LATAM...</span>';
+    }
+    
+    const resultado = await verificarId(id, reintento);
+    
+    if(resultado.ok){
+        statusDiv.innerHTML = `<span class="status-success">${resultado.msg}</span>`;
+        idOk = true;
+        nombreOk = resultado.nombre;
+        if(timeoutReintento){
+            clearTimeout(timeoutReintento);
+            timeoutReintento = null;
+        }
+    }else if(resultado.reintentar){
+        statusDiv.innerHTML = `<span class="status-warning">${resultado.msg}</span>`;
+        idOk = false;
+        if(timeoutReintento) clearTimeout(timeoutReintento);
+        timeoutReintento = setTimeout(() => {
+            iniciarVerificacionAuto(id, true);
+        }, 3000);
+    }else{
+        statusDiv.innerHTML = `<span class="status-error">${resultado.msg}</span>`;
+        idOk = false;
+        nombreOk = "";
+        if(timeoutReintento){
+            clearTimeout(timeoutReintento);
+            timeoutReintento = null;
+        }
+    }
+}
+
+async function cargarTasa(){
     const s=await get(ref(db,'configuracion/tasa_dolar'));
     if(s.exists()){tasa=s.val();actualizarPrecios()}
 }
@@ -162,42 +213,33 @@ window.seleccionarPago=function(m,e){
     actualizarPrecios();
 };
 
-window.reintentar=async function(){
-    const id=inputId.value.trim();
-    if(id.length<8){statusDiv.innerHTML="";return}
-    statusDiv.innerHTML='<span style="color:#f59e0b"><span class="spinner"></span> Verificando...</span>';
-    const r=await verificarId(id);
-    if(r.ok){
-        statusDiv.innerHTML=`<span style="color:#22c55e">${r.msg}</span>`;
-        idOk=true;nombreOk=r.nombre;
-    }else{
-        statusDiv.innerHTML=`<div class="error-container"><span style="color:#ef4444">${r.msg}</span><button class="reintentar-btn" onclick="reintentar()">🔄 Reintentar</button></div>`;
-        idOk=false;
-    }
-};
+let timerVerificacion;
+const inputId = document.getElementById("jugadorId");
+const statusDiv = document.getElementById("verificacionStatus");
 
-let timer;const inputId=document.getElementById("jugadorId"),statusDiv=document.getElementById("verificacionStatus");
-inputId.addEventListener("input",function(){
-    clearTimeout(timer);const id=this.value.trim();
-    if(id.length<8){statusDiv.innerHTML="";idOk=false;nombreOk="";return}
-    statusDiv.innerHTML='<span style="color:#f59e0b"><span class="spinner"></span> Verificando...</span>';
-    timer=setTimeout(async()=>{
-        const r=await verificarId(id);
-        if(r.ok){
-            statusDiv.innerHTML=`<span style="color:#22c55e">${r.msg}</span>`;
-            idOk=true;nombreOk=r.nombre;
-        }else{
-            statusDiv.innerHTML=`<div class="error-container"><span style="color:#ef4444">${r.msg}</span><button class="reintentar-btn" onclick="reintentar()">🔄 Reintentar</button></div>`;
-            idOk=false;
-        }
-    },300);
+inputId.addEventListener("input", function(){
+    clearTimeout(timerVerificacion);
+    if(timeoutReintento){
+        clearTimeout(timeoutReintento);
+        timeoutReintento = null;
+    }
+    const id = this.value.trim();
+    if(id.length < 8){
+        statusDiv.innerHTML = "";
+        idOk = false;
+        nombreOk = "";
+        return;
+    }
+    timerVerificacion = setTimeout(() => {
+        iniciarVerificacionAuto(id, false);
+    }, 500);
 });
 
 window.comprarProducto=async function(p,pu){
-    if(!logueado){alert("❌ Inicia sesión");location.href="login.html";return}
+    if(!logueado){alert("❌ Inicia sesión primero");location.href="login.html";return}
     let idInput=document.getElementById("jugadorId").value.trim();
-    if(!idInput){alert("❌ Ingresa tu ID");return}
-    if(!idOk){alert("❌ Verifica tu ID primero");return}
+    if(!idInput){alert("❌ Ingresa tu ID de Free Fire");return}
+    if(!idOk){alert("❌ Espera a que el ID se verifique automáticamente");return}
     let pe=0;
     document.querySelectorAll('.product-card').forEach(c=>{
         if(c.querySelector('.product-title')?.innerText===p){
@@ -218,7 +260,8 @@ window.comprarProducto=async function(p,pu){
     location.href="pasarela.html";
 };
 
-onAuthStateChanged(auth,u=>logueado=!!u);cargarTasa();window.onload=actualizarPrecios;
+onAuthStateChanged(auth,u=>{logueado=!!u;if(u&&!uidActual){cargarNotisFirebase(u.uid)}});
+cargarTasa();window.onload=actualizarPrecios;
 
 function guardarNotis(){localStorage.setItem('notificaciones',JSON.stringify(notis))}
 function actContador(){const nl=notis.filter(n=>!n.leida).length;const b=document.getElementById('notifCount');if(b){b.textContent=nl;b.style.display=nl>0?'flex':'none'}}
@@ -230,7 +273,6 @@ const pb=document.getElementById('profileBtn'),pd=document.getElementById('profi
 document.getElementById("logoutDropdownBtn")?.addEventListener("click",e=>{e.preventDefault();localStorage.clear();signOut(auth).then(()=>location.href="login.html")});
 window.addEventListener('scroll',()=>{const b=document.getElementById('backToTop');if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show')});
 window.onclick=e=>{const m=document.getElementById('notificacionModal');if(e.target===m)cerrarNotificaciones()};
-onAuthStateChanged(auth,u=>{if(u)cargarNotisFirebase(u.uid)});
 </script>
 </body>
 </html>
