@@ -2,350 +2,87 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Admin - RECARGASGAMES</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-    background-image: url('fondo.jpg');
-    background-size: cover;
-    background-attachment: fixed;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-/* Login */
-.login-admin { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
-.login-box {
-    background: rgba(11, 18, 32, 0.95);
-    border: 1px solid #10b981;
-    border-radius: 20px;
-    padding: 30px;
-    width: 100%;
-    max-width: 350px;
-    text-align: center;
-}
-.login-box h2 { color: #10b981; margin-bottom: 20px; font-size: 22px; }
-.login-box input {
-    width: 100%; height: 45px; margin: 10px 0; border-radius: 10px;
-    border: 1px solid #1f2937; background: #111827; color: white; padding: 10px;
-    font-size: 14px;
-}
-.login-box button {
-    width: 100%; height: 45px; background: #10b981; color: white;
-    border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;
-    font-size: 16px;
-}
-.error { color: #ef4444; margin-top: 10px; display: none; }
-
-/* Header Admin */
-.header {
-    background: rgba(11, 18, 32, 0.95);
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #10b981;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.brand { font-size: 18px; font-weight: bold; color: #10b981; }
-.admin-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.admin-btn {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-}
-.admin-btn:hover { background: #3b82f6; }
-.admin-btn.danger { background: #dc2626; }
-.admin-btn.danger:hover { background: #b91c1c; }
-
-/* Main */
-.main { padding: 15px; max-width: 1400px; margin: 0 auto; }
-
-/* Stats */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-}
-.stat-card {
-    background: rgba(11, 18, 32, 0.9);
-    border: 1px solid #1f2937;
-    border-radius: 14px;
-    padding: 12px;
-    text-align: center;
-}
-.stat-number { font-size: 24px; font-weight: bold; color: #10b981; }
-.stat-label { font-size: 11px; color: #9ca3af; }
-
-/* Configuración tasa */
-.config-card {
-    background: rgba(11, 18, 32, 0.85);
-    border: 1px solid #1f2937;
-    border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-.config-card h3 { color: #10b981; margin-bottom: 12px; font-size: 16px; }
-.config-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-.config-input {
-    flex: 1;
-    min-width: 120px;
-    height: 40px;
-    border: none;
-    border-radius: 10px;
-    background: #111827;
-    color: white;
-    padding: 8px 12px;
-    font-size: 14px;
-    border: 1px solid #1f2937;
-}
-.config-btn {
-    background: #10b981;
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-}
-.config-btn:hover { background: #059669; }
-
-/* Gráficas */
-.chart-container {
-    background: rgba(11, 18, 32, 0.85);
-    border: 1px solid #1f2937;
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 20px;
-}
-.chart-container h3 { color: #10b981; margin-bottom: 12px; font-size: 15px; }
-.chart-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-@media (max-width: 700px) { .chart-row { grid-template-columns: 1fr; } }
-
-/* Tabs */
-.tabs {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-.tab-btn {
-    background: #111827;
-    border: 1px solid #1f2937;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: bold;
-    transition: 0.2s;
-}
-.tab-btn.active { background: #10b981; border-color: #10b981; }
-.tab-pane { display: none; }
-.tab-pane.active { display: block; }
-
-/* Filtros */
-.filters {
-    background: rgba(11, 18, 32, 0.85);
-    border: 1px solid #1f2937;
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 15px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.filter-select, .filter-search {
-    background: #111827;
-    border: 1px solid #1f2937;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 10px;
-    font-size: 12px;
-}
-.filter-search { flex: 1; min-width: 150px; }
-.refresh-btn {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-/* Tablas */
-.table-container {
-    background: rgba(11, 18, 32, 0.85);
-    border: 1px solid #1f2937;
-    border-radius: 14px;
-    padding: 12px;
-    overflow-x: auto;
-}
-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 700px; }
-th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #1f2937; }
-th { background: #1f2937; color: #10b981; font-weight: bold; }
-tr:hover { background: rgba(16, 185, 129, 0.1); }
-
-.badge {
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: bold;
-    display: inline-block;
-}
-.badge-pendiente { background: #f97316; color: white; }
-.badge-completado { background: #22c55e; color: white; }
-
-.btn-action {
-    border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; margin: 2px;
-}
-.btn-view { background: #2563eb; color: white; }
-.btn-view:hover { background: #3b82f6; }
-.btn-complete { background: #22c55e; color: white; }
-.btn-complete:hover { background: #16a34a; }
-.btn-delete { background: #ef4444; color: white; }
-.btn-delete:hover { background: #dc2626; }
-.btn-complete:disabled { background: #9ca3af; cursor: not-allowed; }
-
-.no-pedidos { text-align: center; color: #9ca3af; padding: 30px; font-size: 13px; }
-
-.pagination {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    margin-top: 15px;
-    flex-wrap: wrap;
-}
-.page-btn {
-    background: #111827;
-    border: 1px solid #1f2937;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 11px;
-}
-.page-btn.active { background: #10b981; border-color: #10b981; }
-
-.logout-btn {
-    background: #dc2626;
-    margin-top: 20px;
-    text-align: center;
-    padding: 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    width: 200px;
-    margin-left: auto;
-    margin-right: auto;
-    font-weight: bold;
-}
-.logout-btn:hover { background: #b91c1c; }
-
-/* Modal */
-.modal {
-    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
-    width: 100%; height: 100%; background: rgba(0,0,0,0.8);
-    justify-content: center; align-items: center;
-}
-.modal-content {
-    background: #111827;
-    padding: 20px;
-    border-radius: 16px;
-    max-width: 90%;
-    width: 450px;
-    border: 1px solid #10b981;
-}
-.modal-content h3 { color: #10b981; margin-bottom: 15px; }
-.modal-detail-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #1f2937;
-    font-size: 13px;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-.close-modal {
-    background: #10b981;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 15px;
-    width: 100%;
-}
-
-/* Confeti */
-#confetti-canvas {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none; z-index: 9999; display: none;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .config-row { flex-direction: column; }
-    .config-input { width: 100%; }
-    .filters { flex-direction: column; }
-    .filter-search, .filter-select, .refresh-btn { width: 100%; }
-    .header { flex-direction: column; text-align: center; }
-    .brand { margin-bottom: 5px; }
-    .tabs { justify-content: center; }
-}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background-image:url('fondo.jpg');background-size:cover;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif}
+.login-admin{display:flex;justify-content:center;align-items:center;height:100vh;padding:20px}
+.login-box{background:rgba(11,18,32,.95);border:1px solid #10b981;border-radius:20px;padding:30px;width:100%;max-width:350px;text-align:center}
+.login-box h2{color:#10b981;margin-bottom:20px}
+.login-box input{width:100%;height:45px;margin:10px 0;border-radius:10px;border:1px solid #1f2937;background:#111827;color:#fff;padding:10px}
+.login-box button{width:100%;height:45px;background:#10b981;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:700}
+.error{color:#ef4444;margin-top:10px;display:none}
+.header{background:rgba(11,18,32,.95);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #10b981;flex-wrap:wrap}
+.brand{font-size:18px;font-weight:700;color:#10b981}
+.admin-actions{display:flex;gap:10px}
+.admin-btn{background:#2563eb;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700}
+.admin-btn.danger{background:#dc2626}
+.main{padding:15px;max-width:1400px;margin:0 auto}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:rgba(11,18,32,.9);border:1px solid #1f2937;border-radius:14px;padding:12px;text-align:center}
+.stat-number{font-size:24px;font-weight:700;color:#10b981}
+.stat-label{font-size:11px;color:#9ca3af}
+.config-card{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:14px;padding:15px;margin-bottom:20px}
+.config-card h3{color:#10b981;margin-bottom:12px;font-size:16px}
+.config-row{display:flex;gap:10px;flex-wrap:wrap}
+.config-input{flex:1;min-width:120px;height:40px;border-radius:10px;background:#111827;color:#fff;padding:8px 12px;border:1px solid #1f2937}
+.config-btn{background:#10b981;color:#fff;border:none;padding:8px 20px;border-radius:10px;cursor:pointer}
+.filters{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:14px;padding:12px;margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap}
+.filter-select,.filter-search{background:#111827;border:1px solid #1f2937;color:#fff;padding:8px 12px;border-radius:10px}
+.filter-search{flex:1;min-width:150px}
+.refresh-btn{background:#2563eb;color:#fff;border:none;padding:8px 16px;border-radius:10px;cursor:pointer}
+.table-container{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:14px;padding:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:800px}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #1f2937}
+th{background:#1f2937;color:#10b981}
+tr:hover{background:rgba(16,185,129,.1)}
+.badge{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-pendiente{background:#f97316}
+.badge-completado{background:#22c55e}
+.btn-action{border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;margin:2px}
+.btn-view{background:#2563eb;color:#fff}
+.btn-complete{background:#22c55e;color:#fff}
+.btn-delete{background:#ef4444;color:#fff}
+.pagination{display:flex;justify-content:center;gap:5px;margin-top:15px;flex-wrap:wrap}
+.page-btn{background:#111827;border:1px solid #1f2937;color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer}
+.page-btn.active{background:#10b981}
+.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.8);justify-content:center;align-items:center}
+.modal-content{background:#111827;padding:20px;border-radius:16px;max-width:90%;width:450px;border:1px solid #10b981}
+.modal-content h3{color:#10b981;margin-bottom:15px}
+.modal-detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1f2937;font-size:13px}
+.close-modal{background:#10b981;color:#fff;border:none;padding:10px;border-radius:10px;cursor:pointer;margin-top:15px;width:100%}
+.nombre-jugador{color:#10b981;font-weight:700}
+@media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)}.filters{flex-direction:column}.filter-search,.filter-select,.refresh-btn{width:100%}}
 </style>
 </head>
 <body>
-
-<canvas id="confetti-canvas"></canvas>
 
 <div class="login-admin" id="loginPanel">
     <div class="login-box">
         <h2>🔐 Acceso Administrador</h2>
         <input type="email" id="adminEmail" placeholder="Correo autorizado" value="aa3964063@gmail.com">
         <input type="password" id="adminPassword" placeholder="Contraseña">
-        <button onclick="verificarAcceso()">Ingresar al Panel</button>
+        <button onclick="verificarAcceso()">Ingresar</button>
         <div id="errorMsg" class="error"></div>
     </div>
 </div>
 
-<div id="adminContent" style="display: none;">
+<div id="adminContent" style="display:none">
     <div class="header">
         <div class="brand">⚙️ PANEL ADMIN - RECARGASGAMES</div>
         <div class="admin-actions">
             <button class="admin-btn" onclick="recargarTodo()">🔄 Recargar</button>
-            <button class="admin-btn danger" onclick="cerrarSesionAdmin()">🚪 Salir</button>
+            <button class="admin-btn danger" onclick="cerrarSesion()">🚪 Salir</button>
         </div>
     </div>
-
     <div class="main">
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-number" id="totalPedidos">0</div><div class="stat-label">Total Pedidos</div></div>
             <div class="stat-card"><div class="stat-number" id="totalPendientes">0</div><div class="stat-label">Pendientes</div></div>
             <div class="stat-card"><div class="stat-number" id="totalCompletados">0</div><div class="stat-label">Completados</div></div>
             <div class="stat-card"><div class="stat-number" id="totalGanado">0</div><div class="stat-label">💰 Ganado (Bs)</div></div>
-            <div class="stat-card"><div class="stat-number" id="totalUsuarios">0</div><div class="stat-label">👥 Usuarios</div></div>
         </div>
 
         <div class="config-card">
@@ -353,515 +90,231 @@ tr:hover { background: rgba(16, 185, 129, 0.1); }
             <div class="config-row">
                 <input type="number" id="tasaInput" class="config-input" placeholder="Tasa Bs/USDT" value="735">
                 <button class="config-btn" onclick="guardarTasa()">💾 Guardar Tasa</button>
-                <span style="font-size: 12px; color: #9ca3af;">Tasa actual: <span id="tasaActual">735</span> Bs</span>
+                <span style="font-size:12px;color:#9ca3af">Tasa actual: <span id="tasaActual">735</span> Bs</span>
             </div>
         </div>
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="mostrarTab('pedidos')">📦 Pedidos</button>
-            <button class="tab-btn" onclick="mostrarTab('usuarios')">👥 Usuarios Registrados</button>
-            <button class="tab-btn" onclick="mostrarTab('graficas')">📊 Gráficas</button>
+        <div class="filters">
+            <select id="filtroEstado" class="filter-select">
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="completado">Completados</option>
+            </select>
+            <select id="filtroJuego" class="filter-select">
+                <option value="todos">Todos los juegos</option>
+                <option value="FREE FIRE">🔥 Free Fire</option>
+                <option value="BLOOD STRIKE">🪖 Blood Strike</option>
+                <option value="ROBLOX">🤖 Roblox</option>
+                <option value="MOBILE LEGENDS">👑 MLBB</option>
+                <option value="CALL OF DUTY">🎮 COD Mobile</option>
+            </select>
+            <input type="text" id="searchInput" class="filter-search" placeholder="Buscar por ID, nombre o referencia...">
+            <button class="refresh-btn" onclick="recargarPedidos()">🔄 Actualizar</button>
+            <button class="refresh-btn" onclick="exportarPedidos()" style="background:#22c55e">📥 Exportar</button>
         </div>
 
-        <div id="tabPedidos" class="tab-pane active">
-            <div class="filters">
-                <select id="filtroEstado" class="filter-select">
-                    <option value="todos">Todos</option>
-                    <option value="pendiente">Pendientes</option>
-                    <option value="completado">Completados</option>
-                </select>
-                <input type="text" id="searchInput" class="filter-search" placeholder="Buscar por usuario o referencia...">
-                <button class="refresh-btn" onclick="recargarPedidos()">🔄 Actualizar</button>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>#</th><th>Usuario</th><th>Juego</th><th>Producto</th><th>Monto</th><th>Referencia</th><th>Estado</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody id="listaPedidos"><tr><td colspan="8" class="no-pedidos">Cargando...</tbody>
-                </table>
-                <div class="pagination" id="pagination"></div>
-            </div>
-        </div>
-
-        <div id="tabUsuarios" class="tab-pane">
-            <div class="filters">
-                <input type="text" id="searchUsuarioInput" class="filter-search" placeholder="Buscar usuario por correo...">
-                <button class="refresh-btn" onclick="cargarUsuarios()">🔄 Actualizar</button>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>#</th><th>Correo</th><th>Nombre</th><th>Fecha Registro</th><th>UID</th></tr>
-                    </thead>
-                    <tbody id="listaUsuarios"><tr><td colspan="5" class="no-pedidos">Cargando usuarios...</tbody>
-                </table>
-                <div class="pagination" id="paginationUsuarios"></div>
-            </div>
-        </div>
-
-        <div id="tabGraficas" class="tab-pane">
-            <div class="chart-row">
-                <div class="chart-container">
-                    <h3>📊 Ventas por Día (últimos 7 días)</h3>
-                    <canvas id="ventasDiariasChart" width="400" height="200"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>🎮 Ventas por Juego</h3>
-                    <canvas id="ventasJuegoChart" width="400" height="200"></canvas>
-                </div>
-            </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th><th>ID Jugador</th><th>Nombre</th><th>Juego</th><th>Producto</th><th>Monto</th><th>Referencia</th><th>Estado</th><th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPedidos"><tr><td colspan="9" class="no-pedidos">Cargando...</td></tr>
+            </table>
+            <div class="pagination" id="pagination"></div>
         </div>
     </div>
 </div>
 
 <div id="modalDetalles" class="modal">
     <div class="modal-content"><h3>📋 Detalles del Pedido</h3><div id="modalBody"></div><button class="close-modal" onclick="cerrarModal()">Cerrar</button></div>
-</div><script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, onValue, update, remove, set, get, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+</div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-        authDomain: "recargasgames-14c38.firebaseapp.com",
-        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-        projectId: "recargasgames-14c38",
-        storageBucket: "recargasgames-14c38.firebasestorage.app",
-        messagingSenderId: "370952235234",
-        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-    };
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import{getDatabase,ref,onValue,update,remove,set,get}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+const firebaseConfig={apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",authDomain:"recargasgames-14c38.firebaseapp.com",databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",projectId:"recargasgames-14c38",storageBucket:"recargasgames-14c38.firebasestorage.app",messagingSenderId:"370952235234",appId:"1:370952235234:web:41a9ebd7084f1955a256bb"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+const ADMIN_EMAIL="aa3964063@gmail.com";
 
-    const ADMIN_EMAIL = "aa3964063@gmail.com";
+let pedidos=[];
+let currentPage=1;
+const porPagina=10;
 
-    let pedidos = [];
-    let usuarios = [];
-    let currentPage = 1;
-    let currentPageUsuarios = 1;
-    const porPagina = 10;
-    let ventasChart = null;
-    let juegosChart = null;
-
-    function mostrarToast(mensaje) {
-        const toast = document.createElement('div');
-        toast.style.position = 'fixed';
-        toast.style.bottom = '100px';
-        toast.style.left = '50%';
-        toast.style.transform = 'translateX(-50%)';
-        toast.style.background = '#10b981';
-        toast.style.color = 'white';
-        toast.style.padding = '12px 24px';
-        toast.style.borderRadius = '30px';
-        toast.style.fontSize = '14px';
-        toast.style.zIndex = '2000';
-        toast.style.animation = 'fadeOut 3s ease forwards';
-        toast.textContent = mensaje;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    // ========== ENVIAR NOTIFICACIÓN AL CLIENTE ==========
-    async function enviarNotificacionAlCliente(userId, pedidoInfo) {
-        if (!userId) return;
-        
-        try {
-            const notificacionRef = ref(db, `notificaciones/${userId}/${Date.now()}`);
-            await set(notificacionRef, {
-                id: Date.now(),
-                titulo: "✅ Pedido Completado",
-                mensaje: `Tu pedido de ${pedidoInfo.producto} para ${pedidoInfo.juego} ha sido entregado. ¡Gracias por tu compra!`,
-                fecha: new Date().toLocaleString(),
-                leida: false,
-                timestamp: Date.now()
-            });
-            console.log(`📢 Notificación enviada a usuario: ${userId}`);
-            mostrarToast("✅ Notificación enviada al cliente");
-        } catch (error) {
-            console.error("Error al enviar notificación:", error);
-        }
-    }
-
-    // ========== COMPLETAR PEDIDO CON NOTIFICACIÓN ==========
-    window.completarPedido = async (id) => {
-        if (confirm('¿Marcar este pedido como COMPLETADO?')) {
-            try {
-                const pedidoRef = ref(db, 'pedidos/' + id);
-                const snapshot = await get(pedidoRef);
-                const pedido = snapshot.val();
-                
-                if (!pedido) {
-                    alert("❌ Pedido no encontrado");
-                    return;
-                }
-                
-                await update(pedidoRef, { 
-                    estado: 'Completado', 
-                    fecha_completado: new Date().toLocaleString() 
-                });
-                
-                if (pedido.userId) {
-                    await enviarNotificacionAlCliente(pedido.userId, {
-                        producto: pedido.producto,
-                        juego: pedido.juego
-                    });
-                }
-                
-                lanzarConfeti();
-                registrarLog('COMPLETAR_PEDIDO', `Pedido ${id} completado`);
-                cargarPedidos();
-                
-            } catch (error) {
-                console.error("Error:", error);
-                alert("❌ Error al completar el pedido");
-            }
-        }
-    };
-
-    window.eliminarPedido = async (id) => {
-        if (confirm('¿Eliminar este pedido permanentemente?')) {
-            await remove(ref(db, 'pedidos/' + id));
-            registrarLog('ELIMINAR_PEDIDO', `Pedido ${id} eliminado`);
-            cargarPedidos();
-        }
-    };
-
-    async function registrarLog(accion, detalles) {
-        try {
-            const logsRef = ref(db, 'logs');
-            const nuevoLog = push(logsRef);
-            await set(nuevoLog, {
-                fecha: new Date().toLocaleString(),
-                timestamp: Date.now(),
-                accion: accion,
-                detalles: detalles,
-                admin: auth.currentUser?.email || 'admin'
-            });
-        } catch (error) {
-            console.error("Error al guardar log:", error);
-        }
-    }
-
-    function lanzarConfeti() {
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        canvas.style.display = 'block';
-        
-        let particles = [];
-        for (let i = 0; i < 150; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height - canvas.height,
-                size: Math.random() * 8 + 4,
-                speedY: Math.random() * 5 + 3,
-                speedX: (Math.random() - 0.5) * 3,
-                color: `hsl(${Math.random() * 360}, 100%, 50%)`
-            });
-        }
-        
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let active = false;
-            for (let p of particles) {
-                p.y += p.speedY;
-                p.x += p.speedX;
-                if (p.y < canvas.height) active = true;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
-            }
-            if (active) requestAnimationFrame(animate);
-            else canvas.style.display = 'none';
-        }
-        animate();
-        setTimeout(() => { canvas.style.display = 'none'; }, 3000);
-    }
-
-    window.guardarTasa = async () => {
-        let tasa = document.getElementById('tasaInput').value;
-        if (!tasa) { alert("❌ Ingresa una tasa válida"); return; }
-        await set(ref(db, 'configuracion/tasa_dolar'), parseFloat(tasa));
-        document.getElementById('tasaActual').innerText = tasa;
-        alert("✅ Tasa guardada");
-    };
-
-    function cargarTasa() {
-        onValue(ref(db, 'configuracion/tasa_dolar'), (snapshot) => {
-            const tasa = snapshot.val();
-            if (tasa) {
-                document.getElementById('tasaInput').value = tasa;
-                document.getElementById('tasaActual').innerText = tasa;
-            }
-        });
-    }
-
-    window.verificarAcceso = async () => {
-        const email = document.getElementById("adminEmail").value.trim();
-        const password = document.getElementById("adminPassword").value;
-        const errorMsg = document.getElementById("errorMsg");
-        
-        if (email !== ADMIN_EMAIL) {
-            errorMsg.textContent = "❌ Correo no autorizado";
-            errorMsg.style.display = "block";
-            return;
-        }
-        
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            document.getElementById("loginPanel").style.display = "none";
-            document.getElementById("adminContent").style.display = "block";
-            cargarPedidos();
-            cargarTasa();
-            cargarUsuarios();
-            registrarLog('LOGIN_ADMIN', 'Administrador inició sesión');
-        } catch (error) {
-            errorMsg.textContent = "❌ Contraseña incorrecta";
-            errorMsg.style.display = "block";
-        }
-    };
-
-    window.cerrarSesionAdmin = () => {
-        registrarLog('LOGOUT_ADMIN', 'Administrador cerró sesión');
-        signOut(auth).then(() => {
-            document.getElementById("loginPanel").style.display = "flex";
-            document.getElementById("adminContent").style.display = "none";
-        });
-    };
-
-    window.recargarTodo = () => {
-        cargarPedidos();
-        cargarUsuarios();
-        actualizarGraficas();
-    };
-
-    window.cargarUsuarios = () => {
-        const usuariosRef = ref(db, 'usuarios');
-        onValue(usuariosRef, (snapshot) => {
-            const data = snapshot.val();
-            usuarios = [];
-            if (data) {
-                for (let id in data) {
-                    usuarios.push({ id, ...data[id] });
-                }
-            }
-            document.getElementById('totalUsuarios').innerText = usuarios.length;
-            renderizarUsuarios();
-        });
-    };
-
-    function renderizarUsuarios() {
-        const busqueda = document.getElementById('searchUsuarioInput')?.value.toLowerCase() || '';
-        let filtrados = usuarios;
-        if (busqueda) {
-            filtrados = filtrados.filter(u => (u.email && u.email.toLowerCase().includes(busqueda)) || (u.nombre && u.nombre.toLowerCase().includes(busqueda)));
-        }
-        const totalPages = Math.ceil(filtrados.length / porPagina);
-        const start = (currentPageUsuarios - 1) * porPagina;
-        const paginados = filtrados.slice(start, start + porPagina);
-        const tbody = document.getElementById('listaUsuarios');
-        
-        if (paginados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="no-pedidos">No hay usuarios registrados</tbody>';
-            return;
-        }
-        
-        let html = '';
-        paginados.forEach((u, i) => {
-            html += `<tr>
-                <td>${start + i + 1}</td>
-                <td><strong>${u.email || 'N/A'}</strong></td>
-                <td>${u.nombre || u.displayName || 'N/A'}</td>
-                <td>${u.fecha || new Date(u.timestamp).toLocaleString() || 'N/A'}</td>
-                <td style="font-size: 10px;">${u.uid ? u.uid.slice(-8) : 'N/A'}</td>
-            </tr>`;
-        });
-        tbody.innerHTML = html;
-        
-        let pages = '';
-        for (let i = 1; i <= totalPages; i++) {
-            pages += `<button class="page-btn ${i === currentPageUsuarios ? 'active' : ''}" onclick="irPaginaUsuarios(${i})">${i}</button>`;
-        }
-        const paginationDiv = document.getElementById('paginationUsuarios');
-        if (paginationDiv) paginationDiv.innerHTML = pages;
-    }
-
-    window.irPaginaUsuarios = (page) => { currentPageUsuarios = page; renderizarUsuarios(); };
-
-    function cargarPedidos() {
-        onValue(ref(db, 'pedidos'), (snapshot) => {
-            const data = snapshot.val();
-            pedidos = [];
-            if (data) for (let id in data) pedidos.push({ id, ...data[id] });
-            pedidos.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-            renderizarPedidos();
-            actualizarGraficas();
-        });
-    }
-
-    function actualizarGraficas() {
-        const completados = pedidos.filter(p => p.estado === 'Completado');
-        const ventasPorDia = {};
-        completados.forEach(p => {
-            const fecha = p.fecha_completado ? p.fecha_completado.split(',')[0] : new Date(p.timestamp).toLocaleDateString();
-            const monto = parseFloat((p.precio || '0').replace('Bs', '').trim()) || 0;
-            ventasPorDia[fecha] = (ventasPorDia[fecha] || 0) + monto;
-        });
-        const ultimos7Dias = [];
-        for (let i = 6; i >= 0; i--) {
-            const fecha = new Date();
-            fecha.setDate(fecha.getDate() - i);
-            ultimos7Dias.push(fecha.toLocaleDateString());
-        }
-        const ventasData = ultimos7Dias.map(fecha => ventasPorDia[fecha] || 0);
-        
-        if (ventasChart) ventasChart.destroy();
-        const ctxVentas = document.getElementById('ventasDiariasChart')?.getContext('2d');
-        if (ctxVentas) {
-            ventasChart = new Chart(ctxVentas, {
-                type: 'line',
-                data: { labels: ultimos7Dias, datasets: [{ label: 'Ventas (Bs)', data: ventasData, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', tension: 0.3, fill: true }] },
-                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: 'white' } }, x: { ticks: { color: 'white', rotation: 45 } } } }
-            });
-        }
-        
-        const ventasPorJuego = {};
-        completados.forEach(p => {
-            const juego = p.juego || 'Otro';
-            const monto = parseFloat((p.precio || '0').replace('Bs', '').trim()) || 0;
-            ventasPorJuego[juego] = (ventasPorJuego[juego] || 0) + monto;
-        });
-        
-        if (juegosChart) juegosChart.destroy();
-        const ctxJuegos = document.getElementById('ventasJuegoChart')?.getContext('2d');
-        if (ctxJuegos) {
-            juegosChart = new Chart(ctxJuegos, {
-                type: 'bar',
-                data: { labels: Object.keys(ventasPorJuego), datasets: [{ label: 'Ventas (Bs)', data: Object.values(ventasPorJuego), backgroundColor: '#10b981' }] },
-                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: 'white' } }, x: { ticks: { color: 'white', rotation: 45 } } } }
-            });
-        }
-    }
-
-    function filtrarPedidos() {
-        const estado = document.getElementById('filtroEstado').value;
-        const busqueda = document.getElementById('searchInput').value.toLowerCase();
-        let f = pedidos;
-        if (estado === 'pendiente') f = f.filter(p => p.estado !== 'Completado');
-        if (estado === 'completado') f = f.filter(p => p.estado === 'Completado');
-        if (busqueda) f = f.filter(p => (p.usuario && p.usuario.toLowerCase().includes(busqueda)) || (p.referencia && p.referencia.toLowerCase().includes(busqueda)));
-        return f;
-    }
-
-    function actualizarStatsPedidos() {
-        const f = filtrarPedidos();
-        const pendientes = f.filter(p => p.estado !== 'Completado').length;
-        const completados = f.filter(p => p.estado === 'Completado').length;
-        let ganado = 0;
-        f.forEach(p => { if (p.estado === 'Completado' && p.precio) ganado += parseFloat(p.precio.replace('Bs','')) || 0; });
-        document.getElementById('totalPedidos').innerText = f.length;
-        document.getElementById('totalPendientes').innerText = pendientes;
-        document.getElementById('totalCompletados').innerText = completados;
-        document.getElementById('totalGanado').innerText = ganado.toLocaleString('es-VE');
-    }
-
-    window.verDetalle = (id) => {
-        const p = pedidos.find(x => x.id === id);
-        if (!p) return;
-        document.getElementById('modalBody').innerHTML = `
-            <div class="modal-detail-row"><strong>ID:</strong> <span>${p.id}</span></div>
-            <div class="modal-detail-row"><strong>Usuario:</strong> <span>${p.usuario || 'N/A'}</span></div>
-            <div class="modal-detail-row"><strong>Juego:</strong> <span>${p.juego || 'N/A'}</span></div>
-            <div class="modal-detail-row"><strong>Producto:</strong> <span>${p.producto || 'N/A'}</span></div>
-            <div class="modal-detail-row"><strong>Monto:</strong> <span>${p.precio || '0 Bs'}</span></div>
-            <div class="modal-detail-row"><strong>ID/Jugador:</strong> <span>${p.jugadorId || p.jugador || 'N/A'}</span></div>
-            <div class="modal-detail-row"><strong>Referencia:</strong> <span>${p.referencia || 'N/A'}</span></div>
-            <div class="modal-detail-row"><strong>Método:</strong> <span>${p.metodo || 'PAGO MOVIL'}</span></div>
-            <div class="modal-detail-row"><strong>Fecha:</strong> <span>${p.fecha || new Date(p.timestamp).toLocaleString()}</span></div>
-            <div class="modal-detail-row"><strong>Estado:</strong> <span class="badge ${p.estado === 'Completado' ? 'badge-completado' : 'badge-pendiente'}">${p.estado || 'Pendiente'}</span></div>
-        `;
-        document.getElementById('modalDetalles').style.display = 'flex';
-    };
-
-    function renderizarPedidos() {
-        const filtrados = filtrarPedidos();
-        actualizarStatsPedidos();
-        const totalPages = Math.ceil(filtrados.length / porPagina);
-        const start = (currentPage - 1) * porPagina;
-        const paginados = filtrados.slice(start, start + porPagina);
-        const tbody = document.getElementById('listaPedidos');
-        
-        if (paginados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="no-pedidos">📭 Sin pedidos</tbody>';
-            document.getElementById('pagination').innerHTML = '';
-            return;
-        }
-        
-        let html = '';
-        paginados.forEach((p, i) => {
-            const badge = p.estado === 'Completado' ? 'badge-completado' : 'badge-pendiente';
-            html += `<tr>
-                <td>${start + i + 1}</td>
-                <td><strong>${p.usuario || 'Anónimo'}</strong></td>
-                <td>${p.juego || 'N/A'}</td>
-                <td>${p.producto || 'N/A'}</td>
-                <td>${p.precio || '0 Bs'}</td>
-                <td>${p.referencia || 'N/A'}</td>
-                <td><span class="badge ${badge}">${p.estado || 'Pendiente'}</span></td>
-                <td>
-                    <button class="btn-action btn-view" onclick="verDetalle('${p.id}')">👁️</button>
-                    <button class="btn-action btn-complete" onclick="completarPedido('${p.id}')" ${p.estado === 'Completado' ? 'disabled' : ''}>✅</button>
-                    <button class="btn-action btn-delete" onclick="eliminarPedido('${p.id}')">🗑️</button>
-                </td>
-            </td>`;
-        });
-        tbody.innerHTML = html;
-        
-        let pages = '';
-        for (let i = 1; i <= totalPages; i++) {
-            pages += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="irPaginaPedidos(${i})">${i}</button>`;
-        }
-        document.getElementById('pagination').innerHTML = pages;
-    }
-
-    window.recargarPedidos = () => { currentPage = 1; renderizarPedidos(); };
-    window.irPaginaPedidos = (page) => { currentPage = page; renderizarPedidos(); };
-    window.cerrarModal = () => document.getElementById('modalDetalles').style.display = 'none';
+function filtrarPedidos(){
+    let filtrados=pedidos;
+    const estado=document.getElementById('filtroEstado').value;
+    const juego=document.getElementById('filtroJuego').value;
+    const busqueda=document.getElementById('searchInput').value.toLowerCase();
     
-    window.mostrarTab = (tab) => {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-        if (tab === 'pedidos') {
-            document.querySelector('.tab-btn').classList.add('active');
-            document.getElementById('tabPedidos').classList.add('active');
-        } else if (tab === 'usuarios') {
-            document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            document.getElementById('tabUsuarios').classList.add('active');
-            cargarUsuarios();
-        } else if (tab === 'graficas') {
-            document.querySelectorAll('.tab-btn')[2].classList.add('active');
-            document.getElementById('tabGraficas').classList.add('active');
-            actualizarGraficas();
-        }
-    };
+    if(estado==='pendiente')filtrados=filtrados.filter(p=>p.estado!=='Completado');
+    if(estado==='completado')filtrados=filtrados.filter(p=>p.estado==='Completado');
+    if(juego!=='todos')filtrados=filtrados.filter(p=>p.juego?.includes(juego));
+    if(busqueda){
+        filtrados=filtrados.filter(p=>
+            (p.id_jugador && p.id_jugador.toLowerCase().includes(busqueda)) ||
+            (p.nombre_verificado && p.nombre_verificado.toLowerCase().includes(busqueda)) ||
+            (p.referencia && p.referencia.toLowerCase().includes(busqueda))
+        );
+    }
+    return filtrados;
+}
 
-    document.getElementById('filtroEstado')?.addEventListener('change', () => { currentPage = 1; renderizarPedidos(); });
-    document.getElementById('searchInput')?.addEventListener('keyup', () => { currentPage = 1; renderizarPedidos(); });
-    document.getElementById('searchUsuarioInput')?.addEventListener('keyup', () => { currentPageUsuarios = 1; renderizarUsuarios(); });
+function actualizarStats(filtrados){
+    const pendientes=filtrados.filter(p=>p.estado!=='Completado').length;
+    const completados=filtrados.filter(p=>p.estado==='Completado').length;
+    let ganado=0;
+    filtrados.forEach(p=>{if(p.estado==='Completado' && p.precio)ganado+=parseFloat(p.precio.replace('Bs',''))||0});
+    document.getElementById('totalPedidos').innerText=filtrados.length;
+    document.getElementById('totalPendientes').innerText=pendientes;
+    document.getElementById('totalCompletados').innerText=completados;
+    document.getElementById('totalGanado').innerText=ganado.toLocaleString('es-VE');
+}
 
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.email === ADMIN_EMAIL) {
-            document.getElementById("loginPanel").style.display = "none";
-            document.getElementById("adminContent").style.display = "block";
-            cargarPedidos();
-            cargarTasa();
-            cargarUsuarios();
-        }
+function renderizarPedidos(){
+    const filtrados=filtrarPedidos();
+    actualizarStats(pedidos);
+    const totalPages=Math.ceil(filtrados.length/porPagina);
+    const start=(currentPage-1)*porPagina;
+    const paginados=filtrados.slice(start,start+porPagina);
+    const tbody=document.getElementById('listaPedidos');
+    
+    if(paginados.length===0){
+        tbody.innerHTML='<tr><td colspan="9" class="no-pedidos">📭 Sin pedidos</td></tr>';
+        document.getElementById('pagination').innerHTML='';
+        return;
+    }
+    
+    let html='';
+    paginados.forEach((p,i)=>{
+        const badgeClass=p.estado==='Completado'?'badge-completado':'badge-pendiente';
+        const nombreMostrar=p.nombre_verificado || p.usuario || 'Anónimo';
+        html+=`<tr>
+            <td>${start+i+1}</td>
+            <td><strong>${p.id_jugador || p.jugadorId || 'N/A'}</strong></td>
+            <td><span class="nombre-jugador">${nombreMostrar}</span></td>
+            <td>${p.juego || 'N/A'}</td>
+            <td>${p.producto || 'N/A'}</td>
+            <td>${p.precio || '0 Bs'}</td>
+            <td>${p.referencia || 'N/A'}</td>
+            <td><span class="badge ${badgeClass}">${p.estado || 'Pendiente'}</span></td>
+            <td>
+                <button class="btn-action btn-view" onclick="verDetalle('${p.id}')">👁️</button>
+                <button class="btn-action btn-complete" onclick="completarPedido('${p.id}')" ${p.estado==='Completado'?'disabled':''}>✅</button>
+                <button class="btn-action btn-delete" onclick="eliminarPedido('${p.id}')">🗑️</button>
+            </td>
+        </tr>`;
     });
+    tbody.innerHTML=html;
+    
+    let pages='';
+    for(let i=1;i<=totalPages;i++)pages+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="irPagina(${i})">${i}</button>`;
+    document.getElementById('pagination').innerHTML=pages;
+}
+
+function cargarPedidos(){
+    onValue(ref(db,'pedidos'),(snapshot)=>{
+        const data=snapshot.val();
+        pedidos=[];
+        if(data)for(let id in data)pedidos.push({id,...data[id]});
+        pedidos.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+        renderizarPedidos();
+    });
+}
+
+window.verDetalle=(id)=>{
+    const p=pedidos.find(x=>x.id===id);
+    if(!p)return;
+    const nombreMostrar=p.nombre_verificado || p.usuario || 'No disponible';
+    document.getElementById('modalBody').innerHTML=`
+        <div class="modal-detail-row"><strong>ID Jugador:</strong> ${p.id_jugador || p.jugadorId || 'N/A'}</div>
+        <div class="modal-detail-row"><strong>Nombre:</strong> <span class="nombre-jugador">${nombreMostrar}</span></div>
+        <div class="modal-detail-row"><strong>Juego:</strong> ${p.juego || 'N/A'}</div>
+        <div class="modal-detail-row"><strong>Producto:</strong> ${p.producto || 'N/A'}</div>
+        <div class="modal-detail-row"><strong>Monto:</strong> ${p.precio || '0 Bs'}</div>
+        <div class="modal-detail-row"><strong>Referencia:</strong> ${p.referencia || 'N/A'}</div>
+        <div class="modal-detail-row"><strong>Método:</strong> ${p.metodo || 'PAGO MOVIL'}</div>
+        <div class="modal-detail-row"><strong>Fecha:</strong> ${p.fecha || new Date(p.timestamp).toLocaleString()}</div>
+        <div class="modal-detail-row"><strong>Estado:</strong> ${p.estado || 'Pendiente'}</div>
+    `;
+    document.getElementById('modalDetalles').style.display='flex';
+};
+
+window.completarPedido=async(id)=>{
+    if(!confirm('¿Marcar como COMPLETADO?'))return;
+    await update(ref(db,'pedidos/'+id),{estado:'Completado',fecha_completado:new Date().toLocaleString()});
+    alert('✅ Pedido completado');
+    cargarPedidos();
+};
+
+window.eliminarPedido=async(id)=>{
+    if(!confirm('¿Eliminar?'))return;
+    await remove(ref(db,'pedidos/'+id));
+    cargarPedidos();
+};
+
+window.recargarPedidos=()=>{currentPage=1;renderizarPedidos();};
+window.irPagina=(page)=>{currentPage=page;renderizarPedidos();};
+window.cerrarModal=()=>document.getElementById('modalDetalles').style.display='none';
+
+window.guardarTasa=async()=>{
+    let tasa=document.getElementById('tasaInput').value;
+    if(!tasa)return alert('Ingresa una tasa');
+    await set(ref(db,'configuracion/tasa_dolar'),parseFloat(tasa));
+    document.getElementById('tasaActual').innerText=tasa;
+    alert('✅ Tasa guardada');
+};
+
+function cargarTasa(){
+    onValue(ref(db,'configuracion/tasa_dolar'),(snapshot)=>{
+        const tasa=snapshot.val();
+        if(tasa){document.getElementById('tasaInput').value=tasa;document.getElementById('tasaActual').innerText=tasa;}
+    });
+}
+
+window.recargarTodo=()=>{cargarPedidos();};
+
+window.exportarPedidos=()=>{
+    const filtrados=filtrarPedidos();
+    if(filtrados.length===0)return alert('No hay pedidos');
+    let csv="ID Jugador,Nombre,Juego,Producto,Monto,Referencia,Fecha,Estado\n";
+    filtrados.forEach(p=>{
+        csv+=`"${p.id_jugador||p.jugadorId||''}","${p.nombre_verificado||p.usuario||''}","${p.juego||''}","${p.producto||''}","${p.precio||''}","${p.referencia||''}","${p.fecha||''}","${p.estado||'Pendiente'}"\n`;
+    });
+    const blob=new Blob([csv],{type:'text/csv'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=`pedidos_${new Date().toISOString().slice(0,19)}.csv`;
+    a.click();
+    alert('✅ Exportado');
+};
+
+window.verificarAcceso=async()=>{
+    const email=document.getElementById("adminEmail").value.trim();
+    const password=document.getElementById("adminPassword").value;
+    const errorMsg=document.getElementById("errorMsg");
+    if(email!==ADMIN_EMAIL){errorMsg.textContent="❌ Correo no autorizado";errorMsg.style.display="block";return;}
+    try{
+        await signInWithEmailAndPassword(auth,email,password);
+        document.getElementById("loginPanel").style.display="none";
+        document.getElementById("adminContent").style.display="block";
+        cargarPedidos();
+        cargarTasa();
+    }catch(e){errorMsg.textContent="❌ Contraseña incorrecta";errorMsg.style.display="block";}
+};
+
+window.cerrarSesion=()=>{signOut(auth);document.getElementById("loginPanel").style.display="flex";document.getElementById("adminContent").style.display="none";};
+
+document.getElementById('filtroEstado')?.addEventListener('change',()=>{currentPage=1;renderizarPedidos();});
+document.getElementById('filtroJuego')?.addEventListener('change',()=>{currentPage=1;renderizarPedidos();});
+document.getElementById('searchInput')?.addEventListener('keyup',()=>{currentPage=1;renderizarPedidos();});
+
+onAuthStateChanged(auth,(user)=>{if(user&&user.email===ADMIN_EMAIL){document.getElementById("loginPanel").style.display="none";document.getElementById("adminContent").style.display="block";cargarPedidos();cargarTasa();}});
 </script>
 </body>
-            </html>
+</html>

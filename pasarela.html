@@ -1,238 +1,209 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pasarela de Pago - RECARGASGAMES</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-image: url('fondo.jpg'); background-size: cover; background-position: center; background-attachment: fixed; color: white; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { max-width: 450px; width: 100%; margin: 0 auto; }
-        .payment-card { background: rgba(11, 18, 32, 0.95); border: 1px solid #10b981; border-radius: 24px; padding: 25px; backdrop-filter: blur(10px); }
-        h1 { text-align: center; font-size: 22px; margin-bottom: 20px; color: #10b981; }
-        .method-title { background: #10b981; display: inline-block; padding: 8px 20px; border-radius: 30px; font-size: 16px; font-weight: bold; margin-bottom: 20px; text-align: center; width: 100%; }
-        .info-box { background: #0b1220; border-radius: 16px; padding: 15px; margin-bottom: 20px; border: 1px solid #1f2937; }
-        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1f2937; }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { font-weight: bold; color: #10b981; font-size: 14px; }
-        .info-value { font-family: monospace; font-size: 16px; font-weight: bold; letter-spacing: 1px; }
-        .copy-btn { background: #2563eb; color: white; border: none; padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; transition: 0.2s; }
-        .copy-btn:hover { background: #3b82f6; }
-        .copy-btn.copied { background: #22c55e; }
-        .instruction { background: rgba(16, 185, 129, 0.15); border-left: 4px solid #10b981; padding: 15px; border-radius: 12px; margin: 20px 0; text-align: center; }
-        .instruction p { margin: 5px 0; font-size: 13px; }
-        .example { background: #1f2937; padding: 10px; border-radius: 10px; text-align: center; font-family: monospace; font-size: 16px; margin: 10px 0; letter-spacing: 2px; }
-        .amount-box { background: #1f2937; padding: 15px; border-radius: 12px; text-align: center; margin: 20px 0; }
-        .amount-label { font-size: 13px; color: #9ca3af; }
-        .amount-value { font-size: 32px; font-weight: bold; color: #22c55e; }
-        .discount-box { display: flex; gap: 10px; margin: 15px 0; }
-        .discount-input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #1f2937; background: #111827; color: white; font-size: 14px; text-align: center; text-transform: uppercase; }
-        .discount-btn { background: #10b981; color: white; border: none; padding: 0 20px; border-radius: 12px; cursor: pointer; font-weight: bold; }
-        .discount-btn:hover { background: #059669; }
-        .discount-info { font-size: 12px; color: #f97316; text-align: center; margin-top: 5px; display: none; }
-        .reference-box { margin: 20px 0; }
-        .reference-box label { display: block; margin-bottom: 8px; font-weight: bold; color: #10b981; font-size: 14px; }
-        .reference-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #1f2937; background: #111827; color: white; font-size: 16px; text-align: center; font-family: monospace; letter-spacing: 2px; }
-        .reference-input:focus { outline: none; border-color: #10b981; }
-        .complete-btn { width: 100%; padding: 15px; background: #10b981; color: white; border: none; border-radius: 14px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-        .complete-btn:hover { background: #059669; }
-        .complete-btn:disabled { background: #9ca3af; cursor: not-allowed; }
-        .footer-text { text-align: center; color: #9ca3af; font-size: 11px; margin-top: 20px; }
-        .copy-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #22c55e; color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; z-index: 9999; animation: fadeOut 1.5s ease forwards; }
-        @keyframes fadeOut { 0% { opacity: 1; transform: translateX(-50%) translateY(0); } 70% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); display: none; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pasarela de Pago - RECARGASGAMES</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background-image:url('fondo.jpg');background-size:cover;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.container{max-width:450px;width:100%;margin:0 auto}
+.payment-card{background:rgba(11,18,32,.95);border:1px solid #10b981;border-radius:24px;padding:25px;backdrop-filter:blur(10px)}
+h1{text-align:center;font-size:22px;margin-bottom:20px;color:#10b981}
+.method-title{background:#10b981;display:inline-block;padding:8px 20px;border-radius:30px;font-size:16px;font-weight:700;margin-bottom:20px;width:100%;text-align:center}
+.info-box{background:#0b1220;border-radius:16px;padding:15px;margin-bottom:20px;border:1px solid #1f2937}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #1f2937}
+.info-row:last-child{border-bottom:none}
+.info-label{font-weight:700;color:#10b981;font-size:14px}
+.info-value{font-family:monospace;font-size:16px;font-weight:700}
+.copy-btn{background:#2563eb;color:#fff;border:none;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:11px}
+.copy-btn:hover{background:#3b82f6}
+.instruction{background:rgba(16,185,129,.15);border-left:4px solid #10b981;padding:15px;border-radius:12px;margin:20px 0;text-align:center}
+.instruction p{margin:5px 0;font-size:13px}
+.example{background:#1f2937;padding:10px;border-radius:10px;text-align:center;font-family:monospace;font-size:16px;margin:10px 0}
+.amount-box{background:#1f2937;padding:15px;border-radius:12px;text-align:center;margin:20px 0}
+.amount-label{font-size:13px;color:#9ca3af}
+.amount-value{font-size:32px;font-weight:700;color:#22c55e}
+.discount-box{display:flex;gap:10px;margin:15px 0}
+.discount-input{flex:1;padding:12px;border-radius:12px;border:1px solid #1f2937;background:#111827;color:#fff;text-align:center;text-transform:uppercase}
+.discount-btn{background:#10b981;color:#fff;border:none;padding:0 20px;border-radius:12px;cursor:pointer;font-weight:700}
+.reference-box{margin:20px 0}
+.reference-box label{display:block;margin-bottom:8px;font-weight:700;color:#10b981;font-size:14px}
+.reference-input{width:100%;padding:12px;border-radius:12px;border:1px solid #1f2937;background:#111827;color:#fff;text-align:center;font-family:monospace}
+.complete-btn{width:100%;padding:15px;background:#10b981;color:#fff;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
+.complete-btn:hover{background:#059669}
+.footer-text{text-align:center;color:#9ca3af;font-size:11px;margin-top:20px}
+.copy-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 20px;border-radius:30px;z-index:9999;animation:fadeOut 1.5s ease forwards}
+@keyframes fadeOut{0%{opacity:1}70%{opacity:1}100%{opacity:0;display:none}}
+</style>
 </head>
 <body>
-
 <div class="container">
     <div class="payment-card">
         <h1>💳 Método de Pago</h1>
         <div class="method-title">💵 PAGO MOVIL</div>
-
         <div class="info-box">
-            <div class="info-row"><span class="info-label">BANCO:</span><span class="info-value">0102</span><button class="copy-btn" onclick="copiarTexto('0102', this)">📋</button></div>
-            <div class="info-row"><span class="info-label">CÉDULA:</span><span class="info-value">32824869</span><button class="copy-btn" onclick="copiarTexto('32824869', this)">📋</button></div>
-            <div class="info-row"><span class="info-label">TELÉFONO:</span><span class="info-value">04228242411</span><button class="copy-btn" onclick="copiarTexto('04228242411', this)">📋</button></div>
+            <div class="info-row"><span class="info-label">BANCO:</span><span class="info-value">0102</span><button class="copy-btn" onclick="copiarTexto('0102',this)">📋</button></div>
+            <div class="info-row"><span class="info-label">CÉDULA:</span><span class="info-value">32824869</span><button class="copy-btn" onclick="copiarTexto('32824869',this)">📋</button></div>
+            <div class="info-row"><span class="info-label">TELÉFONO:</span><span class="info-value">04228242411</span><button class="copy-btn" onclick="copiarTexto('04228242411',this)">📋</button></div>
         </div>
-
-        <div class="instruction"><p>💰 <strong>REALIZA TU PAGO Y CARGA LA REFERENCIA</strong></p><p style="font-size: 12px;">EJEMPLO:</p><div class="example">001432808801</div></div>
-
+        <div class="instruction"><p>💰 <strong>REALIZA TU PAGO Y CARGA LA REFERENCIA</strong></p><p style="font-size:12px">EJEMPLO:</p><div class="example">001432808801</div></div>
         <div class="amount-box"><div class="amount-label">💸 Monto a enviar:</div><div class="amount-value" id="montoMostrar">Bs 0.00</div></div>
-
-        <div class="discount-box">
-            <input type="text" id="codigoDescuento" class="discount-input" placeholder="🎟️ Código GAMES = 1.5% OFF">
-            <button class="discount-btn" onclick="aplicarDescuento()">Aplicar</button>
-        </div>
-        <div id="discountInfo" class="discount-info"></div>
-
+        <div class="discount-box"><input type="text" id="codigoDescuento" class="discount-input" placeholder="¿CODIGO DESCUENTO?"><button class="discount-btn" onclick="aplicarDescuento()">Aplicar</button></div>
+        <div id="discountInfo" class="discount-info" style="display:none"></div>
         <div class="reference-box"><label>🧾 REFERENCIA DE PAGO</label><input type="text" id="referencia" class="reference-input" placeholder="Ej: 001432808801"></div>
-
         <button class="complete-btn" onclick="completarPedido()">✅ COMPLETAR PEDIDO</button>
         <div class="footer-text">Después de pagar, ingresa la referencia y presiona completar</div>
     </div>
 </div>
-
 <script src="telegram.js"></script>
 <script>
-    // ========== OBTENER DATOS DEL localStorage (YA CALCULADOS POR EL JUEGO) ==========
-    let producto = localStorage.getItem('producto_seleccionado') || "Producto";
-    let precioUSD = parseFloat(localStorage.getItem('precio_usd')) || 0;
-    let precioEnBsOriginal = parseInt(localStorage.getItem('precio_en_bs')) || 0;
-    let jugador = localStorage.getItem('id_jugador') || "No especificado";
-    let metodo = "PAGO MOVIL";
-    let juego = localStorage.getItem('juego_seleccionado') || "JUEGO";
-    
-    // Si no hay precio_en_bs (por compatibilidad con pedidos viejos), lo calculamos con tasa por defecto
-    let TASA_POR_DEFECTO = 735;
-    if (precioEnBsOriginal === 0 && precioUSD > 0) {
-        precioEnBsOriginal = Math.round(precioUSD * TASA_POR_DEFECTO);
+let producto=localStorage.getItem('producto_seleccionado')||"Producto";
+let precioUSD=parseFloat(localStorage.getItem('precio_usd'))||0;
+let idJugador=localStorage.getItem('id_jugador')||"No especificado";
+let nombreVerificado=localStorage.getItem('nombre_verificado')||"No verificado";
+let metodo="PAGO MOVIL";
+let juego=localStorage.getItem('juego_seleccionado')||"JUEGO";
+let nivelVerificado=localStorage.getItem('nivel_verificado')||"N/A";
+let paseId=localStorage.getItem('pase_id')||"";
+
+let TASA=735;
+let montoOriginalBs=0;
+let montoActualBs=0;
+let descuentoAplicado=false;
+let descuentoPorcentaje=0;
+
+async function cargarTasa(){
+    try{
+        const{getDatabase,ref,get}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+        const{initializeApp}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+        const firebaseConfig={apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",authDomain:"recargasgames-14c38.firebaseapp.com",databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",projectId:"recargasgames-14c38",storageBucket:"recargasgames-14c38.firebasestorage.app",messagingSenderId:"370952235234",appId:"1:370952235234:web:41a9ebd7084f1955a256bb"};
+        const app=initializeApp(firebaseConfig);
+        const db=getDatabase(app);
+        const tasaRef=ref(db,'configuracion/tasa_dolar');
+        const snapshot=await get(tasaRef);
+        if(snapshot.exists())TASA=snapshot.val();
+        calcularMonto();
+    }catch(e){calcularMonto();}
+}
+
+function calcularMonto(){
+    let precioEnBsGuardado=localStorage.getItem('precio_en_bs');
+    if(precioEnBsGuardado&&parseInt(precioEnBsGuardado)>0){
+        montoOriginalBs=parseInt(precioEnBsGuardado);
+        montoActualBs=montoOriginalBs;
+        document.getElementById("montoMostrar").innerHTML=montoOriginalBs.toLocaleString("es-VE")+" Bs";
+    }else{
+        montoOriginalBs=Math.round(precioUSD*TASA);
+        montoActualBs=montoOriginalBs;
+        document.getElementById("montoMostrar").innerHTML=montoOriginalBs.toLocaleString("es-VE")+" Bs";
     }
-    
-    let montoActualBs = precioEnBsOriginal;
-    let descuentoAplicado = false;
-    let descuentoPorcentaje = 0;
-    
-    // Mostrar el monto original
-    const montoDisplay = document.getElementById("montoMostrar");
-    montoDisplay.innerHTML = montoActualBs.toLocaleString("es-VE") + " Bs";
-    
-    // Aplicar descuento (1.5% con código GAMES)
-    window.aplicarDescuento = function() {
-        let codigo = document.getElementById("codigoDescuento").value.trim().toUpperCase();
-        let discountInfo = document.getElementById("discountInfo");
-        
-        if (codigo === "GAMES") {
-            if (!descuentoAplicado) {
-                let descuento = precioEnBsOriginal * 0.015;
-                let nuevoMonto = precioEnBsOriginal - descuento;
-                montoActualBs = Math.round(nuevoMonto);
-                montoDisplay.innerHTML = montoActualBs.toLocaleString("es-VE") + " Bs";
-                descuentoAplicado = true;
-                descuentoPorcentaje = 1.5;
-                discountInfo.innerHTML = `🎉 ¡Código GAMES aplicado! ${descuentoPorcentaje}% de descuento. Total: ${montoActualBs.toLocaleString("es-VE")} Bs`;
-                discountInfo.style.display = "block";
-                mostrarToast(`✅ 1.5% de descuento aplicado. Total: ${montoActualBs.toLocaleString("es-VE")} Bs`);
-            } else {
-                mostrarToast("⚠️ El descuento ya fue aplicado", "error");
-            }
-        } else if (codigo === "") {
-            if (descuentoAplicado) {
-                montoActualBs = precioEnBsOriginal;
-                montoDisplay.innerHTML = montoActualBs.toLocaleString("es-VE") + " Bs";
-                descuentoAplicado = false;
-                discountInfo.style.display = "none";
-                mostrarToast("🔄 Descuento eliminado");
-            }
-        } else {
-            mostrarToast("❌ Código inválido. Prueba con GAMES", "error");
+}
+
+window.aplicarDescuento=function(){
+    let codigo=document.getElementById("codigoDescuento").value.trim().toUpperCase();
+    let discountInfo=document.getElementById("discountInfo");
+    let montoDisplay=document.getElementById("montoMostrar");
+    if(codigo==="GAMES"){
+        if(!descuentoAplicado){
+            let descuento=montoOriginalBs*0.015;
+            let nuevoMonto=montoOriginalBs-descuento;
+            montoActualBs=Math.round(nuevoMonto);
+            montoDisplay.innerHTML=montoActualBs.toLocaleString("es-VE")+" Bs";
+            descuentoAplicado=true;
+            descuentoPorcentaje=1.5;
+            discountInfo.innerHTML=`🎉 Código GAMES aplicado! ${descuentoPorcentaje}% descuento. Total: ${montoActualBs.toLocaleString("es-VE")} Bs`;
+            discountInfo.style.display="block";
+            mostrarToast(`✅ 1.5% descuento aplicado. Total: ${montoActualBs.toLocaleString("es-VE")} Bs`);
+        }else mostrarToast("⚠️ El descuento ya fue aplicado","error");
+    }else if(codigo===""){
+        if(descuentoAplicado){
+            montoActualBs=montoOriginalBs;
+            montoDisplay.innerHTML=montoOriginalBs.toLocaleString("es-VE")+" Bs";
+            descuentoAplicado=false;
+            discountInfo.style.display="none";
+            mostrarToast("🔄 Descuento eliminado");
         }
-    };
-    
-    function copiarTexto(texto, boton) {
-        navigator.clipboard.writeText(texto).then(() => {
-            const textoOriginal = boton.innerText;
-            boton.innerText = "✓";
-            boton.classList.add("copied");
-            mostrarToast("✓ Copiado: " + texto);
-            setTimeout(() => {
-                boton.innerText = textoOriginal;
-                boton.classList.remove("copied");
-            }, 1000);
-        });
-    }
-    
-    function mostrarToast(mensaje, tipo = "success") {
-        const toast = document.createElement("div");
-        toast.className = "copy-toast";
-        toast.innerText = mensaje;
-        if (tipo === "error") toast.style.background = "#ef4444";
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
-    }
-    
-    async function completarPedido() {
-        let referencia = document.getElementById("referencia").value.trim();
-        if(referencia === "") {
-            mostrarToast("❌ Ingresa la referencia", "error");
-            return;
-        }
-        
-        localStorage.setItem('referencia_pago', referencia);
-        localStorage.setItem('fecha_pedido', new Date().toLocaleString());
-        
-        const btn = document.querySelector(".complete-btn");
-        btn.innerText = "⏳ Enviando...";
-        btn.disabled = true;
-        
-        let precioFinalTexto = montoActualBs.toLocaleString("es-VE") + " Bs";
-        if (descuentoAplicado) precioFinalTexto += ` (${descuentoPorcentaje}% descuento)`;
-        
-        await enviarTelegram(producto, precioFinalTexto, jugador, metodo, juego, referencia);
-        await guardarPedidoEnFirebase();
-        
-        btn.innerText = "✅ COMPLETAR PEDIDO";
-        btn.disabled = false;
-        window.location.href = "perfil.html";
-    }
-    
-    async function guardarPedidoEnFirebase() {
-        try {
-            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-            const { getDatabase, ref, push, set } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-            const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
-            
-            const firebaseConfig = {
-                apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-                authDomain: "recargasgames-14c38.firebaseapp.com",
-                databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-                projectId: "recargasgames-14c38",
-                storageBucket: "recargasgames-14c38.firebasestorage.app",
-                messagingSenderId: "370952235234",
-                appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-            };
-            const app = initializeApp(firebaseConfig);
-            const db = getDatabase(app);
-            const auth = getAuth(app);
-            
-            const user = await new Promise((resolve) => {
-                const unsubscribe = auth.onAuthStateChanged((user) => {
-                    unsubscribe();
-                    resolve(user);
-                });
+    }else mostrarToast("❌ Código inválido. Prueba con GAMES","error");
+};
+
+function copiarTexto(texto,boton){
+    navigator.clipboard.writeText(texto).then(()=>{
+        const original=boton.innerText;
+        boton.innerText="✓";
+        boton.classList.add("copied");
+        mostrarToast("✓ Copiado: "+texto);
+        setTimeout(()=>{boton.innerText=original;boton.classList.remove("copied");},1000);
+    });
+}
+
+function mostrarToast(mensaje,tipo="success"){
+    const toast=document.createElement("div");
+    toast.className="copy-toast";
+    toast.innerText=mensaje;
+    if(tipo==="error")toast.style.background="#ef4444";
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),2000);
+}
+
+async function completarPedido(){
+    let referencia=document.getElementById("referencia").value.trim();
+    if(referencia===""){mostrarToast("❌ Ingresa la referencia","error");return;}
+    localStorage.setItem('referencia_pago',referencia);
+    localStorage.setItem('fecha_pedido',new Date().toLocaleString());
+    const btn=document.querySelector(".complete-btn");
+    btn.innerText="⏳ Enviando...";
+    btn.disabled=true;
+    let precioFinalTexto=montoActualBs.toLocaleString("es-VE")+" Bs";
+    if(descuentoAplicado)precioFinalTexto+=` (${descuentoPorcentaje}% descuento)`;
+    await enviarTelegram(producto,precioFinalTexto,idJugador,metodo,juego,referencia);
+    await guardarPedidoEnFirebase();
+    btn.innerText="✅ COMPLETAR PEDIDO";
+    btn.disabled=false;
+    window.location.href="perfil.html";
+}
+
+async function guardarPedidoEnFirebase(){
+    try{
+        const{initializeApp}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+        const{getDatabase,ref,push,set}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+        const{getAuth}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+        const firebaseConfig={apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",authDomain:"recargasgames-14c38.firebaseapp.com",databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",projectId:"recargasgames-14c38",storageBucket:"recargasgames-14c38.firebasestorage.app",messagingSenderId:"370952235234",appId:"1:370952235234:web:41a9ebd7084f1955a256bb"};
+        const app=initializeApp(firebaseConfig);
+        const db=getDatabase(app);
+        const auth=getAuth(app);
+        const user=await new Promise((resolve)=>{const unsubscribe=auth.onAuthStateChanged((u)=>{unsubscribe();resolve(u);});});
+        if(user){
+            const pedidosRef=ref(db,'pedidos');
+            const nuevoPedidoRef=push(pedidosRef);
+            let precioFinalTexto=montoActualBs.toLocaleString("es-VE")+" Bs";
+            if(descuentoAplicado)precioFinalTexto+=` (${descuentoPorcentaje}% descuento)`;
+            await set(nuevoPedidoRef,{
+                userId:user.uid,
+                usuario:user.displayName||user.email,
+                id_jugador:idJugador,
+                nombre_verificado:nombreVerificado,
+                nivel_verificado:nivelVerificado,
+                juego:juego,
+                producto:producto,
+                precio:precioFinalTexto,
+                metodo:metodo,
+                referencia:document.getElementById("referencia").value.trim(),
+                estado:"Pendiente",
+                fecha:new Date().toLocaleString(),
+                timestamp:Date.now(),
+                descuento_aplicado:descuentoAplicado,
+                descuento_porcentaje:descuentoPorcentaje,
+                pase_id:paseId
             });
-            
-            if (user) {
-                const pedidosRef = ref(db, 'pedidos');
-                const nuevoPedidoRef = push(pedidosRef);
-                let precioFinalTexto = montoActualBs.toLocaleString("es-VE") + " Bs";
-                if (descuentoAplicado) precioFinalTexto += ` (${descuentoPorcentaje}% descuento)`;
-                
-                await set(nuevoPedidoRef, {
-                    userId: user.uid,
-                    usuario: user.displayName || user.email,
-                    juego: juego,
-                    producto: producto,
-                    precio: precioFinalTexto,
-                    metodo: metodo,
-                    jugadorId: jugador,
-                    referencia: document.getElementById("referencia").value.trim(),
-                    estado: "Pendiente",
-                    fecha: new Date().toLocaleString(),
-                    timestamp: Date.now(),
-                    descuento_aplicado: descuentoAplicado,
-                    descuento_porcentaje: descuentoPorcentaje,
-                    precio_usd_original: precioUSD,
-                    precio_bs_original: precioEnBsOriginal
-                });
-                console.log("✅ Pedido guardado en Firebase");
-            }
-        } catch (error) { 
-            console.error("Error guardando en Firebase:", error); 
+            console.log("✅ Pedido guardado con nombre:",nombreVerificado);
         }
-    }
-    
-    window.copiarTexto = copiarTexto;
-    window.completarPedido = completarPedido;
+    }catch(e){console.error("Error:",e);}
+}
+
+window.copiarTexto=copiarTexto;
+window.completarPedido=completarPedido;
+cargarTasa();
 </script>
 </body>
 </html>
