@@ -133,49 +133,63 @@ let logueado=false,metodo="PAGO MOVIL",tasa=735,notis=[],uidActual=null;
 let idOk=false,nombreOk="";
 let verificando=false;
 
-// ========== API CORRECTA (la que probaste y funciona) ==========
+// ========== MÚLTIPLES PROXIES DE RESPALDO ==========
 const API_KEY = "ffc_momryhse_nixuxcj9ztm2eoytiytspe";
 const REGION = "br";
+
+// Lista de proxies (si uno falla, intenta con el siguiente)
+const PROXIES = [
+    "https://api.allorigins.win/raw?url=",
+    "https://corsproxy.io/?",
+    "https://cors-anywhere.herokuapp.com/"
+];
+
+let proxyIndex = 0;
 
 async function verificarID(id){
     if(!/^\d{8,12}$/.test(id)){
         return {ok:false, nombre:null, msg:"❌ ID inválido (8-12 dígitos)"};
     }
     
-    try{
-        // Usamos un proxy CORS público gratuito para evitar el bloqueo del navegador
-        const proxy = "https://cors-anywhere.herokuapp.com/";
-        const url = `${proxy}https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${id}&key=${API_KEY}`;
-        
-        console.log("Verificando ID:", id);
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
-        
-        const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        
-        if(response.ok){
-            const data = await response.json();
-            console.log("Respuesta API:", data);
+    const apiUrl = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${id}&key=${API_KEY}`;
+    
+    // Intentar con cada proxy hasta que uno funcione
+    for(let intento = 0; intento < PROXIES.length; intento++){
+        try{
+            const proxy = PROXIES[proxyIndex];
+            const url = proxy + encodeURIComponent(apiUrl);
             
-            if(data.basicInfo && data.basicInfo.nickname){
-                return {
-                    ok: true, 
-                    nombre: data.basicInfo.nickname, 
-                    msg: `✅ ${data.basicInfo.nickname}`
-                };
-            } else {
-                return {ok: false, nombre: null, msg: "❌ ID no encontrado en Free Fire"};
+            console.log(`Intentando con proxy ${proxyIndex + 1}:`, proxy);
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if(response.ok){
+                const data = await response.json();
+                console.log("Respuesta API:", data);
+                
+                if(data.basicInfo && data.basicInfo.nickname){
+                    // Si funciona, guardamos este proxy como el preferido para la próxima
+                    return {
+                        ok: true, 
+                        nombre: data.basicInfo.nickname, 
+                        msg: `✅ ${data.basicInfo.nickname}`
+                    };
+                } else {
+                    return {ok: false, nombre: null, msg: "❌ ID no encontrado en Free Fire"};
+                }
             }
-        } else {
-            return {ok: false, nombre: null, msg: `⚠️ Error ${response.status} - Intenta de nuevo`};
+        } catch(error){
+            console.log(`Proxy ${proxyIndex + 1} falló:`, error.message);
+            // Cambiar al siguiente proxy
+            proxyIndex = (proxyIndex + 1) % PROXIES.length;
         }
-        
-    } catch(error){
-        console.error("Error en verificación:", error);
-        return {ok: false, nombre: null, msg: "⚠️ Error de conexión. Revisa tu internet"};
     }
+    
+    return {ok: false, nombre: null, msg: "⚠️ Error de conexión. Revisa tu internet"};
 }
 
 async function cargarTasa(){
@@ -239,7 +253,6 @@ async function verificarManual(){
     btnVerificar.innerHTML='🔍 Verificar';
 }
 
-// Validar formato mientras escribe
 inputId.addEventListener("input",function(){
     const id=this.value.trim();
     
