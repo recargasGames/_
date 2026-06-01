@@ -133,63 +133,38 @@ let logueado=false,metodo="PAGO MOVIL",tasa=735,notis=[],uidActual=null;
 let idOk=false,nombreOk="";
 let verificando=false;
 
-// ========== MÚLTIPLES PROXIES DE RESPALDO ==========
 const API_KEY = "ffc_momryhse_nixuxcj9ztm2eoytiytspe";
 const REGION = "br";
-
-// Lista de proxies (si uno falla, intenta con el siguiente)
-const PROXIES = [
-    "https://api.allorigins.win/raw?url=",
-    "https://corsproxy.io/?",
-    "https://cors-anywhere.herokuapp.com/"
-];
-
-let proxyIndex = 0;
+const PROXY = "https://api.allorigins.win/raw?url=";
 
 async function verificarID(id){
     if(!/^\d{8,12}$/.test(id)){
         return {ok:false, nombre:null, msg:"❌ ID inválido (8-12 dígitos)"};
     }
     
-    const apiUrl = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${id}&key=${API_KEY}`;
-    
-    // Intentar con cada proxy hasta que uno funcione
-    for(let intento = 0; intento < PROXIES.length; intento++){
-        try{
-            const proxy = PROXIES[proxyIndex];
-            const url = proxy + encodeURIComponent(apiUrl);
-            
-            console.log(`Intentando con proxy ${proxyIndex + 1}:`, proxy);
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
-            
-            const response = await fetch(url, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            
-            if(response.ok){
-                const data = await response.json();
-                console.log("Respuesta API:", data);
-                
-                if(data.basicInfo && data.basicInfo.nickname){
-                    // Si funciona, guardamos este proxy como el preferido para la próxima
-                    return {
-                        ok: true, 
-                        nombre: data.basicInfo.nickname, 
-                        msg: `✅ ${data.basicInfo.nickname}`
-                    };
-                } else {
-                    return {ok: false, nombre: null, msg: "❌ ID no encontrado en Free Fire"};
-                }
+    try{
+        const apiUrl = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${id}&key=${API_KEY}`;
+        const url = PROXY + encodeURIComponent(apiUrl);
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        if(response.ok){
+            const data = await response.json();
+            if(data.basicInfo && data.basicInfo.nickname){
+                return {ok: true, nombre: data.basicInfo.nickname, msg: `✅ ${data.basicInfo.nickname}`};
+            } else {
+                return {ok: false, nombre: null, msg: "❌ ID no encontrado en Free Fire"};
             }
-        } catch(error){
-            console.log(`Proxy ${proxyIndex + 1} falló:`, error.message);
-            // Cambiar al siguiente proxy
-            proxyIndex = (proxyIndex + 1) % PROXIES.length;
+        } else {
+            return {ok: false, nombre: null, msg: `⚠️ Error ${response.status}`};
         }
+    } catch(error){
+        return {ok: false, nombre: null, msg: "⚠️ Error de conexión"};
     }
-    
-    return {ok: false, nombre: null, msg: "⚠️ Error de conexión. Revisa tu internet"};
 }
 
 async function cargarTasa(){
@@ -218,23 +193,14 @@ const btnVerificar=document.getElementById("btnVerificar");
 
 async function verificarManual(){
     const id=inputId.value.trim();
-    
-    if(!id){
-        statusDiv.innerHTML='<div class="status-warning">⚠️ Ingresa un ID primero</div>';
-        return;
-    }
-    
-    if(!/^\d{8,12}$/.test(id)){
-        statusDiv.innerHTML='<div class="status-error">❌ ID inválido (debe tener 8-12 dígitos numéricos)</div>';
-        return;
-    }
-    
+    if(!id){statusDiv.innerHTML='<div class="status-warning">⚠️ Ingresa un ID</div>';return;}
+    if(!/^\d{8,12}$/.test(id)){statusDiv.innerHTML='<div class="status-error">❌ ID inválido (8-12 dígitos)</div>';return;}
     if(verificando) return;
     
     verificando=true;
     btnVerificar.disabled=true;
     btnVerificar.innerHTML='<span class="spinner"></span> Verificando...';
-    statusDiv.innerHTML='<div class="status-info"><span class="spinner"></span> Verificando ID en servidores de Free Fire...</div>';
+    statusDiv.innerHTML='<div class="status-info"><span class="spinner"></span> Verificando ID...</div>';
     
     const resultado = await verificarID(id);
     
@@ -245,7 +211,6 @@ async function verificarManual(){
     }else{
         statusDiv.innerHTML=`<div class="status-error">${resultado.msg}</div>`;
         idOk=false;
-        nombreOk="";
     }
     
     verificando=false;
@@ -255,20 +220,14 @@ async function verificarManual(){
 
 inputId.addEventListener("input",function(){
     const id=this.value.trim();
-    
-    if(id.length===0){
-        statusDiv.innerHTML="";
-        idOk=false;
-        return;
-    }
-    
+    if(id.length===0){statusDiv.innerHTML="";idOk=false;return;}
     if(/^\d{8,12}$/.test(id)){
-        statusDiv.innerHTML='<div class="status-info">✅ Formato correcto. Haz clic en "Verificar" para obtener el nombre del jugador.</div>';
+        statusDiv.innerHTML='<div class="status-info">✅ Formato correcto. Haz clic en "Verificar"</div>';
         idOk=false;
     }else{
-        if(id.length<8) statusDiv.innerHTML=`<div class="status-warning">⚠️ Mínimo 8 dígitos (actual: ${id.length})</div>`;
-        else if(id.length>12) statusDiv.innerHTML=`<div class="status-error">❌ Máximo 12 dígitos (actual: ${id.length})</div>`;
-        else if(!/^\d+$/.test(id)) statusDiv.innerHTML=`<div class="status-error">❌ Solo números permitidos</div>`;
+        if(id.length<8) statusDiv.innerHTML=`<div class="status-warning">⚠️ Mínimo 8 dígitos (${id.length})</div>`;
+        else if(id.length>12) statusDiv.innerHTML=`<div class="status-error">❌ Máximo 12 dígitos (${id.length})</div>`;
+        else if(!/^\d+$/.test(id)) statusDiv.innerHTML=`<div class="status-error">❌ Solo números</div>`;
         idOk=false;
     }
 });
@@ -276,24 +235,11 @@ inputId.addEventListener("input",function(){
 btnVerificar.onclick = verificarManual;
 
 window.comprarProducto=async function(p,pu){
-    if(!logueado){alert("❌ Inicia sesión primero");location.href="login.html";return}
-    
+    if(!logueado){alert("❌ Inicia sesión");location.href="login.html";return}
     let idInput = document.getElementById("jugadorId").value.trim();
-    
-    if(!idInput){
-        alert("❌ Ingresa tu ID de Free Fire");
-        return;
-    }
-    
-    if(!/^\d{8,12}$/.test(idInput)){
-        alert("❌ ID inválido. Debe tener 8-12 dígitos numéricos");
-        return;
-    }
-    
-    if(!idOk){
-        alert("❌ Primero verifica el ID haciendo clic en el botón 'Verificar'");
-        return;
-    }
+    if(!idInput){alert("❌ Ingresa tu ID");return;}
+    if(!/^\d{8,12}$/.test(idInput)){alert("❌ ID inválido");return;}
+    if(!idOk){alert("❌ Verifica el ID primero");return;}
     
     let pe=0;
     document.querySelectorAll('.product-card').forEach(c=>{
@@ -306,7 +252,7 @@ window.comprarProducto=async function(p,pu){
     let diamantes = event.target.dataset.diamantes || 0;
     
     localStorage.setItem('id_jugador', idInput);
-    localStorage.setItem('nombre_verificado', nombreOk || `ID ${idInput}`);
+    localStorage.setItem('nombre_verificado', nombreOk);
     localStorage.setItem('diamantes', diamantes);
     localStorage.setItem('juego_seleccionado','FREE FIRE 🔥');
     localStorage.setItem('producto_seleccionado', p);
