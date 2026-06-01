@@ -1,10 +1,22 @@
+# netlify.toml - Copia esto exactamente
+
+# Configuración de build
 [build]
   publish = "."
 
-[functions]
-  directory = "netlify/functions"
+# Reglas de redirección y proxy
+[[redirects]]
+  from = "/api/ff/*"
+  to = "https://developers.freefirecommunity.com/api/v1/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/api/verify/*"
+  to = "https://wlx-demon-info.vercel.app/:splat"
   status = 200
+  force = true
+
+# Para depuración - ver logs
+[build.environment]
+  NETLIFY_USE_YARN = "false"
