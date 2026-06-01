@@ -133,9 +133,9 @@ let logueado=false,metodo="PAGO MOVIL",tasa=735,notis=[],uidActual=null;
 let idOk=false,nombreOk="";
 let verificando=false;
 
+// ========== API CON PROXY DE NETLIFY ==========
 const API_KEY = "ffc_momryhse_nixuxcj9ztm2eoytiytspe";
 const REGION = "br";
-const PROXY = "https://api.allorigins.win/raw?url=";
 
 async function verificarID(id){
     if(!/^\d{8,12}$/.test(id)){
@@ -143,26 +143,39 @@ async function verificarID(id){
     }
     
     try{
-        const apiUrl = `https://developers.freefirecommunity.com/api/v1/info?region=${REGION}&uid=${id}&key=${API_KEY}`;
-        const url = PROXY + encodeURIComponent(apiUrl);
+        // ✅ Usamos el proxy de Netlify (configurado en netlify.toml)
+        const url = `/api/ff/info?region=${REGION}&uid=${id}&key=${API_KEY}`;
+        
+        console.log("🔍 Verificando ID:", id);
+        console.log("📡 URL:", url);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         
         const response = await fetch(url, { signal: controller.signal });
         clearTimeout(timeoutId);
         
+        console.log("📊 Status HTTP:", response.status);
+        
         if(response.ok){
             const data = await response.json();
+            console.log("✅ Respuesta:", data);
+            
             if(data.basicInfo && data.basicInfo.nickname){
-                return {ok: true, nombre: data.basicInfo.nickname, msg: `✅ ${data.basicInfo.nickname}`};
+                return {
+                    ok: true, 
+                    nombre: data.basicInfo.nickname, 
+                    msg: `✅ ${data.basicInfo.nickname}`
+                };
             } else {
-                return {ok: false, nombre: null, msg: "❌ ID no encontrado en Free Fire"};
+                return {ok: false, nombre: null, msg: "❌ ID no encontrado en LATAM"};
             }
         } else {
             return {ok: false, nombre: null, msg: `⚠️ Error ${response.status}`};
         }
+        
     } catch(error){
+        console.error("❌ Error:", error);
         return {ok: false, nombre: null, msg: "⚠️ Error de conexión"};
     }
 }
@@ -193,14 +206,23 @@ const btnVerificar=document.getElementById("btnVerificar");
 
 async function verificarManual(){
     const id=inputId.value.trim();
-    if(!id){statusDiv.innerHTML='<div class="status-warning">⚠️ Ingresa un ID</div>';return;}
-    if(!/^\d{8,12}$/.test(id)){statusDiv.innerHTML='<div class="status-error">❌ ID inválido (8-12 dígitos)</div>';return;}
+    
+    if(!id){
+        statusDiv.innerHTML='<div class="status-warning">⚠️ Ingresa un ID primero</div>';
+        return;
+    }
+    
+    if(!/^\d{8,12}$/.test(id)){
+        statusDiv.innerHTML='<div class="status-error">❌ ID inválido (debe tener 8-12 dígitos numéricos)</div>';
+        return;
+    }
+    
     if(verificando) return;
     
     verificando=true;
     btnVerificar.disabled=true;
     btnVerificar.innerHTML='<span class="spinner"></span> Verificando...';
-    statusDiv.innerHTML='<div class="status-info"><span class="spinner"></span> Verificando ID...</div>';
+    statusDiv.innerHTML='<div class="status-info"><span class="spinner"></span> Verificando ID en servidores LATAM...</div>';
     
     const resultado = await verificarID(id);
     
@@ -211,6 +233,7 @@ async function verificarManual(){
     }else{
         statusDiv.innerHTML=`<div class="status-error">${resultado.msg}</div>`;
         idOk=false;
+        nombreOk="";
     }
     
     verificando=false;
@@ -220,14 +243,20 @@ async function verificarManual(){
 
 inputId.addEventListener("input",function(){
     const id=this.value.trim();
-    if(id.length===0){statusDiv.innerHTML="";idOk=false;return;}
+    
+    if(id.length===0){
+        statusDiv.innerHTML="";
+        idOk=false;
+        return;
+    }
+    
     if(/^\d{8,12}$/.test(id)){
-        statusDiv.innerHTML='<div class="status-info">✅ Formato correcto. Haz clic en "Verificar"</div>';
+        statusDiv.innerHTML='<div class="status-info">✅ Formato correcto. Haz clic en "Verificar" para obtener el nombre.</div>';
         idOk=false;
     }else{
-        if(id.length<8) statusDiv.innerHTML=`<div class="status-warning">⚠️ Mínimo 8 dígitos (${id.length})</div>`;
-        else if(id.length>12) statusDiv.innerHTML=`<div class="status-error">❌ Máximo 12 dígitos (${id.length})</div>`;
-        else if(!/^\d+$/.test(id)) statusDiv.innerHTML=`<div class="status-error">❌ Solo números</div>`;
+        if(id.length<8) statusDiv.innerHTML=`<div class="status-warning">⚠️ Mínimo 8 dígitos (actual: ${id.length})</div>`;
+        else if(id.length>12) statusDiv.innerHTML=`<div class="status-error">❌ Máximo 12 dígitos (actual: ${id.length})</div>`;
+        else if(!/^\d+$/.test(id)) statusDiv.innerHTML=`<div class="status-error">❌ Solo números permitidos</div>`;
         idOk=false;
     }
 });
@@ -235,11 +264,24 @@ inputId.addEventListener("input",function(){
 btnVerificar.onclick = verificarManual;
 
 window.comprarProducto=async function(p,pu){
-    if(!logueado){alert("❌ Inicia sesión");location.href="login.html";return}
+    if(!logueado){alert("❌ Inicia sesión primero");location.href="login.html";return}
+    
     let idInput = document.getElementById("jugadorId").value.trim();
-    if(!idInput){alert("❌ Ingresa tu ID");return;}
-    if(!/^\d{8,12}$/.test(idInput)){alert("❌ ID inválido");return;}
-    if(!idOk){alert("❌ Verifica el ID primero");return;}
+    
+    if(!idInput){
+        alert("❌ Ingresa tu ID de Free Fire");
+        return;
+    }
+    
+    if(!/^\d{8,12}$/.test(idInput)){
+        alert("❌ ID inválido. Debe tener 8-12 dígitos numéricos");
+        return;
+    }
+    
+    if(!idOk){
+        alert("❌ Primero verifica el ID haciendo clic en el botón 'Verificar'");
+        return;
+    }
     
     let pe=0;
     document.querySelectorAll('.product-card').forEach(c=>{
@@ -252,7 +294,7 @@ window.comprarProducto=async function(p,pu){
     let diamantes = event.target.dataset.diamantes || 0;
     
     localStorage.setItem('id_jugador', idInput);
-    localStorage.setItem('nombre_verificado', nombreOk);
+    localStorage.setItem('nombre_verificado', nombreOk || `ID ${idInput}`);
     localStorage.setItem('diamantes', diamantes);
     localStorage.setItem('juego_seleccionado','FREE FIRE 🔥');
     localStorage.setItem('producto_seleccionado', p);
