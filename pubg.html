@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECARGASGAMES - PUBG Mobile</title>
+<style>
+:root{--color-principal:#10b981;--color-hover:#059669}
+body{background-image:url('fondo.jpg');background-size:cover;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif;margin:0}
+.header{background:rgba(11,18,32,.95);padding:15px 20px;display:flex;justify-content:flex-end;align-items:center;border-bottom:2px solid var(--color-principal)}
+.brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand img{height:35px}
+.brand span{color:var(--color-principal)}
+.header-buttons{display:flex;align-items:center;gap:15px;position:relative}
+.icon-btn{background:rgba(0,0,0,.3);border:none;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:20px;position:relative}
+.icon-btn:hover{background:var(--color-principal)}
+.notification-badge{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.profile-dropdown{position:relative}
+.dropdown-menu{position:absolute;top:50px;right:0;background:#0b1220;border:1px solid #1f2937;border-radius:12px;width:200px;z-index:1000;display:none}
+.dropdown-menu a{display:block;padding:12px 16px;color:#fff;text-decoration:none;font-size:14px}
+.dropdown-menu a:hover{background:var(--color-principal)}
+.dropdown-menu .logout-item{color:#ef4444;border-top:1px solid #1f2937}
+.games-menu{display:flex;gap:8px;overflow-x:auto;background:rgba(11,18,32,.95);padding:12px 15px;border-bottom:1px solid #1f2937}
+.games-menu a{text-decoration:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:14px;font-weight:700;white-space:nowrap}
+.games-menu a:hover,.games-menu a.active{color:var(--color-principal)}
+.main{padding:20px;max-width:600px;margin:0 auto}
+.card-panel{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px}
+.panel-title{font-size:15px;font-weight:700;margin:20px 0 12px;color:var(--color-principal)}
+.form-input{width:100%;height:50px;border-radius:14px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;box-sizing:border-box;font-size:16px}
+.form-input:focus{outline:none;border-color:var(--color-principal)}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.pay-box{background:#111827;border:2px solid #1f2937;border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700}
+.pay-box.active{border-color:var(--color-principal);background:#1e293b}
+.product-card{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px}
+.card-header{display:flex;align-items:center;gap:15px;border-bottom:1px solid #1f2937;padding-bottom:12px;margin-bottom:12px}
+.game-icon{background:#1a2333;padding:8px;border-radius:12px}
+.product-title{font-size:17px;font-weight:700}
+.product-desc{color:#9ca3af;font-size:13px;margin-bottom:12px}
+.product-price{font-size:24px;font-weight:700;color:#22c55e}
+.btn-buy{background:var(--color-principal);color:#fff;border:none;width:100%;height:45px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer}
+.btn-buy:hover{background:var(--color-hover)}
+.section-divider{margin:25px 0 10px;text-align:center}
+.section-divider span{background:var(--color-principal);padding:6px 18px;border-radius:30px;font-size:14px;font-weight:700}
+.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.8);justify-content:center;align-items:center}
+.modal-content{background:#111827;border-radius:20px;max-width:350px;width:90%;border:1px solid var(--color-principal)}
+.modal-header{background:var(--color-principal);padding:15px;display:flex;justify-content:space-between}
+.modal-header h3{color:#fff;margin:0}
+.modal-header .close-modal{background:0 0;border:none;color:#fff;font-size:24px;cursor:pointer}
+.modal-body{padding:20px;max-height:400px;overflow-y:auto}
+.notification-item{padding:12px;border-bottom:1px solid #1f2937;display:flex;align-items:center;gap:12px}
+.notification-icon{font-size:24px}
+.notification-text{flex:1}
+.notification-title{font-weight:700}
+.notification-date{font-size:11px;color:#9ca3af}
+.empty-notifications{text-align:center;color:#9ca3af;padding:30px}
+.whatsapp-float{position:fixed;bottom:20px;right:20px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:28px}
+.back-to-top{position:fixed;bottom:90px;right:20px;background:var(--color-principal);color:#fff;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;visibility:hidden}
+.back-to-top.show{opacity:1;visibility:visible}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.status-success{color:#22c55e}
+.status-error{color:#ef4444}
+.status-warning{color:#f59e0b}
+@media(max-width:500px){.brand{font-size:18px}.icon-btn{width:35px;height:35px;font-size:18px}}
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="brand"><img src="logo.png" alt="Logo"><span>RECARGASGAMES</span></div>
+    <div class="header-buttons">
+        <button class="icon-btn" id="notificacionBtn" onclick="abrirNotificaciones()">🔔<span class="notification-badge" id="notifCount">0</span></button>
+        <div class="profile-dropdown">
+            <button class="icon-btn" id="profileBtn">👤</button>
+            <div class="dropdown-menu" id="profileDropdown">
+                <a href="editar-perfil.html">✏️ Mi Perfil</a>
+                <a href="perfil.html">📋 Mis Pedidos</a>
+                <a href="#" id="logoutDropdownBtn" class="logout-item">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="notificacionModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>🔔 Notificaciones</h3><button class="close-modal" onclick="cerrarNotificaciones()">×</button></div><div class="modal-body" id="notificacionesList"><div class="empty-notifications">No tienes notificaciones</div></div></div></div>
+<div class="games-menu">
+    <a href="index.html">🏠 Inicio</a>
+    <a href="freefire.html">🔥 Free Fire</a>
+    <a href="bloodstrike.html">🪖 Blood Strike</a>
+    <a href="roblox.html">🤖 Roblox</a>
+    <a href="ml.html">👑 MLBB</a>
+    <a href="cod.html">🎮 COD Mobile</a>
+    <a href="pubg.html" class="active">🎮 PUBG Mobile</a>
+</div>
+<div class="main">
+    <div class="card-panel">
+        <div class="panel-title" style="margin-top:0;color:#9ca3af">👤 ID del Jugador</div>
+        <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de PUBG Mobile">
+        <div id="verificacionStatus" style="margin-top:8px"></div>
+    </div>
+    <div class="card-panel"><div class="panel-title" style="margin-top:0;color:#9ca3af">💳 Método de Pago</div><div class="payment-methods"><div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div><div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div></div></div>
+    
+    <!-- ========== UC (Unknown Cash) - Moneda de PUBG ========== -->
+    <div class="section-divider"><span>🎮 UC - PUNTOS PUBG 🎮</span></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎮</div><div class="product-title">60 UC</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="0.99">$0.99</div><button class="btn-buy" data-uc="60" onclick="comprarProducto('60 UC', '0.99')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎮</div><div class="product-title">125 UC</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="1.99">$1.99</div><button class="btn-buy" data-uc="125" onclick="comprarProducto('125 UC', '1.99')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎮</div><div class="product-title">250 UC</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="3.99">$3.99</div><button class="btn-buy" data-uc="250" onclick="comprarProducto('250 UC', '3.99')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎮</div><div class="product-title">500 UC</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="7.99">$7.99</div><button class="btn-buy" data-uc="500" onclick="comprarProducto('500 UC', '7.99')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎮</div><div class="product-title">1000 UC</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="15.99">$15.99</div><button class="btn-buy" data-uc="1000" onclick="comprarProducto('1000 UC', '15.99')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎮</div><div class="product-title">2000 UC</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="31.99">$31.99</div><button class="btn-buy" data-uc="2000" onclick="comprarProducto('2000 UC', '31.99')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">🎮</div><div class="product-title">4000 UC</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="63.99">$63.99</div><button class="btn-buy" data-uc="4000" onclick="comprarProducto('4000 UC', '63.99')">🛍️ Comprar</button></div>
+    
+    <!-- ========== ROYAL PASS (Pase de Batalla) ========== -->
+    <div class="section-divider"><span>👑 ROYAL PASS 👑</span></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">👑</div><div class="product-title">Royal Pass (Normal)</div></div><div class="product-desc">Pase de batalla temporada actual ⚡</div><div class="product-price" data-usd="9.99">$9.99</div><button class="btn-buy" data-uc="0" onclick="comprarProducto('Royal Pass Normal', '9.99')">🛍️ Comprar</button></div>
+    <div class="product-card"><div class="card-header"><div class="game-icon">👑</div><div class="product-title">Royal Pass (Plus)</div></div><div class="product-desc">Pase de batalla + 25 niveles ⚡</div><div class="product-price" data-usd="19.99">$19.99</div><button class="btn-buy" data-uc="0" onclick="comprarProducto('Royal Pass Plus', '19.99')">🛍️ Comprar</button></div>
+</div>
+<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import{getDatabase,ref,get,onValue,update}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const fbConfig={apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",authDomain:"recargasgames-14c38.firebaseapp.com",databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",projectId:"recargasgames-14c38",storageBucket:"recargasgames-14c38.firebasestorage.app",messagingSenderId:"370952235234",appId:"1:370952235234:web:41a9ebd7084f1955a256bb"};
+const app=initializeApp(fbConfig),auth=getAuth(app),db=getDatabase(app);
+let logueado=false,metodo="PAGO MOVIL",tasa=735,notis=[],uidActual=null,idOk=false,nombreOk="";
+
+// ========== API DE PUBG MOBILE ==========
+// API pública de PUBG (https://pubg.op.gg/api)
+// También puedes usar la API oficial de Krafton con tu propia clave
+const PROXY = "https://api.allorigins.win/raw?url=";
+
+async function verificarIdPubg(id){
+    if(!/^\d{8,12}$/.test(id)) return {ok:false, nombre:"", msg:"❌ ID inválido (8-12 dígitos)"};
+    
+    // Verificar cache primero
+    const nombreCache = localStorage.getItem(`pubg_nombre_${id}`);
+    if(nombreCache){
+        return {ok:true, nombre:nombreCache, msg:`✅ ${nombreCache} (cargado)`};
+    }
+    
+    try{
+        // Usamos la API de PUBG Lookup (gratuita, no requiere clave)
+        const url = PROXY + encodeURIComponent(`https://api.pubglookup.com/v1/player/any?playerId=${id}`);
+        const controller = new AbortController();
+        setTimeout(()=>controller.abort(), 5000);
+        const response = await fetch(url, {signal: controller.signal});
+        
+        if(!response.ok) throw new Error();
+        const data = await response.json();
+        
+        if(data && data.name){
+            // Guardar en cache
+            localStorage.setItem(`pubg_nombre_${id}`, data.name);
+            return {ok:true, nombre:data.name, msg:`✅ ${data.name}`};
+        }
+        return {ok:false, nombre:"", msg:"❌ ID no encontrado en PUBG"};
+    }catch(e){
+        // Si falla la API, intentamos con otra (opcional)
+        try{
+            const url2 = PROXY + encodeURIComponent(`https://pubg.op.gg/api/users/${id}`);
+            const response2 = await fetch(url2);
+            const data2 = await response2.json();
+            if(data2 && data2.nickname){
+                localStorage.setItem(`pubg_nombre_${id}`, data2.nickname);
+                return {ok:true, nombre:data2.nickname, msg:`✅ ${data2.nickname}`};
+            }
+        }catch(e2){}
+        return {ok:false, nombre:"", msg:"⚠️ Error - Reintenta", error:true};
+    }
+}
+
+async function cargarTasa(){
+    const s=await get(ref(db,'configuracion/tasa_dolar'));
+    if(s.exists()){tasa=s.val();actualizarPrecios()}
+}
+function actualizarPrecios(){
+    document.querySelectorAll('.product-price').forEach(el=>{
+        let u=parseFloat(el.dataset.usd);
+        if(metodo==="PAGO MOVIL"){
+            let b=Math.round(u*tasa);
+            el.innerText=b.toLocaleString("es-VE")+" Bs";
+        }else{
+            el.innerText=u.toFixed(2)+" USDT";
+        }
+    });
+}
+window.seleccionarPago=function(m,e){
+    document.querySelectorAll('.pay-box').forEach(b=>b.classList.remove('active'));
+    e.classList.add('active');
+    metodo=m;
+    actualizarPrecios();
+};
+
+window.reintentar=async function(){
+    const id=inputId.value.trim();
+    if(id.length<8){statusDiv.innerHTML="";return}
+    statusDiv.innerHTML='<span style="color:#f59e0b"><span class="spinner"></span> Verificando...</span>';
+    const r=await verificarIdPubg(id);
+    if(r.ok){
+        statusDiv.innerHTML=`<span style="color:#22c55e">${r.msg}</span>`;
+        idOk=true;nombreOk=r.nombre;
+    }else{
+        statusDiv.innerHTML=`<span style="color:#ef4444">${r.msg} <button onclick="reintentar()" style="background:#f59e0b;border:none;padding:5px 12px;border-radius:8px;margin-left:10px;cursor:pointer">🔄 Reintentar</button></span>`;
+        idOk=false;
+    }
+};
+
+let timer;const inputId=document.getElementById("jugadorId"),statusDiv=document.getElementById("verificacionStatus");
+inputId.addEventListener("input",function(){
+    clearTimeout(timer);const id=this.value.trim();
+    if(id.length<8){statusDiv.innerHTML="";idOk=false;nombreOk="";return}
+    statusDiv.innerHTML='<span style="color:#f59e0b"><span class="spinner"></span> Verificando...</span>';
+    timer=setTimeout(async()=>{
+        const r=await verificarIdPubg(id);
+        if(r.ok){
+            statusDiv.innerHTML=`<span style="color:#22c55e">${r.msg}</span>`;
+            idOk=true;nombreOk=r.nombre;
+        }else{
+            statusDiv.innerHTML=`<span style="color:#ef4444">${r.msg} <button onclick="reintentar()" style="background:#f59e0b;border:none;padding:5px 12px;border-radius:8px;margin-left:10px;cursor:pointer">🔄 Reintentar</button></span>`;
+            idOk=false;
+        }
+    },300);
+});
+
+window.comprarProducto=async function(p,pu){
+    if(!logueado){alert("❌ Inicia sesión");location.href="login.html";return}
+    let idInput=document.getElementById("jugadorId").value.trim();
+    if(!idInput){alert("❌ Ingresa tu ID de PUBG");return}
+    if(!idOk){alert("❌ Verifica tu ID primero");return}
+    let pe=0;
+    document.querySelectorAll('.product-card').forEach(c=>{
+        if(c.querySelector('.product-title')?.innerText===p){
+            let pr=c.querySelector('.product-price');
+            if(pr&&metodo==="PAGO MOVIL")pe=parseInt(pr.innerText.replace(' Bs','').replace(/\./g,''));
+        }
+    });
+    if(!pe&&metodo==="PAGO MOVIL")pe=Math.round(parseFloat(pu)*tasa);
+    let uc=event.target.dataset.uc||0;
+    localStorage.setItem('id_jugador',idInput);
+    localStorage.setItem('nombre_verificado',nombreOk);
+    localStorage.setItem('uc',uc);
+    localStorage.setItem('juego_seleccionado','PUBG MOBILE 🎮');
+    localStorage.setItem('producto_seleccionado',p);
+    localStorage.setItem('precio_usd',pu);
+    localStorage.setItem('precio_en_bs',pe);
+    localStorage.setItem('metodo_pago',metodo);
+    location.href="pasarela.html";
+};
+
+onAuthStateChanged(auth,u=>logueado=!!u);cargarTasa();window.onload=actualizarPrecios;
+
+function guardarNotis(){localStorage.setItem('notificaciones',JSON.stringify(notis))}
+function actContador(){const nl=notis.filter(n=>!n.leida).length;const b=document.getElementById('notifCount');if(b){b.textContent=nl;b.style.display=nl>0?'flex':'none'}}
+async function marcarLeidas(){if(!uidActual)return;for(const n of notis){if(!n.leida)await update(ref(db,`notificaciones/${uidActual}/${n.id}`),{leida:true})}}
+function cargarNotisFirebase(u){if(!u)return;uidActual=u;onValue(ref(db,`notificaciones/${u}`),s=>{const d=s.val();if(d){let nv=[];for(let id in d)nv.push({id,...d[id]});nv.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));notis=nv;guardarNotis();actContador()}else{notis=[];guardarNotis();actContador()}})}
+window.abrirNotificaciones=async()=>{const modal=document.getElementById('notificacionModal'),lista=document.getElementById('notificacionesList');if(!notis.length){lista.innerHTML='<div class="empty-notifications">No tienes notificaciones</div>'}else{let html='';for(const n of notis){html+=`<div class="notification-item"><div class="notification-icon">${n.titulo?.includes('Completado')?'✅':'🔔'}</div><div class="notification-text"><div class="notification-title">${n.titulo||'Notificación'}</div><div style="font-size:12px">${n.mensaje||''}</div><div class="notification-date">${n.fecha||''}</div></div></div>`;if(n.id)try{await update(ref(db,`notificaciones/${uidActual}/${n.id}`),{leida:true})}catch(e){}n.leida=true}lista.innerHTML=html;guardarNotis();actContador()}modal.style.display='flex'};
+window.cerrarNotificaciones=()=>document.getElementById('notificacionModal').style.display='none';
+const pb=document.getElementById('profileBtn'),pd=document.getElementById('profileDropdown');if(pb){pb.addEventListener('click',e=>{e.stopPropagation();pd.style.display=pd.style.display==='block'?'none':'block'})}document.addEventListener('click',()=>{if(pd)pd.style.display='none'});
+document.getElementById("logoutDropdownBtn")?.addEventListener("click",e=>{e.preventDefault();localStorage.clear();signOut(auth).then(()=>location.href="login.html")});
+window.addEventListener('scroll',()=>{const b=document.getElementById('backToTop');if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show')});
+window.onclick=e=>{const m=document.getElementById('notificacionModal');if(e.target===m)cerrarNotificaciones()};
+onAuthStateChanged(auth,u=>{if(u)cargarNotisFirebase(u.uid)});
+</script>
+</body>
+</html>

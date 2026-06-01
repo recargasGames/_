@@ -1,201 +1,460 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Perfil - RECARGASGAMES</title>
-    <style>
-        body {
-            background-image: url('fondo.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .edit-box {
-            background: rgba(11, 18, 32, 0.95);
-            padding: 35px;
-            border-radius: 24px;
-            border: 1px solid #10b981;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-        h2 { color: #10b981; margin-bottom: 25px; }
-        input {
-            width: 100%;
-            height: 50px;
-            margin: 10px 0;
-            border-radius: 12px;
-            border: 1px solid #1f2937;
-            background: #0b1220;
-            color: white;
-            padding: 15px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            height: 50px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 15px;
-            font-size: 16px;
-            transition: 0.2s;
-        }
-        button:hover { background: #059669; }
-        .back-link {
-            color: #60a5fa;
-            text-decoration: none;
-            display: block;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-        .error-msg, .success-msg {
-            font-size: 13px;
-            margin-top: 10px;
-            display: none;
-        }
-        .error-msg { color: #ef4444; }
-        .success-msg { color: #10b981; }
-        .logo { margin-bottom: 20px; }
-        .logo img { height: 50px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>RECARGASGAMES - Pasarela de Pago</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 100%); 
+        color: #fff; 
+        padding: 20px; 
+        min-height: 100vh;
+    }
+    .container { max-width: 500px; margin: 0 auto; }
+    
+    .header { 
+        text-align: center; 
+        margin-bottom: 30px; 
+        padding: 20px;
+        position: relative;
+    }
+    .header h1 { 
+        font-size: 1.8rem; 
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4); 
+        -webkit-background-clip: text; 
+        background-clip: text; 
+        color: transparent; 
+        font-weight: 800;
+    }
+    .back-btn {
+        position: absolute;
+        top: 20px;
+        left: 10px;
+        background: #4ecdc4;
+        color: #0f172a;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        text-decoration: none;
+    }
+    .back-btn:hover { transform: scale(1.1); }
+    
+    .card {
+        background: rgba(15, 23, 42, 0.95);
+        border-radius: 24px;
+        padding: 25px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .card-title {
+        font-size: 1.3rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #4ecdc4;
+        border-left: 4px solid #4ecdc4;
+        padding-left: 12px;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .info-label { color: #94a3b8; font-size: 0.9rem; }
+    .info-value { font-weight: bold; font-size: 1rem; }
+    .info-value.game { color: #ff6b6b; }
+    .info-value.product { color: #4ecdc4; }
+    .info-value.amount { color: #fbbf24; font-size: 1.2rem; }
+    
+    .bank-card {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border-radius: 20px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid #4ecdc4;
+    }
+    .bank-name {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #4ecdc4;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    .bank-detail {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px dashed rgba(255,255,255,0.1);
+    }
+    .bank-detail:last-child { border-bottom: none; }
+    .bank-label { color: #94a3b8; }
+    .bank-value { font-weight: bold; font-family: monospace; font-size: 1rem; }
+    
+    .copy-btn {
+        background: #4ecdc4;
+        color: #0f172a;
+        border: none;
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.3s;
+    }
+    .copy-btn:hover { background: #2dd4bf; transform: translateY(-2px); }
+    
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-group label {
+        display: block;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid #334155;
+        background: #0a0f1e;
+        color: white;
+        font-size: 0.95rem;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+        outline: none;
+        border-color: #4ecdc4;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(90deg, #4ecdc4, #2dd4bf);
+        color: #0f172a;
+        border: none;
+        width: 100%;
+        padding: 16px;
+        border-radius: 14px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 10px;
+    }
+    .btn-submit:hover { transform: translateY(-2px); opacity: 0.9; }
+    .btn-submit.loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .alert {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid #ef4444;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 20px;
+        color: #ef4444;
+        font-size: 0.85rem;
+        text-align: center;
+    }
+    .alert.success {
+        background: rgba(34, 197, 94, 0.1);
+        border-color: #22c55e;
+        color: #22c55e;
+    }
+    
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #4ecdc4;
+        color: #0f172a;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: bold;
+        z-index: 1000;
+        animation: fadeInUp 0.3s ease;
+    }
+    .toast.error { background: #ef4444; color: white; }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translate(-50%, 20px); }
+        to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #0f172a;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .qr-code {
+        text-align: center;
+        margin: 15px 0;
+        padding: 15px;
+        background: white;
+        border-radius: 16px;
+        display: inline-block;
+        width: 100%;
+    }
+    .qr-code img {
+        max-width: 180px;
+        margin: 0 auto;
+    }
+    
+    footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 0.7rem;
+        color: #64748b;
+    }
+</style>
 </head>
 <body>
-
-<div class="edit-box">
-    <div class="logo"><img src="logo.png" alt="Logo"></div>
-    <h2>✏️ Editar Perfil</h2>
+<div class="container">
+    <div class="header">
+        <a href="freefire.html" class="back-btn">←</a>
+        <h1>💳 PASARELA DE PAGO</h1>
+        <p>Completa tu pedido</p>
+    </div>
     
-    <input type="text" id="nombre" placeholder="Nuevo nombre">
-    <input type="password" id="passwordActual" placeholder="Contraseña actual">
-    <input type="password" id="nuevaPassword" placeholder="Nueva contraseña (opcional)">
-    <input type="password" id="confirmarPassword" placeholder="Confirmar nueva contraseña">
+    <div id="resumenPedido" class="card">
+        <div class="card-title">📋 RESUMEN DEL PEDIDO</div>
+        <div id="detallesPedido"></div>
+    </div>
     
-    <button id="guardarBtn">Guardar Cambios</button>
+    <div class="card">
+        <div class="card-title">🏦 DATOS DE PAGO</div>
+        <div class="bank-card">
+            <div class="bank-name">🏛️ BANCO DE VENEZUELA</div>
+            <div class="bank-detail"><span class="bank-label">Banco:</span><span class="bank-value">0102 - Banco de Venezuela</span></div>
+            <div class="bank-detail"><span class="bank-label">Tipo de Cuenta:</span><span class="bank-value">Corriente</span></div>
+            <div class="bank-detail"><span class="bank-label">Número de Cuenta:</span><span class="bank-value">0102 1234 5678 90123456</span></div>
+            <div class="bank-detail"><span class="bank-label">Cédula / RIF:</span><span class="bank-value">V-32824869</span></div>
+            <div class="bank-detail"><span class="bank-label">Titular:</span><span class="bank-value">[Tu Nombre Aquí]</span></div>
+        </div>
+        
+        <div class="bank-card">
+            <div class="bank-name">📱 PAGO MÓVIL</div>
+            <div class="bank-detail"><span class="bank-label">Teléfono:</span><span class="bank-value">0424-2824241</span></div>
+            <div class="bank-detail"><span class="bank-label">Cédula:</span><span class="bank-value">V-32824869</span></div>
+            <div class="bank-detail"><span class="bank-label">Banco:</span><span class="bank-value">Banco de Venezuela</span></div>
+        </div>
+        
+        <button class="copy-btn" id="btnCopiarTodo">📋 COPIAR DATOS DE PAGO</button>
+    </div>
     
-    <div id="errorMsg" class="error-msg"></div>
-    <div id="successMsg" class="success-msg"></div>
+    <div class="card">
+        <div class="card-title">📝 CONFIRMAR PEDIDO</div>
+        <div id="alertMensaje" class="alert" style="display: none;"></div>
+        
+        <div class="form-group">
+            <label>📱 NÚMERO DE TELÉFONO (WhatsApp)</label>
+            <input type="tel" id="telefono" placeholder="Ej: 04241234567" value="+58424">
+        </div>
+        
+        <div class="form-group">
+            <label>🧾 REFERENCIA DE PAGO / COMPROBANTE</label>
+            <input type="text" id="referencia" placeholder="Ej: BANV-1234567890 o número de referencia">
+        </div>
+        
+        <div class="form-group">
+            <label>📷 LINK DE CAPTURA (opcional - Sube a imgbb.com y pega el link)</label>
+            <input type="text" id="comprobanteUrl" placeholder="https://i.ibb.co/xxx/captura.jpg">
+        </div>
+        
+        <button class="btn-submit" id="btnConfirmar">✅ CONFIRMAR PEDIDO</button>
+    </div>
     
-    <a href="index.html" class="back-link">← Volver al inicio</a>
+    <footer>
+        <p>⚠️ Una vez enviado el comprobante, tu pedido será procesado en menos de 10 minutos</p>
+        <p>📞 Contacto: <a href="https://wa.me/582428242411" style="color:#4ecdc4">0424-2824241</a></p>
+    </footer>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    // Datos recibidos de freefire.html
+    const idJugador = localStorage.getItem('id_jugador');
+    const nombreJugador = localStorage.getItem('nombre_verificado');
+    const diamantes = localStorage.getItem('diamantes');
+    const juego = localStorage.getItem('juego_seleccionado');
+    const producto = localStorage.getItem('producto_seleccionado');
+    const precioUsd = localStorage.getItem('precio_usd');
+    const precioBs = localStorage.getItem('precio_en_bs');
+    const metodoPago = localStorage.getItem('metodo_pago');
     
-    const firebaseConfig = {
-        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-        authDomain: "recargasgames-14c38.firebaseapp.com",
-        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-        projectId: "recargasgames-14c38",
-        storageBucket: "recargasgames-14c38.firebasestorage.app",
-        messagingSenderId: "370952235234",
-        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    // Verificar que hay datos
+    if(!idJugador || !producto) {
+        window.location.href = "freefire.html";
+    }
+    
+    // Mostrar resumen del pedido
+    const detallesDiv = document.getElementById('detallesPedido');
+    detallesDiv.innerHTML = `
+        <div class="info-row"><span class="info-label">🎮 Juego:</span><span class="info-value game">${juego || 'FREE FIRE'}</span></div>
+        <div class="info-row"><span class="info-label">📦 Producto:</span><span class="info-value product">${producto}</span></div>
+        ${nombreJugador ? `<div class="info-row"><span class="info-label">👤 Nombre:</span><span class="info-value">${nombreJugador}</span></div>` : ''}
+        <div class="info-row"><span class="info-label">🆔 ID:</span><span class="info-value">${idJugador}</span></div>
+        <div class="info-row"><span class="info-label">💵 Monto en Bs:</span><span class="info-value amount">${precioBs} Bs</span></div>
+        <div class="info-row"><span class="info-label">💲 Monto en USD:</span><span class="info-value">$${precioUsd} USD</span></div>
+        <div class="info-row"><span class="info-label">💳 Método de Pago:</span><span class="info-value">${metodoPago}</span></div>
+    `;
+    
+    // Mostrar alerta si hay método específico
+    const alertDiv = document.getElementById('alertMensaje');
+    if(metodoPago === 'PAGO MOVIL') {
+        alertDiv.style.display = 'block';
+        alertDiv.className = 'alert success';
+        alertDiv.innerHTML = '💡 Recuerda usar el Pago Móvil exactamente con los datos mostrados arriba';
+    }
+    
+    // Función para mostrar toast
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast' + (isError ? ' error' : '');
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+    
+    // Copiar datos bancarios
+    document.getElementById('btnCopiarTodo').onclick = function() {
+        let texto = '';
+        if(metodoPago === 'PAGO MOVIL') {
+            texto = `📱 PAGO MÓVIL\nTeléfono: 0424-2824241\nCédula: V-32824869\nBanco: Banco de Venezuela\nMonto: ${precioBs} Bs`;
+        } else {
+            texto = `🏦 TRANSFERENCIA BANCARIA\nBanco: 0102 - Banco de Venezuela\nCuenta: 0102 1234 5678 90123456\nCédula: V-32824869\nTitular: [Tu Nombre]\nMonto: ${precioBs} Bs`;
+        }
+        navigator.clipboard.writeText(texto);
+        this.innerText = "✅ COPIADO";
+        setTimeout(() => this.innerText = "📋 COPIAR DATOS DE PAGO", 2000);
+        showToast("📋 Datos copiados");
     };
     
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    
-    const guardarBtn = document.getElementById("guardarBtn");
-    const errorMsg = document.getElementById("errorMsg");
-    const successMsg = document.getElementById("successMsg");
-    
-    let usuarioActual = null;
-    
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            usuarioActual = user;
-            document.getElementById("nombre").placeholder = user.displayName || "Nombre actual";
-        } else {
-            window.location.href = "login.html";
+    // Enviar a Telegram
+    async function enviarTelegram(pedido) {
+        const TELEGRAM_BOT_TOKEN = "8995715863:AAGUVR-U-Gf59EEClR1VXgUqW0XjYc9puFs";
+        const TELEGRAM_CHAT_ID = "1935104549";
+        
+        const nombreTexto = pedido.nombreJugador ? `\n🎮 **Nombre:** ${pedido.nombreJugador}` : "";
+        const comprobanteTexto = pedido.comprobanteUrl ? `\n📷 **Comprobante:** ${pedido.comprobanteUrl}` : "";
+        
+        const mensaje = `
+🛒 **NUEVO PEDIDO** 🛒
+━━━━━━━━━━━━━━━━━━━
+🎮 **Juego:** ${pedido.juego}
+👤 **ID:** ${pedido.idJugador}${nombreTexto}
+📦 **Producto:** ${pedido.producto}
+💰 **Monto:** ${pedido.precioBs} Bs ($${pedido.precioUsd} USD)
+💳 **Método:** ${pedido.metodoPago}
+🧾 **Referencia:** ${pedido.referencia}
+📞 **WhatsApp:** ${pedido.telefono}${comprobanteTexto}
+━━━━━━━━━━━━━━━━━━━
+⏰ ${new Date().toLocaleString()}
+        `;
+        
+        // Botones inline para gestionar el pedido
+        const botones = {
+            inline_keyboard: [
+                [
+                    { text: "✅ Completar Pedido", callback_data: "completar" },
+                    { text: "⏳ Verificando", callback_data: "verificando" }
+                ],
+                [
+                    { text: "❌ Cancelar Pedido", callback_data: "cancelar" },
+                    { text: "📞 Contactar Cliente", callback_data: `contactar_${pedido.telefono}` }
+                ]
+            ]
+        };
+        
+        try {
+            const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: mensaje,
+                    parse_mode: "Markdown",
+                    reply_markup: botones
+                })
+            });
+            
+            const data = await response.json();
+            return data.ok;
+        } catch(error) {
+            console.error("Error al enviar a Telegram:", error);
+            return false;
         }
-    });
+    }
     
-    guardarBtn.addEventListener("click", async () => {
-        errorMsg.style.display = "none";
-        successMsg.style.display = "none";
+    // Confirmar pedido
+    document.getElementById('btnConfirmar').onclick = async function() {
+        const telefono = document.getElementById('telefono').value.trim();
+        const referencia = document.getElementById('referencia').value.trim();
+        const comprobanteUrl = document.getElementById('comprobanteUrl').value.trim();
         
-        const nuevoNombre = document.getElementById("nombre").value.trim();
-        const passwordActual = document.getElementById("passwordActual").value;
-        const nuevaPassword = document.getElementById("nuevaPassword").value;
-        const confirmarPassword = document.getElementById("confirmarPassword").value;
-        
-        if (!passwordActual) {
-            errorMsg.textContent = "❌ Ingresa tu contraseña actual para confirmar los cambios";
-            errorMsg.style.display = "block";
+        if(!telefono) {
+            showToast("❌ Ingresa tu número de teléfono", true);
             return;
         }
         
-        guardarBtn.textContent = "Guardando...";
-        guardarBtn.disabled = true;
-        
-        try {
-            const credential = EmailAuthProvider.credential(usuarioActual.email, passwordActual);
-            await reauthenticateWithCredential(usuarioActual, credential);
-            
-            if (nuevoNombre) {
-                await updateProfile(usuarioActual, { displayName: nuevoNombre });
-                const userRef = ref(db, 'usuarios/' + usuarioActual.uid);
-                await update(userRef, { nombre: nuevoNombre });
-                successMsg.textContent = "✅ Nombre actualizado correctamente\n";
-            }
-            
-            if (nuevaPassword) {
-                if (nuevaPassword !== confirmarPassword) {
-                    errorMsg.textContent = "❌ Las nuevas contraseñas no coinciden";
-                    errorMsg.style.display = "block";
-                    guardarBtn.textContent = "Guardar Cambios";
-                    guardarBtn.disabled = false;
-                    return;
-                }
-                if (nuevaPassword.length < 6) {
-                    errorMsg.textContent = "❌ La nueva contraseña debe tener al menos 6 caracteres";
-                    errorMsg.style.display = "block";
-                    guardarBtn.textContent = "Guardar Cambios";
-                    guardarBtn.disabled = false;
-                    return;
-                }
-                await updatePassword(usuarioActual, nuevaPassword);
-                successMsg.textContent += "✅ Contraseña actualizada correctamente";
-            }
-            
-            if (!nuevoNombre && !nuevaPassword) {
-                successMsg.textContent = "✅ No se realizaron cambios";
-            }
-            
-            successMsg.style.display = "block";
-            
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 2000);
-            
-        } catch (error) {
-            if (error.code === 'auth/wrong-password') {
-                errorMsg.textContent = "❌ Contraseña actual incorrecta";
-            } else {
-                errorMsg.textContent = "❌ Error: " + error.message;
-            }
-            errorMsg.style.display = "block";
-        } finally {
-            guardarBtn.textContent = "Guardar Cambios";
-            guardarBtn.disabled = false;
+        if(!referencia) {
+            showToast("❌ Ingresa la referencia de pago", true);
+            return;
         }
-    });
+        
+        const btn = this;
+        btn.classList.add('loading');
+        btn.innerHTML = '<span class="spinner"></span> ENVIANDO...';
+        
+        const pedido = {
+            idJugador: idJugador,
+            nombreJugador: nombreJugador,
+            juego: juego || 'FREE FIRE',
+            producto: producto,
+            precioUsd: precioUsd,
+            precioBs: precioBs,
+            metodoPago: metodoPago,
+            referencia: referencia,
+            telefono: telefono,
+            comprobanteUrl: comprobanteUrl || 'No adjuntó comprobante'
+        };
+        
+        const enviado = await enviarTelegram(pedido);
+        
+        if(enviado) {
+            showToast("✅ Pedido enviado correctamente. En breve recibirás confirmación.");
+            // Limpiar localStorage (opcional)
+            setTimeout(() => {
+                window.location.href = "freefire.html";
+            }, 3000);
+        } else {
+            showToast("❌ Error al enviar el pedido. Intenta de nuevo", true);
+            btn.classList.remove('loading');
+            btn.innerHTML = '✅ CONFIRMAR PEDIDO';
+        }
+    };
 </script>
-
 </body>
 </html>

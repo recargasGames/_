@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Admin - RECARGASGAMES</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Panel Admin Pro - RECARGASGAMES</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background-image:url('fondo.jpg');background-size:cover;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif}
@@ -29,12 +28,17 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .config-row{display:flex;gap:10px;flex-wrap:wrap}
 .config-input{flex:1;min-width:120px;height:40px;border-radius:10px;background:#111827;color:#fff;padding:8px 12px;border:1px solid #1f2937}
 .config-btn{background:#10b981;color:#fff;border:none;padding:8px 20px;border-radius:10px;cursor:pointer}
+.tabs{display:flex;gap:5px;margin-bottom:15px;flex-wrap:wrap}
+.tab-btn{background:#111827;border:1px solid #1f2937;color:#fff;padding:10px 20px;border-radius:30px;cursor:pointer;font-size:13px;font-weight:700}
+.tab-btn.active{background:#10b981;border-color:#10b981}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
 .filters{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:14px;padding:12px;margin-bottom:15px;display:flex;gap:10px;flex-wrap:wrap}
-.filter-select,.filter-search{background:#111827;border:1px solid #1f2937;color:#fff;padding:8px 12px;border-radius:10px}
+.filter-select,.filter-search{background:#111827;border:1px solid #1f2937;color:#fff;padding:8px 12px;border-radius:10px;font-size:12px}
 .filter-search{flex:1;min-width:150px}
-.refresh-btn{background:#2563eb;color:#fff;border:none;padding:8px 16px;border-radius:10px;cursor:pointer}
+.refresh-btn{background:#2563eb;color:#fff;border:none;padding:8px 16px;border-radius:10px;cursor:pointer;font-size:12px}
 .table-container{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:14px;padding:12px;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:800px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px}
 th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #1f2937}
 th{background:#1f2937;color:#10b981}
 tr:hover{background:rgba(16,185,129,.1)}
@@ -54,6 +58,44 @@ tr:hover{background:rgba(16,185,129,.1)}
 .modal-detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1f2937;font-size:13px}
 .close-modal{background:#10b981;color:#fff;border:none;padding:10px;border-radius:10px;cursor:pointer;margin-top:15px;width:100%}
 .nombre-jugador{color:#10b981;font-weight:700}
+
+/* TOAST PERSONALIZADO - Estilo de la página */
+.toast-personalizado{
+    position:fixed;
+    bottom:30px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#10b981;
+    color:#fff;
+    padding:14px 28px;
+    border-radius:50px;
+    font-size:15px;
+    font-weight:700;
+    z-index:9999;
+    box-shadow:0 4px 15px rgba(0,0,0,.3);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    animation:slideUpFade 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+    border:1px solid rgba(255,255,255,.2);
+}
+.toast-personalizado.error{
+    background:#ef4444;
+}
+.toast-personalizado.warning{
+    background:#f59e0b;
+}
+.toast-icon{
+    font-size:20px;
+}
+@keyframes slideUpFade{
+    from{opacity:0;transform:translateX(-50%) translateY(20px);}
+    to{opacity:1;transform:translateX(-50%) translateY(0);}
+}
+@keyframes fadeOut{
+    to{opacity:0;visibility:hidden;display:none;}
+}
+
 @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)}.filters{flex-direction:column}.filter-search,.filter-select,.refresh-btn{width:100%}}
 </style>
 </head>
@@ -61,7 +103,7 @@ tr:hover{background:rgba(16,185,129,.1)}
 
 <div class="login-admin" id="loginPanel">
     <div class="login-box">
-        <h2>🔐 Acceso Administrador</h2>
+        <h2>🔐 Panel Admin Pro</h2>
         <input type="email" id="adminEmail" placeholder="Correo autorizado" value="aa3964063@gmail.com">
         <input type="password" id="adminPassword" placeholder="Contraseña">
         <button onclick="verificarAcceso()">Ingresar</button>
@@ -71,20 +113,23 @@ tr:hover{background:rgba(16,185,129,.1)}
 
 <div id="adminContent" style="display:none">
     <div class="header">
-        <div class="brand">⚙️ PANEL ADMIN - RECARGASGAMES</div>
+        <div class="brand">⚙️ PANEL ADMIN PRO - RECARGASGAMES</div>
         <div class="admin-actions">
             <button class="admin-btn" onclick="recargarTodo()">🔄 Recargar</button>
             <button class="admin-btn danger" onclick="cerrarSesion()">🚪 Salir</button>
         </div>
     </div>
     <div class="main">
+        <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-number" id="totalPedidos">0</div><div class="stat-label">Total Pedidos</div></div>
             <div class="stat-card"><div class="stat-number" id="totalPendientes">0</div><div class="stat-label">Pendientes</div></div>
             <div class="stat-card"><div class="stat-number" id="totalCompletados">0</div><div class="stat-label">Completados</div></div>
             <div class="stat-card"><div class="stat-number" id="totalGanado">0</div><div class="stat-label">💰 Ganado (Bs)</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalUsuarios">0</div><div class="stat-label">👥 Usuarios</div></div>
         </div>
 
+        <!-- Configuración Tasa -->
         <div class="config-card">
             <h3>💱 Configuración Tasa USDT</h3>
             <div class="config-row">
@@ -94,39 +139,59 @@ tr:hover{background:rgba(16,185,129,.1)}
             </div>
         </div>
 
-        <div class="filters">
-            <select id="filtroEstado" class="filter-select">
-                <option value="todos">Todos</option>
-                <option value="pendiente">Pendientes</option>
-                <option value="completado">Completados</option>
-            </select>
-            <select id="filtroJuego" class="filter-select">
-                <option value="todos">Todos los juegos</option>
-                <option value="FREE FIRE">🔥 Free Fire</option>
-                <option value="BLOOD STRIKE">🪖 Blood Strike</option>
-                <option value="ROBLOX">🤖 Roblox</option>
-                <option value="MOBILE LEGENDS">👑 MLBB</option>
-                <option value="CALL OF DUTY">🎮 COD Mobile</option>
-            </select>
-            <input type="text" id="searchInput" class="filter-search" placeholder="Buscar por ID, nombre o referencia...">
-            <button class="refresh-btn" onclick="recargarPedidos()">🔄 Actualizar</button>
-            <button class="refresh-btn" onclick="exportarPedidos()" style="background:#22c55e">📥 Exportar</button>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="mostrarTab('pedidos')">📦 Pedidos</button>
+            <button class="tab-btn" onclick="mostrarTab('usuarios')">👥 Usuarios Registrados</button>
         </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th><th>ID Jugador</th><th>Nombre</th><th>Juego</th><th>Producto</th><th>Monto</th><th>Referencia</th><th>Estado</th><th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="listaPedidos"><tr><td colspan="9" class="no-pedidos">Cargando...</td></tr>
-            </table>
-            <div class="pagination" id="pagination"></div>
+        <!-- Tab Pedidos -->
+        <div id="tabPedidos" class="tab-pane active">
+            <div class="filters">
+                <select id="filtroEstado" class="filter-select">
+                    <option value="todos">Todos</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="completado">Completados</option>
+                </select>
+                <select id="filtroJuego" class="filter-select">
+                    <option value="todos">Todos los juegos</option>
+                    <option value="FREE FIRE">🔥 Free Fire</option>
+                    <option value="BLOOD STRIKE">🪖 Blood Strike</option>
+                    <option value="ROBLOX">🤖 Roblox</option>
+                    <option value="MOBILE LEGENDS">👑 MLBB</option>
+                    <option value="CALL OF DUTY">🎮 COD Mobile</option>
+                </select>
+                <input type="text" id="searchInput" class="filter-search" placeholder="Buscar por ID, nombre o referencia...">
+                <button class="refresh-btn" onclick="recargarPedidos()">🔄 Actualizar</button>
+                <button class="refresh-btn" onclick="exportarPedidos()" style="background:#22c55e">📥 Exportar</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>#</th><th>ID Jugador</th><th>Nombre</th><th>Juego</th><th>Producto</th><th>Monto</th><th>Ref</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="listaPedidos"><tr><td colspan="9" class="no-pedidos">Cargando...</tbody>
+                追赶
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </div>
+
+        <!-- Tab Usuarios -->
+        <div id="tabUsuarios" class="tab-pane">
+            <div class="filters">
+                <input type="text" id="searchUsuarioInput" class="filter-search" placeholder="Buscar usuario por email o nombre...">
+                <button class="refresh-btn" onclick="cargarUsuarios()">🔄 Actualizar</button>
+            </div>
+            <div class="table-container">
+                <table style="min-width:600px">
+                    <thead><tr><th>#</th><th>Usuario</th><th>Email</th><th>Fecha Registro</th><th>Total Pedidos</th><th>Pendientes</th><th>Completados</th><th>Gastado (Bs)</th><th>Acciones</th></tr></thead>
+                    <tbody id="listaUsuarios"><tr><td colspan="9" class="no-pedidos">Cargando usuarios...</tbody>
+                </table>
+                <div class="pagination" id="paginationUsuarios"></div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Modal detalles -->
 <div id="modalDetalles" class="modal">
     <div class="modal-content"><h3>📋 Detalles del Pedido</h3><div id="modalBody"></div><button class="close-modal" onclick="cerrarModal()">Cerrar</button></div>
 </div>
@@ -134,7 +199,7 @@ tr:hover{background:rgba(16,185,129,.1)}
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import{getDatabase,ref,onValue,update,remove,set,get}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import{getDatabase,ref,onValue,update,remove,set,get,query,orderByChild,equalTo}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig={apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",authDomain:"recargasgames-14c38.firebaseapp.com",databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",projectId:"recargasgames-14c38",storageBucket:"recargasgames-14c38.firebasestorage.app",messagingSenderId:"370952235234",appId:"1:370952235234:web:41a9ebd7084f1955a256bb"};
 const app=initializeApp(firebaseConfig);
@@ -143,29 +208,58 @@ const db=getDatabase(app);
 const ADMIN_EMAIL="aa3964063@gmail.com";
 
 let pedidos=[];
+let usuarios=[];
 let currentPage=1;
+let currentPageUsuarios=1;
 const porPagina=10;
+
+// Función para mostrar toast personalizado (bonito, con estilo de la página)
+function mostrarToast(mensaje, tipo = "success") {
+    const toast = document.createElement("div");
+    toast.className = `toast-personalizado ${tipo}`;
+    
+    let icono = "✅";
+    if (tipo === "error") icono = "❌";
+    if (tipo === "warning") icono = "⚠️";
+    
+    toast.innerHTML = `<span class="toast-icon">${icono}</span> <span>${mensaje}</span>`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast && toast.remove) toast.remove();
+    }, 3000);
+}
+
+window.mostrarTab=(tab)=>{
+    document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(pane=>pane.classList.remove('active'));
+    if(tab==='pedidos'){
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tabPedidos').classList.add('active');
+        renderizarPedidos();
+    }else{
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tabUsuarios').classList.add('active');
+        cargarUsuarios();
+    }
+};
 
 function filtrarPedidos(){
     let filtrados=pedidos;
     const estado=document.getElementById('filtroEstado').value;
     const juego=document.getElementById('filtroJuego').value;
     const busqueda=document.getElementById('searchInput').value.toLowerCase();
-    
     if(estado==='pendiente')filtrados=filtrados.filter(p=>p.estado!=='Completado');
     if(estado==='completado')filtrados=filtrados.filter(p=>p.estado==='Completado');
     if(juego!=='todos')filtrados=filtrados.filter(p=>p.juego?.includes(juego));
     if(busqueda){
-        filtrados=filtrados.filter(p=>
-            (p.id_jugador && p.id_jugador.toLowerCase().includes(busqueda)) ||
-            (p.nombre_verificado && p.nombre_verificado.toLowerCase().includes(busqueda)) ||
-            (p.referencia && p.referencia.toLowerCase().includes(busqueda))
-        );
+        filtrados=filtrados.filter(p=>(p.id_jugador&&p.id_jugador.toLowerCase().includes(busqueda))||(p.nombre_verificado&&p.nombre_verificado.toLowerCase().includes(busqueda)));
     }
     return filtrados;
 }
 
-function actualizarStats(filtrados){
+function actualizarStats(){
+    const filtrados=filtrarPedidos();
     const pendientes=filtrados.filter(p=>p.estado!=='Completado').length;
     const completados=filtrados.filter(p=>p.estado==='Completado').length;
     let ganado=0;
@@ -178,44 +272,99 @@ function actualizarStats(filtrados){
 
 function renderizarPedidos(){
     const filtrados=filtrarPedidos();
-    actualizarStats(pedidos);
+    actualizarStats();
     const totalPages=Math.ceil(filtrados.length/porPagina);
     const start=(currentPage-1)*porPagina;
     const paginados=filtrados.slice(start,start+porPagina);
     const tbody=document.getElementById('listaPedidos');
-    
-    if(paginados.length===0){
-        tbody.innerHTML='<tr><td colspan="9" class="no-pedidos">📭 Sin pedidos</td></tr>';
-        document.getElementById('pagination').innerHTML='';
-        return;
-    }
-    
+    if(paginados.length===0){tbody.innerHTML='<tr><td colspan="9" class="no-pedidos">📭 Sin pedidos</td></tr>';document.getElementById('pagination').innerHTML='';return;}
     let html='';
     paginados.forEach((p,i)=>{
         const badgeClass=p.estado==='Completado'?'badge-completado':'badge-pendiente';
         const nombreMostrar=p.nombre_verificado || p.usuario || 'Anónimo';
-        html+=`<tr>
-            <td>${start+i+1}</td>
-            <td><strong>${p.id_jugador || p.jugadorId || 'N/A'}</strong></td>
-            <td><span class="nombre-jugador">${nombreMostrar}</span></td>
-            <td>${p.juego || 'N/A'}</td>
-            <td>${p.producto || 'N/A'}</td>
-            <td>${p.precio || '0 Bs'}</td>
-            <td>${p.referencia || 'N/A'}</td>
-            <td><span class="badge ${badgeClass}">${p.estado || 'Pendiente'}</span></td>
-            <td>
-                <button class="btn-action btn-view" onclick="verDetalle('${p.id}')">👁️</button>
-                <button class="btn-action btn-complete" onclick="completarPedido('${p.id}')" ${p.estado==='Completado'?'disabled':''}>✅</button>
-                <button class="btn-action btn-delete" onclick="eliminarPedido('${p.id}')">🗑️</button>
-            </td>
-        </tr>`;
+        html+=`<tr><td>${start+i+1}</td><td><strong>${p.id_jugador||p.jugadorId||'N/A'}</strong></td><td><span class="nombre-jugador">${nombreMostrar}</span></td><td>${p.juego||'N/A'}</td><td>${p.producto||'N/A'}</td><td>${p.precio||'0 Bs'}</td><td>${p.referencia||'N/A'}</td><td><span class="badge ${badgeClass}">${p.estado||'Pendiente'}</span></td>
+        <td><button class="btn-action btn-view" onclick="verDetalle('${p.id}')">👁️</button><button class="btn-action btn-complete" onclick="completarPedido('${p.id}')" ${p.estado==='Completado'?'disabled':''}>✅</button><button class="btn-action btn-delete" onclick="eliminarPedido('${p.id}')">🗑️</button></td></tr>`;
     });
     tbody.innerHTML=html;
-    
-    let pages='';
-    for(let i=1;i<=totalPages;i++)pages+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="irPagina(${i})">${i}</button>`;
+    let pages='';for(let i=1;i<=totalPages;i++)pages+=`<button class="page-btn ${i===currentPage?'active':''}" onclick="irPagina(${i})">${i}</button>`;
     document.getElementById('pagination').innerHTML=pages;
 }
+
+async function cargarUsuarios(){
+    const usuariosRef=ref(db,'usuarios');
+    const usuariosSnap=await get(usuariosRef);
+    const pedidosSnap=await get(ref(db,'pedidos'));
+    const stats=new Map();
+    if(pedidosSnap.val()){
+        for(let id in pedidosSnap.val()){
+            const p=pedidosSnap.val()[id];
+            const userId=p.userId;
+            if(userId){
+                if(!stats.has(userId))stats.set(userId,{total:0,pend:0,comp:0,ganado:0});
+                const s=stats.get(userId);
+                s.total++;
+                if(p.estado==='Completado'){s.comp++;s.ganado+=parseFloat((p.precio||'0').replace('Bs',''))||0;}
+                else s.pend++;
+            }
+        }
+    }
+    usuarios=[];
+    if(usuariosSnap.val()){
+        for(let id in usuariosSnap.val()){
+            const u=usuariosSnap.val()[id];
+            const s=stats.get(u.uid)||{total:0,pend:0,comp:0,ganado:0};
+            usuarios.push({uid:u.uid,email:u.email||'N/A',nombre:u.nombre||'N/A',fecha:u.fecha||new Date(u.timestamp).toLocaleString(),...s});
+        }
+    }
+    document.getElementById('totalUsuarios').innerText=usuarios.length;
+    renderizarUsuarios();
+}
+
+function renderizarUsuarios(){
+    let filtrados=usuarios;
+    const busqueda=document.getElementById('searchUsuarioInput')?.value.toLowerCase()||'';
+    if(busqueda)filtrados=filtrados.filter(u=>u.email.toLowerCase().includes(busqueda)||u.nombre.toLowerCase().includes(busqueda));
+    const totalPages=Math.ceil(filtrados.length/porPagina);
+    const start=(currentPageUsuarios-1)*porPagina;
+    const paginados=filtrados.slice(start,start+porPagina);
+    const tbody=document.getElementById('listaUsuarios');
+    if(paginados.length===0){tbody.innerHTML='<tr><td colspan="9" class="no-pedidos">No hay usuarios registrados</td></tr>';document.getElementById('paginationUsuarios').innerHTML='';return;}
+    let html='';
+    paginados.forEach((u,i)=>{
+        html+=`<tr><td>${start+i+1}</td><td><strong>${u.nombre}</strong></td><td>${u.email}</td><td>${u.fecha}</td><td>${u.total}</td><td style="color:#f97316">${u.pend}</td><td style="color:#22c55e">${u.comp}</td><td style="color:#10b981">${u.ganado.toLocaleString('es-VE')} Bs</td>
+        <td><button class="btn-action btn-view" onclick="verUsuario('${u.uid}')">👁️</button></td></tr>`;
+    });
+    tbody.innerHTML=html;
+    let pages='';for(let i=1;i<=totalPages;i++)pages+=`<button class="page-btn ${i===currentPageUsuarios?'active':''}" onclick="irPaginaUsuarios(${i})">${i}</button>`;
+    document.getElementById('paginationUsuarios').innerHTML=pages;
+}window.irPaginaUsuarios=(page)=>{currentPageUsuarios=page;renderizarUsuarios();};
+
+window.verUsuario=async(uid)=>{
+    const pedidosRef=ref(db,'pedidos');
+    const q=query(pedidosRef,orderByChild('userId'),equalTo(uid));
+    const snapshot=await get(q);
+    const userInfo=usuarios.find(u=>u.uid===uid);
+    let pedidosHtml='';
+    if(snapshot.val()){
+        for(let id in snapshot.val()){
+            const p=snapshot.val()[id];
+            const estadoClass=p.estado==='Completado'?'badge-completado':'badge-pendiente';
+            pedidosHtml+=`<div class="modal-detail-row"><strong>${p.juego||'Juego'}</strong> - ${p.producto||'Producto'}: <span class="badge ${estadoClass}">${p.estado||'Pendiente'}</span> - ${p.precio||'0 Bs'}</div>`;
+        }
+    }else{pedidosHtml='<div class="modal-detail-row">No tiene pedidos</div>';}
+    document.getElementById('modalBody').innerHTML=`
+        <div class="modal-detail-row"><strong>Nombre:</strong> ${userInfo?.nombre||'N/A'}</div>
+        <div class="modal-detail-row"><strong>Email:</strong> ${userInfo?.email||'N/A'}</div>
+        <div class="modal-detail-row"><strong>Fecha Registro:</strong> ${userInfo?.fecha||'N/A'}</div>
+        <div class="modal-detail-row"><strong>Total Pedidos:</strong> ${userInfo?.total||0}</div>
+        <div class="modal-detail-row"><strong>Pendientes:</strong> <span style="color:#f97316">${userInfo?.pend||0}</span></div>
+        <div class="modal-detail-row"><strong>Completados:</strong> <span style="color:#22c55e">${userInfo?.comp||0}</span></div>
+        <div class="modal-detail-row"><strong>Gastado:</strong> ${(userInfo?.ganado||0).toLocaleString('es-VE')} Bs</div>
+        <div style="margin-top:15px"><strong>📦 Historial de pedidos:</strong></div>
+        ${pedidosHtml}
+    `;
+    document.getElementById('modalDetalles').style.display='flex';
+};
 
 function cargarPedidos(){
     onValue(ref(db,'pedidos'),(snapshot)=>{
@@ -248,14 +397,17 @@ window.verDetalle=(id)=>{
 window.completarPedido=async(id)=>{
     if(!confirm('¿Marcar como COMPLETADO?'))return;
     await update(ref(db,'pedidos/'+id),{estado:'Completado',fecha_completado:new Date().toLocaleString()});
-    alert('✅ Pedido completado');
+    mostrarToast("✅ Pedido completado con éxito", "success");
     cargarPedidos();
+    cargarUsuarios();
 };
 
 window.eliminarPedido=async(id)=>{
-    if(!confirm('¿Eliminar?'))return;
+    if(!confirm('¿Eliminar permanentemente?'))return;
     await remove(ref(db,'pedidos/'+id));
+    mostrarToast("🗑️ Pedido eliminado", "warning");
     cargarPedidos();
+    cargarUsuarios();
 };
 
 window.recargarPedidos=()=>{currentPage=1;renderizarPedidos();};
@@ -264,10 +416,10 @@ window.cerrarModal=()=>document.getElementById('modalDetalles').style.display='n
 
 window.guardarTasa=async()=>{
     let tasa=document.getElementById('tasaInput').value;
-    if(!tasa)return alert('Ingresa una tasa');
+    if(!tasa)return mostrarToast("❌ Ingresa una tasa válida", "error");
     await set(ref(db,'configuracion/tasa_dolar'),parseFloat(tasa));
     document.getElementById('tasaActual').innerText=tasa;
-    alert('✅ Tasa guardada');
+    mostrarToast("✅ Tasa guardada correctamente", "success");
 };
 
 function cargarTasa(){
@@ -277,21 +429,19 @@ function cargarTasa(){
     });
 }
 
-window.recargarTodo=()=>{cargarPedidos();};
+window.recargarTodo=()=>{cargarPedidos();cargarUsuarios();};
 
 window.exportarPedidos=()=>{
     const filtrados=filtrarPedidos();
-    if(filtrados.length===0)return alert('No hay pedidos');
+    if(filtrados.length===0)return mostrarToast("📭 No hay pedidos para exportar", "warning");
     let csv="ID Jugador,Nombre,Juego,Producto,Monto,Referencia,Fecha,Estado\n";
-    filtrados.forEach(p=>{
-        csv+=`"${p.id_jugador||p.jugadorId||''}","${p.nombre_verificado||p.usuario||''}","${p.juego||''}","${p.producto||''}","${p.precio||''}","${p.referencia||''}","${p.fecha||''}","${p.estado||'Pendiente'}"\n`;
-    });
+    filtrados.forEach(p=>{csv+=`"${p.id_jugador||p.jugadorId||''}","${p.nombre_verificado||p.usuario||''}","${p.juego||''}","${p.producto||''}","${p.precio||''}","${p.referencia||''}","${p.fecha||''}","${p.estado||'Pendiente'}"\n`;});
     const blob=new Blob([csv],{type:'text/csv'});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download=`pedidos_${new Date().toISOString().slice(0,19)}.csv`;
     a.click();
-    alert('✅ Exportado');
+    mostrarToast("✅ Pedidos exportados a Excel", "success");
 };
 
 window.verificarAcceso=async()=>{
@@ -305,6 +455,7 @@ window.verificarAcceso=async()=>{
         document.getElementById("adminContent").style.display="block";
         cargarPedidos();
         cargarTasa();
+        cargarUsuarios();
     }catch(e){errorMsg.textContent="❌ Contraseña incorrecta";errorMsg.style.display="block";}
 };
 
@@ -313,8 +464,9 @@ window.cerrarSesion=()=>{signOut(auth);document.getElementById("loginPanel").sty
 document.getElementById('filtroEstado')?.addEventListener('change',()=>{currentPage=1;renderizarPedidos();});
 document.getElementById('filtroJuego')?.addEventListener('change',()=>{currentPage=1;renderizarPedidos();});
 document.getElementById('searchInput')?.addEventListener('keyup',()=>{currentPage=1;renderizarPedidos();});
+document.getElementById('searchUsuarioInput')?.addEventListener('keyup',()=>{currentPageUsuarios=1;renderizarUsuarios();});
 
-onAuthStateChanged(auth,(user)=>{if(user&&user.email===ADMIN_EMAIL){document.getElementById("loginPanel").style.display="none";document.getElementById("adminContent").style.display="block";cargarPedidos();cargarTasa();}});
+onAuthStateChanged(auth,(user)=>{if(user&&user.email===ADMIN_EMAIL){document.getElementById("loginPanel").style.display="none";document.getElementById("adminContent").style.display="block";cargarPedidos();cargarTasa();cargarUsuarios();}});
 </script>
 </body>
 </html>
