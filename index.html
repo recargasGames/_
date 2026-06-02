@@ -149,7 +149,9 @@
 </div>
 
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
-<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a><script type="module">
+<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -182,7 +184,6 @@
             badge.textContent = noLeidas; 
             badge.style.display = noLeidas > 0 ? 'flex' : 'none'; 
         }
-        console.log("Notificaciones no leídas:", noLeidas);
     }
     
     function mostrarToast(mensaje) {
@@ -202,7 +203,6 @@
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
-    
     async function marcarTodasComoLeidas() {
         if (!userIdActual) return;
         try {
@@ -212,10 +212,7 @@
                     await update(notifRef, { leida: true });
                 }
             }
-            console.log("Todas las notificaciones marcadas como leídas");
-        } catch (error) {
-            console.error("Error:", error);
-        }
+        } catch (error) { console.error("Error:", error); }
     }
     
     function cargarNotificacionesFirebase(userId) {
@@ -270,11 +267,11 @@
             let html = '';
             for (const notif of notificaciones) {
                 html += `<div class="notification-item">
-                            <div class="notification-icon">${notif.titulo.includes('Completado') ? '✅' : '🔔'}</div>
+                            <div class="notification-icon">${notif.titulo && notif.titulo.includes('Completado') ? '✅' : '🔔'}</div>
                             <div class="notification-text">
-                                <div class="notification-title">${notif.titulo}</div>
-                                <div style="font-size:12px;">${notif.mensaje}</div>
-                                <div class="notification-date">${notif.fecha}</div>
+                                <div class="notification-title">${notif.titulo || 'Notificación'}</div>
+                                <div style="font-size:12px;">${notif.mensaje || ''}</div>
+                                <div class="notification-date">${notif.fecha || ''}</div>
                             </div>
                         </div>`;
             }
@@ -298,22 +295,57 @@
     const profileBtn = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
     if (profileBtn) {
-        profileBtn.addEventListener('click', (e) => { e.stopPropagation(); profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block'; });
+        profileBtn.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block'; 
+        });
     }
-    document.addEventListener('click', () => { if (profileDropdown) profileDropdown.style.display = 'none'; });
-    
-    document.getElementById("logoutDropdownBtn")?.addEventListener("click", (e) => {
-        e.preventDefault(); localStorage.clear(); window.location.href = "login.html";
+    document.addEventListener('click', () => { 
+        if (profileDropdown) profileDropdown.style.display = 'none'; 
     });
     
+    // ========== CIERRE DE SESIÓN CORREGIDO ==========
+    document.getElementById("logoutDropdownBtn")?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        
+        // Limpiar localStorage y sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Cerrar sesión en Firebase
+        try {
+            await signOut(auth);
+            console.log("✅ Sesión cerrada correctamente");
+        } catch(error) {
+            console.error("Error al cerrar sesión:", error);
+        }
+        
+        // Redirigir a la página principal
+        window.location.replace("index.html");
+    });
+    
+    window.addEventListener('scroll', function() { 
+        const backToTop = document.getElementById('backToTop'); 
+        if (window.scrollY > 300) backToTop.classList.add('show'); 
+        else backToTop.classList.remove('show'); 
+    });
+    
+    window.onclick = function(event) { 
+        const modal = document.getElementById('notificacionModal'); 
+        if (event.target === modal) cerrarNotificaciones(); 
+    };
+    
+    // ========== onAuthStateChanged MODIFICADO ==========
+    // Ya no redirige a login.html si no está logueado
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            console.log("✅ Usuario logueado:", user.email);
             cargarNotificacionesFirebase(user.uid);
+        } else {
+            console.log("❌ Usuario NO logueado - Puede navegar sin problema");
+            // No redirigimos a login, permitimos navegar
         }
     });
-    
-    window.addEventListener('scroll', function() { const backToTop = document.getElementById('backToTop'); if (window.scrollY > 300) backToTop.classList.add('show'); else backToTop.classList.remove('show'); });
-    window.onclick = function(event) { const modal = document.getElementById('notificacionModal'); if (event.target === modal) cerrarNotificaciones(); };
 </script>
 </body>
 </html>
