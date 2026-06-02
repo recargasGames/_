@@ -28,10 +28,7 @@
             backdrop-filter: blur(10px);
         }
         h2 { color: #dc2626; margin-bottom: 20px; }
-        
-        .input-group {
-            margin: 12px 0;
-        }
+        .input-group { margin: 12px 0; }
         input { 
             width: 100%; 
             height: 48px; 
@@ -44,11 +41,7 @@
             font-size: 14px; 
             text-align: center;
         }
-        input:focus { 
-            outline: none; 
-            border-color: #dc2626; 
-        }
-        
+        input:focus { outline: none; border-color: #dc2626; }
         button { 
             width: 100%; 
             height: 48px; 
@@ -63,33 +56,19 @@
             transition: 0.2s;
         }
         button:hover { background: #b91c1c; }
-        
-        a { 
-            color: #60a5fa; 
-            text-decoration: none; 
-            display: block; 
-            margin-top: 15px; 
-            font-size: 14px; 
-        }
+        a { color: #60a5fa; text-decoration: none; display: block; margin-top: 15px; font-size: 14px; }
         a:hover { text-decoration: underline; }
-        
-        .error-msg { 
-            color: #ef4444; 
-            font-size: 13px; 
-            margin-top: 10px; 
-            display: none; 
-        }
-        
+        .error-msg { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; }
         .logo { margin-bottom: 20px; }
         .logo img { height: 50px; width: auto; }
+        .info-text { font-size: 11px; color: #64748b; margin-top: 10px; text-align: center; }
+        .info-text a { color: #10b981; display: inline; margin: 0; }
     </style>
 </head>
 <body>
 
 <div class="register-box">
-    <div class="logo">
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-    </div>
+    <div class="logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
     <h2>📝 Crear Cuenta</h2>
     
     <form id="registerForm">
@@ -99,6 +78,10 @@
         
         <div class="input-group">
             <input type="email" id="email" placeholder="Correo electrónico" autocomplete="email" required>
+        </div>
+        
+        <div class="input-group">
+            <input type="tel" id="telefono" placeholder="WhatsApp (ej: 04241234567)" autocomplete="tel">
         </div>
         
         <div class="input-group">
@@ -115,9 +98,102 @@
     <div id="errorMsg" class="error-msg"></div>
     
     <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
+    <div class="info-text">💡 Agrega tu WhatsApp para recibir notificaciones de tus pedidos</div>
 </div>
 
-<script type="module" src="register.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const form = document.getElementById("registerForm");
+    const errorMsg = document.getElementById("errorMsg");
+
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const nombre = document.getElementById("nombre").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const telefono = document.getElementById("telefono").value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword = document.getElementById("confirmPassword").value;
+            
+            errorMsg.style.display = "none";
+            
+            if (!nombre || !email || !password || !confirmPassword) {
+                errorMsg.textContent = "❌ Completa todos los campos obligatorios";
+                errorMsg.style.display = "block";
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                errorMsg.textContent = "❌ Las contraseñas no coinciden";
+                errorMsg.style.display = "block";
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorMsg.textContent = "❌ La contraseña debe tener al menos 6 caracteres";
+                errorMsg.style.display = "block";
+                return;
+            }
+            
+            const btn = document.querySelector("button[type='submit']");
+            btn.textContent = "Registrando...";
+            btn.disabled = true;
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                await updateProfile(user, { displayName: nombre });
+                
+                // Guardar usuario en Realtime Database con teléfono y chatId (pendiente)
+                const userRef = ref(db, 'usuarios/' + user.uid);
+                await set(userRef, {
+                    uid: user.uid,
+                    email: email,
+                    nombre: nombre,
+                    telefono: telefono || '',
+                    chatId: null, // Se actualizará cuando el usuario inicie sesión o envíe un mensaje al bot
+                    fecha: new Date().toLocaleString(),
+                    timestamp: Date.now()
+                });
+                
+                alert("✅ Cuenta creada exitosamente");
+                window.location.href = "login.html";
+                
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg.textContent = "❌ Este correo ya está registrado";
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg.textContent = "❌ Contraseña demasiado débil";
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg.textContent = "❌ Correo electrónico inválido";
+                } else {
+                    errorMsg.textContent = "❌ Error: " + error.message;
+                }
+                errorMsg.style.display = "block";
+                btn.textContent = "Registrarme";
+                btn.disabled = false;
+            }
+        });
+    }
+</script>
 </body>
 </html>

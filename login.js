@@ -1,7 +1,22 @@
-import { auth } from "./firebase.js";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, update, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// Login
+const firebaseConfig = {
+    apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+    authDomain: "recargasgames-14c38.firebaseapp.com",
+    databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+    projectId: "recargasgames-14c38",
+    storageBucket: "recargasgames-14c38.firebasestorage.app",
+    messagingSenderId: "370952235234",
+    appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// ========== LOGIN ==========
 const loginBtn = document.getElementById("loginBtn");
 const errorMsg = document.getElementById("errorMsg");
 
@@ -23,7 +38,19 @@ if (loginBtn) {
         loginBtn.disabled = true;
         
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            
+            // Actualizar última conexión en la base de datos
+            const userRef = ref(db, 'usuarios/' + user.uid);
+            const snapshot = await get(userRef);
+            if(snapshot.exists()){
+                await update(userRef, {
+                    ultima_conexion: new Date().toLocaleString(),
+                    ultimo_login: Date.now()
+                });
+            }
+            
             window.location.href = "perfil.html";
         } catch (error) {
             if (error.code === 'auth/invalid-credential') {
@@ -32,6 +59,8 @@ if (loginBtn) {
                 errorMsg.textContent = "❌ Usuario no encontrado. Regístrate primero";
             } else if (error.code === 'auth/too-many-requests') {
                 errorMsg.textContent = "❌ Demasiados intentos. Intenta más tarde";
+            } else if (error.code === 'auth/invalid-email') {
+                errorMsg.textContent = "❌ Correo electrónico inválido";
             } else {
                 errorMsg.textContent = "❌ Error: " + error.message;
             }
@@ -47,7 +76,7 @@ if (loginBtn) {
     });
 }
 
-// Recuperar contraseña
+// ========== RECUPERAR CONTRASEÑA ==========
 window.abrirModalRecuperar = () => {
     document.getElementById("modalRecuperar").style.display = "flex";
     document.getElementById("resetEmail").value = "";
@@ -111,3 +140,11 @@ window.onclick = (event) => {
     const modal = document.getElementById("modalRecuperar");
     if (event.target === modal) cerrarModalRecuperar();
 };
+
+// ========== VERIFICAR SESIÓN ACTIVA ==========
+onAuthStateChanged(auth, (user) => {
+    if (user && window.location.pathname.includes("login.html")) {
+        // Si ya está logueado y está en login, redirigir a perfil
+        window.location.href = "perfil.html";
+    }
+});
