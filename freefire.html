@@ -2,75 +2,93 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>RECARGASGAMES - Free Fire</title>
 <style>
-:root{--color-principal:#10b981;--color-hover:#059669}
-body{background-image:url('fondo.jpg');background-size:cover;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif;margin:0}
-.header{background:rgba(11,18,32,.95);padding:15px 20px;display:flex;justify-content:flex-end;align-items:center;border-bottom:2px solid var(--color-principal)}
-.brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;margin-right:auto}
-.brand img{height:35px}
-.brand span{color:var(--color-principal)}
-.header-buttons{display:flex;align-items:center;gap:15px;position:relative}
-.icon-btn{background:rgba(0,0,0,.3);border:none;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:20px;position:relative}
-.icon-btn:hover{background:var(--color-principal)}
-.notification-badge{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.profile-dropdown{position:relative}
-.dropdown-menu{position:absolute;top:50px;right:0;background:#0b1220;border:1px solid #1f2937;border-radius:12px;width:200px;z-index:1000;display:none}
-.dropdown-menu a{display:block;padding:12px 16px;color:#fff;text-decoration:none;font-size:14px}
-.dropdown-menu a:hover{background:var(--color-principal)}
-.dropdown-menu .logout-item{color:#ef4444;border-top:1px solid #1f2937}
-.games-menu{display:flex;gap:8px;overflow-x:auto;background:rgba(11,18,32,.95);padding:12px 15px;border-bottom:1px solid #1f2937}
-.games-menu a{text-decoration:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:14px;font-weight:700;white-space:nowrap}
-.games-menu a:hover,.games-menu a.active{color:var(--color-principal)}
-.main{padding:20px;max-width:600px;margin:0 auto}
-.card-panel{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px}
-.panel-title{font-size:15px;font-weight:700;margin:20px 0 12px;color:var(--color-principal)}
-.form-input{width:100%;height:50px;border-radius:14px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;box-sizing:border-box;font-size:16px}
-.form-input:focus{outline:none;border-color:var(--color-principal)}
-.id-container{display:flex;gap:10px;align-items:center}
-.id-container .form-input{flex:1}
-.btn-verify{background:rgba(16,185,129,0.2);border:1px solid var(--color-principal);color:var(--color-principal);border-radius:14px;padding:0 20px;height:50px;font-weight:700;cursor:pointer;font-size:14px}
-.btn-verify:hover{background:var(--color-principal);color:#fff}
-.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.pay-box{background:#111827;border:2px solid #1f2937;border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700}
-.pay-box.active{border-color:var(--color-principal);background:#1e293b}
-.product-card{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px}
-.card-header{display:flex;align-items:center;gap:15px;border-bottom:1px solid #1f2937;padding-bottom:12px;margin-bottom:12px}
-.game-icon{background:#1a2333;padding:8px;border-radius:12px}
-.product-title{font-size:17px;font-weight:700}
-.product-desc{color:#9ca3af;font-size:13px;margin-bottom:12px}
-.product-price{font-size:24px;font-weight:700;color:#22c55e}
-.btn-buy{background:var(--color-principal);color:#fff;border:none;width:100%;height:45px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer}
-.btn-buy:hover{background:var(--color-hover)}
-.section-divider{margin:25px 0 10px;text-align:center}
-.section-divider span{background:var(--color-principal);padding:6px 18px;border-radius:30px;font-size:14px;font-weight:700}
-.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.8);justify-content:center;align-items:center}
-.modal-content{background:#111827;border-radius:20px;max-width:350px;width:90%;border:1px solid var(--color-principal)}
-.modal-header{background:var(--color-principal);padding:15px;display:flex;justify-content:space-between}
-.modal-header h3{color:#fff;margin:0}
-.modal-header .close-modal{background:0 0;border:none;color:#fff;font-size:24px;cursor:pointer}
-.modal-body{padding:20px;max-height:400px;overflow-y:auto}
-.notification-item{padding:12px;border-bottom:1px solid #1f2937;display:flex;align-items:center;gap:12px}
-.notification-icon{font-size:24px}
-.notification-text{flex:1}
-.notification-title{font-weight:700}
-.notification-date{font-size:11px;color:#9ca3af}
-.empty-notifications{text-align:center;color:#9ca3af;padding:30px}
-.whatsapp-float{position:fixed;bottom:20px;right:20px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:28px}
-.back-to-top{position:fixed;bottom:90px;right:20px;background:var(--color-principal);color:#fff;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;visibility:hidden}
-.back-to-top.show{opacity:1;visibility:visible}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360)}}
-.status-success{color:#22c55e;background:rgba(34,197,94,0.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
-.status-error{color:#ef4444;background:rgba(239,68,68,0.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
-.status-warning{color:#f59e0b;background:rgba(245,158,11,0.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
-.status-info{color:#60a5fa;background:rgba(96,165,250,0.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
-.btn-buy:disabled{opacity:0.5;cursor:not-allowed}
-@media(max-width:500px){.brand{font-size:18px}.icon-btn{width:35px;height:35px;font-size:18px}}
+    :root { --color-principal: #10b981; --color-hover: #059669; }
+    body { background-image: url('fondo.jpg'); background-size: cover; background-position: center; background-attachment: fixed; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+    
+    .header { background: rgba(11, 18, 32, 0.95); padding: 15px 20px; display: flex; justify-content: flex-end; align-items: center; border-bottom: 2px solid var(--color-principal); }
+    .brand { font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-right: auto; }
+    .brand img { height: 35px; width: auto; }
+    .brand span { color: var(--color-principal); }
+    
+    .header-buttons { display: flex; align-items: center; gap: 15px; position: relative; }
+    .icon-btn { background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; color: white; font-size: 20px; position: relative; }
+    .icon-btn:hover { background: var(--color-principal); transform: scale(1.05); }
+    .notification-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    
+    .profile-dropdown { position: relative; }
+    .dropdown-menu { position: absolute; top: 50px; right: 0; background: #0b1220; border: 1px solid #1f2937; border-radius: 12px; width: 200px; z-index: 1000; display: none; overflow: hidden; }
+    .dropdown-menu a { display: block; padding: 12px 16px; color: white; text-decoration: none; transition: 0.2s; font-size: 14px; }
+    .dropdown-menu a:hover { background: var(--color-principal); }
+    .dropdown-menu .logout-item { color: #ef4444; border-top: 1px solid #1f2937; }
+    .dropdown-menu .logout-item:hover { background: #ef4444; color: white; }
+    
+    .games-menu { display: flex; gap: 8px; overflow-x: auto; background: rgba(11, 18, 32, 0.95); padding: 12px 15px; border-bottom: 1px solid #1f2937; scrollbar-width: thin; }
+    .games-menu a { text-decoration: none; color: white; background: transparent; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; white-space: nowrap; transition: 0.2s; }
+    .games-menu a:hover { color: var(--color-principal); }
+    .games-menu a.active { color: var(--color-principal); border-bottom: 2px solid var(--color-principal); border-radius: 0; }
+    
+    .main { padding: 20px; max-width: 600px; margin: 0 auto; }
+    
+    .card-panel { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 18px; margin-bottom: 20px; backdrop-filter: blur(5px); }
+    .panel-title { font-size: 15px; font-weight: bold; margin-bottom: 12px; color: var(--color-principal); }
+    
+    .form-input { width: 100%; height: 50px; border: none; border-radius: 14px; background: #111827; color: white; padding: 12px; font-size: 15px; box-sizing: border-box; border: 1px solid #1f2937; }
+    .form-input:focus { outline: none; border-color: var(--color-principal); }
+    
+    .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .pay-box { background: #111827; border: 2px solid #1f2937; border-radius: 16px; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+    .pay-box.active { border-color: var(--color-principal); background: #1e293b; }
+    
+    .product-card { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 18px; margin-bottom: 20px; transition: 0.3s; }
+    .product-card:hover { transform: translateY(-3px); border-color: var(--color-principal); }
+    .card-header { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #1f2937; padding-bottom: 12px; margin-bottom: 12px; }
+    .game-icon { background: #1a2333; padding: 8px; border-radius: 12px; font-size: 18px; }
+    .product-title { font-size: 17px; font-weight: bold; }
+    .product-desc { color: #9ca3af; font-size: 13px; margin-bottom: 12px; }
+    .product-price { font-size: 24px; font-weight: bold; color: #22c55e; }
+    .btn-buy { background: var(--color-principal); color: white; border: none; width: 100%; height: 45px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-buy:hover { background: var(--color-hover); }
+    
+    .section-divider { margin: 25px 0 10px 0; text-align: center; }
+    .section-divider span { background: var(--color-principal); padding: 6px 18px; border-radius: 30px; font-size: 14px; font-weight: bold; }
+    
+    .verificacion-status { margin-top: 10px; font-size: 13px; }
+    .status-success { color: #22c55e; background: rgba(34,197,94,0.1); padding: 8px; border-radius: 10px; text-align: center; }
+    .status-error { color: #ef4444; background: rgba(239,68,68,0.1); padding: 8px; border-radius: 10px; text-align: center; }
+    .status-warning { color: #f59e0b; background: rgba(245,158,11,0.1); padding: 8px; border-radius: 10px; text-align: center; }
+    .status-info { color: #60a5fa; background: rgba(96,165,250,0.1); padding: 8px; border-radius: 10px; text-align: center; }
+    .status-verificando { color: #10b981; background: rgba(16,185,129,0.1); padding: 8px; border-radius: 10px; text-align: center; }
+    
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+    .modal-content { background: #111827; border-radius: 20px; max-width: 350px; width: 90%; border: 1px solid var(--color-principal); overflow: hidden; }
+    .modal-header { background: var(--color-principal); padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { color: white; margin: 0; }
+    .modal-header .close-modal { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+    .modal-body { padding: 20px; max-height: 400px; overflow-y: auto; }
+    .notification-item { padding: 12px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; gap: 12px; }
+    .notification-icon { font-size: 24px; }
+    .notification-text { flex: 1; }
+    .notification-title { font-weight: bold; margin-bottom: 4px; }
+    .notification-date { font-size: 11px; color: #9ca3af; }
+    .empty-notifications { text-align: center; color: #9ca3af; padding: 30px; }
+    
+    .whatsapp-float { position: fixed; bottom: 20px; right: 20px; background: #25D366; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; font-size: 28px; transition: 0.2s; }
+    .whatsapp-float:hover { transform: scale(1.1); }
+    
+    .back-to-top { position: fixed; bottom: 90px; right: 20px; background: var(--color-principal); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; }
+    .back-to-top.show { opacity: 1; visibility: visible; }
+    
+    @media (max-width: 500px) { .brand { font-size: 18px; } .icon-btn { width: 35px; height: 35px; font-size: 18px; } }
 </style>
 </head>
 <body>
+
 <div class="header">
     <div class="brand"><img src="logo.png" alt="Logo"><span>RECARGASGAMES</span></div>
     <div class="header-buttons">
@@ -85,7 +103,14 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
         </div>
     </div>
 </div>
-<div id="notificacionModal" class="modal"><div class="modal-content"><div class="modal-header"><h3>🔔 Notificaciones</h3><button class="close-modal" onclick="cerrarNotificaciones()">×</button></div><div class="modal-body" id="notificacionesList"><div class="empty-notifications">No tienes notificaciones</div></div></div></div>
+
+<div id="notificacionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h3>🔔 Notificaciones</h3><button class="close-modal" onclick="cerrarNotificaciones()">×</button></div>
+        <div class="modal-body" id="notificacionesList"><div class="empty-notifications">No tienes notificaciones</div></div>
+    </div>
+</div>
+
 <div class="games-menu">
     <a href="index.html">🏠 Inicio</a>
     <a href="freefire.html" class="active">🔥 Free Fire</a>
@@ -93,19 +118,26 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
     <a href="roblox.html">🤖 Roblox</a>
     <a href="ml.html">👑 MLBB</a>
     <a href="cod.html">🎮 COD Mobile</a>
+    <a href="pubg.html">🎮 PUBG Mobile</a>
 </div>
+
 <div class="main">
     <div class="card-panel">
-        <div class="panel-title" style="margin-top:0;color:#9ca3af">👤 ID del Jugador</div>
-        <div class="id-container">
-            <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
-            <button class="btn-verify" id="btnVerificar">🔍 Verificar</button>
-        </div>
-        <div id="verificacionStatus" style="margin-top:8px"></div>
+        <div class="panel-title" style="margin-top:0; color:#9ca3af;">👤 ID del Jugador</div>
+        <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
+        <div id="verificacionStatus" class="verificacion-status"></div>
     </div>
-    <div class="card-panel"><div class="panel-title" style="margin-top:0;color:#9ca3af">💳 Método de Pago</div><div class="payment-methods"><div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div><div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div></div></div>
     
+    <div class="card-panel">
+        <div class="panel-title" style="margin-top:0; color:#9ca3af;">💳 Método de Pago</div>
+        <div class="payment-methods">
+            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">💵 PAGO MOVIL</div>
+            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🔶 BINANCE</div>
+        </div>
+    </div>
+
     <div class="section-divider"><span>💎 DIAMANTES 💎</span></div>
+    
     <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">110 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="0.97">$0.97</div><button class="btn-buy" data-diamantes="110" onclick="comprarProducto('110 Diamantes', '0.97')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">220 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="1.96">$1.96</div><button class="btn-buy" data-diamantes="220" onclick="comprarProducto('220 Diamantes', '1.96')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">341 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="3.20">$3.20</div><button class="btn-buy" data-diamantes="341" onclick="comprarProducto('341 Diamantes', '3.20')">🛍️ Comprar</button></div>
@@ -113,13 +145,14 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
     <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">1166 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="9.00">$9.00</div><button class="btn-buy" data-diamantes="1166" onclick="comprarProducto('1166 Diamantes', '9.00')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">2398 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="19.00">$19.00</div><button class="btn-buy" data-diamantes="2398" onclick="comprarProducto('2398 Diamantes', '19.00')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">💎</div><div class="product-title">6160 Diamantes</div></div><div class="product-desc">Recarga instantánea ⚡</div><div class="product-price" data-usd="48.00">$48.00</div><button class="btn-buy" data-diamantes="6160" onclick="comprarProducto('6160 Diamantes', '48.00')">🛍️ Comprar</button></div>
-    
+
     <div class="section-divider"><span>🎫 TARJETAS Y PASES 🎫</span></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Semanal Básica</div></div><div class="product-desc">Activa tu pase semanal ⚡</div><div class="product-price" data-usd="0.73">$0.73</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Tarjeta Semanal Básica', '0.73')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Semanal</div></div><div class="product-desc">Activa tu pase semanal ⚡</div><div class="product-price" data-usd="2.50">$2.50</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Tarjeta Semanal', '2.50')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">📅</div><div class="product-title">Tarjeta Mensual</div></div><div class="product-desc">Activa tu pase mensual ⚡</div><div class="product-price" data-usd="11.00">$11.00</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Tarjeta Mensual', '11.00')">🛍️ Comprar</button></div>
     <div class="product-card"><div class="card-header"><div class="game-icon">🎯</div><div class="product-title">Pase Booyah</div></div><div class="product-desc">Pase exclusivo Booyah ⚡</div><div class="product-price" data-usd="3.50">$3.50</div><button class="btn-buy" data-diamantes="0" onclick="comprarProducto('Pase Booyah', '3.50')">🛍️ Comprar</button></div>
 </div>
+
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a><script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -131,9 +164,9 @@ const app=initializeApp(fbConfig),auth=getAuth(app),db=getDatabase(app);
 
 let logueado=false,metodo="PAGO MOVIL",tasa=735,notis=[],uidActual=null;
 let idOk=false,nombreOk="";
-let verificando=false;
+let tiempoVerificacion=null;
 
-// ========== API CON PROXY DE NETLIFY ==========
+// ========== API CON PROXY DE VERCEL ==========
 const API_KEY = "ffc_momryhse_nixuxcj9ztm2eoytiytspe";
 const REGION = "br";
 
@@ -143,39 +176,25 @@ async function verificarID(id){
     }
     
     try{
-        // ✅ Usamos el proxy de Netlify (configurado en netlify.toml)
         const url = `/api/ff/info?region=${REGION}&uid=${id}&key=${API_KEY}`;
         
-        console.log("🔍 Verificando ID:", id);
-        console.log("📡 URL:", url);
-        
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         
         const response = await fetch(url, { signal: controller.signal });
         clearTimeout(timeoutId);
         
-        console.log("📊 Status HTTP:", response.status);
-        
         if(response.ok){
             const data = await response.json();
-            console.log("✅ Respuesta:", data);
-            
             if(data.basicInfo && data.basicInfo.nickname){
-                return {
-                    ok: true, 
-                    nombre: data.basicInfo.nickname, 
-                    msg: `✅ ${data.basicInfo.nickname}`
-                };
+                return {ok: true, nombre: data.basicInfo.nickname, msg: `✅ ${data.basicInfo.nickname}`};
             } else {
                 return {ok: false, nombre: null, msg: "❌ ID no encontrado en LATAM"};
             }
         } else {
             return {ok: false, nombre: null, msg: `⚠️ Error ${response.status}`};
         }
-        
     } catch(error){
-        console.error("❌ Error:", error);
         return {ok: false, nombre: null, msg: "⚠️ Error de conexión"};
     }
 }
@@ -188,8 +207,12 @@ async function cargarTasa(){
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u=parseFloat(el.dataset.usd);
-        if(metodo==="PAGO MOVIL") el.innerText=Math.round(u*tasa).toLocaleString("es-VE")+" Bs";
-        else el.innerText=u.toFixed(2)+" USDT";
+        if(metodo==="PAGO MOVIL"){
+            let b=Math.round(u*tasa);
+            el.innerText=b.toLocaleString("es-VE")+" Bs";
+        }else{
+            el.innerText=u.toFixed(2)+" USDT";
+        }
     });
 }
 
@@ -202,66 +225,53 @@ window.seleccionarPago=function(m,e){
 
 const inputId=document.getElementById("jugadorId");
 const statusDiv=document.getElementById("verificacionStatus");
-const btnVerificar=document.getElementById("btnVerificar");
 
-async function verificarManual(){
-    const id=inputId.value.trim();
-    
-    if(!id){
-        statusDiv.innerHTML='<div class="status-warning">⚠️ Ingresa un ID primero</div>';
-        return;
+function mostrarEstado(mensaje, tipo){
+    let clase = "";
+    switch(tipo){
+        case "verificando": clase = "status-verificando"; break;
+        case "success": clase = "status-success"; break;
+        case "error": clase = "status-error"; break;
+        case "warning": clase = "status-warning"; break;
+        default: clase = "status-info";
     }
-    
-    if(!/^\d{8,12}$/.test(id)){
-        statusDiv.innerHTML='<div class="status-error">❌ ID inválido (debe tener 8-12 dígitos numéricos)</div>';
-        return;
-    }
-    
-    if(verificando) return;
-    
-    verificando=true;
-    btnVerificar.disabled=true;
-    btnVerificar.innerHTML='<span class="spinner"></span> Verificando...';
-    statusDiv.innerHTML='<div class="status-info"><span class="spinner"></span> Verificando ID en servidores LATAM...</div>';
-    
-    const resultado = await verificarID(id);
-    
-    if(resultado.ok){
-        statusDiv.innerHTML=`<div class="status-success">${resultado.msg}</div>`;
-        idOk=true;
-        nombreOk=resultado.nombre;
-    }else{
-        statusDiv.innerHTML=`<div class="status-error">${resultado.msg}</div>`;
-        idOk=false;
-        nombreOk="";
-    }
-    
-    verificando=false;
-    btnVerificar.disabled=false;
-    btnVerificar.innerHTML='🔍 Verificar';
+    statusDiv.innerHTML = `<div class="${clase}">${mensaje}</div>`;
 }
 
-inputId.addEventListener("input",function(){
-    const id=this.value.trim();
+inputId.addEventListener("input", function(){
+    clearTimeout(tiempoVerificacion);
+    const id = this.value.trim();
     
-    if(id.length===0){
-        statusDiv.innerHTML="";
-        idOk=false;
+    if(id.length === 0){
+        mostrarEstado("", "");
+        idOk = false;
         return;
     }
     
     if(/^\d{8,12}$/.test(id)){
-        statusDiv.innerHTML='<div class="status-info">✅ Formato correcto. Haz clic en "Verificar" para obtener el nombre.</div>';
-        idOk=false;
-    }else{
-        if(id.length<8) statusDiv.innerHTML=`<div class="status-warning">⚠️ Mínimo 8 dígitos (actual: ${id.length})</div>`;
-        else if(id.length>12) statusDiv.innerHTML=`<div class="status-error">❌ Máximo 12 dígitos (actual: ${id.length})</div>`;
-        else if(!/^\d+$/.test(id)) statusDiv.innerHTML=`<div class="status-error">❌ Solo números permitidos</div>`;
-        idOk=false;
+        mostrarEstado('<span class="spinner"></span> Verificando ID...', "verificando");
+        tiempoVerificacion = setTimeout(async () => {
+            const resultado = await verificarID(id);
+            if(resultado.ok){
+                mostrarEstado(resultado.msg, "success");
+                idOk = true;
+                nombreOk = resultado.nombre;
+            } else {
+                mostrarEstado(resultado.msg, "error");
+                idOk = false;
+            }
+        }, 500);
+    } else {
+        if(id.length < 8){
+            mostrarEstado(`⚠️ Mínimo 8 dígitos (actual: ${id.length})`, "warning");
+        } else if(id.length > 12){
+            mostrarEstado(`❌ Máximo 12 dígitos (actual: ${id.length})`, "error");
+        } else if(!/^\d+$/.test(id)){
+            mostrarEstado("❌ Solo números permitidos", "error");
+        }
+        idOk = false;
     }
 });
-
-btnVerificar.onclick = verificarManual;
 
 window.comprarProducto=async function(p,pu){
     if(!logueado){alert("❌ Inicia sesión primero");location.href="login.html";return}
@@ -279,7 +289,7 @@ window.comprarProducto=async function(p,pu){
     }
     
     if(!idOk){
-        alert("❌ Primero verifica el ID haciendo clic en el botón 'Verificar'");
+        alert("❌ Verificando ID... Espera un momento");
         return;
     }
     
@@ -294,7 +304,7 @@ window.comprarProducto=async function(p,pu){
     let diamantes = event.target.dataset.diamantes || 0;
     
     localStorage.setItem('id_jugador', idInput);
-    localStorage.setItem('nombre_verificado', nombreOk || `ID ${idInput}`);
+    localStorage.setItem('nombre_verificado', nombreOk);
     localStorage.setItem('diamantes', diamantes);
     localStorage.setItem('juego_seleccionado','FREE FIRE 🔥');
     localStorage.setItem('producto_seleccionado', p);
