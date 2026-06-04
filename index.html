@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECARGASGAMES</title>
+    <style>
+        :root { --color-principal: #10b981; --color-hover: #059669; }
+        body { background-image: url('fondo.jpg'); background-size: cover; background-position: center; background-attachment: fixed; margin: 0; color: white; font-family: 'Segoe UI', sans-serif; }
+        .header { background: rgba(11, 18, 32, 0.95); padding: 15px 20px; display: flex; justify-content: flex-end; align-items: center; border-bottom: 2px solid var(--color-principal); }
+        .brand { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 10px; margin-right: auto; color: var(--color-principal); }
+        .brand img { height: 35px; width: auto; }
+        .header-buttons { display: flex; align-items: center; gap: 15px; position: relative; }
+        .icon-btn { background: rgba(0,0,0,0.3); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; color: white; font-size: 20px; position: relative; }
+        .icon-btn:hover { background: var(--color-principal); transform: scale(1.05); }
+        .notification-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .profile-dropdown { position: relative; }
+        .dropdown-menu { position: absolute; top: 50px; right: 0; background: #0b1220; border: 1px solid #1f2937; border-radius: 12px; width: 200px; z-index: 1000; display: none; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .dropdown-menu a { display: block; padding: 12px 16px; color: white; text-decoration: none; transition: 0.2s; font-size: 14px; }
+        .dropdown-menu a:hover { background: var(--color-principal); }
+        .dropdown-menu .logout-item { color: #ef4444; border-top: 1px solid #1f2937; }
+        .dropdown-menu .logout-item:hover { background: #ef4444; color: white; }
+        .games-menu { display: flex; gap: 8px; overflow-x: auto; background: rgba(11, 18, 32, 0.95); padding: 12px 15px; border-bottom: 1px solid #1f2937; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .games-menu::-webkit-scrollbar { height: 4px; }
+        .games-menu::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
+        .games-menu::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 10px; }
+        .games-menu a { text-decoration: none; color: white; background: transparent; padding: 6px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; white-space: nowrap; transition: 0.2s; }
+        .games-menu a:hover { color: var(--color-principal); }
+        .games-menu a.active { color: var(--color-principal); border-bottom: 2px solid var(--color-principal); border-radius: 0; }
+        .main { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .welcome-text { text-align: center; margin: 20px 0; padding: 15px; background: rgba(11, 18, 32, 0.7); border-radius: 20px; }
+        .welcome-text h2 { color: var(--color-principal); font-size: 20px; }
+        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .game-link { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 0; text-decoration: none; color: white; text-align: center; transition: 0.3s; overflow: hidden; position: relative; }
+        .game-link:hover { transform: translateY(-5px); border-color: var(--color-principal); }
+        .game-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+        .game-name { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 30px 10px 12px 10px; font-size: 16px; font-weight: bold; text-align: center; color: var(--color-principal); }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: #111827; border-radius: 20px; max-width: 350px; width: 90%; border: 1px solid var(--color-principal); overflow: hidden; }
+        .modal-header { background: var(--color-principal); padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { color: white; margin: 0; }
+        .modal-header .close-modal { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
+        .modal-body { padding: 20px; max-height: 400px; overflow-y: auto; }
+        .notification-item { padding: 12px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; gap: 12px; }
+        .notification-icon { font-size: 24px; }
+        .notification-text { flex: 1; }
+        .notification-title { font-weight: bold; margin-bottom: 4px; }
+        .notification-date { font-size: 11px; color: #9ca3af; }
+        .empty-notifications { text-align: center; color: #9ca3af; padding: 30px; }
+        .payment-section { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 20px; margin-top: 30px; text-align: center; }
+        .payment-section h3 { color: var(--color-principal); margin-bottom: 15px; font-size: 18px; }
+        .payment-methods-list { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px; }
+        .payment-method { background: #111827; border: 1px solid #1f2937; border-radius: 30px; padding: 8px 20px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+        .support-info { background: #1f2937; border-radius: 12px; padding: 10px; margin-top: 10px; font-size: 13px; color: #9ca3af; }
+        .support-info a { color: var(--color-principal); text-decoration: none; font-weight: bold; }
+        .faq-section { background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; border-radius: 20px; padding: 20px; margin-top: 20px; }
+        .faq-section h3 { color: var(--color-principal); text-align: center; margin-bottom: 20px; font-size: 18px; }
+        details { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; }
+        summary { font-weight: bold; color: var(--color-principal); }
+        details p { margin-top: 10px; padding-top: 10px; border-top: 1px solid #1f2937; color: #9ca3af; font-size: 13px; }
+        .footer { background: rgba(11, 18, 32, 0.9); border-top: 1px solid #1f2937; padding: 20px; text-align: center; margin-top: 30px; }
+        .footer p { color: #9ca3af; font-size: 12px; margin: 5px 0; }
+        .footer .copyright { color: var(--color-principal); font-weight: bold; font-size: 13px; }
+        .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+        .social-links a { color: #9ca3af; font-size: 14px; text-decoration: none; transition: 0.2s; }
+        .social-links a:hover { color: var(--color-principal); }
+        .whatsapp-float { position: fixed; bottom: 20px; right: 20px; background: #25D366; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; font-size: 28px; }
+        .whatsapp-float:hover { transform: scale(1.1); }
+        .back-to-top { position: fixed; bottom: 90px; right: 20px; background: var(--color-principal); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .back-to-top.show { opacity: 1; visibility: visible; }
+        .back-to-top:hover { background: var(--color-hover); transform: scale(1.1); }
+        @media (max-width: 500px) { .game-img { height: 130px; } .game-name { font-size: 14px; padding: 20px 10px 8px 10px; } .brand { font-size: 18px; } .icon-btn { width: 35px; height: 35px; font-size: 18px; } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="brand"><img src="logo.png" alt="Logo">RECARGASGAMES</div>
+    <div class="header-buttons">
+        <button class="icon-btn" id="notificacionBtn" onclick="abrirNotificaciones()">🔔<span class="notification-badge" id="notifCount">0</span></button>
+        <div class="profile-dropdown">
+            <button class="icon-btn" id="profileBtn">👤
+</button>
+            <div class="dropdown-menu" id="profileDropdown">
+                <a href="editar-perfil.html">✏️ Mi Perfil</a>
+                <a href="perfil.html">📋 Mis Pedidos</a>
+                <a href="#" id="logoutDropdownBtn" class="logout-item">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="notificacionModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header"><h3>🔔 Notificaciones</h3><button class="close-modal" onclick="cerrarNotificaciones()">×</button></div>
+        <div class="modal-body" id="notificacionesList"><div class="empty-notifications">No tienes notificaciones</div></div>
+    </div>
+</div>
+
+<div class="games-menu">
+    <a href="index.html" class="active">🏠 Inicio</a>
+    <a href="freefire.html">🔥 Free Fire</a>
+    <a href="bloodstrike.html">🪖 Blood Strike</a>
+    <a href="roblox.html">🤖 Roblox</a>
+    <a href="ml.html">👑 MLBB</a>
+    <a href="cod.html">🎮 COD Mobile</a>
+    <a href="pubg.html">🎮 PUBG Mobile</a>
+</div>
+
+<div class="main">
+    <div class="welcome-text"><h2>🎮 Los mejores juegos con recargas instantáneas</h2><p>¡Elige tu juego y recarga al instante!</p></div>
+    <div class="games-grid">
+        <a href="freefire.html" class="game-link"><img src="ff.png" class="game-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2310b981%22/%3E%3Ctext x=%2250%22 y=%2265%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22%3E🔥%3C/text%3E%3C/svg%3E'"><div class="game-name">🔥 FREE FIRE</div></a>
+        <a href="bloodstrike.html" class="game-link"><img src="bs.png" class="game-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2310b981%22/%3E%3Ctext x=%2250%22 y=%2265%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22%3E🪖%3C/text%3E%3C/svg%3E'"><div class="game-name">🪖 BLOOD STRIKE</div></a>
+        <a href="roblox.html" class="game-link"><img src="roblox.png" class="game-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2310b981%22/%3E%3Ctext x=%2250%22 y=%2265%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22%3E🤖%3C/text%3E%3C/svg%3E'"><div class="game-name">🤖 ROBLOX</div></a>
+        <a href="ml.html" class="game-link"><img src="mlbb.png" class="game-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2310b981%22/%3E%3Ctext x=%2250%22 y=%2265%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22%3E👑%3C/text%3E%3C/svg%3E'"><div class="game-name">👑 MOBILE LEGENDS</div></a>
+        <a href="cod.html" class="game-link"><img src="cod.png" class="game-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2310b981%22/%3E%3Ctext x=%2250%22 y=%2265%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22%3E🎮%3C/text%3E%3C/svg%3E'"><div class="game-name">🎮 CALL OF DUTY</div></a>
+        <a href="pubg.html" class="game-link">
+    <img src="pubg.png" class="game-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2310b981%22/%3E%3Ctext x=%2250%22 y=%2265%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2250%22%3E🎮%3C/text%3E%3C/svg%3E'">
+    <div class="game-name">🎮 PUBG MOBILE</div>
+</a>
+    </div>
+
+    <div class="payment-section">
+        <h3>💳 Métodos de Pago</h3>
+        <div class="payment-methods-list"><div class="payment-method">💵 Pago Móvil</div></div>
+        <div class="support-info">📞 <strong>¿Necesitas ayuda?</strong> Contáctanos por WhatsApp al <a href="https://wa.me/582428242411" target="_blank">04228242411</a></div>
+    </div>
+
+    <div class="faq-section">
+        <h3>❓ Preguntas Frecuentes</h3>
+        <details><summary>⏱️ ¿Cuánto tarda la recarga?</summary><p>La recarga es <strong>instantánea</strong> una vez confirmado tu pago.</p></details>
+        <details><summary>🎮 ¿Cómo recibo mis diamantes/oros?</summary><p>Se entregan directamente a tu cuenta del juego usando el ID que nos proporcionas.</p></details>
+        <details><summary>🔒 ¿Es seguro comprar aquí?</summary><p>¡Sí! Tenemos años de experiencia y cientos de clientes satisfechos.</p></details>
+        <details><summary>💸 ¿Qué métodos de pago aceptan?</summary><p>Aceptamos: <strong>Pago Móvil</strong>.</p></details>
+        <details><summary>🔄 ¿Puedo cancelar mi pedido?</summary><p>Sí, antes de que sea procesado. Contáctanos por WhatsApp inmediatamente.</p></details>
+    </div>
+</div>
+
+<div class="footer">
+    <p class="copyright">© 2026 RECARGASGAMES</p>
+    <p>Todos los derechos reservados</p>
+    <p>💰 Recargas instantáneas | 🔒 Pago seguro | ⚡ Entrega rápida</p>
+    <div class="social-links">
+        <a href="https://wa.me/582428242411" target="_blank">📱 WhatsApp</a>
+        <a href="mailto:recargasgames@gmail.com">📧 Correo</a>
+        <a href="#">📷 Instagram</a>
+    </div>
+</div>
+
+<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
+<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    
+    let notificaciones = [];
+    let userIdActual = null;
+    
+    function guardarNotificacionesLocal() { 
+        localStorage.setItem('notificaciones', JSON.stringify(notificaciones)); 
+    }
+    
+    function actualizarContador() {
+        const noLeidas = notificaciones.filter(n => !n.leida).length;
+        const badge = document.getElementById('notifCount');
+        if (badge) { 
+            badge.textContent = noLeidas; 
+            badge.style.display = noLeidas > 0 ? 'flex' : 'none'; 
+        }
+    }
+    
+    function mostrarToast(mensaje) {
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.bottom = '100px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = '#10b981';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '30px';
+        toast.style.fontSize = '14px';
+        toast.style.zIndex = '2000';
+        toast.style.animation = 'fadeOut 3s ease forwards';
+        toast.textContent = mensaje;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    async function marcarTodasComoLeidas() {
+        if (!userIdActual) return;
+        try {
+            for (const notif of notificaciones) {
+                if (!notif.leida) {
+                    const notifRef = ref(db, `notificaciones/${userIdActual}/${notif.id}`);
+                    await update(notifRef, { leida: true });
+                }
+            }
+        } catch (error) { console.error("Error:", error); }
+    }
+    
+    function cargarNotificacionesFirebase(userId) {
+        if (!userId) return;
+        userIdActual = userId;
+        const notificacionesRef = ref(db, `notificaciones/${userId}`);
+        
+        onValue(notificacionesRef, (snapshot) => {
+            const data = snapshot.val();
+            const notificacionesAntes = notificaciones.map(n => n.id);
+            
+            if (data) {
+                let nuevasNotificaciones = [];
+                for (let id in data) {
+                    nuevasNotificaciones.push({ id, ...data[id] });
+                }
+                nuevasNotificaciones.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                
+                let hayNuevas = false;
+                for (let notif of nuevasNotificaciones) {
+                    if (!notificacionesAntes.includes(notif.id) && !notif.leida) {
+                        hayNuevas = true;
+                        break;
+                    }
+                }
+                
+                notificaciones = nuevasNotificaciones;
+                guardarNotificacionesLocal();
+                actualizarContador();
+                
+                if (hayNuevas && !localStorage.getItem('notif_toast')) {
+                    const noLeidas = notificaciones.filter(n => !n.leida).length;
+                    mostrarToast(`🔔 Tienes ${noLeidas} notificación(es) nueva(s)`);
+                    localStorage.setItem('notif_toast', 'true');
+                    setTimeout(() => localStorage.removeItem('notif_toast'), 5000);
+                }
+            } else {
+                notificaciones = [];
+                guardarNotificacionesLocal();
+                actualizarContador();
+            }
+        });
+    }
+    
+    window.abrirNotificaciones = async function() {
+        const modal = document.getElementById('notificacionModal');
+        const listaDiv = document.getElementById('notificacionesList');
+        
+        if (!notificaciones.length) {
+            listaDiv.innerHTML = '<div class="empty-notifications">No tienes notificaciones</div>';
+        } else {
+            let html = '';
+            for (const notif of notificaciones) {
+                html += `<div class="notification-item">
+                            <div class="notification-icon">${notif.titulo && notif.titulo.includes('Completado') ? '✅' : '🔔'}</div>
+                            <div class="notification-text">
+                                <div class="notification-title">${notif.titulo || 'Notificación'}</div>
+                                <div style="font-size:12px;">${notif.mensaje || ''}</div>
+                                <div class="notification-date">${notif.fecha || ''}</div>
+                            </div>
+                        </div>`;
+            }
+            listaDiv.innerHTML = html;
+            
+            await marcarTodasComoLeidas();
+            
+            for (let notif of notificaciones) {
+                notif.leida = true;
+            }
+            guardarNotificacionesLocal();
+            actualizarContador();
+        }
+        modal.style.display = 'flex';
+    };
+    
+    window.cerrarNotificaciones = function() { 
+        document.getElementById('notificacionModal').style.display = 'none'; 
+    };
+    
+    const profileBtn = document.getElementById('profileBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+    if (profileBtn) {
+        profileBtn.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block'; 
+        });
+    }
+    document.addEventListener('click', () => { 
+        if (profileDropdown) profileDropdown.style.display = 'none'; 
+    });
+    
+    // ========== CIERRE DE SESIÓN CORREGIDO ==========
+    document.getElementById("logoutDropdownBtn")?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        
+        // Limpiar localStorage y sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Cerrar sesión en Firebase
+        try {
+            await signOut(auth);
+            console.log("✅ Sesión cerrada correctamente");
+        } catch(error) {
+            console.error("Error al cerrar sesión:", error);
+        }
+        
+        // Redirigir a la página principal
+        window.location.replace("index.html");
+    });
+    
+    window.addEventListener('scroll', function() { 
+        const backToTop = document.getElementById('backToTop'); 
+        if (window.scrollY > 300) backToTop.classList.add('show'); 
+        else backToTop.classList.remove('show'); 
+    });
+    
+    window.onclick = function(event) { 
+        const modal = document.getElementById('notificacionModal'); 
+        if (event.target === modal) cerrarNotificaciones(); 
+    };
+    
+    // ========== onAuthStateChanged MODIFICADO ==========
+    // Ya no redirige a login.html si no está logueado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("✅ Usuario logueado:", user.email);
+            cargarNotificacionesFirebase(user.uid);
+        } else {
+            console.log("❌ Usuario NO logueado - Puede navegar sin problema");
+            // No redirigimos a login, permitimos navegar
+        }
+    });
+</script>
+</body>
+</html>
