@@ -51,21 +51,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .file-input::-webkit-file-upload-button{background:var(--color-principal);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin-right:12px}
 .preview-img{margin-top:10px;text-align:center}
 .preview-img img{max-width:100%;max-height:150px;border-radius:12px;border:1px solid #1f2937}
-/* Nuevos estilos para OCR */
-.ocr-panel{background:rgba(16,185,129,0.1);border:1px solid var(--color-principal);border-radius:12px;padding:12px;margin-bottom:15px}
-.ocr-loading{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--color-principal);font-size:13px}
-.ocr-loading .spinner-small{width:16px;height:16px;border:2px solid var(--color-principal);border-top:2px solid transparent;border-radius:50%;animation:spin .8s linear infinite}
-.ocr-result{background:#0b1220;border-radius:10px;padding:10px;margin-top:10px}
-.ocr-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1f2937;font-size:13px}
-.ocr-row:last-child{border-bottom:none}
-.ocr-label{color:#9ca3af}
-.ocr-value{font-weight:bold;color:#22c55e}
-.ocr-match{background:rgba(34,197,94,0.2);border-radius:6px;padding:2px 6px;font-size:11px}
-.ocr-mismatch{background:rgba(239,68,68,0.2);border-radius:6px;padding:2px 6px;font-size:11px;color:#ef4444}
-.btn-use-ref{background:var(--color-principal);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;margin-top:8px;width:100%}
-.btn-use-ref:hover{background:var(--color-hover)}
-.warning-fraud{background:rgba(239,68,68,0.15);border:1px solid #ef4444;border-radius:12px;padding:12px;margin-top:12px;font-size:12px;color:#fca5a5;text-align:center}
-.warning-fraud strong{color:#ef4444}
 .btn-send{background:var(--color-principal);color:#fff;border:none;width:100%;height:50px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px}
 .btn-send:hover{background:var(--color-hover)}
 .btn-send.loading{opacity:0.6;pointer-events:none}
@@ -155,18 +140,9 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
         </div>
     </div>
 
-    <!-- Confirmación con comprobante + OCR INTELIGENTE -->
+    <!-- Confirmación con comprobante -->
     <div class="card-panel">
         <div class="panel-title">📝 CONFIRMAR PAGO</div>
-        
-        <!-- Panel OCR - Detección automática -->
-        <div id="ocrPanel" class="ocr-panel" style="display:none">
-            <div id="ocrLoading" class="ocr-loading">
-                <div class="spinner-small"></div>
-                <span>🔍 Leyendo comprobante...</span>
-            </div>
-            <div id="ocrResult" style="display:none"></div>
-        </div>
         
         <div class="form-group">
             <label>🔢 NÚMERO DE REFERENCIA (últimos 6 dígitos)</label>
@@ -179,13 +155,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
             <input type="file" id="comprobanteFile" class="file-input" accept="image/*">
             <div id="previewContainer" class="preview-img"></div>
             <div id="fileError" style="font-size:11px;color:#ef4444;margin-top:5px;display:none"></div>
-        </div>
-        
-        <!-- Advertencia de fraude -->
-        <div class="warning-fraud">
-            <strong>⚠️ ADVERTENCIA LEGAL</strong><br>
-            Subir comprobantes falsos o manipulados constituye <strong>fraude electrónico</strong> y será penalizado conforme a la ley.<br>
-            Nos reservamos el derecho de reportar ante las autoridades.
         </div>
         
         <button class="btn-send" id="btnConfirmar">✅ ENVIAR COMPROBANTE</button>
@@ -203,9 +172,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import{getDatabase,ref,get,onValue,update,push,set}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-// Importar Tesseract.js para OCR
-import Tesseract from 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
 
 const fbConfig={
     apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
@@ -225,7 +191,6 @@ let uidActual=null;
 let notis=[];
 let comprobanteBase64 = null;
 let referenciaSeleccionada = null;
-let datosOcr = null; // Guardar datos extraídos por OCR
 
 // Obtener datos del localStorage
 let idJugador = localStorage.getItem('id_jugador');
@@ -265,162 +230,6 @@ function actualizarMontos(){
         document.getElementById('filaDescuento').style.display = 'flex';
     } else {
         document.getElementById('filaDescuento').style.display = 'none';
-    }
-}
-
-// ========== FUNCIONES OCR INTELIGENTE ==========
-async function extraerDatosConOCR(imagenBase64) {
-    const ocrPanel = document.getElementById('ocrPanel');
-    const ocrLoading = document.getElementById('ocrLoading');
-    const ocrResult = document.getElementById('ocrResult');
-    
-    ocrPanel.style.display = 'block';
-    ocrLoading.style.display = 'flex';
-    ocrResult.style.display = 'none';
-    
-    try {
-        showToast("🔍 Leyendo comprobante...", "warning");
-        
-        // Ejecutar OCR con Tesseract
-        const { data: { text } } = await Tesseract.recognize(
-            imagenBase64,
-            'spa',
-            {
-                logger: m => console.log("OCR Progress:", m),
-                tessedit_pageseg_mode: 6, // Modo uniform block of text
-                tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,- Bs'
-            }
-        );
-        
-        console.log("Texto OCR extraído:", text);
-        
-        // Buscar referencia (patrones comunes en comprobantes venezolanos)
-        let referenciaEncontrada = null;
-        
-        // Patrón 1: "Operación: 006261376864" -> últimos 6 = 376864
-        let refMatch = text.match(/Operaci[óo]n:\s*(\d{12,15})/i);
-        if(refMatch) referenciaEncontrada = refMatch[1].slice(-6);
-        
-        // Patrón 2: "Referencia: 376864"
-        if(!referenciaEncontrada) {
-            refMatch = text.match(/Referencia:\s*(\d{6,10})/i);
-            if(refMatch) referenciaEncontrada = refMatch[1].slice(-6);
-        }
-        
-        // Patrón 3: Número de 6 dígitos aislado
-        if(!referenciaEncontrada) {
-            refMatch = text.match(/\b(\d{6})\b/);
-            if(refMatch) referenciaEncontrada = refMatch[1];
-        }
-        
-        // Patrón 4: Buscar secuencia larga y tomar últimos 6
-        if(!referenciaEncontrada) {
-            refMatch = text.match(/\b(\d{10,15})\b/);
-            if(refMatch) referenciaEncontrada = refMatch[1].slice(-6);
-        }
-        
-        // Buscar monto
-        let montoEncontrado = null;
-        // Patrón: "677 Bs", "677,600 Bs", "677.600 Bs"
-        let montoMatch = text.match(/(\d{1,3}(?:[.,]\d{3})*)\s*Bs/i);
-        if(montoMatch) {
-            let montoStr = montoMatch[1].replace(/\./g, '').replace(',', '.');
-            montoEncontrado = parseFloat(montoStr);
-        }
-        
-        // Buscar fecha
-        let fechaEncontrada = null;
-        let fechaMatch = text.match(/(\d{2}[\/\-]\d{2}[\/\-]\d{4})/);
-        if(fechaMatch) fechaEncontrada = fechaMatch[1];
-        
-        // Validar si el monto coincide con el que debe pagar
-        let montoCoincide = false;
-        let diferenciaMonto = 0;
-        if(montoEncontrado) {
-            diferenciaMonto = Math.abs(montoEncontrado - precioBsFinal);
-            montoCoincide = diferenciaMonto < 10; // Margen de 10 Bs por posibles errores OCR
-        }
-        
-        const resultadoOcr = {
-            referencia: referenciaEncontrada,
-            monto: montoEncontrado,
-            fecha: fechaEncontrada,
-            textoCompleto: text,
-            montoCoincide: montoCoincide,
-            diferenciaMonto: diferenciaMonto
-        };
-        
-        // Mostrar resultados
-        ocrLoading.style.display = 'none';
-        ocrResult.style.display = 'block';
-        
-        let html = '<div class="ocr-result">';
-        html += '<div style="font-size:12px; color:#10b981; margin-bottom:8px;">📸 DATOS DETECTADOS</div>';
-        
-        if(referenciaEncontrada) {
-            html += `<div class="ocr-row"><span class="ocr-label">🔢 Referencia detectada:</span><span class="ocr-value">${referenciaEncontrada}</span></div>`;
-            html += `<button class="btn-use-ref" id="btnUsarReferenciaOcr">✅ Usar esta referencia</button>`;
-        } else {
-            html += `<div class="ocr-row"><span class="ocr-label">🔢 Referencia detectada:</span><span class="ocr-value" style="color:#ef4444;">No detectada (ingresa manual)</span></div>`;
-        }
-        
-        if(montoEncontrado) {
-            const coincideClass = montoCoincide ? 'ocr-match' : 'ocr-mismatch';
-            const coincideText = montoCoincide ? '✓ Monto correcto' : `✗ Monto incorrecto (debe ser ${formatearNumero(precioBsFinal)} Bs)`;
-            html += `<div class="ocr-row"><span class="ocr-label">💰 Monto detectado:</span><span class="ocr-value">${formatearNumero(montoEncontrado)} Bs <span class="${coincideClass}">${coincideText}</span></span></div>`;
-        } else {
-            html += `<div class="ocr-row"><span class="ocr-label">💰 Monto detectado:</span><span class="ocr-value" style="color:#ef4444;">No detectado</span></div>`;
-        }
-        
-        if(fechaEncontrada) {
-            html += `<div class="ocr-row"><span class="ocr-label">📅 Fecha:</span><span class="ocr-value">${fechaEncontrada}</span></div>`;
-        }
-        
-        html += '</div>';
-        ocrResult.innerHTML = html;
-        
-        datosOcr = resultadoOcr;
-        
-        // Si el monto no coincide, mostrar advertencia
-        if(montoEncontrado && !montoCoincide) {
-            showToast(`⚠️ El monto detectado (${formatearNumero(montoEncontrado)} Bs) no coincide con el total a pagar (${formatearNumero(precioBsFinal)} Bs)`, "warning");
-        }
-        
-        if(referenciaEncontrada) {
-            showToast(`✅ Referencia detectada: ${referenciaEncontrada}`, "success");
-            // Auto-completar referencia automáticamente si el monto coincide
-            if(montoCoincide) {
-                document.getElementById('referencia').value = referenciaEncontrada;
-                referenciaSeleccionada = referenciaEncontrada;
-                document.getElementById('refError').style.display = 'none';
-                showToast(`📝 Referencia autocompletada: ${referenciaEncontrada}`, "success");
-            }
-        } else {
-            showToast("⚠️ No se pudo detectar la referencia, ingrésala manualmente", "warning");
-        }
-        
-        return resultadoOcr;
-        
-    } catch(error) {
-        console.error("Error OCR:", error);
-        ocrPanel.style.display = 'none';
-        showToast("❌ Error al leer el comprobante, ingresa los datos manualmente", "error");
-        return null;
-    }
-}
-
-// Botón para usar referencia detectada
-function bindUsarReferenciaBtn() {
-    const btn = document.getElementById('btnUsarReferenciaOcr');
-    if(btn) {
-        btn.onclick = () => {
-            if(datosOcr && datosOcr.referencia) {
-                document.getElementById('referencia').value = datosOcr.referencia;
-                referenciaSeleccionada = datosOcr.referencia;
-                document.getElementById('refError').style.display = 'none';
-                showToast(`✅ Referencia aplicada: ${datosOcr.referencia}`, "success");
-            }
-        };
     }
 }
 
@@ -489,7 +298,7 @@ function fileToBase64(file){
     });
 }
 
-// Previsualizar imagen Y ejecutar OCR automáticamente
+// Previsualizar imagen
 document.getElementById('comprobanteFile').onchange = async (e) => {
     const file = e.target.files[0];
     const fileError = document.getElementById('fileError');
@@ -498,7 +307,6 @@ document.getElementById('comprobanteFile').onchange = async (e) => {
     if(!file){
         comprobanteBase64 = null;
         previewContainer.innerHTML = '';
-        document.getElementById('ocrPanel').style.display = 'none';
         return;
     }
     
@@ -510,8 +318,8 @@ document.getElementById('comprobanteFile').onchange = async (e) => {
         return;
     }
     
-    if(file.size > 5 * 1024 * 1024){
-        fileError.innerText = '❌ La imagen no debe superar 5MB';
+    if(file.size > 2 * 1024 * 1024){
+        fileError.innerText = '❌ La imagen no debe superar 2MB';
         fileError.style.display = 'block';
         comprobanteBase64 = null;
         previewContainer.innerHTML = '';
@@ -523,11 +331,6 @@ document.getElementById('comprobanteFile').onchange = async (e) => {
     try{
         comprobanteBase64 = await fileToBase64(file);
         previewContainer.innerHTML = `<img src="${comprobanteBase64}" alt="Vista previa">`;
-        
-        // 🔥 EJECUTAR OCR AUTOMÁTICAMENTE 🔥
-        await extraerDatosConOCR(comprobanteBase64);
-        bindUsarReferenciaBtn();
-        
     } catch(error){
         fileError.innerText = '❌ Error al cargar la imagen';
         fileError.style.display = 'block';
@@ -601,13 +404,6 @@ async function guardarPedidoEnFirebase(referencia, comprobanteUrl){
         pedidoData.precio_original_bs = precioBsOriginal;
     }
     
-    // Guardar datos OCR si existen
-    if(datosOcr && datosOcr.referencia) {
-        pedidoData.ocr_referencia_detectada = datosOcr.referencia;
-        pedidoData.ocr_monto_detectado = datosOcr.monto;
-        pedidoData.ocr_monto_coincide = datosOcr.montoCoincide;
-    }
-    
     await set(nuevoPedidoRef, pedidoData);
     return nuevoPedidoRef.key;
 }
@@ -620,11 +416,11 @@ async function verificarReferenciaUnica(referencia){
         const pedidos = snapshot.val();
         for(let id in pedidos){
             if(pedidos[id].referencia === referencia){
-                return false;
+                return false; // Ya existe
             }
         }
     }
-    return true;
+    return true; // Es única
 }
 
 // Enviar a Telegram
@@ -635,7 +431,6 @@ async function enviarTelegram(referencia, pedidoId, comprobanteUrl){
     const nombreTexto = nombreJugador ? `\n🎮 Nombre: ${nombreJugador}` : "";
     const descuentoTexto = descuentoActivo ? `\n🎁 Descuento: 1.5% (Ahorro: ${formatearNumero(precioBsOriginal - precioBsFinal)} Bs)` : "";
     const comprobanteTexto = comprobanteUrl ? `\n📷 Comprobante: ${comprobanteUrl}` : "";
-    const ocrTexto = datosOcr?.referencia ? `\n🔍 OCR Detectó: Ref:${datosOcr.referencia} | Monto:${datosOcr.monto}Bs` : "";
     
     const mensaje = `
 🛒 *NUEVO PEDIDO* 🛒
@@ -647,7 +442,7 @@ async function enviarTelegram(referencia, pedidoId, comprobanteUrl){
 💰 Original: ${formatearNumero(precioBsOriginal)} Bs${descuentoTexto}
 💵 Pagado: ${formatearNumero(precioBsFinal)} Bs
 💳 Método: ${metodoPago}
-🧾 Referencia: ${referencia}${ocrTexto}${comprobanteTexto}
+🧾 Referencia: ${referencia}${comprobanteTexto}
 ━━━━━━━━━━━━━━━━━━━
 📅 ${new Date().toLocaleString()}
     `;
@@ -691,12 +486,6 @@ document.getElementById('btnConfirmar').onclick = async function(){
         return;
     }
     fileError.style.display = 'none';
-    
-    // Advertencia si el monto OCR no coincide
-    if(datosOcr && datosOcr.monto && !datosOcr.montoCoincide) {
-        const confirmar = confirm(`⚠️ El monto detectado por OCR (${formatearNumero(datosOcr.monto)} Bs) NO coincide con el total a pagar (${formatearNumero(precioBsFinal)} Bs).\n\n¿Estás seguro de continuar?`);
-        if(!confirmar) return;
-    }
     
     if(!uidActual){
         showToast("❌ Debes iniciar sesión", "error");
