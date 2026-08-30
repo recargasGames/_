@@ -236,13 +236,26 @@
 
 <script>
     // =====================================================
-    // 🔑 TUS DATOS Y APIS
+    // 🔑 TUS DATOS Y APIS — TOKEN CORRECTO
     // =====================================================
     const CONFIG = {
-        API_RECARGA: "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEeE0DckQSx6060j7XVq84A2iScZE31CpXxv3s&tipo=recargaFreeFire",
+        API_RECARGA: "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire",
         TELEGRAM_TOKEN: "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM",
         TELEGRAM_CHAT_ID: "8452807558",
         TASA: 930
+    };
+
+    // 📦 MAPA DE PAQUETES — CÓDIGOS PARA LA API
+    const MAPA_PAQUETES = {
+        "110 Diamantes": "110",
+        "341 Diamantes": "341",
+        "572 Diamantes": "572",
+        "1166 Diamantes": "1166",
+        "2398 Diamantes": "2398",
+        "6160 Diamantes": "6160",
+        "Tarjeta Semanal": "semanal",
+        "Tarjeta Mensual": "mensual",
+        "Pase Booyah": "booyah"
     };
 
     // =====================================================
@@ -252,12 +265,12 @@
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById("fechaPago").value = hoy;
         
-        // 📥 TRAER DATOS DE freefire.html Y DE LA TIENDA
+        // 📥 TRAER DATOS DE freefire.html
         const idJugador = localStorage.getItem("id_jugador") || "No especificado";
         const nombreJugador = localStorage.getItem("nombre_jugador") || "No verificado";
         const producto = localStorage.getItem("productoSeleccionado") || "110 Diamantes";
         const precioUsd = localStorage.getItem("precio_usd") || "0.84";
-        const paqueteCodigo = localStorage.getItem("paquete_codigo") || "110";
+        const paqueteCodigo = localStorage.getItem("paquete_codigo") || MAPA_PAQUETES[producto] || "110";
         
         const montoBs = Math.round(parseFloat(precioUsd) * CONFIG.TASA);
         
@@ -269,7 +282,7 @@
         document.getElementById("campoTotalBs").textContent = `${montoBs} Bs`;
         document.getElementById("montoPagado").value = montoBs;
         
-        console.log("✅ Datos cargados:", { idJugador, nombreJugador, producto, precioUsd, montoBs, paqueteCodigo });
+        console.log("✅ Datos cargados:", { idJugador, nombreJugador, producto, paqueteCodigo, precioUsd, montoBs });
     });
 
     function copiarTexto(texto) {
@@ -289,7 +302,7 @@
         const producto = document.getElementById("campoProducto").textContent;
         const precioUsd = document.getElementById("campoPrecio").textContent.replace("$", "").replace(" USD", "");
         const montoBs = document.getElementById("campoTotalBs").textContent.replace(" Bs", "");
-        const paqueteCodigo = localStorage.getItem("paquete_codigo") || "110";
+        const paqueteCodigo = localStorage.getItem("paquete_codigo") || MAPA_PAQUETES[producto] || "110";
         const btn = document.getElementById("btnPagar");
 
         // ✅ Validaciones
@@ -317,6 +330,7 @@
 💵 Total: ${montoBs} Bs
 🔢 Referencia: ${referencia}
 📅 Fecha: ${fecha}
+📦 Código paquete: ${paqueteCodigo}
 ━━━━━━━━━━━━━━━━━━
 ⏳ Estado: EN VERIFICACIÓN...
         `);
@@ -326,8 +340,8 @@
         // =====================================================
         await esperar(2000);
         
-        // ⚠️ Por ahora TÚ apruebas manualmente. Cuando tengas sistema automático, lo conectas aquí
-        const pagoAprobado = true; // ← Tú decides si apruebas o no
+        // ⚠️ TÚ apruebas manualmente. Cuando tengas sistema automático, lo conectas aquí
+        const pagoAprobado = true; // ← Cambia a false para rechazar
         
         if (!pagoAprobado) {
             document.getElementById("paso1").className = "paso-linea error";
@@ -380,23 +394,24 @@
         document.getElementById("paso3").className = "paso-linea activo";
         
         let recargaExitosa = false;
+        let respuestaApi = "";
         try {
-            // 📡 LLAMADA A LA API DE RECARGA REAL
+            // 📡 LLAMADA A LA API DE RECARGA — TOKEN CORRECTO
             const urlRecarga = `${CONFIG.API_RECARGA}&id_jugador=${encodeURIComponent(idJugador)}&paquete=${encodeURIComponent(paqueteCodigo)}`;
             console.log("📡 Enviando recarga:", urlRecarga);
             
             const respuesta = await fetch(urlRecarga);
-            const resultadoTexto = await respuesta.text();
-            console.log("📡 Respuesta recarga:", respuesta.status, resultadoTexto);
+            respuestaApi = await respuesta.text();
+            console.log("📡 Respuesta recarga:", respuesta.status, respuestaApi);
             
-            recargaExitosa = respuesta.ok && 
-                            !resultadoTexto.toLowerCase().includes("error") && 
-                            !resultadoTexto.toLowerCase().includes("no encontrado") &&
-                            resultadoTexto.length > 2;
+            // ✅ VERIFICAR RESPUESTA DE LA API
+            // La API devuelve alerta:"green" = éxito, alerta:"red" = error
+            recargaExitosa = respuesta.ok && !respuestaApi.includes('"alerta":"red"');
             
         } catch (error) {
             console.error("❌ Error en recarga:", error);
             recargaExitosa = false;
+            respuestaApi = "Error de conexión";
         }
 
         await esperar(1500);
@@ -418,15 +433,18 @@
         document.getElementById("paso4").className = "paso-linea ok";
         document.getElementById("paso4").innerHTML = `<span>✅</span><span>Entrega confirmada</span>`;
 
-        // 📲 TELEGRAM — FINAL
+        // 📲 TELEGRAM — FINAL CON RESPUESTA DE LA API
         await enviarTelegram(`
 ${recargaExitosa ? '✅' : '⚠️'} **PEDIDO ${recargaExitosa ? 'COMPLETADO' : 'EN PROCESO'}**
 ━━━━━━━━━━━━━━━━━━
 📦 ${producto} | 🆔 ${idJugador} | 👤 ${nombreJugador}
 💰 $${precioUsd} USD | ${montoBs} Bs
 🔢 Ref: ${referencia}
+📦 Paquete: ${paqueteCodigo}
 ━━━━━━━━━━━━━━━━━━
-${recargaExitosa ? '✅ COMPLETADO — DIAMANTES ENVIADOS' : '⚠️ PAGO APROBADO — RECARGA EN PROCESO'}
+📡 Respuesta API: ${respuestaApi.substring(0, 200)}
+━━━━━━━━━━━━━━━━━━
+${recargaExitosa ? '✅ COMPLETADO — DIAMANTES ENVIADOS' : '⚠️ PAGO APROBADO — REVISAR RECARGA'}
         `);
 
         // =====================================================
