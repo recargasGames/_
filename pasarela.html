@@ -161,17 +161,15 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 <script type="module">
 // ==================================================
 // 🔧 CONFIGURACIÓN — PABILO + FIREBASE
+// DATOS PROPORCIONADOS POR ANDRUS DÍAZ ✅
 // ==================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// 📌 TU API KEY DE PABILO
+// 📌 DATOS DE PABILO — YA CONFIGURADOS ✅
 const PABILO_API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-
-// ⚠️ PON AQUÍ EL ID DE TU CUENTA BANCARIA CONECTADA EN PABILO
-// (Obtén el ID con la función listarCuentasPabilo() que está abajo)
-const ID_CUENTA_BANCARIA_PABILO = "ID_DE_TU_CUENTA_AQUI";
+const ID_CUENTA_BANCARIA_PABILO = "6a93ac1b98055a34bd8b05f2";
 
 // Firebase Config
 const firebaseConfig = {
@@ -240,12 +238,10 @@ document.getElementById('btnAplicarDescuento').addEventListener('click', functio
     
     if (codigo === "GAMES") {
         if (!descuentoActivo) {
-            // Aplicar 1.5% de descuento
             precioBsFinal = Math.round(precioBsOriginal * 0.985);
             precioUsdFinal = parseFloat((precioUsdOriginal * 0.985).toFixed(2));
             descuentoActivo = true;
             
-            // Mostrar descuento
             document.getElementById('infoDescuento').style.display = 'block';
             document.getElementById('filaDescuento').style.display = 'flex';
             document.getElementById('resumenDescuento').textContent = "- " + formatearMonto(precioBsOriginal - precioBsFinal) + " Bs";
@@ -253,13 +249,12 @@ document.getElementById('btnAplicarDescuento').addEventListener('click', functio
             document.getElementById('montoPago').textContent = formatearMonto(precioBsFinal) + " Bs";
             
             mostrarNotificacion("✅ Descuento aplicado: 1.5%", "success");
-            document.getElementById('codigoDescuento').value = ""; // Queda en blanco
+            document.getElementById('codigoDescuento').value = "";
         } else {
             mostrarNotificacion("⚠️ El descuento ya está aplicado", "warning");
             document.getElementById('codigoDescuento').value = "";
         }
     } else if (codigo === "CANCELAR") {
-        // Quitar descuento
         precioBsFinal = precioBsOriginal;
         precioUsdFinal = precioUsdOriginal;
         descuentoActivo = false;
@@ -321,7 +316,7 @@ inputReferencia.addEventListener('input', function() {
 });
 
 // ==================================================
-// 🔍 VERIFICAR PAGO CON PABILO API
+// 🔍 VERIFICAR PAGO CON PABILO API DIRECTA ✅
 // ==================================================
 document.getElementById('btnVerificar').addEventListener('click', async function() {
     const referencia = inputReferencia.value.trim();
@@ -334,18 +329,12 @@ document.getElementById('btnVerificar').addEventListener('click', async function
         return;
     }
     
-    // Validar que tenga el ID de cuenta de Pabilo
-    if (ID_CUENTA_BANCARIA_PABILO === "6a93ac1b98055a34bd8b05f2") {
-        mostrarNotificacion("⚠️ Falta configurar la cuenta de Pabilo. Revisa el código.", "error");
-        return;
-    }
-    
     // Estado de carga
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> VERIFICANDO...';
     
     try {
-        // 📡 LLAMADA A LA API DE PABILO
+        // 📡 LLAMADA DIRECTA A LA API DE PABILO — DATOS DE ANDRUS ✅
         const respuesta = await fetch("https://api.pabilo.app/v1/payments/verify", {
             method: "POST",
             headers: {
@@ -419,27 +408,6 @@ document.getElementById('btnVerificar').addEventListener('click', async function
     btn.disabled = false;
     btn.innerHTML = "🔍 VERIFICAR PAGO";
 });
-
-// ==================================================
-// 🏦 LISTAR CUENTAS CONECTADAS EN PABILO (PARA OBTENER EL ID)
-// ==================================================
-async function listarCuentasPabilo() {
-    try {
-        const respuesta = await fetch("https://api.pabilo.app/v1/bank-accounts", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${PABILO_API_KEY}`
-            }
-        });
-        const cuentas = await respuesta.json();
-        console.log("🏦 CUENTAS CONECTADAS EN PABILO:");
-        console.log(cuentas);
-        alert("Abre la consola (F12) para ver tus cuentas bancarias y copiar el ID");
-    } catch (e) {
-        console.log("Error al listar cuentas:", e);
-    }
-}
-// Ejecuta esto en consola una vez para obtener tu ID: listarCuentasPabilo()
 
 // ==================================================
 // 🔐 INICIO DE SESIÓN — NO OBLIGATORIO
