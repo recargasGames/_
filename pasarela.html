@@ -91,7 +91,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 </div>
 
 <div class="main">
-    <!-- Resumen del pedido -->
     <div class="card-panel">
         <div class="panel-title">📋 TU PEDIDO</div>
         <div class="detail-row"><span class="detail-label">🎮 Juego</span><span class="detail-value" id="resumenJuego">-</span></div>
@@ -103,19 +102,17 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
         <div class="detail-row"><span class="detail-label">💰 Total a pagar</span><span class="detail-value amount" id="resumenMontoFinal">-</span></div>
     </div>
 
-    <!-- Código de descuento -->
     <div class="card-panel">
-        <div class="panel-title">🎁 ¿TIENES CÓDIGO?</div>
+        <div class="panel-title">🎁 ¿TIENES CÓDIGO DE DESCUENTO?</div>
         <div class="discount-input">
-            <input type="text" id="codigoDescuento" placeholder="Ej: GAMES">
+            <input type="text" id="codigoDescuento" placeholder="" autocomplete="off">
             <button id="btnAplicarDescuento">Aplicar</button>
         </div>
         <div id="discountInfo" class="discount-info" style="display:none">
-            ✅ Código <span>GAMES</span> aplicado - 1.5% de descuento
+            ✅ Código aplicado - <span>1.5% de descuento</span>
         </div>
     </div>
 
-    <!-- Datos de pago -->
     <div class="card-panel">
         <div class="panel-title">💳 DATOS PAGO MÓVIL</div>
         <div class="payment-row">
@@ -128,7 +125,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
         </div>
         <div class="payment-row">
             <div><span class="payment-icon">📲</span> <span class="payment-text">0422-8242411</span></div>
-            <button class="copy-btn-mini" data-copiar="0422-8242411">📋 Copiar</button>
+            <button class="copy-btn-mini" data-copiar="04228242411">📋 Copiar</button>
         </div>
         <div class="payment-row" id="filaMontoPago">
             <div><span class="payment-icon">💰</span> <span class="payment-text" id="montoTexto">-</span></div>
@@ -136,16 +133,13 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
         </div>
     </div>
 
-    <!-- VERIFICACIÓN AUTOMÁTICA POR REFERENCIA -->
     <div class="card-panel">
         <div class="panel-title">🔍 VERIFICAR PAGO</div>
-        
         <div class="form-group">
             <label>🔢 NÚMERO DE REFERENCIA (últimos 6 dígitos)</label>
             <input type="text" class="form-input" id="referencia" placeholder="Ej: 252363" maxlength="6" autocomplete="off">
             <div id="refError" style="font-size:11px;color:#ef4444;margin-top:5px;display:none"></div>
         </div>
-        
         <button class="btn-send" id="btnVerificar">🔍 VERIFICAR PAGO</button>
     </div>
 </div>
@@ -162,7 +156,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import{getDatabase,ref,get,push,set}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import{getDatabase,ref,push,set}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const fbConfig={
     apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
@@ -182,25 +176,23 @@ let uidActual=null;
 let referenciaSeleccionada=null;
 
 // ==============================================
-// 🔧 AQUÍ PEGAS TU ENLACE DE LA API DE VERIFICACIÓN
+// 🔧 PEGA TU ENLACE DE LA API AQUÍ
 // ==============================================
-const API_VERIFICAR_PAGO_URL = ""; // 👈 PEGA TU ENLACE AQUÍ
+const API_VERIFICAR_PAGO_URL = "";
 
-// Obtener datos del localStorage
 let idJugador = localStorage.getItem('id_jugador');
-let nombreJugador = localStorage.getItem('nombre_verificado');
+let nombreJugador = localStorage.getItem('nombre_verificado') || 'Cliente';
 let producto = localStorage.getItem('producto_seleccionado');
 let precioBsOriginal = parseInt(localStorage.getItem('precio_en_bs')) || 0;
 let precioUsdOriginal = parseFloat(localStorage.getItem('precio_usd')) || 0;
-let juego = localStorage.getItem('juego_seleccionado') || 'FREE FIRE 🔥';
+let juego = localStorage.getItem('juego_seleccionado') || 'Juego';
 let metodoPago = localStorage.getItem('metodo_pago') || 'PAGO MOVIL';
 
-// Redirigir si no hay datos
 if(!idJugador || !producto || !precioBsOriginal){
-    window.location.href = "freefire.html";
+    alert("⚠️ No hay datos del pedido. Serás redirigido al inicio.");
+    window.location.href = "index.html";
 }
 
-// Variables de descuento
 let descuentoActivo = false;
 let precioBsFinal = precioBsOriginal;
 let precioUsdFinal = precioUsdOriginal;
@@ -213,7 +205,7 @@ function actualizarMontos(){
     document.getElementById('resumenJuego').innerText = juego;
     document.getElementById('resumenProducto').innerText = producto;
     document.getElementById('resumenId').innerText = idJugador;
-    document.getElementById('resumenNombre').innerText = nombreJugador || 'Verificando...';
+    document.getElementById('resumenNombre').innerText = nombreJugador;
     document.getElementById('resumenMontoOriginal').innerHTML = formatearNumero(precioBsOriginal) + " Bs";
     document.getElementById('resumenMontoFinal').innerHTML = formatearNumero(precioBsFinal) + " Bs";
     document.getElementById('montoTexto').innerHTML = formatearNumero(precioBsFinal) + " Bs";
@@ -227,7 +219,9 @@ function actualizarMontos(){
     }
 }
 
-// Aplicar descuento
+// ==============================================
+// 🎁 CÓDIGO DE DESCUENTO: SOLO "GAMES" — NO SE MUESTRA EN EL CAMPO
+// ==============================================
 document.getElementById('btnAplicarDescuento').onclick = () => {
     const codigo = document.getElementById('codigoDescuento').value.trim().toUpperCase();
     if(codigo === "GAMES"){
@@ -237,22 +231,25 @@ document.getElementById('btnAplicarDescuento').onclick = () => {
             descuentoActivo = true;
             document.getElementById('discountInfo').style.display = 'block';
             actualizarMontos();
-            showToast("✅ Código GAMES aplicado - 1.5% descuento");
+            showToast("✅ Código aplicado — 1.5% de descuento");
+            document.getElementById('codigoDescuento').value = ""; // Queda en blanco al aplicar
+        } else {
+            showToast("⚠️ El descuento ya está aplicado", "warning");
         }
     } else if(codigo === "CANCELAR"){
         precioBsFinal = precioBsOriginal;
         precioUsdFinal = precioUsdOriginal;
         descuentoActivo = false;
         document.getElementById('discountInfo').style.display = 'none';
-        document.getElementById('codigoDescuento').value = '';
+        document.getElementById('codigoDescuento').value = "";
         actualizarMontos();
         showToast("❌ Descuento cancelado", "warning");
     } else if(codigo !== ""){
         showToast("❌ Código incorrecto", "error");
+        document.getElementById('codigoDescuento').value = ""; // Queda en blanco si falla
     }
 };
 
-// Botones de copiar
 document.querySelectorAll('.copy-btn-mini').forEach(btn => {
     btn.onclick = () => {
         const texto = btn.getAttribute('data-copiar');
@@ -282,7 +279,6 @@ function showToast(msg, type = "success"){
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Validar referencia (solo números y 6 dígitos)
 document.getElementById('referencia').oninput = (e) => {
     let value = e.target.value.replace(/\D/g, '').slice(0, 6);
     e.target.value = value;
@@ -297,14 +293,10 @@ document.getElementById('referencia').oninput = (e) => {
     }
 };
 
-// ==============================================
-// 🔍 FUNCIÓN DE VERIFICACIÓN AUTOMÁTICA CON API
-// ==============================================
 document.getElementById('btnVerificar').onclick = async function(){
     const referencia = document.getElementById('referencia').value.trim();
     const refError = document.getElementById('refError');
     
-    // Validar referencia
     if(!referencia || referencia.length !== 6){
         refError.innerText = '❌ Ingresa los 6 dígitos de la referencia';
         refError.style.display = 'block';
@@ -321,8 +313,6 @@ document.getElementById('btnVerificar').onclick = async function(){
     this.innerHTML = '<span class="spinner"></span> VERIFICANDO...';
     
     try{
-        // 📡 LLAMADA A TU API DE VERIFICACIÓN
-        // Envía la referencia y el monto para que la API confirme
         const respuesta = await fetch(API_VERIFICAR_PAGO_URL + "?referencia=" + referencia + "&monto=" + precioBsFinal, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
@@ -330,11 +320,9 @@ document.getElementById('btnVerificar').onclick = async function(){
         
         const resultado = await respuesta.json();
         
-        // ✅ La API responde: existe = true → pago confirmado
         if(resultado.existe === true || resultado.status === "aprobado" || resultado.valido === true){
             showToast("✅ PAGO VERIFICADO! Guardando pedido...");
             
-            // Guardar pedido en Firebase
             const nuevoPedidoRef = push(ref(db, 'pedidos'));
             const pedidoData = {
                 userId: uidActual || 'anonimo',
@@ -348,7 +336,7 @@ document.getElementById('btnVerificar').onclick = async function(){
                 precio_bs: precioBsFinal,
                 referencia: referencia,
                 metodo: metodoPago,
-                estado: 'Completado', // ✅ Queda completado automáticamente
+                estado: 'Completado',
                 timestamp: Date.now(),
                 fecha: new Date().toLocaleString(),
                 verificado_por_api: true
@@ -361,7 +349,6 @@ document.getElementById('btnVerificar').onclick = async function(){
             
             await set(nuevoPedidoRef, pedidoData);
             
-            // Limpiar y redirigir
             localStorage.clear();
             showToast("✅ Pedido registrado! Recarga en proceso.");
             setTimeout(() => {
@@ -369,7 +356,6 @@ document.getElementById('btnVerificar').onclick = async function(){
             }, 2000);
             
         } else {
-            // ❌ La API dice que no existe o no es válido
             showToast("❌ PAGO NO ENCONTRADO. Verifica la referencia.", "error");
         }
         
@@ -382,13 +368,12 @@ document.getElementById('btnVerificar').onclick = async function(){
     this.innerHTML = '🔍 VERIFICAR PAGO';
 };
 
-// ========== FIREBASE AUTH Y NOTIFICACIONES ==========
+// ✅ NO OBLIGA INICIAR SESIÓN — funciona sin cuenta
 onAuthStateChanged(auth, (user) => {
     if(user){
         uidActual = user.uid;
     } else {
         uidActual = null;
-        window.location.href = "login.html";
     }
 });
 
@@ -404,7 +389,6 @@ document.getElementById("logoutDropdownBtn")?.addEventListener("click",e=>{
     signOut(auth).then(()=>location.href="login.html");
 });
 
-// Inicializar
 actualizarMontos();
 </script>
 </body>
