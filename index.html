@@ -1,493 +1,200 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECARGASGAMES</title>
-    <style>
-        :root { --color-principal: #10b981; --color-hover: #059669; --color-acento: #f97316; }
-        body { 
-            background-image: url('fondo.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            background-attachment: fixed; 
-            margin: 0; color: white; 
-            font-family: 'Segoe UI', sans-serif; 
-        }
-        .header { 
-            background: rgba(11, 18, 32, 0.95); 
-            padding: 15px 20px; 
-            display: flex; 
-            justify-content: flex-end; 
-            align-items: center; 
-            border-bottom: 2px solid var(--color-principal); 
-        }
-        .brand { 
-            font-size: 22px; font-weight: bold; 
-            display: flex; align-items: center; gap: 10px; 
-            margin-right: auto; color: var(--color-principal); 
-        }
-        .brand img { height: 35px; width: auto; }
-        .header-buttons { display: flex; align-items: center; gap: 15px; position: relative; }
-        .icon-btn { 
-            background: rgba(0,0,0,0.3); border: none; border-radius: 50%; 
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.2s; color: white; font-size: 20px; position: relative; 
-        }
-        .icon-btn:hover { background: var(--color-principal); transform: scale(1.05); }
-        .notification-badge { 
-            position: absolute; top: -5px; right: -5px; 
-            background: #ef4444; color: white; font-size: 10px; font-weight: bold; 
-            width: 18px; height: 18px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-        }
-        .profile-dropdown { position: relative; }
-        .dropdown-menu { 
-            position: absolute; top: 50px; right: 0; 
-            background: #0b1220; border: 1px solid #1f2937; border-radius: 12px; 
-            width: 200px; z-index: 1000; display: none; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
-        }
-        .dropdown-menu a { 
-            display: block; padding: 12px 16px; color: white; 
-            text-decoration: none; transition: 0.2s; font-size: 14px; 
-        }
-        .dropdown-menu a:hover { background: var(--color-principal); }
-        .dropdown-menu .logout-item { color: #ef4444; border-top: 1px solid #1f2937; }
-        .dropdown-menu .logout-item:hover { background: #ef4444; color: white; }
-        .games-menu { 
-            display: flex; gap: 8px; overflow-x: auto; 
-            background: rgba(11, 18, 32, 0.95); padding: 12px 15px; 
-            border-bottom: 1px solid #1f2937; scrollbar-width: thin; 
-            -webkit-overflow-scrolling: touch; 
-        }
-        .games-menu::-webkit-scrollbar { height: 4px; }
-        .games-menu::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
-        .games-menu::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 10px; }
-        .games-menu a { 
-            text-decoration: none; color: white; background: transparent; 
-            padding: 6px 12px; border-radius: 20px; font-size: 14px; 
-            font-weight: bold; white-space: nowrap; transition: 0.2s; 
-        }
-        .games-menu a:hover { color: var(--color-principal); }
-        .games-menu a.active { 
-            color: var(--color-principal); border-bottom: 2px solid var(--color-principal); 
-            border-radius: 0; 
-        }
-        .main { padding: 20px; max-width: 600px; margin: 0 auto; }
-        .welcome-text { 
-            text-align: center; margin: 20px 0; padding: 15px; 
-            background: rgba(11, 18, 32, 0.7); border-radius: 20px; 
-        }
-        .welcome-text h2 { color: var(--color-principal); font-size: 20px; }
-        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .game-link { 
-            background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; 
-            border-radius: 20px; padding: 0; text-decoration: none; color: white; 
-            text-align: center; transition: 0.3s; overflow: hidden; position: relative; 
-        }
-        .game-link:hover { transform: translateY(-5px); border-color: var(--color-principal); }
-        .game-img { width: 100%; height: 160px; object-fit: cover; display: block; }
-        .game-name { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
-            padding: 30px 10px 12px 10px; font-size: 16px; 
-            font-weight: bold; text-align: center; color: var(--color-principal); 
-        }
-        .modal { 
-            display: none; position: fixed; z-index: 2000; left: 0; top: 0; 
-            width: 100%; height: 100%; background: rgba(0,0,0,0.8); 
-            justify-content: center; align-items: center; 
-        }
-        .modal-content { 
-            background: #111827; border-radius: 20px; max-width: 350px; 
-            width: 90%; border: 1px solid var(--color-principal); overflow: hidden; 
-        }
-        .modal-header { 
-            background: var(--color-principal); padding: 15px; 
-            display: flex; justify-content: space-between; align-items: center; 
-        }
-        .modal-header h3 { color: white; margin: 0; }
-        .modal-header .close-modal { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        .modal-body { padding: 20px; max-height: 400px; overflow-y: auto; }
-        .notification-item { padding: 12px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; gap: 12px; }
-        .notification-icon { font-size: 24px; }
-        .notification-text { flex: 1; }
-        .notification-title { font-weight: bold; margin-bottom: 4px; }
-        .notification-date { font-size: 11px; color: #9ca3af; }
-        .empty-notifications { text-align: center; color: #9ca3af; padding: 30px; }
-        .payment-section { 
-            background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; 
-            border-radius: 20px; padding: 20px; margin-top: 30px; text-align: center; 
-        }
-        .payment-section h3 { color: var(--color-principal); margin-bottom: 15px; font-size: 18px; }
-        .payment-methods-list { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 15px; }
-        .payment-method { background: #111827; border: 1px solid #1f2937; border-radius: 30px; padding: 8px 20px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
-        .support-info { background: #1f2937; border-radius: 12px; padding: 10px; margin-top: 10px; font-size: 13px; color: #9ca3af; }
-        .support-info a { color: var(--color-principal); text-decoration: none; font-weight: bold; }
-        .faq-section { 
-            background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; 
-            border-radius: 20px; padding: 20px; margin-top: 20px; 
-        }
-        .faq-section h3 { color: var(--color-principal); text-align: center; margin-bottom: 20px; font-size: 18px; }
-        details { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; }
-        summary { font-weight: bold; color: var(--color-principal); }
-        details p { margin-top: 10px; padding-top: 10px; border-top: 1px solid #1f2937; color: #9ca3af; font-size: 13px; }
-        .footer { 
-            background: rgba(11, 18, 32, 0.9); border-top: 1px solid #1f2937; 
-            padding: 20px; text-align: center; margin-top: 30px; 
-        }
-        .footer p { color: #9ca3af; font-size: 12px; margin: 5px 0; }
-        .footer .copyright { color: var(--color-principal); font-weight: bold; font-size: 13px; }
-        .social-links { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-        .social-links a { color: #9ca3af; font-size: 14px; text-decoration: none; transition: 0.2s; }
-        .social-links a:hover { color: var(--color-principal); }
-        .whatsapp-float { 
-            position: fixed; bottom: 20px; right: 20px; background: #25D366; 
-            width: 55px; height: 55px; border-radius: 50%; display: flex; 
-            align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            z-index: 1000; text-decoration: none; 
-        }
-        .whatsapp-float:hover { transform: scale(1.1); }
-        .back-to-top { 
-            position: fixed; bottom: 90px; right: 20px; background: var(--color-principal); 
-            color: white; width: 45px; height: 45px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer; 
-            z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-        }
-        .back-to-top.show { opacity: 1; visibility: visible; }
-        .back-to-top:hover { background: var(--color-hover); transform: scale(1.1); }
-        @media (max-width: 500px) { 
-            .game-img { height: 130px; } 
-            .game-name { font-size: 14px; padding: 20px 10px 8px 10px; } 
-            .brand { font-size: 18px; } 
-            .icon-btn { width: 35px; height: 35px; font-size: 18px; } 
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECARGASGAMES - Recargas de Videojuegos</title>
+
+<!-- ✅ VERIFICACIÓN DE GOOGLE SITE — TAL CUAL ME LO DISTE -->
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+
+<style>
+:root{--color-principal:#facc15;--color-hover:#eab308;--color-fondo:#0b1220;--color-tarjeta:#111827;--color-borde:#1f2937}
+body{background-image:url('fondo.jpg');background-size:cover;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh}
+.header{background:rgba(11,18,32,.95);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--color-principal);position:sticky;top:0;z-index:100}
+.brand{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.brand img{height:40px}
+.brand span{color:var(--color-principal)}
+.nav-links{display:flex;gap:20px;align-items:center}
+.nav-links a{color:#d1d5db;text-decoration:none;font-weight:600;font-size:15px;transition:.2s}
+.nav-links a:hover,.nav-links a.active{color:var(--color-principal)}
+.header-buttons{display:flex;align-items:center;gap:12px}
+.icon-btn{background:rgba(0,0,0,.3);border:none;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:20px;transition:.2s}
+.icon-btn:hover{background:var(--color-principal);color:#000}
+.profile-dropdown{position:relative}
+.dropdown-menu{position:absolute;top:52px;right:0;background:var(--color-tarjeta);border:1px solid var(--color-borde);border-radius:14px;width:210px;z-index:1000;display:none;box-shadow:0 10px 25px rgba(0,0,0,.4)}
+.dropdown-menu a{display:block;padding:13px 16px;color:#e5e7eb;text-decoration:none;font-size:15px;transition:.2s}
+.dropdown-menu a:hover{background:rgba(250,204,21,.1);color:var(--color-principal)}
+.dropdown-menu .logout-item{color:#ef4444;border-top:1px solid var(--color-borde)}
+.hero{text-align:center;padding:50px 20px 30px;max-width:900px;margin:0 auto}
+.hero h1{font-size:36px;margin-bottom:12px;color:var(--color-principal)}
+.hero p{font-size:18px;color:#9ca3af;max-width:600px;margin:0 auto}
+.games-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:0 auto 50px;padding:0 20px}
+.game-card{background:rgba(11,18,32,.85);border:2px solid var(--color-borde);border-radius:20px;padding:25px;text-align:center;cursor:pointer;transition:.3s;text-decoration:none;color:#fff}
+.game-card:hover{border-color:var(--color-principal);transform:translateY(-5px);box-shadow:0 10px 30px rgba(250,204,21,.15)}
+.game-icon{font-size:48px;margin-bottom:15px}
+.game-name{font-size:20px;font-weight:700;margin-bottom:8px}
+.game-desc{color:#9ca3af;font-size:14px}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:900px;margin:0 auto 50px;padding:0 20px}
+.feature-item{text-align:center;padding:20px}
+.feature-icon{font-size:32px;margin-bottom:10px}
+.feature-text{font-weight:600}
+.whatsapp-float{position:fixed;bottom:25px;right:25px;background:#25D366;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:30px;z-index:999;box-shadow:0 4px 15px rgba(37,211,102,.4)}
+.whatsapp-float:hover{transform:scale(1.1)}
+.footer{text-align:center;padding:30px 20px;color:#6b7280;font-size:14px;border-top:1px solid var(--color-borde);margin-top:40px}
+@media(max-width:900px){.games-grid{grid-template-columns:repeat(2,1fr)}.features{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:550px){.games-grid{grid-template-columns:1fr}.features{grid-template-columns:1fr}.nav-links{display:none}.hero h1{font-size:28px}}
+</style>
 </head>
 <body>
 
+<!-- HEADER -->
 <div class="header">
-    <div class="brand"><img src="logo.png" alt="Logo">RECARGASGAMES</div>
-    
-    <!-- QUITADO EL TEXTO DE TASA — SOLO FUNCIONA POR DETRÁS -->
-    
+    <a href="index.html" class="brand">
+        <img src="logo.png" alt="Logo RECARGASGAMES">
+        <span>RECARGASGAMES</span>
+    </a>
+    <nav class="nav-links">
+        <a href="index.html" class="active">Inicio</a>
+        <a href="freefire.html">Free Fire</a>
+        <a href="perfil.html">Mis Pedidos</a>
+    </nav>
     <div class="header-buttons">
-        <button class="icon-btn" id="notificacionBtn" onclick="abrirNotificaciones()">
-            🔔
-            <span class="notification-badge" id="notifCount">0</span>
-        </button>
         <div class="profile-dropdown">
             <button class="icon-btn" id="profileBtn">👤</button>
             <div class="dropdown-menu" id="profileDropdown">
-                <a href="editar-perfil.html">Mi Perfil</a>
-                <a href="perfil.html">Mis Pedidos</a>
-                <a href="#" id="logoutDropdownBtn" class="logout-item">Cerrar Sesión</a>
+                <a href="editar-perfil.html">✏️ Mi Perfil</a>
+                <a href="perfil.html">📋 Mis Pedidos</a>
+                <a href="#" id="logoutDropdownBtn" class="logout-item">🚪 Cerrar Sesión</a>
             </div>
         </div>
     </div>
 </div>
 
-<div id="notificacionModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Notificaciones</h3>
-            <button class="close-modal" onclick="cerrarNotificaciones()">&times;</button>
-        </div>
-        <div class="modal-body" id="notificacionesList">
-            <div class="empty-notifications">No tienes notificaciones</div>
-        </div>
-    </div>
-</div>
+<!-- HERO -->
+<section class="hero">
+    <h1>🎮 RECARGAS DE VIDEOJUEGOS AL INSTANTE</h1>
+    <p>Pago Móvil · Binance · Verificación automática con Pabilo</p>
+</section>
 
-<div class="games-menu">
-    <a href="index.html" class="active">Inicio</a>
-    <a href="freefire.html">Free Fire</a>
-    <a href="bloodstrike.html">Blood Strike</a>
-    <a href="roblox.html">Roblox</a>
-    <a href="ml.html">Mobile Legends</a>
-    <a href="cod.html">COD Mobile</a>
-    <a href="pubg.html">PUBG Mobile</a>
-</div>
+<!-- JUEGOS -->
+<section class="games-grid">
+    <a href="freefire.html" class="game-card">
+        <div class="game-icon">🔥</div>
+        <div class="game-name">Free Fire</div>
+        <div class="game-desc">Diamantes, Pases y Tarjetas</div>
+    </a>
+    <a href="bloodstrike.html" class="game-card">
+        <div class="game-icon">🩸</div>
+        <div class="game-name">Blood Strike</div>
+        <div class="game-desc">Cargas y Pases de batalla</div>
+    </a>
+    <a href="roblox.html" class="game-card">
+        <div class="game-icon">🧱</div>
+        <div class="game-name">Roblox</div>
+        <div class="game-desc">Robux y memberships</div>
+    </a>
+    <a href="ml.html" class="game-card">
+        <div class="game-icon">⚔️</div>
+        <div class="game-name">Mobile Legends</div>
+        <div class="game-desc">Diamantes y Pases</div>
+    </a>
+    <a href="cod.html" class="game-card">
+        <div class="game-icon">🎖️</div>
+        <div class="game-name">COD Mobile</div>
+        <div class="game-desc">Puntos y Pases</div>
+    </a>
+    <a href="pubg.html" class="game-card">
+        <div class="game-icon">🔫</div>
+        <div class="game-name">PUBG Mobile</div>
+        <div class="game-desc">UC y Pases</div>
+    </a>
+</section>
 
-<div class="main">
-    <div class="welcome-text">
-        <h2>Los mejores juegos con recargas instantáneas</h2>
-        <p>Elige tu juego y recarga al instante. Sin cuenta obligatoria, solo tu ID y listo.</p>
+<!-- CARACTERÍSTICAS -->
+<section class="features">
+    <div class="feature-item">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-text">Entrega Inmediata</div>
     </div>
-    
-    <div class="games-grid">
-        <a href="freefire.html" class="game-link">
-            <img src="ff.png" class="game-img" alt="Free Fire" onerror="this.style.background='#10b981'">
-            <div class="game-name">FREE FIRE</div>
-        </a>
-        <a href="bloodstrike.html" class="game-link">
-            <img src="bs.png" class="game-img" alt="Blood Strike" onerror="this.style.background='#ef4444'">
-            <div class="game-name">BLOOD STRIKE</div>
-        </a>
-        <a href="roblox.html" class="game-link">
-            <img src="roblox.png" class="game-img" alt="Roblox" onerror="this.style.background='#8b5cf6'">
-            <div class="game-name">ROBLOX</div>
-        </a>
-        <a href="ml.html" class="game-link">
-            <img src="mlbb.png" class="game-img" alt="Mobile Legends" onerror="this.style.background='#f97316'">
-            <div class="game-name">MOBILE LEGENDS</div>
-        </a>
-        <a href="cod.html" class="game-link">
-            <img src="cod.png" class="game-img" alt="Call of Duty" onerror="this.style.background='#3b82f6'">
-            <div class="game-name">CALL OF DUTY</div>
-        </a>
-        <a href="pubg.html" class="game-link">
-            <img src="pubg.png" class="game-img" alt="PUBG Mobile" onerror="this.style.background='#f59e0b'">
-            <div class="game-name">PUBG MOBILE</div>
-        </a>
+    <div class="feature-item">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-text">Pago Seguro</div>
     </div>
+    <div class="feature-item">
+        <div class="feature-icon">💰</div>
+        <div class="feature-text">Mejores Precios</div>
+    </div>
+    <div class="feature-item">
+        <div class="feature-icon">💬</div>
+        <div class="feature-text">Soporte 24/7</div>
+    </div>
+</section>
 
-    <div class="payment-section">
-        <h3>Métodos de Pago</h3>
-        <div class="payment-methods-list">
-            <div class="payment-method">Pago Móvil</div>
-        </div>
-        <div class="support-info">
-            <strong>¿Necesitas ayuda?</strong> Contáctanos por WhatsApp al 
-            <a href="https://wa.me/582428242411" target="_blank">04228242411</a>
-        </div>
-    </div>
+<!-- FOOTER -->
+<footer class="footer">
+    <p>© 2026 RECARGASGAMES — Todos los derechos reservados</p>
+    <p>Recargas automáticas · Verificación con Pabilo API</p>
+</footer>
 
-    <div class="faq-section">
-        <h3>Preguntas Frecuentes</h3>
-        <details>
-            <summary>¿Cuánto tarda la recarga?</summary>
-            <p>La recarga es instantánea una vez confirmado tu pago. No necesitas crear cuenta, solo tu ID de jugador.</p>
-        </details>
-        <details>
-            <summary>¿Cómo recibo mis diamantes o monedas?</summary>
-            <p>Se entregan directamente a tu cuenta del juego usando el ID que nos proporcionas. No necesitas contraseña.</p>
-        </details>
-        <details>
-            <summary>¿Es seguro comprar aquí?</summary>
-            <p>Sí, tenemos años de experiencia y cientos de clientes satisfechos. No guardamos contraseñas ni datos sensibles.</p>
-        </details>
-        <details>
-            <summary>¿Qué métodos de pago aceptan?</summary>
-            <p>Aceptamos Pago Móvil, Transferencia, Binance y PayPal. Todos los pagos se confirman automáticamente.</p>
-        </details>
-        <details>
-            <summary>¿Necesito crear una cuenta?</summary>
-            <p>No. Solo elige tu juego, pon tu ID, paga y recibe tu recarga. Así de simple, igual que la tienda oficial.</p>
-        </details>
-    </div>
-</div>
-
-<div class="footer">
-    <p class="copyright">© 2026 RECARGASGAMES</p>
-    <p>Todos los derechos reservados</p>
-    <p>Recargas instantáneas | Pago seguro | Entrega rápida</p>
-    <div class="social-links">
-        <a href="https://wa.me/582428242411" target="_blank">WhatsApp</a>
-        <a href="mailto:recargasgames@gmail.com">Correo</a>
-        <a href="#">Instagram</a>
-    </div>
-</div>
-
-<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</div>
-<a href="https://wa.me/582428242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank"></a>
+<!-- WHATSAPP FLOTANTE -->
+<a href="https://wa.me/584228242411?text=Hola,%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script type="module">
-    // =====================================================
-    // TASA DE CAMBIO — API DE BINANCE (OCULTA, FUNCIONA POR DETRÁS)
-    // =====================================================
-    const CONFIG = {
-        parBinance: "USDTVES",
-        urlBinance: "https://api.binance.com/api/v3/ticker/price?symbol=",
-        tasaRespaldo: 930,
-        actualizarCada: 60000
-    };
+// ==================================================
+// 🔐 FIREBASE — AUTENTICACIÓN
+// ==================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    let tasaActual = null;
-    let intervaloBinance = null;
+const firebaseConfig = {
+    apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+    authDomain: "recargasgames-14c38.firebaseapp.com",
+    databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+    projectId: "recargasgames-14c38",
+    storageBucket: "recargasgames-14c38.appspot.com",
+    messagingSenderId: "370952235234",
+    appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+};
 
-    // Obtener precio desde Binance — SIN MOSTRAR NADA EN PANTALLA
-    async function cargarTasaBinance() {
-        try {
-            const respuesta = await fetch(CONFIG.urlBinance + CONFIG.parBinance, {
-                method: 'GET',
-                cache: 'no-cache'
-            });
+const appFirebase = initializeApp(firebaseConfig);
+const auth = getAuth(appFirebase);
 
-            if (!respuesta.ok) throw new Error("Error en la API");
+// ==================================================
+// 📱 MENÚ PERFIL
+// ==================================================
+const btnPerfil = document.getElementById('profileBtn');
+const menuPerfil = document.getElementById('profileDropdown');
 
-            const datos = await respuesta.json();
-            const precio = parseFloat(datos.price);
+btnPerfil.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuPerfil.style.display = menuPerfil.style.display === "block" ? "none" : "block";
+});
 
-            if (!precio || precio <= 0) throw new Error("Precio inválido");
+document.addEventListener('click', () => {
+    menuPerfil.style.display = "none";
+});
 
-            // ✅ GUARDAMOS LA TASA PARA CALCULAR PRECIOS EN BOLÍVARES
-            tasaActual = Math.round(precio);
-            localStorage.setItem('tasa_usd_ves', tasaActual);
-            localStorage.setItem('ultima_actualizacion_tasa', new Date().toISOString());
+// ==================================================
+// 🚪 CERRAR SESIÓN
+// ==================================================
+document.getElementById('logoutDropdownBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    await signOut(auth);
+    localStorage.clear();
+    window.location.href = "login.html";
+});
 
-            // Avisamos a las páginas de productos que la tasa cambió
-            window.dispatchEvent(new CustomEvent('tasaActualizada', { detail: tasaActual }));
-
-        } catch (error) {
-            console.warn("No se pudo obtener tasa de Binance, usando respaldo:", error);
-            
-            tasaActual = localStorage.getItem('tasa_usd_ves') 
-                ? parseFloat(localStorage.getItem('tasa_usd_ves')) 
-                : CONFIG.tasaRespaldo;
-
-            localStorage.setItem('tasa_usd_ves', tasaActual);
-        }
+// ==================================================
+// 🔓 ESTADO DE SESIÓN
+// ==================================================
+onAuthStateChanged(auth, (usuario) => {
+    if (usuario) {
+        console.log("✅ Sesión activa:", usuario.email);
+    } else {
+        console.log("ℹ️ Sin sesión — modo invitado");
     }
-
-    // Cargar tasa al iniciar y repetir
-    cargarTasaBinance();
-    intervaloBinance = setInterval(cargarTasaBinance, CONFIG.actualizarCada);
-
-    // Escuchar cambios desde el panel
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'tasa_usd_ves') {
-            tasaActual = parseFloat(e.newValue);
-        }
-    });
-
-    // =====================================================
-    // FIREBASE
-    // =====================================================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-        authDomain: "recargasgames-14c38.firebaseapp.com",
-        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-        projectId: "recargasgames-14c38",
-        storageBucket: "recargasgames-14c38.firebasestorage.app",
-        messagingSenderId: "370952235234",
-        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    
-    let notificaciones = [];
-    let userIdActual = null;
-    
-    function actualizarContador() {
-        const noLeidas = notificaciones.filter(n => !n.leida).length;
-        const badge = document.getElementById('notifCount');
-        if (badge) { 
-            badge.textContent = noLeidas; 
-            badge.style.display = noLeidas > 0 ? 'flex' : 'none'; 
-        }
-    }
-    
-    async function marcarTodasComoLeidas() {
-        if (!userIdActual) return;
-        try {
-            for (const notif of notificaciones) {
-                if (!notif.leida) {
-                    const notifRef = ref(db, `notificaciones/${userIdActual}/${notif.id}`);
-                    await update(notifRef, { leida: true });
-                }
-            }
-        } catch (error) { console.error("Error:", error); }
-    }
-    
-    function cargarNotificacionesFirebase(userId) {
-        if (!userId) return;
-        userIdActual = userId;
-        const notificacionesRef = ref(db, `notificaciones/${userId}`);
-        
-        onValue(notificacionesRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                notificaciones = Object.entries(data).map(([id, valor]) => ({ id, ...valor }));
-                notificaciones.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                actualizarContador();
-            } else {
-                notificaciones = [];
-                actualizarContador();
-            }
-        });
-    }
-    
-    window.abrirNotificaciones = async function() {
-        const modal = document.getElementById('notificacionModal');
-        const listaDiv = document.getElementById('notificacionesList');
-        
-        if (!notificaciones.length) {
-            listaDiv.innerHTML = '<div class="empty-notifications">No tienes notificaciones</div>';
-        } else {
-            listaDiv.innerHTML = notificaciones.map(notif => `
-                <div class="notification-item">
-                    <div class="notification-icon">${notif.titulo?.includes('Completado') ? '✅' : '🔔'}</div>
-                    <div class="notification-text">
-                        <div class="notification-title">${notif.titulo || 'Notificación'}</div>
-                        <div style="font-size:12px;">${notif.mensaje || ''}</div>
-                        <div class="notification-date">${notif.fecha || ''}</div>
-                    </div>
-                </div>
-            `).join('');
-            await marcarTodasComoLeidas();
-        }
-        modal.style.display = 'flex';
-    };
-    
-    window.cerrarNotificaciones = function() { 
-        document.getElementById('notificacionModal').style.display = 'none'; 
-    };
-    
-    // ========== MENÚ DE PERFIL ==========
-    const profileBtn = document.getElementById('profileBtn');
-    const profileDropdown = document.getElementById('profileDropdown');
-    if (profileBtn) {
-        profileBtn.addEventListener('click', (e) => { 
-            e.stopPropagation(); 
-            profileDropdown.style.display = profileDropdown.style.display === 'block' ? 'none' : 'block'; 
-        });
-    }
-    document.addEventListener('click', () => { 
-        if (profileDropdown) profileDropdown.style.display = 'none'; 
-    });
-    
-    // ========== CIERRE DE SESIÓN ==========
-    document.getElementById("logoutDropdownBtn")?.addEventListener("click", async (e) => {
-        e.preventDefault();
-        localStorage.clear();
-        sessionStorage.clear();
-        try {
-            await signOut(auth);
-        } catch(error) {
-            console.error("Error al cerrar:", error);
-        }
-        window.location.reload();
-    });
-    
-    // ========== BOTÓN SUBIR ==========
-    window.addEventListener('scroll', function() { 
-        const backToTop = document.getElementById('backToTop'); 
-        backToTop.classList.toggle('show', window.scrollY > 300); 
-    });
-    
-    // ========== CERRAR MODAL AL HACER CLIC FUERA ==========
-    window.onclick = function(event) { 
-        const modal = document.getElementById('notificacionModal'); 
-        if (event.target === modal) cerrarNotificaciones(); 
-    };
-    
-    // ========== AUTH — SIN REDIRIGIR A LOGIN ==========
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("Usuario logueado:", user.email);
-            cargarNotificacionesFirebase(user.uid);
-        } else {
-            console.log("Navegando sin cuenta — Compra disponible");
-        }
-    });
+});
 </script>
 
 </body>
