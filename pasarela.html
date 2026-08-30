@@ -1,452 +1,250 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RECARGASGAMES - Confirmar Pago</title>
-<style>
-:root{--color-principal:#10b981;--color-hover:#059669}
-body{background-image:url('fondo.jpg');background-size:cover;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif;margin:0}
-.header{background:rgba(11,18,32,.95);padding:15px 20px;display:flex;justify-content:flex-end;align-items:center;border-bottom:2px solid var(--color-principal)}
-.brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;margin-right:auto}
-.brand img{height:35px}
-.brand span{color:var(--color-principal)}
-.header-buttons{display:flex;align-items:center;gap:15px;position:relative}
-.icon-btn{background:rgba(0,0,0,.3);border:none;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:20px;position:relative}
-.icon-btn:hover{background:var(--color-principal)}
-.back-btn{background:rgba(0,0,0,.3);border:none;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:20px;text-decoration:none;margin-right:10px}
-.back-btn:hover{background:var(--color-principal)}
-.notification-badge{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.profile-dropdown{position:relative}
-.dropdown-menu{position:absolute;top:50px;right:0;background:#0b1220;border:1px solid #1f2937;border-radius:12px;width:200px;z-index:1000;display:none}
-.dropdown-menu a{display:block;padding:12px 16px;color:#fff;text-decoration:none;font-size:14px}
-.dropdown-menu a:hover{background:var(--color-principal)}
-.dropdown-menu .logout-item{color:#ef4444;border-top:1px solid #1f2937}
-.main{padding:20px;max-width:550px;margin:0 auto}
-.card-panel{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px}
-.panel-title{font-size:15px;font-weight:700;margin:0 0 15px;color:var(--color-principal)}
-.detail-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.detail-row:last-child{border-bottom:none}
-.detail-label{color:#9ca3af}
-.detail-value{font-weight:bold}
-.detail-value.amount{color:#22c55e;font-size:18px}
-.payment-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.payment-row:last-child{border-bottom:none}
-.payment-icon{font-size:20px;margin-right:10px}
-.payment-text{font-family:monospace;font-size:15px;font-weight:500}
-.copy-btn-mini{background:rgba(16,185,129,.15);border:1px solid var(--color-principal);color:var(--color-principal);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:bold;cursor:pointer;transition:.2s}
-.copy-btn-mini:hover{background:var(--color-principal);color:#fff}
-.discount-input{display:flex;gap:10px;margin-bottom:15px}
-.discount-input input{flex:1;height:45px;border-radius:12px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;font-size:14px}
-.discount-input input:focus{outline:none;border-color:var(--color-principal)}
-.discount-input button{background:rgba(16,185,129,.2);color:var(--color-principal);border:1px solid var(--color-principal);border-radius:12px;padding:0 18px;font-weight:700;cursor:pointer}
-.discount-input button:hover{background:var(--color-principal);color:#fff}
-.discount-info{background:rgba(245,158,11,.1);border:1px solid #f59e0b;border-radius:12px;padding:10px;margin-bottom:15px;text-align:center;font-size:13px}
-.discount-info span{color:#f59e0b;font-weight:bold}
-.form-group{margin-bottom:15px}
-.form-group label{display:block;color:#9ca3af;font-size:13px;margin-bottom:8px}
-.form-input{width:100%;height:50px;border-radius:14px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;box-sizing:border-box;font-size:16px}
-.form-input:focus{outline:none;border-color:var(--color-principal)}
-.btn-send{background:var(--color-principal);color:#fff;border:none;width:100%;height:50px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px}
-.btn-send:hover{background:var(--color-hover)}
-.btn-send.loading{opacity:.6;pointer-events:none}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--color-principal);color:#fff;padding:12px 24px;border-radius:30px;font-weight:bold;z-index:1000;animation:fadeUp .3s ease}
-.toast.error{background:#ef4444}
-.toast.warning{background:#f59e0b}
-@keyframes fadeUp{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
-.whatsapp-float{position:fixed;bottom:20px;right:20px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:28px;z-index:100}
-.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.8);justify-content:center;align-items:center}
-.modal-content{background:#111827;border-radius:20px;max-width:350px;width:90%;border:1px solid var(--color-principal);padding:20px}
-.modal-header{background:var(--color-principal);padding:15px;display:flex;justify-content:space-between;align-items:center;border-radius:12px 12px 0 0;margin:-20px -20px 15px -20px}
-.modal-header h3{color:#fff;margin:0;font-size:16px}
-.modal-header .close-modal{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:0;line-height:1}
-.empty-state{text-align:center;color:#9ca3af;padding:30px 20px}
-#filaDescuento{display:none}
-@media(max-width:500px){.brand{font-size:18px}.icon-btn{width:35px;height:35px;font-size:18px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Pago — RECARGASGAMES</title>
+    <style>
+        :root { --color-principal: #10b981; --color-hover: #059669; --color-error: #ef4444; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; color: white;
+        }
+        .card {
+            background: rgba(15, 23, 42, 0.9); border: 1px solid #334155;
+            border-radius: 20px; padding: 30px; max-width: 420px; width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 6px; color: #94a3b8;
+            text-decoration: none; font-size: 14px; margin-bottom: 20px; transition: 0.2s;
+        }
+        .back-btn:hover { color: white; }
+        h1 { font-size: 22px; margin-bottom: 5px; color: var(--color-principal); }
+        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-size: 14px; color: #e2e8f0; }
+        input {
+            width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #475569;
+            background: #1e293b; color: white; font-size: 16px; outline: none;
+            transition: 0.2s;
+        }
+        input:focus { border-color: var(--color-principal); box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+        small { display: block; margin-top: 6px; font-size: 12px; color: #94a3b8; }
+        .btn-verificar {
+            width: 100%; padding: 15px; background: var(--color-principal); color: white;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn-verificar:hover { background: var(--color-hover); transform: translateY(-2px); }
+        .btn-verificar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .info-box {
+            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px; padding: 15px; margin-top: 20px; font-size: 13px; line-height: 1.6;
+        }
+        .info-box strong { color: var(--color-principal); }
+        .mensaje { margin-top: 20px; padding: 15px; border-radius: 12px; display: none; font-weight: 500; }
+        .mensaje.exito { background: rgba(16,185,129,0.15); border: 1px solid var(--color-principal); color: #6ee7b7; display: block; }
+        .mensaje.error { background: rgba(239,68,68,0.15); border: 1px solid var(--color-error); color: #fca5a5; display: block; }
+        .loading { display: none; text-align: center; margin-top: 15px; color: #facc15; }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #333; border-top-color: var(--color-principal); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="brand"><img src="logo.png" alt="Logo"><span>RECARGASGAMES</span></div>
-    <div class="header-buttons">
-        <a href="javascript:history.back()" class="back-btn">←</a>
-        <button class="icon-btn" id="notificacionBtn">🔔<span class="notification-badge" id="notifCount">0</span></button>
-        <div class="profile-dropdown">
-            <button class="icon-btn" id="profileBtn">👤</button>
-            <div class="dropdown-menu" id="profileDropdown">
-                <a href="editar-perfil.html">✏️ Mi Perfil</a>
-                <a href="perfil.html">📋 Mis Pedidos</a>
-                <a href="#" id="logoutDropdownBtn" class="logout-item">🚪 Cerrar Sesión</a>
-            </div>
-        </div>
+<div class="card">
+    <a href="javascript:history.back()" class="back-btn">← Volver</a>
+    <h1>🔍 Verificar Pago</h1>
+    <p class="subtitle">Confirma tu pago móvil para procesar la recarga</p>
+
+    <div class="form-group">
+        <label>🔢 Referencia del pago</label>
+        <input type="text" id="referencia" placeholder="Ej: 67890" autocomplete="off" required>
+        <small>Últimos dígitos del comprobante bancario</small>
+    </div>
+
+    <div class="form-group">
+        <label>💰 Monto exacto en Bolívares</label>
+        <input type="number" step="0.01" id="monto" placeholder="Ej: 921.50" required>
+        <small>⚠️ Debe ser EXACTAMENTE lo que pagaste</small>
+    </div>
+
+    <div class="form-group">
+        <label>📅 Fecha del pago</label>
+        <input type="date" id="fecha_pago" required>
+    </div>
+
+    <button id="btnVerificar" class="btn-verificar" onclick="verificarPago()">✅ VERIFICAR PAGO</button>
+
+    <div class="loading" id="loading">
+        <span class="spinner"></span> Verificando...
+    </div>
+
+    <div class="mensaje" id="mensaje"></div>
+
+    <div class="info-box">
+        <strong>ℹ️ Cómo funciona:</strong><br>
+        Pabilo busca el pago en tu cuenta usando la referencia, el monto exacto y la fecha. Si coincide, se confirma automáticamente. Si no lo encuentra, espera 3 minutos y vuelve a intentarlo.
     </div>
 </div>
-
-<div class="main">
-    <!-- RESUMEN DEL PEDIDO -->
-    <div class="card-panel">
-        <div class="panel-title">📋 TU PEDIDO</div>
-        <div class="detail-row"><span class="detail-label">🎮 Juego</span><span class="detail-value" id="resumenJuego">-</span></div>
-        <div class="detail-row"><span class="detail-label">📦 Producto</span><span class="detail-value" id="resumenProducto">-</span></div>
-        <div class="detail-row"><span class="detail-label">🆔 ID</span><span class="detail-value" id="resumenId">-</span></div>
-        <div class="detail-row"><span class="detail-label">👤 Nombre</span><span class="detail-value" id="resumenNombre">-</span></div>
-        <div class="detail-row"><span class="detail-label">💰 Monto original</span><span class="detail-value amount" id="resumenMontoOriginal">-</span></div>
-        <div class="detail-row" id="filaDescuento"><span class="detail-label">🎁 Descuento (1.5%)</span><span class="detail-value" style="color:#f59e0b" id="resumenDescuento">-</span></div>
-        <div class="detail-row"><span class="detail-label">💰 Total a pagar</span><span class="detail-value amount" id="resumenMontoFinal">-</span></div>
-    </div>
-
-    <!-- CÓDIGO DE DESCUENTO -->
-    <div class="card-panel">
-        <div class="panel-title">🎁 ¿TIENES CÓDIGO DE DESCUENTO?</div>
-        <div class="discount-input">
-            <input type="text" id="codigoDescuento" placeholder="" autocomplete="off">
-            <button id="btnAplicarDescuento">Aplicar</button>
-        </div>
-        <div id="infoDescuento" class="discount-info" style="display:none">
-            ✅ Código aplicado — <span>1.5% de descuento</span>
-        </div>
-    </div>
-
-    <!-- DATOS DE PAGO MÓVIL -->
-    <div class="card-panel">
-        <div class="panel-title">💳 DATOS PAGO MÓVIL</div>
-        <div class="payment-row">
-            <div style="display:flex;align-items:center"><span class="payment-icon">🏦</span><span class="payment-text">0102</span></div>
-            <button class="copy-btn-mini" onclick="copiarTexto('0102')">📋 Copiar</button>
-        </div>
-        <div class="payment-row">
-            <div style="display:flex;align-items:center"><span class="payment-icon">🪪</span><span class="payment-text">32824869</span></div>
-            <button class="copy-btn-mini" onclick="copiarTexto('32824869')">📋 Copiar</button>
-        </div>
-        <div class="payment-row">
-            <div style="display:flex;align-items:center"><span class="payment-icon">📱</span><span class="payment-text">0422-8242411</span></div>
-            <button class="copy-btn-mini" onclick="copiarTexto('04228242411')">📋 Copiar</button>
-        </div>
-        <div class="payment-row">
-            <div style="display:flex;align-items:center"><span class="payment-icon">💰</span><span class="payment-text" id="montoPago">-</span></div>
-            <button class="copy-btn-mini" id="btnCopiarMonto">📋 Copiar</button>
-        </div>
-    </div>
-
-    <!-- VERIFICAR PAGO CON PABILO -->
-    <div class="card-panel">
-        <div class="panel-title">🔍 VERIFICAR PAGO</div>
-        <div class="form-group">
-            <label>🔢 NÚMERO DE REFERENCIA (últimos 6 dígitos)</label>
-            <input type="text" class="form-input" id="referencia" placeholder="Ej: 252363" maxlength="6" autocomplete="off">
-            <div id="errorReferencia" style="font-size:11px;color:#ef4444;margin-top:5px;display:none"></div>
-        </div>
-        <button class="btn-send" id="btnVerificar">🔍 VERIFICAR PAGO</button>
-    </div>
-</div>
-
-<!-- MODAL NOTIFICACIONES -->
-<div id="modalNotificaciones" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>🔔 Notificaciones</h3>
-            <button class="close-modal" onclick="cerrarModal()">&times;</button>
-        </div>
-        <div id="contenidoNotificaciones" class="empty-state">
-            No tienes notificaciones nuevas
-        </div>
-    </div>
-</div>
-
-<a href="https://wa.me/584228242411?text=Hola,%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script type="module">
-// ==================================================
-// 🔧 CONFIGURACIÓN — PABILO + FIREBASE
-// DATOS PROPORCIONADOS POR ANDRUS DÍAZ ✅
-// ==================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    // =====================================================
+    // 🔑 CONFIGURACIÓN — RELLENA TUS DATOS AQUÍ
+    // =====================================================
+    const CONFIG = {
+        API_URL: "https://api.pabilo.app/userbankpayment/TU_ID_DE_CUENTA/betaserio", // ← Reemplaza TU_ID_DE_CUENTA
+        API_KEY: "TU_CLAVE_API_AQUÍ"  // ← Tu API Key de Pabilo (Bearer token)
+    };
 
-// 📌 DATOS DE PABILO — YA CONFIGURADOS ✅
-const PABILO_API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const ID_CUENTA_BANCARIA_PABILO = "6a93ac1b98055a34bd8b05f2";
+    // =====================================================
+    // ✅ FUNCIÓN DE VERIFICACIÓN — CORREGIDA SEGÚN ANDRUS
+    // =====================================================
+    async function verificarPago() {
+        // Obtener valores del formulario
+        const referencia = document.getElementById("referencia").value.trim();
+        const monto = parseFloat(document.getElementById("monto").value);
+        const fechaPago = document.getElementById("fecha_pago").value;
+        const btn = document.getElementById("btnVerificar");
+        const loading = document.getElementById("loading");
+        const mensaje = document.getElementById("mensaje");
 
-// Firebase Config
-const firebaseConfig = {
-    apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-    authDomain: "recargasgames-14c38.firebaseapp.com",
-    databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
-    projectId: "recargasgames-14c38",
-    storageBucket: "recargasgames-14c38.appspot.com",
-    messagingSenderId: "370952235234",
-    appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
-};
-
-// Inicializar Firebase
-const appFirebase = initializeApp(firebaseConfig);
-const auth = getAuth(appFirebase);
-const db = getDatabase(appFirebase);
-
-// ==================================================
-// 📦 DATOS DEL PEDIDO DESDE LOCALSTORAGE
-// ==================================================
-const idJugador = localStorage.getItem('id_jugador');
-const nombreJugador = localStorage.getItem('nombre_verificado') || 'Cliente';
-const producto = localStorage.getItem('producto_seleccionado');
-const precioBsOriginal = parseInt(localStorage.getItem('precio_en_bs')) || 0;
-const precioUsdOriginal = parseFloat(localStorage.getItem('precio_usd')) || 0;
-const juego = localStorage.getItem('juego_seleccionado') || 'Juego';
-const metodoPago = localStorage.getItem('metodo_pago') || 'PAGO MOVIL';
-
-// Validar que existan datos
-if (!idJugador || !producto || precioBsOriginal <= 0) {
-    alert("⚠️ No hay datos del pedido. Serás redirigido al inicio.");
-    window.location.href = "index.html";
-}
-
-// Variables globales
-let descuentoActivo = false;
-let precioBsFinal = precioBsOriginal;
-let precioUsdFinal = precioUsdOriginal;
-let uidUsuario = null;
-
-// ==================================================
-// 📊 FORMATEAR NÚMEROS
-// ==================================================
-function formatearMonto(monto) {
-    return new Intl.NumberFormat('es-VE').format(monto);
-}
-
-// ==================================================
-// 📄 MOSTRAR RESUMEN DEL PEDIDO
-// ==================================================
-function cargarResumenPedido() {
-    document.getElementById('resumenJuego').textContent = juego;
-    document.getElementById('resumenProducto').textContent = producto;
-    document.getElementById('resumenId').textContent = idJugador;
-    document.getElementById('resumenNombre').textContent = nombreJugador;
-    document.getElementById('resumenMontoOriginal').textContent = formatearMonto(precioBsOriginal) + " Bs";
-    document.getElementById('resumenMontoFinal').textContent = formatearMonto(precioBsFinal) + " Bs";
-    document.getElementById('montoPago').textContent = formatearMonto(precioBsFinal) + " Bs";
-}
-
-// ==================================================
-// 🎁 CÓDIGO DE DESCUENTO — SOLO "GAMES"
-// ==================================================
-document.getElementById('btnAplicarDescuento').addEventListener('click', function() {
-    const codigo = document.getElementById('codigoDescuento').value.trim().toUpperCase();
-    
-    if (codigo === "GAMES") {
-        if (!descuentoActivo) {
-            precioBsFinal = Math.round(precioBsOriginal * 0.985);
-            precioUsdFinal = parseFloat((precioUsdOriginal * 0.985).toFixed(2));
-            descuentoActivo = true;
-            
-            document.getElementById('infoDescuento').style.display = 'block';
-            document.getElementById('filaDescuento').style.display = 'flex';
-            document.getElementById('resumenDescuento').textContent = "- " + formatearMonto(precioBsOriginal - precioBsFinal) + " Bs";
-            document.getElementById('resumenMontoFinal').textContent = formatearMonto(precioBsFinal) + " Bs";
-            document.getElementById('montoPago').textContent = formatearMonto(precioBsFinal) + " Bs";
-            
-            mostrarNotificacion("✅ Descuento aplicado: 1.5%", "success");
-            document.getElementById('codigoDescuento').value = "";
-        } else {
-            mostrarNotificacion("⚠️ El descuento ya está aplicado", "warning");
-            document.getElementById('codigoDescuento').value = "";
+        // ✅ Validaciones
+        if (!referencia) {
+            mostrarMensaje("⚠️ Escribe la referencia del pago", "error");
+            return;
         }
-    } else if (codigo === "CANCELAR") {
-        precioBsFinal = precioBsOriginal;
-        precioUsdFinal = precioUsdOriginal;
-        descuentoActivo = false;
-        
-        document.getElementById('infoDescuento').style.display = 'none';
-        document.getElementById('filaDescuento').style.display = 'none';
-        document.getElementById('resumenMontoFinal').textContent = formatearMonto(precioBsFinal) + " Bs";
-        document.getElementById('montoPago').textContent = formatearMonto(precioBsFinal) + " Bs";
-        
-        mostrarNotificacion("❌ Descuento cancelado", "warning");
-        document.getElementById('codigoDescuento').value = "";
-    } else if (codigo !== "") {
-        mostrarNotificacion("❌ Código incorrecto", "error");
-        document.getElementById('codigoDescuento').value = "";
-    }
-});
+        if (!monto || monto <= 0) {
+            mostrarMensaje("⚠️ El monto debe ser mayor a 0", "error");
+            return;
+        }
+        if (!fechaPago) {
+            mostrarMensaje("⚠️ Selecciona la fecha del pago", "error");
+            return;
+        }
 
-// ==================================================
-// 📋 COPIAR TEXTO
-// ==================================================
-window.copiarTexto = function(texto) {
-    navigator.clipboard.writeText(texto).then(() => {
-        mostrarNotificacion("✅ Copiado al portapapeles", "success");
-    });
-};
+        // ⏳ Mostrar carga
+        btn.disabled = true;
+        btn.style.display = "none";
+        loading.style.display = "block";
+        mensaje.style.display = "none";
 
-document.getElementById('btnCopiarMonto').addEventListener('click', () => {
-    navigator.clipboard.writeText(precioBsFinal.toString()).then(() => {
-        mostrarNotificacion("✅ Monto copiado", "success");
-    });
-});
+        try {
+            console.log("🔍 Verificando con Pabilo...");
+            console.log("📌 Referencia:", referencia);
+            console.log("💰 Monto Bs:", monto);
+            console.log("📅 Fecha:", fechaPago);
+            console.log("📋 movement_type: GENERIC");
 
-// ==================================================
-// 🔔 MOSTRAR NOTIFICACIONES / TOAST
-// ==================================================
-function mostrarNotificacion(mensaje, tipo = "success") {
-    const toast = document.createElement('div');
-    toast.className = `toast ${tipo}`;
-    toast.textContent = mensaje;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
+            // 📡 Llamada a la API de Pabilo — TAL CUAL LO DIO ANDRUS
+            const respuesta = await fetch(CONFIG.API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${CONFIG.API_KEY}`
+                },
+                body: JSON.stringify({
+                    bank_reference: referencia,
+                    amount: monto,
+                    movement_type: "GENERIC",
+                    fecha_pago: fechaPago
+                })
+            });
 
-// ==================================================
-// 🔍 VERIFICAR REFERENCIA (6 dígitos)
-// ==================================================
-const inputReferencia = document.getElementById('referencia');
-inputReferencia.addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, '').slice(0, 6);
-    const error = document.getElementById('errorReferencia');
-    if (this.value.length === 6) {
-        error.style.display = 'none';
-    } else if (this.value.length > 0) {
-        error.textContent = "Faltan " + (6 - this.value.length) + " dígitos";
-        error.style.display = 'block';
-    } else {
-        error.style.display = 'none';
-    }
-});
+            const resultado = await respuesta.json();
+            console.log("✅ Respuesta completa de Pabilo:", resultado);
 
-// ==================================================
-// 🔍 VERIFICAR PAGO CON PABILO API DIRECTA ✅
-// ==================================================
-document.getElementById('btnVerificar').addEventListener('click', async function() {
-    const referencia = inputReferencia.value.trim();
-    const btn = this;
-    
-    // Validar referencia
-    if (referencia.length !== 6) {
-        document.getElementById('errorReferencia').textContent = "Ingresa los 6 dígitos de la referencia";
-        document.getElementById('errorReferencia').style.display = 'block';
-        return;
-    }
-    
-    // Estado de carga
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> VERIFICANDO...';
-    
-    try {
-        // 📡 LLAMADA DIRECTA A LA API DE PABILO — DATOS DE ANDRUS ✅
-        const respuesta = await fetch("https://api.pabilo.app/v1/payments/verify", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${PABILO_API_KEY}`
-            },
-            body: JSON.stringify({
-                userBankId: ID_CUENTA_BANCARIA_PABILO,
-                amount: precioBsFinal,
-                bankReference: referencia,
-                movementType: "MOVIL_PAY"
-            })
-        });
-        
-        const resultado = await respuesta.json();
-        console.log("📦 Respuesta Pabilo:", resultado);
-        
-        // ✅ PAGO ENCONTRADO
-        if (resultado.found === true) {
-            mostrarNotificacion("✅ PAGO VERIFICADO! Guardando pedido...", "success");
-            
-            // 📝 GUARDAR PEDIDO EN FIREBASE
-            const nuevoPedidoRef = push(ref(db, 'pedidos'));
-            const datosPedido = {
-                idPedido: nuevoPedidoRef.key,
-                idJugador: idJugador,
-                nombreJugador: nombreJugador,
-                juego: juego,
-                producto: producto,
-                montoOriginalBs: precioBsOriginal,
-                montoFinalBs: precioBsFinal,
-                montoUsd: precioUsdFinal,
-                referencia: referencia,
-                metodoPago: metodoPago,
-                estado: "Completado",
-                fecha: new Date().toLocaleString("es-VE"),
-                timestamp: Date.now(),
-                verificadoPor: "Pabilo API",
-                idCuentaPabilo: ID_CUENTA_BANCARIA_PABILO,
-                datosPago: resultado.data || null
-            };
-            
-            if (descuentoActivo) {
-                datosPedido.descuento = "1.5% (GAMES)";
+            if (!respuesta.ok) {
+                throw new Error(resultado.message || resultado.error || "Error en la verificación");
             }
-            
-            await set(nuevoPedidoRef, datosPedido);
-            
-            // 🧹 LIMPIAR Y REDIRIGIR
-            localStorage.clear();
-            mostrarNotificacion("✅ Pedido registrado! Recarga en proceso 🎉", "success");
-            
+
+            // ✅ PAGO ENCONTRADO
+            if (resultado.encontrado === true || resultado.status === "aprobado" || resultado.existe === true) {
+                mostrarMensaje("✅ ¡PAGO VERIFICADO! 🎉\nLa recarga se procesará en unos segundos.", "exito");
+                
+                // 🔥 ACTUALIZAR PEDIDO EN FIREBASE
+                await marcarComoCompletado();
+
+                // Redirigir después de 3 segundos
+                setTimeout(() => {
+                    window.location.href = "exito.html";
+                }, 3000);
+
+            } else {
+                // ❌ No encontrado
+                mostrarMensaje(
+                    "❌ Pago no encontrado.\n\n" +
+                    "Verifica:\n" +
+                    "• El monto sea EXACTO\n" +
+                    "• La referencia esté bien escrita\n" +
+                    "• La fecha del pago sea correcta\n" +
+                    "• Espera 3-5 minutos y vuelve a intentarlo",
+                    "error"
+                );
+            }
+
+        } catch (error) {
+            console.error("❌ Error:", error);
+            mostrarMensaje("⚠️ Error: " + error.message + "\nRevisa tu conexión y vuelve a intentarlo.", "error");
+        } finally {
+            // Restaurar botón
             setTimeout(() => {
-                window.location.href = "perfil.html";
-            }, 2500);
-            
-        } 
-        // ❌ PAGO NO ENCONTRADO
-        else {
-            const razon = resultado.reason || "No se encontró el pago";
-            mostrarNotificacion(`❌ ${razon}. Verifica la referencia o espera unos segundos.`, "error");
-            console.log("Detalle:", resultado);
+                btn.disabled = false;
+                btn.style.display = "block";
+                loading.style.display = "none";
+            }, 2000);
         }
-        
-    } catch (error) {
-        console.error("❌ Error al verificar con Pabilo:", error);
-        mostrarNotificacion("⚠️ Error de conexión. Intenta de nuevo.", "error");
     }
-    
-    // Restaurar botón
-    btn.disabled = false;
-    btn.innerHTML = "🔍 VERIFICAR PAGO";
-});
 
-// ==================================================
-// 🔐 INICIO DE SESIÓN — NO OBLIGATORIO
-// ==================================================
-onAuthStateChanged(auth, (usuario) => {
-    if (usuario) {
-        uidUsuario = usuario.uid;
-        console.log("✅ Sesión activa:", usuario.email);
-    } else {
-        uidUsuario = null;
-        console.log("ℹ️ Sin sesión — modo invitado");
+    // =====================================================
+    // 📍 MOSTRAR MENSAJES
+    // =====================================================
+    function mostrarMensaje(texto, tipo) {
+        const mensaje = document.getElementById("mensaje");
+        mensaje.textContent = texto;
+        mensaje.className = `mensaje ${tipo}`;
     }
-});
 
-// Cerrar sesión
-document.getElementById('logoutDropdownBtn')?.addEventListener('click', async (e) => {
-    e.preventDefault();
-    await signOut(auth);
-    localStorage.clear();
-    window.location.href = "login.html";
-});
+    // =====================================================
+    // 🔥 MARCAR PEDIDO COMO COMPLETADO EN FIREBASE
+    // =====================================================
+    async function marcarComoCompletado() {
+        try {
+            const { getDatabase, ref, update } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+            const { getApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+            
+            const db = getDatabase(getApp());
+            const pedidoId = localStorage.getItem("pedidoId") || localStorage.getItem("pedidoActual");
+            
+            if (pedidoId) {
+                await update(ref(db, `pedidos/${pedidoId}`), {
+                    estado: "Verificado ✅",
+                    verificado: true,
+                    fechaVerificacion: new Date().toISOString(),
+                    referenciaVerificacion: document.getElementById("referencia").value
+                });
+                console.log("✅ Pedido marcado como completado en Firebase");
+            }
+        } catch (fbError) {
+            console.warn("⚠️ No se pudo actualizar Firebase:", fbError);
+        }
+    }
 
-// ==================================================
-// 📱 MENÚ PERFIL
-// ==================================================
-const btnPerfil = document.getElementById('profileBtn');
-const menuPerfil = document.getElementById('profileDropdown');
-btnPerfil?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    menuPerfil.style.display = menuPerfil.style.display === "block" ? "none" : "block";
-});
-document.addEventListener('click', () => {
-    if (menuPerfil) menuPerfil.style.display = "none";
-});
+    // =====================================================
+    // 📅 HOY POR DEFECTO EN EL INPUT DE FECHA
+    // =====================================================
+    document.addEventListener("DOMContentLoaded", () => {
+        const hoy = new Date().toISOString().split("T")[0];
+        document.getElementById("fecha_pago").value = hoy;
+    });
 
-// ==================================================
-// 🚀 CARGAR TODO AL INICIO
-// ==================================================
-cargarResumenPedido();
+    // Exponer función al botón
+    window.verificarPago = verificarPago;
 </script>
+
 </body>
 </html>
