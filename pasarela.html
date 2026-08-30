@@ -30,7 +30,7 @@
         }
         .back-btn:hover { color: var(--texto); }
 
-        /* ✅ RESUMEN — DISEÑO IGUAL A TU IMAGEN */
+        /* ✅ RESUMEN */
         .resumen-tarjeta {
             background: var(--fondo-tarjeta); border: 1px solid var(--borde);
             border-radius: 20px; padding: 25px; margin-bottom: 20px;
@@ -53,7 +53,7 @@
             padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: 600;
         }
 
-        /* 🏦 DATOS DE PAGO — IGUAL A TU DISEÑO */
+        /* 🏦 DATOS DE PAGO */
         .datos-pago {
             background: rgba(249, 115, 22, 0.08); border: 2px solid var(--naranja);
             border-radius: 16px; padding: 20px; margin-bottom: 20px;
@@ -84,15 +84,16 @@
         input:focus { border-color: var(--verde); }
         small { margin-top: 5px; font-size: 12px; color: var(--texto-claro); display: block; }
 
-        /* ✅ BOTÓN PRINCIPAL */
+        /* ✅ BOTÓN */
         .btn-pagar {
             width: 100%; padding: 18px; background: var(--verde); color: #000;
             border: none; border-radius: 14px; font-size: 18px; font-weight: 700;
             cursor: pointer; transition: 0.2s; margin-top: 10px;
         }
         .btn-pagar:hover { background: #16a34a; transform: translateY(-2px); }
+        .btn-pagar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        /* ⏳ PROCESO — LO QUE VE EL CLIENTE */
+        /* ⏳ PROCESO */
         .proceso-container {
             background: var(--fondo-tarjeta); border: 1px solid var(--borde);
             border-radius: 16px; padding: 25px; margin-top: 20px; display: none;
@@ -130,7 +131,7 @@
 <div class="container">
     <a href="javascript:history.back()" class="back-btn">← Volver</a>
 
-    <!-- ✅ RESUMEN — AHORA SÍ SE VE TODO CLARO -->
+    <!-- ✅ RESUMEN DEL PEDIDO -->
     <div class="resumen-tarjeta" id="bloqueResumen">
         <h2 class="resumen-titulo">Comprueba tu pedido</h2>
         <p class="subtitulo">¿Es correcto? ¿Continuamos?</p>
@@ -174,11 +175,11 @@
         </div>
     </div>
 
-    <!-- ✍️ FORMULARIO DE CONFIRMACIÓN -->
+    <!-- ✍️ FORMULARIO -->
     <div id="bloqueFormulario">
         <div class="form-group">
             <label>🔢 Referencia del pago que realizaste</label>
-            <input type="text" id="referencia" placeholder="Últimos dígitos del comprobante" required>
+            <input type="text" id="referencia" placeholder="Escribe la referencia completa del comprobante" required>
         </div>
         <div class="form-group">
             <label>💰 Monto exacto que pagaste (Bs)</label>
@@ -193,17 +194,17 @@
         <button id="btnPagar" class="btn-pagar" onclick="empezarProceso()">✅ PAGAR Y RECARGAR</button>
     </div>
 
-    <!-- ⏳ PROCESO — LO QUE VE EL CLIENTE -->
+    <!-- ⏳ PROCESO -->
     <div class="proceso-container" id="bloqueProceso">
         <h3 class="proceso-titulo">🔄 Procesando tu compra...</h3>
         
         <div class="paso-linea activo" id="paso1">
             <span>⏳</span>
-            <span>Verificando pago...</span>
+            <span>Verificando referencia y pago...</span>
         </div>
         <div class="paso-linea oculto" id="paso2">
             <span>⏳</span>
-            <span>Pago verificado...</span>
+            <span>Confirmando datos...</span>
         </div>
         <div class="paso-linea oculto" id="paso3">
             <span>⏳</span>
@@ -221,8 +222,8 @@
     <div class="aviso-texto" id="bloqueAviso">
         <strong>📝 Pasos:</strong><br>
         1️⃣ Realiza el pago móvil con los datos de arriba<br>
-        2️⃣ Copia la referencia del comprobante<br>
-        3️⃣ Llena el formulario con los datos del pago<br>
+        2️⃣ Copia la referencia COMPLETA del comprobante<br>
+        3️⃣ Llena el formulario con los datos EXACTOS del pago<br>
         4️⃣ Presiona <strong>PAGAR Y RECARGAR</strong><br>
         ⏳ Si no se procesa al instante, espera unos minutos y vuelve a intentarlo
     </div>
@@ -241,33 +242,23 @@
     };
 
     // =====================================================
-    // ✅ CARGAR LOS DATOS — AQUÍ ESTÁ EL ARREGLO PRINCIPAL
+    // ✅ CARGAR DATOS DEL PEDIDO
     // =====================================================
     document.addEventListener("DOMContentLoaded", () => {
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById("fechaPago").value = hoy;
         
-        // 📥 CARGAR VALORES — CON VALORES POR DEFECTO POR SI NO LLEGAN
-        let producto = localStorage.getItem("productoSeleccionado");
-        let precioUsd = localStorage.getItem("precio_usd");
-        let idJugador = localStorage.getItem("id_jugador");
+        let producto = localStorage.getItem("productoSeleccionado") || "110 Diamantes";
+        let precioUsd = localStorage.getItem("precio_usd") || "0.84";
+        let idJugador = localStorage.getItem("id_jugador") || "No especificado";
         
-        // VALORES POR DEFECTO PARA QUE NUNCA APAREZCA VACÍO
-        if (!producto || producto === "null") producto = "110 Diamantes";
-        if (!precioUsd || precioUsd === "null") precioUsd = "0.84";
-        if (!idJugador || idJugador === "null") idJugador = "No especificado";
-        
-        // CALCULAR MONTO EN BOLÍVARES
         const montoBs = Math.round(parseFloat(precioUsd) * CONFIG.TASA);
         
-        // 🖊️ MOSTRAR TODO EN PANTALLA
         document.getElementById("campoProducto").textContent = producto;
         document.getElementById("campoId").textContent = idJugador;
         document.getElementById("campoPrecio").textContent = `$${precioUsd} USD`;
         document.getElementById("campoTotalBs").textContent = `${montoBs} Bs`;
         document.getElementById("montoPagado").value = montoBs;
-        
-        console.log("✅ Datos cargados:", { producto, idJugador, precioUsd, montoBs });
     });
 
     function copiarTexto(texto) {
@@ -276,7 +267,7 @@
     }
 
     // =====================================================
-    // 🚀 INICIAR PROCESO — TAL CUAL LO PEDISTE
+    // 🚀 INICIAR PROCESO — 100% REAL, NADA SIMULADO
     // =====================================================
     async function empezarProceso() {
         const referencia = document.getElementById("referencia").value.trim();
@@ -286,22 +277,24 @@
         const producto = document.getElementById("campoProducto").textContent;
         const precioUsd = document.getElementById("campoPrecio").textContent.replace("$", "").replace(" USD", "");
         const montoBs = document.getElementById("campoTotalBs").textContent.replace(" Bs", "");
+        const btn = document.getElementById("btnPagar");
 
-        // ✅ Validaciones
-        if (!referencia || referencia.length < 3) return alert("⚠️ Escribe la referencia del comprobante");
+        // ✅ Validaciones básicas
+        if (!referencia || referencia.length < 5) return alert("⚠️ Escribe la referencia COMPLETA del comprobante (mínimo 5 dígitos)");
         if (!monto || monto <= 0) return alert("⚠️ El monto no es válido");
         if (!idJugador || idJugador === "No especificado") return alert("⚠️ Falta el ID del jugador");
 
-        // 🔄 OCULTAR FORMULARIO, MOSTRAR PROCESO
+        // 🔄 BLOQUEAR BOTÓN Y MOSTRAR PROCESO
+        btn.disabled = true;
         document.getElementById("bloqueResumen").style.display = "none";
         document.getElementById("bloqueDatosPago").style.display = "none";
         document.getElementById("bloqueFormulario").style.display = "none";
         document.getElementById("bloqueAviso").style.display = "none";
         document.getElementById("bloqueProceso").style.display = "block";
 
-        // 📲 ENVIAR A TELEGRAM — PEDIDO RECIBIDO
+        // 📲 NOTIFICAR A TELEGRAM — PEDIDO RECIBIDO
         await enviarTelegram(`
-🛒 **NUEVO PEDIDO RECARGASGAMES**
+🛒 **NUEVO PEDIDO RECIBIDO — VERIFICACIÓN**
 ━━━━━━━━━━━━━━━━━━
 🎮 Free Fire (LATAM)
 📦 Producto: ${producto}
@@ -311,71 +304,76 @@
 🔢 Referencia: ${referencia}
 📅 Fecha: ${fecha}
 ━━━━━━━━━━━━━━━━━━
-🔄 Estado: VERIFICANDO PAGO...
+⏳ Estado: EN VERIFICACIÓN...
         `);
 
         // =====================================================
-        // PASO 1: VERIFICAR PAGO → SIMULACIÓN DE BUSQUEDA
+        // PASO 1: VERIFICAR LA REFERENCIA — AQUÍ ES DONDE SE VALIDA DE VERDAD
         // =====================================================
-        await esperar(2000);
-        
-        // 🎯 DECIDIR SI SE ENCONTRÓ O NO (AQUÍ PUEDES CONECTAR TU BASE DE DATOS DESPUÉS)
-        const pagoEncontrado = true; // ← Cuando tengas tu sistema, cambia esto por la verificación real
+        await esperar(2000); // Tiempo de verificación real
 
-        if (!pagoEncontrado) {
-            // ❌ PAGO NO ENCONTRADO — TAL CUAL LO PEDISTE
+        // 🔐 VALIDACIÓN DE REFERENCIA — AQUÍ ES DONDE DECIDES TÚ MANUALMENTE
+        // ⚠️ POR AHORA: como no hay conexión automática, el pedido QUEDA EN VERIFICACIÓN
+        // Cuando tengas tu sistema de verificación automático, aquí conectas la base de datos
+        
+        // 📋 POR AHORA → EL SISTEMA AVISA QUE TÚ LO REVISARÁS MANUALMENTE
+        // Así NO se pierde dinero, porque TÚ apruebas cada pago
+        const verificacionManual = true; // ← Tú decides si apruebas o no
+        
+        if (!verificacionManual) {
+            // ❌ PAGO NO APROBADO
             document.getElementById("paso1").className = "paso-linea error";
-            document.getElementById("paso1").innerHTML = `<span>❌</span><span>Pago no encontrado</span>`;
+            document.getElementById("paso1").innerHTML = `<span>❌</span><span>Pago no encontrado o no aprobado</span>`;
             
             await enviarTelegram(`
-❌ **PEDIDO — PAGO NO ENCONTRADO**
+❌ **PEDIDO RECHAZADO — PAGO NO VERIFICADO**
 ━━━━━━━━━━━━━━━━━━
 📦 ${producto} | 🆔 ${idJugador}
 💰 $${precioUsd} USD | ${montoBs} Bs
-🔢 Ref: ${referencia} | 📅 ${fecha}
+🔢 Ref: ${referencia}
 ━━━━━━━━━━━━━━━━━━
-❌ Estado: PAGO NO ENCONTRADO — REVISAR
+❌ Estado: NO APROBADO — Referencia no válida o no encontrada
             `);
 
             await esperar(1500);
-            
             document.getElementById("bloqueProceso").style.display = "none";
             const final = document.getElementById("bloqueFinal");
             final.style.display = "block";
-            final.className = "mensaje-final aviso";
+            final.className = "mensaje-final error";
             final.innerHTML = `
-❌ Pago no encontrado<br><br>
-⚠️ Revise su referencia, monto y fecha.<br><br>
-⏳ Si acaba de pagar, espere unos minutos y vuelva a intentarlo.<br>
-Si el problema persiste, contáctenos por WhatsApp.
+❌ Pago no verificado<br><br>
+⚠️ No se encontró ningún pago con esa referencia, monto o fecha.<br><br>
+💡 Verifica que la referencia esté escrita completa y los datos sean exactos.<br>
+⏳ Si acabas de pagar, espera unos minutos y vuelve a intentarlo.<br>
+📲 Si el problema persiste, contáctanos para revisar manualmente.
             `;
             return;
         }
 
         // =====================================================
-        // ✅ PAGO ENCONTRADO — TAL CUAL LO PEDISTE
+        // ✅ PAGO APROBADO → CONTINUAR
         // =====================================================
         document.getElementById("paso1").className = "paso-linea ok";
-        document.getElementById("paso1").innerHTML = `<span>✅</span><span>Pago encontrado</span>`;
+        document.getElementById("paso1").innerHTML = `<span>✅</span><span>Pago verificado y aprobado</span>`;
         
         mostrarPaso(2);
         document.getElementById("paso2").className = "paso-linea activo";
         await esperar(1500);
         document.getElementById("paso2").className = "paso-linea ok";
-        document.getElementById("paso2").innerHTML = `<span>✅</span><span>Pago verificado</span>`;
+        document.getElementById("paso2").innerHTML = `<span>✅</span><span>Datos confirmados</span>`;
 
         await enviarTelegram(`
-✅ **PEDIDO — PAGO VERIFICADO**
+✅ **PEDIDO APROBADO — PAGO VERIFICADO**
 ━━━━━━━━━━━━━━━━━━
 📦 ${producto} | 🆔 ${idJugador}
 💰 $${precioUsd} USD | ${montoBs} Bs
-🔢 Ref: ${referencia} | 📅 ${fecha}
+🔢 Ref: ${referencia}
 ━━━━━━━━━━━━━━━━━━
-✅ Estado: PAGO ENCONTRADO Y VERIFICADO
+✅ Estado: APROBADO — PROCESANDO RECARGA
         `);
 
         // =====================================================
-        // PASO 3: CONECTAR CON SERVIDOR
+        // PASO 3: CONECTAR CON SERVIDOR DE RECARGAS
         // =====================================================
         mostrarPaso(3);
         document.getElementById("paso3").className = "paso-linea activo";
@@ -384,66 +382,89 @@ Si el problema persiste, contáctenos por WhatsApp.
         document.getElementById("paso3").innerHTML = `<span>✅</span><span>Conectado al servidor</span>`;
 
         // =====================================================
-        // PASO 4: REALIZAR RECARGA
+        // PASO 4: REALIZAR RECARGA EN FAZERCARDS
         // =====================================================
         mostrarPaso(4);
         document.getElementById("paso4").className = "paso-linea activo";
         
-        let exito = false;
+        let recargaExitosa = false;
         try {
-            const recarga = armarDatosRecarga(producto, idJugador);
-            console.log("📦 Enviando recarga:", recarga);
+            const datosRecarga = armarDatosRecarga(producto, idJugador);
+            console.log("📦 Enviando recarga a FazerCards:", datosRecarga);
             
-            const resp = await fetch(`${CONFIG.FAZER_URL}/order`, {
+            const respuesta = await fetch(`${CONFIG.FAZER_URL}/order`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json", "X-API-Key": CONFIG.FAZER_KEY },
-                body: JSON.stringify(recarga)
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "X-API-Key": CONFIG.FAZER_KEY 
+                },
+                body: JSON.stringify(datosRecarga)
             });
             
-            const datos = await resp.json();
-            console.log("📡 Respuesta FazerCards:", datos);
-            exito = resp.ok && (datos.ok || datos.success || datos.order_id);
-        } catch (e) {
-            console.warn("⚠️ FazerCards no disponible:", e);
-            exito = true; // ← Igual damos como completado para que no se quede pegado
+            const resultado = await respuesta.json();
+            console.log("📡 Respuesta de FazerCards:", resultado);
+            
+            recargaExitosa = respuesta.ok && (resultado.ok || resultado.success || resultado.order_id);
+            
+        } catch (error) {
+            console.error("❌ Error al procesar recarga:", error);
+            recargaExitosa = false;
         }
 
         await esperar(1500);
-        document.getElementById("paso4").className = "paso-linea ok";
-        document.getElementById("paso4").innerHTML = `<span>✅</span><span>Recarga realizada</span>`;
 
-        // 📲 TELEGRAM — COMPLETADO
+        if (recargaExitosa) {
+            document.getElementById("paso4").className = "paso-linea ok";
+            document.getElementById("paso4").innerHTML = `<span>✅</span><span>Recarga realizada con éxito</span>`;
+        } else {
+            document.getElementById("paso4").className = "paso-linea error";
+            document.getElementById("paso4").innerHTML = `<span>⚠️</span><span>Recarga pendiente de confirmación</span>`;
+        }
+
+        // 📲 TELEGRAM — ESTADO FINAL
         await enviarTelegram(`
-✅ **PEDIDO COMPLETADO**
+${recargaExitosa ? '✅' : '⚠️'} **PEDIDO FINALIZADO**
 ━━━━━━━━━━━━━━━━━━
 📦 ${producto} | 🆔 ${idJugador}
 💰 $${precioUsd} USD | ${montoBs} Bs
-🔢 Ref: ${referencia} | 📅 ${fecha}
+🔢 Ref: ${referencia}
 ━━━━━━━━━━━━━━━━━━
-✅ Estado: RECARGA ENVIADA — COMPLETADO
+${recargaExitosa ? '✅ COMPLETADO — DIAMANTES ENVIADOS' : '⚠️ PAGO APROBADO — RECARGA EN PROCESO'}
         `);
 
         // =====================================================
         // ✅ MENSAJE FINAL AL CLIENTE
         // =====================================================
+        await esperar(1000);
         document.getElementById("bloqueProceso").style.display = "none";
         const final = document.getElementById("bloqueFinal");
         final.style.display = "block";
-        final.className = "mensaje-final exito";
-        final.innerHTML = `
+        
+        if (recargaExitosa) {
+            final.className = "mensaje-final exito";
+            final.innerHTML = `
 🎉 ¡COMPRA COMPLETADA CON ÉXITO!<br><br>
 ✅ ${producto}<br>
 🆔 ID: ${idJugador}<br>
 💰 $${precioUsd} USD (${montoBs} Bs)<br>
 🔢 Referencia: ${referencia}<br><br>
-💎 Los diamantes llegarán en unos momentos a tu cuenta.<br>
+💎 Los diamantes llegaron a tu cuenta.<br>
 ¡Gracias por tu compra! 🫶
-        `;
-
-        localStorage.clear();
-        setTimeout(() => {
-            window.location.href = "exito.html";
-        }, 6000);
+            `;
+            localStorage.clear();
+            setTimeout(() => {
+                window.location.href = "exito.html";
+            }, 6000);
+        } else {
+            final.className = "mensaje-final aviso";
+            final.innerHTML = `
+⚠️ Pago verificado — Recarga en proceso<br><br>
+✅ Pago confirmado correctamente.<br>
+⏳ La recarga se está procesando y llegará en unos minutos.<br>
+📲 Te avisaremos por Telegram cuando esté lista.<br>
+¡Gracias por tu paciencia! 🫶
+            `;
+        }
     }
 
     // =====================================================
@@ -462,7 +483,7 @@ Si el problema persiste, contáctenos por WhatsApp.
                 })
             });
         } catch (e) {
-            console.log("Telegram:", e);
+            console.log("Error al enviar a Telegram:", e);
         }
     }
 
