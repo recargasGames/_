@@ -205,11 +205,11 @@
         
         <div class="paso-linea activo" id="paso1">
             <span>⏳</span>
-            <span>Verificando pago...</span>
+            <span>Consultando movimientos del banco...</span>
         </div>
         <div class="paso-linea oculto" id="paso2">
             <span>⏳</span>
-            <span>Confirmando datos...</span>
+            <span>Verificando referencia y monto...</span>
         </div>
         <div class="paso-linea oculto" id="paso3">
             <span>⏳</span>
@@ -236,16 +236,25 @@
 
 <script>
     // =====================================================
-    // 🔑 TUS DATOS Y APIS — TOKEN CORRECTO
+    // 🔑 TUS DATOS Y APIS — TODO INTEGRADO
     // =====================================================
     const CONFIG = {
+        // 🏦 API BANCO DE VENEZUELA — VERIFICAR PAGOS
+        API_BANCO: "https://apicentral.pro/apis/movimientos_bdv.jsp?token=HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc",
+        PASSWORD_BANCO: "", // ⚠️ PON AQUÍ TU CONTRASEÑA DE LA API DEL BANCO
+        
+        // 💎 API DE RECARGA FREE FIRE
         API_RECARGA: "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire",
+        
+        // 📲 TELEGRAM
         TELEGRAM_TOKEN: "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM",
         TELEGRAM_CHAT_ID: "8452807558",
+        
+        // 💱 TASA
         TASA: 930
     };
 
-    // 📦 MAPA DE PAQUETES — CÓDIGOS PARA LA API
+    // 📦 MAPA DE PAQUETES
     const MAPA_PAQUETES = {
         "110 Diamantes": "110",
         "341 Diamantes": "341",
@@ -265,7 +274,6 @@
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById("fechaPago").value = hoy;
         
-        // 📥 TRAER DATOS DE freefire.html
         const idJugador = localStorage.getItem("id_jugador") || "No especificado";
         const nombreJugador = localStorage.getItem("nombre_jugador") || "No verificado";
         const producto = localStorage.getItem("productoSeleccionado") || "110 Diamantes";
@@ -274,7 +282,6 @@
         
         const montoBs = Math.round(parseFloat(precioUsd) * CONFIG.TASA);
         
-        // 🖊️ MOSTRAR TODO
         document.getElementById("campoId").textContent = idJugador;
         document.getElementById("campoNombre").textContent = nombreJugador;
         document.getElementById("campoProducto").textContent = producto;
@@ -288,6 +295,57 @@
     function copiarTexto(texto) {
         navigator.clipboard.writeText(texto);
         alert("✓ Copiado: " + texto);
+    }
+
+    // =====================================================
+    // 🔍 VERIFICAR PAGO EN EL BANCO DE VENEZUELA
+    // =====================================================
+    async function verificarPagoBanco(referencia, monto, fecha) {
+        if (!CONFIG.PASSWORD_BANCO || CONFIG.PASSWORD_BANCO === "") {
+            console.warn("⚠️ Contraseña del banco no configurada — modo manual activo");
+            return { ok: true, mensaje: "Modo manual — revisar en Telegram" };
+        }
+
+        try {
+            const url = `${CONFIG.API_BANCO}&password=${encodeURIComponent(CONFIG.PASSWORD_BANCO)}`;
+            console.log("🏦 Consultando banco...");
+            
+            const respuesta = await fetch(url);
+            const texto = await respuesta.text();
+            console.log("📡 Respuesta Banco:", texto);
+
+            // Parsear respuesta
+            let datos;
+            try {
+                datos = JSON.parse(texto);
+            } catch {
+                return { ok: false, mensaje: "Respuesta inválida del banco" };
+            }
+
+            // Verificar credenciales
+            if (datos.alerta === "red") {
+                return { ok: false, mensaje: datos.mensaje || "Error de acceso al banco" };
+            }
+
+            // ✅ Aquí se procesan los movimientos
+            // Buscar la referencia, monto y fecha entre los movimientos
+            const movimientos = datos.movimientos || datos.data || [];
+            const referenciaEncontrada = movimientos.find(m => 
+                (m.referencia === referencia || m.ref === referencia) &&
+                Math.abs(parseFloat(m.monto) - monto) < 0.01 &&
+                m.fecha === fecha
+            );
+
+            if (referenciaEncontrada) {
+                return { ok: true, mensaje: "Pago encontrado en el banco", movimiento: referenciaEncontrada };
+            } else {
+                return { ok: false, mensaje: "Pago no encontrado en los movimientos" };
+            }
+
+        } catch (error) {
+            console.error("❌ Error consultando banco:", error);
+            return { ok: false, mensaje: "Error de conexión con el banco" };
+        }
     }
 
     // =====================================================
@@ -332,44 +390,43 @@
 📅 Fecha: ${fecha}
 📦 Código paquete: ${paqueteCodigo}
 ━━━━━━━━━━━━━━━━━━
-⏳ Estado: EN VERIFICACIÓN...
+⏳ Estado: CONSULTANDO BANCO...
         `);
 
         // =====================================================
-        // PASO 1: VERIFICAR PAGO → TÚ LO REVISAS
+        // PASO 1: CONSULTAR BANCO DE VENEZUELA
         // =====================================================
-        await esperar(2000);
+        const verificacion = await verificarPagoBanco(referencia, monto, fecha);
         
-        // ⚠️ TÚ apruebas manualmente. Cuando tengas sistema automático, lo conectas aquí
-        const pagoAprobado = true; // ← Cambia a false para rechazar
-        
-        if (!pagoAprobado) {
+        if (!verificacion.ok) {
             document.getElementById("paso1").className = "paso-linea error";
-            document.getElementById("paso1").innerHTML = `<span>❌</span><span>Pago no verificado</span>`;
+            document.getElementById("paso1").innerHTML = `<span>❌</span><span>${verificacion.mensaje}</span>`;
             
             await enviarTelegram(`
-❌ **PEDIDO RECHAZADO**
+❌ **PEDIDO RECHAZADO — PAGO NO VERIFICADO**
 ━━━━━━━━━━━━━━━━━━
 📦 ${producto} | 🆔 ${idJugador}
 💰 $${precioUsd} USD | ${montoBs} Bs
 🔢 Ref: ${referencia}
+📡 Respuesta: ${verificacion.mensaje}
 ━━━━━━━━━━━━━━━━━━
-❌ Estado: NO APROBADO — PAGO NO VERIFICADO
+❌ Estado: NO APROBADO — ${verificacion.mensaje}
             `);
 
             await esperar(1500);
             mostrarMensajeFinal("error", `
 ❌ Pago no verificado<br><br>
-⚠️ No se encontró ningún pago con esos datos.<br>
-💡 Verifica referencia, monto y fecha sean exactos.<br>
-⏳ Si acabas de pagar, espera unos minutos y vuelve a intentarlo.
+⚠️ ${verificacion.mensaje}.<br>
+💡 Verifica que la referencia, el monto y la fecha sean EXACTAMENTE iguales al comprobante.<br>
+⏳ Si acabas de pagar, espera unos minutos y vuelve a intentarlo.<br>
+📲 Si el problema persiste, contáctanos.
             `);
             return;
         }
 
-        // ✅ PAGO APROBADO
+        // ✅ PAGO ENCONTRADO Y VERIFICADO
         document.getElementById("paso1").className = "paso-linea ok";
-        document.getElementById("paso1").innerHTML = `<span>✅</span><span>Pago verificado</span>`;
+        document.getElementById("paso1").innerHTML = `<span>✅</span><span>Pago encontrado en el banco</span>`;
         
         mostrarPaso(2);
         document.getElementById("paso2").className = "paso-linea activo";
@@ -378,13 +435,13 @@
         document.getElementById("paso2").innerHTML = `<span>✅</span><span>Datos confirmados</span>`;
 
         await enviarTelegram(`
-✅ **PAGO APROBADO — PROCESANDO RECARGA**
+✅ **PAGO VERIFICADO — PROCESANDO RECARGA**
 ━━━━━━━━━━━━━━━━━━
 📦 ${producto} | 🆔 ${idJugador}
 💰 $${precioUsd} USD | ${montoBs} Bs
 🔢 Ref: ${referencia}
 ━━━━━━━━━━━━━━━━━━
-✅ Estado: EN PROCESO DE RECARGA
+✅ Estado: PAGO CONFIRMADO — EN PROCESO DE RECARGA
         `);
 
         // =====================================================
@@ -396,7 +453,6 @@
         let recargaExitosa = false;
         let respuestaApi = "";
         try {
-            // 📡 LLAMADA A LA API DE RECARGA — TOKEN CORRECTO
             const urlRecarga = `${CONFIG.API_RECARGA}&id_jugador=${encodeURIComponent(idJugador)}&paquete=${encodeURIComponent(paqueteCodigo)}`;
             console.log("📡 Enviando recarga:", urlRecarga);
             
@@ -404,8 +460,6 @@
             respuestaApi = await respuesta.text();
             console.log("📡 Respuesta recarga:", respuesta.status, respuestaApi);
             
-            // ✅ VERIFICAR RESPUESTA DE LA API
-            // La API devuelve alerta:"green" = éxito, alerta:"red" = error
             recargaExitosa = respuesta.ok && !respuestaApi.includes('"alerta":"red"');
             
         } catch (error) {
@@ -433,7 +487,7 @@
         document.getElementById("paso4").className = "paso-linea ok";
         document.getElementById("paso4").innerHTML = `<span>✅</span><span>Entrega confirmada</span>`;
 
-        // 📲 TELEGRAM — FINAL CON RESPUESTA DE LA API
+        // 📲 TELEGRAM — FINAL
         await enviarTelegram(`
 ${recargaExitosa ? '✅' : '⚠️'} **PEDIDO ${recargaExitosa ? 'COMPLETADO' : 'EN PROCESO'}**
 ━━━━━━━━━━━━━━━━━━
