@@ -47,10 +47,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .form-group label{display:block;color:#9ca3af;font-size:13px;margin-bottom:8px}
 .form-input{width:100%;height:50px;border-radius:14px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;box-sizing:border-box;font-size:16px}
 .form-input:focus{outline:none;border-color:var(--color-principal)}
-.file-input{width:100%;padding:12px;border-radius:14px;background:#111827;color:#fff;border:1px solid #1f2937;font-size:14px;cursor:pointer}
-.file-input::-webkit-file-upload-button{background:var(--color-principal);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin-right:12px}
-.preview-img{margin-top:10px;text-align:center}
-.preview-img img{max-width:100%;max-height:150px;border-radius:12px;border:1px solid #1f2937}
 .btn-send{background:var(--color-principal);color:#fff;border:none;width:100%;height:50px;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px}
 .btn-send:hover{background:var(--color-hover)}
 .btn-send.loading{opacity:0.6;pointer-events:none}
@@ -81,7 +77,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 <div class="header">
     <div class="brand"><img src="logo.png" alt="Logo"><span>RECARGASGAMES</span></div>
     <div class="header-buttons">
-        <a href="freefire.html" class="back-btn">←</a>
+        <a href="javascript:history.back()" class="back-btn">←</a>
         <button class="icon-btn" id="notificacionBtn" onclick="abrirNotificaciones()">🔔<span class="notification-badge" id="notifCount">0</span></button>
         <div class="profile-dropdown">
             <button class="icon-btn" id="profileBtn">👤</button>
@@ -140,9 +136,9 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
         </div>
     </div>
 
-    <!-- Confirmación con comprobante -->
+    <!-- VERIFICACIÓN AUTOMÁTICA POR REFERENCIA -->
     <div class="card-panel">
-        <div class="panel-title">📝 CONFIRMAR PAGO</div>
+        <div class="panel-title">🔍 VERIFICAR PAGO</div>
         
         <div class="form-group">
             <label>🔢 NÚMERO DE REFERENCIA (últimos 6 dígitos)</label>
@@ -150,14 +146,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
             <div id="refError" style="font-size:11px;color:#ef4444;margin-top:5px;display:none"></div>
         </div>
         
-        <div class="form-group">
-            <label>📷 COMPROBANTE DE PAGO (captura de pantalla)</label>
-            <input type="file" id="comprobanteFile" class="file-input" accept="image/*">
-            <div id="previewContainer" class="preview-img"></div>
-            <div id="fileError" style="font-size:11px;color:#ef4444;margin-top:5px;display:none"></div>
-        </div>
-        
-        <button class="btn-send" id="btnConfirmar">✅ ENVIAR COMPROBANTE</button>
+        <button class="btn-send" id="btnVerificar">🔍 VERIFICAR PAGO</button>
     </div>
 </div>
 
@@ -168,10 +157,12 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
     </div>
 </div>
 
-<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a><script type="module">
+<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+
+<script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import{getDatabase,ref,get,onValue,update,push,set}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import{getDatabase,ref,get,push,set}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const fbConfig={
     apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
@@ -188,9 +179,12 @@ const auth=getAuth(app);
 const db=getDatabase(app);
 
 let uidActual=null;
-let notis=[];
-let comprobanteBase64 = null;
-let referenciaSeleccionada = null;
+let referenciaSeleccionada=null;
+
+// ==============================================
+// 🔧 AQUÍ PEGAS TU ENLACE DE LA API DE VERIFICACIÓN
+// ==============================================
+const API_VERIFICAR_PAGO_URL = ""; // 👈 PEGA TU ENLACE AQUÍ
 
 // Obtener datos del localStorage
 let idJugador = localStorage.getItem('id_jugador');
@@ -288,56 +282,6 @@ function showToast(msg, type = "success"){
     setTimeout(() => toast.remove(), 3000);
 }
 
-// Convertir archivo a Base64
-function fileToBase64(file){
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
-
-// Previsualizar imagen
-document.getElementById('comprobanteFile').onchange = async (e) => {
-    const file = e.target.files[0];
-    const fileError = document.getElementById('fileError');
-    const previewContainer = document.getElementById('previewContainer');
-    
-    if(!file){
-        comprobanteBase64 = null;
-        previewContainer.innerHTML = '';
-        return;
-    }
-    
-    if(!file.type.startsWith('image/')){
-        fileError.innerText = '❌ Solo se permiten imágenes';
-        fileError.style.display = 'block';
-        comprobanteBase64 = null;
-        previewContainer.innerHTML = '';
-        return;
-    }
-    
-    if(file.size > 2 * 1024 * 1024){
-        fileError.innerText = '❌ La imagen no debe superar 2MB';
-        fileError.style.display = 'block';
-        comprobanteBase64 = null;
-        previewContainer.innerHTML = '';
-        return;
-    }
-    
-    fileError.style.display = 'none';
-    
-    try{
-        comprobanteBase64 = await fileToBase64(file);
-        previewContainer.innerHTML = `<img src="${comprobanteBase64}" alt="Vista previa">`;
-    } catch(error){
-        fileError.innerText = '❌ Error al cargar la imagen';
-        fileError.style.display = 'block';
-        comprobanteBase64 = null;
-    }
-};
-
 // Validar referencia (solo números y 6 dígitos)
 document.getElementById('referencia').oninput = (e) => {
     let value = e.target.value.replace(/\D/g, '').slice(0, 6);
@@ -353,123 +297,12 @@ document.getElementById('referencia').oninput = (e) => {
     }
 };
 
-// Subir imagen a imgbb
-async function subirImagenImgbb(base64){
-    const formData = new FormData();
-    formData.append('image', base64.split(',')[1]);
-    formData.append('key', '5d031c25ca77abdbb7b1054d56ed86b4');
-    
-    try{
-        const response = await fetch('https://api.imgbb.com/1/upload', {
-            method: 'POST',
-            body: formData
-        });
-        const data = await response.json();
-        if(data.success){
-            return data.data.url;
-        } else {
-            throw new Error('Error al subir imagen');
-        }
-    } catch(error){
-        console.error('Error imgbb:', error);
-        return null;
-    }
-}
-
-// Guardar pedido en Firebase
-async function guardarPedidoEnFirebase(referencia, comprobanteUrl){
-    if(!uidActual) return null;
-    
-    const nuevoPedidoRef = push(ref(db, 'pedidos'));
-    const pedidoData = {
-        userId: uidActual,
-        usuario: nombreJugador || idJugador,
-        jugadorId: idJugador,
-        nombre_verificado: nombreJugador || '',
-        juego: juego,
-        producto: producto,
-        precio: `${formatearNumero(precioBsFinal)} Bs`,
-        precio_usd: precioUsdFinal.toFixed(2),
-        precio_bs: precioBsFinal,
-        referencia: referencia,
-        metodo: metodoPago,
-        estado: 'Pendiente',
-        timestamp: Date.now(),
-        fecha: new Date().toLocaleString(),
-        comprobanteUrl: comprobanteUrl || null
-    };
-    
-    if(descuentoActivo){
-        pedidoData.descuento_aplicado = '1.5%';
-        pedidoData.precio_original_bs = precioBsOriginal;
-    }
-    
-    await set(nuevoPedidoRef, pedidoData);
-    return nuevoPedidoRef.key;
-}
-
-// Verificar si referencia ya existe
-async function verificarReferenciaUnica(referencia){
-    const pedidosRef = ref(db, 'pedidos');
-    const snapshot = await get(pedidosRef);
-    if(snapshot.exists()){
-        const pedidos = snapshot.val();
-        for(let id in pedidos){
-            if(pedidos[id].referencia === referencia){
-                return false; // Ya existe
-            }
-        }
-    }
-    return true; // Es única
-}
-
-// Enviar a Telegram
-async function enviarTelegram(referencia, pedidoId, comprobanteUrl){
-    const TELEGRAM_BOT_TOKEN = "8995715863:AAGUVR-U-Gf59EEClR1VXgUqW0XjYc9puFs";
-    const TELEGRAM_CHAT_ID = "1935104549";
-    
-    const nombreTexto = nombreJugador ? `\n🎮 Nombre: ${nombreJugador}` : "";
-    const descuentoTexto = descuentoActivo ? `\n🎁 Descuento: 1.5% (Ahorro: ${formatearNumero(precioBsOriginal - precioBsFinal)} Bs)` : "";
-    const comprobanteTexto = comprobanteUrl ? `\n📷 Comprobante: ${comprobanteUrl}` : "";
-    
-    const mensaje = `
-🛒 *NUEVO PEDIDO* 🛒
-━━━━━━━━━━━━━━━━━━━
-🆔 Pedido# ${pedidoId.slice(-6)}
-🎮 Juego: ${juego}
-👤 ID: ${idJugador}${nombreTexto}
-📦 Producto: ${producto}
-💰 Original: ${formatearNumero(precioBsOriginal)} Bs${descuentoTexto}
-💵 Pagado: ${formatearNumero(precioBsFinal)} Bs
-💳 Método: ${metodoPago}
-🧾 Referencia: ${referencia}${comprobanteTexto}
-━━━━━━━━━━━━━━━━━━━
-📅 ${new Date().toLocaleString()}
-    `;
-    
-    try{
-        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CHAT_ID,
-                text: mensaje,
-                parse_mode: "Markdown"
-            })
-        });
-        const data = await response.json();
-        return data.ok;
-    } catch(error){
-        console.error("Error Telegram:", error);
-        return false;
-    }
-}
-
-// Confirmar pedido
-document.getElementById('btnConfirmar').onclick = async function(){
+// ==============================================
+// 🔍 FUNCIÓN DE VERIFICACIÓN AUTOMÁTICA CON API
+// ==============================================
+document.getElementById('btnVerificar').onclick = async function(){
     const referencia = document.getElementById('referencia').value.trim();
     const refError = document.getElementById('refError');
-    const fileError = document.getElementById('fileError');
     
     // Validar referencia
     if(!referencia || referencia.length !== 6){
@@ -479,97 +312,97 @@ document.getElementById('btnConfirmar').onclick = async function(){
     }
     refError.style.display = 'none';
     
-    // Validar comprobante
-    if(!comprobanteBase64){
-        fileError.innerText = '❌ Adjunta el comprobante de pago';
-        fileError.style.display = 'block';
-        return;
-    }
-    fileError.style.display = 'none';
-    
-    if(!uidActual){
-        showToast("❌ Debes iniciar sesión", "error");
-        setTimeout(() => window.location.href = "login.html", 1500);
-        return;
-    }
-    
-    // Verificar referencia única
-    const esUnica = await verificarReferenciaUnica(referencia);
-    if(!esUnica){
-        showToast("❌ Esta referencia ya fue utilizada", "error");
+    if(!API_VERIFICAR_PAGO_URL){
+        showToast("⚠️ Falta configurar la API. Avisa al administrador.", "warning");
         return;
     }
     
     this.classList.add('loading');
-    this.innerHTML = '<span class="spinner"></span> ENVIANDO...';
+    this.innerHTML = '<span class="spinner"></span> VERIFICANDO...';
     
-    // Subir imagen a imgbb
-    let comprobanteUrl = null;
     try{
-        comprobanteUrl = await subirImagenImgbb(comprobanteBase64);
-        if(!comprobanteUrl){
-            showToast("⚠️ No se pudo subir la imagen, pero el pedido se guardará", "warning");
+        // 📡 LLAMADA A TU API DE VERIFICACIÓN
+        // Envía la referencia y el monto para que la API confirme
+        const respuesta = await fetch(API_VERIFICAR_PAGO_URL + "?referencia=" + referencia + "&monto=" + precioBsFinal, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        });
+        
+        const resultado = await respuesta.json();
+        
+        // ✅ La API responde: existe = true → pago confirmado
+        if(resultado.existe === true || resultado.status === "aprobado" || resultado.valido === true){
+            showToast("✅ PAGO VERIFICADO! Guardando pedido...");
+            
+            // Guardar pedido en Firebase
+            const nuevoPedidoRef = push(ref(db, 'pedidos'));
+            const pedidoData = {
+                userId: uidActual || 'anonimo',
+                usuario: nombreJugador || idJugador,
+                jugadorId: idJugador,
+                nombre_verificado: nombreJugador || '',
+                juego: juego,
+                producto: producto,
+                precio: `${formatearNumero(precioBsFinal)} Bs`,
+                precio_usd: precioUsdFinal.toFixed(2),
+                precio_bs: precioBsFinal,
+                referencia: referencia,
+                metodo: metodoPago,
+                estado: 'Completado', // ✅ Queda completado automáticamente
+                timestamp: Date.now(),
+                fecha: new Date().toLocaleString(),
+                verificado_por_api: true
+            };
+            
+            if(descuentoActivo){
+                pedidoData.descuento_aplicado = '1.5%';
+                pedidoData.precio_original_bs = precioBsOriginal;
+            }
+            
+            await set(nuevoPedidoRef, pedidoData);
+            
+            // Limpiar y redirigir
+            localStorage.clear();
+            showToast("✅ Pedido registrado! Recarga en proceso.");
+            setTimeout(() => {
+                window.location.href = "perfil.html";
+            }, 2000);
+            
+        } else {
+            // ❌ La API dice que no existe o no es válido
+            showToast("❌ PAGO NO ENCONTRADO. Verifica la referencia.", "error");
         }
+        
     } catch(error){
-        console.error("Error al subir imagen:", error);
-        showToast("⚠️ No se pudo subir la imagen, pero el pedido se guardará", "warning");
+        console.error("Error al verificar:", error);
+        showToast("⚠️ Error al conectar con la verificación. Intenta en unos segundos.", "error");
     }
     
-    // Guardar pedido
-    const pedidoId = await guardarPedidoEnFirebase(referencia, comprobanteUrl);
-    
-    if(!pedidoId){
-        showToast("❌ Error al guardar el pedido", "error");
-        this.classList.remove('loading');
-        this.innerHTML = '✅ ENVIAR COMPROBANTE';
-        return;
-    }
-    
-    // Enviar a Telegram
-    const enviado = await enviarTelegram(referencia, pedidoId, comprobanteUrl);
-    
-    if(enviado){
-        showToast("✅ Pedido enviado correctamente");
-        
-        // Limpiar localStorage
-        localStorage.removeItem('id_jugador');
-        localStorage.removeItem('nombre_verificado');
-        localStorage.removeItem('producto_seleccionado');
-        localStorage.removeItem('precio_en_bs');
-        localStorage.removeItem('precio_usd');
-        localStorage.removeItem('juego_seleccionado');
-        localStorage.removeItem('diamantes');
-        localStorage.removeItem('metodo_pago');
-        
-        setTimeout(() => {
-            window.location.href = "perfil.html";
-        }, 2000);
-    } else {
-        showToast("⚠️ Pedido guardado pero no se notificó al admin", "warning");
-        setTimeout(() => {
-            window.location.href = "perfil.html";
-        }, 2000);
-    }
+    this.classList.remove('loading');
+    this.innerHTML = '🔍 VERIFICAR PAGO';
 };
 
 // ========== FIREBASE AUTH Y NOTIFICACIONES ==========
 onAuthStateChanged(auth, (user) => {
     if(user){
         uidActual = user.uid;
-        cargarNotisFirebase(user.uid);
     } else {
         uidActual = null;
         window.location.href = "login.html";
     }
 });
 
-function guardarNotis(){localStorage.setItem('notificaciones',JSON.stringify(notis))}
-function actContador(){const nl=notis.filter(n=>!n.leida).length;const b=document.getElementById('notifCount');if(b){b.textContent=nl;b.style.display=nl>0?'flex':'none'}}
-function cargarNotisFirebase(u){if(!u)return;onValue(ref(db,`notificaciones/${u}`),s=>{const d=s.val();if(d){let nv=[];for(let id in d)nv.push({id,...d[id]});nv.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));notis=nv;guardarNotis();actContador()}else{notis=[];guardarNotis();actContador()}})}
-window.abrirNotificaciones=async()=>{const modal=document.getElementById('notificacionModal'),lista=document.getElementById('notificacionesList');if(!notis.length){lista.innerHTML='<div class="empty-notifications">No tienes notificaciones</div>'}else{let html='';for(const n of notis){html+=`<div class="notification-item"><div class="notification-icon">${n.titulo?.includes('Completado')?'✅':'🔔'}</div><div class="notification-text"><div class="notification-title">${n.titulo||'Notificación'}</div><div style="font-size:12px">${n.mensaje||''}</div><div class="notification-date">${n.fecha||''}</div></div></div>`;if(n.id)try{await update(ref(db,`notificaciones/${uidActual}/${n.id}`),{leida:true})}catch(e){}n.leida=true}lista.innerHTML=html;guardarNotis();actContador()}modal.style.display='flex'};
-window.cerrarNotificaciones=()=>document.getElementById('notificacionModal').style.display='none';
-const pb=document.getElementById('profileBtn'),pd=document.getElementById('profileDropdown');if(pb){pb.addEventListener('click',e=>{e.stopPropagation();pd.style.display=pd.style.display==='block'?'none':'block'})}document.addEventListener('click',()=>{if(pd)pd.style.display='none'});
-document.getElementById("logoutDropdownBtn")?.addEventListener("click",e=>{e.preventDefault();localStorage.clear();signOut(auth).then(()=>location.href="login.html")});
+const pb=document.getElementById('profileBtn'),pd=document.getElementById('profileDropdown');
+if(pb){
+    pb.addEventListener('click',e=>{e.stopPropagation();pd.style.display=pd.style.display==='block'?'none':'block'});
+}
+document.addEventListener('click',()=>{if(pd)pd.style.display='none'});
+
+document.getElementById("logoutDropdownBtn")?.addEventListener("click",e=>{
+    e.preventDefault();
+    localStorage.clear();
+    signOut(auth).then(()=>location.href="login.html");
+});
 
 // Inicializar
 actualizarMontos();
