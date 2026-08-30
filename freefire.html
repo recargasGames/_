@@ -237,6 +237,7 @@ inputId.addEventListener("input", function(){
     }
 });
 
+// ✅ FUNCIÓN CORREGIDA — AHORA SÍ LLEGA TODO A LA PASARELA
 window.comprarProducto = function(producto, precioUsd){
     const idInput = document.getElementById("jugadorId").value.trim();
     
@@ -255,19 +256,18 @@ window.comprarProducto = function(producto, precioUsd){
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
+    // ✅ GUARDAR CON LOS NOMBRES QUE LA PASARELA ESPERA
+    localStorage.setItem('juegoSeleccionado', juegoActual);
+    localStorage.setItem('productoSeleccionado', producto);
+    localStorage.setItem('montoFinalBs', precioBs.toString());
     localStorage.setItem('id_jugador', idInput);
-    localStorage.setItem('nombre_verificado', nombreOk || `ID ${idInput}`);
-    localStorage.setItem('juego_seleccionado', juegoActual);
-    localStorage.setItem('producto_seleccionado', producto);
     localStorage.setItem('precio_usd', precioUsd);
-    localStorage.setItem('precio_en_bs', precioBs);
     localStorage.setItem('metodo_pago', metodo);
 
-    const prueba = localStorage.getItem('producto_seleccionado');
-    if(!prueba){
-        alert("❌ Error al guardar. Intenta de nuevo.");
-        return;
-    }
+    console.log("✅ Datos enviados a pasarela:");
+    console.log("🎮 Juego:", juegoActual);
+    console.log("📦 Producto:", producto);
+    console.log("💰 Monto Bs:", precioBs);
 
     window.location.href = "pasarela.html";
 };
