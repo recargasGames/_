@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificar Pago — RECARGASGAMES</title>
+    <title>Realizar Recarga — RECARGASGAMES</title>
     <style>
-        :root { --color-principal: #10b981; --color-hover: #059669; --color-error: #ef4444; }
+        :root { --color-principal: #10b981; --color-hover: #059669; --color-error: #ef4444; --color-texto: #e2e8f0; --color-banco: #f97316; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -23,124 +23,266 @@
             text-decoration: none; font-size: 14px; margin-bottom: 20px; transition: 0.2s;
         }
         .back-btn:hover { color: white; }
-        h1 { font-size: 22px; margin-bottom: 5px; color: var(--color-principal); }
-        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 25px; }
+        h1 { font-size: 22px; margin-bottom: 5px; color: var(--color-principal); text-align: center; }
+        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 25px; text-align: center; }
+        
+        /* ========== 🏦 SECCIÓN DE DATOS BANCARIOS ========== */
+        .datos-banco {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
+            border: 2px solid var(--color-banco);
+            border-radius: 16px; padding: 20px; margin-bottom: 25px;
+        }
+        .datos-banco h3 {
+            color: var(--color-banco); font-size: 16px; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dato-fila { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .dato-fila:last-child { border-bottom: none; }
+        .dato-etiqueta { color: #94a3b8; font-size: 14px; }
+        .dato-valor { color: white; font-weight: 600; font-size: 14px; text-align: right; }
+        .copiar-btn {
+            background: rgba(249, 115, 22, 0.2); border: none; color: var(--color-banco);
+            padding: 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer;
+            margin-left: 8px; transition: 0.2s;
+        }
+        .copiar-btn:hover { background: rgba(249, 115, 22, 0.4); }
+        .copiado { background: var(--color-principal); color: white; }
+        
+        .resumen-pedido {
+            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px; padding: 15px; margin-bottom: 25px;
+        }
+        .resumen-pedido h3 { font-size: 15px; color: var(--color-principal); margin-bottom: 10px; }
+        .resumen-pedido p { font-size: 14px; margin: 5px 0; color: var(--color-texto); }
         .form-group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 8px; font-size: 14px; color: #e2e8f0; }
-        input {
+        input, select {
             width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #475569;
             background: #1e293b; color: white; font-size: 16px; outline: none;
             transition: 0.2s;
         }
-        input:focus { border-color: var(--color-principal); box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
+        input:focus, select:focus { border-color: var(--color-principal); box-shadow: 0 0 0 3px rgba(16,185,129,0.2); }
         small { display: block; margin-top: 6px; font-size: 12px; color: #94a3b8; }
-        .btn-verificar {
-            width: 100%; padding: 15px; background: var(--color-principal); color: white;
-            border: none; border-radius: 12px; font-size: 16px; font-weight: bold;
+        .btn-recarga {
+            width: 100%; padding: 16px; background: var(--color-principal); color: white;
+            border: none; border-radius: 12px; font-size: 18px; font-weight: bold;
             cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
-        .btn-verificar:hover { background: var(--color-hover); transform: translateY(-2px); }
-        .btn-verificar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .info-box {
-            background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px; padding: 15px; margin-top: 20px; font-size: 13px; line-height: 1.6;
-        }
-        .info-box strong { color: var(--color-principal); }
-        .mensaje { margin-top: 20px; padding: 15px; border-radius: 12px; display: none; font-weight: 500; }
+        .btn-recarga:hover { background: var(--color-hover); transform: translateY(-2px); }
+        .btn-recarga:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .loading { display: none; text-align: center; margin-top: 20px; color: #facc15; padding: 20px; }
+        .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid #333; border-top-color: var(--color-principal); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .mensaje { margin-top: 20px; padding: 15px; border-radius: 12px; display: none; font-weight: 500; text-align: center; }
         .mensaje.exito { background: rgba(16,185,129,0.15); border: 1px solid var(--color-principal); color: #6ee7b7; display: block; }
         .mensaje.error { background: rgba(239,68,68,0.15); border: 1px solid var(--color-error); color: #fca5a5; display: block; }
-        .loading { display: none; text-align: center; margin-top: 15px; color: #facc15; }
-        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #333; border-top-color: var(--color-principal); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .info-box {
+            background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px; padding: 15px; margin-top: 20px; font-size: 13px; line-height: 1.6;
+        }
+        .info-box strong { color: #60a5fa; }
+        .divisor { text-align: center; margin: 25px 0; color: #64748b; font-size: 13px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <a href="javascript:history.back()" class="back-btn">← Volver</a>
-    <h1>🔍 Verificar Pago</h1>
-    <p class="subtitle">Confirma tu pago móvil para procesar la recarga</p>
+    <a href="javascript:history.back()" class="back-btn">← Volver a la tienda</a>
+    
+    <h1>💳 HACER RECARGA</h1>
+    <p class="subtitle">Haz el pago móvil y luego verifícalo aquí</p>
+
+    <!-- =====================================================
+         🏦 TUS DATOS DE PAGO MÓVIL — TAL CUAL ME LOS DISTE
+         ===================================================== -->
+    <div class="datos-banco">
+        <h3>🏦 DATOS PARA EL PAGO MÓVIL</h3>
+        <div class="dato-fila">
+            <span class="dato-etiqueta">Banco:</span>
+            <span class="dato-valor">Banco de Venezuela <button class="copiar-btn" onclick="copiarTexto('Banco de Venezuela', this)">Copiar</button></span>
+        </div>
+        <div class="dato-fila">
+            <span class="dato-etiqueta">Cédula de Identidad:</span>
+            <span class="dato-valor">32824869 <button class="copiar-btn" onclick="copiarTexto('32824869', this)">Copiar</button></span>
+        </div>
+        <div class="dato-fila">
+            <span class="dato-etiqueta">Teléfono / N° Móvil:</span>
+            <span class="dato-valor">04228242411 <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">Copiar</button></span>
+        </div>
+        <div class="dato-fila">
+            <span class="dato-etiqueta">Monto a pagar:</span>
+            <span class="dato-valor" id="datoMonto" style="color:#facc15; font-size:16px;">0.00 Bs</span>
+        </div>
+    </div>
+
+    <!-- 📦 RESUMEN DEL PEDIDO -->
+    <div class="resumen-pedido">
+        <h3>📦 Resumen del pedido</h3>
+        <p><strong>Juego:</strong> <span id="juegoNombre">Free Fire</span></p>
+        <p><strong>Producto:</strong> <span id="productoNombre">560 Diamantes</span></p>
+    </div>
+
+    <div class="divisor">⬇️ Después de pagar, llena el formulario de abajo ⬇️</div>
+
+    <!-- ✍️ FORMULARIO DE VERIFICACIÓN — EL CLIENTE LLENA DESPUÉS DE PAGAR -->
+    <div class="form-group">
+        <label>🏦 Banco desde donde hiciste el pago</label>
+        <select id="bancoOrigen" required>
+            <option value="">Selecciona tu banco</option>
+            <option value="Banesco">Banesco</option>
+            <option value="Mercantil">Mercantil</option>
+            <option value="Banco de Venezuela">Banco de Venezuela</option>
+            <option value="BBVA Provincial">BBVA Provincial</option>
+            <option value="BOD">BOD</option>
+            <option value="Banco Exterior">Banco Exterior</option>
+            <option value="Banplus">Banplus</option>
+            <option value="Bancamiga">Bancamiga</option>
+            <option value="100% Banco">100% Banco</option>
+            <option value="Otro">Otro</option>
+        </select>
+    </div>
 
     <div class="form-group">
-        <label>🔢 Referencia del pago</label>
+        <label>🔢 Referencia del pago móvil</label>
         <input type="text" id="referencia" placeholder="Ej: 67890" autocomplete="off" required>
-        <small>Últimos dígitos del comprobante bancario</small>
+        <small>Los últimos dígitos del comprobante que te dio el banco</small>
     </div>
 
     <div class="form-group">
-        <label>💰 Monto exacto en Bolívares</label>
-        <input type="number" step="0.01" id="monto" placeholder="Ej: 921.50" required>
-        <small>⚠️ Debe ser EXACTAMENTE lo que pagaste</small>
+        <label>💰 Monto exacto que pagaste (en Bolívares)</label>
+        <input type="number" step="0.01" id="montoPagado" placeholder="Ej: 921.50" required>
+        <small>⚠️ Debe ser EXACTAMENTE igual al monto de arriba</small>
     </div>
 
     <div class="form-group">
-        <label>📅 Fecha del pago</label>
-        <input type="date" id="fecha_pago" required>
+        <label>📅 Fecha en que hiciste el pago</label>
+        <input type="date" id="fechaPago" required>
     </div>
 
-    <button id="btnVerificar" class="btn-verificar" onclick="verificarPago()">✅ VERIFICAR PAGO</button>
+    <!-- ✅ BOTÓN PRINCIPAL -->
+    <button id="btnRecarga" class="btn-recarga" onclick="iniciarRecarga()">✅ HACER RECARGA</button>
 
+    <!-- ⏳ ESTADO DE VERIFICACIÓN -->
     <div class="loading" id="loading">
-        <span class="spinner"></span> Verificando...
+        <span class="spinner"></span>
+        <strong>Verificando el pago...</strong><br>
+        <span style="font-size:13px; color:#e2e8f0;">Estamos confirmando tu pago, espera un momento</span>
     </div>
 
+    <!-- 📬 MENSAJES DE RESULTADO -->
     <div class="mensaje" id="mensaje"></div>
 
+    <!-- ℹ️ INSTRUCCIONES -->
     <div class="info-box">
-        <strong>ℹ️ Cómo funciona:</strong><br>
-        Pabilo busca el pago en tu cuenta usando la referencia, el monto exacto y la fecha. Si coincide, se confirma automáticamente. Si no lo encuentra, espera 3 minutos y vuelve a intentarlo.
+        <strong>📝 Pasos a seguir:</strong><br>
+        1️⃣ Haz el pago móvil con los datos de arriba<br>
+        2️⃣ Copia la referencia del comprobante<br>
+        3️⃣ Llena el formulario con los datos exactos del pago<br>
+        4️⃣ Presiona <strong>HACER RECARGA</strong> para verificar<br>
+        ⏳ Si no se encuentra al instante, espera 3-5 minutos y vuelve a intentarlo
     </div>
 </div>
 
 <script type="module">
     // =====================================================
-    // 🔑 CONFIGURACIÓN — RELLENA TUS DATOS AQUÍ
+    // 🔑 CONFIGURACIÓN — SOLO FALTAN TUS DATOS DE PABILO
     // =====================================================
     const CONFIG = {
-        API_URL: "https://api.pabilo.app/userbankpayment/TU_ID_DE_CUENTA/betaserio", // ← Reemplaza TU_ID_DE_CUENTA
-        API_KEY: "TU_CLAVE_API_AQUÍ"  // ← Tu API Key de Pabilo (Bearer token)
+        // 🏦 TUS DATOS DE PAGO MÓVIL — YA ESTÁN PUESTOS ✅
+        TU_BANCO: "Banco de Venezuela",
+        TU_CEDULA: "32824869",
+        TU_TELEFONO: "04228242411",
+        
+        // 🔑 DATOS DE PABILO — ← AQUÍ PONES LOS TUYOS
+        API_URL: "https://api.pabilo.app/userbankpayment/TU_ID_DE_CUENTA/betaserio",
+        API_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789"
     };
 
     // =====================================================
-    // ✅ FUNCIÓN DE VERIFICACIÓN — CORREGIDA SEGÚN ANDRUS
+    // 📅 FECHA DE HOY Y CARGAR DATOS AL ABRIR LA PÁGINA
     // =====================================================
-    async function verificarPago() {
-        // Obtener valores del formulario
+    document.addEventListener("DOMContentLoaded", () => {
+        // Fecha de hoy por defecto
+        const hoy = new Date().toISOString().split("T")[0];
+        document.getElementById("fechaPago").value = hoy;
+        
+        // Cargar datos del pedido y mostrar monto
+        cargarDatosPedido();
+    });
+
+    // =====================================================
+    // 📦 CARGAR DATOS DEL PEDIDO Y MOSTRAR MONTO
+    // =====================================================
+    function cargarDatosPedido() {
+        const juego = localStorage.getItem("juegoSeleccionado") || "Free Fire";
+        const producto = localStorage.getItem("productoSeleccionado") || "560 Diamantes";
+        const monto = localStorage.getItem("montoFinalBs") || "0.00";
+        
+        document.getElementById("juegoNombre").textContent = juego;
+        document.getElementById("productoNombre").textContent = producto;
+        document.getElementById("datoMonto").textContent = `${monto} Bs`;
+    }
+
+    // =====================================================
+    // 📋 FUNCIÓN PARA COPIAR DATOS AL PORTAPAPELES
+    // =====================================================
+    window.copiarTexto = function(texto, boton) {
+        navigator.clipboard.writeText(texto).then(() => {
+            boton.textContent = "✓ Copiado";
+            boton.classList.add("copiado");
+            setTimeout(() => {
+                boton.textContent = "Copiar";
+                boton.classList.remove("copiado");
+            }, 2000);
+        });
+    };
+
+    // =====================================================
+    // ✅ FUNCIÓN PRINCIPAL — HACER RECARGA Y VERIFICAR
+    // =====================================================
+    async function iniciarRecarga() {
+        // Obtener todos los datos del formulario
+        const banco = document.getElementById("bancoOrigen").value;
         const referencia = document.getElementById("referencia").value.trim();
-        const monto = parseFloat(document.getElementById("monto").value);
-        const fechaPago = document.getElementById("fecha_pago").value;
-        const btn = document.getElementById("btnVerificar");
+        const monto = parseFloat(document.getElementById("montoPagado").value);
+        const fecha = document.getElementById("fechaPago").value;
+        
+        const btn = document.getElementById("btnRecarga");
         const loading = document.getElementById("loading");
         const mensaje = document.getElementById("mensaje");
 
         // ✅ Validaciones
-        if (!referencia) {
-            mostrarMensaje("⚠️ Escribe la referencia del pago", "error");
+        if (!banco) {
+            mostrarMensaje("⚠️ Selecciona el banco desde donde pagaste", "error");
+            return;
+        }
+        if (!referencia || referencia.length < 4) {
+            mostrarMensaje("⚠️ Escribe la referencia del comprobante", "error");
             return;
         }
         if (!monto || monto <= 0) {
-            mostrarMensaje("⚠️ El monto debe ser mayor a 0", "error");
+            mostrarMensaje("⚠️ Escribe el monto exacto que pagaste", "error");
             return;
         }
-        if (!fechaPago) {
+        if (!fecha) {
             mostrarMensaje("⚠️ Selecciona la fecha del pago", "error");
             return;
         }
 
-        // ⏳ Mostrar carga
+        // ⏳ Mostrar estado de verificación
         btn.disabled = true;
         btn.style.display = "none";
         loading.style.display = "block";
         mensaje.style.display = "none";
 
         try {
-            console.log("🔍 Verificando con Pabilo...");
+            console.log("🔍 Verificando pago con Pabilo...");
+            console.log("🏦 Banco origen:", banco);
             console.log("📌 Referencia:", referencia);
             console.log("💰 Monto Bs:", monto);
-            console.log("📅 Fecha:", fechaPago);
-            console.log("📋 movement_type: GENERIC");
+            console.log("📅 Fecha:", fecha);
 
-            // 📡 Llamada a la API de Pabilo — TAL CUAL LO DIO ANDRUS
+            // 📡 LLAMADA A LA API DE PABILO — TAL CUAL LO DIO ANDRUS
             const respuesta = await fetch(CONFIG.API_URL, {
                 method: "POST",
                 headers: {
@@ -151,52 +293,69 @@
                     bank_reference: referencia,
                     amount: monto,
                     movement_type: "GENERIC",
-                    fecha_pago: fechaPago
+                    fecha_pago: fecha
                 })
             });
 
             const resultado = await respuesta.json();
-            console.log("✅ Respuesta completa de Pabilo:", resultado);
+            console.log("✅ Respuesta de Pabilo:", resultado);
 
             if (!respuesta.ok) {
-                throw new Error(resultado.message || resultado.error || "Error en la verificación");
+                throw new Error(resultado.message || resultado.error || "No se pudo verificar el pago");
             }
 
-            // ✅ PAGO ENCONTRADO
+            // ✅ PAGO VERIFICADO — RECARGA EN PROCESO
             if (resultado.encontrado === true || resultado.status === "aprobado" || resultado.existe === true) {
-                mostrarMensaje("✅ ¡PAGO VERIFICADO! 🎉\nLa recarga se procesará en unos segundos.", "exito");
-                
-                // 🔥 ACTUALIZAR PEDIDO EN FIREBASE
-                await marcarComoCompletado();
+                loading.style.display = "none";
+                mostrarMensaje(
+                    "✅ ¡PAGO VERIFICADO! 🎉\n\n" +
+                    "Tu recarga se está procesando...\n" +
+                    "Llegará en unos momentos a tu cuenta del juego.\n\n" +
+                    "¡Gracias por tu compra!",
+                    "exito"
+                );
 
-                // Redirigir después de 3 segundos
+                // 🔥 ACTUALIZAR PEDIDO EN FIREBASE
+                await marcarPedidoVerificado(referencia, monto, banco);
+
+                // Redirigir a página de éxito
                 setTimeout(() => {
                     window.location.href = "exito.html";
-                }, 3000);
+                }, 4000);
 
             } else {
-                // ❌ No encontrado
+                // ❌ PAGO NO ENCONTRADO
+                loading.style.display = "none";
                 mostrarMensaje(
-                    "❌ Pago no encontrado.\n\n" +
-                    "Verifica:\n" +
-                    "• El monto sea EXACTO\n" +
+                    "❌ No se encontró el pago\n\n" +
+                    "Verifica que:\n" +
+                    "• El monto sea EXACTAMENTE igual\n" +
                     "• La referencia esté bien escrita\n" +
-                    "• La fecha del pago sea correcta\n" +
-                    "• Espera 3-5 minutos y vuelve a intentarlo",
+                    "• La fecha del pago sea correcta\n\n" +
+                    "⏳ Si acabas de pagar, espera 3-5 minutos y vuelve a intentarlo",
                     "error"
                 );
+                // Restaurar botón para reintentar
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.style.display = "block";
+                }, 3000);
             }
 
         } catch (error) {
-            console.error("❌ Error:", error);
-            mostrarMensaje("⚠️ Error: " + error.message + "\nRevisa tu conexión y vuelve a intentarlo.", "error");
-        } finally {
+            console.error("❌ Error de verificación:", error);
+            loading.style.display = "none";
+            mostrarMensaje(
+                "⚠️ Error al verificar el pago\n\n" +
+                error.message + "\n\n" +
+                "Revisa tu conexión y vuelve a intentarlo en unos minutos.",
+                "error"
+            );
             // Restaurar botón
             setTimeout(() => {
                 btn.disabled = false;
                 btn.style.display = "block";
-                loading.style.display = "none";
-            }, 2000);
+            }, 3000);
         }
     }
 
@@ -210,9 +369,9 @@
     }
 
     // =====================================================
-    // 🔥 MARCAR PEDIDO COMO COMPLETADO EN FIREBASE
+    // 🔥 GUARDAR VERIFICACIÓN EN FIREBASE
     // =====================================================
-    async function marcarComoCompletado() {
+    async function marcarPedidoVerificado(referencia, monto, banco) {
         try {
             const { getDatabase, ref, update } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
             const { getApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
@@ -225,25 +384,19 @@
                     estado: "Verificado ✅",
                     verificado: true,
                     fechaVerificacion: new Date().toISOString(),
-                    referenciaVerificacion: document.getElementById("referencia").value
+                    referenciaPago: referencia,
+                    montoPagado: monto,
+                    bancoOrigen: banco
                 });
-                console.log("✅ Pedido marcado como completado en Firebase");
+                console.log("✅ Pedido marcado como verificado en Firebase");
             }
         } catch (fbError) {
             console.warn("⚠️ No se pudo actualizar Firebase:", fbError);
         }
     }
 
-    // =====================================================
-    // 📅 HOY POR DEFECTO EN EL INPUT DE FECHA
-    // =====================================================
-    document.addEventListener("DOMContentLoaded", () => {
-        const hoy = new Date().toISOString().split("T")[0];
-        document.getElementById("fecha_pago").value = hoy;
-    });
-
     // Exponer función al botón
-    window.verificarPago = verificarPago;
+    window.iniciarRecarga = iniciarRecarga;
 </script>
 
 </body>
