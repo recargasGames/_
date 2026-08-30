@@ -26,7 +26,6 @@
         h1 { font-size: 22px; margin-bottom: 5px; color: var(--color-principal); text-align: center; }
         .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 25px; text-align: center; }
         
-        /* ========== 🏦 SECCIÓN DE DATOS BANCARIOS ========== */
         .datos-banco {
             background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(249, 115, 22, 0.05));
             border: 2px solid var(--color-banco);
@@ -82,6 +81,7 @@
         }
         .info-box strong { color: #60a5fa; }
         .divisor { text-align: center; margin: 25px 0; color: #64748b; font-size: 13px; }
+        .monto-grande { font-size: 22px; font-weight: bold; color: #facc15 !important; }
     </style>
 </head>
 <body>
@@ -92,9 +92,7 @@
     <h1>💳 HACER RECARGA</h1>
     <p class="subtitle">Haz el pago móvil y luego verifícalo aquí</p>
 
-    <!-- =====================================================
-         🏦 TUS DATOS DE PAGO MÓVIL — TAL CUAL ME LOS DISTE
-         ===================================================== -->
+    <!-- 🏦 TUS DATOS DE PAGO MÓVIL -->
     <div class="datos-banco">
         <h3>🏦 DATOS PARA EL PAGO MÓVIL</h3>
         <div class="dato-fila">
@@ -110,21 +108,21 @@
             <span class="dato-valor">04228242411 <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">Copiar</button></span>
         </div>
         <div class="dato-fila">
-            <span class="dato-etiqueta">Monto a pagar:</span>
-            <span class="dato-valor" id="datoMonto" style="color:#facc15; font-size:16px;">0.00 Bs</span>
+            <span class="dato-etiqueta">💰 Monto a pagar:</span>
+            <span class="dato-valor monto-grande" id="datoMonto">0.00 Bs</span>
         </div>
     </div>
 
     <!-- 📦 RESUMEN DEL PEDIDO -->
     <div class="resumen-pedido">
         <h3>📦 Resumen del pedido</h3>
-        <p><strong>Juego:</strong> <span id="juegoNombre">Free Fire</span></p>
-        <p><strong>Producto:</strong> <span id="productoNombre">560 Diamantes</span></p>
+        <p><strong>Juego:</strong> <span id="juegoNombre">Cargando...</span></p>
+        <p><strong>Producto:</strong> <span id="productoNombre">Cargando...</span></p>
     </div>
 
     <div class="divisor">⬇️ Después de pagar, llena el formulario de abajo ⬇️</div>
 
-    <!-- ✍️ FORMULARIO DE VERIFICACIÓN — EL CLIENTE LLENA DESPUÉS DE PAGAR -->
+    <!-- ✍️ FORMULARIO DE VERIFICACIÓN -->
     <div class="form-group">
         <label>🏦 Banco desde donde hiciste el pago</label>
         <select id="bancoOrigen" required>
@@ -166,7 +164,7 @@
     <div class="loading" id="loading">
         <span class="spinner"></span>
         <strong>Verificando el pago...</strong><br>
-        <span style="font-size:13px; color:#e2e8f0;">Estamos confirmando tu pago, espera un momento</span>
+        <span style="font-size:13px; color:#e2e8f0;">Estamos buscando tu pago en el sistema, espera un momento</span>
     </div>
 
     <!-- 📬 MENSAJES DE RESULTADO -->
@@ -185,42 +183,46 @@
 
 <script type="module">
     // =====================================================
-    // 🔑 CONFIGURACIÓN — SOLO FALTAN TUS DATOS DE PABILO
+    // 🔑 TUS DATOS DE PABILO — YA ESTÁN PUESTOS ✅
     // =====================================================
     const CONFIG = {
-        // 🏦 TUS DATOS DE PAGO MÓVIL — YA ESTÁN PUESTOS ✅
-        TU_BANCO: "Banco de Venezuela",
-        TU_CEDULA: "32824869",
-        TU_TELEFONO: "04228242411",
-        
-        // 🔑 DATOS DE PABILO — ← AQUÍ PONES LOS TUYOS
         API_URL: "https://api.pabilo.app/userbankpayment/6a93ac1b98055a34bd8b05f2/betaserio",
         API_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789"
     };
 
     // =====================================================
-    // 📅 FECHA DE HOY Y CARGAR DATOS AL ABRIR LA PÁGINA
+    // 📅 AL CARGAR LA PÁGINA — CARGA EL MONTO Y LOS DATOS
     // =====================================================
     document.addEventListener("DOMContentLoaded", () => {
         // Fecha de hoy por defecto
         const hoy = new Date().toISOString().split("T")[0];
         document.getElementById("fechaPago").value = hoy;
         
-        // Cargar datos del pedido y mostrar monto
+        // ✅ CARGAR DATOS DEL PEDIDO DESDE LA TIENDA
         cargarDatosPedido();
     });
 
     // =====================================================
-    // 📦 CARGAR DATOS DEL PEDIDO Y MOSTRAR MONTO
+    // 📦 CARGAR DATOS DEL PEDIDO — CORREGIDO Y MEJORADO
     // =====================================================
     function cargarDatosPedido() {
+        // Leer datos que vienen de la tienda
         const juego = localStorage.getItem("juegoSeleccionado") || "Free Fire";
         const producto = localStorage.getItem("productoSeleccionado") || "560 Diamantes";
         const monto = localStorage.getItem("montoFinalBs") || "0.00";
         
+        // Mostrar en pantalla
         document.getElementById("juegoNombre").textContent = juego;
         document.getElementById("productoNombre").textContent = producto;
         document.getElementById("datoMonto").textContent = `${monto} Bs`;
+        
+        // ✅ AUTO-RELLENAR EL MONTO EN EL FORMULARIO DE VERIFICACIÓN
+        document.getElementById("montoPagado").value = monto;
+        
+        console.log("✅ Datos del pedido cargados:");
+        console.log("🎮 Juego:", juego);
+        console.log("📦 Producto:", producto);
+        console.log("💰 Monto:", monto, "Bs");
     }
 
     // =====================================================
@@ -256,12 +258,12 @@
             mostrarMensaje("⚠️ Selecciona el banco desde donde pagaste", "error");
             return;
         }
-        if (!referencia || referencia.length < 4) {
+        if (!referencia || referencia.length < 3) {
             mostrarMensaje("⚠️ Escribe la referencia del comprobante", "error");
             return;
         }
         if (!monto || monto <= 0) {
-            mostrarMensaje("⚠️ Escribe el monto exacto que pagaste", "error");
+            mostrarMensaje("⚠️ El monto no es válido. Vuelve a la tienda y selecciona un producto.", "error");
             return;
         }
         if (!fecha) {
@@ -269,20 +271,20 @@
             return;
         }
 
-        // ⏳ Mostrar estado de verificación
+        // ⏳ MOSTRAR "VERIFICANDO EL PAGO..."
         btn.disabled = true;
         btn.style.display = "none";
         loading.style.display = "block";
         mensaje.style.display = "none";
 
         try {
-            console.log("🔍 Verificando pago con Pabilo...");
-            console.log("🏦 Banco origen:", banco);
+            console.log("🔍 Enviando a Pabilo...");
             console.log("📌 Referencia:", referencia);
-            console.log("💰 Monto Bs:", monto);
+            console.log("💰 Monto:", monto);
             console.log("📅 Fecha:", fecha);
+            console.log("📋 movement_type: GENERIC");
 
-            // 📡 LLAMADA A LA API DE PABILO — TAL CUAL LO DIO ANDRUS
+            // 📡 LLAMADA A LA API DE PABILO
             const respuesta = await fetch(CONFIG.API_URL, {
                 method: "POST",
                 headers: {
@@ -298,27 +300,27 @@
             });
 
             const resultado = await respuesta.json();
-            console.log("✅ Respuesta de Pabilo:", resultado);
+            console.log("✅ Respuesta completa de Pabilo:", resultado);
 
             if (!respuesta.ok) {
-                throw new Error(resultado.message || resultado.error || "No se pudo verificar el pago");
+                throw new Error(resultado.message || resultado.error || "Error en la verificación");
             }
 
-            // ✅ PAGO VERIFICADO — RECARGA EN PROCESO
-            if (resultado.encontrado === true || resultado.status === "aprobado" || resultado.existe === true) {
+            // ✅ PAGO ENCONTRADO Y VERIFICADO
+            if (resultado.encontrado === true || resultado.status === "aprobado" || resultado.existe === true || resultado.success === true) {
                 loading.style.display = "none";
                 mostrarMensaje(
-                    "✅ ¡PAGO VERIFICADO! 🎉\n\n" +
+                    "✅ ¡PAGO ENCONTRADO Y VERIFICADO! 🎉\n\n" +
                     "Tu recarga se está procesando...\n" +
                     "Llegará en unos momentos a tu cuenta del juego.\n\n" +
                     "¡Gracias por tu compra!",
                     "exito"
                 );
 
-                // 🔥 ACTUALIZAR PEDIDO EN FIREBASE
+                // 🔥 GUARDAR EN FIREBASE
                 await marcarPedidoVerificado(referencia, monto, banco);
 
-                // Redirigir a página de éxito
+                // Redirigir después de 4 segundos
                 setTimeout(() => {
                     window.location.href = "exito.html";
                 }, 4000);
@@ -327,7 +329,7 @@
                 // ❌ PAGO NO ENCONTRADO
                 loading.style.display = "none";
                 mostrarMensaje(
-                    "❌ No se encontró el pago\n\n" +
+                    "❌ PAGO NO ENCONTRADO\n\n" +
                     "Verifica que:\n" +
                     "• El monto sea EXACTAMENTE igual\n" +
                     "• La referencia esté bien escrita\n" +
@@ -343,10 +345,10 @@
             }
 
         } catch (error) {
-            console.error("❌ Error de verificación:", error);
+            console.error("❌ Error:", error);
             loading.style.display = "none";
             mostrarMensaje(
-                "⚠️ Error al verificar el pago\n\n" +
+                "⚠️ ERROR AL VERIFICAR\n\n" +
                 error.message + "\n\n" +
                 "Revisa tu conexión y vuelve a intentarlo en unos minutos.",
                 "error"
@@ -369,7 +371,7 @@
     }
 
     // =====================================================
-    // 🔥 GUARDAR VERIFICACIÓN EN FIREBASE
+    // 🔥 GUARDAR EN FIREBASE
     // =====================================================
     async function marcarPedidoVerificado(referencia, monto, banco) {
         try {
