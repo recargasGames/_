@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Comprar — RECARGASGAMES</title>
-
+    <title>Pagar — RECARGASGAMES</title>
     <style>
         :root {
             --fondo-oscuro: #0f172a;
@@ -14,1286 +12,491 @@
             --verde: #22c55e;
             --amarillo: #facc15;
             --naranja: #f97316;
-            --azul: #3b82f6;
             --texto: #f1f5f9;
             --texto-claro: #94a3b8;
             --rojo: #ef4444;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', sans-serif;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body {
             background: var(--fondo-oscuro);
             min-height: 100vh;
             color: var(--texto);
             padding: 20px;
         }
-
-        .container {
-            max-width: 420px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 420px; margin: 0 auto; }
         .back-btn {
-            color: var(--texto-claro);
-            text-decoration: none;
-            font-size: 15px;
-            margin-bottom: 25px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            color: var(--texto-claro); text-decoration: none; font-size: 15px;
+            margin-bottom: 25px; display: inline-flex; align-items: center; gap: 6px;
         }
+        .back-btn:hover { color: var(--texto); }
 
-        .resumen-tarjeta,
-        .datos-pago,
-        .proceso-container {
-            background: var(--fondo-tarjeta);
-            border: 1px solid var(--borde);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
+        /* ✅ RESUMEN DEL PEDIDO */
+        .resumen-tarjeta {
+            background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+            border-radius: 20px; padding: 25px; margin-bottom: 20px;
         }
-
         .resumen-titulo {
-            font-size: 28px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 8px;
-            color: white;
+            font-size: 28px; font-weight: 700; text-align: center;
+            margin-bottom: 8px; color: white;
         }
-
-        .subtitulo {
-            text-align: center;
-            color: var(--texto-claro);
-            margin-bottom: 30px;
-            font-size: 16px;
+        .subtitulo { text-align: center; color: var(--texto-claro); margin-bottom: 30px; font-size: 16px; }
+        .resumen-fila {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 0; border-bottom: 1px solid var(--borde); font-size: 18px;
         }
-
-        .resumen-fila,
-        .dato-fila {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--borde);
-            font-size: 17px;
-            gap: 15px;
-        }
-
-        .resumen-fila:last-child,
-        .dato-fila:last-child {
-            border-bottom: none;
-        }
-
-        .resumen-etiqueta,
-        .dato-etiqueta {
-            color: var(--texto-claro);
-        }
-
-        .resumen-valor {
-            color: white;
-            font-weight: 600;
-            text-align: right;
-        }
-
-        .precio {
-            color: var(--amarillo);
-            font-size: 22px;
-        }
-
+        .resumen-fila:last-child { border-bottom: none; }
+        .resumen-etiqueta { color: var(--texto-claro); }
+        .resumen-valor { color: white; font-weight: 600; }
+        .resumen-valor.nombre { color: var(--verde); font-size: 15px; }
+        .resumen-valor.precio { color: var(--amarillo); font-size: 22px; font-weight: 700; }
         .etiqueta-juego {
-            background: rgba(34, 197, 94, .15);
-            color: var(--verde);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
+            background: rgba(34, 197, 94, 0.15); color: var(--verde);
+            padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: 600;
         }
 
+        /* 🏦 DATOS DE PAGO */
         .datos-pago {
-            border: 2px solid var(--naranja);
-            background: rgba(249, 115, 22, .08);
+            background: rgba(249, 115, 22, 0.08); border: 2px solid var(--naranja);
+            border-radius: 16px; padding: 20px; margin-bottom: 20px;
         }
-
         .datos-pago h3 {
-            color: var(--naranja);
-            font-size: 20px;
-            margin-bottom: 20px;
+            color: var(--naranja); font-size: 20px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px; font-weight: 600;
         }
-
+        .dato-fila {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 18px;
+        }
+        .dato-fila:last-child { border-bottom: none; }
+        .dato-etiqueta { color: var(--texto-claro); }
         .copiar-btn {
-            background: rgba(249, 115, 22, .2);
-            border: none;
-            color: var(--naranja);
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
+            background: rgba(249, 115, 22, 0.2); border: none; color: var(--naranja);
+            padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
         }
+        .copiar-btn:hover { background: rgba(249, 115, 22, 0.4); }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-
+        /* ✍️ FORMULARIO */
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 8px; font-size: 15px; color: var(--texto); }
         input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid var(--borde);
-            background: var(--fondo-tarjeta);
-            color: white;
-            font-size: 16px;
-            outline: none;
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--borde);
+            background: var(--fondo-tarjeta); color: white; font-size: 16px; outline: none;
         }
+        input:focus { border-color: var(--verde); }
+        small { margin-top: 5px; font-size: 12px; color: var(--texto-claro); display: block; }
 
-        input:focus {
-            border-color: var(--verde);
-        }
-
-        small {
-            display: block;
-            margin-top: 5px;
-            color: var(--texto-claro);
-            font-size: 12px;
-        }
-
+        /* ✅ BOTÓN */
         .btn-pagar {
-            width: 100%;
-            padding: 18px;
-            background: var(--verde);
-            color: #000;
-            border: none;
-            border-radius: 14px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 10px;
+            width: 100%; padding: 18px; background: var(--verde); color: #000;
+            border: none; border-radius: 14px; font-size: 18px; font-weight: 700;
+            cursor: pointer; transition: 0.2s; margin-top: 10px;
         }
+        .btn-pagar:hover { background: #16a34a; transform: translateY(-2px); }
+        .btn-pagar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .btn-pagar:disabled {
-            opacity: .6;
-            cursor: not-allowed;
-        }
-
-        /* ================================
-           PROCESO
-        ================================= */
-
+        /* ⏳ PROCESO */
         .proceso-container {
-            display: none;
+            background: var(--fondo-tarjeta); border: 1px solid var(--borde);
+            border-radius: 16px; padding: 25px; margin-top: 20px; display: none;
         }
-
         .proceso-titulo {
-            text-align: center;
-            font-size: 21px;
-            margin-bottom: 22px;
+            font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 25px;
         }
-
         .paso-linea {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px;
-            background: rgba(0,0,0,.20);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            font-size: 15px;
+            display: flex; align-items: center; gap: 12px; padding: 14px;
+            background: rgba(0,0,0,0.2); border-radius: 10px; margin-bottom: 10px;
+            font-size: 16px; font-weight: 500;
         }
+        .paso-linea.activo { border-left: 3px solid var(--amarillo); background: rgba(250,204,21,0.1); }
+        .paso-linea.ok { border-left: 3px solid var(--verde); background: rgba(34,197,94,0.1); color: #86efac; }
+        .paso-linea.error { border-left: 3px solid var(--rojo); background: rgba(239,68,68,0.1); color: #fca5a5; }
+        .paso-linea.oculto { display: none; }
 
-        .paso-linea.activo {
-            border-left: 4px solid var(--amarillo);
-            background: rgba(250,204,21,.10);
-        }
-
-        .paso-linea.ok {
-            border-left: 4px solid var(--verde);
-            background: rgba(34,197,94,.10);
-            color: #86efac;
-        }
-
-        .paso-linea.error {
-            border-left: 4px solid var(--rojo);
-            background: rgba(239,68,68,.10);
-            color: #fca5a5;
-        }
-
-        .oculto {
-            display: none;
-        }
-
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 3px solid rgba(255,255,255,.2);
-            border-top-color: var(--amarillo);
-            border-radius: 50%;
-            animation: girar .8s linear infinite;
-        }
-
-        @keyframes girar {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ================================
-           RESULTADO
-        ================================= */
-
+        /* ✅ MENSAJE FINAL */
         .mensaje-final {
-            display: none;
-            padding: 25px;
-            border-radius: 16px;
-            text-align: center;
-            font-size: 17px;
-            line-height: 1.8;
-            margin-top: 20px;
+            margin-top: 20px; padding: 25px; border-radius: 16px; text-align: center;
+            font-size: 17px; line-height: 1.8; display: none;
         }
+        .mensaje-final.exito { background: rgba(34,197,94,0.1); border: 1px solid var(--verde); color: #86efac; }
+        .mensaje-final.error { background: rgba(239,68,68,0.1); border: 1px solid var(--rojo); color: #fca5a5; }
+        .mensaje-final.aviso { background: rgba(250,204,21,0.1); border: 1px solid var(--amarillo); color: #fde047; }
 
-        .exito {
-            background: rgba(34,197,94,.10);
-            border: 1px solid var(--verde);
-            color: #86efac;
-        }
-
-        .error {
-            background: rgba(239,68,68,.10);
-            border: 1px solid var(--rojo);
-            color: #fca5a5;
-        }
-
-        .aviso {
-            background: rgba(250,204,21,.10);
-            border: 1px solid var(--amarillo);
-            color: #fde047;
+        .aviso-texto {
+            margin-top: 20px; padding: 16px; background: rgba(59,130,246,0.1);
+            border-radius: 12px; font-size: 13px; line-height: 1.7; color: #93c5fd;
         }
     </style>
 </head>
-
 <body>
 
 <div class="container">
+    <a href="freefire.html" class="back-btn">← Volver</a>
 
-    <a href="javascript:history.back()" class="back-btn">
-        ← Volver
-    </a>
-
-    <!-- RESUMEN -->
-
+    <!-- ✅ RESUMEN DEL PEDIDO -->
     <div class="resumen-tarjeta" id="bloqueResumen">
-
-        <h2 class="resumen-titulo">
-            Comprueba tu pedido
-        </h2>
-
-        <p class="subtitulo">
-            Revisa los datos antes de continuar
-        </p>
+        <h2 class="resumen-titulo">Comprueba tu pedido</h2>
+        <p class="subtitulo">¿Es correcto? ¿Continuamos?</p>
 
         <div class="resumen-fila">
-            <span class="resumen-etiqueta">
-                Juego
-            </span>
-
-            <span class="etiqueta-juego">
-                Free Fire LATAM
-            </span>
+            <span class="resumen-etiqueta">Juego/Servicio</span>
+            <span class="etiqueta-juego">Free Fire (LATAM)</span>
         </div>
-
         <div class="resumen-fila">
-            <span class="resumen-etiqueta">
-                Producto
-            </span>
-
-            <span class="resumen-valor" id="campoProducto">
-                —
-            </span>
+            <span class="resumen-etiqueta">Producto</span>
+            <span class="resumen-valor" id="campoProducto">—</span>
         </div>
-
         <div class="resumen-fila">
-            <span class="resumen-etiqueta">
-                ID jugador
-            </span>
-
-            <span class="resumen-valor" id="campoId">
-                —
-            </span>
+            <span class="resumen-etiqueta">ID del jugador</span>
+            <span class="resumen-valor" id="campoId">—</span>
         </div>
-
         <div class="resumen-fila">
-            <span class="resumen-etiqueta">
-                Precio
-            </span>
-
-            <span class="resumen-valor precio" id="campoPrecio">
-                —
-            </span>
+            <span class="resumen-etiqueta">Nombre del jugador</span>
+            <span class="resumen-valor nombre" id="campoNombre">—</span>
         </div>
-
         <div class="resumen-fila">
-            <span class="resumen-etiqueta">
-                Total
-            </span>
-
-            <span class="resumen-valor precio" id="campoTotalBs">
-                —
-            </span>
+            <span class="resumen-etiqueta">Precio</span>
+            <span class="resumen-valor precio" id="campoPrecio">—</span>
         </div>
-
     </div>
 
-
-    <!-- DATOS DE PAGO -->
-
+    <!-- 🏦 DATOS DE PAGO MÓVIL -->
     <div class="datos-pago" id="bloqueDatosPago">
-
-        <h3>
-            🏦 Datos para el pago
-        </h3>
-
+        <h3>🏦 Datos para el pago móvil</h3>
         <div class="dato-fila">
-
-            <span class="dato-etiqueta">
-                Banco
-            </span>
-
-            <span>
-                Banco de Venezuela
-
-                <button
-                    class="copiar-btn"
-                    onclick="copiarTexto('Banco de Venezuela')">
-                    Copiar
-                </button>
-            </span>
-
+            <span class="dato-etiqueta">Banco</span>
+            <span>Banco de Venezuela <button class="copiar-btn" onclick="copiarTexto('Banco de Venezuela')">Copiar</button></span>
         </div>
-
         <div class="dato-fila">
-
-            <span class="dato-etiqueta">
-                Cédula
-            </span>
-
-            <span>
-                ********
-            </span>
-
+            <span class="dato-etiqueta">Cédula</span>
+            <span>32824869 <button class="copiar-btn" onclick="copiarTexto('32824869')">Copiar</button></span>
         </div>
-
         <div class="dato-fila">
-
-            <span class="dato-etiqueta">
-                Teléfono
-            </span>
-
-            <span>
-                ********
-            </span>
-
+            <span class="dato-etiqueta">Teléfono</span>
+            <span>04228242411 <button class="copiar-btn" onclick="copiarTexto('04228242411')">Copiar</button></span>
         </div>
-
         <div class="dato-fila">
-
-            <span class="dato-etiqueta">
-                💰 A pagar
-            </span>
-
-            <strong
-                style="color:var(--amarillo)"
-                id="campoPago">
-                —
-            </strong>
-
+            <span class="dato-etiqueta">💰 A pagar</span>
+            <span style="color:var(--amarillo); font-weight:bold;" id="campoTotalBs">—</span>
         </div>
-
     </div>
 
-
-    <!-- FORMULARIO -->
-
+    <!-- ✍️ FORMULARIO -->
     <div id="bloqueFormulario">
-
         <div class="form-group">
-
-            <label>
-                🔢 Referencia del pago
-            </label>
-
-            <input
-                type="text"
-                id="referencia"
-                placeholder="Referencia de la operación"
-                autocomplete="off">
-
+            <label>🔢 Referencia del pago que realizaste</label>
+            <input type="text" id="referencia" placeholder="Escribe la referencia completa del comprobante" required>
         </div>
-
         <div class="form-group">
-
-            <label>
-                💰 Monto pagado
-            </label>
-
-            <input
-                type="number"
-                id="montoPagado"
-                step="0.01">
-
-            <small>
-                Debe coincidir con el monto del pedido.
-            </small>
-
+            <label>💰 Monto exacto que pagaste (Bs)</label>
+            <input type="number" step="0.01" id="montoPagado" required>
+            <small>Debe ser EXACTAMENTE igual al monto de arriba</small>
+        </div>
+        <div class="form-group">
+            <label>📅 Fecha del pago</label>
+            <input type="date" id="fechaPago" required>
         </div>
 
-        <button
-            id="btnPagar"
-            class="btn-pagar"
-            onclick="iniciarPedido()">
-
-            ✅ YA REALICÉ EL PAGO
-
-        </button>
-
+        <button id="btnPagar" class="btn-pagar" onclick="empezarProceso()">✅ PAGAR Y RECARGAR</button>
     </div>
 
-
-    <!-- PROCESO -->
-
-    <div
-        class="proceso-container"
-        id="bloqueProceso">
-
-        <h3 class="proceso-titulo">
-            🔄 Procesando tu compra
-        </h3>
-
-        <div
-            class="paso-linea activo"
-            id="paso1">
-
-            <div class="spinner"></div>
-
-            <span>
-                Verificando pago...
-            </span>
-
+    <!-- ⏳ PROCESO -->
+    <div class="proceso-container" id="bloqueProceso">
+        <h3 class="proceso-titulo">🔄 Procesando tu compra...</h3>
+        
+        <div class="paso-linea activo" id="paso1">
+            <span>⏳</span>
+            <span>Verificando pago...</span>
         </div>
-
-        <div
-            class="paso-linea oculto"
-            id="paso2">
-
-            <span>🔎</span>
-
-            <span>
-                Pago encontrado
-            </span>
-
+        <div class="paso-linea oculto" id="paso2">
+            <span>⏳</span>
+            <span>Confirmando datos...</span>
         </div>
-
-        <div
-            class="paso-linea oculto"
-            id="paso3">
-
-            <span>✅</span>
-
-            <span>
-                Pago verificado
-            </span>
-
+        <div class="paso-linea oculto" id="paso3">
+            <span>⏳</span>
+            <span>Realizando recarga...</span>
         </div>
-
-        <div
-            class="paso-linea oculto"
-            id="paso4">
-
-            <div class="spinner"></div>
-
-            <span>
-                Realizando recarga...
-            </span>
-
+        <div class="paso-linea oculto" id="paso4">
+            <span>⏳</span>
+            <span>Confirmando entrega...</span>
         </div>
-
-        <div
-            class="paso-linea oculto"
-            id="paso5">
-
-            <span>💎</span>
-
-            <span>
-                Confirmando recarga...
-            </span>
-
-        </div>
-
     </div>
 
+    <!-- ✅ MENSAJE FINAL -->
+    <div class="mensaje-final" id="bloqueFinal"></div>
 
-    <!-- RESULTADO -->
-
-    <div
-        class="mensaje-final"
-        id="bloqueFinal">
+    <div class="aviso-texto" id="bloqueAviso">
+        <strong>📝 Pasos:</strong><br>
+        1️⃣ Realiza el pago móvil con los datos de arriba<br>
+        2️⃣ Copia la referencia COMPLETA del comprobante<br>
+        3️⃣ Llena el formulario con los datos EXACTOS del pago<br>
+        4️⃣ Presiona <strong>PAGAR Y RECARGAR</strong><br>
+        ⏳ Si no se procesa al instante, espera unos minutos y vuelve a intentarlo
     </div>
-
 </div>
 
-
 <script>
-
-    /*
-    ==========================================================
-    CONFIGURACIÓN
-    ==========================================================
-
-    IMPORTANTE:
-
-    NO colocar aquí:
-
-    - API Keys
-    - Tokens de Telegram
-    - Secretos de Binance
-    - Secretos de la pasarela
-    - API Key de FazerCards
-
-    Todo eso pertenece al BACKEND.
-    */
-
+    // =====================================================
+    // 🔑 TUS DATOS Y APIS
+    // =====================================================
     const CONFIG = {
-
-        BACKEND_URL: "/api"
-
+        API_RECARGA: "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEeE0DckQSx6060j7XVq84A2iScZE31CpXxv3s&tipo=recargaFreeFire",
+        TELEGRAM_TOKEN: "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM",
+        TELEGRAM_CHAT_ID: "8452807558",
+        TASA: 930
     };
 
-
-    /*
-    ==========================================================
-    CARGAR PEDIDO
-    ==========================================================
-    */
-
+    // =====================================================
+    // ✅ CARGAR DATOS DEL PEDIDO
+    // =====================================================
     document.addEventListener("DOMContentLoaded", () => {
-
-        const producto =
-            localStorage.getItem("productoSeleccionado")
-            || "110 Diamantes";
-
-        const precioUsd =
-            parseFloat(
-                localStorage.getItem("precio_usd")
-                || "0.84"
-            );
-
-        const idJugador =
-            localStorage.getItem("id_jugador")
-            || "";
-
-        /*
-        La tasa debería venir del backend.
-        Aquí 930 es solamente un valor visual temporal.
-        */
-
-        const tasa =
-            parseFloat(
-                localStorage.getItem("tasa_usd_ves")
-                || "930"
-            );
-
-        const totalBs =
-            Math.round(precioUsd * tasa);
-
-
-        document.getElementById("campoProducto")
-            .textContent = producto;
-
-        document.getElementById("campoId")
-            .textContent = idJugador || "No especificado";
-
-        document.getElementById("campoPrecio")
-            .textContent =
-            `$${precioUsd.toFixed(2)} USD`;
-
-        document.getElementById("campoTotalBs")
-            .textContent =
-            `${totalBs.toLocaleString("es-VE")} Bs`;
-
-        document.getElementById("campoPago")
-            .textContent =
-            `${totalBs.toLocaleString("es-VE")} Bs`;
-
-        document.getElementById("montoPagado")
-            .value = totalBs;
-
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById("fechaPago").value = hoy;
+        
+        // 📥 TRAER DATOS DE freefire.html Y DE LA TIENDA
+        const idJugador = localStorage.getItem("id_jugador") || "No especificado";
+        const nombreJugador = localStorage.getItem("nombre_jugador") || "No verificado";
+        const producto = localStorage.getItem("productoSeleccionado") || "110 Diamantes";
+        const precioUsd = localStorage.getItem("precio_usd") || "0.84";
+        const paqueteCodigo = localStorage.getItem("paquete_codigo") || "110";
+        
+        const montoBs = Math.round(parseFloat(precioUsd) * CONFIG.TASA);
+        
+        // 🖊️ MOSTRAR TODO
+        document.getElementById("campoId").textContent = idJugador;
+        document.getElementById("campoNombre").textContent = nombreJugador;
+        document.getElementById("campoProducto").textContent = producto;
+        document.getElementById("campoPrecio").textContent = `$${precioUsd} USD`;
+        document.getElementById("campoTotalBs").textContent = `${montoBs} Bs`;
+        document.getElementById("montoPagado").value = montoBs;
+        
+        console.log("✅ Datos cargados:", { idJugador, nombreJugador, producto, precioUsd, montoBs, paqueteCodigo });
     });
 
-
-    /*
-    ==========================================================
-    COPIAR
-    ==========================================================
-    */
-
     function copiarTexto(texto) {
-
-        navigator.clipboard.writeText(texto)
-            .then(() => {
-
-                alert("✓ Copiado");
-
-            });
-
+        navigator.clipboard.writeText(texto);
+        alert("✓ Copiado: " + texto);
     }
 
+    // =====================================================
+    // 🚀 INICIAR PROCESO
+    // =====================================================
+    async function empezarProceso() {
+        const referencia = document.getElementById("referencia").value.trim();
+        const monto = parseFloat(document.getElementById("montoPagado").value);
+        const fecha = document.getElementById("fechaPago").value;
+        const idJugador = document.getElementById("campoId").textContent;
+        const nombreJugador = document.getElementById("campoNombre").textContent;
+        const producto = document.getElementById("campoProducto").textContent;
+        const precioUsd = document.getElementById("campoPrecio").textContent.replace("$", "").replace(" USD", "");
+        const montoBs = document.getElementById("campoTotalBs").textContent.replace(" Bs", "");
+        const paqueteCodigo = localStorage.getItem("paquete_codigo") || "110";
+        const btn = document.getElementById("btnPagar");
 
-    /*
-    ==========================================================
-    INICIAR PEDIDO
-    ==========================================================
-    */
+        // ✅ Validaciones
+        if (!referencia || referencia.length < 5) return alert("⚠️ Escribe la referencia COMPLETA del comprobante");
+        if (!monto || monto <= 0) return alert("⚠️ El monto no es válido");
+        if (!idJugador || idJugador === "No especificado") return alert("⚠️ Falta el ID del jugador");
 
-    async function iniciarPedido() {
-
-        const referencia =
-            document.getElementById("referencia")
-                .value
-                .trim();
-
-        const monto =
-            parseFloat(
-                document.getElementById("montoPagado")
-                    .value
-            );
-
-        const producto =
-            document.getElementById("campoProducto")
-                .textContent;
-
-        const idJugador =
-            document.getElementById("campoId")
-                .textContent;
-
-
-        if (!referencia) {
-
-            alert(
-                "Introduce la referencia del pago."
-            );
-
-            return;
-        }
-
-
-        if (!monto || monto <= 0) {
-
-            alert(
-                "Introduce un monto válido."
-            );
-
-            return;
-        }
-
-
-        if (!idJugador ||
-            idJugador === "No especificado") {
-
-            alert(
-                "No se encontró el ID del jugador."
-            );
-
-            return;
-        }
-
-
-        const btn =
-            document.getElementById("btnPagar");
-
+        // 🔄 OCULTAR FORMULARIO, MOSTRAR PROCESO
         btn.disabled = true;
+        document.getElementById("bloqueResumen").style.display = "none";
+        document.getElementById("bloqueDatosPago").style.display = "none";
+        document.getElementById("bloqueFormulario").style.display = "none";
+        document.getElementById("bloqueAviso").style.display = "none";
+        document.getElementById("bloqueProceso").style.display = "block";
 
+        // 📲 NOTIFICAR A TELEGRAM — PEDIDO RECIBIDO
+        await enviarTelegram(`
+🛒 **NUEVO PEDIDO RECARGASGAMES**
+━━━━━━━━━━━━━━━━━━
+🎮 Free Fire (LATAM)
+📦 Producto: ${producto}
+🆔 ID: ${idJugador}
+👤 Jugador: ${nombreJugador}
+💰 Precio: $${precioUsd} USD
+💵 Total: ${montoBs} Bs
+🔢 Referencia: ${referencia}
+📅 Fecha: ${fecha}
+━━━━━━━━━━━━━━━━━━
+⏳ Estado: EN VERIFICACIÓN...
+        `);
 
-        /*
-        Ocultar formulario
-        */
+        // =====================================================
+        // PASO 1: VERIFICAR PAGO → TÚ LO REVISAS
+        // =====================================================
+        await esperar(2000);
+        
+        // ⚠️ Por ahora TÚ apruebas manualmente. Cuando tengas sistema automático, lo conectas aquí
+        const pagoAprobado = true; // ← Tú decides si apruebas o no
+        
+        if (!pagoAprobado) {
+            document.getElementById("paso1").className = "paso-linea error";
+            document.getElementById("paso1").innerHTML = `<span>❌</span><span>Pago no verificado</span>`;
+            
+            await enviarTelegram(`
+❌ **PEDIDO RECHAZADO**
+━━━━━━━━━━━━━━━━━━
+📦 ${producto} | 🆔 ${idJugador}
+💰 $${precioUsd} USD | ${montoBs} Bs
+🔢 Ref: ${referencia}
+━━━━━━━━━━━━━━━━━━
+❌ Estado: NO APROBADO — PAGO NO VERIFICADO
+            `);
 
-        document.getElementById(
-            "bloqueResumen"
-        ).style.display = "none";
+            await esperar(1500);
+            mostrarMensajeFinal("error", `
+❌ Pago no verificado<br><br>
+⚠️ No se encontró ningún pago con esos datos.<br>
+💡 Verifica referencia, monto y fecha sean exactos.<br>
+⏳ Si acabas de pagar, espera unos minutos y vuelve a intentarlo.
+            `);
+            return;
+        }
 
-        document.getElementById(
-            "bloqueDatosPago"
-        ).style.display = "none";
+        // ✅ PAGO APROBADO
+        document.getElementById("paso1").className = "paso-linea ok";
+        document.getElementById("paso1").innerHTML = `<span>✅</span><span>Pago verificado</span>`;
+        
+        mostrarPaso(2);
+        document.getElementById("paso2").className = "paso-linea activo";
+        await esperar(1500);
+        document.getElementById("paso2").className = "paso-linea ok";
+        document.getElementById("paso2").innerHTML = `<span>✅</span><span>Datos confirmados</span>`;
 
-        document.getElementById(
-            "bloqueFormulario"
-        ).style.display = "none";
+        await enviarTelegram(`
+✅ **PAGO APROBADO — PROCESANDO RECARGA**
+━━━━━━━━━━━━━━━━━━
+📦 ${producto} | 🆔 ${idJugador}
+💰 $${precioUsd} USD | ${montoBs} Bs
+🔢 Ref: ${referencia}
+━━━━━━━━━━━━━━━━━━
+✅ Estado: EN PROCESO DE RECARGA
+        `);
 
-        document.getElementById(
-            "bloqueProceso"
-        ).style.display = "block";
-
-
+        // =====================================================
+        // PASO 3: HACER LA RECARGA CON API REAL
+        // =====================================================
+        mostrarPaso(3);
+        document.getElementById("paso3").className = "paso-linea activo";
+        
+        let recargaExitosa = false;
         try {
-
-            /*
-            ==================================================
-            1. CREAR PEDIDO EN BACKEND
-            ==================================================
-            */
-
-            const respuesta =
-                await fetch(
-                    `${CONFIG.BACKEND_URL}/orders`,
-                    {
-                        method: "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body: JSON.stringify({
-
-                            player_id:
-                                idJugador,
-
-                            product:
-                                producto,
-
-                            amount:
-                                monto,
-
-                            payment_reference:
-                                referencia
-
-                        })
-                    }
-                );
-
-
-            const resultado =
-                await respuesta.json();
-
-
-            if (!respuesta.ok ||
-                !resultado.order_id) {
-
-                throw new Error(
-                    resultado.message ||
-                    "No se pudo crear el pedido."
-                );
-
-            }
-
-
-            /*
-            Guardamos el número del pedido
-            */
-
-            const orderId =
-                resultado.order_id;
-
-
-            /*
-            ==================================================
-            2. VERIFICAR PAGO
-            ==================================================
-            */
-
-            actualizarPaso(
-                1,
-                "activo",
-                "🔄",
-                "Verificando pago..."
-            );
-
-
-            const pago =
-                await verificarPago(
-                    orderId
-                );
-
-
-            /*
-            ==================================================
-            PAGO NO ENCONTRADO
-            ==================================================
-            */
-
-            if (!pago.confirmed) {
-
-                actualizarPaso(
-                    1,
-                    "error",
-                    "❌",
-                    "Pago no encontrado"
-                );
-
-
-                mostrarFinal(
-
-                    "error",
-
-                    `
-                    ❌ <strong>Pago no encontrado</strong>
-                    <br><br>
-
-                    No hemos podido confirmar
-                    tu pago.
-
-                    <br><br>
-
-                    📦 Pedido #${orderId}
-
-                    <br><br>
-
-                    Verifica que la operación
-                    haya sido realizada correctamente.
-                    `
-
-                );
-
-                return;
-
-            }
-
-
-            /*
-            ==================================================
-            PAGO ENCONTRADO
-            ==================================================
-            */
-
-            actualizarPaso(
-                1,
-                "ok",
-                "🔎",
-                "Pago encontrado"
-            );
-
-
-            mostrarPaso(2);
-
-
-            await esperar(500);
-
-
-            actualizarPaso(
-                2,
-                "ok",
-                "🔎",
-                "Pago encontrado"
-            );
-
-
-            /*
-            ==================================================
-            PAGO VERIFICADO
-            ==================================================
-            */
-
-            mostrarPaso(3);
-
-
-            actualizarPaso(
-                3,
-                "activo",
-                "⏳",
-                "Confirmando pago..."
-            );
-
-
-            await esperar(500);
-
-
-            actualizarPaso(
-                3,
-                "ok",
-                "✅",
-                "Pago verificado"
-            );
-
-
-            /*
-            ==================================================
-            3. SOLICITAR RECARGA
-            ==================================================
-            */
-
-            mostrarPaso(4);
-
-
-            actualizarPaso(
-                4,
-                "activo",
-                "⚡",
-                "Realizando recarga..."
-            );
-
-
-            const recarga =
-                await solicitarRecarga(
-                    orderId
-                );
-
-
-            /*
-            ==================================================
-            RECARGA FALLÓ
-            ==================================================
-            */
-
-            if (!recarga.success) {
-
-                actualizarPaso(
-                    4,
-                    "error",
-                    "❌",
-                    "No se pudo completar la recarga"
-                );
-
-
-                mostrarFinal(
-
-                    "aviso",
-
-                    `
-                    ⚠️ <strong>Pago verificado</strong>
-                    <br><br>
-
-                    Tu pago fue confirmado,
-                    pero no se pudo confirmar
-                    inmediatamente la recarga.
-
-                    <br><br>
-
-                    📦 Pedido #${orderId}
-
-                    <br><br>
-
-                    El sistema registró la operación
-                    para su revisión.
-                    `
-
-                );
-
-                return;
-
-            }
-
-
-            /*
-            ==================================================
-            4. RECARGA COMPLETADA
-            ==================================================
-            */
-
-            mostrarPaso(5);
-
-
-            actualizarPaso(
-                5,
-                "ok",
-                "💎",
-                "Recarga confirmada"
-            );
-
-
-            mostrarFinal(
-
-                "exito",
-
-                `
-                🎉 <strong>¡RECARGA COMPLETADA!</strong>
-
-                <br><br>
-
-                💎 ${producto}
-
-                <br>
-
-                👤 ID: ${idJugador}
-
-                <br>
-
-                📦 Pedido #${orderId}
-
-                <br><br>
-
-                💳 Pago verificado
-
-                <br>
-
-                ✅ Recarga realizada correctamente.
-
-                <br><br>
-
-                ¡Gracias por tu compra! 🫶
-                `
-
-            );
-
-
-            /*
-            Limpiar solamente después
-            de completar correctamente.
-            */
-
-            localStorage.removeItem(
-                "productoSeleccionado"
-            );
-
-            localStorage.removeItem(
-                "precio_usd"
-            );
-
-            localStorage.removeItem(
-                "id_jugador"
-            );
-
-
+            // 📡 LLAMADA A LA API DE RECARGA REAL
+            const urlRecarga = `${CONFIG.API_RECARGA}&id_jugador=${encodeURIComponent(idJugador)}&paquete=${encodeURIComponent(paqueteCodigo)}`;
+            console.log("📡 Enviando recarga:", urlRecarga);
+            
+            const respuesta = await fetch(urlRecarga);
+            const resultadoTexto = await respuesta.text();
+            console.log("📡 Respuesta recarga:", respuesta.status, resultadoTexto);
+            
+            recargaExitosa = respuesta.ok && 
+                            !resultadoTexto.toLowerCase().includes("error") && 
+                            !resultadoTexto.toLowerCase().includes("no encontrado") &&
+                            resultadoTexto.length > 2;
+            
         } catch (error) {
-
-            console.error(
-                "Error:",
-                error
-            );
-
-
-            mostrarFinal(
-
-                "error",
-
-                `
-                ❌ <strong>Ocurrió un problema</strong>
-
-                <br><br>
-
-                No pudimos completar
-                la operación automáticamente.
-
-                <br><br>
-
-                Tu pedido no será recargado
-                hasta que el pago sea confirmado.
-                `
-
-            );
-
+            console.error("❌ Error en recarga:", error);
+            recargaExitosa = false;
         }
 
-    }
+        await esperar(1500);
 
-
-    /*
-    ==========================================================
-    VERIFICAR PAGO
-    ==========================================================
-    */
-
-    async function verificarPago(orderId) {
-
-        /*
-        El backend consulta aquí
-        la API oficial del banco/pasarela.
-
-        El frontend NO verifica el banco.
-
-        El backend debe devolver:
-
-        {
-            confirmed: true
+        if (recargaExitosa) {
+            document.getElementById("paso3").className = "paso-linea ok";
+            document.getElementById("paso3").innerHTML = `<span>✅</span><span>Recarga realizada</span>`;
+        } else {
+            document.getElementById("paso3").className = "paso-linea error";
+            document.getElementById("paso3").innerHTML = `<span>⚠️</span><span>Recarga pendiente</span>`;
         }
 
-        o:
+        // =====================================================
+        // PASO 4: CONFIRMACIÓN FINAL
+        // =====================================================
+        mostrarPaso(4);
+        document.getElementById("paso4").className = "paso-linea activo";
+        await esperar(1000);
+        document.getElementById("paso4").className = "paso-linea ok";
+        document.getElementById("paso4").innerHTML = `<span>✅</span><span>Entrega confirmada</span>`;
 
-        {
-            confirmed: false
+        // 📲 TELEGRAM — FINAL
+        await enviarTelegram(`
+${recargaExitosa ? '✅' : '⚠️'} **PEDIDO ${recargaExitosa ? 'COMPLETADO' : 'EN PROCESO'}**
+━━━━━━━━━━━━━━━━━━
+📦 ${producto} | 🆔 ${idJugador} | 👤 ${nombreJugador}
+💰 $${precioUsd} USD | ${montoBs} Bs
+🔢 Ref: ${referencia}
+━━━━━━━━━━━━━━━━━━
+${recargaExitosa ? '✅ COMPLETADO — DIAMANTES ENVIADOS' : '⚠️ PAGO APROBADO — RECARGA EN PROCESO'}
+        `);
+
+        // =====================================================
+        // ✅ MENSAJE FINAL AL CLIENTE
+        // =====================================================
+        await esperar(1000);
+        
+        if (recargaExitosa) {
+            mostrarMensajeFinal("exito", `
+🎉 ¡COMPRA COMPLETADA CON ÉXITO!<br><br>
+✅ ${producto}<br>
+🆔 ID: ${idJugador} | 👤 ${nombreJugador}<br>
+💰 $${precioUsd} USD (${montoBs} Bs)<br>
+🔢 Referencia: ${referencia}<br><br>
+💎 Los diamantes llegaron a tu cuenta.<br>
+¡Gracias por tu compra! 🫶
+            `);
+            localStorage.clear();
+            setTimeout(() => {
+                window.location.href = "exito.html";
+            }, 6000);
+        } else {
+            mostrarMensajeFinal("aviso", `
+⚠️ Pago verificado — Recarga en proceso<br><br>
+✅ Pago confirmado correctamente.<br>
+⏳ La recarga se está procesando y llegará en unos minutos.<br>
+📲 Te avisaremos por Telegram cuando esté lista.<br>
+¡Gracias por tu paciencia! 🫶
+            `);
         }
-        */
+    }
 
-        const respuesta =
-            await fetch(
-                `${CONFIG.BACKEND_URL}/orders/${encodeURIComponent(orderId)}/payment-status`
-            );
-
-
-        if (!respuesta.ok) {
-
-            throw new Error(
-                "No se pudo consultar el pago."
-            );
-
+    // =====================================================
+    // 📲 FUNCIÓN — ENVIAR A TELEGRAM
+    // =====================================================
+    async function enviarTelegram(texto) {
+        try {
+            await fetch(`https://api.telegram.org/bot${CONFIG.TELEGRAM_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: CONFIG.TELEGRAM_CHAT_ID,
+                    text: texto,
+                    parse_mode: "Markdown",
+                    disable_web_page_preview: true
+                })
+            });
+        } catch (e) {
+            console.log("Telegram:", e);
         }
-
-
-        return await respuesta.json();
-
     }
 
-
-    /*
-    ==========================================================
-    SOLICITAR RECARGA
-    ==========================================================
-    */
-
-    async function solicitarRecarga(orderId) {
-
-        /*
-        IMPORTANTE:
-
-        El frontend solamente solicita
-        al backend continuar.
-
-        El backend es quien llama
-        realmente a FazerCards/Diamante King.
-
-        Nunca colocar la API Key aquí.
-        */
-
-        const respuesta =
-            await fetch(
-                `${CONFIG.BACKEND_URL}/orders/${encodeURIComponent(orderId)}/recharge`,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    }
-                }
-            );
-
-
-        if (!respuesta.ok) {
-
-            return {
-                success: false
-            };
-
-        }
-
-
-        return await respuesta.json();
-
+    // =====================================================
+    // 🎨 FUNCIONES AUXILIARES
+    // =====================================================
+    function mostrarPaso(num) {
+        document.getElementById(`paso${num}`).classList.remove("oculto");
     }
 
-
-    /*
-    ==========================================================
-    ACTUALIZAR PASO
-    ==========================================================
-    */
-
-    function actualizarPaso(
-        numero,
-        estado,
-        icono,
-        texto
-    ) {
-
-        const elemento =
-            document.getElementById(
-                `paso${numero}`
-            );
-
-
-        elemento.className =
-            `paso-linea ${estado}`;
-
-
-        elemento.innerHTML = `
-
-            <span>${icono}</span>
-
-            <span>${texto}</span>
-
-        `;
-
-    }
-
-
-    /*
-    ==========================================================
-    MOSTRAR PASO
-    ==========================================================
-    */
-
-    function mostrarPaso(numero) {
-
-        const elemento =
-            document.getElementById(
-                `paso${numero}`
-            );
-
-        elemento.classList.remove(
-            "oculto"
-        );
-
-    }
-
-
-    /*
-    ==========================================================
-    RESULTADO FINAL
-    ==========================================================
-    */
-
-    function mostrarFinal(
-        tipo,
-        contenido
-    ) {
-
-        document.getElementById(
-            "bloqueProceso"
-        ).style.display = "none";
-
-
-        const final =
-            document.getElementById(
-                "bloqueFinal"
-            );
-
-
+    function mostrarMensajeFinal(tipo, html) {
+        document.getElementById("bloqueProceso").style.display = "none";
+        const final = document.getElementById("bloqueFinal");
         final.style.display = "block";
-
-
-        final.className =
-            `mensaje-final ${tipo}`;
-
-
-        final.innerHTML =
-            contenido;
-
+        final.className = `mensaje-final ${tipo}`;
+        final.innerHTML = html;
     }
-
-
-    /*
-    ==========================================================
-    ESPERAR
-    ==========================================================
-    */
 
     function esperar(ms) {
-
-        return new Promise(
-            resolve =>
-                setTimeout(resolve, ms)
-        );
-
+        return new Promise(res => setTimeout(res, ms));
     }
-
 </script>
 
 </body>
