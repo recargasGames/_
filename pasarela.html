@@ -83,7 +83,9 @@
         .info-box strong { color: #60a5fa; }
         .divisor { text-align: center; margin: 25px 0; color: #64748b; font-size: 13px; }
         .monto-grande { font-size: 22px; font-weight: bold; color: #facc15 !important; }
-        .respuesta-api { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 11px; color: #94a3b8; word-break: break-all; }
+        .paso { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 13px; }
+        .paso.ok { border-left: 3px solid #10b981; }
+        .paso.esp { border-left: 3px solid #facc15; }
     </style>
 </head>
 <body>
@@ -166,12 +168,13 @@
     <!-- ⏳ ESTADO DE VERIFICACIÓN -->
     <div class="loading" id="loading">
         <span class="spinner"></span>
-        <strong>Buscando el pago...</strong><br>
-        <span style="font-size:13px; color:#e2e8f0;">Consultando en el sistema, por favor espera</span>
+        <strong id="estadoTexto">Buscando el pago...</strong><br>
+        <span style="font-size:13px; color:#e2e8f0;" id="estadoDetalle">Consultando en el sistema, por favor espera</span>
     </div>
 
-    <!-- 📬 MENSAJES DE RESULTADO — YA NO SE QUITA, SE QUEDA VISIBLE -->
+    <!-- 📬 MENSAJES DE RESULTADO -->
     <div class="mensaje" id="mensaje" style="display:none;"></div>
+    <div id="pasosProceso" style="margin-top:20px; display:none;"></div>
 
     <!-- ℹ️ INSTRUCCIONES -->
     <div class="info-box">
@@ -179,34 +182,36 @@
         1️⃣ Haz el pago móvil con los datos de arriba<br>
         2️⃣ Copia la referencia del comprobante<br>
         3️⃣ Llena el formulario con los datos exactos del pago<br>
-        4️⃣ Presiona <strong>HACER RECARGA</strong> para verificar<br>
+        4️⃣ Presiona <strong>HACER RECARGA</strong> → se verifica y se entrega automáticamente 💎<br>
         ⏳ Si no se encuentra al instante, espera 3-5 minutos y vuelve a intentarlo
     </div>
 </div>
 
 <script>
     // =====================================================
-    // 🔑 TUS DATOS DE PABILO — YA ESTÁN PUESTOS ✅
+    // 🔑 CONFIGURACIÓN COMPLETA — FAZERCARDS + PABILO
     // =====================================================
     const CONFIG = {
-        API_URL: "https://api.pabilo.app/userbankpayment/6a93ac1b98055a34bd8b05f2/betaserio",
-        API_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789"
+        // 💰 API para verificar el pago
+        PABILO_URL: "https://api.pabilo.app/userbankpayment/6a93ac1b98055a34bd8b05f2/betaserio",
+        PABILO_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789",
+        
+        // 💎 API para ENTREGAR la recarga
+        FAZERCARDS_URL: "https://api.fzr.cards/api/v2",
+        FAZERCARDS_KEY: "fc_690c1ab9f99f7642922ab3f6"
     };
 
     // =====================================================
-    // 📅 AL CARGAR LA PÁGINA — CARGA TODO
+    // 📅 AL CARGAR LA PÁGINA
     // =====================================================
     document.addEventListener("DOMContentLoaded", () => {
-        // Fecha de hoy por defecto
         const hoy = new Date().toISOString().split("T")[0];
         document.getElementById("fechaPago").value = hoy;
-        
-        // ✅ CARGAR DATOS DEL PEDIDO
         cargarDatosPedido();
     });
 
     // =====================================================
-    // 📦 CARGAR DATOS DEL PEDIDO — MEJORADO
+    // 📦 CARGAR DATOS DEL PEDIDO
     // =====================================================
     function cargarDatosPedido() {
         const juego = localStorage.getItem("juegoSeleccionado") || "Free Fire";
@@ -219,20 +224,15 @@
         document.getElementById("datoMonto").textContent = `${monto} Bs`;
         document.getElementById("idJugador").textContent = idJugador;
         
-        // Auto-rellenar el monto
         if (monto && monto !== "0.00") {
             document.getElementById("montoPagado").value = monto;
         }
         
-        console.log("✅ Datos cargados en pasarela:");
-        console.log("🎮 Juego:", juego);
-        console.log("📦 Producto:", producto);
-        console.log("💰 Monto:", monto);
-        console.log("🆔 ID Jugador:", idJugador);
+        console.log("✅ Datos cargados:", { juego, producto, monto, idJugador });
     }
 
     // =====================================================
-    // 📋 FUNCIÓN PARA COPIAR DATOS
+    // 📋 COPIAR DATOS
     // =====================================================
     window.copiarTexto = function(texto, boton) {
         navigator.clipboard.writeText(texto).then(() => {
@@ -246,56 +246,51 @@
     };
 
     // =====================================================
-    // ✅ FUNCIÓN PRINCIPAL — MEJORADA CON MENSAJES CLAROS
+    // ✅ FUNCIÓN PRINCIPAL — VERIFICAR PAGO + ENTREGAR RECARGA
     // =====================================================
     async function iniciarRecarga() {
         const banco = document.getElementById("bancoOrigen").value;
         const referencia = document.getElementById("referencia").value.trim();
         const monto = parseFloat(document.getElementById("montoPagado").value);
         const fecha = document.getElementById("fechaPago").value;
+        const idJugador = localStorage.getItem("id_jugador");
+        const producto = localStorage.getItem("productoSeleccionado");
         
         const btn = document.getElementById("btnRecarga");
         const loading = document.getElementById("loading");
         const mensaje = document.getElementById("mensaje");
+        const pasosProceso = document.getElementById("pasosProceso");
+        const estadoTexto = document.getElementById("estadoTexto");
+        const estadoDetalle = document.getElementById("estadoDetalle");
 
         // ✅ Validaciones
-        if (!banco) {
-            mostrarMensaje("⚠️ Selecciona el banco desde donde pagaste", "error");
-            return;
-        }
-        if (!referencia || referencia.length < 3) {
-            mostrarMensaje("⚠️ Escribe la referencia del comprobante", "error");
-            return;
-        }
-        if (!monto || monto <= 0) {
-            mostrarMensaje("⚠️ El monto no es válido. Vuelve a la tienda y selecciona un producto.", "error");
-            return;
-        }
-        if (!fecha) {
-            mostrarMensaje("⚠️ Selecciona la fecha del pago", "error");
-            return;
-        }
+        if (!banco) { mostrarMensaje("⚠️ Selecciona el banco desde donde pagaste", "error"); return; }
+        if (!referencia || referencia.length < 3) { mostrarMensaje("⚠️ Escribe la referencia del comprobante", "error"); return; }
+        if (!monto || monto <= 0) { mostrarMensaje("⚠️ El monto no es válido. Vuelve a la tienda.", "error"); return; }
+        if (!fecha) { mostrarMensaje("⚠️ Selecciona la fecha del pago", "error"); return; }
+        if (!idJugador || idJugador === "No especificado") { mostrarMensaje("⚠️ Falta el ID del jugador. Vuelve a la tienda.", "error"); return; }
 
-        // ⏳ MOSTRAR BUSCANDO PAGO
+        // ⏳ MOSTRAR PROGRESO
         btn.disabled = true;
         btn.style.display = "none";
         loading.style.display = "block";
         mensaje.style.display = "none";
+        pasosProceso.style.display = "block";
+        pasosProceso.innerHTML = "";
+
+        // =====================================================
+        // PASO 1: VERIFICAR EL PAGO CON PABILO
+        // =====================================================
+        agregarPaso("1️⃣ Verificando el pago...", "esp");
+        estadoTexto.textContent = "Verificando pago...";
+        estadoDetalle.textContent = "Consultando el sistema de pagos";
 
         try {
-            console.log("🔍 === ENVIANDO A PABILO ===");
-            console.log("📌 Referencia:", referencia);
-            console.log("💰 Monto:", monto);
-            console.log("📅 Fecha:", fecha);
-            console.log("📋 movement_type: GENERIC");
-            console.log("🌐 URL:", CONFIG.API_URL);
-
-            // 📡 LLAMADA A LA API
-            const respuesta = await fetch(CONFIG.API_URL, {
+            const respPabilo = await fetch(CONFIG.PABILO_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${CONFIG.API_KEY}`
+                    "Authorization": `Bearer ${CONFIG.PABILO_KEY}`
                 },
                 body: JSON.stringify({
                     bank_reference: referencia,
@@ -305,90 +300,118 @@
                 })
             });
 
-            console.log("📡 Respuesta status:", respuesta.status, respuesta.statusText);
-            
-            const resultado = await respuesta.json();
-            console.log("✅ Respuesta completa de Pabilo:", resultado);
+            const datosPabilo = await respPabilo.json();
+            console.log("📡 Respuesta Pabilo:", datosPabilo);
 
-            // ⏹️ OCULTAR LOADING, MOSTRAR RESPUESTA — YA NO SE QUITA
-            loading.style.display = "none";
-            mensaje.style.display = "block";
-
-            // ✅ VERIFICAR RESPUESTA DE PABILO — MÁS CONDICIONES
-            const encontrado = 
-                resultado.encontrado === true || 
-                resultado.status === "aprobado" || 
-                resultado.existe === true || 
-                resultado.success === true ||
-                resultado.encontrado === "true";
-
-            if (respuesta.ok && encontrado) {
-                mostrarMensaje(
-                    "✅ ¡PAGO ENCONTRADO Y VERIFICADO! 🎉\n\n" +
-                    "Tu recarga se está procesando...\n" +
-                    "Llegará en unos momentos a tu cuenta del juego.\n\n" +
-                    "¡Gracias por tu compra!",
-                    "exito"
-                );
-                // Guardar en Firebase
-                await marcarPedidoVerificado(referencia, monto, banco);
-                // Redirigir
-                setTimeout(() => {
-                    window.location.href = "exito.html";
-                }, 5000);
-
-            } else if (!respuesta.ok) {
-                mostrarMensaje(
-                    "⚠️ ERROR DEL SERVIDOR\n\n" +
-                    "Código: " + respuesta.status + " " + respuesta.statusText + "\n" +
-                    (resultado.message || resultado.error || JSON.stringify(resultado)),
-                    "error"
-                );
-                // Restaurar botón
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.style.display = "block";
-                }, 3000);
-
-            } else {
-                // ❌ PAGO NO ENCONTRADO — MUESTRA LO QUE DEVOLVIÓ PABILO
-                mostrarMensaje(
-                    "❌ PAGO NO ENCONTRADO\n\n" +
-                    "Verifica que:\n" +
-                    "• El monto sea EXACTAMENTE igual\n" +
-                    "• La referencia esté bien escrita\n" +
-                    "• La fecha del pago sea correcta\n\n" +
-                    "⏳ Si acabas de pagar, espera 3-5 minutos y vuelve a intentarlo\n\n" +
-                    "📋 Respuesta del sistema: " + JSON.stringify(resultado),
-                    "info"
-                );
-                // Restaurar botón
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.style.display = "block";
-                }, 3000);
+            if (!respPabilo.ok || datosPabilo.encontrado === false || datosPabilo.status === "not_found") {
+                agregarPaso("1️⃣ Pago no encontrado en el sistema", "");
+                throw new Error(`Pago no verificado: ${datosPabilo.msg || datosPabilo.error || "Intenta en 5 minutos"}`);
             }
 
-        } catch (error) {
-            console.error("❌ ERROR DE CONEXIÓN:", error);
-            loading.style.display = "none";
-            mensaje.style.display = "block";
+            agregarPaso("1️⃣ ✅ Pago verificado correctamente", "ok");
+
+            // =====================================================
+            // PASO 2: ENTREGAR RECARGA CON FAZERCARDS
+            // =====================================================
+            agregarPaso("2️⃣ Conectando con el proveedor de recargas...", "esp");
+            estadoTexto.textContent = "Entregando recarga...";
+            estadoDetalle.textContent = "Conectando con FazerCards";
+
+            // 📦 Preparar el producto para FazerCards
+            const recarga = await prepararRecargaFazerCards(producto, idJugador, monto);
+            console.log("📦 Datos para FazerCards:", recarga);
+
+            const respFazer = await fetch(`${CONFIG.FAZERCARDS_URL}/order`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-API-Key": CONFIG.FAZERCARDS_KEY
+                },
+                body: JSON.stringify(recarga)
+            });
+
+            const datosFazer = await respFazer.json();
+            console.log("💎 Respuesta FazerCards:", datosFazer);
+
+            if (!respFazer.ok || !datosFazer.ok) {
+                throw new Error(datosFazer.message || datosFazer.error || "Error al procesar la recarga");
+            }
+
+            agregarPaso("2️⃣ ✅ Recarga procesada con éxito", "ok");
+
+            // =====================================================
+            // PASO 3: ¡COMPLETADO!
+            // =====================================================
+            agregarPaso("3️⃣ 💎 ¡Diamantes enviados a tu cuenta!", "ok");
+            
             mostrarMensaje(
-                "⚠️ ERROR DE CONEXIÓN\n\n" +
-                error.message + "\n\n" +
-                "Verifica tu internet y vuelve a intentarlo.",
+                "🎉 ¡RECARGA COMPLETADA CON ÉXITO!\n\n" +
+                "✅ Pago verificado\n" +
+                "✅ Producto: " + producto + "\n" +
+                "✅ ID: " + idJugador + "\n" +
+                "💎 Los diamantes llegarán en unos momentos a tu cuenta.\n\n" +
+                "¡Gracias por tu compra!",
+                "exito"
+            );
+
+            // Limpiar carrito
+            localStorage.removeItem("juegoSeleccionado");
+            localStorage.removeItem("productoSeleccionado");
+            localStorage.removeItem("montoFinalBs");
+
+            // Redirigir a éxito
+            setTimeout(() => {
+                window.location.href = "exito.html";
+            }, 6000);
+
+        } catch (error) {
+            console.error("❌ Error:", error);
+            loading.style.display = "none";
+            mostrarMensaje(
+                "⚠️ " + error.message + "\n\n" +
+                "Si acabas de pagar, espera 5 minutos y vuelve a intentarlo.\n" +
+                "Si el problema persiste, contáctanos por WhatsApp.",
                 "error"
             );
-            // Restaurar botón
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.style.display = "block";
-            }, 3000);
+            btn.disabled = false;
+            btn.style.display = "block";
         }
     }
 
     // =====================================================
-    // 📍 MOSTRAR MENSAJES — YA NO SE OCULTAN
+    // 📦 PREPARAR DATOS PARA FAZERCARDS
+    // =====================================================
+    async function prepararRecargaFazerCards(producto, playerId, montoBs) {
+        // 🔍 Mapear el producto al ID de FazerCards
+        const mapaProductos = {
+            "110 Diamantes": { sku: "ff_110", cantidad: 110 },
+            "341 Diamantes": { sku: "ff_341", cantidad: 341 },
+            "572 Diamantes": { sku: "ff_572", cantidad: 572 },
+            "1166 Diamantes": { sku: "ff_1166", cantidad: 1166 },
+            "2398 Diamantes": { sku: "ff_2398", cantidad: 2398 },
+            "6160 Diamantes": { sku: "ff_6160", cantidad: 6160 },
+            "Tarjeta Semanal": { sku: "ff_weekly", cantidad: 1 },
+            "Tarjeta Mensual": { sku: "ff_monthly", cantidad: 1 },
+            "Pase Booyah": { sku: "ff_booyah", cantidad: 1 }
+        };
+
+        const prod = mapaProductos[producto] || { sku: "ff_custom", cantidad: 1 };
+
+        return {
+            game: "freefire",
+            player_id: playerId,
+            sku: prod.sku,
+            quantity: prod.cantidad,
+            amount_bs: montoBs,
+            metadata: {
+                producto: producto,
+                referencia_pago: document.getElementById("referencia").value
+            }
+        };
+    }
+
+    // =====================================================
+    // 📍 MOSTRAR MENSAJES
     // =====================================================
     function mostrarMensaje(texto, tipo) {
         const mensaje = document.getElementById("mensaje");
@@ -398,30 +421,14 @@
     }
 
     // =====================================================
-    // 🔥 GUARDAR EN FIREBASE
+    // 📍 AGREGAR PASO AL PROCESO
     // =====================================================
-    async function marcarPedidoVerificado(referencia, monto, banco) {
-        try {
-            const { getDatabase, ref, update } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-            const { getApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-            
-            const db = getDatabase(getApp());
-            const pedidoId = localStorage.getItem("pedidoId") || localStorage.getItem("pedidoActual");
-            
-            if (pedidoId) {
-                await update(ref(db, `pedidos/${pedidoId}`), {
-                    estado: "Verificado ✅",
-                    verificado: true,
-                    fechaVerificacion: new Date().toISOString(),
-                    referenciaPago: referencia,
-                    montoPagado: monto,
-                    bancoOrigen: banco
-                });
-                console.log("✅ Pedido marcado como verificado");
-            }
-        } catch (fbError) {
-            console.warn("⚠️ No se pudo actualizar Firebase:", fbError);
-        }
+    function agregarPaso(texto, estado = "") {
+        const pasos = document.getElementById("pasosProceso");
+        const div = document.createElement("div");
+        div.className = `paso ${estado}`;
+        div.textContent = texto;
+        pasos.appendChild(div);
     }
 
     window.iniciarRecarga = iniciarRecarga;
