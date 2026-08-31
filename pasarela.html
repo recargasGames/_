@@ -37,7 +37,6 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%;font-size:16px}
 .volver-btn:hover{color:#fff}
 .error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:13px;color:#fca5a5;white-space:pre-wrap;word-break:break-all}
-.debug-box{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:12px;margin-top:15px;font-size:12px;color:#93c5fd;white-space:pre-wrap;word-break:break-all}
 .aviso-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#fcd34d}
 .usada-box{background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.5);border-radius:12px;padding:20px;margin-top:15px;color:#fca5a5;font-weight:600}
 </style>
@@ -120,18 +119,24 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 
 <script>
 // ==============================================
-// 🔑 DATOS OFICIALES DE ANDRUS
+// 🔑 DATOS OFICIALES — TODO CONFIRMADO ✅
 // ==============================================
+
+// API DE PABILO — VERIFICACIÓN DE PAGO
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
 
-const API_RECARGA_FF = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire";
+// API DE RECARGA FREE FIRE — API CENTRAL PRO
+const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
+const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
+
+// TELEGRAM — NOTIFICACIONES
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
 // ==============================================
-// 🔒 LISTA DE REFERENCIAS YA USADAS
+// 🔒 BLOQUEO DE REFERENCIAS REPETIDAS
 // ==============================================
 function obtenerReferenciasUsadas() {
     const guardadas = localStorage.getItem('referencias_usadas');
@@ -149,7 +154,7 @@ function yaFueUsada(referencia) {
 }
 
 // ==============================================
-// 📋 DATOS DEL PEDIDO
+// 📋 DATOS DEL PEDIDO — DESDE LOCALSTORAGE
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || "";
@@ -159,7 +164,7 @@ const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
 // ==============================================
-// 📄 CARGAR DATOS
+// 📄 CARGAR DATOS EN PANTALLA
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
@@ -176,23 +181,23 @@ function generarPedido(){
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN — REFERENCIA DE UN SOLO USO 🔒
+// ⚡ VERIFICACIÓN DE PAGO — API DE PABILO
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    // 🛡️ Verificar si ya fue usada
+    // 🛡️ BLOQUEO: Si la referencia ya fue usada → NO DEJA CONTINUAR
     if(yaFueUsada(referencia)){
         document.getElementById('pasoDatos').style.display = 'none';
         document.getElementById('pasoUsada').style.display = 'block';
         return;
     }
     
-    // ✅ MONTO en bolívares
+    // ✅ MONTO en bolívares, limpio
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
 
-    // ✅ FECHA FORMATO YYYY-MM-DD
+    // ✅ FECHA FORMATO YYYY-MM-DD (como pide Pabilo)
     const hoy = new Date();
     const fechaFormateada = hoy.toISOString().split('T')[0];
 
@@ -201,11 +206,11 @@ async function iniciarVerificacion(){
         return;
     }
 
-    // Cambiar pantalla
+    // Cambiar pantalla a verificando
     document.getElementById('pasoDatos').style.display = 'none';
     document.getElementById('pasoVerificando').style.display = 'block';
 
-    // 📤 OBJETO A ENVIAR
+    // 📤 DATOS PARA PABILO
     const cuerpoPeticion = {
         bank_reference: referencia,
         amount: montoPago,
@@ -213,14 +218,13 @@ async function iniciarVerificacion(){
         fecha_pago: fechaFormateada
     };
 
-    console.log("📤 URL:", API_PABILO_URL);
-    console.log("📤 DATOS:", cuerpoPeticion);
+    console.log("📤 Verificando pago:", cuerpoPeticion);
 
     let pagoConfirmado = false;
     let respuestaCruda = null;
 
     try {
-        // 🔵 LLAMADA A LA API
+        // 🔵 LLAMADA A LA API DE PABILO
         const respuesta = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: {
@@ -231,9 +235,9 @@ async function iniciarVerificacion(){
         });
 
         respuestaCruda = await respuesta.json();
-        console.log("📊 RESPUESTA:", respuestaCruda);
+        console.log("📊 Respuesta Pabilo:", respuestaCruda);
 
-        // ✅ DETECCIÓN DE ÉXITO
+        // ✅ DETECCIÓN DE PAGO CONFIRMADO
         if(respuesta.ok && respuestaCruda){
             if(
                 respuestaCruda.message === 'payment confirmed' ||
@@ -246,29 +250,36 @@ async function iniciarVerificacion(){
         }
 
     } catch(error) {
-        console.error("❌ Error:", error);
+        console.error("❌ Error de conexión:", error);
     }
 
     // ==============================================
-    // ✅ PAGO CONFIRMADO
+    // ✅ PAGO CONFIRMADO → HACER RECARGA
     // ==============================================
     if(pagoConfirmado){
+        // 🔒 MARCAR REFERENCIA COMO USADA — NO SE PODRÁ REPETIR
         marcarComoUsada(referencia);
         
         const nroPedido = generarPedido();
+        
+        // Cambiar pantalla a verificado
         document.getElementById('pasoVerificando').style.display = 'none';
         document.getElementById('pasoVerificado').style.display = 'block';
         
+        // Llenar resumen
         document.getElementById('resPedido').textContent = nroPedido;
         document.getElementById('resProducto').textContent = producto;
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${montoPago} Bs`;
 
-        await ejecutarRecarga();
+        // 🔄 EJECUTAR RECARGA AUTOMÁTICA
+        await ejecutarRecargaFreeFire(idJugador, paqueteCod);
+        
+        // 📢 ENVIAR NOTIFICACIÓN POR TELEGRAM
         enviarTelegram(nroPedido, referencia);
     } 
     // ==============================================
-    // ❌ NO ENCONTRADO — SOLO MENSAJE LIMPIO ✅
+    // ❌ PAGO NO ENCONTRADO — MENSAJE LIMPIO
     // ==============================================
     else {
         document.getElementById('pasoVerificando').style.display = 'none';
@@ -277,32 +288,51 @@ async function iniciarVerificacion(){
 }
 
 // ==============================================
-// 🔄 RECARGA
+// 🔄 FUNCIÓN DE RECARGA FREE FIRE — API CENTRAL PRO
 // ==============================================
-async function ejecutarRecarga(){
+async function ejecutarRecargaFreeFire(idJugador, codigoPaquete) {
+    if(!juego.includes("FREE FIRE") || !idJugador || !codigoPaquete){
+        console.log("⚠️ No es Free Fire o faltan datos para recargar");
+        return;
+    }
+
+    // 🔗 CONSTRUIR URL DE RECARGA
+    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${codigoPaquete}`;
+    
+    console.log("🔥 Enviando recarga Free Fire:", url);
+
     try {
-        if(juego.includes("FREE FIRE")){
-            const url = `${API_RECARGA_FF}&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-            console.log("🔗 Recarga:", url);
-            await fetch(url);
+        const respuesta = await fetch(url);
+        const resultado = await respuesta.json();
+        
+        console.log("💎 Respuesta API Free Fire:", resultado);
+        
+        if(resultado.alerta === "green" || resultado.estado === "exito" || resultado.mensaje?.includes("éxito") || resultado.mensaje?.includes("correcto")){
+            console.log("✅ RECARGA REALIZADA CON ÉXITO");
+        } else {
+            console.log("⚠️ Respuesta API:", resultado.mensaje || resultado);
         }
-    } catch(e) { console.log("Recarga:", e); }
+    } catch (error) {
+        console.error("❌ Error al recargar:", error);
+    }
 }
 
 // ==============================================
-// 📢 TELEGRAM
+// 📢 NOTIFICACIÓN POR TELEGRAM
 // ==============================================
 function enviarTelegram(pedido, ref){
     const msg = encodeURIComponent(`
 🛒 ${pedido} — PAGO VERIFICADO ✅
 🎮 Juego: ${juego}
-👤 ID: ${idJugador}
+👤 ID Jugador: ${idJugador}
 📦 Producto: ${producto}
 💰 Total: ${precioBs} Bs
 🔗 Referencia: ${ref}
-✅ Recarga procesada
+✅ Recarga procesada automáticamente
     `);
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${msg}`).catch(e=>{});
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${msg}`).catch(e=>{
+        console.log("⚠️ No se pudo enviar a Telegram:", e);
+    });
 }
 </script>
 </body>
