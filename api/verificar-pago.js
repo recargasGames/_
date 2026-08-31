@@ -10,17 +10,23 @@ const PABILO_CONFIG = {
 };
 
 module.exports = async (req, res) => {
-    // Solo aceptar POST
+    // ==============================================
+    // 🔧 CONFIGURAR CORS
+    // ==============================================
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ success: false, mensaje: 'Método no permitido' });
     }
 
-    // ==============================================
-    // 📥 RECIBIR DATOS DEL FRONTEND
-    // ==============================================
     const { referencia, monto, juego, id_jugador, producto, paquete_cod } = req.body;
 
-    // Validaciones
     if (!referencia || referencia.length < 4) {
         return res.json({ success: false, mensaje: 'Referencia inválida (mínimo 4 dígitos)' });
     }
@@ -30,9 +36,6 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // ==============================================
-        // 🔍 VERIFICAR PAGO CON PABILO
-        // ==============================================
         console.log(`🔍 Verificando pago con Pabilo - Ref: ${referencia}, Monto: ${monto} Bs`);
         
         const url = `${PABILO_CONFIG.API_URL}/userbankpayment/${PABILO_CONFIG.USER_BANK_ID}/betaserio`;
@@ -54,13 +57,13 @@ module.exports = async (req, res) => {
         const resultado = await response.json();
         console.log('📊 Respuesta de Pabilo:', resultado);
 
-        // ==============================================
-        // 📊 ANALIZAR RESPUESTA DE PABILO
-        // ==============================================
         let pagoVerificado = false;
         let mensajePabilo = '';
 
-        if (resultado.success || resultado.status === 'success' || resultado.data) {
+        if (resultado.success === true || 
+            resultado.status === 'success' || 
+            resultado.data || 
+            (resultado.codigo && resultado.codigo === '00')) {
             pagoVerificado = true;
             mensajePabilo = 'Pago verificado exitosamente';
         } else if (resultado.error || resultado.message) {
@@ -89,14 +92,18 @@ module.exports = async (req, res) => {
             
             const urlFF = `${FF_API}?token=${FF_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(id_jugador)}&paquete=${paquete_cod}`;
             
-            const responseFF = await fetch(urlFF);
-            const dataFF = await responseFF.json();
-            
-            if (dataFF?.codigo === '00' || dataFF?.status === 'success') {
-                recargaExitosa = true;
-                mensajeRecarga = 'Recarga Free Fire exitosa';
-            } else {
-                mensajeRecarga = dataFF?.mensaje || 'Error en recarga Free Fire';
+            try {
+                const responseFF = await fetch(urlFF);
+                const dataFF = await responseFF.json();
+                
+                if (dataFF?.codigo === '00' || dataFF?.status === 'success') {
+                    recargaExitosa = true;
+                    mensajeRecarga = 'Recarga Free Fire exitosa';
+                } else {
+                    mensajeRecarga = dataFF?.mensaje || 'Error en recarga Free Fire';
+                }
+            } catch (error) {
+                mensajeRecarga = 'Error al conectar con servidor de Free Fire';
             }
         } else if (juego.includes('BLOOD STRIKE')) {
             recargaExitosa = true;
@@ -135,9 +142,6 @@ module.exports = async (req, res) => {
             console.log('⚠️ Error enviando Telegram:', e.message);
         }
 
-        // ==============================================
-        // 📤 RESPUESTA FINAL
-        // ==============================================
         if (recargaExitosa) {
             res.json({
                 success: true,
