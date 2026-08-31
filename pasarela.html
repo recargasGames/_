@@ -7,12 +7,12 @@
 <style>
 :root{--color-principal:#10b981;--color-hover:#059669}
 *{box-sizing:border-box}
-body{background:#0b1220;color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh;padding:20px}
+body{background:#0b1220;color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh;padding:20px;background-image:url('/fondo.jpg');background-size:cover;background-attachment:fixed}
 .container{max-width:520px;margin:0 auto}
 .header{text-align:center;padding:20px 0;border-bottom:2px solid var(--color-principal);margin-bottom:20px}
 .header h1{font-size:24px;color:var(--color-principal)}
 .header span{color:#9ca3af;font-size:14px}
-.card{background:rgba(17,24,39,0.95);border:1px solid #1f2937;border-radius:16px;padding:25px;margin-bottom:20px}
+.card{background:rgba(17,24,39,0.95);border:1px solid #1f2937;border-radius:16px;padding:25px;margin-bottom:20px;backdrop-filter:blur(10px)}
 .card h2{color:var(--color-principal);font-size:20px;margin-bottom:20px;text-align:center}
 .resumen-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #374151;font-size:15px}
 .resumen-row:last-child{border-bottom:none}
@@ -56,7 +56,6 @@ small{color:#6b7280;display:block;margin-top:5px}
         <div class="badge-pabilo">🔐 Verificación en tiempo real</div>
     </div>
 
-    <!-- PASO 1: RESUMEN Y DATOS DE PAGO -->
     <div class="card" id="pasoPago">
         <h2 id="tituloJuego">Confirmar Pago</h2>
         
@@ -110,7 +109,6 @@ small{color:#6b7280;display:block;margin-top:5px}
         </div>
     </div>
 
-    <!-- PASO 2: ESTADO DE VERIFICACIÓN -->
     <div class="card estado-box" id="pasoEstado">
         <div id="contenidoEstado"></div>
         <button onclick="volver()" class="volver-btn" id="btnVolver" style="display:none">← Volver a intentar</button>
@@ -119,9 +117,6 @@ small{color:#6b7280;display:block;margin-top:5px}
 </div>
 
 <script>
-// ==============================================
-// 📋 OBTENER DATOS DE LA URL
-// ==============================================
 function getParametro(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param) || '';
@@ -134,14 +129,10 @@ const precioUsd = getParametro('precio') || localStorage.getItem('precio_usd') |
 const precioBs = getParametro('precio_bs') || localStorage.getItem('precio_en_bs') || '0';
 const paqueteCod = getParametro('paquete') || localStorage.getItem('paquete_codigo') || '';
 
-// Si no hay datos, redirigir al index
 if (!juego || !idJugador) {
     window.location.href = 'index.html';
 }
 
-// ==============================================
-// 🎨 DETECTAR JUEGO Y CAMBIAR COLOR
-// ==============================================
 const root = document.documentElement;
 if(juego.includes("FREE FIRE")){
     root.style.setProperty('--color-principal', '#facc15');
@@ -153,18 +144,12 @@ if(juego.includes("FREE FIRE")){
     document.getElementById('tituloJuego').innerHTML = '🎯 Recarga Blood Strike';
 }
 
-// ==============================================
-// 📄 CARGAR RESUMEN DEL PEDIDO
-// ==============================================
 document.getElementById('resJuego').textContent = juego;
 document.getElementById('resId').textContent = idJugador;
 document.getElementById('resProducto').textContent = producto;
 document.getElementById('resTotal').innerHTML = `$${precioUsd} <small style="color:#9ca3af">≈ ${precioBs} Bs</small>`;
 document.getElementById('montoExacto').textContent = `${precioBs} Bs`;
 
-// ==============================================
-// 📋 FUNCIONES COPIAR
-// ==============================================
 async function copiarTexto(texto, boton){
     try {
         await navigator.clipboard.writeText(texto);
@@ -225,12 +210,10 @@ async function iniciarProceso() {
         return;
     }
     
-    // Deshabilitar botón
     const btn = document.getElementById('btnConfirmar');
     btn.disabled = true;
     btn.textContent = '⏳ Verificando...';
     
-    // Mostrar estado
     document.getElementById('pasoPago').style.display = 'none';
     document.getElementById('pasoEstado').style.display = 'block';
     const c = document.getElementById('contenidoEstado');
@@ -242,8 +225,10 @@ async function iniciarProceso() {
     `;
     
     try {
-        // Enviar a la API de Vercel
-        const response = await fetch('/api/verificar-pago', {
+        const API_URL = window.location.origin + '/api/verificar-pago';
+        console.log('📡 API URL:', API_URL);
+        
+        const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -257,6 +242,10 @@ async function iniciarProceso() {
                 paquete_cod: paqueteCod
             })
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         
         const resultado = await response.json();
         console.log('📊 Resultado:', resultado);
@@ -284,19 +273,17 @@ async function iniciarProceso() {
         c.innerHTML = `
             <div class="error-icon">⚠️</div>
             <div class="estado-msg">Error de conexión</div>
-            <div class="estado-sub">No se pudo conectar con el servidor. Intenta de nuevo.</div>
+            <div class="estado-sub">No se pudo conectar con el servidor.<br>
+            Verifica tu conexión a internet.<br>
+            <span style="font-size:12px;color:#6b7280">Detalle: ${error.message}</span></div>
         `;
         document.getElementById('btnVolver').style.display = 'inline-block';
     }
     
-    // Restaurar botón
     btn.disabled = false;
     btn.textContent = '✅ Verificar Pago';
 }
 
-// ==============================================
-// 🔄 VOLVER
-// ==============================================
 function volver() {
     document.getElementById('pasoPago').style.display = 'block';
     document.getElementById('pasoEstado').style.display = 'none';
@@ -305,9 +292,6 @@ function volver() {
     document.getElementById('referenciaPago').focus();
 }
 
-// ==============================================
-// ⌨️ ENTER PARA CONFIRMAR
-// ==============================================
 document.getElementById('referenciaPago').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         iniciarProceso();
@@ -315,7 +299,6 @@ document.getElementById('referenciaPago').addEventListener('keypress', function(
 });
 
 console.log('🔄 Pasarela de pago con Pabilo cargada');
-console.log('📝 Datos del pedido:', { juego, idJugador, producto, precioBs });
 </script>
 </body>
 </html>
