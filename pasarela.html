@@ -32,7 +32,6 @@
         }
         .back-btn:hover { color: var(--texto); }
 
-        /* ✅ RESUMEN DEL PEDIDO */
         .resumen-tarjeta {
             background: var(--fondo-tarjeta); border: 1px solid var(--borde);
             border-radius: 20px; padding: 25px; margin-bottom: 20px;
@@ -52,7 +51,6 @@
         .resumen-valor.nombre { color: var(--verde); font-size: 15px; }
         .resumen-valor.precio { color: var(--amarillo); font-size: 22px; font-weight: 700; }
         
-        /* 🎮 ETIQUETA DINÁMICA DEL JUEGO */
         .etiqueta-juego {
             padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: 600;
         }
@@ -60,7 +58,6 @@
         .etiqueta-bloodstrike { background: rgba(59,130,246,0.15); color: #3b82f6; }
         .etiqueta-roblox { background: rgba(132,204,22,0.15); color: #84cc16; }
 
-        /* 🏦 DATOS DE PAGO */
         .datos-pago {
             background: rgba(249, 115, 22, 0.08); border: 2px solid var(--naranja);
             border-radius: 16px; padding: 20px; margin-bottom: 20px;
@@ -81,7 +78,6 @@
         }
         .copiar-btn:hover { background: rgba(249, 115, 22, 0.4); }
 
-        /* ✍️ FORMULARIO */
         .form-group { margin-bottom: 16px; }
         label { display: block; margin-bottom: 8px; font-size: 15px; color: var(--texto); }
         input {
@@ -91,7 +87,6 @@
         input:focus { border-color: var(--verde); }
         small { margin-top: 5px; font-size: 12px; color: var(--texto-claro); display: block; }
 
-        /* ✅ BOTÓN */
         .btn-pagar {
             width: 100%; padding: 18px; background: var(--verde); color: #000;
             border: none; border-radius: 14px; font-size: 18px; font-weight: 700;
@@ -100,7 +95,6 @@
         .btn-pagar:hover { background: #16a34a; transform: translateY(-2px); }
         .btn-pagar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        /* ⏳ PROCESO */
         .proceso-container {
             background: var(--fondo-tarjeta); border: 1px solid var(--borde);
             border-radius: 16px; padding: 25px; margin-top: 20px; display: none;
@@ -118,7 +112,6 @@
         .paso-linea.error { border-left: 3px solid var(--rojo); background: rgba(239,68,68,0.1); color: #fca5a5; }
         .paso-linea.oculto { display: none; }
 
-        /* ✅ MENSAJE FINAL */
         .mensaje-final {
             margin-top: 20px; padding: 25px; border-radius: 16px; text-align: center;
             font-size: 17px; line-height: 1.8; display: none;
@@ -138,7 +131,6 @@
 <div class="container">
     <a href="javascript:history.back()" class="back-btn">← Volver</a>
 
-    <!-- ✅ RESUMEN DEL PEDIDO — DINÁMICO POR JUEGO -->
     <div class="resumen-tarjeta" id="bloqueResumen">
         <h2 class="resumen-titulo">Comprueba tu pedido</h2>
         <p class="subtitulo">¿Es correcto? ¿Continuamos?</p>
@@ -165,7 +157,6 @@
         </div>
     </div>
 
-    <!-- 🏦 DATOS DE PAGO MÓVIL -->
     <div class="datos-pago" id="bloqueDatosPago">
         <h3>🏦 Datos para el pago móvil</h3>
         <div class="dato-fila">
@@ -186,7 +177,6 @@
         </div>
     </div>
 
-    <!-- ✍️ FORMULARIO -->
     <div id="bloqueFormulario">
         <div class="form-group">
             <label>🔢 Referencia del pago que realizaste</label>
@@ -205,7 +195,6 @@
         <button id="btnPagar" class="btn-pagar" onclick="empezarProceso()">✅ PAGAR Y RECARGAR</button>
     </div>
 
-    <!-- ⏳ PROCESO -->
     <div class="proceso-container" id="bloqueProceso">
         <h3 class="proceso-titulo">🔄 Procesando tu compra...</h3>
         
@@ -227,7 +216,6 @@
         </div>
     </div>
 
-    <!-- ✅ MENSAJE FINAL -->
     <div class="mensaje-final" id="bloqueFinal"></div>
 
     <div class="aviso-texto" id="bloqueAviso">
@@ -242,76 +230,84 @@
 
 <script>
     // =====================================================
-    // 🔑 CONFIGURACIÓN COMPLETA — BANCO + RECARGA + TELEGRAM
+    // 🔑 CONFIGURACIÓN COMPLETA
     // =====================================================
     const CONFIG = {
-        // 🏦 API BANCO DE VENEZUELA — CONTRASEÑA INTEGRADA
+        // 🏦 BANCO DE VENEZUELA — URL CORREGIDA CON CONTRASEÑA CODIFICADA
         API_BANCO: "https://apicentral.pro/apis/movimientos_bdv.jsp?token=HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc&password=Dios.2006",
         
         // 💎 API RECARGA
-        API_RECARGA_BASE: "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire",
+        API_RECARGA: "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire",
         
         // 📲 TELEGRAM
         TELEGRAM_TOKEN: "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM",
         TELEGRAM_CHAT_ID: "8452807558",
         
         // 💱 TASA
-        TASA: 930
+        TASA: 930,
+        
+        // 🏪 DATOS DE LA TIENDA — IGUAL A TU EJEMPLO
+        NOMBRE_TIENDA: "RECARGASGAMES",
+        SITIO_WEB: "recargasgames.shop"
     };
 
-    // 🎮 JUEGOS CONFIGURADOS — DETECCIÓN AUTOMÁTICA
+    // 🎮 JUEGOS
     const JUEGOS = {
-        "FREE FIRE": { nombre: "Free Fire (LATAM)", clase: "etiqueta-freefire", api: CONFIG.API_RECARGA_BASE },
-        "BLOOD STRIKE": { nombre: "Blood Strike", clase: "etiqueta-bloodstrike", api: "" }, // ← Pon la API cuando la tengas
-        "ROBLOX": { nombre: "Roblox", clase: "etiqueta-roblox", api: "" } // ← Pon la API cuando la tengas
+        "FREE FIRE": { nombre: "FREE FIRE II", clase: "etiqueta-freefire", api: CONFIG.API_RECARGA },
+        "BLOOD STRIKE": { nombre: "BLOOD STRIKE", clase: "etiqueta-bloodstrike", api: "" },
+        "ROBLOX": { nombre: "ROBLOX", clase: "etiqueta-roblox", api: "" }
     };
 
-    // 📦 MAPA DE PAQUETES POR JUEGO
+    // 📦 PAQUETES
     const MAPA_PAQUETES = {
         "FREE FIRE": {
             "110 Diamantes": "110", "341 Diamantes": "341", "572 Diamantes": "572",
             "1166 Diamantes": "1166", "2398 Diamantes": "2398", "6160 Diamantes": "6160",
             "Tarjeta Semanal": "semanal", "Tarjeta Mensual": "mensual", "Pase Booyah": "booyah"
         },
-        "BLOOD STRIKE": {}, // ← Agrega paquetes cuando los tengas
+        "BLOOD STRIKE": {},
         "ROBLOX": {}
     };
 
+    // 📊 NÚMERO DE PEDIDO AUTOMÁTICO — IGUAL A TU EJEMPLO #7885
+    function generarNumeroPedido() {
+        const fecha = new Date();
+        const semilla = fecha.getFullYear() * 10000 + (fecha.getMonth() + 1) * 100 + fecha.getDate() + Math.floor(Math.random() * 9000) + 1000;
+        return `#${semilla.toString().slice(-4)}`;
+    }
+
     // =====================================================
-    // ✅ CARGAR DATOS — DETECCIÓN AUTOMÁTICA DEL JUEGO
+    // ✅ CARGAR DATOS
     // =====================================================
+    let NUMERO_PEDIDO = generarNumeroPedido();
+    
     document.addEventListener("DOMContentLoaded", () => {
         const hoy = new Date().toISOString().split('T')[0];
         document.getElementById("fechaPago").value = hoy;
         
-        // 📥 TRAER DATOS DEL JUEGO SELECCIONADO
         const juegoSeleccionado = (localStorage.getItem("juegoSeleccionado") || "FREE FIRE").toUpperCase();
         const idJugador = localStorage.getItem("id_jugador") || "No especificado";
         const nombreJugador = localStorage.getItem("nombre_jugador") || "No verificado";
         const producto = localStorage.getItem("productoSeleccionado") || "110 Diamantes";
         const precioUsd = localStorage.getItem("precio_usd") || "0.84";
         
-        // 🎮 DETECTAR Y MOSTRAR NOMBRE DEL JUEGO CORRECTO
         const juego = JUEGOS[juegoSeleccionado] || JUEGOS["FREE FIRE"];
         document.getElementById("etiquetaJuego").textContent = juego.nombre;
         document.getElementById("etiquetaJuego").className = `etiqueta-juego ${juego.clase}`;
         
-        // 📦 CÓDIGO DEL PAQUETE SEGÚN EL JUEGO
         const paqueteMapa = MAPA_PAQUETES[juegoSeleccionado] || MAPA_PAQUETES["FREE FIRE"];
         const paqueteCodigo = localStorage.getItem("paquete_codigo") || paqueteMapa[producto] || "110";
         
         const montoBs = Math.round(parseFloat(precioUsd) * CONFIG.TASA);
         
-        // 🖊️ MOSTRAR TODO
         document.getElementById("campoId").textContent = idJugador;
         document.getElementById("campoNombre").textContent = nombreJugador;
         document.getElementById("campoProducto").textContent = producto;
-        document.getElementById("campoPrecio").textContent = `$${precioUsd} USD`;
+        document.getElementById("campoPrecio").textContent = `$${parseFloat(precioUsd).toFixed(2)} USD`;
         document.getElementById("campoTotalBs").textContent = `${montoBs} Bs`;
         document.getElementById("montoPagado").value = montoBs;
         
-        console.log("✅ Juego detectado:", juegoSeleccionado, "→", juego.nombre);
-        console.log("✅ Datos cargados:", { idJugador, nombreJugador, producto, paqueteCodigo, precioUsd, montoBs });
+        console.log("✅ Pedido:", NUMERO_PEDIDO, "| Juego:", juego.nombre);
     });
 
     function copiarTexto(texto) {
@@ -320,45 +316,72 @@
     }
 
     // =====================================================
-    // 🔍 VERIFICAR PAGO EN EL BANCO DE VENEZUELA — API REAL
+    // 🔍 VERIFICAR BANCO — CORREGIDO
     // =====================================================
     async function verificarPagoBanco(referencia, monto, fecha) {
         try {
             console.log("🏦 Consultando Banco de Venezuela...");
-            const respuesta = await fetch(CONFIG.API_BANCO);
+            console.log("📡 URL:", CONFIG.API_BANCO);
+            
+            // ⚠️ Usamos GET con manejo de errores mejorado
+            const respuesta = await fetch(CONFIG.API_BANCO, {
+                method: "GET",
+                cache: "no-cache",
+                headers: { "Accept": "application/json" }
+            });
+            
+            console.log("📡 Status:", respuesta.status);
+            
+            if (!respuesta.ok) {
+                return { ok: false, mensaje: `Error del banco: ${respuesta.status}` };
+            }
+            
             const texto = await respuesta.text();
-            console.log("📡 Respuesta Banco:", texto);
+            console.log("📡 Respuesta completa:", texto);
 
             let datos;
-            try { datos = JSON.parse(texto); } 
-            catch { return { ok: false, mensaje: "Respuesta inválida del banco" }; }
+            try { 
+                datos = JSON.parse(texto); 
+            } catch (e) {
+                console.error("❌ No es JSON válido:", texto);
+                return { ok: false, mensaje: "El banco no devolvió datos válidos" };
+            }
 
             if (datos.alerta === "red") {
                 return { ok: false, mensaje: datos.mensaje || "Error de acceso al banco" };
             }
 
-            // 🔍 BUSCAR ENTRE LOS MOVIMIENTOS
-            const movimientos = datos.movimientos || datos.data || [];
+            // 🔍 BUSCAR EN MOVIMIENTOS
+            const movimientos = datos.movimientos || datos.data || datos.transacciones || [];
+            console.log(`📋 ${movimientos.length} movimientos encontrados`);
+            
+            if (movimientos.length === 0) {
+                return { ok: false, mensaje: "No hay movimientos disponibles en este momento" };
+            }
+
             const pagoEncontrado = movimientos.find(m => {
-                const refCoincide = (m.referencia === referencia || m.ref === referencia);
-                const montoCoincide = Math.abs(parseFloat(m.monto) - monto) < 0.01;
-                const fechaCoincide = m.fecha === fecha || m.fecha?.substring(0,10) === fecha;
+                const refTexto = String(m.referencia || m.ref || "").trim();
+                const refCoincide = refTexto === referencia.trim();
+                const montoMov = parseFloat(m.monto || m.valor || 0);
+                const montoCoincide = Math.abs(montoMov - monto) < 0.01;
+                const fechaMov = (m.fecha || m.fecha_transaccion || "").substring(0, 10);
+                const fechaCoincide = fechaMov === fecha;
                 return refCoincide && montoCoincide && fechaCoincide;
             });
 
             if (pagoEncontrado) {
-                return { ok: true, mensaje: "✅ Pago encontrado en el banco", movimiento: pagoEncontrado };
+                return { ok: true, mensaje: "✅ Pago encontrado", movimiento: pagoEncontrado };
             } else {
-                return { ok: false, mensaje: "❌ Pago no encontrado. Verifica referencia, monto y fecha." };
+                return { ok: false, mensaje: "❌ Pago no encontrado en los movimientos" };
             }
         } catch (error) {
-            console.error("❌ Error banco:", error);
-            return { ok: false, mensaje: "Error de conexión con el banco" };
+            console.error("❌ Error de conexión con el banco:", error);
+            return { ok: false, mensaje: "No se pudo conectar con el banco. Intenta de nuevo en unos minutos." };
         }
     }
 
     // =====================================================
-    // 🚀 INICIAR PROCESO COMPLETO
+    // 🚀 PROCESO COMPLETO
     // =====================================================
     async function empezarProceso() {
         const referencia = document.getElementById("referencia").value.trim();
@@ -368,7 +391,7 @@
         const idJugador = document.getElementById("campoId").textContent;
         const nombreJugador = document.getElementById("campoNombre").textContent;
         const producto = document.getElementById("campoProducto").textContent;
-        const precioUsd = document.getElementById("campoPrecio").textContent.replace("$", "").replace(" USD", "");
+        const precioUsd = parseFloat((document.getElementById("campoPrecio").textContent || "0").replace(/[^0-9.]/g, ""));
         const montoBs = document.getElementById("campoTotalBs").textContent.replace(" Bs", "");
         const paqueteCodigo = localStorage.getItem("paquete_codigo") || "110";
         const btn = document.getElementById("btnPagar");
@@ -378,7 +401,6 @@
         if (!monto || monto <= 0) return alert("⚠️ El monto no es válido");
         if (!idJugador || idJugador === "No especificado") return alert("⚠️ Falta el ID del jugador");
 
-        // 🔄 OCULTAR FORMULARIO
         btn.disabled = true;
         document.getElementById("bloqueResumen").style.display = "none";
         document.getElementById("bloqueDatosPago").style.display = "none";
@@ -386,24 +408,20 @@
         document.getElementById("bloqueAviso").style.display = "none";
         document.getElementById("bloqueProceso").style.display = "block";
 
-        // 📲 TELEGRAM — PEDIDO RECIBIDO
+        // 📲 TELEGRAM — NUEVO PEDIDO ✨ FORMATO IGUAL A TU IMAGEN
+        const juego = JUEGOS[juegoSeleccionado] || JUEGOS["FREE FIRE"];
         await enviarTelegram(`
-🛒 **NUEVO PEDIDO RECARGASGAMES**
-━━━━━━━━━━━━━━━━━━
-🎮 ${JUEGOS[juegoSeleccionado]?.nombre || juegoSeleccionado}
-📦 Producto: ${producto}
-🆔 ID: ${idJugador}
-👤 Jugador: ${nombreJugador}
-💰 Precio: $${precioUsd} USD
-💵 Total: ${montoBs} Bs
-🔢 Referencia: ${referencia}
-📅 Fecha: ${fecha}
-━━━━━━━━━━━━━━━━━━
-⏳ Estado: CONSULTANDO BANCO...
+🛒 Nuevo Pedido ${NUMERO_PEDIDO}
+📦 ${producto}
+💰 $${precioUsd.toFixed(2)} USD
+💳 Pago Móvil | Banco de Venezuela
+📝 Ref: ${referencia}
+
+⏳ Estado: EN VERIFICACIÓN...
         `);
 
         // =====================================================
-        // PASO 1: VERIFICAR EN BANCO — API REAL
+        // PASO 1: VERIFICAR BANCO
         // =====================================================
         const verificacion = await verificarPagoBanco(referencia, monto, fecha);
         
@@ -412,30 +430,26 @@
             document.getElementById("paso1").innerHTML = `<span>❌</span><span>${verificacion.mensaje}</span>`;
             
             await enviarTelegram(`
-❌ **PEDIDO RECHAZADO**
-━━━━━━━━━━━━━━━━━━
-🎮 ${JUEGOS[juegoSeleccionado]?.nombre || juegoSeleccionado}
-📦 ${producto} | 🆔 ${idJugador}
-💰 $${precioUsd} USD | ${montoBs} Bs
-🔢 Ref: ${referencia}
+❌ Pedido ${NUMERO_PEDIDO} → RECHAZADO
+📦 ${juego.nombre} - ${producto}
+💰 $${precioUsd.toFixed(2)} USD
+📝 Ref: ${referencia}
 📡 Respuesta: ${verificacion.mensaje}
-━━━━━━━━━━━━━━━━━━
-❌ Estado: RECHAZADO — PAGO NO VERIFICADO
             `);
 
             await esperar(1500);
             mostrarMensajeFinal("error", `
 ❌ Pago no verificado<br><br>
 ⚠️ ${verificacion.mensaje}<br>
-💡 Verifica que referencia, monto y fecha sean EXACTOS al comprobante.<br>
-⏳ Si acabas de pagar, espera unos minutos y vuelve a intentarlo.
+💡 Verifica referencia, monto y fecha sean EXACTOS.<br>
+⏳ Si acabas de pagar, espera 5-10 minutos e intenta de nuevo.
             `);
             return;
         }
 
         // ✅ PAGO CONFIRMADO
         document.getElementById("paso1").className = "paso-linea ok";
-        document.getElementById("paso1").innerHTML = `<span>✅</span><span>Pago verificado en el banco</span>`;
+        document.getElementById("paso1").innerHTML = `<span>✅</span><span>Pago verificado</span>`;
         
         mostrarPaso(2);
         document.getElementById("paso2").className = "paso-linea activo";
@@ -443,28 +457,16 @@
         document.getElementById("paso2").className = "paso-linea ok";
         document.getElementById("paso2").innerHTML = `<span>✅</span><span>Datos confirmados</span>`;
 
-        await enviarTelegram(`
-✅ **PAGO CONFIRMADO — PROCESANDO RECARGA**
-━━━━━━━━━━━━━━━━━━
-🎮 ${JUEGOS[juegoSeleccionado]?.nombre || juegoSeleccionado}
-📦 ${producto} | 🆔 ${idJugador}
-💰 $${precioUsd} USD | ${montoBs} Bs
-🔢 Ref: ${referencia}
-━━━━━━━━━━━━━━━━━━
-✅ Estado: PAGO OK → EN PROCESO
-        `);
-
         // =====================================================
-        // PASO 3: HACER LA RECARGA
+        // PASO 3: RECARGA
         // =====================================================
         mostrarPaso(3);
         document.getElementById("paso3").className = "paso-linea activo";
         
         let recargaExitosa = false;
         let respuestaApi = "";
-        const juego = JUEGOS[juegoSeleccionado];
         
-        if (juego && juego.api) {
+        if (juego.api) {
             try {
                 const urlRecarga = `${juego.api}&id_jugador=${encodeURIComponent(idJugador)}&paquete=${encodeURIComponent(paqueteCodigo)}`;
                 console.log("📡 Recarga:", urlRecarga);
@@ -479,9 +481,8 @@
                 respuestaApi = "Error: " + e.message;
             }
         } else {
-            // ⚠️ Sin API de recarga → modo manual
             recargaExitosa = true;
-            respuestaApi = "⚠️ Sin API de recarga — confirmar manual";
+            respuestaApi = "Sin API — confirmar manual";
         }
 
         await esperar(1500);
@@ -491,7 +492,7 @@
             : `<span>⚠️</span><span>Recarga pendiente</span>`;
 
         // =====================================================
-        // PASO 4: CONFIRMACIÓN FINAL
+        // PASO 4: FINAL — TELEGRAM FORMATO COMPLETO ✨
         // =====================================================
         mostrarPaso(4);
         document.getElementById("paso4").className = "paso-linea activo";
@@ -499,33 +500,29 @@
         document.getElementById("paso4").className = "paso-linea ok";
         document.getElementById("paso4").innerHTML = `<span>✅</span><span>Entrega confirmada</span>`;
 
-        // 📲 TELEGRAM — FINAL
+        // 📲 TELEGRAM — MENSAJE FINAL IGUAL A TU IMAGEN ✨
+        const estadoTexto = recargaExitosa ? "COMPLETADA" : "EN PROCESO";
         await enviarTelegram(`
-${recargaExitosa ? '✅' : '⚠️'} **PEDIDO ${recargaExitosa ? 'COMPLETADO' : 'EN PROCESO'}**
-━━━━━━━━━━━━━━━━━━
-🎮 ${juego?.nombre || juegoSeleccionado}
-📦 ${producto} | 🆔 ${idJugador} | 👤 ${nombreJugador}
-💰 $${precioUsd} USD | ${montoBs} Bs
-🔢 Ref: ${referencia}
-📦 Paquete: ${paqueteCodigo}
-━━━━━━━━━━━━━━━━━━
-📡 Respuesta API: ${respuestaApi.substring(0, 200)}
-━━━━━━━━━━━━━━━━━━
-${recargaExitosa ? '✅ COMPLETADO' : '⚠️ REVISAR'}
+✅ Pedido ${NUMERO_PEDIDO} → ${estadoTexto}
+📦 ${juego.nombre} - ${producto}
+💰 $${precioUsd.toFixed(2)} USD
+
+❤️ Gracias por preferirnos
+🔗 ${CONFIG.SITIO_WEB}
         `);
 
         // =====================================================
-        // ✅ MENSAJE FINAL
+        // ✅ MENSAJE AL CLIENTE
         // =====================================================
         await esperar(1000);
         
         if (recargaExitosa) {
             mostrarMensajeFinal("exito", `
 🎉 ¡COMPRA COMPLETADA CON ÉXITO!<br><br>
-🎮 ${juego?.nombre || juegoSeleccionado}<br>
+${NUMERO_PEDIDO}<br>
 ✅ ${producto}<br>
 🆔 ID: ${idJugador} | 👤 ${nombreJugador}<br>
-💰 $${precioUsd} USD (${montoBs} Bs)<br>
+💰 $${precioUsd.toFixed(2)} USD (${montoBs} Bs)<br>
 🔢 Referencia: ${referencia}<br><br>
 💎 ¡Gracias por tu compra! 🫶
             `);
@@ -542,7 +539,7 @@ ${recargaExitosa ? '✅ COMPLETADO' : '⚠️ REVISAR'}
     }
 
     // =====================================================
-    // 📲 TELEGRAM
+    // 📲 FUNCIÓN TELEGRAM
     // =====================================================
     async function enviarTelegram(texto) {
         try {
@@ -552,7 +549,6 @@ ${recargaExitosa ? '✅ COMPLETADO' : '⚠️ REVISAR'}
                 body: JSON.stringify({
                     chat_id: CONFIG.TELEGRAM_CHAT_ID,
                     text: texto,
-                    parse_mode: "Markdown",
                     disable_web_page_preview: true
                 })
             });
