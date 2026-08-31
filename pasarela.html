@@ -30,8 +30,6 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:15px}
 .dato-line:last-child{border-bottom:none}
 .dato-texto strong{color:#94a3b8;display:inline-block;width:90px}
-.btn-copiar{background:#334155;border:none;color:#fff;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600}
-.btn-copiar:hover{background:var(--color-principal);color:#000}
 .input-ref{width:100%;padding:14px;border-radius:10px;background:#0f172a;border:1px solid var(--color-border);color:#fff;font-size:16px;box-sizing:border-box;margin-top:10px;margin-bottom:15px}
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
 .btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
@@ -54,7 +52,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
         <div class="aviso-box">
-            ⚠️ <strong>Importante:</strong> Escribe la referencia COMPLETA, incluyendo los ceros del inicio.
+            ⚠️ Referencia completa (con ceros del inicio) · Monto en Bolívares
         </div>
         
         <div class="datos-pago-box">
@@ -70,7 +68,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
             <div class="dato-line"><div class="dato-texto"><strong>Cédula:</strong></div><div>32824869</div></div>
             <div class="dato-line"><div class="dato-texto"><strong>Teléfono:</strong></div><div>04228242411</div></div>
             
-            <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600">Referencia de pago (COMPLETA):</label>
+            <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600">Referencia completa:</label>
             <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
             
             <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
@@ -92,7 +90,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor" id="resReferencia">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor verde" id="resMonto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Monto Bs</span><span class="resumen-valor verde" id="resMonto">-</span></div>
         </div>
 
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
@@ -103,13 +101,13 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
         <div class="verificado-texto" style="color:#ef4444">Pago No Encontrado</div>
         <div class="verificado-sub">Revisa la referencia completa y vuelve a intentar.</div>
         
-        <div class="debug-box" id="datosEnviados">
+        <div class="debug-box">
 📤 Datos enviados:
 <span id="debugDatos"></span>
         </div>
         
-        <div class="error-box" id="respuestaApi">
-📡 Respuesta:
+        <div class="error-box">
+📡 Respuesta del sistema:
 <span id="textoRespuesta"></span>
         </div>
         
@@ -119,11 +117,12 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 
 <script>
 // ==============================================
-// 🔑 API DE PABILO — TUS DATOS CORRECTOS ✅
+// 🔑 DATOS OFICIALES DE ANDRUS — TODO CORRECTO ✅
 // ==============================================
-const USER_BANK_ID = "6a93ab3598055a34bd8b052d";
+const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/verify`;
+const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
+
 const API_RECARGA_FF = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
@@ -156,24 +155,21 @@ function generarPedido(){
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN — REFERENCIA COMPLETA + FECHA dd/mm/yyyy ✅
+// ⚡ VERIFICACIÓN — FORMATO EXACTO DE ANDRUS ✅
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    // ✅ MONTO limpio
+    // ✅ MONTO en bolívares, limpio
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
 
-    // ✅ FECHA FORMATO dd/mm/yyyy (como muestra Pabilo)
+    // ✅ FECHA FORMATO YYYY-MM-DD (como pide Andrus)
     const hoy = new Date();
-    const dia = String(hoy.getDate()).padStart(2, '0');
-    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-    const anio = hoy.getFullYear();
-    const fechaFormateada = `${dia}/${mes}/${anio}`; // "31/08/2026"
+    const fechaFormateada = hoy.toISOString().split('T')[0]; // "2026-08-31"
 
     if(!referencia || referencia.length < 6){
-        alert("❌ Escribe la referencia COMPLETA, no solo los últimos dígitos");
+        alert("❌ Escribe la referencia COMPLETA");
         return;
     }
 
@@ -181,7 +177,7 @@ async function iniciarVerificacion(){
     document.getElementById('pasoDatos').style.display = 'none';
     document.getElementById('pasoVerificando').style.display = 'block';
 
-    // 📤 OBJETO COMPLETO
+    // 📤 OBJETO EXACTO DE LA DOCUMENTACIÓN
     const cuerpoPeticion = {
         bank_reference: referencia,
         amount: montoPago,
@@ -189,13 +185,14 @@ async function iniciarVerificacion(){
         fecha_pago: fechaFormateada
     };
 
-    console.log("📤 DATOS ENVIADOS:", cuerpoPeticion);
+    console.log("📤 URL:", API_PABILO_URL);
+    console.log("📤 DATOS:", cuerpoPeticion);
 
     let pagoConfirmado = false;
     let respuestaCruda = null;
 
     try {
-        // 🔵 LLAMADA A PABILO
+        // 🔵 LLAMADA EXACTA A LA API DE PABILO
         const respuesta = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: {
@@ -208,7 +205,7 @@ async function iniciarVerificacion(){
         respuestaCruda = await respuesta.json();
         console.log("📊 RESPUESTA:", respuestaCruda);
 
-        // ✅ VERIFICAR
+        // ✅ VERIFICAR respuesta
         if(respuesta.ok){
             if(respuestaCruda.success === true || respuestaCruda.aprobado === true || respuestaCruda.estado === 'aprobado'){
                 pagoConfirmado = true;
@@ -219,7 +216,7 @@ async function iniciarVerificacion(){
         console.error("❌ Error:", error);
         respuestaCruda = { 
             error: error.message,
-            nota: "Si dice Failed to fetch → Pide a Andrus que habilite tu dominio recargasgames.shop"
+            nota: "Si dice Failed to fetch → Pide a Andrus que habilite tu dominio recargasgames.shop en CORS"
         };
     }
 
