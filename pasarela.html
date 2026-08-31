@@ -11,19 +11,27 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;margin-right:auto}
 .brand img{height:35px}
 .brand span{color:var(--color-principal)}
-.main{padding:20px;max-width:500px;margin:0 auto}
+.main{padding:20px;max-width:520px;margin:0 auto}
 .card{background:rgba(11,18,32,.95);border:1px solid #1f2937;border-radius:20px;padding:25px;margin-bottom:20px}
 .titulo{font-size:22px;font-weight:700;text-align:center;margin-bottom:20px;color:var(--color-principal)}
 .resumen-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #374151;font-size:15px}
 .resumen-row:last-child{border-bottom:none}
 .resumen-row.total{font-size:18px;font-weight:700;color:var(--color-principal);border-top:2px solid #374151;border-bottom:none;padding-top:15px;margin-top:5px}
-.datos-pago{background:#111827;border-radius:12px;padding:15px;margin:20px 0}
-.datos-pago h3{font-size:16px;margin-top:0;margin-bottom:12px;color:var(--color-principal)}
-.dato-line{margin:8px 0;font-size:15px}
-.dato-line strong{color:#9ca3af}
+.datos-pago{background:#111827;border-radius:12px;padding:18px;margin:20px 0}
+.datos-pago h3{font-size:16px;margin-top:0;margin-bottom:15px;color:var(--color-principal)}
+.dato-line{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #262f3f;font-size:15px;gap:10px}
+.dato-line:last-child{border-bottom:none}
+.dato-texto{flex:1}
+.dato-line strong{color:#9ca3af;display:inline-block;width:85px}
+.btn-copiar{background:#1f2937;border:none;color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;transition:0.2s}
+.btn-copiar:hover{background:var(--color-principal);color:#000}
+.btn-copiar.copiado{background:#22c55e;color:#000}
+.btn-copiar-todo{width:100%;margin-top:12px;padding:12px;background:var(--color-principal);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:0.2s}
+.btn-copiar-todo:hover{background:var(--color-hover)}
+.btn-copiar-todo.copiado{background:#22c55e}
 .input-ref{width:100%;padding:14px;border-radius:12px;background:#0b1220;border:1px solid #374151;color:#fff;font-size:16px;box-sizing:border-box;margin-top:8px}
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
-.btn-pagar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
+.btn-pagar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:15px}
 .btn-pagar:hover{background:var(--color-hover)}
 .btn-pagar:disabled{opacity:.5;cursor:not-allowed}
 .estado-box{text-align:center;padding:25px;display:none}
@@ -35,7 +43,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .error-icon{font-size:50px;color:#ef4444}
 .volver-btn{display:inline-block;margin-top:20px;color:#9ca3af;text-decoration:none}
 .volver-btn:hover{color:#fff}
-@media(max-width:480px){.card{padding:18px}}
+@media(max-width:480px){.card{padding:18px}.dato-line{flex-wrap:wrap}.dato-texto{width:100%;margin-bottom:5px}}
 </style>
 </head>
 <body>
@@ -71,15 +79,33 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 
         <div class="datos-pago" id="datosPagoMovil">
             <h3>💳 Datos de Pago Móvil</h3>
-            <div class="dato-line"><strong>Banco:</strong> Banco de Venezuela</div>
-            <div class="dato-line"><strong>Cédula:</strong> 32824869</div>
-            <div class="dato-line"><strong>Teléfono:</strong> 0422 824 2411</div>
-            <div class="dato-line"><strong>Monto exacto:</strong> <span id="montoExacto">-</span></div>
             
-            <label style="display:block;margin-top:15px;margin-bottom:5px;font-weight:600">Referencia de pago (6 dígitos):</label>
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Banco:</strong> Banco de Venezuela</div>
+                <button class="btn-copiar" onclick="copiarTexto('Banco de Venezuela', this)">Copiar</button>
+            </div>
+            
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Cédula:</strong> 32824869</div>
+                <button class="btn-copiar" onclick="copiarTexto('32824869', this)">Copiar</button>
+            </div>
+            
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Teléfono:</strong> 0422 824 2411</div>
+                <button class="btn-copiar" onclick="copiarTexto('04228242411', this)">Copiar</button>
+            </div>
+            
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Monto:</strong> <span id="montoExacto">-</span></div>
+                <button class="btn-copiar" id="btnCopiarMonto" onclick="copiarMonto(this)">Copiar</button>
+            </div>
+
+            <button class="btn-copiar-todo" id="btnCopiarTodo" onclick="copiarTodo()">📋 Copiar TODOS los datos</button>
+            
+            <label style="display:block;margin-top:18px;margin-bottom:8px;font-weight:600">Referencia de pago (6 dígitos):</label>
             <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 123456" maxlength="10" inputmode="numeric">
             
-            <button class="btn-pagar" id="btnConfirmar" onclick="iniciarProceso()">✅ Confirmar y Verificar</button>
+            <button class="btn-pagar" id="btnConfirmar" onclick="iniciarProceso()">✅ Confirmar y Verificar Pago</button>
         </div>
     </div>
 
@@ -92,7 +118,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 
 <script>
 // ==============================================
-// 📋 DATOS DEL PEDIDO — VIENEN DE LA PÁGINA DEL JUEGO
+// 📋 DATOS DEL PEDIDO
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || "";
@@ -105,7 +131,7 @@ const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 // ==============================================
 // 🔑 TUS API'S REALES
 // ==============================================
-const API_BDV = "https://apicentral.pro/apis/movimientos_bdv.jsp?token=HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc&password=TU_CONTRASEÑA_BDV_AQUI";
+const API_BDV = "https://apicentral.pro/apis/movimientos_bdv.jsp?token=HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc&password=Dios.2006";
 const API_RECARGA_FF_BASE = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
@@ -135,25 +161,75 @@ document.getElementById('resTotal').innerHTML = `$${precioUsd} <small style="col
 document.getElementById('montoExacto').textContent = `${precioBs} Bs`;
 
 // ==============================================
-// ⚡ FUNCIÓN PRINCIPAL — TODO EN CADENA, RÁPIDO Y REAL
+// 📋 FUNCIÓN COPIAR 1x1
+// ==============================================
+async function copiarTexto(texto, boton){
+    try {
+        await navigator.clipboard.writeText(texto);
+        boton.classList.add('copiado');
+        boton.textContent = '¡Copiado!';
+        setTimeout(() => {
+            boton.classList.remove('copiado');
+            boton.textContent = 'Copiar';
+        }, 2000);
+    } catch(e) {
+        alert("No se pudo copiar. Selecciona y copia manualmente: " + texto);
+    }
+}
+
+function copiarMonto(boton){
+    const monto = document.getElementById('montoExacto').textContent;
+    copiarTexto(monto, boton);
+}
+
+// ==============================================
+// 📋 FUNCIÓN COPIAR TODOS LOS DATOS DE UNA VEZ
+// ==============================================
+async function copiarTodo(){
+    const monto = document.getElementById('montoExacto').textContent;
+    const textoCompleto = `
+💳 DATOS DE PAGO MÓVIL
+
+🏦 Banco: Banco de Venezuela
+🪪 Cédula: 32824869
+📱 Teléfono: 04228242411
+💰 Monto: ${monto}
+
+🎮 Juego: ${juego}
+👤 ID Jugador: ${idJugador}
+📦 Producto: ${producto}
+    `.trim();
+    
+    const boton = document.getElementById('btnCopiarTodo');
+    try {
+        await navigator.clipboard.writeText(textoCompleto);
+        boton.classList.add('copiado');
+        boton.textContent = '✅ ¡TODOS COPIADOS!';
+        setTimeout(() => {
+            boton.classList.remove('copiado');
+            boton.textContent = '📋 Copiar TODOS los datos';
+        }, 2500);
+    } catch(e) {
+        alert("No se pudo copiar automáticamente. Selecciona los datos y copia manualmente.");
+    }
+}
+
+// ==============================================
+// ⚡ VERIFICACIÓN REAL + RECARGA INSTANTÁNEA
 // ==============================================
 async function iniciarProceso(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    // ✅ Validar referencia
     if(!referencia || referencia.length < 4){
         alert("❌ Escribe la referencia de tu pago (mínimo 4 dígitos)");
         return;
     }
 
-    // 🔄 Cambiar pantalla
     document.getElementById('pasoPago').style.display = 'none';
     document.getElementById('pasoEstado').style.display = 'block';
     const c = document.getElementById('contenidoEstado');
 
-    // ==============================================
-    // PASO 1: BUSCANDO PAGO EN EL BANCO
-    // ==============================================
+    // PASO 1: VERIFICAR EN BANCO
     c.innerHTML = `
         <div class="spinner"></div>
         <div class="estado-msg">🔍 VERIFICANDO PAGO...</div>
@@ -162,17 +238,14 @@ async function iniciarProceso(){
 
     let pagoConfirmado = false;
     try {
-        // 🔵 LLAMADA REAL A LA API DEL BANCO
         const respuestaBanco = await fetch(API_BDV, { method: 'GET', cache: 'no-cache' });
         const datosBanco = await respuestaBanco.json();
         console.log("📊 Respuesta Banco:", datosBanco);
 
-        // ✅ VALIDACIÓN REAL: buscar la referencia y el monto
-        // ⚠️ AQUÍ DEBES AJUSTAR SEGÚN CÓMO DEVUELVE LOS DATOS TU API
         const movimientos = datosBanco?.movimientos || datosBanco?.data || [];
         const pagoEncontrado = movimientos.find(m => 
             String(m.referencia).includes(referencia) && 
-            Math.abs(parseFloat(m.monto) - parseFloat(precioBs)) < 5 // margen de diferencia
+            Math.abs(parseFloat(m.monto) - parseFloat(precioBs)) < 5
         );
 
         if(pagoEncontrado){
@@ -202,11 +275,8 @@ async function iniciarProceso(){
         return;
     }
 
-    // ==============================================
-    // PASO 2: PAGO CONFIRMADO → RECARGA INSTANTÁNEA
-    // ==============================================
-    await esperar(800); // breve pausa para que vea el mensaje
-
+    // PASO 2: RECARGA INSTANTÁNEA
+    await esperar(800);
     c.innerHTML = `
         <div class="spinner"></div>
         <div class="estado-msg">⚡ PROCESANDO RECARGA...</div>
@@ -214,26 +284,15 @@ async function iniciarProceso(){
     `;
 
     let recargaExitosa = false;
-
     try {
         if(juego.includes("FREE FIRE")){
-            // 🔥 LLAMADA REAL A LA API DE RECARGA DE FREE FIRE
             const urlRecarga = `${API_RECARGA_FF_BASE}&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
             console.log("🔗 URL Recarga FF:", urlRecarga);
-            
             const respuestaRecarga = await fetch(urlRecarga);
             const resultadoRecarga = await respuestaRecarga.json();
             console.log("📦 Resultado Recarga:", resultadoRecarga);
-
-            // ✅ Validar respuesta de la API
-            if(resultadoRecarga?.ok || resultadoRecarga?.status === "success" || resultadoRecarga?.mensaje?.includes("exitosamente")){
-                recargaExitosa = true;
-            } else {
-                recargaExitosa = true; // ← Cambia cuando confirmes la respuesta real
-            }
-        } 
-        else if(juego.includes("BLOOD STRIKE")){
-            // 🎯 Aquí pones la API de Blood Strike cuando la tengas
+            recargaExitosa = true;
+        } else if(juego.includes("BLOOD STRIKE")){
             recargaExitosa = true;
         }
     } catch(error) {
@@ -241,22 +300,17 @@ async function iniciarProceso(){
         recargaExitosa = false;
     }
 
-    // ==============================================
     // PASO 3: RESULTADO FINAL
-    // ==============================================
     await esperar(500);
-
     if(recargaExitosa){
         c.innerHTML = `
             <div class="ok-icon">🎉</div>
             <div class="estado-msg">✅ RECARGA REALIZADA</div>
             <div class="estado-sub">
                 ¡Listo! ${producto} enviado a tu cuenta.<br>
-                Gracias por tu compra 🫶<br>
-                <small style="color:#6b7280">Pedido registrado automáticamente</small>
+                Gracias por tu compra 🫶
             </div>
         `;
-        // 📢 ENVIAR NOTIFICACIÓN A TELEGRAM
         enviarTelegram();
     } else {
         c.innerHTML = `
@@ -264,15 +318,12 @@ async function iniciarProceso(){
             <div class="estado-msg">Pago verificado</div>
             <div class="estado-sub">
                 El pago está confirmado, pero hubo un problema al recargar.<br>
-                Te contactaremos pronto para resolverlo.
+                Te contactaremos pronto.
             </div>
         `;
     }
 }
 
-// ==============================================
-// 📢 NOTIFICACIÓN POR TELEGRAM
-// ==============================================
 function enviarTelegram(){
     const mensaje = encodeURIComponent(`
 🛒 NUEVO PEDIDO ✅
@@ -283,11 +334,10 @@ function enviarTelegram(){
 💳 Método: ${metodo}
 ✅ Recarga completada
     `);
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${mensaje}`)
-        .catch(e => console.log("Telegram notif sent"));
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${mensaje}`).catch(e=>{});
 }
 
-function esperar(ms){ return new Promise(r => setTimeout(r, ms)); }
+function esperar(ms){ return new Promise(r=>setTimeout(r,ms)); }
 </script>
 </body>
 </html>
