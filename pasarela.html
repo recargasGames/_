@@ -80,8 +80,8 @@ small{color:#6b7280;display:block;margin-top:5px}
             <h3>🏦 Datos de Pago Móvil</h3>
             
             <div class="dato-line">
-                <div class="dato-texto"><strong>Banco:</strong> Bdv</div>
-                <button class="btn-copiar" onclick="copiarTexto('Bdv', this)">Copiar</button>
+                <div class="dato-texto"><strong>Banco:</strong> Banco de Venezuela</div>
+                <button class="btn-copiar" onclick="copiarTexto('Banco de Venezuela', this)">Copiar</button>
             </div>
             
             <div class="dato-line">
@@ -117,22 +117,30 @@ small{color:#6b7280;display:block;margin-top:5px}
 </div>
 
 <script>
+// ==============================================
+// 📋 OBTENER DATOS DE LA URL
+// ==============================================
 function getParametro(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param) || '';
 }
 
+// 🔥🔥🔥 ESTAS SON TODAS LAS VARIABLES QUE NECESITAS 🔥🔥🔥
 const juego = getParametro('juego') || localStorage.getItem('juego_seleccionado') || '';
-const idJugador = getParametro('id') || localStorage.getItem('id_jugador') || '';
+const id_jugador = getParametro('id') || localStorage.getItem('id_jugador') || '';
 const producto = getParametro('producto') || localStorage.getItem('producto_seleccionado') || '';
 const precioUsd = getParametro('precio') || localStorage.getItem('precio_usd') || '0';
 const precioBs = getParametro('precio_bs') || localStorage.getItem('precio_en_bs') || '0';
 const paqueteCod = getParametro('paquete') || localStorage.getItem('paquete_codigo') || '';
 
-if (!juego || !idJugador) {
+// Si no hay datos, redirigir al index
+if (!juego || !id_jugador) {
     window.location.href = 'index.html';
 }
 
+// ==============================================
+// 🎨 DETECTAR JUEGO Y CAMBIAR COLOR
+// ==============================================
 const root = document.documentElement;
 if(juego.includes("FREE FIRE")){
     root.style.setProperty('--color-principal', '#facc15');
@@ -144,12 +152,18 @@ if(juego.includes("FREE FIRE")){
     document.getElementById('tituloJuego').innerHTML = '🎯 Recarga Blood Strike';
 }
 
+// ==============================================
+// 📄 CARGAR RESUMEN DEL PEDIDO
+// ==============================================
 document.getElementById('resJuego').textContent = juego;
-document.getElementById('resId').textContent = idJugador;
+document.getElementById('resId').textContent = id_jugador;
 document.getElementById('resProducto').textContent = producto;
 document.getElementById('resTotal').innerHTML = `$${precioUsd} <small style="color:#9ca3af">≈ ${precioBs} Bs</small>`;
 document.getElementById('montoExacto').textContent = `${precioBs} Bs`;
 
+// ==============================================
+// 📋 FUNCIONES COPIAR
+// ==============================================
 async function copiarTexto(texto, boton){
     try {
         await navigator.clipboard.writeText(texto);
@@ -175,13 +189,13 @@ async function copiarTodo(){
     const textoCompleto = `
 💳 DATOS DE PAGO MÓVIL
 
-🏦 Banco: Bdv
+🏦 Banco: Banco de Venezuela
 🪪 Cédula: 32824869
 📱 Teléfono: 04228242411
 💰 Monto: ${monto}
 
 🎮 Juego: ${juego}
-👤 ID Jugador: ${idJugador}
+👤 ID Jugador: ${id_jugador}
 📦 Producto: ${producto}
     `.trim();
     
@@ -200,7 +214,7 @@ async function copiarTodo(){
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN CON PABILO - 🔥 FUNCIONA SIEMPRE 🔥
+// ⚡ VERIFICACIÓN CON PABILO
 // ==============================================
 async function iniciarProceso() {
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -225,11 +239,18 @@ async function iniciarProceso() {
     `;
     
     try {
-        // 🔥🔥🔥 LA URL CORRECTA - SIEMPRE USA VERCEL 🔥🔥🔥
+        // 🔥 LA URL CORRECTA - SIEMPRE USA VERCEL 🔥
         const API_URL = 'https://recargasjuegos.vercel.app/api/verificar-pago';
         
         console.log('📡 Enviando a:', API_URL);
-        console.log('📝 Datos:', { referencia, monto: parseFloat(precioBs), juego, id_jugador, producto, paquete_cod: paqueteCod });
+        console.log('📝 Datos:', { 
+            referencia, 
+            monto: parseFloat(precioBs), 
+            juego, 
+            id_jugador, 
+            producto, 
+            paquete_cod: paqueteCod 
+        });
         
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -240,7 +261,7 @@ async function iniciarProceso() {
                 referencia: referencia,
                 monto: parseFloat(precioBs),
                 juego: juego,
-                id_jugador: idJugador,
+                id_jugador: id_jugador,
                 producto: producto,
                 paquete_cod: paqueteCod
             })
@@ -303,6 +324,7 @@ document.getElementById('referenciaPago').addEventListener('keypress', function(
 
 console.log('🔄 Pasarela de pago con Pabilo cargada');
 console.log('📡 API URL: https://recargasjuegos.vercel.app/api/verificar-pago');
+console.log('📝 Datos del pedido:', { juego, id_jugador, producto, precioBs });
 </script>
 </body>
 </html>
