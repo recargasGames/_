@@ -34,7 +34,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
 .btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
 .btn-confirmar:hover{background:var(--color-hover)}
-.volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%}
+.volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%;font-size:16px}
 .volver-btn:hover{color:#fff}
 .error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:13px;color:#fca5a5;white-space:pre-wrap;word-break:break-all}
 .debug-box{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:12px;margin-top:15px;font-size:12px;color:#93c5fd;white-space:pre-wrap;word-break:break-all}
@@ -112,17 +112,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
     <div id="pasoError" class="verificado-box" style="display:none">
         <div class="check-circle" style="border-color:#ef4444"><span class="check-icon" style="color:#ef4444">✕</span></div>
         <div class="verificado-texto" style="color:#ef4444">Pago No Encontrado</div>
-        <div class="verificado-sub">Revisa la referencia completa y vuelve a intentar.</div>
-        
-        <div class="debug-box">
-📤 Datos enviados:
-<span id="debugDatos"></span>
-        </div>
-        
-        <div class="error-box">
-📡 Respuesta del sistema:
-<span id="textoRespuesta"></span>
-        </div>
+        <div class="verificado-sub">Verifica tu referencia e inténtalo de nuevo.</div>
         
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
@@ -141,7 +131,7 @@ const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
 // ==============================================
-// 🔒 LISTA DE REFERENCIAS YA USADAS — NO SE REPITEN
+// 🔒 LISTA DE REFERENCIAS YA USADAS
 // ==============================================
 function obtenerReferenciasUsadas() {
     const guardadas = localStorage.getItem('referencias_usadas');
@@ -191,14 +181,14 @@ function generarPedido(){
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    // 🛡️ PRIMERO: Verificar si la referencia YA FUE USADA antes de llamar a la API
+    // 🛡️ Verificar si ya fue usada
     if(yaFueUsada(referencia)){
         document.getElementById('pasoDatos').style.display = 'none';
         document.getElementById('pasoUsada').style.display = 'block';
-        return; // ❌ NO deja continuar
+        return;
     }
     
-    // ✅ MONTO en bolívares, limpio
+    // ✅ MONTO en bolívares
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
 
@@ -215,7 +205,7 @@ async function iniciarVerificacion(){
     document.getElementById('pasoDatos').style.display = 'none';
     document.getElementById('pasoVerificando').style.display = 'block';
 
-    // 📤 OBJETO EXACTO DE LA DOCUMENTACIÓN
+    // 📤 OBJETO A ENVIAR
     const cuerpoPeticion = {
         bank_reference: referencia,
         amount: montoPago,
@@ -241,9 +231,9 @@ async function iniciarVerificacion(){
         });
 
         respuestaCruda = await respuesta.json();
-        console.log("📊 RESPUESTA COMPLETA:", respuestaCruda);
+        console.log("📊 RESPUESTA:", respuestaCruda);
 
-        // ✅ DETECCIÓN DE ÉXITO — CORREGIDA
+        // ✅ DETECCIÓN DE ÉXITO
         if(respuesta.ok && respuestaCruda){
             if(
                 respuestaCruda.message === 'payment confirmed' ||
@@ -257,17 +247,12 @@ async function iniciarVerificacion(){
 
     } catch(error) {
         console.error("❌ Error:", error);
-        respuestaCruda = { 
-            error: error.message,
-            nota: "Si dice Failed to fetch → Pide a Andrus que habilite tu dominio"
-        };
     }
 
     // ==============================================
-    // ✅ PAGO CONFIRMADO → MARCAR COMO USADA 🔒
+    // ✅ PAGO CONFIRMADO
     // ==============================================
     if(pagoConfirmado){
-        // 🔒 MARCAR LA REFERENCIA COMO USADA — NO SE PODRÁ REPETIR
         marcarComoUsada(referencia);
         
         const nroPedido = generarPedido();
@@ -283,13 +268,11 @@ async function iniciarVerificacion(){
         enviarTelegram(nroPedido, referencia);
     } 
     // ==============================================
-    // ❌ NO ENCONTRADO
+    // ❌ NO ENCONTRADO — SOLO MENSAJE LIMPIO ✅
     // ==============================================
     else {
         document.getElementById('pasoVerificando').style.display = 'none';
         document.getElementById('pasoError').style.display = 'block';
-        document.getElementById('debugDatos').textContent = JSON.stringify(cuerpoPeticion, null, 2);
-        document.getElementById('textoRespuesta').textContent = JSON.stringify(respuestaCruda, null, 2);
     }
 }
 
