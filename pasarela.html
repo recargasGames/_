@@ -7,12 +7,12 @@
 <style>
 :root{--color-principal:#10b981;--color-hover:#059669}
 *{box-sizing:border-box}
-body{background:#0b1220;color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh;padding:20px;background-image:url('/fondo.jpg');background-size:cover;background-attachment:fixed}
+body{background:#0b1220;color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh;padding:20px}
 .container{max-width:520px;margin:0 auto}
 .header{text-align:center;padding:20px 0;border-bottom:2px solid var(--color-principal);margin-bottom:20px}
 .header h1{font-size:24px;color:var(--color-principal)}
 .header span{color:#9ca3af;font-size:14px}
-.card{background:rgba(17,24,39,0.95);border:1px solid #1f2937;border-radius:16px;padding:25px;margin-bottom:20px;backdrop-filter:blur(10px)}
+.card{background:rgba(17,24,39,0.95);border:1px solid #1f2937;border-radius:16px;padding:25px;margin-bottom:20px}
 .card h2{color:var(--color-principal);font-size:20px;margin-bottom:20px;text-align:center}
 .resumen-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #374151;font-size:15px}
 .resumen-row:last-child{border-bottom:none}
@@ -175,7 +175,7 @@ async function copiarTodo(){
     const textoCompleto = `
 💳 DATOS DE PAGO MÓVIL
 
-🏦 Banco: Banco de Venezuela
+🏦 Banco: Bdv
 🪪 Cédula: 32824869
 📱 Teléfono: 04228242411
 💰 Monto: ${monto}
@@ -200,7 +200,7 @@ async function copiarTodo(){
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN CON PABILO
+// ⚡ VERIFICACIÓN CON PABILO - 🔥 FUNCIONA SIEMPRE 🔥
 // ==============================================
 async function iniciarProceso() {
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -225,8 +225,11 @@ async function iniciarProceso() {
     `;
     
     try {
-        const API_URL = window.location.origin + '/api/verificar-pago';
-        console.log('📡 API URL:', API_URL);
+        // 🔥🔥🔥 LA URL CORRECTA - SIEMPRE USA VERCEL 🔥🔥🔥
+        const API_URL = 'https://recargasjuegos.vercel.app/api/verificar-pago';
+        
+        console.log('📡 Enviando a:', API_URL);
+        console.log('📝 Datos:', { referencia, monto: parseFloat(precioBs), juego, id_jugador, producto, paquete_cod: paqueteCod });
         
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -299,6 +302,7 @@ document.getElementById('referenciaPago').addEventListener('keypress', function(
 });
 
 console.log('🔄 Pasarela de pago con Pabilo cargada');
+console.log('📡 API URL: https://recargasjuegos.vercel.app/api/verificar-pago');
 </script>
 </body>
 </html>
