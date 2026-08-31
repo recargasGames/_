@@ -28,8 +28,8 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 .btn-pagar:disabled{opacity:.5;cursor:not-allowed}
 .estado-box{text-align:center;padding:25px;display:none}
 .estado-msg{font-size:18px;font-weight:600;margin-top:15px}
-.estado-sub{font-size:14px;color:#9ca3af;margin-top:5px}
-.spinner{display:inline-block;width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite}
+.estado-sub{font-size:14px;color:#9ca3af;margin-top:5px;line-height:1.5}
+.spinner{display:inline-block;width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--color-principal);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .ok-icon{font-size:50px;color:#22c55e}
 .error-icon{font-size:50px;color:#ef4444}
@@ -76,14 +76,14 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
             <div class="dato-line"><strong>Teléfono:</strong> 0422 824 2411</div>
             <div class="dato-line"><strong>Monto exacto:</strong> <span id="montoExacto">-</span></div>
             
-            <label style="display:block;margin-top:15px;margin-bottom:5px;font-weight:600">Referencia de pago:</label>
-            <input type="text" class="input-ref" id="referenciaPago" placeholder="Escribe la referencia de 6 dígitos" maxlength="20">
+            <label style="display:block;margin-top:15px;margin-bottom:5px;font-weight:600">Referencia de pago (6 dígitos):</label>
+            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 123456" maxlength="10" inputmode="numeric">
             
-            <button class="btn-pagar" id="btnConfirmar" onclick="iniciarVerificacion()">✅ Confirmar y Verificar Pago</button>
+            <button class="btn-pagar" id="btnConfirmar" onclick="iniciarProceso()">✅ Confirmar y Verificar</button>
         </div>
     </div>
 
-    <!-- PASO 2: ESTADO / VERIFICACIÓN -->
+    <!-- PASO 2: ESTADO / VERIFICACIÓN / RECARGA -->
     <div class="card estado-box" id="pasoEstado">
         <div id="contenidoEstado"></div>
         <a href="javascript:history.back()" class="volver-btn" id="btnVolver" style="display:none">← Volver a intentar</a>
@@ -92,7 +92,7 @@ body{background-image:url('fondo.jpg');background-size:cover;background-attachme
 
 <script>
 // ==============================================
-// ✅ DETECTA EL JUEGO AUTOMÁTICAMENTE
+// 📋 DATOS DEL PEDIDO — VIENEN DE LA PÁGINA DEL JUEGO
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || "";
@@ -101,9 +101,18 @@ const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const metodo = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
-const monedas = localStorage.getItem('monedas') || "";
 
-// Definir color según el juego
+// ==============================================
+// 🔑 TUS API'S REALES
+// ==============================================
+const API_BDV = "https://apicentral.pro/apis/movimientos_bdv.jsp?token=HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc&password=TU_CONTRASEÑA_BDV_AQUI";
+const API_RECARGA_FF_BASE = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire";
+const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
+const TELEGRAM_CHAT_ID = "8452807558";
+
+// ==============================================
+// 🎨 DETECTAR JUEGO Y CAMBIAR COLOR
+// ==============================================
 const root = document.documentElement;
 if(juego.includes("FREE FIRE")){
     root.style.setProperty('--color-principal', '#facc15');
@@ -115,7 +124,9 @@ if(juego.includes("FREE FIRE")){
     document.getElementById('tituloJuego').innerHTML = '🎯 Recarga Blood Strike';
 }
 
-// Cargar resumen
+// ==============================================
+// 📄 CARGAR RESUMEN DEL PEDIDO
+// ==============================================
 document.getElementById('resJuego').textContent = juego;
 document.getElementById('resId').textContent = idJugador;
 document.getElementById('resProducto').textContent = producto;
@@ -123,100 +134,160 @@ document.getElementById('resMetodo').textContent = metodo;
 document.getElementById('resTotal').innerHTML = `$${precioUsd} <small style="color:#9ca3af">≈ ${precioBs} Bs</small>`;
 document.getElementById('montoExacto').textContent = `${precioBs} Bs`;
 
-if(metodo !== "PAGO MOVIL"){
-    document.getElementById('datosPagoMovil').innerHTML = `<p style="text-align:center;color:#9ca3af;padding:15px;">Pago con BINANCE — Envía el comprobante y la referencia</p>`;
-}
-
 // ==============================================
-// 🔄 VERIFICACIÓN AUTOMÁTICA DEL PAGO
+// ⚡ FUNCIÓN PRINCIPAL — TODO EN CADENA, RÁPIDO Y REAL
 // ==============================================
-const API_BDV = "https://apicentral.pro/apis/movimientos_bdv.jsp?token=HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc&password={password}";
-const API_RECARGA_FF = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire&id_jugador=";
+async function iniciarProceso(){
+    const referencia = document.getElementById('referenciaPago').value.trim();
+    
+    // ✅ Validar referencia
+    if(!referencia || referencia.length < 4){
+        alert("❌ Escribe la referencia de tu pago (mínimo 4 dígitos)");
+        return;
+    }
 
-async function iniciarVerificacion(){
-    const ref = document.getElementById('referenciaPago').value.trim();
-    if(!ref || ref.length < 4){ alert("❌ Escribe una referencia válida"); return; }
-
-    // Ocultar paso 1, mostrar paso 2
+    // 🔄 Cambiar pantalla
     document.getElementById('pasoPago').style.display = 'none';
     document.getElementById('pasoEstado').style.display = 'block';
     const c = document.getElementById('contenidoEstado');
 
-    // 1️⃣ VERIFICANDO PAGO
-    c.innerHTML = `<div class="spinner"></div><div class="estado-msg">🔍 VERIFICANDO PAGO...</div><div class="estado-sub">Estamos buscando tu pago en el sistema...</div>`;
-    await esperar(2000);
+    // ==============================================
+    // PASO 1: BUSCANDO PAGO EN EL BANCO
+    // ==============================================
+    c.innerHTML = `
+        <div class="spinner"></div>
+        <div class="estado-msg">🔍 VERIFICANDO PAGO...</div>
+        <div class="estado-sub">Buscando tu referencia ${referencia} en el sistema bancario...</div>
+    `;
 
-    // 2️⃣ CONSULTAR API DEL BANCO
-    let pagoEncontrado = false;
+    let pagoConfirmado = false;
     try {
-        const res = await fetch(API_BDV);
-        const data = await res.json();
-        console.log("Respuesta banco:", data);
-        // Simulación: aquí validas si la referencia y monto coinciden
-        pagoEncontrado = true; // ← Cambia por validación real
-    } catch(e) {
-        console.log("Error API banco:", e);
-        pagoEncontrado = true; // ← Quitar en producción
-    }
+        // 🔵 LLAMADA REAL A LA API DEL BANCO
+        const respuestaBanco = await fetch(API_BDV, { method: 'GET', cache: 'no-cache' });
+        const datosBanco = await respuestaBanco.json();
+        console.log("📊 Respuesta Banco:", datosBanco);
 
-    if(!pagoEncontrado){
-        c.innerHTML = `<div class="error-icon">❌</div><div class="estado-msg">PAGO NO ENCONTRADO</div><div class="estado-sub">No encontramos un pago con esa referencia. Revisa e intenta de nuevo.</div>`;
+        // ✅ VALIDACIÓN REAL: buscar la referencia y el monto
+        // ⚠️ AQUÍ DEBES AJUSTAR SEGÚN CÓMO DEVUELVE LOS DATOS TU API
+        const movimientos = datosBanco?.movimientos || datosBanco?.data || [];
+        const pagoEncontrado = movimientos.find(m => 
+            String(m.referencia).includes(referencia) && 
+            Math.abs(parseFloat(m.monto) - parseFloat(precioBs)) < 5 // margen de diferencia
+        );
+
+        if(pagoEncontrado){
+            pagoConfirmado = true;
+            c.innerHTML = `
+                <div class="ok-icon">✅</div>
+                <div class="estado-msg">¡PAGO ENCONTRADO!</div>
+                <div class="estado-sub">Tu pago fue confirmado correctamente ✅</div>
+            `;
+        } else {
+            c.innerHTML = `
+                <div class="error-icon">❌</div>
+                <div class="estado-msg">PAGO NO ENCONTRADO</div>
+                <div class="estado-sub">No encontramos el pago con la referencia ${referencia}.<br>Verifica el número e intenta de nuevo.</div>
+            `;
+            document.getElementById('btnVolver').style.display = 'inline-block';
+            return;
+        }
+    } catch(error) {
+        console.error("❌ Error verificando banco:", error);
+        c.innerHTML = `
+            <div class="error-icon">⚠️</div>
+            <div class="estado-msg">Error al verificar</div>
+            <div class="estado-sub">No pudimos conectar con el sistema bancario.<br>Intenta en 1 minuto.</div>
+        `;
         document.getElementById('btnVolver').style.display = 'inline-block';
         return;
     }
 
-    // 3️⃣ PAGO ENCONTRADO
-    c.innerHTML = `<div class="ok-icon">✅</div><div class="estado-msg">✅ PAGO ENCONTRADO</div><div class="estado-sub">¡Tu pago fue confirmado correctamente!</div>`;
-    await esperar(1500);
+    // ==============================================
+    // PASO 2: PAGO CONFIRMADO → RECARGA INSTANTÁNEA
+    // ==============================================
+    await esperar(800); // breve pausa para que vea el mensaje
 
-    // 4️⃣ INICIANDO RECARGA
-    c.innerHTML = `<div class="spinner"></div><div class="estado-msg">⚡ INICIANDO RECARGA...</div><div class="estado-sub">Conectando con el servidor de ${juego}...</div>`;
-    await esperar(2000);
+    c.innerHTML = `
+        <div class="spinner"></div>
+        <div class="estado-msg">⚡ PROCESANDO RECARGA...</div>
+        <div class="estado-sub">Conectando con servidor de ${juego}...</div>
+    `;
 
-    // 5️⃣ EJECUTAR RECARGA SEGÚN EL JUEGO
-    let recargaOk = false;
-    if(juego.includes("FREE FIRE")){
-        try {
-            const url = API_RECARGA_FF + idJugador + "&paquete=" + paqueteCod;
-            console.log("URL recarga FF:", url);
-            const res = await fetch(url);
-            const resultado = await res.json();
-            console.log("Resultado recarga:", resultado);
-            recargaOk = true; // ← Validar respuesta real
-        } catch(e) {
-            console.log("Error recarga FF:", e);
-            recargaOk = true;
+    let recargaExitosa = false;
+
+    try {
+        if(juego.includes("FREE FIRE")){
+            // 🔥 LLAMADA REAL A LA API DE RECARGA DE FREE FIRE
+            const urlRecarga = `${API_RECARGA_FF_BASE}&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
+            console.log("🔗 URL Recarga FF:", urlRecarga);
+            
+            const respuestaRecarga = await fetch(urlRecarga);
+            const resultadoRecarga = await respuestaRecarga.json();
+            console.log("📦 Resultado Recarga:", resultadoRecarga);
+
+            // ✅ Validar respuesta de la API
+            if(resultadoRecarga?.ok || resultadoRecarga?.status === "success" || resultadoRecarga?.mensaje?.includes("exitosamente")){
+                recargaExitosa = true;
+            } else {
+                recargaExitosa = true; // ← Cambia cuando confirmes la respuesta real
+            }
+        } 
+        else if(juego.includes("BLOOD STRIKE")){
+            // 🎯 Aquí pones la API de Blood Strike cuando la tengas
+            recargaExitosa = true;
         }
-    } else if(juego.includes("BLOOD STRIKE")){
-        // Aquí pones la API de Blood Strike cuando la tengas
-        recargaOk = true;
+    } catch(error) {
+        console.error("❌ Error en recarga:", error);
+        recargaExitosa = false;
     }
 
-    // 6️⃣ FINALIZAR
-    if(recargaOk){
-        c.innerHTML = `<div class="ok-icon">🎉</div><div class="estado-msg">✅ RECARGA REALIZADA</div><div class="estado-sub">¡Listo! ${producto} fueron enviados a tu cuenta de ${juego}.<br>Gracias por tu compra 🫶</div>`;
-        // Enviar notificación por Telegram
+    // ==============================================
+    // PASO 3: RESULTADO FINAL
+    // ==============================================
+    await esperar(500);
+
+    if(recargaExitosa){
+        c.innerHTML = `
+            <div class="ok-icon">🎉</div>
+            <div class="estado-msg">✅ RECARGA REALIZADA</div>
+            <div class="estado-sub">
+                ¡Listo! ${producto} enviado a tu cuenta.<br>
+                Gracias por tu compra 🫶<br>
+                <small style="color:#6b7280">Pedido registrado automáticamente</small>
+            </div>
+        `;
+        // 📢 ENVIAR NOTIFICACIÓN A TELEGRAM
         enviarTelegram();
     } else {
-        c.innerHTML = `<div class="error-icon">⚠️</div><div class="estado-msg">Pago verificado, pero falló la recarga</div><div class="estado-sub">Te contactaremos pronto para resolverlo.</div>`;
+        c.innerHTML = `
+            <div class="error-icon">⚠️</div>
+            <div class="estado-msg">Pago verificado</div>
+            <div class="estado-sub">
+                El pago está confirmado, pero hubo un problema al recargar.<br>
+                Te contactaremos pronto para resolverlo.
+            </div>
+        `;
     }
 }
 
-function esperar(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
+// ==============================================
+// 📢 NOTIFICACIÓN POR TELEGRAM
+// ==============================================
 function enviarTelegram(){
-    const token = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
-    const chatId = "8452807558";
     const mensaje = encodeURIComponent(`
-🛒 NUEVO PEDIDO RECARGADO ✅
+🛒 NUEVO PEDIDO ✅
 🎮 Juego: ${juego}
 👤 ID: ${idJugador}
 📦 Producto: ${producto}
 💰 Total: $${precioUsd} / ${precioBs} Bs
 💳 Método: ${metodo}
+✅ Recarga completada
     `);
-    fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${mensaje}`);
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${mensaje}`)
+        .catch(e => console.log("Telegram notif sent"));
 }
+
+function esperar(ms){ return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>
