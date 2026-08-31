@@ -40,6 +40,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .volver-btn:hover{color:#fff}
 .aviso-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#fcd34d}
 .usada-box{background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.5);border-radius:12px;padding:20px;margin-top:15px;color:#fca5a5;font-weight:600}
+.mantengo-box{background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.5);border-radius:12px;padding:20px;margin-top:15px;color:#93c5fd;font-weight:600}
 </style>
 </head>
 <body>
@@ -49,15 +50,10 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 </div>
 
 <div class="main">
-    <!-- ============================================== -->
-    <!-- PASO 0: INGRESAR DATOS Y REFERENCIA -->
-    <!-- ============================================== -->
+    <!-- PASO 0: DATOS Y REFERENCIA -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
-        
-        <div class="aviso-box">
-            ⚠️ Referencia completa — <strong>Solo se puede usar UNA VEZ</strong>
-        </div>
+        <div class="aviso-box">⚠️ Referencia completa — <strong>Solo se puede usar UNA VEZ</strong></div>
         
         <div class="datos-pago-box">
             <div class="dato-line"><div class="dato-texto"><strong>Juego:</strong></div><div id="datoJuego">-</div></div>
@@ -65,55 +61,43 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
             <div class="dato-line"><div class="dato-texto"><strong>Producto:</strong></div><div id="datoProducto">-</div></div>
             <div class="dato-line"><div class="dato-texto"><strong>Total Bs:</strong></div><div id="datoMontoBs">-</div></div>
         </div>
-
         <div class="datos-pago-box">
             <h3 class="titulo-seccion" style="margin-top:0;margin-bottom:15px;text-align:left">💳 Datos de Pago</h3>
             <div class="dato-line"><div class="dato-texto"><strong>Banco:</strong></div><div>Banco de Venezuela</div></div>
             <div class="dato-line"><div class="dato-texto"><strong>Cédula:</strong></div><div>32824869</div></div>
             <div class="dato-line"><div class="dato-texto"><strong>Teléfono:</strong></div><div>04228242411</div></div>
-            
             <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600">Referencia completa:</label>
             <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
-            
             <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
         </div>
     </div>
 
-    <!-- ============================================== -->
     <!-- PASO 1: VERIFICANDO PAGO -->
-    <!-- ============================================== -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
         <div class="texto-secundario">Estamos buscando tu pago en el sistema bancario...</div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- PASO 2: PAGO ENCONTRADO / CONFIRMADO -->
-    <!-- ============================================== -->
+    <!-- PASO 2: PAGO CONFIRMADO -->
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Tu pago fue encontrado y verificado correctamente.</div>
+        <div class="texto-secundario">Tu pago fue verificado correctamente. Preparando recarga...</div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- PASO 3: CONECTANDO CON SERVIDOR DE RECARGAS -->
-    <!-- ============================================== -->
+    <!-- PASO 3: CONECTANDO CON SERVIDOR -->
     <div id="pasoConectandoServidor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
         <div class="texto-principal">Conectando con el servidor de recargas...</div>
-        <div class="texto-secundario">Preparando tu recarga, por favor espera un momento...</div>
+        <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
     </div>
 
-    <!-- ============================================== -->
     <!-- PASO 4: RECARGA EXITOSA ✅ -->
-    <!-- ============================================== -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
         <div class="texto-secundario">Tu recarga se procesó correctamente. ¡Disfruta tu compra!</div>
-
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
@@ -121,40 +105,41 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Monto Bs</span><span class="resumen-valor" id="resMonto">-</span></div>
         </div>
-
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ============================================== -->
-    <!-- PANTALLA: REFERENCIA YA USADA ⚠️ -->
-    <!-- ============================================== -->
-    <div id="pasoReferenciaUsada" class="paso-box">
+    <!-- ⚠️ SALDO INSUFICIENTE — PAGO SE GUARDA, NO SE PIERDE -->
+    <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Referencia Ya Utilizada</div>
-        <div class="texto-secundario">Esta referencia ya fue usada en un pago anterior.<br>Usa una referencia nueva.</div>
-        
-        <div class="usada-box">
-            🔒 Cada referencia de pago se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.
+        <div class="texto-principal">Servicio Temporalmente Indisponible</div>
+        <div class="texto-secundario">El pago fue confirmado, pero estamos procesando la recarga. Se completará en breve.</div>
+        <div class="mantengo-box">
+            💳 Tu pago quedó registrado y seguro. En cuanto se restablezca el servicio, la recarga se enviará automáticamente. Te llegará un aviso por Telegram.
         </div>
-        
-        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
+        <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ============================================== -->
-    <!-- PANTALLA: PAGO NO ENCONTRADO ❌ -->
-    <!-- ============================================== -->
+    <!-- ❌ PAGO NO ENCONTRADO -->
     <div id="pasoPagoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
         <div class="texto-secundario">Verifica tu referencia e inténtalo de nuevo.</div>
-        
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
+    </div>
+
+    <!-- ⚠️ REFERENCIA YA USADA -->
+    <div id="pasoReferenciaUsada" class="paso-box">
+        <div class="icono-circle icono-amarillo">⚠</div>
+        <div class="texto-principal">Referencia Ya Utilizada</div>
+        <div class="texto-secundario">Esta referencia ya fue usada en un pago anterior. Usa una referencia nueva.</div>
+        <div class="usada-box">🔒 Cada referencia se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.</div>
+        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
     </div>
 </div>
 
 <script>
 // ==============================================
-// 🔑 DATOS OFICIALES — TODO CONFIRMADO ✅
+// 🔑 DATOS
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
@@ -167,22 +152,11 @@ const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
 // ==============================================
-// 🔒 BLOQUEO DE REFERENCIAS REPETIDAS
+// 🔒 REFERENCIAS USADAS
 // ==============================================
-function obtenerReferenciasUsadas() {
-    const guardadas = localStorage.getItem('referencias_usadas');
-    return guardadas ? JSON.parse(guardadas) : [];
-}
-
-function marcarComoUsada(referencia) {
-    const usadas = obtenerReferenciasUsadas();
-    usadas.push(referencia);
-    localStorage.setItem('referencias_usadas', JSON.stringify(usadas));
-}
-
-function yaFueUsada(referencia) {
-    return obtenerReferenciasUsadas().includes(referencia);
-}
+function obtenerReferenciasUsadas() { const g=localStorage.getItem('referencias_usadas'); return g?JSON.parse(g):[] }
+function marcarComoUsada(r) { const u=obtenerReferenciasUsadas(); u.push(r); localStorage.setItem('referencias_usadas',JSON.stringify(u)) }
+function yaFueUsada(r) { return obtenerReferenciasUsadas().includes(r) }
 
 // ==============================================
 // 📋 DATOS DEL PEDIDO
@@ -194,167 +168,136 @@ const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
-// ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
-// ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
 document.getElementById('datoProducto').textContent = producto;
 document.getElementById('datoMontoBs').textContent = `${precioBs} Bs`;
 
-// ==============================================
-// 🔢 NÚMERO DE PEDIDO
-// ==============================================
 function generarPedido(){
-    const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '1000') + 1;
-    localStorage.setItem('ultimoPedido', ultimo);
-    return '#' + ultimo;
+    const u=parseInt(localStorage.getItem('ultimoPedido')||'1000')+1;
+    localStorage.setItem('ultimoPedido',u);
+    return '#'+u;
+}
+
+function mostrarPaso(id) {
+    document.querySelectorAll('.paso-box').forEach(p=>p.classList.remove('activo'));
+    document.getElementById(id).classList.add('activo');
 }
 
 // ==============================================
-// 🔄 CAMBIAR DE PANTALLA
+// 🔥 VERIFICAR SALDO + HACER RECARGA
 // ==============================================
-function mostrarPaso(idPaso) {
-    document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
-    document.getElementById(idPaso).classList.add('activo');
+async function procesarRecarga() {
+    if(!juego.includes("FREE FIRE") || !idJugador || !paqueteCod) {
+        return { exito: true, mensaje: "Sin recarga de Free Fire" };
+    }
+
+    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
+    
+    try {
+        const res = await fetch(url);
+        const json = await res.json();
+        console.log("📦 Respuesta API:", json);
+
+        // ✅ SALDO SUFICIENTE → RECARGA HECHA
+        if(json.alerta === "green" || json.estado === "exito" || json.mensaje?.toLowerCase().includes("éxito") || json.mensaje?.toLowerCase().includes("correcto")){
+            return { exito: true, mensaje: json.mensaje || "Recarga exitosa" };
+        }
+
+        // ⚠️ SALDO INSUFICIENTE O ERROR
+        if(json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.mensaje?.toLowerCase().includes("insuficiente") || json.mensaje?.toLowerCase().includes("no disponible")){
+            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
+        }
+
+        // ⚠️ CUALQUIER OTRO ERROR
+        return { exito: false, mensaje: json.mensaje || "Error en recarga" };
+
+    } catch (err) {
+        console.error("❌ Error:", err);
+        return { exito: false, mensaje: "Error de conexión" };
+    }
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO PASO A PASO
+// ⚡ FLUJO COMPLETO
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    // 🛡️ PASO 0: Verificar si ya fue usada
-    if(yaFueUsada(referencia)){
-        mostrarPaso('pasoReferenciaUsada');
-        return;
-    }
-    
-    // ✅ Preparar datos
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
+    if(yaFueUsada(referencia)){ mostrarPaso('pasoReferenciaUsada'); return; }
+
+    let montoPago = String(precioBs).replace(/[.,]/g,'');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
-    const hoy = new Date();
-    const fechaFormateada = hoy.toISOString().split('T')[0];
+    const fecha = new Date().toISOString().split('T')[0];
 
-    if(!referencia || referencia.length < 6){
-        alert("❌ Escribe la referencia COMPLETA");
-        return;
-    }
+    if(!referencia || referencia.length < 6){ alert("❌ Escribe la referencia completa"); return; }
 
-    // ==============================================
-    // 📱 PASO 1: VERIFICANDO PAGO
-    // ==============================================
+    // PASO 1: VERIFICANDO PAGO
     mostrarPaso('pasoVerificandoPago');
 
-    const cuerpoPeticion = {
-        bank_reference: referencia,
-        amount: montoPago,
-        movement_type: "GENERIC",
-        fecha_pago: fechaFormateada
-    };
-
+    const cuerpo = { bank_reference: referencia, amount: montoPago, movement_type: "GENERIC", fecha_pago: fecha };
     let pagoConfirmado = false;
 
     try {
-        const respuesta = await fetch(API_PABILO_URL, {
+        const res = await fetch(API_PABILO_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify(cuerpoPeticion)
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+            body: JSON.stringify(cuerpo)
         });
-
-        const respuestaCruda = await respuesta.json();
-        
-        if(respuesta.ok && respuestaCruda){
-            if(
-                respuestaCruda.message === 'payment confirmed' ||
-                respuestaCruda.status === 'paid' ||
-                respuestaCruda.data?.status === 'paid' ||
-                respuestaCruda.success === true
-            ) {
-                pagoConfirmado = true;
-            }
+        const datos = await res.json();
+        if(res.ok && datos) {
+            if(datos.message==='payment confirmed' || datos.status==='paid' || datos.data?.status==='paid' || datos.success===true) pagoConfirmado = true;
         }
-    } catch(error) {
-        console.error("Error:", error);
-    }
+    } catch(e) { console.error(e); }
 
-    // ==============================================
-    // ❌ PAGO NO ENCONTRADO
-    // ==============================================
-    if(!pagoConfirmado){
-        setTimeout(() => {
-            mostrarPaso('pasoPagoNoEncontrado');
-        }, 800);
-        return;
-    }
+    if(!pagoConfirmado) { setTimeout(()=>mostrarPaso('pasoPagoNoEncontrado'),800); return; }
 
-    // ==============================================
-    // ✅ PASO 2: PAGO CONFIRMADO
-    // ==============================================
-    marcarComoUsada(referencia); // 🔒 Bloquear referencia
+    // PASO 2: PAGO CONFIRMADO
+    marcarComoUsada(referencia);
     mostrarPaso('pasoPagoConfirmado');
-    await new Promise(r => setTimeout(r, 1200)); // Esperar 1.2 segundos
+    await new Promise(r=>setTimeout(r,1200));
 
-    // ==============================================
-    // 🔄 PASO 3: CONECTANDO CON SERVIDOR DE RECARGAS
-    // ==============================================
+    // PASO 3: CONECTANDO + VERIFICAR SALDO Y RECARGAR
     mostrarPaso('pasoConectandoServidor');
-    
-    // 🔄 EJECUTAR RECARGA MIENTRAS MUESTRA EL MENSAJE
-    await ejecutarRecargaFreeFire(idJugador, paqueteCod);
-    await new Promise(r => setTimeout(r, 1500)); // Mostrar mensaje 1.5 segundos
+    const resultadoRecarga = await procesarRecarga();
+    await new Promise(r=>setTimeout(r,1500));
 
     // ==============================================
-    // ✅ PASO 4: ¡RECARGA EXITOSA!
+    // ✅ HAY SALDO → RECARGA EXITOSA
     // ==============================================
-    const nroPedido = generarPedido();
-    document.getElementById('resPedido').textContent = nroPedido;
-    document.getElementById('resProducto').textContent = producto;
-    document.getElementById('resIdResumen').textContent = idJugador;
-    document.getElementById('resReferencia').textContent = referencia;
-    document.getElementById('resMonto').textContent = `${montoPago} Bs`;
-
-    mostrarPaso('pasoRecargaExitosa');
-
-    // 📢 ENVIAR TELEGRAM
-    enviarTelegram(nroPedido, referencia);
-}
-
-// ==============================================
-// 🔥 FUNCIÓN DE RECARGA FREE FIRE
-// ==============================================
-async function ejecutarRecargaFreeFire(idJugador, codigoPaquete) {
-    if(!juego.includes("FREE FIRE") || !idJugador || !codigoPaquete) return;
-
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${codigoPaquete}`;
-    
-    try {
-        const respuesta = await fetch(url);
-        const resultado = await respuesta.json();
-        console.log("💎 Recarga:", resultado);
-    } catch (error) {
-        console.error("❌ Error recarga:", error);
+    if(resultadoRecarga.exito){
+        const nroPedido = generarPedido();
+        document.getElementById('resPedido').textContent = nroPedido;
+        document.getElementById('resProducto').textContent = producto;
+        document.getElementById('resIdResumen').textContent = idJugador;
+        document.getElementById('resReferencia').textContent = referencia;
+        document.getElementById('resMonto').textContent = `${montoPago} Bs`;
+        mostrarPaso('pasoRecargaExitosa');
+        enviarTelegram(nroPedido, referencia, "✅ RECARGA ENVIADA — " + resultadoRecarga.mensaje);
+    }
+    // ==============================================
+    // ⚠️ SIN SALDO → NO SE RECARGA, PAGO SE GUARDA
+    // ==============================================
+    else {
+        mostrarPaso('pasoSinSaldo');
+        enviarTelegram("PAGO PENDIENTE", referencia, "⚠️ SALDO INSUFICIENTE — Pago confirmado pero sin saldo para recargar. Producto: " + producto);
     }
 }
 
 // ==============================================
 // 📢 TELEGRAM
 // ==============================================
-function enviarTelegram(pedido, ref){
+function enviarTelegram(pedido, ref, estado){
     const msg = encodeURIComponent(`
-🛒 ${pedido} — PAGO VERIFICADO ✅
+🛒 ${pedido}
 🎮 Juego: ${juego}
-👤 ID Jugador: ${idJugador}
+👤 ID: ${idJugador}
 📦 Producto: ${producto}
 💰 Total: ${precioBs} Bs
 🔗 Referencia: ${ref}
-✅ Recarga procesada automáticamente
+📌 Estado: ${estado}
     `);
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${msg}`).catch(e=>{});
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${msg}`).catch(()=>{});
 }
 </script>
 </body>
