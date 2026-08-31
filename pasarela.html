@@ -161,8 +161,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
     <div id="pasoError" class="verificado-box" style="display:none">
         <div class="check-circle" style="border-color:#ef4444"><span class="check-icon" style="color:#ef4444">✕</span></div>
         <div class="verificado-texto" style="color:#ef4444">Pago No Encontrado</div>
-        <div class="verificado-sub">No encontramos un pago con esos datos.<br>
-        🔍 Revisa la información de abajo y compárala con tu comprobante.</div>
+        <div class="verificado-sub">No encontramos un pago con esos datos.<br>Revisa la información de abajo y compárala con tu comprobante.</div>
         
         <div class="debug-box" id="datosEnviados">
 📤 Datos enviados al sistema:
@@ -241,14 +240,18 @@ function generarPedido(){
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN — CORREGIDA: MONTO SIN DECIMALES, PRUEBA SIN FECHA
+// ⚡ VERIFICACIÓN — CON FECHA INCLUIDA ✅
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    // ✅ CORRECCIÓN: Enviar monto como NÚMERO entero, sin decimales, sin comas
-    let montoPago = precioBs.replace(/[.,]/g, ''); // Quitar puntos y comas
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs)); // Número entero
+    // ✅ MONTO: limpiar y convertir a número entero
+    let montoPago = String(precioBs).replace(/[.,]/g, '');
+    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
+
+    // ✅ FECHA: formato EXACTO que pide Pabilo → YYYY-MM-DD
+    const hoy = new Date();
+    const fechaFormateada = hoy.toISOString().split('T')[0]; // "2026-08-31"
 
     if(!referencia || referencia.length < 4){
         alert("❌ Escribe la referencia de tu pago");
@@ -259,23 +262,21 @@ async function iniciarVerificacion(){
     document.getElementById('pasoDatos').style.display = 'none';
     document.getElementById('pasoVerificando').style.display = 'block';
 
-    const hoy = new Date().toISOString().split('T')[0];
-    let pagoConfirmado = false;
-    let respuestaCruda = null;
-    
-    // 📤 OBJETO A ENVIAR — PRUEBA 2 FORMATOS
+    // 📤 OBJETO COMPLETO CON TODO LO QUE PIDE ANDRUS
     const cuerpoPeticion = {
         bank_reference: referencia,
-        amount: montoPago, // ✅ NÚMERO ENTERO, sin decimales
-        movement_type: "GENERIC"
-        // ⚠️ PRUEBA SIN fecha_pago primero — si funciona, la agregamos
+        amount: montoPago,
+        movement_type: "GENERIC",
+        fecha_pago: fechaFormateada // ✅ FECHA AGREGADA
     };
 
-    // Mostrar qué enviamos para comparar
-    console.log("📤 DATOS QUE ENVIAMOS:", cuerpoPeticion);
+    console.log("📤 DATOS ENVIADOS:", cuerpoPeticion);
+
+    let pagoConfirmado = false;
+    let respuestaCruda = null;
 
     try {
-        // 🔵 LLAMADA A PABILO
+        // 🔵 LLAMADA A PABILO CON TODO COMPLETO
         const respuesta = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: {
@@ -288,7 +289,7 @@ async function iniciarVerificacion(){
         respuestaCruda = await respuesta.json();
         console.log("📊 RESPUESTA DE PABILO:", respuestaCruda);
 
-        // ✅ VERIFICAR — DIFERENTES FORMATOS DE RESPUESTA
+        // ✅ VERIFICAR RESPUESTA
         if(respuesta.ok){
             if(respuestaCruda.success === true) pagoConfirmado = true;
             else if(['confirmed','found','ok','existe','encontrado'].includes(String(respuestaCruda.status || respuestaCruda.estado || '').toLowerCase())) pagoConfirmado = true;
@@ -296,7 +297,7 @@ async function iniciarVerificacion(){
         }
 
     } catch(error) {
-        console.error("❌ Error de conexión:", error);
+        console.error("❌ Error:", error);
         respuestaCruda = { error: String(error) };
     }
 
@@ -315,19 +316,15 @@ async function iniciarVerificacion(){
         document.getElementById('resId').textContent = idJugador;
         document.getElementById('resNombre').textContent = nombreJugador || "Verificado";
 
-        // ⚡ Recarga automática
         await ejecutarRecarga();
-        // 📢 Telegram
         enviarTelegram(nroPedido, referencia);
     } 
     // ==============================================
-    // ❌ NO ENCONTRADO — MOSTRAR TODO PARA COMPARAR
+    // ❌ NO ENCONTRADO — MOSTRAR TODO
     // ==============================================
     else {
         document.getElementById('pasoVerificando').style.display = 'none';
         document.getElementById('pasoError').style.display = 'block';
-        
-        // Mostrar QUÉ enviamos vs QUÉ respondió para comparar con el comprobante
         document.getElementById('debugDatos').textContent = JSON.stringify(cuerpoPeticion, null, 2);
         document.getElementById('textoRespuesta').textContent = JSON.stringify(respuestaCruda, null, 2);
     }
