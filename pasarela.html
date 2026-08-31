@@ -10,19 +10,16 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .header{background:rgba(15,23,42,.9);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--color-border)}
 .brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;color:var(--color-principal)}
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
-/* PASO 1: VERIFICACIÓN */
 .verificacion-box{text-align:center;padding:40px 20px;display:block}
 .spinner-circle{width:80px;height:80px;border:3px solid var(--color-border);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
 @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
 .verificando-texto{font-size:32px;font-weight:700;margin-bottom:15px}
 .verificando-sub{font-size:16px;color:#94a3b8;line-height:1.6;max-width:340px;margin:0 auto}
-/* PASO 2: PAGO VERIFICADO */
 .verificado-box{text-align:center;padding:30px 20px;display:none}
 .check-circle{width:90px;height:90px;border:3px solid var(--color-principal);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px}
 .check-icon{font-size:45px;color:var(--color-principal);font-weight:bold}
 .verificado-texto{font-size:32px;font-weight:700;color:var(--color-principal);margin-bottom:15px}
 .verificado-sub{font-size:16px;color:#cbd5e1;line-height:1.7;max-width:360px;margin:0 auto 30px}
-/* RESUMEN PEDIDO */
 .resumen-box{background:var(--color-card);border:1px solid var(--color-border);border-radius:16px;padding:25px;text-align:left;margin-bottom:25px}
 .resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:16px}
 .resumen-fila:last-child{border-bottom:none}
@@ -30,11 +27,9 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .resumen-valor{font-weight:600}
 .resumen-valor.verde{color:var(--color-principal)}
 .resumen-valor.amarillo{color:var(--color-fuego)}
-/* BARRA ESTADO ABAJO */
 .barra-estado{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-top:20px}
 .barra-check{color:var(--color-principal);font-size:20px;font-weight:bold}
 .barra-texto{color:#a7f3d0;font-size:15px;font-weight:500}
-/* PANTALLA DE DATOS ANTES DE PAGAR */
 .datos-pago-box{background:var(--color-card);border:1px solid var(--color-border);border-radius:16px;padding:25px;margin-bottom:20px}
 .titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
 .dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:15px}
@@ -49,6 +44,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .btn-confirmar:hover{background:var(--color-hover)}
 .volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%}
 .volver-btn:hover{color:#fff}
+.error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#fca5a5;white-space:pre-wrap;word-break:break-all}
 @media(max-width:480px){.verificando-texto{font-size:26px}.verificado-texto{font-size:26px}.resumen-fila{font-size:15px}}
 </style>
 </head>
@@ -56,13 +52,10 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 
 <div class="header">
     <div class="brand">RECARGASGAMES</div>
-    <div></div>
 </div>
 
 <div class="main">
-    <!-- ============================================== -->
-    <!-- PASO 0: DATOS DE PAGO (lo que ve primero) -->
-    <!-- ============================================== -->
+    <!-- PASO 0: DATOS DE PAGO -->
     <div id="pasoDatos">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
@@ -100,7 +93,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
                 <button class="btn-copiar" onclick="copiarTexto('04228242411', this)">Copiar</button>
             </div>
             <div class="dato-line">
-                <div class="dato-texto"><strong>Monto:</strong> <span id="datoMontoBs">-</span></div>
+                <div class="dato-texto"><strong>Monto Bs:</strong> <span id="datoMontoBs">-</span></div>
                 <button class="btn-copiar" onclick="copiarMonto(this)">Copiar</button>
             </div>
 
@@ -113,18 +106,14 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- PASO 1: VERIFICANDO TU PAGO... -->
-    <!-- ============================================== -->
+    <!-- PASO 1: VERIFICANDO -->
     <div id="pasoVerificando" class="verificacion-box" style="display:none">
         <div class="spinner-circle"></div>
         <div class="verificando-texto">Verificando tu pago...</div>
-        <div class="verificando-sub">Por favor no cierres la ventana ni recargues la página.</div>
+        <div class="verificando-sub">Por favor no cierres la ventana ni recargues la página.<br>Esto puede tardar unos segundos...</div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- PASO 2: ¡PAGO VERIFICADO! + RESUMEN COMPLETO -->
-    <!-- ============================================== -->
+    <!-- PASO 2: VERIFICADO -->
     <div id="pasoVerificado" class="verificado-box" style="display:none">
         <div class="check-circle"><span class="check-icon">✓</span></div>
         <div class="verificado-texto">¡Pago Verificado!</div>
@@ -159,19 +148,26 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 
         <div class="barra-estado">
             <span class="barra-check">✓</span>
-            <span class="barra-texto" id="estadoFinal">Procesado automáticamente ✅ Recarga completada</span>
+            <span class="barra-texto">Procesado automáticamente ✅ Recarga completada</span>
         </div>
 
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ============================================== -->
-    <!-- PASO ERROR: PAGO NO ENCONTRADO -->
-    <!-- ============================================== -->
+    <!-- PASO ERROR: NO ENCONTRADO + INFO DE AYUDA -->
     <div id="pasoError" class="verificado-box" style="display:none">
         <div class="check-circle" style="border-color:#ef4444"><span class="check-icon" style="color:#ef4444">✕</span></div>
         <div class="verificado-texto" style="color:#ef4444">Pago No Encontrado</div>
-        <div class="verificado-sub">No encontramos un pago con esa referencia. Verifica el número e intenta de nuevo.</div>
+        <div class="verificado-sub">No encontramos un pago con esa referencia.<br>
+        ⏳ Espera 2-3 minutos si acabas de pagar.<br>
+        💰 Verifica que el monto sea exacto.<br>
+        🔢 Copia la referencia completa del comprobante.</div>
+        
+        <div class="error-box" id="detalleApi" style="display:none">
+📡 Respuesta del sistema:
+<span id="respuestaApi"></span>
+        </div>
+        
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 </div>
@@ -199,7 +195,7 @@ const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
+// 📄 CARGAR DATOS
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
@@ -209,7 +205,7 @@ document.getElementById('datoTotal').textContent = `$${precioUsd}`;
 document.getElementById('datoMontoBs').textContent = `${precioBs} Bs`;
 
 // ==============================================
-// 📋 FUNCIONES COPIAR
+// 📋 COPIAR
 // ==============================================
 async function copiarTexto(texto, boton){
     try {
@@ -229,7 +225,7 @@ async function copiarTodo(){
 }
 
 // ==============================================
-// 🔢 GENERAR NÚMERO DE PEDIDO AUTOMÁTICO
+// 🔢 NÚMERO DE PEDIDO
 // ==============================================
 function generarPedido(){
     const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '7975') + 1;
@@ -238,7 +234,7 @@ function generarPedido(){
 }
 
 // ==============================================
-// ⚡ FUNCIÓN PRINCIPAL — VERIFICACIÓN CON PABILO
+// ⚡ VERIFICACIÓN CON PABILO — CON MÁS FLEXIBILIDAD
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -249,12 +245,13 @@ async function iniciarVerificacion(){
         return;
     }
 
-    // OCULTAR DATOS → MOSTRAR VERIFICANDO
+    // Cambiar pantalla
     document.getElementById('pasoDatos').style.display = 'none';
     document.getElementById('pasoVerificando').style.display = 'block';
 
     const hoy = new Date().toISOString().split('T')[0];
     let pagoConfirmado = false;
+    let respuestaCruda = null;
 
     try {
         // 🔵 LLAMADA A PABILO
@@ -272,19 +269,27 @@ async function iniciarVerificacion(){
             })
         });
 
-        const resultado = await respuesta.json();
-        console.log("📊 Respuesta Pabilo:", resultado);
+        respuestaCruda = await respuesta.json();
+        console.log("📊 RESPUESTA COMPLETA DE PABILO:", respuestaCruda);
 
-        // ✅ VALIDAR — AJUSTA SEGÚN RESPUESTA REAL DE PABILO
-        if(respuesta.ok && (resultado.success === true || resultado.status === "confirmed" || resultado.encontrado === true)){
-            pagoConfirmado = true;
+        // ✅ AQUÍ ES DONDE PUEDE ESTAR EL PROBLEMA
+        // Probamos DIFERENTES formas de validar según lo que devuelva
+        if(respuesta.ok){
+            // Prueba 1: success = true
+            if(respuestaCruda.success === true) pagoConfirmado = true;
+            // Prueba 2: status = confirmed / found / ok
+            else if(['confirmed','found','ok','existe','encontrado'].includes(String(respuestaCruda.status || respuestaCruda.estado || '').toLowerCase())) pagoConfirmado = true;
+            // Prueba 3: tiene datos del pago
+            else if(respuestaCruda.movimiento || respuestaCruda.pago || respuestaCruda.data) pagoConfirmado = true;
         }
+
     } catch(error) {
-        console.error("❌ Error:", error);
+        console.error("❌ Error de conexión:", error);
+        respuestaCruda = { error: String(error) };
     }
 
     // ==============================================
-    // ✅ PAGO ENCONTRADO → MOSTRAR VERIFICADO
+    // ✅ SI SE ENCONTRÓ EL PAGO
     // ==============================================
     if(pagoConfirmado){
         const nroPedido = generarPedido();
@@ -298,14 +303,23 @@ async function iniciarVerificacion(){
         document.getElementById('resId').textContent = idJugador;
         document.getElementById('resNombre').textContent = nombreJugador || "Verificado";
 
-        // ⚡ DISPARAR RECARGA
+        // ⚡ Recarga automática
         await ejecutarRecarga();
-        // 📢 NOTIFICACIÓN TELEGRAM
+        // 📢 Telegram
         enviarTelegram(nroPedido, referencia);
-    } else {
-        // ❌ PAGO NO ENCONTRADO
+    } 
+    // ==============================================
+    // ❌ NO SE ENCONTRÓ — MOSTRAR QUÉ RESPONDIÓ
+    // ==============================================
+    else {
         document.getElementById('pasoVerificando').style.display = 'none';
         document.getElementById('pasoError').style.display = 'block';
+        
+        // Mostrar respuesta para diagnosticar
+        if(respuestaCruda){
+            document.getElementById('detalleApi').style.display = 'block';
+            document.getElementById('respuestaApi').textContent = JSON.stringify(respuestaCruda, null, 2);
+        }
     }
 }
 
