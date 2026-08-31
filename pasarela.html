@@ -12,7 +12,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
 .verificacion-box{text-align:center;padding:40px 20px;display:block}
 .spinner-circle{width:80px;height:80px;border:3px solid var(--color-border);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 .verificando-texto{font-size:32px;font-weight:700;margin-bottom:15px}
 .verificando-sub{font-size:16px;color:#94a3b8;line-height:1.6;max-width:340px;margin:0 auto}
 .verificado-box{text-align:center;padding:30px 20px;display:none}
@@ -92,7 +92,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
                 <button class="btn-copiar" onclick="copiarTexto('32824869', this)">Copiar</button>
             </div>
             <div class="dato-line">
-                <div class="dato-texto"><strong>Teléfono:</strong> 0422 824 2411</div>
+                <div class="dato-texto"><strong>Teléfono:</strong> 04228242411</div>
                 <button class="btn-copiar" onclick="copiarTexto('04228242411', this)">Copiar</button>
             </div>
             <div class="dato-line">
@@ -179,6 +179,16 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 
 <script>
 // ==============================================
+// 🔑 TU ID REAL DE TU PERFIL DE PABILO ✅ CORRECTO
+// ==============================================
+const USER_BANK_ID = "6a93ab3598055a34bd8b052d";  // ✅ EL DE TU IMAGEN
+const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
+const API_PABILO_URL = `https://apicentral.pro/apis/movimientos_bdv.jsp?token=HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc`;
+const API_RECARGA_FF = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire";
+const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
+const TELEGRAM_CHAT_ID = "8452807558";
+
+// ==============================================
 // 📋 DATOS DEL PEDIDO
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
@@ -188,16 +198,6 @@ const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
-
-// ==============================================
-// 🔑 API DE PABILO — TUS DATOS
-// ==============================================
-const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
-const API_RECARGA_FF = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire";
-const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
-const TELEGRAM_CHAT_ID = "8452807558";
 
 // ==============================================
 // 📄 CARGAR DATOS EN PANTALLA
@@ -240,7 +240,7 @@ function generarPedido(){
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN — CON FECHA INCLUIDA ✅
+// ⚡ VERIFICACIÓN CON FECHA Y ID CORRECTOS ✅
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -249,9 +249,9 @@ async function iniciarVerificacion(){
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
 
-    // ✅ FECHA: formato EXACTO que pide Pabilo → YYYY-MM-DD
+    // ✅ FECHA: formato YYYY-MM-DD
     const hoy = new Date();
-    const fechaFormateada = hoy.toISOString().split('T')[0]; // "2026-08-31"
+    const fechaFormateada = hoy.toISOString().split('T')[0];
 
     if(!referencia || referencia.length < 4){
         alert("❌ Escribe la referencia de tu pago");
@@ -262,12 +262,12 @@ async function iniciarVerificacion(){
     document.getElementById('pasoDatos').style.display = 'none';
     document.getElementById('pasoVerificando').style.display = 'block';
 
-    // 📤 OBJETO COMPLETO CON TODO LO QUE PIDE ANDRUS
+    // 📤 OBJETO COMPLETO CON TODO LO QUE PIDE
     const cuerpoPeticion = {
         bank_reference: referencia,
         amount: montoPago,
         movement_type: "GENERIC",
-        fecha_pago: fechaFormateada // ✅ FECHA AGREGADA
+        fecha_pago: fechaFormateada
     };
 
     console.log("📤 DATOS ENVIADOS:", cuerpoPeticion);
@@ -276,7 +276,7 @@ async function iniciarVerificacion(){
     let respuestaCruda = null;
 
     try {
-        // 🔵 LLAMADA A PABILO CON TODO COMPLETO
+        // 🔵 LLAMADA A LA API
         const respuesta = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: {
@@ -287,7 +287,7 @@ async function iniciarVerificacion(){
         });
 
         respuestaCruda = await respuesta.json();
-        console.log("📊 RESPUESTA DE PABILO:", respuestaCruda);
+        console.log("📊 RESPUESTA DE LA API:", respuestaCruda);
 
         // ✅ VERIFICAR RESPUESTA
         if(respuesta.ok){
