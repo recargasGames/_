@@ -39,6 +39,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 .error-box{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:13px;color:#fca5a5;white-space:pre-wrap;word-break:break-all}
 .debug-box{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:12px;margin-top:15px;font-size:12px;color:#93c5fd;white-space:pre-wrap;word-break:break-all}
 .aviso-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#fcd34d}
+.usada-box{background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.5);border-radius:12px;padding:20px;margin-top:15px;color:#fca5a5;font-weight:600}
 </style>
 </head>
 <body>
@@ -52,7 +53,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
         <div class="aviso-box">
-            ⚠️ Referencia completa (con ceros del inicio) · Monto en Bolívares
+            ⚠️ Referencia completa — <strong>Solo se puede usar UNA VEZ</strong>
         </div>
         
         <div class="datos-pago-box">
@@ -89,11 +90,23 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor" id="resReferencia">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Monto Bs</span><span class="resumen-valor verde" id="resMonto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Monto Bs</span><span class="resumen-valor" id="resMonto">-</span></div>
         </div>
 
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
+    </div>
+
+    <div id="pasoUsada" class="verificado-box" style="display:none">
+        <div class="check-circle" style="border-color:#f59e0b"><span class="check-icon" style="color:#f59e0b">⚠</span></div>
+        <div class="verificado-texto" style="color:#f59e0b">Referencia Ya Utilizada</div>
+        <div class="verificado-sub">Esta referencia ya fue usada en un pago anterior.<br>Usa una referencia nueva.</div>
+        
+        <div class="usada-box">
+            🔒 Cada referencia de pago se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.
+        </div>
+        
+        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
     </div>
 
     <div id="pasoError" class="verificado-box" style="display:none">
@@ -117,7 +130,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 
 <script>
 // ==============================================
-// 🔑 DATOS OFICIALES DE ANDRUS — TODO CORRECTO ✅
+// 🔑 DATOS OFICIALES DE ANDRUS
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
@@ -126,6 +139,24 @@ const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/b
 const API_RECARGA_FF = "https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
+
+// ==============================================
+// 🔒 LISTA DE REFERENCIAS YA USADAS — NO SE REPITEN
+// ==============================================
+function obtenerReferenciasUsadas() {
+    const guardadas = localStorage.getItem('referencias_usadas');
+    return guardadas ? JSON.parse(guardadas) : [];
+}
+
+function marcarComoUsada(referencia) {
+    const usadas = obtenerReferenciasUsadas();
+    usadas.push(referencia);
+    localStorage.setItem('referencias_usadas', JSON.stringify(usadas));
+}
+
+function yaFueUsada(referencia) {
+    return obtenerReferenciasUsadas().includes(referencia);
+}
 
 // ==============================================
 // 📋 DATOS DEL PEDIDO
@@ -155,10 +186,17 @@ function generarPedido(){
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN — DETECCIÓN CORRECTA DEL ÉXITO ✅
+// ⚡ VERIFICACIÓN — REFERENCIA DE UN SOLO USO 🔒
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
+    
+    // 🛡️ PRIMERO: Verificar si la referencia YA FUE USADA antes de llamar a la API
+    if(yaFueUsada(referencia)){
+        document.getElementById('pasoDatos').style.display = 'none';
+        document.getElementById('pasoUsada').style.display = 'block';
+        return; // ❌ NO deja continuar
+    }
     
     // ✅ MONTO en bolívares, limpio
     let montoPago = String(precioBs).replace(/[.,]/g, '');
@@ -205,9 +243,8 @@ async function iniciarVerificacion(){
         respuestaCruda = await respuesta.json();
         console.log("📊 RESPUESTA COMPLETA:", respuestaCruda);
 
-        // ✅ DETECCIÓN DE ÉXITO — CORREGIDA según la respuesta real
+        // ✅ DETECCIÓN DE ÉXITO — CORREGIDA
         if(respuesta.ok && respuestaCruda){
-            // 🎯 CUALQUIERA de estas condiciones = PAGO CONFIRMADO
             if(
                 respuestaCruda.message === 'payment confirmed' ||
                 respuestaCruda.status === 'paid' ||
@@ -227,9 +264,12 @@ async function iniciarVerificacion(){
     }
 
     // ==============================================
-    // ✅ PAGO CONFIRMADO — MOSTRAR ÉXITO
+    // ✅ PAGO CONFIRMADO → MARCAR COMO USADA 🔒
     // ==============================================
     if(pagoConfirmado){
+        // 🔒 MARCAR LA REFERENCIA COMO USADA — NO SE PODRÁ REPETIR
+        marcarComoUsada(referencia);
+        
         const nroPedido = generarPedido();
         document.getElementById('pasoVerificando').style.display = 'none';
         document.getElementById('pasoVerificado').style.display = 'block';
