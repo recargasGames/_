@@ -10,10 +10,12 @@
 
     <style>
         :root { 
-            --color-principal: #3b82f6; /* 🔵 AZUL en lugar de verde */
+            --color-principal: #3b82f6; /* 🔵 AZUL */
             --color-hover: #2563eb; 
             --color-azul: #3b82f6;
             --color-blanco: #ffffff;
+            --altura-header: 65px;
+            --altura-menu: 52px;
         }
         body { 
             background-image: url('fondo.jpg'); 
@@ -22,34 +24,51 @@
             background-attachment: fixed; 
             margin: 0; color: white; 
             font-family: 'Segoe UI', sans-serif; 
+            padding-top: calc(var(--altura-header) + var(--altura-menu)); /* 👈 ESPACIO para que no se tape el contenido */
         }
+        /* ===================================================== */
+        /* 🔒 HEADER FIJO ARRIBA — NO SE MUEVE CON EL SCROLL */
+        /* ===================================================== */
         .header { 
+            position: fixed; /* 👈 FIJO, FLOTANDO */
+            top: 0; left: 0; right: 0; /* 👈 OCUPA TODO EL ANCHO */
+            z-index: 999; /* 👈 QUEDA POR ENCIMA DE TODO */
             background: rgba(11, 18, 32, 0.95); 
             padding: 12px 20px; 
             display: flex; 
             justify-content: flex-start; 
             align-items: center; 
-            border-bottom: 2px solid var(--color-azul); /* 🔵 LÍNEA AZUL en vez de verde */
+            border-bottom: 2px solid var(--color-azul); 
+            height: var(--altura-header);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         .brand { 
             display: flex; align-items: center; 
         }
-        /* 🎨 LOGO: esquinas curvas, SIN bordes azules extra */
+        /* LOGO: esquinas curvas, SIN bordes extra */
         .brand img { 
             height: 55px; 
             width: auto; 
-            border-radius: 14px; /* 🔵 Esquinas curvas */
-            /* ❌ SIN bordes azules extra, solo la imagen */
+            border-radius: 14px; 
             background: transparent; 
             padding: 0; 
         }
+        /* ===================================================== */
+        /* 🔒 MENÚ DE JUEGOS TAMBIÉN FIJO */
+        /* ===================================================== */
         .games-menu { 
+            position: fixed; /* 👈 TAMBIÉN FIJO */
+            top: var(--altura-header); /* 👈 DEBAJO DEL HEADER */
+            left: 0; right: 0;
+            z-index: 998; /* 👈 POR ENCIMA DEL CONTENIDO PERO DEBAJO DEL HEADER */
             display: flex; gap: 8px; overflow-x: auto; 
             background: rgba(11, 18, 32, 0.95); padding: 12px 15px; 
             border-bottom: 1px solid #1f2937; scrollbar-width: thin; 
             -webkit-overflow-scrolling: touch; 
+            height: var(--altura-menu);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-        .games-menu::-webkit-scrollbar { height: 4px; }
+        .games-menu::-webkit-scrollbar { height: 3px; }
         .games-menu::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
         .games-menu::-webkit-scrollbar-thumb { background: var(--color-azul); border-radius: 10px; }
         .games-menu a { 
@@ -59,7 +78,7 @@
         }
         .games-menu a:hover { color: var(--color-azul); }
         .games-menu a.active { 
-            color: var(--color-azul); /* 🔵 ACTIVO EN AZUL, NO VERDE */
+            color: var(--color-azul); 
             border-bottom: 2px solid var(--color-azul); 
             border-radius: 0; 
         }
@@ -68,11 +87,11 @@
             text-align: center; margin: 20px 0; padding: 15px; 
             background: rgba(11, 18, 32, 0.7); border-radius: 20px; 
         }
-        /* 🎨 TÍTULO: más grueso, azul y blanco combinado */
+        /* TÍTULO: más grueso, azul y blanco combinado */
         .welcome-text h2 { 
             font-size: 22px; 
-            font-weight: 900; /* 🔤 MÁS GRUESA */
-            background: linear-gradient(90deg, #3b82f6 0%, #ffffff 50%, #3b82f6 100%); /* 🔵 ⚪ 🔵 Azul + Blanco + Azul */
+            font-weight: 900; 
+            background: linear-gradient(90deg, #3b82f6 0%, #ffffff 50%, #3b82f6 100%); 
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -81,16 +100,15 @@
         .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .game-link { 
             background: rgba(11, 18, 32, 0.85); 
-            border: 1px solid #ffffff; /* ⚪ Borde blanco en las tarjetas */
+            border: 1px solid #ffffff; 
             border-radius: 20px; padding: 0; text-decoration: none; color: white; 
             text-align: center; transition: 0.3s; overflow: hidden; position: relative; 
         }
         .game-link:hover { 
             transform: translateY(-5px); 
-            border-color: var(--color-azul); /* 🔵 Borde azul al pasar el mouse */
+            border-color: var(--color-azul); 
         }
         .game-img { width: 100%; height: 160px; object-fit: cover; display: block; }
-        /* ❌ ELIMINADO el nombre del juego sobre la tarjeta */
         .game-name { display: none; }
         .footer { 
             background: rgba(11, 18, 32, 0.9); border-top: 1px solid #1f2937; 
@@ -118,17 +136,18 @@
             .game-img { height: 130px; } 
             .brand img { height: 45px; }
             .welcome-text h2 { font-size: 18px; }
+            :root { --altura-header: 58px; }
         }
     </style>
 </head>
 <body>
 
-<!-- HEADER → LOGO SIN BORDES AZULES EXTRA, SOLO ESQUINAS CURVAS -->
+<!-- 🔒 HEADER FIJO — NO SE MUEVE AL DESLIZAR -->
 <div class="header">
     <div class="brand"><img src="logo.png" alt="Logo"></div>
 </div>
 
-<!-- MENÚ DE JUEGOS → ACTIVO EN AZUL -->
+<!-- 🔒 MENÚ DE JUEGOS TAMBIÉN FIJO — QUEDA ARRIBA SIEMPRE -->
 <div class="games-menu">
     <a href="index.html" class="active">Inicio</a>
     <a href="freefire.html">Free Fire</a>
@@ -139,14 +158,12 @@
     <a href="pubg.html">PUBG Mobile</a>
 </div>
 
-<!-- CONTENIDO PRINCIPAL → SIN EL TEXTO DE ABAJO -->
+<!-- CONTENIDO — PASA POR DEBAJO AL DESLIZAR -->
 <div class="main">
     <div class="welcome-text">
         <h2>Los mejores juegos con recargas instantáneas</h2>
-        <!-- ❌ ELIMINADO: "Elige tu juego y recarga al instante..." -->
     </div>
     
-    <!-- GRID DE JUEGOS → SIN NOMBRES SOBRE LAS IMÁGENES, BORDE BLANCO -->
     <div class="games-grid">
         <a href="freefire.html" class="game-link">
             <img src="ff.png" class="game-img" alt="Free Fire" onerror="this.style.background='#3b82f6'">
@@ -169,17 +186,14 @@
     </div>
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
     <p class="copyright">© 2026 RECARGASGAMES</p>
     <p>Todos los derechos reservados</p>
     <p>Recargas instantáneas · Pago seguro · Entrega rápida</p>
 </div>
 
-<!-- BOTÓN SUBIR ARRIBA -->
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">↑</a>
 
-<!-- WHATSAPP FLOTANTE -->
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script type="module">
