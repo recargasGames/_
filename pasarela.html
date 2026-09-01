@@ -7,7 +7,6 @@
 <style>
 :root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-binance:#f3ba2f;--color-borde:rgba(51,65,85,0.5)}
 
-/* 🖼️ FONDO IDÉNTICO AL DE LOS JUEGOS */
 body{
     background-image:url('fondo.jpg');
     background-size:cover;
@@ -20,7 +19,7 @@ body{
     padding-top:80px;
 }
 
-/* 🔒 CABECERA — LOGO OVALADO/REDONDEADO ARRIBA A LA IZQUIERDA */
+/* 🔒 LOGO OVALADO ARRIBA A LA IZQUIERDA */
 .header{
     position:fixed;
     top:0;
@@ -37,7 +36,7 @@ body{
 .header img{
     height:50px;
     width:auto;
-    border-radius:50%; /* ✅ OVALADO/CURVITAS */
+    border-radius:50%;
     object-fit:contain;
 }
 
@@ -79,7 +78,7 @@ body{
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 
-/* 🎯 SELECCIÓN DE MÉTODO DE PAGO — AHÍ MISMO EN LA PASARELA */
+/* 🎯 SELECCIÓN DE MÉTODO DE PAGO */
 .metodo-pago-box{
     display:flex;
     gap:12px;
@@ -160,7 +159,6 @@ body{
     transition:.2s;
 }
 .btn-confirmar:hover{background:var(--color-hover)}
-.btn-confirmar:disabled{opacity:0.5;cursor:not-allowed}
 
 .volver-btn{
     display:inline-block;
@@ -214,21 +212,17 @@ body{
 }
 .copiar-btn:hover{background:rgba(16,185,129,.2)}
 .binance-color{color:var(--color-binance)}
-.titulo-metodo{text-align:center;font-size:20px;font-weight:700;margin-bottom:20px}
 .oculto{display:none !important}
 </style>
 </head>
 <body>
 
-<!-- 🔒 LOGO OVALADO ARRIBA A LA IZQUIERDA -->
 <div class="header">
     <img src="logo.png" alt="Logo RecargasGames">
 </div>
 
 <div class="main">
-    <!-- ============================================== -->
     <!-- PASO 0: ELEGIR MÉTODO + DATOS DEL PEDIDO -->
-    <!-- ============================================== -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
@@ -240,7 +234,7 @@ body{
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
-        <!-- 🎯 ELEGIR MÉTODO DE PAGO — AHÍ MISMO EN LA PASARELA -->
+        <!-- 🎯 ELEGIR MÉTODO DE PAGO -->
         <div class="metodo-pago-box">
             <button class="metodo-btn activo" id="btnMovil" onclick="seleccionarMetodo('movil')">🏦 Pago Móvil</button>
             <button class="metodo-btn binance" id="btnBinance" onclick="seleccionarMetodo('binance')">🟡 Binance Pay</button>
@@ -368,38 +362,26 @@ const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-let metodoSeleccionado = 'movil'; // ✅ Por defecto Pago Móvil
+let metodoSeleccionado = 'movil';
 
 // ==============================================
-// 🎯 CAMBIAR MÉTODO DE PAGO — AHÍ MISMO EN LA PASARELA
+// 🎯 CAMBIAR MÉTODO DE PAGO
 // ==============================================
 function seleccionarMetodo(metodo){
     metodoSeleccionado = metodo;
-    
-    // Cambiar botones activos
     document.getElementById('btnMovil').classList.toggle('activo', metodo === 'movil');
     document.getElementById('btnBinance').classList.toggle('activo', metodo === 'binance');
-    
-    // Mostrar/ocultar secciones
     document.getElementById('seccionPagoMovil').classList.toggle('oculto', metodo !== 'movil');
     document.getElementById('seccionBinance').classList.toggle('oculto', metodo !== 'binance');
-    
-    // Cambiar texto de verificación
     document.getElementById('textoVerificando').textContent = 
-        metodo === 'movil' 
-            ? "Estamos buscando tu pago en el sistema bancario..." 
-            : "Verificando tu transacción de Binance...";
+        metodo === 'movil' ? "Estamos buscando tu pago en el sistema bancario..." : "Verificando tu transacción de Binance...";
 }
 
 // ==============================================
 // 📋 COPIAR TEXTO
 // ==============================================
 function copiarTexto(texto) {
-    navigator.clipboard.writeText(texto).then(() => {
-        console.log("✅ Copiado:", texto);
-    }).catch(err => {
-        alert("Copiado: " + texto);
-    });
+    navigator.clipboard.writeText(texto).catch(err => alert("Copiado: " + texto));
 }
 
 // ==============================================
@@ -419,7 +401,7 @@ function yaFueUsada(referencia) {
 }
 
 // ==============================================
-// 📋 DATOS DEL PEDIDO — DESDE EL JUEGO
+// 📋 DATOS DEL PEDIDO
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
@@ -469,91 +451,56 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — ARREGLADO EL ERROR
+// ⚡ FLUJO COMPLETO
 // ==============================================
 async function iniciarVerificacion(){
-    // ✅ OBTENER REFERENCIA SEGÚN MÉTODO — SIN ERROR, VALIDACIÓN CORRECTA
     let referencia = "";
     if(metodoSeleccionado === 'movil') {
         referencia = document.getElementById('referenciaPago').value.trim();
-        if(!referencia || referencia.length < 6) {
-            alert("❌ Escribe la referencia completa del pago móvil");
-            return;
-        }
+        if(!referencia || referencia.length < 6) { alert("❌ Escribe la referencia completa del pago móvil"); return; }
     } else {
         referencia = document.getElementById('referenciaBinance').value.trim();
-        if(!referencia || referencia.length < 4) {
-            alert("❌ Escribe el ID de transacción de Binance"); // ✅ SIN ERROR, MENSAJE CORRECTO
-            return;
-        }
+        if(!referencia || referencia.length < 4) { alert("❌ Escribe el ID de transacción de Binance"); return; }
     }
 
-    // 🛡️ Verificar referencia repetida
-    if(yaFueUsada(referencia)){ 
-        mostrarPaso('pasoReferenciaUsada'); 
-        return; 
-    }
+    if(yaFueUsada(referencia)){ mostrarPaso('pasoReferenciaUsada'); return; }
 
-    // Preparar monto para verificación
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     const fecha = new Date().toISOString().split('T')[0];
 
-    // PASO 1: VERIFICANDO PAGO
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
 
-    // 🏦 VERIFICAR PAGO MÓVIL CON PABILO
     if(metodoSeleccionado === 'movil') {
-        const cuerpo = { 
-            bank_reference: referencia, 
-            amount: montoPago, 
-            movement_type: "GENERIC", 
-            fecha_pago: fecha 
-        };
+        const cuerpo = { bank_reference: referencia, amount: montoPago, movement_type: "GENERIC", fecha_pago: fecha };
         try {
             const res = await fetch(API_PABILO_URL, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${API_KEY}` 
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
                 body: JSON.stringify(cuerpo)
             });
             const datos = await res.json();
-            console.log("🏦 Respuesta Pabilo:", datos);
-            
             if(res.ok && datos) {
-                if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
-                   datos.data?.status === 'paid' || datos.success === true) {
+                if(datos.message === 'payment confirmed' || datos.status === 'paid' || datos.data?.status === 'paid' || datos.success === true) {
                     pagoConfirmado = true;
                 }
             }
-        } catch(e) { 
-            console.error("Error verificación:", e); 
-        }
-    }
-    // 🟡 BINANCE — MARCAR COMO CONFIRMADO
-    else {
+        } catch(e) {}
+    } else {
         pagoConfirmado = true;
     }
 
-    if(!pagoConfirmado) { 
-        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); 
-        return; 
-    }
+    if(!pagoConfirmado) { setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); return; }
 
-    // PASO 2: PAGO CONFIRMADO
     marcarComoUsada(referencia);
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
-    // PASO 3: CONECTANDO + PROCESAR RECARGA
     mostrarPaso('pasoConectandoServidor');
     const resultadoRecarga = await procesarRecarga();
     await new Promise(r => setTimeout(r, 1500));
 
-    // ✅ RECARGA EXITOSA
     if(resultadoRecarga.exito){
         const nroPedido = generarPedido();
         document.getElementById('resPedido').textContent = nroPedido;
@@ -563,30 +510,34 @@ async function iniciarVerificacion(){
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
         mostrarPaso('pasoRecargaExitosa');
-        enviarTelegram(nroPedido, referencia, "✅ RECARGA ENVIADA — " + resultadoRecarga.mensaje);
-    }
-    // ⚠️ SIN SALDO
-    else {
+        enviarTelegram(nroPedido, referencia, true);
+    } else {
         mostrarPaso('pasoSinSaldo');
-        enviarTelegram("PAGO PENDIENTE", referencia, "⚠️ SALDO INSUFICIENTE — Método: " + (metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance') + ". Producto: " + producto);
+        enviarTelegram("PAGO PENDIENTE", referencia, false);
     }
 }
 
 // ==============================================
-// 📢 NOTIFICACIÓN TELEGRAM
+// 📢 MENSAJE TELEGRAM — EXACTAMENTE COMO LO PEDISTE
 // ==============================================
-function enviarTelegram(pedido, ref, estado){
-    const msg = encodeURIComponent(`
-🛒 ${pedido}
-🎮 Juego: ${juego}
-👤 ID Jugador: ${idJugador}
-📦 Producto: ${producto}
-💰 Total: ${precioUsd} USD / ${precioBs} Bs
-💳 Método: ${metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance Pay'}
-🔗 Referencia/ID: ${ref}
-📌 Estado: ${estado}
+function enviarTelegram(pedido, ref, todoCorrecto){
+    const metodo = metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance Pay';
+    const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO PENDIENTE — SALDO INSUFICIENTE";
+    
+    const mensaje = encodeURIComponent(`
+📌 NUEVO PEDIDO
+
+🎮 Producto: ${producto}
+💵 Valor USDT: ${precioUsd}
+💳 Método de pago: ${metodo}
+🔗 Ref: ${ref}
+💰 Monto: ${precioUsd} / ${precioBs} Bs
+
+${estado}
     `);
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${msg}`).catch(()=>{});
+
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${mensaje}`)
+        .catch(err => console.log("Error enviando Telegram:", err));
 }
 </script>
 </body>
