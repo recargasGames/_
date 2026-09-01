@@ -14,136 +14,80 @@
             --color-hover: #2563eb; 
             --color-azul: #3b82f6;
             --color-blanco: #ffffff;
-
-            /* Medidas exactas para que no se descuadre */
-            --altura-header: 60px;
-            --altura-menu: 48px;
         }
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-
         body { 
             background-image: url('fondo.jpg'); 
             background-size: cover; 
             background-position: center; 
             background-attachment: fixed; 
-            color: white; 
+            margin: 0; color: white; 
             font-family: 'Segoe UI', sans-serif; 
-
-            /* Espacio exacto para que el contenido no quede tapado */
-            padding-top: calc(var(--altura-header) + var(--altura-menu));
+            padding-top: 115px; /* 👈 Espacio justo para el bloque completo */
         }
 
         /* ===================================================== */
-        /* 🔒 HEADER FIJO, PAREJO, SIN DESCUADRE */
+        /* 🔒 BLOQUE COMPLETO — LOGO + MENÚ JUNTOS, FIJOS */
         /* ===================================================== */
-        .header { 
-            position: fixed;
+        .barra-superior {
+            position: fixed; /* 👈 TODO FIJO ARRIBA */
             top: 0;
             left: 0;
             right: 0;
             z-index: 999;
-
-            background: rgba(11, 18, 32, 0.95); 
-            padding: 0 20px; 
-            display: flex; 
-            justify-content: flex-start; 
-            align-items: center; 
-
-            border-bottom: 2px solid var(--color-azul); 
-            height: var(--altura-header);
-
+            background: rgba(11, 18, 32, 0.95);
+            border-bottom: 2px solid var(--color-azul);
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
-        .brand { 
+        /* LOGO — ARRIBA, DENTRO DEL MISMO BLOQUE */
+        .header { 
+            padding: 12px 20px; 
             display: flex; 
-            align-items: center;
-            height: 100%;
+            justify-content: flex-start; 
+            align-items: center; 
         }
-
         .brand img { 
-            height: 48px; 
+            height: 55px; 
             width: auto; 
             border-radius: 14px; 
             background: transparent; 
-            padding: 0; 
-            display: block;
         }
 
-        /* ===================================================== */
-        /* 🔒 MENÚ FIJO, DEBAJO DEL HEADER, ALINEADO */
-        /* ===================================================== */
+        /* MENÚ — ABAJO DEL LOGO, MISMO BLOQUE, SIN SEPARACIÓN */
         .games-menu { 
-            position: fixed;
-            top: var(--altura-header);
-            left: 0;
-            right: 0;
-            z-index: 998;
-
-            display: flex; 
-            gap: 8px; 
-            overflow-x: auto; 
-            background: rgba(11, 18, 32, 0.95); 
-            padding: 0 15px; 
-            border-bottom: 1px solid #1f2937; 
-
-            height: var(--altura-menu);
-            line-height: var(--altura-menu);
-
+            display: flex; gap: 8px; overflow-x: auto; 
+            padding: 12px 15px; 
+            border-top: none; /* 👈 SIN LÍNEA SEPARADORA */
+            border-bottom: none;
             scrollbar-width: thin; 
             -webkit-overflow-scrolling: touch; 
-
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-
         .games-menu::-webkit-scrollbar { height: 3px; }
         .games-menu::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
         .games-menu::-webkit-scrollbar-thumb { background: var(--color-azul); border-radius: 10px; }
-
         .games-menu a { 
-            text-decoration: none; 
-            color: white; 
-            background: transparent; 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            font-size: 14px; 
-            font-weight: bold; 
-            white-space: nowrap; 
-            transition: 0.2s; 
-            display: inline-block;
-            vertical-align: middle;
+            text-decoration: none; color: white; 
+            padding: 6px 12px; border-radius: 20px; font-size: 14px; 
+            font-weight: bold; white-space: nowrap; transition: 0.2s; 
         }
-
         .games-menu a:hover { color: var(--color-azul); }
-
         .games-menu a.active { 
             color: var(--color-azul); 
             border-bottom: 2px solid var(--color-azul); 
             border-radius: 0; 
         }
 
-        /* ===================================================== */
-        /* CONTENIDO PRINCIPAL */
-        /* ===================================================== */
-        .main { 
-            padding: 20px; 
-            max-width: 600px; 
-            margin: 0 auto; 
-        }
-
+        /* CONTENIDO */
+        .main { padding: 20px; max-width: 600px; margin: 0 auto; }
         .welcome-text { 
-            text-align: center; 
-            margin: 20px 0; 
-            padding: 15px; 
-            background: rgba(11, 18, 32, 0.7); 
-            border-radius: 20px; 
+            text-align: center; margin: 20px 0; padding: 15px; 
+            background: rgba(11, 18, 32, 0.7); border-radius: 20px; 
         }
-
         .welcome-text h2 { 
             font-size: 22px; 
             font-weight: 900; 
@@ -153,142 +97,71 @@
             background-clip: text;
             margin: 0;
         }
-
-        .games-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            margin-top: 20px; 
-        }
-
+        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .game-link { 
             background: rgba(11, 18, 32, 0.85); 
             border: 1px solid #ffffff; 
-            border-radius: 20px; 
-            padding: 0; 
-            text-decoration: none; 
-            color: white; 
-            text-align: center; 
-            transition: 0.3s; 
-            overflow: hidden; 
-            position: relative; 
+            border-radius: 20px; padding: 0; text-decoration: none; color: white; 
+            text-align: center; transition: 0.3s; overflow: hidden; position: relative; 
         }
-
         .game-link:hover { 
             transform: translateY(-5px); 
             border-color: var(--color-azul); 
         }
-
-        .game-img { 
-            width: 100%; 
-            height: 160px; 
-            object-fit: cover; 
-            display: block; 
-        }
-
+        .game-img { width: 100%; height: 160px; object-fit: cover; display: block; }
         .game-name { display: none; }
 
-        /* ===================================================== */
-        /* FOOTER */
-        /* ===================================================== */
+        /* FOOTER Y BOTONES */
         .footer { 
-            background: rgba(11, 18, 32, 0.9); 
-            border-top: 1px solid #1f2937; 
-            padding: 20px; 
-            text-align: center; 
-            margin-top: 30px; 
+            background: rgba(11, 18, 32, 0.9); border-top: 1px solid #1f2937; 
+            padding: 20px; text-align: center; margin-top: 30px; 
         }
-
         .footer p { color: #9ca3af; font-size: 12px; margin: 5px 0; }
         .footer .copyright { color: var(--color-azul); font-weight: bold; font-size: 13px; }
-
-        /* ===================================================== */
-        /* BOTONES FLOTANTES */
-        /* ===================================================== */
         .whatsapp-float { 
-            position: fixed; 
-            bottom: 20px; 
-            right: 20px; 
-            background: #25D366; 
-            width: 55px; 
-            height: 55px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            z-index: 1000; 
-            text-decoration: none; 
-            font-size: 28px; 
-            color: white;
+            position: fixed; bottom: 20px; right: 20px; background: #25D366; 
+            width: 55px; height: 55px; border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            z-index: 1000; text-decoration: none; font-size: 28px; color: white;
         }
-
         .whatsapp-float:hover { transform: scale(1.1); }
-
         .back-to-top { 
-            position: fixed; 
-            bottom: 90px; 
-            right: 20px; 
-            background: var(--color-azul); 
-            color: white; 
-            width: 45px; 
-            height: 45px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer; 
-            z-index: 1000; 
-            opacity: 0; 
-            visibility: hidden; 
-            transition: 0.3s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            font-size: 18px; 
-            text-decoration: none;
+            position: fixed; bottom: 90px; right: 20px; background: var(--color-azul); 
+            color: white; width: 45px; height: 45px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 18px; text-decoration: none;
         }
-
         .back-to-top.show { opacity: 1; visibility: visible; }
         .back-to-top:hover { background: var(--color-hover); transform: scale(1.1); }
 
-        /* ===================================================== */
-        /* 📱 AJUSTE RESPONSIVO PARA QUE NO SE DESCUADRE */
-        /* ===================================================== */
+        /* 📱 MÓVIL — TODO PAREJO Y JUNTO */
         @media (max-width: 500px) { 
+            body { padding-top: 100px; }
             .game-img { height: 130px; } 
-            .brand img { height: 42px; }
+            .brand img { height: 45px; }
             .welcome-text h2 { font-size: 18px; }
-
-            :root {
-                --altura-header: 56px;
-                --altura-menu: 46px;
-            }
-
-            .header {
-                padding: 0 16px;
-            }
-
-            .games-menu {
-                padding: 0 12px;
-            }
+            .header { padding: 10px 16px; }
+            .games-menu { padding: 10px 12px; }
         }
     </style>
 </head>
 <body>
 
-<!-- 🔒 HEADER FIJO, PAREJO -->
-<div class="header">
-    <div class="brand"><img src="logo.png" alt="Logo"></div>
-</div>
-
-<!-- 🔒 MENÚ FIJO, ALINEADO DEBAJO -->
-<div class="games-menu">
-    <a href="index.html" class="active">Inicio</a>
-    <a href="freefire.html">Free Fire</a>
-    <a href="bloodstrike.html">Blood Strike</a>
-    <a href="roblox.html">Roblox</a>
-    <a href="ml.html">Mobile Legends</a>
-    <a href="cod.html">COD Mobile</a>
-    <a href="pubg.html">PUBG Mobile</a>
+<!-- 🔒 BLOQUE COMPLETO — LOGO + MENÚ JUNTOS, FIJOS, SIN SEPARACIÓN -->
+<div class="barra-superior">
+    <div class="header">
+        <div class="brand"><img src="logo.png" alt="Logo"></div>
+    </div>
+    <div class="games-menu">
+        <a href="index.html" class="active">Inicio</a>
+        <a href="freefire.html">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+    </div>
 </div>
 
 <!-- CONTENIDO -->
@@ -307,7 +180,8 @@
         <a href="roblox.html" class="game-link">
             <img src="roblox.png" class="game-img" alt="Roblox" onerror="this.style.background='#3b82f6'">
         </a>
-        <a href="ml.html" class="game-img" class="game-img" alt="Mobile Legends" onerror="this.style.background='#3b82f6'">
+        <a href="ml.html" class="game-link">
+            <img src="mlbb.png" class="game-img" alt="Mobile Legends" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="cod.html" class="game-link">
             <img src="cod.png" class="game-img" alt="Call of Duty" onerror="this.style.background='#3b82f6'">
