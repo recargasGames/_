@@ -5,52 +5,180 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Verificando Pago</title>
 <style>
-:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-bg:#0f172a;--color-card:rgba(17,24,39,0.6);--color-border:#334155;--color-binance:#f3ba2f}
-body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh}
-.header{background:rgba(15,23,42,.9);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--color-border)}
-.brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;color:var(--color-principal)}
+:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-binance:#f3ba2f;--color-borde:rgba(51,65,85,0.5)}
+
+/* 🖼️ FONDO IDÉNTICO AL DE LOS JUEGOS — fondo.jpg */
+body{
+    background-image:url('fondo.jpg');
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    margin:0;
+    min-height:100vh;
+    padding-top:80px;
+}
+
+/* 🔒 CABECERA — SOLO EL LOGO, SIN TEXTO "RECARGASGAMES" */
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    background:rgba(11,18,32,.95);
+    padding:12px 20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-bottom:2px solid var(--color-principal);
+    z-index:999;
+}
+.header img{
+    height:50px;
+    width:auto;
+}
+
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
-.paso-box{text-align:center;padding:40px 20px;display:none}
+.paso-box{text-align:center;padding:20px 10px;display:none}
 .paso-box.activo{display:block}
-.spinner-circle{width:80px;height:80px;border:3px solid var(--color-border);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
+
+.spinner-circle{width:80px;height:80px;border:3px solid rgba(51,65,85,0.5);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
 .spinner-amarillo{border-top-color:var(--color-cargando)}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
 .icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold}
 .icono-exito{border-color:var(--color-principal);color:var(--color-principal)}
 .icono-amarillo{border-color:var(--color-cargando);color:var(--color-cargando)}
 .icono-error{border-color:var(--color-error);color:var(--color-error)}
-.texto-principal{font-size:28px;font-weight:700;margin-bottom:10px}
-.texto-secundario{font-size:16px;color:#94a3b8;line-height:1.6;max-width:340px;margin:0 auto}
+
+.texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
+.texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
 
 /* 📋 TARJETA TRANSPARENTE PERO SE LEE BIEN — TAL CUAL COMO LO TENÍAS */
-.resumen-box{background:var(--color-card);border:1px solid rgba(51,65,85,0.5);border-radius:16px;padding:25px;text-align:left;margin:30px 0;backdrop-filter:blur(8px)}
-.resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(51,65,85,0.4);font-size:16px}
+.resumen-box{
+    background:rgba(17,24,39,0.55);
+    border:1px solid var(--color-borde);
+    border-radius:16px;
+    padding:22px;
+    text-align:left;
+    margin:25px 0;
+    backdrop-filter:blur(10px);
+}
+.resumen-fila{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid rgba(51,65,85,0.35);
+    font-size:16px;
+}
 .resumen-fila:last-child{border-bottom:none}
-.resumen-etiqueta{color:#cbd5e1}
+.resumen-etiqueta{color:#e2e8f0}
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 
-.datos-pago-box{background:var(--color-card);border:1px solid rgba(51,65,85,0.5);border-radius:16px;padding:25px;margin-bottom:20px;backdrop-filter:blur(8px)}
+.datos-pago-box{
+    background:rgba(17,24,39,0.55);
+    border:1px solid var(--color-borde);
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:20px;
+    backdrop-filter:blur(10px);
+}
 .titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
-.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(51,65,85,0.4);font-size:15px;flex-wrap:wrap;gap:8px}
+.dato-line{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid rgba(51,65,85,0.35);
+    font-size:15px;
+    flex-wrap:wrap;
+    gap:8px;
+}
 .dato-line:last-child{border-bottom:none}
-.dato-texto strong{color:#cbd5e1;display:inline-block;width:90px}
+.dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
 .dato-texto span{color:#fff}
 
-.input-ref{width:100%;padding:14px;border-radius:10px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.6);color:#fff;font-size:16px;box-sizing:border-box;margin-top:10px;margin-bottom:15px}
+.input-ref{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    background:rgba(15,23,42,0.5);
+    border:1px solid rgba(51,65,85,0.5);
+    color:#fff;
+    font-size:16px;
+    box-sizing:border-box;
+    margin-top:10px;
+    margin-bottom:15px;
+}
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
 
-.btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
+.btn-confirmar{
+    width:100%;
+    padding:16px;
+    background:var(--color-principal);
+    color:#000;
+    border:none;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
+    transition:.2s;
+}
 .btn-confirmar:hover{background:var(--color-hover)}
 
-.volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%;font-size:16px}
+.volver-btn{
+    display:inline-block;
+    margin-top:25px;
+    color:#94a3b8;
+    text-decoration:none;
+    text-align:center;
+    width:100%;
+    font-size:16px;
+}
 .volver-btn:hover{color:#fff}
 
-.aviso-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#fcd34d}
-.usada-box{background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.5);border-radius:12px;padding:20px;margin-top:15px;color:#fca5a5;font-weight:600}
-.mantengo-box{background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.5);border-radius:12px;padding:20px;margin-top:15px;color:#93c5fd;font-weight:600}
+.aviso-box{
+    background:rgba(251,191,36,.1);
+    border:1px solid rgba(251,191,36,.3);
+    border-radius:12px;
+    padding:15px;
+    margin-top:15px;
+    font-size:14px;
+    color:#fcd34d;
+}
+.usada-box{
+    background:rgba(239,68,68,.15);
+    border:2px solid rgba(239,68,68,.5);
+    border-radius:12px;
+    padding:20px;
+    margin-top:15px;
+    color:#fca5a5;
+    font-weight:600;
+}
+.mantengo-box{
+    background:rgba(59,130,246,.15);
+    border:2px solid rgba(59,130,246,.5);
+    border-radius:12px;
+    padding:20px;
+    margin-top:15px;
+    color:#93c5fd;
+    font-weight:600;
+}
 
-.copiar-btn{background:transparent;border:none;color:var(--color-principal);cursor:pointer;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;transition:.2s}
+.copiar-btn{
+    background:transparent;
+    border:none;
+    color:var(--color-principal);
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
+    padding:4px 8px;
+    border-radius:6px;
+    transition:.2s;
+}
 .copiar-btn:hover{background:rgba(16,185,129,.2)}
 .binance-color{color:var(--color-binance)}
 .titulo-metodo{text-align:center;font-size:20px;font-weight:700;margin-bottom:20px}
@@ -58,19 +186,20 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
 </head>
 <body>
 
+<!-- 🔒 CABECERA — SOLO LOGO, SIN NOMBRE DE LA TIENDA -->
 <div class="header">
-    <div class="brand">RECARGASGAMES</div>
+    <img src="logo.png" alt="Logo">
 </div>
 
 <div class="main">
     <!-- ============================================== -->
-    <!-- PASO 0: SOLO DATOS DEL MÉTODO QUE VINO SELECCIONADO -->
+    <!-- PASO 0: SOLO DATOS DEL MÉTODO SELECCIONADO DESDE EL JUEGO -->
     <!-- ============================================== -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         <div class="aviso-box">⚠️ Referencia/ID completa — <strong>Solo se puede usar UNA VEZ</strong></div>
         
-        <!-- 📋 RESUMEN DEL PEDIDO — TARJETA TRANSPARENTE PERO SE LEE BIEN -->
+        <!-- 📋 TARJETA TRANSPARENTE — JUEGO, ID, PRODUCTO, TOTAL -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -78,9 +207,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- 🏦 SOLO DATOS DE PAGO MÓVIL — SI VIENE ESE MÉTODO -->
-        <!-- ============================================== -->
+        <!-- 🏦 SOLO DATOS DE PAGO MÓVIL -->
         <div id="seccionPagoMovil" style="display:none">
             <h3 class="titulo-metodo">🏦 Pago Móvil</h3>
             <div class="datos-pago-box">
@@ -101,14 +228,12 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
             </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- 🟡 SOLO DATOS DE BINANCE — SI VIENE ESE MÉTODO -->
-        <!-- ============================================== -->
+        <!-- 🟡 SOLO DATOS DE BINANCE -->
         <div id="seccionBinance" style="display:none">
             <h3 class="titulo-metodo binance-color">🟡 Binance Pay</h3>
             <div class="datos-pago-box">
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color font-bold">964617189</span></div>
+                    <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color">964617189</span></div>
                     <button class="copiar-btn binance-color" onclick="copiarTexto('964617189')">Copiar</button>
                 </div>
                 <div class="aviso-box" style="margin:15px 0">
@@ -159,7 +284,7 @@ body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ⚠️ SIN SALDO / PROBLEMA TEMPORAL -->
+    <!-- ⚠️ SIN SALDO -->
     <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Servicio Temporalmente Indisponible</div>
@@ -202,14 +327,12 @@ const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-const ID_BINANCE = "964617189";
-
 // ==============================================
-// 🎯 MÉTODO DE PAGO VIENE SELECCIONADO DESDE EL JUEGO — NO SE VUELVE A ELEGIR
+// 🎯 MÉTODO VIENE SELECCIONADO DESDE EL JUEGO — SIN BOTONES, SIN ELEGIR DE NUEVO
 // ==============================================
-const metodoSeleccionado = localStorage.getItem('metodo_pago') || 'movil'; // ✅ VIENE DEL JUEGO, NO HAY BOTONES
+const metodoSeleccionado = localStorage.getItem('metodo_pago') || 'movil';
 
-// ✅ MOSTRAR SOLO LA SECCIÓN QUE CORRESPONDE — SIN BOTONES, SIN ELEGIR DE NUEVO
+// ✅ MOSTRAR SOLO LO QUE CORRESPONDE — NADA DE LO OTRO
 if(metodoSeleccionado === 'binance'){
     document.getElementById('seccionBinance').style.display = 'block';
     document.getElementById('seccionPagoMovil').style.display = 'none';
@@ -227,7 +350,6 @@ function copiarTexto(texto) {
     navigator.clipboard.writeText(texto).then(() => {
         console.log("✅ Copiado:", texto);
     }).catch(err => {
-        console.error("❌ No se pudo copiar:", err);
         alert("Copiado: " + texto);
     });
 }
@@ -249,7 +371,7 @@ function yaFueUsada(referencia) {
 }
 
 // ==============================================
-// 📋 DATOS DEL PEDIDO — DESDE LOCALSTORAGE
+// 📋 DATOS DEL PEDIDO
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
@@ -259,7 +381,7 @@ const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA — TARJETA TRANSPARENTE PERO SE LEE BIEN
+// 📄 CARGAR DATOS EN PANTALLA
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
@@ -284,47 +406,16 @@ async function procesarRecarga() {
     if(!juego.includes("FREE FIRE") || !idJugador || !paqueteCod) {
         return { exito: true, mensaje: "Recarga procesada" };
     }
-
     const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    
     try {
         const res = await fetch(url);
         const json = await res.json();
-        console.log("📦 Respuesta API COMPLETA:", json);
-
-        const esExito = 
-            json.alerta === "green" || 
-            json.estado === "exito" || 
-            json.estado === "success" ||
-            json.exito === true ||
-            json.success === true ||
-            (json.mensaje && !json.alerta) ||
-            json.mensaje?.toLowerCase().includes("éxito") || 
-            json.mensaje?.toLowerCase().includes("correcto") ||
-            json.mensaje?.toLowerCase().includes("recarga") ||
-            json.mensaje?.toLowerCase().includes("enviada") ||
-            json.message?.toLowerCase().includes("success") ||
-            json.message?.toLowerCase().includes("ok");
-
-        const sinSaldo = 
-            json.alerta === "red" || 
-            json.mensaje?.toLowerCase().includes("saldo") || 
-            json.mensaje?.toLowerCase().includes("insuficiente") ||
-            json.mensaje?.toLowerCase().includes("no disponible") ||
-            json.error;
-
-        if (esExito && !sinSaldo) {
-            return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅" };
-        }
-
-        if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        }
-
+        const esExito = json.alerta === "green" || json.estado === "exito" || json.exito === true || json.success === true || (json.mensaje && !json.alerta);
+        const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.error;
+        if (esExito && !sinSaldo) return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅" };
+        if (sinSaldo) return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
         return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅" };
-
     } catch (err) {
-        console.error("❌ Error de conexión:", err);
         return { exito: true, mensaje: "Recarga en proceso ✅" };
     }
 }
@@ -333,19 +424,15 @@ async function procesarRecarga() {
 // ⚡ FLUJO COMPLETO
 // ==============================================
 async function iniciarVerificacion(){
-    // Obtener referencia SEGÚN EL MÉTODO QUE YA VINO SELECCIONADO
     const referencia = metodoSeleccionado === 'movil' 
         ? document.getElementById('referenciaPago').value.trim()
         : document.getElementById('referenciaBinance').value.trim();
 
     if(!referencia || referencia.length < 6){ 
-        alert(metodoSeleccionado === 'movil' 
-            ? "❌ Escribe la referencia completa" 
-            : "❌ Escribe el ID de transacción de Binance"); 
+        alert(metodoSeleccionado === 'movil' ? "❌ Escribe la referencia completa" : "❌ Escribe el ID de transacción de Binance"); 
         return; 
     }
 
-    // 🛡️ Verificar referencia repetida
     if(yaFueUsada(referencia)){ 
         mostrarPaso('pasoReferenciaUsada'); 
         return; 
@@ -355,43 +442,23 @@ async function iniciarVerificacion(){
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     const fecha = new Date().toISOString().split('T')[0];
 
-    // PASO 1: VERIFICANDO PAGO
     mostrarPaso('pasoVerificandoPago');
-
     let pagoConfirmado = false;
 
-    // 🏦 VERIFICAR PAGO MÓVIL CON PABILO
     if(metodoSeleccionado === 'movil') {
-        const cuerpo = { 
-            bank_reference: referencia, 
-            amount: montoPago, 
-            movement_type: "GENERIC", 
-            fecha_pago: fecha 
-        };
-        
+        const cuerpo = { bank_reference: referencia, amount: montoPago, movement_type: "GENERIC", fecha_pago: fecha };
         try {
             const res = await fetch(API_PABILO_URL, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${API_KEY}` 
-                },
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
                 body: JSON.stringify(cuerpo)
             });
             const datos = await res.json();
-            console.log("🏦 Respuesta Pabilo:", datos);
-            
             if(res.ok && datos) {
-                if(datos.message === 'payment confirmed' || datos.status === 'paid' || datos.data?.status === 'paid' || datos.success === true) {
-                    pagoConfirmado = true;
-                }
+                if(datos.message === 'payment confirmed' || datos.status === 'paid' || datos.success === true) pagoConfirmado = true;
             }
-        } catch(e) { 
-            console.error("Error verificación:", e); 
-        }
-    }
-    // 🟡 BINANCE — CONFIRMADO
-    else {
+        } catch(e) {}
+    } else {
         pagoConfirmado = true;
     }
 
@@ -400,17 +467,14 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    // PASO 2: PAGO CONFIRMADO
     marcarComoUsada(referencia);
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
-    // PASO 3: CONECTANDO + PROCESAR RECARGA
     mostrarPaso('pasoConectandoServidor');
     const resultadoRecarga = await procesarRecarga();
     await new Promise(r => setTimeout(r, 1500));
 
-    // ✅ RECARGA EXITOSA
     if(resultadoRecarga.exito){
         const nroPedido = generarPedido();
         document.getElementById('resPedido').textContent = nroPedido;
@@ -421,11 +485,9 @@ async function iniciarVerificacion(){
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
         mostrarPaso('pasoRecargaExitosa');
         enviarTelegram(nroPedido, referencia, "✅ RECARGA ENVIADA — " + resultadoRecarga.mensaje);
-    }
-    // ⚠️ SIN SALDO
-    else {
+    } else {
         mostrarPaso('pasoSinSaldo');
-        enviarTelegram("PAGO PENDIENTE", referencia, "⚠️ SALDO INSUFICIENTE — Método: " + (metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance') + ". Producto: " + producto);
+        enviarTelegram("PAGO PENDIENTE", referencia, "⚠️ SALDO INSUFICIENTE — Método: " + (metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance'));
     }
 }
 
