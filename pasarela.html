@@ -151,7 +151,7 @@ body{
 .dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
 .dato-texto span{color:#fff}
 
-/* 📋 BOTÓN DE COPIAR — TRANSPARENTE, REDONDO, IGUAL A LA IMAGEN 🫩 */
+/* 📋 BOTÓN DE COPIAR — TU SVG EXACTO, TRANSPARENTE 🫩 */
 .copiar-btn{
     width:44px;
     height:44px;
@@ -159,7 +159,6 @@ body{
     background:rgba(59,130,246,0.15);
     border:none;
     color:#93c5fd;
-    font-size:20px;
     cursor:pointer;
     display:flex;
     align-items:center;
@@ -167,14 +166,33 @@ body{
     transition:.2s;
     backdrop-filter:blur(4px);
     flex-shrink:0;
+    padding:0;
+}
+.copiar-btn svg{
+    width:20px;
+    height:20px;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    fill:none;
+    opacity:0.7;
+    transition:.2s;
 }
 .copiar-btn:hover{
     background:rgba(59,130,246,0.25);
     transform:scale(1.05);
 }
+.copiar-btn:hover svg{opacity:1}
 .copiar-btn.copiado{
     background:rgba(16,185,129,0.2);
     color:#34d399;
+}
+.copiar-btn.copiado svg{display:none}
+.copiar-btn.copiado::after{
+    content:'✓';
+    font-size:20px;
+    font-weight:bold;
 }
 
 .input-ref{
@@ -290,15 +308,30 @@ body{
             <div class="datos-pago-box">
                 <div class="dato-line">
                     <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)">📄</button>
+                    <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="dato-line">
                     <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('32824869', this)">📄</button>
+                    <button class="copiar-btn" onclick="copiarTexto('32824869', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="dato-line">
                     <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">📄</button>
+                    <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
                 <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
@@ -311,7 +344,12 @@ body{
             <div class="datos-pago-box">
                 <div class="dato-line">
                     <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color">964617189</span></div>
-                    <button class="copiar-btn binance-color" onclick="copiarTexto('964617189')">Copiar</button>
+                    <button class="copiar-btn binance-color" onclick="copiarTexto('964617189')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="aviso-box" style="margin:15px 0">
                     ⚠️ Binance Pay temporalmente no disponible.
@@ -423,16 +461,14 @@ function seleccionarMetodo(metodo){
 }
 
 // ==============================================
-// 📋 COPIAR TEXTO — BOTÓN CON EFECTO DE CONFIRMACIÓN
+// 📋 COPIAR TEXTO — TU SVG + EFECTO DE CONFIRMACIÓN
 // ==============================================
 function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
         .then(() => {
             boton.classList.add('copiado');
-            boton.textContent = '✓';
             setTimeout(() => {
                 boton.classList.remove('copiado');
-                boton.textContent = '📄';
             }, 2000);
         })
         .catch(err => alert("Copiado: " + texto));
