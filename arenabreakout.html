@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+<title>RECARGASGAMES - Arena Breakout Mobile</title>
+<style>
+:root{
+    --color-principal:#3b82f6; /* 🔵 AZUL — IGUAL A MOBILE LEGENDS Y TODOS LOS DEMÁS */
+    --color-hover:#2563eb;
+    --color-azul:#3b82f6;
+    --color-blanco:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    background-image:url('fondo.jpg');
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    padding-top:110px;
+}
+
+/* 🔒 BARRA FIJA — IGUAL A TODOS */
+.barra-superior{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:999;
+    background:rgba(11,18,32,.95);
+    border-bottom:2px solid var(--color-azul);
+    box-shadow:0 2px 10px rgba(0,0,0,.3);
+}
+.header{
+    padding:12px 20px;
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    border-bottom:1px solid #2a374f;
+    margin-bottom:0;
+}
+.brand{display:flex;align-items:center}
+.brand img{
+    height:55px;
+    width:auto;
+    border-radius:14px;
+    background:transparent;
+}
+
+/* MENÚ — IGUAL A TODOS */
+.games-menu{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:12px 15px;
+    border-top:none;
+    border-bottom:none;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+}
+.games-menu::-webkit-scrollbar{display:none;width:0;height:0}
+.games-menu a{
+    text-decoration:none;
+    color:#fff;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:700;
+    white-space:nowrap;
+    transition:.2s;
+}
+.games-menu a:hover,.games-menu a.active{
+    color:var(--color-azul);
+    border-bottom:2px solid var(--color-azul);
+    border-radius:0;
+}
+
+/* CONTENIDO — MISMO DISEÑO EXACTO */
+.main{
+    padding:20px;
+    padding-top:30px;
+    max-width:800px;
+    margin:0 auto;
+}
+.card-panel{
+    background:rgba(11,18,32,.85);
+    border:1px solid #1f2937;
+    border-radius:20px;
+    padding:18px;
+    margin-bottom:20px;
+}
+.panel-title{font-size:15px;font-weight:700;margin:0 0 12px;color:var(--color-azul)}
+.form-input{
+    width:100%;height:50px;
+    border-radius:14px;
+    background:#111827;
+    color:#fff;
+    padding:12px;
+    border:1px solid #1f2937;
+    font-size:16px;
+}
+.form-input:focus{outline:none;border-color:var(--color-azul)}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.pay-box{
+    background:#111827;
+    border:2px solid #1f2937;
+    border-radius:16px;
+    padding:12px;
+    text-align:center;
+    cursor:pointer;
+    font-weight:700;
+    transition:.2s;
+}
+.pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul)}
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
+.product-card{
+    background:rgba(11,18,32,.85);
+    border:1px solid #1f2937;
+    border-radius:16px;
+    padding:15px;
+    transition:.2s;
+}
+.product-card:hover{border-color:var(--color-azul);transform:translateY(-2px)}
+.card-header{display:flex;align-items:center;gap:12px;border-bottom:1px solid #1f2937;padding-bottom:10px;margin-bottom:10px}
+.game-icon{background:#1a2333;padding:8px;border-radius:12px;font-size:18px}
+.product-title{font-size:16px;font-weight:700}
+.product-desc{color:#9ca3af;font-size:11px;margin-bottom:10px}
+.product-price{font-size:22px;font-weight:700;color:var(--color-azul);margin-bottom:12px}
+.btn-buy{
+    background:var(--color-azul);
+    color:#fff;
+    border:none;
+    width:100%;height:40px;
+    border-radius:12px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+}
+.btn-buy:hover{background:var(--color-hover)}
+.section-divider{margin:25px 0 15px;text-align:center}
+.section-divider span{
+    background:var(--color-azul);
+    color:#fff;
+    padding:6px 18px;
+    border-radius:30px;
+    font-size:14px;
+    font-weight:700;
+}
+.status-success{color:#22c55e;background:rgba(34,197,94,.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
+.status-error{color:#ef4444;background:rgba(239,68,68,.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
+.status-verificando{color:#3b82f6;background:rgba(59,130,246,.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top:2px solid var(--color-azul);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360)}}
+.whatsapp-float{
+    position:fixed;bottom:20px;right:20px;
+    background:#25D366;
+    width:55px;height:55px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;font-size:28px;z-index:1000;
+}
+.back-to-top{
+    position:fixed;bottom:90px;right:20px;
+    background:var(--color-azul);
+    color:#fff;
+    width:45px;height:45px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;visibility:hidden;
+    z-index:1000;transition:.3s;text-decoration:none;
+}
+.back-to-top.show{opacity:1;visibility:visible}
+@media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:500px){
+    body{padding-top:100px}
+    .main{padding-top:25px}
+    .brand img{height:45px}
+    .header{padding:10px 16px}
+    .games-menu{padding:10px 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- 🔒 BARRA FIJA — IGUAL A TODOS -->
+<div class="barra-superior">
+    <div class="header">
+        <div class="brand"><img src="logo.png" alt="Logo"></div>
+    </div>
+    <div class="games-menu">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html" class="active">Arena Breakout</a>
+    </div>
+</div>
+
+<div class="main">
+    <!-- ✅ TARJETA DEL ID — MISMO DISEÑO -->
+    <div class="card-panel">
+        <div class="panel-title">ID del Jugador</div>
+        <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Arena Breakout Mobile" autocomplete="off">
+        <div id="verificacionStatus" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card-panel">
+        <div class="panel-title">Método de Pago</div>
+        <div class="payment-methods">
+            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">PAGO MOVIL</div>
+            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">BINANCE</div>
+        </div>
+    </div>
+
+    <!-- 💰 BONDS -->
+    <div class="section-divider"><span>💰 BONDS - ARENA BREAKOUT</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💰</div><div class="product-title">66 Bonds</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="0.98">$0.98</div>
+            <button class="btn-buy" data-bonds="66" onclick="comprarProducto('66 Bonds', '0.98')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💰</div><div class="product-title">335 Bonds</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="4.50">$4.50</div>
+            <button class="btn-buy" data-bonds="335" onclick="comprarProducto('335 Bonds', '4.50')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💰</div><div class="product-title">675 Bonds</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="8.90">$8.90</div>
+            <button class="btn-buy" data-bonds="675" onclick="comprarProducto('675 Bonds', '8.90')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💰</div><div class="product-title">1690 Bonds</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="21.90">$21.90</div>
+            <button class="btn-buy" data-bonds="1690" onclick="comprarProducto('1690 Bonds', '21.90')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💰</div><div class="product-title">3400 Bonds</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="43.50">$43.50</div>
+            <button class="btn-buy" data-bonds="3400" onclick="comprarProducto('3400 Bonds', '43.50')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💰</div><div class="product-title">6820 Bonds</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="86.50">$86.50</div>
+            <button class="btn-buy" data-bonds="6820" onclick="comprarProducto('6820 Bonds', '86.50')">Comprar</button>
+        </div>
+    </div>
+
+    <!-- 🎫 PASES -->
+    <div class="section-divider"><span>🎫 PASES DE BATALLA</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎖️</div><div class="product-title">Beginner Select</div></div>
+            <div class="product-desc">Pase para principiantes</div>
+            <div class="product-price" data-usd="0.90">$0.90</div>
+            <button class="btn-buy" data-bonds="0" onclick="comprarProducto('Beginner Select', '0.90')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">⚔️</div><div class="product-title">Battle Pass Advanced Mensual</div></div>
+            <div class="product-desc">Pase avanzado — 1 mes</div>
+            <div class="product-price" data-usd="1.10">$1.10</div>
+            <button class="btn-buy" data-bonds="0" onclick="comprarProducto('Battle Pass Advanced Mensual', '1.10')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">👑</div><div class="product-title">Battle Pass Premium Mensual</div></div>
+            <div class="product-desc">Pase premium — 1 mes</div>
+            <div class="product-price" data-usd="4.25">$4.25</div>
+            <button class="btn-buy" data-bonds="0" onclick="comprarProducto('Battle Pass Premium Mensual', '4.25')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🏆</div><div class="product-title">Battle Pass Premium Trimestral</div></div>
+            <div class="product-desc">Pase premium — 3 meses</div>
+            <div class="product-price" data-usd="12.50">$12.50</div>
+            <button class="btn-buy" data-bonds="0" onclick="comprarProducto('Battle Pass Premium Trimestral', '12.50')">Comprar</button>
+        </div>
+    </div>
+</div>
+
+<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import{getDatabase,ref}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const fbConfig={
+    apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+    authDomain:"recargasgames-14c38.firebaseapp.com",
+    databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",
+    projectId:"recargasgames-14c38",
+    storageBucket:"recargasgames-14c38.firebasestorage.app",
+    messagingSenderId:"370952235234",
+    appId:"1:370952235234:web:41a9ebd7084f1955a256bb"
+};
+const app=initializeApp(fbConfig),auth=getAuth(app),db=getDatabase(app);
+
+let logueado=false,metodo="PAGO MOVIL",tasa=930,uidActual=null;
+let idOk = false, nombreOk = "", idActual = "";
+const juegoActual = "ARENA BREAKOUT MOBILE";
+
+async function cargarTasaBinance() {
+    try {
+        const respuesta = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", { method: 'GET', cache: 'no-cache' });
+        if (!respuesta.ok) throw new Error("Error API");
+        const datos = await respuesta.json();
+        const precio = parseFloat(datos.price);
+        if (!precio || precio <= 0) throw new Error("Precio inválido");
+        tasa = Math.round(precio);
+        localStorage.setItem('tasa_usd_ves', tasa);
+        actualizarPrecios();
+    } catch (error) {
+        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 930;
+        actualizarPrecios();
+    }
+}
+
+function actualizarPrecios(){
+    document.querySelectorAll('.product-price').forEach(el=>{
+        let u=parseFloat(el.dataset.usd);
+        el.innerText = metodo==="PAGO MOVIL" ? Math.round(u*tasa).toLocaleString("es-VE")+" Bs" : u.toFixed(2)+" USDT";
+    });
+}
+
+window.seleccionarPago=function(m,e){
+    document.querySelectorAll('.pay-box').forEach(b=>b.classList.remove('active'));
+    e.classList.add('active');
+    metodo=m;
+    actualizarPrecios();
+};
+
+async function verificarID(id){
+    if(!/^\d{5,12}$/.test(id)) return {ok: false, msg: "ID inválido (5-12 dígitos)"};
+    await new Promise(r => setTimeout(r, 500));
+    return {ok: true, nombre: `ID_${id}`, msg: "ID verificado ✅"};
+}
+
+let timeoutId = null;
+const inputId = document.getElementById("jugadorId");
+const statusDiv = document.getElementById("verificacionStatus");
+
+function mostrarEstado(mensaje, tipo) {
+    if(!statusDiv) return;
+    let clase = "";
+    if(tipo === "verificando") { clase = "status-verificando"; mensaje = '<span class="spinner"></span> ' + mensaje; }
+    if(tipo === "success") clase = "status-success";
+    if(tipo === "error") clase = "status-error";
+    statusDiv.innerHTML = clase ? `<div class="${clase}">${mensaje}</div>` : "";
+}
+
+inputId.addEventListener("input", function(){
+    clearTimeout(timeoutId);
+    const id = this.value.trim();
+    if(id.length === 0){ mostrarEstado(""); idOk = false; return; }
+    if(/^\d{5,12}$/.test(id)){
+        timeoutId = setTimeout(async () => {
+            mostrarEstado("Verificando ID...", "verificando");
+            const res = await verificarID(id);
+            if(res.ok){ mostrarEstado(res.msg, "success"); idOk = true; nombreOk = res.nombre; idActual = id; }
+            else { mostrarEstado(res.msg, "error"); idOk = false; }
+        }, 300);
+    } else {
+        idOk = false;
+        if(id.length < 5) mostrarEstado(`Mínimo 5 dígitos`, "error");
+        else if(id.length > 12) mostrarEstado(`Máximo 12 dígitos`, "error");
+        else mostrarEstado("Solo números", "error");
+    }
+});
+
+window.comprarProducto = function(producto, precioUsd){
+    const idInput = document.getElementById("jugadorId").value.trim();
+    
+    if(!idInput){
+        alert("❌ Escribe tu ID del jugador primero");
+        return;
+    }
+    if(!idOk){
+        alert("⏳ Espera a que se verifique el ID antes de comprar");
+        return;
+    }
+
+    const precioBs = Math.round(parseFloat(precioUsd) * tasa);
+    const cantidad = event.target.dataset.bonds || 0;
+
+    localStorage.setItem('id_jugador', idInput);
+    localStorage.setItem('nombre_verificado', nombreOk || `ID ${idInput}`);
+    localStorage.setItem('cantidad', cantidad);
+    localStorage.setItem('juego_seleccionado', juegoActual);
+    localStorage.setItem('producto_seleccionado', producto);
+    localStorage.setItem('precio_usd', precioUsd);
+    localStorage.setItem('precio_en_bs', precioBs);
+    localStorage.setItem('metodo_pago', metodo);
+
+    window.location.href = "pasarela.html";
+};
+
+onAuthStateChanged(auth,u=>{logueado=!!u; if(u)uidActual=u.uid;});
+cargarTasaBinance();
+setInterval(cargarTasaBinance, 60000);
+
+window.addEventListener('scroll',()=>{
+    const b=document.getElementById('backToTop');
+    if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
+});
+</script>
+</body>
+</html>
