@@ -9,7 +9,12 @@
     <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
 
     <style>
-        :root { --color-principal: #10b981; --color-hover: #059669; --color-acento: #f97316; --color-azul-borde: #3b82f6; }
+        :root { 
+            --color-principal: #3b82f6; /* 🔵 AZUL en lugar de verde */
+            --color-hover: #2563eb; 
+            --color-azul: #3b82f6;
+            --color-blanco: #ffffff;
+        }
         body { 
             background-image: url('fondo.jpg'); 
             background-size: cover; 
@@ -22,22 +27,21 @@
             background: rgba(11, 18, 32, 0.95); 
             padding: 12px 20px; 
             display: flex; 
-            justify-content: flex-start; /* 👈 Logo a la IZQUIERDA, esquina */
+            justify-content: flex-start; 
             align-items: center; 
-            border-bottom: 2px solid var(--color-principal); 
+            border-bottom: 2px solid var(--color-azul); /* 🔵 LÍNEA AZUL en vez de verde */
         }
         .brand { 
             display: flex; align-items: center; 
         }
-        /* 🎨 LOGO AJUSTADO: más grande, esquinas redondeadas, bordes azules */
+        /* 🎨 LOGO: esquinas curvas, SIN bordes azules extra */
         .brand img { 
-            height: 55px; /* 👈 Más grande */
+            height: 55px; 
             width: auto; 
-            border-radius: 14px; /* 👈 Esquinas curvas */
-            border: 3px solid var(--color-azul-borde); /* 👈 Borde azul */
-            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); /* 👈 Brillo azul */
-            background: #ffffff; /* 👈 Fondo blanco → letras se ven blancas */
-            padding: 4px; /* 👈 Espacio interno */
+            border-radius: 14px; /* 🔵 Esquinas curvas */
+            /* ❌ SIN bordes azules extra, solo la imagen */
+            background: transparent; 
+            padding: 0; 
         }
         .games-menu { 
             display: flex; gap: 8px; overflow-x: auto; 
@@ -47,15 +51,16 @@
         }
         .games-menu::-webkit-scrollbar { height: 4px; }
         .games-menu::-webkit-scrollbar-track { background: #1f2937; border-radius: 10px; }
-        .games-menu::-webkit-scrollbar-thumb { background: var(--color-principal); border-radius: 10px; }
+        .games-menu::-webkit-scrollbar-thumb { background: var(--color-azul); border-radius: 10px; }
         .games-menu a { 
             text-decoration: none; color: white; background: transparent; 
             padding: 6px 12px; border-radius: 20px; font-size: 14px; 
             font-weight: bold; white-space: nowrap; transition: 0.2s; 
         }
-        .games-menu a:hover { color: var(--color-principal); }
+        .games-menu a:hover { color: var(--color-azul); }
         .games-menu a.active { 
-            color: var(--color-principal); border-bottom: 2px solid var(--color-principal); 
+            color: var(--color-azul); /* 🔵 ACTIVO EN AZUL, NO VERDE */
+            border-bottom: 2px solid var(--color-azul); 
             border-radius: 0; 
         }
         .main { padding: 20px; max-width: 600px; margin: 0 auto; }
@@ -63,27 +68,36 @@
             text-align: center; margin: 20px 0; padding: 15px; 
             background: rgba(11, 18, 32, 0.7); border-radius: 20px; 
         }
-        .welcome-text h2 { color: var(--color-principal); font-size: 20px; }
+        /* 🎨 TÍTULO: más grueso, azul y blanco combinado */
+        .welcome-text h2 { 
+            font-size: 22px; 
+            font-weight: 900; /* 🔤 MÁS GRUESA */
+            background: linear-gradient(90deg, #3b82f6 0%, #ffffff 50%, #3b82f6 100%); /* 🔵 ⚪ 🔵 Azul + Blanco + Azul */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
         .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .game-link { 
-            background: rgba(11, 18, 32, 0.85); border: 1px solid #1f2937; 
+            background: rgba(11, 18, 32, 0.85); 
+            border: 1px solid #ffffff; /* ⚪ Borde blanco en las tarjetas */
             border-radius: 20px; padding: 0; text-decoration: none; color: white; 
             text-align: center; transition: 0.3s; overflow: hidden; position: relative; 
         }
-        .game-link:hover { transform: translateY(-5px); border-color: var(--color-principal); }
-        .game-img { width: 100%; height: 160px; object-fit: cover; display: block; }
-        .game-name { 
-            position: absolute; bottom: 0; left: 0; right: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
-            padding: 30px 10px 12px 10px; font-size: 16px; 
-            font-weight: bold; text-align: center; color: var(--color-principal); 
+        .game-link:hover { 
+            transform: translateY(-5px); 
+            border-color: var(--color-azul); /* 🔵 Borde azul al pasar el mouse */
         }
+        .game-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+        /* ❌ ELIMINADO el nombre del juego sobre la tarjeta */
+        .game-name { display: none; }
         .footer { 
             background: rgba(11, 18, 32, 0.9); border-top: 1px solid #1f2937; 
             padding: 20px; text-align: center; margin-top: 30px; 
         }
         .footer p { color: #9ca3af; font-size: 12px; margin: 5px 0; }
-        .footer .copyright { color: var(--color-principal); font-weight: bold; font-size: 13px; }
+        .footer .copyright { color: var(--color-azul); font-weight: bold; font-size: 13px; }
         .whatsapp-float { 
             position: fixed; bottom: 20px; right: 20px; background: #25D366; 
             width: 55px; height: 55px; border-radius: 50%; display: flex; 
@@ -92,7 +106,7 @@
         }
         .whatsapp-float:hover { transform: scale(1.1); }
         .back-to-top { 
-            position: fixed; bottom: 90px; right: 20px; background: var(--color-principal); 
+            position: fixed; bottom: 90px; right: 20px; background: var(--color-azul); 
             color: white; width: 45px; height: 45px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; cursor: pointer; 
             z-index: 1000; opacity: 0; visibility: hidden; transition: 0.3s; 
@@ -102,19 +116,19 @@
         .back-to-top:hover { background: var(--color-hover); transform: scale(1.1); }
         @media (max-width: 500px) { 
             .game-img { height: 130px; } 
-            .game-name { font-size: 14px; padding: 20px 10px 8px 10px; } 
-            .brand img { height: 45px; } /* Responsive en móvil */
+            .brand img { height: 45px; }
+            .welcome-text h2 { font-size: 18px; }
         }
     </style>
 </head>
 <body>
 
-<!-- HEADER → LOGO A LA IZQUIERDA, ESQUINAS CURVAS, BORDE AZUL, LETRAS BLANCAS -->
+<!-- HEADER → LOGO SIN BORDES AZULES EXTRA, SOLO ESQUINAS CURVAS -->
 <div class="header">
     <div class="brand"><img src="logo.png" alt="Logo"></div>
 </div>
 
-<!-- MENÚ DE JUEGOS -->
+<!-- MENÚ DE JUEGOS → ACTIVO EN AZUL -->
 <div class="games-menu">
     <a href="index.html" class="active">Inicio</a>
     <a href="freefire.html">Free Fire</a>
@@ -125,38 +139,32 @@
     <a href="pubg.html">PUBG Mobile</a>
 </div>
 
-<!-- CONTENIDO PRINCIPAL -->
+<!-- CONTENIDO PRINCIPAL → SIN EL TEXTO DE ABAJO -->
 <div class="main">
     <div class="welcome-text">
         <h2>Los mejores juegos con recargas instantáneas</h2>
-        <p>Elige tu juego y recarga al instante. Sin cuenta obligatoria, solo tu ID y listo.</p>
+        <!-- ❌ ELIMINADO: "Elige tu juego y recarga al instante..." -->
     </div>
     
-    <!-- GRID DE JUEGOS -->
+    <!-- GRID DE JUEGOS → SIN NOMBRES SOBRE LAS IMÁGENES, BORDE BLANCO -->
     <div class="games-grid">
         <a href="freefire.html" class="game-link">
-            <img src="ff.png" class="game-img" alt="Free Fire" onerror="this.style.background='#10b981'">
-            <div class="game-name">FREE FIRE</div>
+            <img src="ff.png" class="game-img" alt="Free Fire" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="bloodstrike.html" class="game-link">
-            <img src="bs.png" class="game-img" alt="Blood Strike" onerror="this.style.background='#ef4444'">
-            <div class="game-name">BLOOD STRIKE</div>
+            <img src="bs.png" class="game-img" alt="Blood Strike" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="roblox.html" class="game-link">
-            <img src="roblox.png" class="game-img" alt="Roblox" onerror="this.style.background='#8b5cf6'">
-            <div class="game-name">ROBLOX</div>
+            <img src="roblox.png" class="game-img" alt="Roblox" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="ml.html" class="game-link">
-            <img src="mlbb.png" class="game-img" alt="Mobile Legends" onerror="this.style.background='#f97316'">
-            <div class="game-name">MOBILE LEGENDS</div>
+            <img src="mlbb.png" class="game-img" alt="Mobile Legends" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="cod.html" class="game-link">
             <img src="cod.png" class="game-img" alt="Call of Duty" onerror="this.style.background='#3b82f6'">
-            <div class="game-name">CALL OF DUTY</div>
         </a>
         <a href="pubg.html" class="game-link">
-            <img src="pubg.png" class="game-img" alt="PUBG Mobile" onerror="this.style.background='#f59e0b'">
-            <div class="game-name">PUBG MOBILE</div>
+            <img src="pubg.png" class="game-img" alt="PUBG Mobile" onerror="this.style.background='#3b82f6'">
         </a>
     </div>
 </div>
