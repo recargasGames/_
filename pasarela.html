@@ -5,58 +5,122 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Verificando Pago</title>
 <style>
-:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-bg:#0f172a;--color-card:#1e293b;--color-border:#334155;--color-binance:#f3ba2f}
-body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh}
-.header{background:rgba(15,23,42,.9);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--color-border)}
-.brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;color:var(--color-principal)}
+:root{
+    --color-principal:#3b82f6; /* 🔵 TODO AZUL IGUAL QUE LOS JUEGOS */
+    --color-hover:#2563eb;
+    --color-cargando:#facc15;
+    --color-error:#ef4444;
+    --color-binance:#f3ba2f;
+    --color-bg:#0b1220;
+    --color-card:#111827;
+    --color-border:#1f2937;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    background-image:url('fondo.jpg'); /* 🖼️ MISMO FONDO QUE TODOS */
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    min-height:100vh;
+    padding-top:90px;
+}
+
+/* 🔒 BARRA SUPERIOR — IGUAL QUE TODOS LOS JUEGOS */
+.barra-superior{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:999;
+    background:rgba(11,18,32,.95);
+    border-bottom:2px solid var(--color-principal);
+    box-shadow:0 2px 10px rgba(0,0,0,.3);
+}
+.header{
+    padding:12px 20px;
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    border-bottom:1px solid #2a374f;
+}
+.brand img{
+    height:55px;
+    width:auto;
+    border-radius:14px;
+    background:transparent;
+}
+
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
 .paso-box{text-align:center;padding:40px 20px;display:none}
 .paso-box.activo{display:block}
+
 .spinner-circle{width:80px;height:80px;border:3px solid var(--color-border);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
 .spinner-amarillo{border-top-color:var(--color-cargando)}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
 .icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold}
 .icono-exito{border-color:var(--color-principal);color:var(--color-principal)}
 .icono-amarillo{border-color:var(--color-cargando);color:var(--color-cargando)}
 .icono-error{border-color:var(--color-error);color:var(--color-error)}
+
 .texto-principal{font-size:28px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#94a3b8;line-height:1.6;max-width:340px;margin:0 auto}
+
 .resumen-box{background:var(--color-card);border:1px solid var(--color-border);border-radius:16px;padding:25px;text-align:left;margin:30px 0}
 .resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:16px}
 .resumen-fila:last-child{border-bottom:none}
 .resumen-etiqueta{color:#94a3b8}
 .resumen-valor{font-weight:600}
 .resumen-valor.verde{color:var(--color-principal)}
+
 .datos-pago-box{background:var(--color-card);border:1px solid var(--color-border);border-radius:16px;padding:25px;margin-bottom:20px}
 .titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
-.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:15px}
+.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:15px;flex-wrap:wrap;gap:8px}
 .dato-line:last-child{border-bottom:none}
 .dato-texto strong{color:#94a3b8;display:inline-block;width:90px}
+
 .input-ref{width:100%;padding:14px;border-radius:10px;background:#0f172a;border:1px solid var(--color-border);color:#fff;font-size:16px;box-sizing:border-box;margin-top:10px;margin-bottom:15px}
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
-.btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
+
+.btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
 .btn-confirmar:hover{background:var(--color-hover)}
+
 .volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%;font-size:16px}
 .volver-btn:hover{color:#fff}
+
 .aviso-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#fcd34d}
 .usada-box{background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.5);border-radius:12px;padding:20px;margin-top:15px;color:#fca5a5;font-weight:600}
 .mantengo-box{background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.5);border-radius:12px;padding:20px;margin-top:15px;color:#93c5fd;font-weight:600}
-/* 👇 ESTILOS NUEVOS — MÉTODOS DE PAGO */
+
+/* 💰 MÉTODOS DE PAGO */
 .metodos-pago{display:flex;gap:12px;margin-bottom:25px}
 .metodo-btn{flex:1;padding:14px;background:var(--color-card);border:2px solid var(--color-border);border-radius:12px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
-.metodo-btn.activo{border-color:var(--color-principal);background:rgba(16,185,129,.1);color:var(--color-principal)}
+.metodo-btn.activo{border-color:var(--color-principal);background:rgba(59,130,246,.1);color:var(--color-principal)}
 .metodo-btn.binance.activo{border-color:var(--color-binance);background:rgba(243,186,47,.1);color:var(--color-binance)}
+
 .datos-pago-movil{display:block}
 .datos-binance{display:none}
-.copiar-btn{background:transparent;border:none;color:var(--color-principal);cursor:pointer;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px}
-.copiar-btn:hover{background:rgba(16,185,129,.2)}
+
+.copiar-btn{background:transparent;border:none;color:var(--color-principal);cursor:pointer;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;transition:.2s}
+.copiar-btn:hover{background:rgba(59,130,246,.2)}
 .binance-color{color:var(--color-binance)}
+
+@media(max-width:480px){
+    .main{padding:20px 15px}
+    .dato-line{flex-direction:column;align-items:flex-start;gap:6px}
+    .metodos-pago{flex-direction:column}
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="brand">RECARGASGAMES</div>
+<!-- 🔒 BARRA FIJA — SOLO LOGO, IGUAL QUE TODOS -->
+<div class="barra-superior">
+    <div class="header">
+        <div class="brand"><img src="logo.png" alt="Logo"></div>
+    </div>
 </div>
 
 <div class="main">
@@ -218,7 +282,7 @@ const TELEGRAM_CHAT_ID = "8452807558";
 const ID_BINANCE = "964617189"; // 🟡 TU ID DE BINANCE
 
 // ==============================================
-// 💰 CAMBIAR MÉTODO DE PAGO
+// 💰 CAMBIAR MÉTODO DE PAGO — SE MUESTRA SOLO EL ELEGIDO
 // ==============================================
 let metodoSeleccionado = 'movil'; // Por defecto
 
@@ -229,7 +293,7 @@ function cambiarMetodo(metodo) {
     document.getElementById('btnPagoMovil').classList.toggle('activo', metodo === 'movil');
     document.getElementById('btnBinance').classList.toggle('activo', metodo === 'binance');
     
-    // Mostrar/ocultar datos
+    // ✅ MOSTRAR SOLO LOS DATOS DEL MÉTODO ELEGIDO
     document.getElementById('datosPagoMovil').style.display = metodo === 'movil' ? 'block' : 'none';
     document.getElementById('datosBinance').style.display = metodo === 'binance' ? 'block' : 'none';
     
@@ -269,10 +333,10 @@ function yaFueUsada(referencia) {
 }
 
 // ==============================================
-// 📋 DATOS DEL PEDIDO
+// 📋 DATOS DEL PEDIDO — DESDE LOCALSTORAGE
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem('id_jugador') || "";
+const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
 const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
@@ -412,9 +476,9 @@ async function iniciarVerificacion(){
             console.error("Error verificación:", e); 
         }
     }
-    // 🟡 BINANCE — MARCAR COMO CONFIRMADO (verificación manual o integración futura)
+    // 🟡 BINANCE — MARCAR COMO CONFIRMADO
     else {
-        pagoConfirmado = true; // ✅ Aceptamos → tú revisas en Binance o integra API luego
+        pagoConfirmado = true;
     }
 
     if(!pagoConfirmado) { 
