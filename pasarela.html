@@ -5,86 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Verificando Pago</title>
 <style>
-:root{
-    --color-principal:#3b82f6; /* 🔵 TODO AZUL IGUAL QUE LOS JUEGOS */
-    --color-hover:#2563eb;
-    --color-cargando:#facc15;
-    --color-error:#ef4444;
-    --color-binance:#f3ba2f;
-    --color-bg:#0b1220;
-    --color-card:#111827;
-    --color-border:#1f2937;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-    background-image:url('fondo.jpg'); /* 🖼️ MISMO FONDO QUE TODOS */
-    background-size:cover;
-    background-position:center;
-    background-attachment:fixed;
-    color:#fff;
-    font-family:'Segoe UI',sans-serif;
-    min-height:100vh;
-    padding-top:90px;
-}
-
-/* 🔒 BARRA SUPERIOR — IGUAL QUE TODOS LOS JUEGOS */
-.barra-superior{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    z-index:999;
-    background:rgba(11,18,32,.95);
-    border-bottom:2px solid var(--color-principal);
-    box-shadow:0 2px 10px rgba(0,0,0,.3);
-}
-.header{
-    padding:12px 20px;
-    display:flex;
-    justify-content:flex-start;
-    align-items:center;
-    border-bottom:1px solid #2a374f;
-}
-.brand img{
-    height:55px;
-    width:auto;
-    border-radius:14px;
-    background:transparent;
-}
-
+:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-bg:#0f172a;--color-card:rgba(17,24,39,0.6);--color-border:#334155;--color-binance:#f3ba2f}
+body{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-family:'Segoe UI',sans-serif;margin:0;min-height:100vh}
+.header{background:rgba(15,23,42,.9);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--color-border)}
+.brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;color:var(--color-principal)}
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
 .paso-box{text-align:center;padding:40px 20px;display:none}
 .paso-box.activo{display:block}
-
 .spinner-circle{width:80px;height:80px;border:3px solid var(--color-border);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
 .spinner-amarillo{border-top-color:var(--color-cargando)}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-
 .icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold}
 .icono-exito{border-color:var(--color-principal);color:var(--color-principal)}
 .icono-amarillo{border-color:var(--color-cargando);color:var(--color-cargando)}
 .icono-error{border-color:var(--color-error);color:var(--color-error)}
-
 .texto-principal{font-size:28px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#94a3b8;line-height:1.6;max-width:340px;margin:0 auto}
 
-.resumen-box{background:var(--color-card);border:1px solid var(--color-border);border-radius:16px;padding:25px;text-align:left;margin:30px 0}
-.resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:16px}
+/* 📋 TARJETA TRANSPARENTE PERO SE LEE BIEN — TAL CUAL COMO LO TENÍAS */
+.resumen-box{background:var(--color-card);border:1px solid rgba(51,65,85,0.5);border-radius:16px;padding:25px;text-align:left;margin:30px 0;backdrop-filter:blur(8px)}
+.resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(51,65,85,0.4);font-size:16px}
 .resumen-fila:last-child{border-bottom:none}
-.resumen-etiqueta{color:#94a3b8}
-.resumen-valor{font-weight:600}
+.resumen-etiqueta{color:#cbd5e1}
+.resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 
-.datos-pago-box{background:var(--color-card);border:1px solid var(--color-border);border-radius:16px;padding:25px;margin-bottom:20px}
+.datos-pago-box{background:var(--color-card);border:1px solid rgba(51,65,85,0.5);border-radius:16px;padding:25px;margin-bottom:20px;backdrop-filter:blur(8px)}
 .titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
-.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-border);font-size:15px;flex-wrap:wrap;gap:8px}
+.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(51,65,85,0.4);font-size:15px;flex-wrap:wrap;gap:8px}
 .dato-line:last-child{border-bottom:none}
-.dato-texto strong{color:#94a3b8;display:inline-block;width:90px}
+.dato-texto strong{color:#cbd5e1;display:inline-block;width:90px}
+.dato-texto span{color:#fff}
 
-.input-ref{width:100%;padding:14px;border-radius:10px;background:#0f172a;border:1px solid var(--color-border);color:#fff;font-size:16px;box-sizing:border-box;margin-top:10px;margin-bottom:15px}
+.input-ref{width:100%;padding:14px;border-radius:10px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.6);color:#fff;font-size:16px;box-sizing:border-box;margin-top:10px;margin-bottom:15px}
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
 
-.btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
+.btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
 .btn-confirmar:hover{background:var(--color-hover)}
 
 .volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%;font-size:16px}
@@ -94,109 +50,76 @@ body{
 .usada-box{background:rgba(239,68,68,.15);border:2px solid rgba(239,68,68,.5);border-radius:12px;padding:20px;margin-top:15px;color:#fca5a5;font-weight:600}
 .mantengo-box{background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.5);border-radius:12px;padding:20px;margin-top:15px;color:#93c5fd;font-weight:600}
 
-/* 💰 MÉTODOS DE PAGO */
-.metodos-pago{display:flex;gap:12px;margin-bottom:25px}
-.metodo-btn{flex:1;padding:14px;background:var(--color-card);border:2px solid var(--color-border);border-radius:12px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
-.metodo-btn.activo{border-color:var(--color-principal);background:rgba(59,130,246,.1);color:var(--color-principal)}
-.metodo-btn.binance.activo{border-color:var(--color-binance);background:rgba(243,186,47,.1);color:var(--color-binance)}
-
-.datos-pago-movil{display:block}
-.datos-binance{display:none}
-
 .copiar-btn{background:transparent;border:none;color:var(--color-principal);cursor:pointer;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;transition:.2s}
-.copiar-btn:hover{background:rgba(59,130,246,.2)}
+.copiar-btn:hover{background:rgba(16,185,129,.2)}
 .binance-color{color:var(--color-binance)}
-
-@media(max-width:480px){
-    .main{padding:20px 15px}
-    .dato-line{flex-direction:column;align-items:flex-start;gap:6px}
-    .metodos-pago{flex-direction:column}
-}
+.titulo-metodo{text-align:center;font-size:20px;font-weight:700;margin-bottom:20px}
 </style>
 </head>
 <body>
 
-<!-- 🔒 BARRA FIJA — SOLO LOGO, IGUAL QUE TODOS -->
-<div class="barra-superior">
-    <div class="header">
-        <div class="brand"><img src="logo.png" alt="Logo"></div>
-    </div>
+<div class="header">
+    <div class="brand">RECARGASGAMES</div>
 </div>
 
 <div class="main">
     <!-- ============================================== -->
-    <!-- PASO 0: SELECCIONAR MÉTODO + DATOS DE PAGO -->
+    <!-- PASO 0: SOLO DATOS DEL MÉTODO QUE VINO SELECCIONADO -->
     <!-- ============================================== -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         <div class="aviso-box">⚠️ Referencia/ID completa — <strong>Solo se puede usar UNA VEZ</strong></div>
         
-        <!-- 📋 RESUMEN DEL PEDIDO -->
-        <div class="datos-pago-box">
-            <div class="dato-line"><div class="dato-texto"><strong>Juego:</strong></div><div id="datoJuego">-</div></div>
-            <div class="dato-line"><div class="dato-texto"><strong>ID Jugador:</strong></div><div id="datoId">-</div></div>
-            <div class="dato-line"><div class="dato-texto"><strong>Producto:</strong></div><div id="datoProducto">-</div></div>
-            <div class="dato-line"><div class="dato-texto"><strong>Total:</strong></div><div id="datoMontoTotal">-</div></div>
+        <!-- 📋 RESUMEN DEL PEDIDO — TARJETA TRANSPARENTE PERO SE LEE BIEN -->
+        <div class="resumen-box">
+            <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
-        <!-- 💰 ELEGIR MÉTODO DE PAGO -->
-        <div class="datos-pago-box">
-            <h3 class="titulo-seccion" style="margin-top:0;margin-bottom:15px;text-align:left">💳 Método de Pago</h3>
-            
-            <div class="metodos-pago">
-                <button class="metodo-btn activo" id="btnPagoMovil" onclick="cambiarMetodo('movil')">🏦 Pago Móvil</button>
-                <button class="metodo-btn binance" id="btnBinance" onclick="cambiarMetodo('binance')">🟡 Binance</button>
-            </div>
-
-            <!-- 📱 DATOS DE PAGO MÓVIL -->
-            <div id="datosPagoMovil" class="datos-pago-movil">
+        <!-- ============================================== -->
+        <!-- 🏦 SOLO DATOS DE PAGO MÓVIL — SI VIENE ESE MÉTODO -->
+        <!-- ============================================== -->
+        <div id="seccionPagoMovil" style="display:none">
+            <h3 class="titulo-metodo">🏦 Pago Móvil</h3>
+            <div class="datos-pago-box">
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>Banco:</strong></div>
-                    <div style="display:flex;align-items:center;gap:8px">
-                        <span>Banco de Venezuela</span>
-                        <button class="copiar-btn" onclick="copiarTexto('Banco de Venezuela')">Copiar</button>
-                    </div>
+                    <div class="dato-texto"><strong>Banco:</strong> <span>Banco de Venezuela</span></div>
+                    <button class="copiar-btn" onclick="copiarTexto('Banco de Venezuela')">Copiar</button>
                 </div>
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>Cédula:</strong></div>
-                    <div style="display:flex;align-items:center;gap:8px">
-                        <span>32824869</span>
-                        <button class="copiar-btn" onclick="copiarTexto('32824869')">Copiar</button>
-                    </div>
+                    <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
+                    <button class="copiar-btn" onclick="copiarTexto('32824869')">Copiar</button>
                 </div>
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>Teléfono:</strong></div>
-                    <div style="display:flex;align-items:center;gap:8px">
-                        <span>04228242411</span>
-                        <button class="copiar-btn" onclick="copiarTexto('04228242411')">Copiar</button>
-                    </div>
+                    <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
+                    <button class="copiar-btn" onclick="copiarTexto('04228242411')">Copiar</button>
                 </div>
-                <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600">Referencia completa del pago:</label>
+                <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
                 <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
             </div>
+        </div>
 
-            <!-- 🟡 DATOS DE BINANCE -->
-            <div id="datosBinance" class="datos-binance">
+        <!-- ============================================== -->
+        <!-- 🟡 SOLO DATOS DE BINANCE — SI VIENE ESE MÉTODO -->
+        <!-- ============================================== -->
+        <div id="seccionBinance" style="display:none">
+            <h3 class="titulo-metodo binance-color">🟡 Binance Pay</h3>
+            <div class="datos-pago-box">
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>Método:</strong></div>
-                    <div class="binance-color">Binance Pay</div>
-                </div>
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>ID Binance:</strong></div>
-                    <div style="display:flex;align-items:center;gap:8px">
-                        <span class="binance-color font-bold">964617189</span>
-                        <button class="copiar-btn binance-color" onclick="copiarTexto('964617189')">Copiar</button>
-                    </div>
+                    <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color font-bold">964617189</span></div>
+                    <button class="copiar-btn binance-color" onclick="copiarTexto('964617189')">Copiar</button>
                 </div>
                 <div class="aviso-box" style="margin:15px 0">
                     💡 Envía el pago por <strong>Binance Pay</strong> (USDT). Luego escribe el ID de transacción abajo.
                 </div>
-                <label style="display:block;margin-top:10px;margin-bottom:8px;font-weight:600">ID de transacción de Binance:</label>
+                <label style="display:block;margin-top:10px;margin-bottom:8px;font-weight:600;text-align:left">ID de transacción de Binance:</label>
                 <input type="text" class="input-ref" id="referenciaBinance" placeholder="Pega el ID de la transacción" maxlength="100">
             </div>
-
-            <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
         </div>
+
+        <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
     <!-- PASO 1: VERIFICANDO PAGO -->
@@ -279,29 +202,22 @@ const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-const ID_BINANCE = "964617189"; // 🟡 TU ID DE BINANCE
+const ID_BINANCE = "964617189";
 
 // ==============================================
-// 💰 CAMBIAR MÉTODO DE PAGO — SE MUESTRA SOLO EL ELEGIDO
+// 🎯 MÉTODO DE PAGO VIENE SELECCIONADO DESDE EL JUEGO — NO SE VUELVE A ELEGIR
 // ==============================================
-let metodoSeleccionado = 'movil'; // Por defecto
+const metodoSeleccionado = localStorage.getItem('metodo_pago') || 'movil'; // ✅ VIENE DEL JUEGO, NO HAY BOTONES
 
-function cambiarMetodo(metodo) {
-    metodoSeleccionado = metodo;
-    
-    // Cambiar botones
-    document.getElementById('btnPagoMovil').classList.toggle('activo', metodo === 'movil');
-    document.getElementById('btnBinance').classList.toggle('activo', metodo === 'binance');
-    
-    // ✅ MOSTRAR SOLO LOS DATOS DEL MÉTODO ELEGIDO
-    document.getElementById('datosPagoMovil').style.display = metodo === 'movil' ? 'block' : 'none';
-    document.getElementById('datosBinance').style.display = metodo === 'binance' ? 'block' : 'none';
-    
-    // Cambiar texto de verificación
-    document.getElementById('textoVerificando').textContent = 
-        metodo === 'movil' 
-            ? "Estamos buscando tu pago en el sistema bancario..." 
-            : "Verificando tu transacción de Binance...";
+// ✅ MOSTRAR SOLO LA SECCIÓN QUE CORRESPONDE — SIN BOTONES, SIN ELEGIR DE NUEVO
+if(metodoSeleccionado === 'binance'){
+    document.getElementById('seccionBinance').style.display = 'block';
+    document.getElementById('seccionPagoMovil').style.display = 'none';
+    document.getElementById('textoVerificando').textContent = "Verificando tu transacción de Binance...";
+}else{
+    document.getElementById('seccionPagoMovil').style.display = 'block';
+    document.getElementById('seccionBinance').style.display = 'none';
+    document.getElementById('textoVerificando').textContent = "Estamos buscando tu pago en el sistema bancario...";
 }
 
 // ==============================================
@@ -343,12 +259,12 @@ const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
+// 📄 CARGAR DATOS EN PANTALLA — TARJETA TRANSPARENTE PERO SE LEE BIEN
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
 document.getElementById('datoProducto').textContent = producto;
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#94a3b8">${precioBs} Bs</small>`;
+document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
 function generarPedido(){
     const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '1000') + 1;
@@ -362,7 +278,7 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// 🔥 FUNCIÓN DE RECARGA — DETECCIÓN CORREGIDA ✅
+// 🔥 FUNCIÓN DE RECARGA
 // ==============================================
 async function procesarRecarga() {
     if(!juego.includes("FREE FIRE") || !idJugador || !paqueteCod) {
@@ -376,7 +292,6 @@ async function procesarRecarga() {
         const json = await res.json();
         console.log("📦 Respuesta API COMPLETA:", json);
 
-        // ✅ DETECTA CUALQUIER RESPUESTA DE ÉXITO
         const esExito = 
             json.alerta === "green" || 
             json.estado === "exito" || 
@@ -391,7 +306,6 @@ async function procesarRecarga() {
             json.message?.toLowerCase().includes("success") ||
             json.message?.toLowerCase().includes("ok");
 
-        // ⚠️ DETECTA SALDO INSUFICIENTE
         const sinSaldo = 
             json.alerta === "red" || 
             json.mensaje?.toLowerCase().includes("saldo") || 
@@ -416,10 +330,10 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO PASO A PASO
+// ⚡ FLUJO COMPLETO
 // ==============================================
 async function iniciarVerificacion(){
-    // Obtener referencia según método
+    // Obtener referencia SEGÚN EL MÉTODO QUE YA VINO SELECCIONADO
     const referencia = metodoSeleccionado === 'movil' 
         ? document.getElementById('referenciaPago').value.trim()
         : document.getElementById('referenciaBinance').value.trim();
@@ -476,7 +390,7 @@ async function iniciarVerificacion(){
             console.error("Error verificación:", e); 
         }
     }
-    // 🟡 BINANCE — MARCAR COMO CONFIRMADO
+    // 🟡 BINANCE — CONFIRMADO
     else {
         pagoConfirmado = true;
     }
@@ -496,9 +410,7 @@ async function iniciarVerificacion(){
     const resultadoRecarga = await procesarRecarga();
     await new Promise(r => setTimeout(r, 1500));
 
-    // ==============================================
     // ✅ RECARGA EXITOSA
-    // ==============================================
     if(resultadoRecarga.exito){
         const nroPedido = generarPedido();
         document.getElementById('resPedido').textContent = nroPedido;
@@ -510,9 +422,7 @@ async function iniciarVerificacion(){
         mostrarPaso('pasoRecargaExitosa');
         enviarTelegram(nroPedido, referencia, "✅ RECARGA ENVIADA — " + resultadoRecarga.mensaje);
     }
-    // ==============================================
-    // ⚠️ SIN SALDO O PROBLEMA
-    // ==============================================
+    // ⚠️ SIN SALDO
     else {
         mostrarPaso('pasoSinSaldo');
         enviarTelegram("PAGO PENDIENTE", referencia, "⚠️ SALDO INSUFICIENTE — Método: " + (metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance') + ". Producto: " + producto);
@@ -520,7 +430,7 @@ async function iniciarVerificacion(){
 }
 
 // ==============================================
-// 📢 NOTIFICACIÓN POR TELEGRAM
+// 📢 NOTIFICACIÓN TELEGRAM
 // ==============================================
 function enviarTelegram(pedido, ref, estado){
     const msg = encodeURIComponent(`
