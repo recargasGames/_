@@ -9,7 +9,7 @@
     <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
 
     <style>
-        :root { --color-principal: #10b981; --color-hover: #059669; --color-acento: #f97316; }
+        :root { --color-principal: #10b981; --color-hover: #059669; --color-acento: #f97316; --color-azul-borde: #3b82f6; }
         body { 
             background-image: url('fondo.jpg'); 
             background-size: cover; 
@@ -20,17 +20,25 @@
         }
         .header { 
             background: rgba(11, 18, 32, 0.95); 
-            padding: 15px 20px; 
+            padding: 12px 20px; 
             display: flex; 
-            justify-content: center; 
+            justify-content: flex-start; /* 👈 Logo a la IZQUIERDA, esquina */
             align-items: center; 
             border-bottom: 2px solid var(--color-principal); 
         }
         .brand { 
             display: flex; align-items: center; 
-            justify-content: center;
         }
-        .brand img { height: 40px; width: auto; }
+        /* 🎨 LOGO AJUSTADO: más grande, esquinas redondeadas, bordes azules */
+        .brand img { 
+            height: 55px; /* 👈 Más grande */
+            width: auto; 
+            border-radius: 14px; /* 👈 Esquinas curvas */
+            border: 3px solid var(--color-azul-borde); /* 👈 Borde azul */
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); /* 👈 Brillo azul */
+            background: #ffffff; /* 👈 Fondo blanco → letras se ven blancas */
+            padding: 4px; /* 👈 Espacio interno */
+        }
         .games-menu { 
             display: flex; gap: 8px; overflow-x: auto; 
             background: rgba(11, 18, 32, 0.95); padding: 12px 15px; 
@@ -95,13 +103,13 @@
         @media (max-width: 500px) { 
             .game-img { height: 130px; } 
             .game-name { font-size: 14px; padding: 20px 10px 8px 10px; } 
-            .brand img { height: 32px; }
+            .brand img { height: 45px; } /* Responsive en móvil */
         }
     </style>
 </head>
 <body>
 
-<!-- HEADER → SOLO LOGO, SIN NOMBRE -->
+<!-- HEADER → LOGO A LA IZQUIERDA, ESQUINAS CURVAS, BORDE AZUL, LETRAS BLANCAS -->
 <div class="header">
     <div class="brand"><img src="logo.png" alt="Logo"></div>
 </div>
@@ -163,12 +171,12 @@
 <!-- BOTÓN SUBIR ARRIBA -->
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">↑</a>
 
-<!-- WHATSAPP FLOTANTE → NÚMERO CORRECTO -->
+<!-- WHATSAPP FLOTANTE -->
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script type="module">
     // =====================================================
-    // TASA DE CAMBIO — API DE BINANCE (FUNCIONA EN SEGUNDO PLANO)
+    // TASA DE CAMBIO — API DE BINANCE
     // =====================================================
     const CONFIG = {
         parBinance: "USDTVES",
@@ -178,7 +186,6 @@
     };
 
     let tasaActual = null;
-    let intervaloBinance = null;
 
     async function cargarTasaBinance() {
         try {
@@ -186,42 +193,27 @@
                 method: 'GET',
                 cache: 'no-cache'
             });
-
             if (!respuesta.ok) throw new Error("Error en la API");
-
             const datos = await respuesta.json();
             const precio = parseFloat(datos.price);
-
             if (!precio || precio <= 0) throw new Error("Precio inválido");
-
             tasaActual = Math.round(precio);
             localStorage.setItem('tasa_usd_ves', tasaActual);
-            localStorage.setItem('ultima_actualizacion_tasa', new Date().toISOString());
             window.dispatchEvent(new CustomEvent('tasaActualizada', { detail: tasaActual }));
-
         } catch (error) {
-            console.warn("No se pudo obtener tasa de Binance, usando respaldo:", error);
-            tasaActual = localStorage.getItem('tasa_usd_ves') 
-                ? parseFloat(localStorage.getItem('tasa_usd_ves')) 
-                : CONFIG.tasaRespaldo;
+            console.warn("Usando tasa de respaldo:", error);
+            tasaActual = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : CONFIG.tasaRespaldo;
             localStorage.setItem('tasa_usd_ves', tasaActual);
         }
     }
 
     cargarTasaBinance();
-    intervaloBinance = setInterval(cargarTasaBinance, CONFIG.actualizarCada);
-
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'tasa_usd_ves') {
-            tasaActual = parseFloat(e.newValue);
-        }
-    });
+    setInterval(cargarTasaBinance, CONFIG.actualizarCada);
 
     // =====================================================
-    // FIREBASE (mantengo para futuras funciones)
+    // FIREBASE
     // =====================================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    
     const firebaseConfig = {
         apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
         authDomain: "recargasgames-14c38.firebaseapp.com",
@@ -231,13 +223,11 @@
         messagingSenderId: "370952235234",
         appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
     };
-    
     initializeApp(firebaseConfig);
 
     // ========== BOTÓN SUBIR ARRIBA ==========
     window.addEventListener('scroll', function() { 
-        const backToTop = document.getElementById('backToTop'); 
-        backToTop.classList.toggle('show', window.scrollY > 300); 
+        document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300); 
     });
 </script>
 
