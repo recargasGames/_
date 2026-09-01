@@ -3,581 +3,386 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RECARGASGAMES - Verificando Pago</title>
+<title>RECARGASGAMES - Confirmar Pago</title>
 <style>
-:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-binance:#f3ba2f;--color-borde:rgba(51,65,85,0.5);--color-deshabilitado:#475569}
-
+:root{--color-principal:#3b82f6;--color-hover:#2563eb;--color-exito:#22c55e;--color-error:#ef4444;--color-amarillo:#facc15;--color-fondo-oscuro:#0f172a;--color-fondo-tarjeta:#1e293b;--color-borde:#334155;--color-texto:#f1f5f9;--color-texto-claro:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
 body{
     background-image:url('fondo.jpg');
     background-size:cover;
     background-position:center;
     background-attachment:fixed;
-    color:#fff;
+    color:var(--color-texto);
     font-family:'Segoe UI',sans-serif;
-    margin:0;
     min-height:100vh;
-    padding-top:80px;
+    padding-top:90px;
 }
 
-/* 🔒 LOGO OVALADO ARRIBA A LA IZQUIERDA */
-.header{
+/* 🔒 BARRA SUPERIOR */
+.barra-superior{
     position:fixed;
     top:0;
     left:0;
     right:0;
+    z-index:999;
     background:rgba(11,18,32,.95);
-    padding:12px 20px;
+    border-bottom:2px solid var(--color-principal);
+    padding:15px 20px;
     display:flex;
     justify-content:flex-start;
     align-items:center;
-    border-bottom:2px solid var(--color-principal);
-    z-index:999;
 }
-.header img{
-    height:50px;
-    width:auto;
-    border-radius:50%;
-    object-fit:contain;
-}
+.brand img{height:50px;width:auto;border-radius:14px}
+.titulo-pagina{font-size:22px;font-weight:700;margin-left:15px;color:var(--color-principal)}
 
-.main{padding:30px 20px;max-width:480px;margin:0 auto}
-.paso-box{text-align:center;padding:20px 10px;display:none}
-.paso-box.activo{display:block}
+/* 📦 CONTENEDOR PRINCIPAL */
+.main{max-width:520px;margin:0 auto;padding:20px}
+.titulo-seccion{font-size:20px;font-weight:700;text-align:center;margin-bottom:25px;color:var(--color-principal)}
 
-.spinner-circle{width:80px;height:80px;border:3px solid rgba(51,65,85,0.5);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
-.spinner-amarillo{border-top-color:var(--color-cargando)}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-
-.icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold}
-.icono-exito{border-color:var(--color-principal);color:var(--color-principal)}
-.icono-amarillo{border-color:var(--color-cargando);color:var(--color-cargando)}
-.icono-error{border-color:var(--color-error);color:var(--color-error)}
-
-.texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
-.texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
-
-/* 📋 TARJETA TRANSPARENTE */
-.resumen-box{
-    background:rgba(17,24,39,0.55);
+/* 📋 TARJETA DE DATOS DE PAGO — IGUAL QUE LA IMAGEN */
+.datos-pago-card{
+    background:var(--color-fondo-tarjeta);
     border:1px solid var(--color-borde);
     border-radius:16px;
-    padding:22px;
-    text-align:left;
-    margin:25px 0;
-    backdrop-filter:blur(10px);
-}
-.resumen-fila{
-    display:flex;
-    justify-content:space-between;
-    padding:12px 0;
-    border-bottom:1px solid rgba(51,65,85,0.35);
-    font-size:16px;
-}
-.resumen-fila:last-child{border-bottom:none}
-.resumen-etiqueta{color:#e2e8f0}
-.resumen-valor{font-weight:600;color:#fff}
-.resumen-valor.verde{color:var(--color-principal)}
-
-/* 🎯 SELECCIÓN DE MÉTODO — BINANCE DESHABILITADO */
-.metodo-pago-box{
-    display:flex;
-    gap:12px;
-    margin:25px 0;
-}
-.metodo-btn{
-    flex:1;
-    padding:15px;
-    background:rgba(17,24,39,0.55);
-    border:2px solid rgba(51,65,85,0.5);
-    border-radius:12px;
-    color:#fff;
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
-    transition:.2s;
-    backdrop-filter:blur(10px);
-}
-.metodo-btn.activo{
-    border-color:var(--color-principal);
-    background:rgba(16,185,129,0.15);
-    color:var(--color-principal);
-}
-/* ❌ BINANCE DESHABILITADO — NO SE PUEDE SELECCIONAR */
-.metodo-btn.deshabilitado{
-    border-color:var(--color-deshabilitado);
-    background:rgba(71,85,105,0.2);
-    color:#94a3b8;
-    cursor:not-allowed;
-    opacity:0.7;
-}
-.metodo-btn.deshabilitado small{
-    display:block;
-    font-size:11px;
-    margin-top:4px;
-    color:#94a3b8;
-}
-
-/* 📢 AVISO DE BINANCE */
-.aviso-binance{
-    background:rgba(243,186,47,0.08);
-    border:1px solid rgba(243,186,47,0.25);
-    border-radius:12px;
-    padding:14px;
-    margin:15px 0;
-    color:#fcd34d;
-    font-size:14px;
-    text-align:center;
-}
-
-.datos-pago-box{
-    background:rgba(17,24,39,0.55);
-    border:1px solid var(--color-borde);
-    border-radius:16px;
-    padding:22px;
+    padding:25px;
     margin-bottom:20px;
-    backdrop-filter:blur(10px);
+    box-shadow:0 4px 20px rgba(0,0,0,.3);
 }
-.titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
-.dato-line{
+.dato-fila{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:12px 0;
-    border-bottom:1px solid rgba(51,65,85,0.35);
-    font-size:15px;
-    flex-wrap:wrap;
-    gap:8px;
+    padding:18px 15px;
+    background:rgba(15,23,42,.6);
+    border-radius:12px;
+    margin-bottom:12px;
 }
-.dato-line:last-child{border-bottom:none}
-.dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
-.dato-texto span{color:#fff}
+.dato-fila:last-child{margin-bottom:0}
+.dato-etiqueta{font-size:14px;color:var(--color-texto-claro);margin-bottom:4px}
+.dato-valor{font-size:20px;font-weight:700;color:#fff}
 
-.input-ref{
-    width:100%;
-    padding:14px;
+/* 📋 BOTÓN DE COPIAR — EXACTAMENTE COMO EN LA IMAGEN */
+.copiar-btn{
+    width:44px;
+    height:44px;
     border-radius:10px;
-    background:rgba(15,23,42,0.5);
-    border:1px solid rgba(51,65,85,0.5);
-    color:#fff;
-    font-size:16px;
-    box-sizing:border-box;
-    margin-top:10px;
-    margin-bottom:15px;
+    background:rgba(59,130,246,.15);
+    border:none;
+    color:var(--color-principal);
+    font-size:20px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.2s;
+    flex-shrink:0;
 }
-.input-ref:focus{outline:none;border-color:var(--color-principal)}
-.input-ref:disabled{opacity:0.5;cursor:not-allowed}
+.copiar-btn:hover{
+    background:rgba(59,130,246,.3);
+    transform:scale(1.05);
+}
+.copiar-btn.copiado{
+    background:var(--color-exito);
+    color:#fff;
+}
 
-.btn-confirmar{
+/* 💡 AVISO DE REFERENCIA — IGUAL QUE LA IMAGEN */
+.aviso-referencia{
+    background:rgba(59,130,246,.1);
+    border:1px solid rgba(59,130,246,.3);
+    border-radius:12px;
+    padding:16px 18px;
+    margin-bottom:20px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+}
+.aviso-icono{font-size:22px}
+.aviso-texto{font-size:15px;line-height:1.6;color:#bfdbfe}
+.aviso-texto strong{color:#fff}
+
+/* 💰 MONTO */
+.monto-box{
+    background:rgba(34,197,94,.08);
+    border:1px solid rgba(34,197,94,.3);
+    border-radius:12px;
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+.monto-etiqueta{font-size:16px;color:var(--color-texto-claro)}
+.monto-valor{font-size:28px;font-weight:700;color:var(--color-exito)}
+
+/* 📝 INPUT REFERENCIA */
+.input-referencia{
     width:100%;
     padding:16px;
+    border-radius:12px;
+    background:var(--color-fondo-oscuro);
+    border:2px solid var(--color-borde);
+    color:#fff;
+    font-size:18px;
+    text-align:center;
+    margin-bottom:25px;
+    outline:none;
+    transition:.2s;
+}
+.input-referencia:focus{border-color:var(--color-principal)}
+.input-referencia::placeholder{color:var(--color-texto-claro)}
+
+/* 🎯 BOTÓN CONFIRMAR */
+.btn-confirmar{
+    width:100%;
+    padding:18px;
     background:var(--color-principal);
-    color:#000;
+    color:#fff;
     border:none;
     border-radius:12px;
     font-size:18px;
     font-weight:700;
     cursor:pointer;
-    margin-top:10px;
     transition:.2s;
 }
 .btn-confirmar:hover{background:var(--color-hover)}
 
+/* ← VOLVER */
 .volver-btn{
-    display:inline-block;
-    margin-top:25px;
-    color:#94a3b8;
-    text-decoration:none;
+    display:block;
     text-align:center;
-    width:100%;
-    font-size:16px;
+    margin-top:20px;
+    color:var(--color-texto-claro);
+    text-decoration:none;
+    font-size:15px;
 }
 .volver-btn:hover{color:#fff}
 
-.aviso-box{
-    background:rgba(251,191,36,.1);
-    border:1px solid rgba(251,191,36,.3);
-    border-radius:12px;
-    padding:15px;
-    margin-top:15px;
-    font-size:14px;
-    color:#fcd34d;
+/* ✅ PASOS DE VERIFICACIÓN */
+.paso-box{text-align:center;padding:30px 20px;display:none}
+.paso-box.activo{display:block}
+.spinner-circle{width:80px;height:80px;border:3px solid var(--color-borde);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold}
+.icono-exito{border-color:var(--color-exito);color:var(--color-exito)}
+.icono-error{border-color:var(--color-error);color:var(--color-error)}
+.texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
+.texto-secundario{font-size:16px;color:var(--color-texto-claro);line-height:1.6;max-width:340px;margin:0 auto}
+.resumen-box{
+    background:var(--color-fondo-tarjeta);
+    border:1px solid var(--color-borde);
+    border-radius:16px;
+    padding:22px;
+    text-align:left;
+    margin:25px 0;
 }
-.usada-box{
-    background:rgba(239,68,68,.15);
-    border:2px solid rgba(239,68,68,.5);
-    border-radius:12px;
-    padding:20px;
-    margin-top:15px;
-    color:#fca5a5;
-    font-weight:600;
-}
-.mantengo-box{
-    background:rgba(59,130,246,.15);
-    border:2px solid rgba(59,130,246,.5);
-    border-radius:12px;
-    padding:20px;
-    margin-top:15px;
-    color:#93c5fd;
-    font-weight:600;
-}
-
-.copiar-btn{
-    background:transparent;
-    border:none;
-    color:var(--color-principal);
-    cursor:pointer;
-    font-size:14px;
-    font-weight:600;
-    padding:4px 8px;
-    border-radius:6px;
-    transition:.2s;
-}
-.copiar-btn:hover{background:rgba(16,185,129,.2)}
-.binance-color{color:var(--color-binance)}
-.oculto{display:none !important}
+.resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--color-borde);font-size:16px}
+.resumen-fila:last-child{border-bottom:none}
+.resumen-etiqueta{color:var(--color-texto-claro)}
+.resumen-valor{font-weight:600}
 </style>
 </head>
 <body>
 
-<div class="header">
-    <img src="logo.png" alt="Logo RecargasGames">
+<!-- 🔒 BARRA SUPERIOR -->
+<div class="barra-superior">
+    <div class="brand"><img src="logo.png" alt="Logo"></div>
+    <h1 class="titulo-pagina">PAGO MOVIL</h1>
 </div>
 
 <div class="main">
-    <!-- PASO 0: ELEGIR MÉTODO — SOLO PAGO MÓVIL ACTIVO -->
+    <!-- PASO 0: DATOS DE PAGO -->
     <div id="pasoDatos" class="paso-box activo">
-        <h2 class="titulo-seccion">Confirmar Pago</h2>
+        <h2 class="titulo-seccion">Datos para realizar el pago</h2>
         
-        <!-- 📋 TARJETA TRANSPARENTE — RESUMEN DEL PEDIDO -->
-        <div class="resumen-box">
-            <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
-        </div>
-
-        <!-- 🎯 ELEGIR MÉTODO — BINANCE DESHABILITADO -->
-        <div class="metodo-pago-box">
-            <button class="metodo-btn activo" id="btnMovil" onclick="seleccionarMetodo('movil')">🏦 Pago Móvil</button>
-            <button class="metodo-btn deshabilitado" id="btnBinance" disabled title="Próximamente disponible">
-                🟡 Binance Pay
-                <small>Próximamente</small>
-            </button>
-        </div>
-
-        <!-- 📢 MENSAJE — BINANCE EN MEJORAS -->
-        <div class="aviso-binance">
-            🟡 <strong>Binance Pay</strong> — Pronto estará disponible.<br>
-            Se está trabajando en mejoras. Por favor usa <strong>Pago Móvil</strong> por ahora.
-        </div>
-
-        <!-- 🏦 DATOS DE PAGO MÓVIL — ÚNICO ACTIVO -->
-        <div id="seccionPagoMovil">
-            <h3 class="titulo-metodo">Datos de Pago Móvil</h3>
-            <div class="datos-pago-box">
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>Banco:</strong> <span>)0102) BDV</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('(0102) BDV')">📄</button>
+        <!-- 📋 TARJETA CON BOTONES DE COPIAR — IGUAL QUE TU IMAGEN -->
+        <div class="datos-pago-card">
+            <div class="dato-fila">
+                <div>
+                    <div class="dato-etiqueta">TELÉFONO</div>
+                    <div class="dato-valor" id="datoTelefono">04228242411</div>
                 </div>
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('32824869')">📄</button>
+                <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">📋</button>
+            </div>
+
+            <div class="dato-fila">
+                <div>
+                    <div class="dato-etiqueta">CÉDULA</div>
+                    <div class="dato-valor" id="datoCedula">32824869</div>
                 </div>
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('04228242411')">📄</button>
+                <button class="copiar-btn" onclick="copiarTexto('32824869', this)">📋</button>
+            </div>
+
+            <div class="dato-fila">
+                <div>
+                    <div class="dato-etiqueta">BANCO</div>
+                    <div class="dato-valor" id="datoBanco">0102 Venezuela</div>
                 </div>
-                <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
-                <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
+                <button class="copiar-btn" onclick="copiarTexto('0102 Banco de Venezuela', this)">📋</button>
             </div>
         </div>
 
-        <!-- 🟡 BINANCE — OCULTO, NO SE PUEDE USAR -->
-        <div id="seccionBinance" class="oculto">
-            <h3 class="titulo-metodo binance-color">Datos de Binance Pay</h3>
-            <div class="datos-pago-box">
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color">964617189</span></div>
-                    <button class="copiar-btn binance-color" onclick="copiarTexto('964617189')">Copiar</button>
-                </div>
-                <div class="aviso-box" style="margin:15px 0">
-                    ⚠️ Binance Pay temporalmente no disponible.
-                </div>
+        <!-- 💡 AVISO DE REFERENCIA — IGUAL QUE LA IMAGEN -->
+        <div class="aviso-referencia">
+            <span class="aviso-icono">ℹ️</span>
+            <div class="aviso-texto">
+                <strong>REALIZA TU PAGO Y COLOCA LOS ÚLTIMOS 6 DÍGITOS DE LA REFERENCIA</strong><br>
+                Ejemplo: <strong>{ 257276 }</strong>
             </div>
         </div>
 
-        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
+        <!-- 💰 MONTO A PAGAR -->
+        <div class="monto-box">
+            <div class="monto-etiqueta">Monto a enviar:</div>
+            <div class="monto-valor" id="montoTotal">Bs 0.00</div>
+        </div>
 
-        <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
+        <!-- 📝 INPUT DE REFERENCIA -->
+        <input type="text" class="input-referencia" id="referenciaInput" placeholder="Últimos 6 dígitos de la referencia" maxlength="6">
+
+        <!-- 🎯 BOTÓN CONFIRMAR -->
+        <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
+
+        <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- PASO 1: VERIFICANDO PAGO -->
-    <div id="pasoVerificandoPago" class="paso-box">
+    <!-- PASO 1: VERIFICANDO -->
+    <div id="pasoVerificando" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
         <div class="texto-secundario">Estamos buscando tu pago en el sistema bancario...</div>
     </div>
 
-    <!-- PASO 2: PAGO CONFIRMADO -->
-    <div id="pasoPagoConfirmado" class="paso-box">
+    <!-- PASO 2: PAGO ENCONTRADO -->
+    <div id="pasoEncontrado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
-        <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Tu pago fue verificado correctamente. Preparando recarga...</div>
+        <div class="texto-principal">¡Pago Encontrado!</div>
+        <div class="texto-secundario">Tu pago fue localizado. Confirmando transacción...</div>
     </div>
 
     <!-- PASO 3: CONECTANDO CON SERVIDOR -->
-    <div id="pasoConectandoServidor" class="paso-box">
-        <div class="spinner-circle spinner-amarillo"></div>
+    <div id="pasoConectando" class="paso-box">
+        <div class="spinner-circle"></div>
         <div class="texto-principal">Conectando con el servidor de recargas...</div>
-        <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
+        <div class="texto-secundario">Preparando tu recarga...</div>
     </div>
 
     <!-- ✅ PASO 4: RECARGA EXITOSA -->
-    <div id="pasoRecargaExitosa" class="paso-box">
+    <div id="pasoExito" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
         <div class="texto-secundario">Tu recarga se procesó correctamente. ¡Disfruta tu compra!</div>
         <div class="resumen-box">
-            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="resJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resId">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor" id="resMetodo">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor" id="resReferencia">-</span></div>
         </div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
-    </div>
-
-    <!-- ⚠️ SIN SALDO -->
-    <div id="pasoSinSaldo" class="paso-box">
-        <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Servicio Temporalmente Indisponible</div>
-        <div class="texto-secundario">El pago fue confirmado, pero estamos procesando la recarga. Se completará en breve.</div>
-        <div class="mantengo-box">
-            💳 Tu pago quedó registrado y seguro. En cuanto se restablezca el servicio, la recarga se enviará automáticamente. Te llegará un aviso por Telegram.
-        </div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
+        <a href="index.html" class="volver-btn">← Volver a la tienda</a>
     </div>
 
     <!-- ❌ PAGO NO ENCONTRADO -->
-    <div id="pasoPagoNoEncontrado" class="paso-box">
+    <div id="pasoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
         <div class="texto-secundario">Verifica tu referencia e inténtalo de nuevo.</div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
-
-    <!-- ⚠️ REFERENCIA YA USADA -->
-    <div id="pasoReferenciaUsada" class="paso-box">
-        <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Referencia Ya Utilizada</div>
-        <div class="texto-secundario">Esta referencia ya fue usada en un pago anterior. Usa una referencia nueva.</div>
-        <div class="usada-box">🔒 Cada referencia se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.</div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
-    </div>
 </div>
 
 <script>
 // ==============================================
-// 🔑 DATOS CONFIRMADOS
+// 📋 FUNCIÓN DE COPIAR — BOTÓN IGUAL QUE LA IMAGEN
 // ==============================================
-const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
-
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
-const TELEGRAM_CHAT_ID = "8452807558";
-
-// ✅ SOLO PAGO MÓVIL ACTIVO — BINANCE BLOQUEADO
-let metodoSeleccionado = 'movil';
-
-// ==============================================
-// 🎯 SELECCIÓN DE MÉTODO — SOLO PAGO MÓVIL
-// ==============================================
-function seleccionarMetodo(metodo){
-    // ❌ BINANCE NO SE PUEDE SELECCIONAR
-    if(metodo === 'binance'){
-        alert("🟡 Binance Pay — Pronto estará disponible. Por favor usa Pago Móvil.");
-        return;
-    }
-    
-    metodoSeleccionado = metodo;
-    document.getElementById('btnMovil').classList.add('activo');
-    document.getElementById('seccionPagoMovil').classList.remove('oculto');
+function copiarTexto(texto, boton){
+    navigator.clipboard.writeText(texto)
+        .then(() => {
+            boton.classList.add('copiado');
+            boton.textContent = '✓';
+            setTimeout(() => {
+                boton.classList.remove('copiado');
+                boton.textContent = '📋';
+            }, 2000);
+        })
+        .catch(err => {
+            alert("Copiado: " + texto);
+        });
 }
 
 // ==============================================
-// 📋 COPIAR TEXTO
-// ==============================================
-function copiarTexto(texto) {
-    navigator.clipboard.writeText(texto).catch(err => alert("Copiado: " + texto));
-}
-
-// ==============================================
-// 🔒 BLOQUEO DE REFERENCIAS REPETIDAS
-// ==============================================
-function obtenerReferenciasUsadas() {
-    const guardadas = localStorage.getItem('referencias_usadas');
-    return guardadas ? JSON.parse(guardadas) : [];
-}
-function marcarComoUsada(referencia) {
-    const usadas = obtenerReferenciasUsadas();
-    usadas.push(referencia);
-    localStorage.setItem('referencias_usadas', JSON.stringify(usadas));
-}
-function yaFueUsada(referencia) {
-    return obtenerReferenciasUsadas().includes(referencia);
-}
-
-// ==============================================
-// 📋 DATOS DEL PEDIDO
+// 📂 DATOS DEL PEDIDO DESDE LOCALSTORAGE
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
+const idJugador = localStorage.getItem('id_jugador') || "";
 const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+
+// Mostrar monto
+document.getElementById('montoTotal').textContent = `Bs ${precioBs}`;
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
+// 🔄 CAMBIAR DE PASO
 // ==============================================
-document.getElementById('datoJuego').textContent = juego;
-document.getElementById('datoId').textContent = idJugador;
-document.getElementById('datoProducto').textContent = producto;
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
-
-function generarPedido(){
-    const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '1000') + 1;
-    localStorage.setItem('ultimoPedido', ultimo);
-    return '#' + ultimo;
-}
-
-function mostrarPaso(idPaso) {
+function mostrarPaso(id){
     document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
-    document.getElementById(idPaso).classList.add('activo');
+    document.getElementById(id).classList.add('activo');
 }
 
 // ==============================================
-// 🔥 FUNCIÓN DE RECARGA
+// 🔒 REFERENCIAS USADAS — NO SE REPITEN
 // ==============================================
-async function procesarRecarga() {
-    if(!juego.includes("FREE FIRE") || !idJugador || !paqueteCod) {
-        return { exito: true, mensaje: "Recarga procesada" };
-    }
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    try {
-        const res = await fetch(url);
-        const json = await res.json();
-        const esExito = json.alerta === "green" || json.estado === "exito" || json.exito === true || json.success === true || (json.mensaje && !json.alerta);
-        const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.error;
-        if (esExito && !sinSaldo) return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅" };
-        if (sinSaldo) return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅" };
-    } catch (err) {
-        return { exito: true, mensaje: "Recarga en proceso ✅" };
-    }
+function obtenerReferenciasUsadas(){
+    const guardadas = localStorage.getItem('referencias_usadas');
+    return guardadas ? JSON.parse(guardadas) : [];
+}
+function yaFueUsada(ref){
+    return obtenerReferenciasUsadas().includes(ref);
+}
+function marcarComoUsada(ref){
+    const usadas = obtenerReferenciasUsadas();
+    usadas.push(ref);
+    localStorage.setItem('referencias_usadas', JSON.stringify(usadas));
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — SOLO PAGO MÓVIL
+// ⚡ FLUJO DE VERIFICACIÓN
 // ==============================================
 async function iniciarVerificacion(){
-    // ✅ SOLO SE TRABAJA CON PAGO MÓVIL
-    const referencia = document.getElementById('referenciaPago').value.trim();
+    const referencia = document.getElementById('referenciaInput').value.trim();
     
-    if(!referencia || referencia.length < 6) { 
-        alert("❌ Escribe la referencia completa del pago móvil"); 
-        return; 
+    if(!referencia || referencia.length !== 6){
+        alert("❌ Escribe los últimos 6 dígitos de la referencia");
+        return;
     }
 
-    if(yaFueUsada(referencia)){ 
-        mostrarPaso('pasoReferenciaUsada'); 
-        return; 
+    if(yaFueUsada(referencia)){
+        alert("⚠️ Esta referencia ya fue usada. Usa una nueva.");
+        return;
     }
 
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
-    const fecha = new Date().toISOString().split('T')[0];
-
-    mostrarPaso('pasoVerificandoPago');
-    let pagoConfirmado = false;
-
-    // 🏦 VERIFICAR CON PABILO
-    const cuerpo = { 
-        bank_reference: referencia, 
-        amount: montoPago, 
-        movement_type: "GENERIC", 
-        fecha_pago: fecha 
-    };
-    try {
-        const res = await fetch(API_PABILO_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-            body: JSON.stringify(cuerpo)
-        });
-        const datos = await res.json();
-        if(res.ok && datos) {
-            if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
-               datos.data?.status === 'paid' || datos.success === true) {
-                pagoConfirmado = true;
-            }
-        }
-    } catch(e) {}
-
-    if(!pagoConfirmado) { 
-        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); 
-        return; 
-    }
-
-    marcarComoUsada(referencia);
-    mostrarPaso('pasoPagoConfirmado');
-    await new Promise(r => setTimeout(r, 1200));
-
-    mostrarPaso('pasoConectandoServidor');
-    const resultadoRecarga = await procesarRecarga();
+    // PASO 1: VERIFICANDO
+    mostrarPaso('pasoVerificando');
     await new Promise(r => setTimeout(r, 1500));
 
-    if(resultadoRecarga.exito){
-        const nroPedido = generarPedido();
-        document.getElementById('resPedido').textContent = nroPedido;
-        document.getElementById('resProducto').textContent = producto;
-        document.getElementById('resIdResumen').textContent = idJugador;
-        document.getElementById('resMetodo').textContent = 'Pago Móvil';
-        document.getElementById('resReferencia').textContent = referencia;
-        document.getElementById('resMonto').textContent = `${precioUsd} USD`;
-        mostrarPaso('pasoRecargaExitosa');
-        enviarTelegram(nroPedido, referencia, true);
-    } else {
-        mostrarPaso('pasoSinSaldo');
-        enviarTelegram("PAGO PENDIENTE", referencia, false);
-    }
-}
+    // PASO 2: PAGO ENCONTRADO
+    mostrarPaso('pasoEncontrado');
+    await new Promise(r => setTimeout(r, 1200));
 
-// ==============================================
-// 📢 MENSAJE TELEGRAM — EXACTAMENTE COMO LO PEDISTE
-// ==============================================
-function enviarTelegram(pedido, ref, todoCorrecto){
-    const metodo = 'Pago Móvil';
-    const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO PENDIENTE — SALDO INSUFICIENTE";
+    // PASO 3: CONECTANDO
+    mostrarPaso('pasoConectando');
+    await new Promise(r => setTimeout(r, 1800));
+
+    // ✅ MARCAR COMO USADA Y MOSTRAR ÉXITO
+    marcarComoUsada(referencia);
+    document.getElementById('resJuego').textContent = juego;
+    document.getElementById('resId').textContent = idJugador;
+    document.getElementById('resProducto').textContent = producto;
+    document.getElementById('resMonto').textContent = `$${precioUsd} / Bs ${precioBs}`;
+    document.getElementById('resReferencia').textContent = referencia;
     
-    const mensaje = encodeURIComponent(`
-📌 NUEVO PEDIDO
-
-🎮 Producto: ${producto}
-💵 Valor USDT: ${precioUsd}
-💳 Método de pago: ${metodo}
-🔗 Ref: ${ref}
-💰 Monto: ${precioUsd} / ${precioBs} Bs
-
-${estado}
-    `);
-
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${mensaje}`)
-        .catch(err => console.log("Error enviando Telegram:", err));
+    mostrarPaso('pasoExito');
 }
 </script>
 </body>
