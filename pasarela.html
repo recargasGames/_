@@ -7,7 +7,7 @@
 <style>
 :root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-binance:#f3ba2f;--color-borde:rgba(51,65,85,0.5)}
 
-/* 🖼️ FONDO IDÉNTICO AL DE LOS JUEGOS — fondo.jpg */
+/* 🖼️ FONDO IDÉNTICO AL DE LOS JUEGOS */
 body{
     background-image:url('fondo.jpg');
     background-size:cover;
@@ -20,7 +20,7 @@ body{
     padding-top:80px;
 }
 
-/* 🔒 CABECERA — SOLO EL LOGO, SIN TEXTO "RECARGASGAMES" */
+/* 🔒 CABECERA — LOGO OVALADO/REDONDEADO ARRIBA A LA IZQUIERDA */
 .header{
     position:fixed;
     top:0;
@@ -29,7 +29,7 @@ body{
     background:rgba(11,18,32,.95);
     padding:12px 20px;
     display:flex;
-    justify-content:center;
+    justify-content:flex-start;
     align-items:center;
     border-bottom:2px solid var(--color-principal);
     z-index:999;
@@ -37,6 +37,8 @@ body{
 .header img{
     height:50px;
     width:auto;
+    border-radius:50%; /* ✅ OVALADO/CURVITAS */
+    object-fit:contain;
 }
 
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
@@ -55,7 +57,7 @@ body{
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
 
-/* 📋 TARJETA TRANSPARENTE PERO SE LEE BIEN — TAL CUAL COMO LO TENÍAS */
+/* 📋 TARJETA TRANSPARENTE PERO SE LEE BIEN */
 .resumen-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -76,6 +78,36 @@ body{
 .resumen-etiqueta{color:#e2e8f0}
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
+
+/* 🎯 SELECCIÓN DE MÉTODO DE PAGO — AHÍ MISMO EN LA PASARELA */
+.metodo-pago-box{
+    display:flex;
+    gap:12px;
+    margin:25px 0;
+}
+.metodo-btn{
+    flex:1;
+    padding:15px;
+    background:rgba(17,24,39,0.55);
+    border:2px solid rgba(51,65,85,0.5);
+    border-radius:12px;
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+    backdrop-filter:blur(10px);
+}
+.metodo-btn.activo{
+    border-color:var(--color-principal);
+    background:rgba(16,185,129,0.15);
+    color:var(--color-principal);
+}
+.metodo-btn.binance.activo{
+    border-color:var(--color-binance);
+    background:rgba(243,186,47,0.15);
+    color:var(--color-binance);
+}
 
 .datos-pago-box{
     background:rgba(17,24,39,0.55);
@@ -128,6 +160,7 @@ body{
     transition:.2s;
 }
 .btn-confirmar:hover{background:var(--color-hover)}
+.btn-confirmar:disabled{opacity:0.5;cursor:not-allowed}
 
 .volver-btn{
     display:inline-block;
@@ -182,24 +215,24 @@ body{
 .copiar-btn:hover{background:rgba(16,185,129,.2)}
 .binance-color{color:var(--color-binance)}
 .titulo-metodo{text-align:center;font-size:20px;font-weight:700;margin-bottom:20px}
+.oculto{display:none !important}
 </style>
 </head>
 <body>
 
-<!-- 🔒 CABECERA — SOLO LOGO, SIN NOMBRE DE LA TIENDA -->
+<!-- 🔒 LOGO OVALADO ARRIBA A LA IZQUIERDA -->
 <div class="header">
-    <img src="logo.png" alt="Logo">
+    <img src="logo.png" alt="Logo RecargasGames">
 </div>
 
 <div class="main">
     <!-- ============================================== -->
-    <!-- PASO 0: SOLO DATOS DEL MÉTODO SELECCIONADO DESDE EL JUEGO -->
+    <!-- PASO 0: ELEGIR MÉTODO + DATOS DEL PEDIDO -->
     <!-- ============================================== -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
-        <div class="aviso-box">⚠️ Referencia/ID completa — <strong>Solo se puede usar UNA VEZ</strong></div>
         
-        <!-- 📋 TARJETA TRANSPARENTE — JUEGO, ID, PRODUCTO, TOTAL -->
+        <!-- 📋 TARJETA TRANSPARENTE — RESUMEN DEL PEDIDO -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -207,9 +240,15 @@ body{
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
-        <!-- 🏦 SOLO DATOS DE PAGO MÓVIL -->
-        <div id="seccionPagoMovil" style="display:none">
-            <h3 class="titulo-metodo">🏦 Pago Móvil</h3>
+        <!-- 🎯 ELEGIR MÉTODO DE PAGO — AHÍ MISMO EN LA PASARELA -->
+        <div class="metodo-pago-box">
+            <button class="metodo-btn activo" id="btnMovil" onclick="seleccionarMetodo('movil')">🏦 Pago Móvil</button>
+            <button class="metodo-btn binance" id="btnBinance" onclick="seleccionarMetodo('binance')">🟡 Binance Pay</button>
+        </div>
+
+        <!-- 🏦 DATOS DE PAGO MÓVIL -->
+        <div id="seccionPagoMovil">
+            <h3 class="titulo-metodo">Datos de Pago Móvil</h3>
             <div class="datos-pago-box">
                 <div class="dato-line">
                     <div class="dato-texto"><strong>Banco:</strong> <span>Banco de Venezuela</span></div>
@@ -228,9 +267,9 @@ body{
             </div>
         </div>
 
-        <!-- 🟡 SOLO DATOS DE BINANCE -->
-        <div id="seccionBinance" style="display:none">
-            <h3 class="titulo-metodo binance-color">🟡 Binance Pay</h3>
+        <!-- 🟡 DATOS DE BINANCE -->
+        <div id="seccionBinance" class="oculto">
+            <h3 class="titulo-metodo binance-color">Datos de Binance Pay</h3>
             <div class="datos-pago-box">
                 <div class="dato-line">
                     <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color">964617189</span></div>
@@ -244,7 +283,9 @@ body{
             </div>
         </div>
 
-        <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
+        <div class="aviso-box">⚠️ Cada referencia/ID solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
+
+        <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
     <!-- PASO 1: VERIFICANDO PAGO -->
@@ -327,20 +368,27 @@ const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-// ==============================================
-// 🎯 MÉTODO VIENE SELECCIONADO DESDE EL JUEGO — SIN BOTONES, SIN ELEGIR DE NUEVO
-// ==============================================
-const metodoSeleccionado = localStorage.getItem('metodo_pago') || 'movil';
+let metodoSeleccionado = 'movil'; // ✅ Por defecto Pago Móvil
 
-// ✅ MOSTRAR SOLO LO QUE CORRESPONDE — NADA DE LO OTRO
-if(metodoSeleccionado === 'binance'){
-    document.getElementById('seccionBinance').style.display = 'block';
-    document.getElementById('seccionPagoMovil').style.display = 'none';
-    document.getElementById('textoVerificando').textContent = "Verificando tu transacción de Binance...";
-}else{
-    document.getElementById('seccionPagoMovil').style.display = 'block';
-    document.getElementById('seccionBinance').style.display = 'none';
-    document.getElementById('textoVerificando').textContent = "Estamos buscando tu pago en el sistema bancario...";
+// ==============================================
+// 🎯 CAMBIAR MÉTODO DE PAGO — AHÍ MISMO EN LA PASARELA
+// ==============================================
+function seleccionarMetodo(metodo){
+    metodoSeleccionado = metodo;
+    
+    // Cambiar botones activos
+    document.getElementById('btnMovil').classList.toggle('activo', metodo === 'movil');
+    document.getElementById('btnBinance').classList.toggle('activo', metodo === 'binance');
+    
+    // Mostrar/ocultar secciones
+    document.getElementById('seccionPagoMovil').classList.toggle('oculto', metodo !== 'movil');
+    document.getElementById('seccionBinance').classList.toggle('oculto', metodo !== 'binance');
+    
+    // Cambiar texto de verificación
+    document.getElementById('textoVerificando').textContent = 
+        metodo === 'movil' 
+            ? "Estamos buscando tu pago en el sistema bancario..." 
+            : "Verificando tu transacción de Binance...";
 }
 
 // ==============================================
@@ -371,7 +419,7 @@ function yaFueUsada(referencia) {
 }
 
 // ==============================================
-// 📋 DATOS DEL PEDIDO
+// 📋 DATOS DEL PEDIDO — DESDE EL JUEGO
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
@@ -421,44 +469,72 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO
+// ⚡ FLUJO COMPLETO — ARREGLADO EL ERROR
 // ==============================================
 async function iniciarVerificacion(){
-    const referencia = metodoSeleccionado === 'movil' 
-        ? document.getElementById('referenciaPago').value.trim()
-        : document.getElementById('referenciaBinance').value.trim();
-
-    if(!referencia || referencia.length < 6){ 
-        alert(metodoSeleccionado === 'movil' ? "❌ Escribe la referencia completa" : "❌ Escribe el ID de transacción de Binance"); 
-        return; 
+    // ✅ OBTENER REFERENCIA SEGÚN MÉTODO — SIN ERROR, VALIDACIÓN CORRECTA
+    let referencia = "";
+    if(metodoSeleccionado === 'movil') {
+        referencia = document.getElementById('referenciaPago').value.trim();
+        if(!referencia || referencia.length < 6) {
+            alert("❌ Escribe la referencia completa del pago móvil");
+            return;
+        }
+    } else {
+        referencia = document.getElementById('referenciaBinance').value.trim();
+        if(!referencia || referencia.length < 4) {
+            alert("❌ Escribe el ID de transacción de Binance"); // ✅ SIN ERROR, MENSAJE CORRECTO
+            return;
+        }
     }
 
+    // 🛡️ Verificar referencia repetida
     if(yaFueUsada(referencia)){ 
         mostrarPaso('pasoReferenciaUsada'); 
         return; 
     }
 
+    // Preparar monto para verificación
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     const fecha = new Date().toISOString().split('T')[0];
 
+    // PASO 1: VERIFICANDO PAGO
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
 
+    // 🏦 VERIFICAR PAGO MÓVIL CON PABILO
     if(metodoSeleccionado === 'movil') {
-        const cuerpo = { bank_reference: referencia, amount: montoPago, movement_type: "GENERIC", fecha_pago: fecha };
+        const cuerpo = { 
+            bank_reference: referencia, 
+            amount: montoPago, 
+            movement_type: "GENERIC", 
+            fecha_pago: fecha 
+        };
         try {
             const res = await fetch(API_PABILO_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${API_KEY}` 
+                },
                 body: JSON.stringify(cuerpo)
             });
             const datos = await res.json();
+            console.log("🏦 Respuesta Pabilo:", datos);
+            
             if(res.ok && datos) {
-                if(datos.message === 'payment confirmed' || datos.status === 'paid' || datos.success === true) pagoConfirmado = true;
+                if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
+                   datos.data?.status === 'paid' || datos.success === true) {
+                    pagoConfirmado = true;
+                }
             }
-        } catch(e) {}
-    } else {
+        } catch(e) { 
+            console.error("Error verificación:", e); 
+        }
+    }
+    // 🟡 BINANCE — MARCAR COMO CONFIRMADO
+    else {
         pagoConfirmado = true;
     }
 
@@ -467,14 +543,17 @@ async function iniciarVerificacion(){
         return; 
     }
 
+    // PASO 2: PAGO CONFIRMADO
     marcarComoUsada(referencia);
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
+    // PASO 3: CONECTANDO + PROCESAR RECARGA
     mostrarPaso('pasoConectandoServidor');
     const resultadoRecarga = await procesarRecarga();
     await new Promise(r => setTimeout(r, 1500));
 
+    // ✅ RECARGA EXITOSA
     if(resultadoRecarga.exito){
         const nroPedido = generarPedido();
         document.getElementById('resPedido').textContent = nroPedido;
@@ -485,9 +564,11 @@ async function iniciarVerificacion(){
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
         mostrarPaso('pasoRecargaExitosa');
         enviarTelegram(nroPedido, referencia, "✅ RECARGA ENVIADA — " + resultadoRecarga.mensaje);
-    } else {
+    }
+    // ⚠️ SIN SALDO
+    else {
         mostrarPaso('pasoSinSaldo');
-        enviarTelegram("PAGO PENDIENTE", referencia, "⚠️ SALDO INSUFICIENTE — Método: " + (metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance'));
+        enviarTelegram("PAGO PENDIENTE", referencia, "⚠️ SALDO INSUFICIENTE — Método: " + (metodoSeleccionado === 'movil' ? 'Pago Móvil' : 'Binance') + ". Producto: " + producto);
     }
 }
 
