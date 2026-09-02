@@ -23,7 +23,7 @@ body{
     padding-top:110px;
 }
 
-/* 🔒 BARRA FIJA — SOLO LOGO, SIN NOMBRE */
+/* 🔒 BARRA FIJA — SOLO LOGO */
 .barra-superior{
     position:fixed;
     top:0;
@@ -50,7 +50,7 @@ body{
     background:transparent;
 }
 
-/* MENÚ — SIN BRAWL STARS */
+/* MENÚ */
 .games-menu{
     display:flex;
     gap:8px;
@@ -79,7 +79,7 @@ body{
     border-radius:0;
 }
 
-/* CONTENIDO — TARJETA ID MÁS SEPARADITA */
+/* CONTENIDO */
 .main{
     padding:20px;
     padding-top:30px;
@@ -206,7 +206,7 @@ body{
 </div>
 
 <div class="main">
-    <!-- ✅ TARJETA DEL ID CON VERIFICACIÓN REAL -->
+    <!-- ✅ TARJETA DEL ID CON VERIFICACIÓN REAL CORREGIDA -->
     <div class="card-panel">
         <div class="panel-title">ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
@@ -294,7 +294,7 @@ body{
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script>
-// 🔑 API Central Pro — Verificación de Jugador
+// 🔑 API Central Pro
 const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
 const FF_API_VALIDAR_URL = "https://apicentral.pro/apis/freefire.jsp";
 
@@ -306,7 +306,7 @@ let idJugadorActual = "";
 const juegoActual = "FREE FIRE";
 
 // ==============================================
-// 💰 TASA BINANCE — ACTUALIZA PRECIOS EN Bs
+// 💰 TASA BINANCE
 // ==============================================
 async function cargarTasaBinance() {
     try {
@@ -342,7 +342,7 @@ window.seleccionarPago=function(m,e){
 };
 
 // ==============================================
-// ✅ VERIFICACIÓN REAL DEL JUGADOR — API CENTRAL PRO
+// ✅ VERIFICACIÓN DEL JUGADOR — ARREGLADA
 // ==============================================
 async function verificarID(id){
     if(!/^\d{4,12}$/.test(id)){
@@ -356,14 +356,14 @@ async function verificarID(id){
         if (!respuesta.ok) throw new Error("Error de conexión");
         
         const datos = await respuesta.json();
-        console.log("Respuesta API:", datos); // Para depuración
+        console.log("Respuesta API:", datos);
 
-        // ✅ Analizar respuesta de API Central Pro
-        if(datos && (datos.exito === true || datos.success === true || datos.alerta === "green" || datos.nombre)){
-            const nombre = datos.nombre || datos.nombre_jugador || `Jugador ${id}`;
+        // ✅ COINCIDE EXACTAMENTE CON LA RESPUESTA DE API CENTRAL PRO
+        if(datos && datos.code === "true"){
+            const nombre = datos.nickname || `Jugador ${id}`;
             return {ok: true, nombre: nombre, msg: `✅ Jugador verificado: ${nombre}`};
         } else {
-            return {ok: false, msg: datos.mensaje || datos.error || "Jugador no encontrado ❌"};
+            return {ok: false, msg: datos.mensaje || "Jugador no encontrado ❌"};
         }
     } catch (error) {
         console.error("Error verificando ID:", error);
@@ -372,7 +372,7 @@ async function verificarID(id){
 }
 
 // ==============================================
-// 📋 MANEJO DEL INPUT DE ID
+// 📋 MANEJO DEL INPUT
 // ==============================================
 let timeoutId = null;
 const inputId = document.getElementById("jugadorId");
@@ -456,9 +456,8 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
 // 🔄 INICIALIZAR
 // ==============================================
 cargarTasaBinance();
-setInterval(cargarTasaBinance, 60000); // Actualizar tasa cada minuto
+setInterval(cargarTasaBinance, 60000);
 
-// Botón volver arriba
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
