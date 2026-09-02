@@ -261,6 +261,7 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Nombre Jugador</span><span class="resumen-valor" id="datoNombre">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
@@ -342,6 +343,7 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Nombre Jugador</span><span class="resumen-valor" id="resNombreResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método de Pago</span><span class="resumen-valor">Pago Móvil</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
@@ -399,15 +401,17 @@ let metodoSeleccionado = 'movil'; // Solo Pago Móvil activo por ahora
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || "";
+const nombreJugador = localStorage.getItem('nombre_jugador') || "Jugador"; // ✅ AHORA SE CARGA BIEN
 const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
+// 📄 CARGAR DATOS EN PANTALLA — INCLUIDO NOMBRE
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
+document.getElementById('datoNombre').textContent = nombreJugador; // ✅ NOMBRE DEL JUGADOR
 document.getElementById('datoProducto').textContent = producto;
 document.getElementById('datoMontoTotal').innerHTML = 
     `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
@@ -422,7 +426,6 @@ function copiarTexto(texto, boton){
             setTimeout(() => boton.classList.remove('copiado'), 2000);
         })
         .catch(err => {
-            // Fallback para navegadores que no soportan clipboard API
             const input = document.createElement('input');
             input.value = texto;
             document.body.appendChild(input);
@@ -468,7 +471,7 @@ function generarPedido(){
 }
 
 // ==============================================
-// 📢 ENVIAR NOTIFICACIÓN A TELEGRAM
+// 📢 ENVIAR NOTIFICACIÓN A TELEGRAM — CON NOMBRE
 // ==============================================
 function enviarTelegram(pedido, ref, todoCorrecto){
     const estado = todoCorrecto 
@@ -479,7 +482,8 @@ function enviarTelegram(pedido, ref, todoCorrecto){
 📌 NUEVO PEDIDO RECIBIDO
 
 🎮 Juego: ${juego}
-🆔 ID Jugador: ${idJugador}
+👤 Jugador: ${nombreJugador}
+🆔 ID: ${idJugador}
 💎 Producto: ${producto}
 💵 Valor: ${precioUsd} USD / ${precioBs} Bs
 💳 Método de pago: Pago Móvil (BDV)
@@ -514,12 +518,10 @@ async function verificarPagoPagoNorte(referencia, montoBs) {
         const datos = await respuesta.json();
         console.log("✅ Respuesta PagoNorte:", datos);
 
-        // ✅ Pago confirmado si la API lo devuelve como válido
         if (datos.ok === true && datos.alerta === "green") {
             return { confirmado: true, mensaje: datos.mensaje || "Pago verificado correctamente" };
         }
         
-        // ❌ Pago no encontrado
         if (datos.alerta === "red" || !datos.ok) {
             return { confirmado: false, mensaje: datos.mensaje || "Pago no encontrado" };
         }
@@ -540,7 +542,7 @@ async function ejecutarRecargaPagoNorte(idJugador, producto, referencia) {
         formData.append('action', 'recarga');
         formData.append('api_key', PAGONORTE.apiKey);
         formData.append('api_secret', PAGONORTE.apiSecret);
-        formData.append('tipo', 'recargaBloodStrike'); // Cambia según el juego
+        formData.append('tipo', 'recargaBloodStrike');
         formData.append('id_jugador', idJugador);
         formData.append('paquete', producto);
         formData.append('referencia', referencia);
@@ -576,23 +578,19 @@ async function ejecutarRecargaPagoNorte(idJugador, producto, referencia) {
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    // Validaciones básicas
     if(!referencia || referencia.length < 6) { 
         alert("❌ Escribe la referencia completa del pago"); 
         return; 
     }
 
-    // Verificar si ya fue usada
     if(yaFueUsada(referencia)){ 
         mostrarPaso('pasoReferenciaUsada'); 
         return; 
     }
 
-    // PASO 1: Mostrar verificación
     mostrarPaso('pasoVerificandoPago');
     await new Promise(r => setTimeout(r, 1200));
 
-    // PASO 2: Verificar pago en PagoNorte
     const resultadoPago = await verificarPagoPagoNorte(referencia, precioBs);
 
     if(!resultadoPago.confirmado) { 
@@ -600,21 +598,21 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    // ✅ Pago confirmado — marcar como usado
     marcarComoUsada(referencia);
     mostrarPaso('pasoPagoConfirmado');
+    document.getElementById('mensajeConfirmacion').textContent = 
+        `¡Hola ${nombreJugador}! Pago verificado correctamente. Preparando recarga...`;
     await new Promise(r => setTimeout(r, 1200));
 
-    // PASO 3: Conectar con servidor de recargas
     mostrarPaso('pasoConectandoServidor');
     const resultadoRecarga = await ejecutarRecargaPagoNorte(idJugador, producto, referencia);
     await new Promise(r => setTimeout(r, 1500));
 
-    // PASO 4: Resultado final
     if(resultadoRecarga.exito){
         const nroPedido = generarPedido();
         document.getElementById('resPedido').textContent = nroPedido;
         document.getElementById('resProducto').textContent = producto;
+        document.getElementById('resNombreResumen').textContent = nombreJugador;
         document.getElementById('resIdResumen').textContent = idJugador;
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
