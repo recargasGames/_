@@ -1,168 +1,39 @@
-// ==============================================
-// 📁 api/verificar-pago.js
-// Backend para Vercel con Pabilo
-// ==============================================
+// api/verificar-pago.js — SOLO vive en el servidor, NADIE lo ve
+const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
+const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 
-const PABILO_CONFIG = {
-    API_URL: 'https://api.pabilo.app',
-    USER_BANK_ID: '6a93ac1b98055a34bd8b05f2',
-    API_KEY: '5349b9e7-1c73-406d-ac8c-ad4345241789'
-};
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', 'https://www.recargasgames.shop');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-module.exports = async (req, res) => {
-    // ==============================================
-    // 🔧 CONFIGURAR CORS
-    // ==============================================
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+  const { referencia, monto, fecha } = req.body;
 
-    if (req.method !== 'POST') {
-        return res.status(405).json({ success: false, mensaje: 'Método no permitido' });
-    }
+  if (!referencia || !monto) {
+    return res.status(400).json({ error: 'Faltan datos: referencia o monto' });
+  }
 
-    const { referencia, monto, juego, id_jugador, producto, paquete_cod } = req.body;
+  try {
+    const respuesta = await fetch(`https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        bank_reference: referencia,
+        amount: monto,
+        movement_type: "GENERIC",
+        fecha_pago: fecha
+      })
+    });
 
-    if (!referencia || referencia.length < 4) {
-        return res.json({ success: false, mensaje: 'Referencia inválida (mínimo 4 dígitos)' });
-    }
-
-    if (!monto || isNaN(monto) || monto <= 0) {
-        return res.json({ success: false, mensaje: 'Monto inválido' });
-    }
-
-    try {
-        console.log(`🔍 Verificando pago con Pabilo - Ref: ${referencia}, Monto: ${monto} Bs`);
-        
-        const url = `${PABILO_CONFIG.API_URL}/userbankpayment/${PABILO_CONFIG.USER_BANK_ID}/betaserio`;
-        
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${PABILO_CONFIG.API_KEY}`
-            },
-            body: JSON.stringify({
-                bank_reference: referencia,
-                amount: parseFloat(monto),
-                movement_type: "GENERIC",
-                fecha_pago: new Date().toISOString().split('T')[0]
-            })
-        });
-
-        const resultado = await response.json();
-        console.log('📊 Respuesta de Pabilo:', resultado);
-
-        let pagoVerificado = false;
-        let mensajePabilo = '';
-
-        if (resultado.success === true || 
-            resultado.status === 'success' || 
-            resultado.data || 
-            (resultado.codigo && resultado.codigo === '00')) {
-            pagoVerificado = true;
-            mensajePabilo = 'Pago verificado exitosamente';
-        } else if (resultado.error || resultado.message) {
-            mensajePabilo = resultado.message || resultado.error || 'Error en la verificación';
-        }
-
-        if (!pagoVerificado) {
-            return res.json({
-                success: false,
-                mensaje: `❌ Pago no encontrado: ${mensajePabilo}`,
-                detalle: resultado
-            });
-        }
-
-        console.log('✅ Pago verificado por Pabilo');
-
-        // ==============================================
-        // 🎮 EJECUTAR RECARGA (FREE FIRE)
-        // ==============================================
-        let recargaExitosa = false;
-        let mensajeRecarga = '';
-
-        if (juego.includes('FREE FIRE')) {
-            const FF_API = 'https://apicentral.pro/apis/freefire.jsp';
-            const FF_TOKEN = 'NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s';
-            
-            const urlFF = `${FF_API}?token=${FF_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(id_jugador)}&paquete=${paquete_cod}`;
-            
-            try {
-                const responseFF = await fetch(urlFF);
-                const dataFF = await responseFF.json();
-                
-                if (dataFF?.codigo === '00' || dataFF?.status === 'success') {
-                    recargaExitosa = true;
-                    mensajeRecarga = 'Recarga Free Fire exitosa';
-                } else {
-                    mensajeRecarga = dataFF?.mensaje || 'Error en recarga Free Fire';
-                }
-            } catch (error) {
-                mensajeRecarga = 'Error al conectar con servidor de Free Fire';
-            }
-        } else if (juego.includes('BLOOD STRIKE')) {
-            recargaExitosa = true;
-            mensajeRecarga = 'Recarga Blood Strike (simulada)';
-        }
-
-        // ==============================================
-        // 📱 ENVIAR NOTIFICACIÓN POR TELEGRAM
-        // ==============================================
-        const TELEGRAM_TOKEN = '8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM';
-        const TELEGRAM_CHAT_ID = '8452807558';
-
-        const mensajeTelegram = `
-🛒 NUEVA COMPRA - PABILO ✅
-─────────────────
-🎮 Juego: ${juego}
-👤 ID: ${id_jugador}
-📦 Producto: ${producto}
-💰 Monto: ${monto} Bs
-🔑 Referencia: ${referencia}
-📊 Pabilo: ${pagoVerificado ? 'VERIFICADO ✅' : 'FALLIDO ❌'}
-📊 Recarga: ${recargaExitosa ? 'EXITOSA ✅' : 'FALLIDA ⚠️'}
-🕐 ${new Date().toLocaleString('es-VE')}
-        `.trim();
-
-        try {
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: mensajeTelegram
-                })
-            });
-        } catch (e) {
-            console.log('⚠️ Error enviando Telegram:', e.message);
-        }
-
-        if (recargaExitosa) {
-            res.json({
-                success: true,
-                mensaje: '✅ Pago verificado y recarga realizada',
-                recarga: 'Completada',
-                pabilo: resultado
-            });
-        } else {
-            res.json({
-                success: false,
-                mensaje: `⚠️ Pago verificado pero recarga falló: ${mensajeRecarga}`,
-                recarga: 'Fallida',
-                pabilo: resultado
-            });
-        }
-
-    } catch (error) {
-        console.error('❌ Error en verificación:', error);
-        res.status(500).json({
-            success: false,
-            mensaje: 'Error interno del servidor: ' + error.message
-        });
-    }
-};
+    const datos = await respuesta.json();
+    res.status(respuesta.ok ? 200 : respuesta.status).json(datos);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al verificar pago', mensaje: error.message });
+  }
+}
