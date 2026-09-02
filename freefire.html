@@ -206,7 +206,7 @@ body{
 </div>
 
 <div class="main">
-    <!-- ✅ TARJETA DEL ID CON VERIFICACIÓN REAL -->
+    <!-- ✅ TARJETA DEL ID CON VERIFICACIÓN REAL SEGÚN DOCUMENTACIÓN -->
     <div class="card-panel">
         <div class="panel-title">ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
@@ -294,9 +294,9 @@ body{
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script>
-// 🔑 API Central Pro
+// 🔑 API Central Pro — SEGÚN DOCUMENTACIÓN
 const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_VALIDAR_URL = "https://apicentral.pro/apis/freefire.jsp";
+const FF_API_BASE_URL = "https://apicentral.pro/apis/freefire.jsp";
 
 let metodo = "PAGO MOVIL";
 let tasa = 930;
@@ -342,7 +342,8 @@ window.seleccionarPago=function(m,e){
 };
 
 // ==============================================
-// ✅ VERIFICACIÓN DEL JUGADOR — CON CORS PROXY
+// ✅ VALIDAR JUGADOR — SEGÚN DOCUMENTACIÓN OFICIAL
+// Parámetros: token, tipo=validarJugador, id_jugador
 // ==============================================
 async function verificarID(id){
     if(!/^\d{4,12}$/.test(id)){
@@ -350,8 +351,10 @@ async function verificarID(id){
     }
 
     try {
+        // 📋 Construimos la URL EXACTAMENTE como dice la documentación
+        const apiUrl = `${FF_API_BASE_URL}?token=${FF_API_TOKEN}&tipo=validarJugador&id_jugador=${encodeURIComponent(id)}`;
+        
         // 🚀 Usamos proxy para saltar el bloqueo CORS del navegador
-        const apiUrl = `${FF_API_VALIDAR_URL}?token=${FF_API_TOKEN}&tipo=validarJugador&id_jugador=${encodeURIComponent(id)}`;
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
         
         const respuesta = await fetch(proxyUrl);
@@ -359,9 +362,9 @@ async function verificarID(id){
         if (!respuesta.ok) throw new Error("Error de conexión");
         
         const datos = await respuesta.json();
-        console.log("Respuesta API:", datos);
+        console.log("✅ Respuesta API Central Pro:", datos);
 
-        // ✅ Coincide exactamente con la respuesta real de API Central Pro
+        // ✅ Coincide con la respuesta real: {"code":"true","nickname":"...","mensaje":"..."}
         if(datos && datos.code === "true"){
             const nombre = datos.nickname || `Jugador ${id}`;
             return {ok: true, nombre: nombre, msg: `✅ Jugador verificado: ${nombre}`};
@@ -369,7 +372,7 @@ async function verificarID(id){
             return {ok: false, msg: datos.mensaje || "Jugador no encontrado ❌"};
         }
     } catch (error) {
-        console.error("Error verificando ID:", error);
+        console.error("❌ Error verificando ID:", error);
         return {ok: false, msg: "Error al verificar. Intenta de nuevo."};
     }
 }
