@@ -285,12 +285,9 @@ body{
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
 <script>
-// 🔑 API Central Pro
+// 🔑 API Central Pro — EXACTAMENTE COMO FUNCIONABA ANTES
 const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
 const FF_API_BASE_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-// ✅ TU PROPIO DOMINIO COMO PROXY — TAL COMO LO TENÍAMOS
-const TU_PROXY = "https://recargagames.shop/api-proxy?url=";
 
 let metodo = "PAGO MOVIL";
 let tasa = 930;
@@ -300,7 +297,7 @@ let idJugadorActual = "";
 const juegoActual = "FREE FIRE";
 
 // ==============================================
-// 💰 TASA
+// 💰 PRECIOS
 // ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
@@ -317,7 +314,7 @@ window.seleccionarPago=function(m,e){
 };
 
 // ==============================================
-// ✅ VERIFICAR ID — CON TU PROXY recargagames.shop
+// ✅ VERIFICAR ID — IGUAL A COMO FUNCIONABA ANTES
 // ==============================================
 async function verificarID(id){
     if(!/^\d{4,12}$/.test(id)){
@@ -325,38 +322,42 @@ async function verificarID(id){
     }
 
     try {
-        // 📋 URL EXACTA de la API
-        const apiUrl = `${FF_API_BASE_URL}?token=${FF_API_TOKEN}&tipo=validarJugador&id_jugador=${encodeURIComponent(id)}`;
+        // 📋 URL EXACTA — SIN CAMBIOS
+        const apiUrl = `${FF_API_BASE_URL}?token=${FF_API_TOKEN}&tipo=validarJugador&id_jugador=${id}`;
         
-        // ✅ USAMOS TU PROPIO PROXY, NO EL GENÉRICO
-        const urlFinal = TU_PROXY + encodeURIComponent(apiUrl);
-        
-        console.log("🔍 Verificando vía tu proxy:", urlFinal);
+        console.log("🔍 Verificando:", apiUrl);
 
-        const respuesta = await fetch(urlFinal, { 
-            method: 'GET',
-            signal: AbortSignal.timeout(12000)
-        });
+        // ✅ Directo o con el proxy que SÍ funcionaba antes
+        let respuesta;
+        try {
+            respuesta = await fetch(apiUrl, { 
+                method: 'GET',
+                signal: AbortSignal.timeout(10000)
+            });
+        } catch (corsError) {
+            // Si falla por CORS, usamos TU proxy como antes
+            const proxyUrl = `https://recargagames.shop/api-proxy?url=${encodeURIComponent(apiUrl)}`;
+            respuesta = await fetch(proxyUrl, { 
+                method: 'GET',
+                signal: AbortSignal.timeout(10000)
+            });
+        }
         
         if (!respuesta.ok) throw new Error(`Error HTTP: ${respuesta.status}`);
         
         const datos = await respuesta.json();
         console.log("✅ Respuesta API:", datos);
 
-        // ✅ Respuesta esperada: {"code":"true","nickname":"Nombre","mensaje":"..."}
-        if(datos.code === "true" || datos.exito === true || datos.success === true){
-            const nombre = datos.nickname || datos.nombre_jugador || `Jugador ${id}`;
-            return {ok: true, nombre: nombre, msg: `✅ Jugador verificado: ${nombre}`};
+        // ✅ EXACTAMENTE como se leía antes
+        if(datos.code === "true"){
+            const nombre = datos.nickname || `Jugador ${id}`;
+            return {ok: true, nombre: nombre, msg: "✅ Jugador verificado: " + nombre};
         } else {
-            return {ok: false, msg: datos.mensaje || datos.error || "Jugador no encontrado ❌"};
+            return {ok: false, msg: datos.mensaje || "Jugador no encontrado ❌"};
         }
     } catch (error) {
-        console.error("❌ Error verificando ID:", error);
-        
-        if(error.name === 'AbortError' || error.name === 'TimeoutError'){
-            return {ok: false, msg: "⏳ Tiempo agotado. Intenta de nuevo."};
-        }
-        return {ok: false, msg: "⚠️ Error de conexión. Intenta en unos minutos."};
+        console.error("❌ Error:", error);
+        return {ok: false, msg: "Error de conexión. Intenta en unos minutos."};
     }
 }
 
@@ -413,7 +414,7 @@ inputId.addEventListener("input", function(){
 });
 
 // ==============================================
-// 🛒 COMPRAR PRODUCTO
+// 🛒 COMPRAR
 // ==============================================
 window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
@@ -442,7 +443,7 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
 };
 
 // ==============================================
-// 🔄 INICIALIZAR
+// 🔄 INICIO
 // ==============================================
 actualizarPrecios();
 
