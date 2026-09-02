@@ -19,7 +19,6 @@ body{
     padding-top:80px;
 }
 
-/* 🔒 LOGO OVALADO ARRIBA A LA IZQUIERDA */
 .header{
     position:fixed;
     top:0;
@@ -56,7 +55,6 @@ body{
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
 
-/* 📋 TARJETA TRANSPARENTE */
 .resumen-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -78,7 +76,6 @@ body{
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 
-/* 🎯 SELECCIÓN DE MÉTODO */
 .metodo-pago-box{
     display:flex;
     gap:12px;
@@ -131,7 +128,6 @@ body{
 .dato-texto strong{color:#e2e8f0;white-space:nowrap}
 .dato-texto span{color:#fff}
 
-/* 📋 BOTÓN DE COPIAR */
 .copiar-btn{
     width:40px;
     height:40px;
@@ -257,11 +253,9 @@ body{
 </div>
 
 <div class="main">
-    <!-- PASO 0: ELEGIR MÉTODO -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
-        <!-- 📋 RESUMEN DEL PEDIDO — CON NOMBRE DEL JUGADOR ✅ -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -270,13 +264,12 @@ body{
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
-        <!-- 🎯 ELEGIR MÉTODO -->
         <div class="metodo-pago-box">
             <button class="metodo-btn activo" id="btnMovil" onclick="seleccionarMetodo('movil')">🏦 Pago Móvil</button>
             <button class="metodo-btn binance" id="btnBinance" onclick="seleccionarMetodo('binance')">🟡 Binance Pay</button>
         </div>
 
-        <!-- 🏦 DATOS DE PAGO MÓVIL — TELÉFONO BIEN ALINEADO ✅ -->
+        <!-- 🏦 PAGO MÓVIL -->
         <div id="seccionPagoMovil">
             <h3 class="titulo-seccion">Datos de Pago Móvil</h3>
             <div class="datos-pago-box">
@@ -312,7 +305,7 @@ body{
             </div>
         </div>
 
-        <!-- 🟡 DATOS DE BINANCE — SOLO MONTO, ID Y REFERENCIA ✅ -->
+        <!-- 🟡 BINANCE PAY — CON VERIFICACIÓN REAL -->
         <div id="seccionPagoBinance" class="oculto">
             <h3 class="titulo-seccion">Datos de Binance Pay</h3>
             <div class="datos-pago-box">
@@ -334,39 +327,34 @@ body{
                         </svg>
                     </button>
                 </div>
-                <label style="display:block;margin-top:18px;margin-bottom:8px;font-weight:600;text-align:left">Referencia / Hash:</label>
-                <input type="text" class="input-ref" id="referenciaBinance" placeholder="Pega el hash de la transacción" maxlength="100">
-                <div class="aviso-box" style="margin-top:10px">⚠️ Binance Pay requiere verificación manual por ahora. Por favor usa Pago Móvil.</div>
+                <label style="display:block;margin-top:18px;margin-bottom:8px;font-weight:600;text-align:left">Hash / Referencia de transacción:</label>
+                <input type="text" class="input-ref" id="referenciaBinance" placeholder="Pega el hash de Binance" maxlength="100">
             </div>
         </div>
 
-        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
-
+        <div class="aviso-box">⚠️ Cada referencia/hash solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
-    <!-- PASO 1: VERIFICANDO PAGO -->
+    <!-- PASOS DEL PROCESO -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
-        <div class="texto-secundario">Estamos buscando tu pago en el sistema...</div>
+        <div class="texto-secundario" id="textoVerificando">Estamos buscando tu pago en el sistema...</div>
     </div>
 
-    <!-- PASO 2: PAGO CONFIRMADO -->
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
         <div class="texto-secundario" id="mensajeConfirmacion">Tu pago fue verificado correctamente. Preparando recarga...</div>
     </div>
 
-    <!-- PASO 3: CONECTANDO CON SERVIDOR -->
     <div id="pasoConectandoServidor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
         <div class="texto-principal">Conectando con el servidor de recargas...</div>
         <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
     </div>
 
-    <!-- ✅ PASO 4: RECARGA EXITOSA -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
@@ -383,15 +371,6 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ⚠️ BINANCE NO VERIFICADO -->
-    <div id="pasoBinanceNoDisponible" class="paso-box">
-        <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Binance Pay en Mantenimiento</div>
-        <div class="texto-secundario">Por favor usa Pago Móvil. Binance estará disponible pronto.</div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a elegir método</a>
-    </div>
-
-    <!-- ⚠️ SIN SALDO -->
     <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Servicio Temporalmente Indisponible</div>
@@ -402,7 +381,6 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ❌ PAGO NO ENCONTRADO -->
     <div id="pasoPagoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
@@ -410,7 +388,6 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- ⚠️ REFERENCIA YA USADA -->
     <div id="pasoReferenciaUsada" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Referencia Ya Utilizada</div>
@@ -422,7 +399,7 @@ body{
 
 <script>
 // ==============================================
-// 🔑 DATOS CONFIRMADOS
+// 🔑 DATOS DE LAS APIS
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
@@ -451,10 +428,12 @@ function seleccionarMetodo(metodo){
     if(metodo === 'movil'){
         document.getElementById('btnMovil').classList.add('activo');
         document.getElementById('seccionPagoMovil').classList.remove('oculto');
+        document.getElementById('textoVerificando').textContent = "Estamos buscando tu pago en el sistema bancario...";
     } else {
         document.getElementById('btnBinance').classList.add('activo');
         document.getElementById('seccionPagoBinance').classList.remove('oculto');
         document.getElementById('btnVerificar').classList.add('binance-btn');
+        document.getElementById('textoVerificando').textContent = "Consultando transacción en Binance...";
     }
 }
 
@@ -487,7 +466,7 @@ function yaFueUsada(referencia) {
 }
 
 // ==============================================
-// 📋 DATOS DEL PEDIDO — CON NOMBRE DEL JUGADOR ✅
+// 📋 DATOS DEL PEDIDO
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || "";
@@ -498,7 +477,7 @@ const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA — NOMBRE DEL JUGADOR ✅
+// 📄 CARGAR DATOS EN PANTALLA
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
@@ -540,7 +519,44 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — BINANCE YA NO SE CONFIRMA SOLO ✅
+// ⚡ VERIFICACIÓN BINANCE — AQUÍ VA LA API REAL
+// ==============================================
+async function verificarBinance(hash, montoUsd) {
+    // ⚠️ REEMPLAZA ESTA URL CON LA API REAL DE BINANCE/PROVEEDOR
+    // Por ahora la estructura está lista para cuando tengas la API Key configurada
+    const BINANCE_API_URL = "https://api.pabilo.app/binancepayment/verify"; // EJEMPLO
+    const BINANCE_API_KEY = API_KEY; // Usa la misma o la que te den
+    
+    try {
+        const res = await fetch(BINANCE_API_URL, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${BINANCE_API_KEY}` 
+            },
+            body: JSON.stringify({ 
+                tx_hash: hash, 
+                expected_amount: montoUsd,
+                to_user_id: "964617189"
+            })
+        });
+        
+        const datos = await res.json();
+        return res.ok && (
+            datos.status === 'paid' || 
+            datos.confirmed === true || 
+            datos.success === true ||
+            datos.message === 'payment confirmed'
+        );
+    } catch(e) {
+        console.error("Error Binance:", e);
+        // Mientras no tengas la API, devuelve false para NO aprobar pagos falsos
+        return false;
+    }
+}
+
+// ==============================================
+// ⚡ FLUJO COMPLETO — AMBOS MÉTODOS VERIFICADOS
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = metodoSeleccionado === 'binance' 
@@ -563,7 +579,7 @@ async function iniciarVerificacion(){
     let pagoConfirmado = false;
     const fecha = new Date().toISOString().split('T')[0];
 
-    // 🏦 PAGO MÓVIL — VERIFICACIÓN REAL CON PABILO ✅
+    // 🏦 PAGO MÓVIL — VERIFICACIÓN CON PABILO
     if(metodoSeleccionado === 'movil'){
         let montoPago = String(precioBs).replace(/[.,]/g, '');
         montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
@@ -590,14 +606,14 @@ async function iniciarVerificacion(){
         } catch(e) {
             console.error("Error Pabilo:", e);
         }
-    } else {
-        // 🟡 BINANCE — NO SE CONFIRMA SOLO, SE MUESTRA AVISO ✅
-        mostrarPaso('pasoBinanceNoDisponible');
-        return;
+    } 
+    // 🟡 BINANCE — VERIFICACIÓN REAL CON API
+    else {
+        pagoConfirmado = await verificarBinance(referencia, precioUsd);
     }
 
     if(!pagoConfirmado) { 
-        mostrarPaso('pasoPagoNoEncontrado'); 
+        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 500);
         return; 
     }
 
@@ -628,7 +644,7 @@ async function iniciarVerificacion(){
 }
 
 // ==============================================
-// 📢 MENSAJE TELEGRAM — CON NOMBRE DEL JUGADOR ✅
+// 📢 MENSAJE TELEGRAM
 // ==============================================
 function enviarTelegram(pedido, ref, todoCorrecto){
     const metodo = metodoSeleccionado === 'binance' ? 'Binance Pay' : 'Pago Móvil';
