@@ -1,46 +1,72 @@
-const fetch = require('node-fetch');
+// api/proxy-freefire.js
+// URL: https://tudominio.com/api/proxy-freefire
 
-module.exports = async function handler(req, res) {
-    // ✅ Permitir acceso desde tu dominio
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async function handler(req, res) {
+  // Configurar CORS para permitir solicitudes desde tu dominio
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Manejar preflight
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+  // Manejar preflight OPTIONS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Solo aceptar POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      error: 'Método no permitido. Usa POST.',
+      code: 'method_not_allowed'
+    });
+  }
+
+  try {
+    const { token, tipo, id_jugador } = req.body;
+
+    // Validar que todos los campos estén presentes
+    if (!token || !tipo || !id_jugador) {
+      return res.status(400).json({
+        error: 'Faltan parámetros requeridos',
+        required: ['token', 'tipo', 'id_jugador'],
+        received: { token: !!token, tipo: !!tipo, id_jugador: !!id_jugador }
+      });
     }
 
-    try {
-        const { token, tipo, id_jugador, paquete } = req.body;
+    console.log('📡 Proxy recibió:', { token: token.slice(0,10)+'...', tipo, id_jugador });
 
-        if (!token || !tipo) {
-            return res.status(400).json({ alerta: "red", mensaje: "Faltan parámetros" });
-        }
+    // Construir URL de la API externa
+    const apiUrl = `https://apicentral.pro/apis/freefire.jsp?token=${encodeURIComponent(token)}&tipo=${encodeURIComponent(tipo)}&id_jugador=${encodeURIComponent(id_jugador)}`;
+    
+    console.log('🌐 Llamando a:', apiUrl.replace(token, '***TOKEN***'));
 
-        // 📋 Construir URL exacta de la API
-        let apiUrl = `https://apicentral.pro/apis/freefire.jsp?token=${token}&tipo=${tipo}`;
-        if (id_jugador) apiUrl += `&id_jugador=${encodeURIComponent(id_jugador)}`;
-        if (paquete) apiUrl += `&paquete=${paquete}`;
+    // Hacer la solicitud a la API
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'RecargaGames/1.0'
+      }
+    });
 
-        console.log("🔄 Proxy llamando:", apiUrl);
+    console.log('📥 Status API:', response.status);
 
-        // 🚀 Llamada desde el servidor — SIN CORS
-        const respuesta = await fetch(apiUrl, {
-            method: 'GET',
-            timeout: 10000
-        });
-
-        const datos = await respuesta.json();
-        console.log("✅ Respuesta de API:", datos);
-
-        return res.status(200).json(datos);
-
-    } catch (error) {
-        console.error("❌ Error en proxy:", error);
-        return res.status(500).json({ 
-            alerta: "red", 
-            mensaje: "Error de conexión con la API" 
-        });
+    if (!response.ok) {
+      throw new Error(`API respondió con status ${response.status}`);
     }
-};
+
+    const data = await response.json();
+    console.log('✅ Datos recibidos:', data);
+
+    // Enviar respuesta al cliente
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.error('❌ Error en proxy:', error);
+    
+    return res.status(500).json({
+      error: 'Error interno del proxy',
+      message: error.message,
+      code: 'proxy_error'
+    });
+  }
+}
