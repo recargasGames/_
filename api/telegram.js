@@ -1,22 +1,41 @@
-// api/telegram.js — SOLO vive en el servidor, NADIE lo ve
-const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
+// ==============================================
+// 📤 ENVÍO DE MENSAJES A TELEGRAM
+// ==============================================
+const fetch = require('node-fetch');
+
+// 🔑 Tus credenciales de Telegram
+const TELEGRAM_BOT_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://www.recargasgames.shop');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+module.exports = async (datosPedido) => {
+  const { juego, producto, id_jugador, nombre_jugador, metodo_pago, monto, estado = "Procesando con API" } = datosPedido;
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
+  // 📅 Fecha formateada
+  const fecha = new Date().toLocaleDateString('es-VE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 
-  const { mensaje } = req.body;
+  // ✅ MENSAJE EXACTO COMO LO QUERÍAS
+  const mensaje = `
+🚨 ¡NUEVA RECARGA RECIBIDA! 🚨
 
-  if (!mensaje) {
-    return res.status(400).json({ error: 'Falta el mensaje' });
-  }
+🕹️ Juego: ${juego}
+💎 Producto: ${producto}
+👤 ID / User: ${id_jugador} (${nombre_jugador})
+💳 Método de Pago: ${metodo_pago}
+💵 Monto: ${monto}
+⚡ Estado: ${estado}
+
+📅 Fecha: ${fecha}
+  `.trim();
 
   try {
-    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    
     const respuesta = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -27,9 +46,11 @@ export default async function handler(req, res) {
       })
     });
 
-    const datos = await respuesta.json();
-    res.status(200).json(datos);
+    const resultado = await respuesta.json();
+    console.log("✅ Mensaje enviado a Telegram:", resultado.ok ? "ÉXITO" : "FALLÓ");
+    return resultado;
   } catch (error) {
-    res.status(500).json({ error: 'Error al enviar a Telegram', mensaje: error.message });
+    console.error("❌ Error enviando a Telegram:", error);
+    return { ok: false, error: error.message };
   }
-}
+};
