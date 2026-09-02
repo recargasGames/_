@@ -206,7 +206,7 @@ body{
 </div>
 
 <div class="main">
-    <!-- ✅ TARJETA DEL ID CON VERIFICACIÓN REAL CORREGIDA -->
+    <!-- ✅ TARJETA DEL ID CON VERIFICACIÓN REAL -->
     <div class="card-panel">
         <div class="panel-title">ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
@@ -342,7 +342,7 @@ window.seleccionarPago=function(m,e){
 };
 
 // ==============================================
-// ✅ VERIFICACIÓN DEL JUGADOR — ARREGLADA
+// ✅ VERIFICACIÓN DEL JUGADOR — CON CORS PROXY
 // ==============================================
 async function verificarID(id){
     if(!/^\d{4,12}$/.test(id)){
@@ -350,15 +350,18 @@ async function verificarID(id){
     }
 
     try {
-        const url = `${FF_API_VALIDAR_URL}?token=${FF_API_TOKEN}&tipo=validarJugador&id_jugador=${encodeURIComponent(id)}`;
-        const respuesta = await fetch(url);
+        // 🚀 Usamos proxy para saltar el bloqueo CORS del navegador
+        const apiUrl = `${FF_API_VALIDAR_URL}?token=${FF_API_TOKEN}&tipo=validarJugador&id_jugador=${encodeURIComponent(id)}`;
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+        
+        const respuesta = await fetch(proxyUrl);
         
         if (!respuesta.ok) throw new Error("Error de conexión");
         
         const datos = await respuesta.json();
         console.log("Respuesta API:", datos);
 
-        // ✅ COINCIDE EXACTAMENTE CON LA RESPUESTA DE API CENTRAL PRO
+        // ✅ Coincide exactamente con la respuesta real de API Central Pro
         if(datos && datos.code === "true"){
             const nombre = datos.nickname || `Jugador ${id}`;
             return {ok: true, nombre: nombre, msg: `✅ Jugador verificado: ${nombre}`};
