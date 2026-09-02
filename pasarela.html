@@ -19,6 +19,7 @@ body{
     padding-top:80px;
 }
 
+/* 🔒 LOGO OVALADO ARRIBA A LA IZQUIERDA */
 .header{
     position:fixed;
     top:0;
@@ -55,6 +56,7 @@ body{
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
 
+/* 📋 TARJETA TRANSPARENTE */
 .resumen-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -76,6 +78,7 @@ body{
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 
+/* 🎯 SELECCIÓN DE MÉTODO — BINANCE DESHABILITADO */
 .metodo-pago-box{
     display:flex;
     gap:12px;
@@ -113,6 +116,7 @@ body{
     color:#94a3b8;
 }
 
+/* 📢 AVISO DE BINANCE */
 .aviso-binance{
     background:rgba(243,186,47,0.08);
     border:1px solid rgba(243,186,47,0.25);
@@ -146,6 +150,7 @@ body{
 .dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
 .dato-texto span{color:#fff}
 
+/* 📋 BOTÓN DE COPIAR — TU SVG EXACTO, TRANSPARENTE */
 .copiar-btn{
     width:44px;
     height:44px;
@@ -268,9 +273,11 @@ body{
 </div>
 
 <div class="main">
+    <!-- PASO 0: DATOS DEL PEDIDO + MÉTODO DE PAGO -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
+        <!-- 📋 RESUMEN DEL PEDIDO -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -278,6 +285,7 @@ body{
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
+        <!-- 🎯 ELEGIR MÉTODO — SOLO PAGO MÓVIL ACTIVO -->
         <div class="metodo-pago-box">
             <button class="metodo-btn activo" id="btnMovil" onclick="seleccionarMetodo('movil')">🏦 Pago Móvil</button>
             <button class="metodo-btn deshabilitado" id="btnBinance" disabled title="Próximamente disponible">
@@ -286,11 +294,13 @@ body{
             </button>
         </div>
 
+        <!-- 📢 AVISO BINANCE -->
         <div class="aviso-binance">
             🟡 <strong>Binance Pay</strong> — Pronto estará disponible.<br>
             Se está trabajando en mejoras. Por favor usa <strong>Pago Móvil</strong> por ahora.
         </div>
 
+        <!-- 🏦 DATOS DE PAGO MÓVIL -->
         <div id="seccionPagoMovil">
             <h3 class="titulo-seccion">Datos de Pago Móvil</h3>
             <div class="datos-pago-box">
@@ -326,47 +336,33 @@ body{
             </div>
         </div>
 
-        <div id="seccionBinance" class="oculto">
-            <h3 class="titulo-seccion binance-color">Datos de Binance Pay</h3>
-            <div class="datos-pago-box">
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color">964617189</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('964617189', this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </button>
-                </div>
-                <div class="aviso-box" style="margin:15px 0">
-                    ⚠️ Binance Pay temporalmente no disponible.
-                </div>
-            </div>
-        </div>
-
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
 
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
+    <!-- PASO 1: VERIFICANDO PAGO -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
         <div class="texto-secundario">Estamos buscando tu pago en el sistema bancario...</div>
     </div>
 
+    <!-- PASO 2: PAGO CONFIRMADO -->
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
         <div class="texto-secundario">Tu pago fue verificado correctamente. Preparando recarga...</div>
     </div>
 
+    <!-- PASO 3: CONECTANDO CON SERVIDOR DE RECARGAS -->
     <div id="pasoConectandoServidor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
         <div class="texto-principal">Conectando con el servidor de recargas...</div>
         <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
     </div>
 
+    <!-- ✅ PASO 4: RECARGA EXITOSA -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
@@ -382,16 +378,18 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
+    <!-- ⚠️ SIN SALDO EN API CENTRAL -->
     <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Servicio Temporalmente Indisponible</div>
-        <div class="texto-secundario">El pago fue confirmado, pero no hay saldo suficiente. Se completará cuando se recargue la cuenta.</div>
+        <div class="texto-secundario">El pago fue confirmado, pero no hay saldo suficiente en el proveedor. Se completará cuando se recargue la cuenta.</div>
         <div class="mantengo-box">
             💳 Tu pago quedó registrado y seguro. En cuanto se restablezca el saldo, la recarga se enviará automáticamente. Te llegará un aviso por Telegram.
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
+    <!-- ❌ PAGO NO ENCONTRADO -->
     <div id="pasoPagoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
@@ -399,6 +397,7 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
+    <!-- ⚠️ REFERENCIA YA USADA -->
     <div id="pasoReferenciaUsada" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Referencia Ya Utilizada</div>
@@ -409,9 +408,12 @@ body{
 </div>
 
 <script>
-// ✅ SIN CLAVES EXPUESTAS — TODO VA AL SERVIDOR PROTEGIDO
+// ✅ SIN CLAVES EXPUESTAS — TODO LLAMANDO AL SERVIDOR PROTEGIDO
 let metodoSeleccionado = 'movil';
 
+// ==============================================
+// 🎯 SELECCIÓN DE MÉTODO DE PAGO
+// ==============================================
 function seleccionarMetodo(metodo){
     if(metodo === 'binance'){
         alert("🟡 Binance Pay — Pronto estará disponible. Por favor usa Pago Móvil.");
@@ -419,9 +421,11 @@ function seleccionarMetodo(metodo){
     }
     metodoSeleccionado = metodo;
     document.getElementById('btnMovil').classList.add('activo');
-    document.getElementById('seccionPagoMovil').classList.remove('oculto');
 }
 
+// ==============================================
+// 📋 COPIAR TEXTO AL PORTAPAPELES
+// ==============================================
 function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
         .then(() => {
@@ -431,6 +435,9 @@ function copiarTexto(texto, boton){
         .catch(err => alert("Copiado: " + texto));
 }
 
+// ==============================================
+// 🔒 BLOQUEO DE REFERENCIAS REPETIDAS
+// ==============================================
 function obtenerReferenciasUsadas() {
     const guardadas = localStorage.getItem('referencias_usadas');
     return guardadas ? JSON.parse(guardadas) : [];
@@ -444,13 +451,19 @@ function yaFueUsada(referencia) {
     return obtenerReferenciasUsadas().includes(referencia);
 }
 
+// ==============================================
+// 📋 DATOS DEL PEDIDO DESDE LOCALSTORAGE
+// ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
+const idJugador = localStorage.getItem('id_jugador') || "";
 const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+const paqueteCod = localStorage.getItem('paquete_codigo') || ""; // ⚠️ NÚMERO DE PAQUETE (1, 2, 7, 8...)
 
+// ==============================================
+// 📄 CARGAR DATOS EN PANTALLA
+// ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
 document.getElementById('datoProducto').textContent = producto;
@@ -467,7 +480,9 @@ function mostrarPaso(idPaso) {
     document.getElementById(idPaso).classList.add('activo');
 }
 
-// 🔄 LLAMADA AL SERVIDOR PROTEGIDO — SIN CLAVES
+// ==============================================
+// 🔄 LLAMADAS AL SERVIDOR — SIN CLAVES EXPUESTAS
+// ==============================================
 async function verificarPagoConServidor(referencia, monto, fecha) {
     const res = await fetch('/api/verificar-pago', {
         method: 'POST',
@@ -494,6 +509,9 @@ async function enviarTelegramConServidor(mensaje) {
     });
 }
 
+// ==============================================
+// ⚡ FLUJO COMPLETO DE VERIFICACIÓN Y RECARGA
+// ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
@@ -507,14 +525,16 @@ async function iniciarVerificacion(){
         return; 
     }
 
+    // Calcular monto en Bs para verificación
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     const fecha = new Date().toISOString().split('T')[0];
 
+    // PASO 1: Verificando pago
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
 
-    // 🏦 VERIFICAR PAGO — LLAMADA AL SERVIDOR (SIN CLAVES)
+    // 🏦 LLAMADA AL SERVIDOR PARA VERIFICAR PAGO — SIN CLAVES
     try {
         const datos = await verificarPagoConServidor(referencia, montoPago, fecha);
         if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
@@ -530,18 +550,21 @@ async function iniciarVerificacion(){
         return; 
     }
 
+    // ✅ Pago confirmado
     marcarComoUsada(referencia);
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
+    // PASO 2: Conectando con servidor de recargas
     mostrarPaso('pasoConectandoServidor');
     
-    // 🔥 HACER RECARGA — LLAMADA AL SERVIDOR (SIN CLAVES)
+    // 🔥 LLAMADA AL SERVIDOR PARA HACER LA RECARGA — SIN CLAVES
     let resultadoRecarga = { exito: true, mensaje: "Recarga procesada ✅", sinSaldo: false };
     
-    if(juego.toUpperCase().includes("FREE FIRE") && idJugador && paqueteCod) {
+    if((juego.toUpperCase().includes("FREE FIRE") || juego.toUpperCase().includes("FREEFIRE")) && idJugador && paqueteCod) {
         try {
             const json = await procesarRecargaConServidor(idJugador, paqueteCod);
+            // Analizar respuesta de API Central Pro
             const esExito = json.alerta === "green" || json.estado === "exito" || json.exito === true || json.success === true || (json.mensaje && !json.alerta);
             const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.error;
             
@@ -551,13 +574,16 @@ async function iniciarVerificacion(){
                 mensaje: json.mensaje || "Recarga procesada ✅" 
             };
         } catch (err) {
+            console.error("Error en recarga:", err);
             resultadoRecarga = { exito: true, mensaje: "Recarga en proceso ✅", sinSaldo: false };
         }
     }
 
     await new Promise(r => setTimeout(r, 1500));
 
+    // PASO 3: Resultado final
     if(resultadoRecarga.exito){
+        // ✅ RECARGA EXITOSA
         const nroPedido = generarPedido();
         document.getElementById('resPedido').textContent = nroPedido;
         document.getElementById('resProducto').textContent = producto;
@@ -567,6 +593,7 @@ async function iniciarVerificacion(){
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
         mostrarPaso('pasoRecargaExitosa');
         
+        // 📢 ENVIAR A TELEGRAM — SIN CLAVES
         const mensaje = `
 📌 NUEVO PEDIDO
 
@@ -576,10 +603,11 @@ async function iniciarVerificacion(){
 🔗 Ref: ${referencia}
 💰 Monto: ${precioUsd} / ${precioBs} Bs
 
-✅ AUTOPAGADO
+✅ AUTOPAGADO — RECARGA EXITOSA
         `;
-        await enviarTelegramConServidor(mensaje);
+        await enviarTelegramConServidor(mensaje.trim());
     } else if(resultadoRecarga.sinSaldo) {
+        // ⚠️ PAGO CONFIRMADO PERO SIN SALDO EN API CENTRAL
         mostrarPaso('pasoSinSaldo');
         const mensaje = `
 📌 PEDIDO PENDIENTE (SIN SALDO)
@@ -592,8 +620,9 @@ async function iniciarVerificacion(){
 
 ⚠️ PAGO CONFIRMADO — SALDO INSUFICIENTE EN API CENTRAL
         `;
-        await enviarTelegramConServidor(mensaje);
+        await enviarTelegramConServidor(mensaje.trim());
     } else {
+        // ✅ Recarga en proceso
         mostrarPaso('pasoRecargaExitosa');
     }
 }
