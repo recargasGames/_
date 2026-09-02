@@ -99,10 +99,15 @@ body{
     background:rgba(16,185,129,0.15);
     color:var(--color-principal);
 }
-.metodo-btn.binance.activo{
-    border-color:var(--color-binance);
-    background:rgba(243,186,47,0.15);
-    color:var(--color-binance);
+.metodo-btn.deshabilitado{
+    opacity:0.4;
+    cursor:not-allowed;
+    border-style:dashed;
+}
+.metodo-btn.deshabilitado span{
+    font-size:12px;
+    display:block;
+    opacity:0.7;
 }
 
 .datos-pago-box{
@@ -144,7 +149,6 @@ body{
     flex-shrink:0;
     padding:0;
 }
-.copiar-btn.binance{background:rgba(243,186,47,0.15);color:#fcd34d}
 .copiar-btn svg{
     width:18px;
     height:18px;
@@ -160,7 +164,6 @@ body{
     background:rgba(59,130,246,0.25);
     transform:scale(1.05);
 }
-.copiar-btn.binance:hover{background:rgba(243,186,47,0.25)}
 .copiar-btn:hover svg{opacity:1}
 .copiar-btn.copiado{
     background:rgba(16,185,129,0.2);
@@ -200,9 +203,8 @@ body{
     margin-top:10px;
     transition:.2s;
 }
-.btn-confirmar.binance-btn{background:var(--color-binance);color:#000}
 .btn-confirmar:hover{background:var(--color-hover)}
-.btn-confirmar.binance-btn:hover{background:#e6b200}
+.btn-confirmar:disabled{opacity:0.5;cursor:not-allowed}
 
 .volver-btn{
     display:inline-block;
@@ -265,17 +267,20 @@ body{
         </div>
 
         <div class="metodo-pago-box">
-            <button class="metodo-btn activo" id="btnMovil" onclick="seleccionarMetodo('movil')">🏦 Pago Móvil</button>
-            <button class="metodo-btn binance" id="btnBinance" onclick="seleccionarMetodo('binance')">🟡 Binance Pay</button>
+            <button class="metodo-btn activo" id="btnMovil">🏦 Pago Móvil</button>
+            <button class="metodo-btn deshabilitado" id="btnBinance" disabled>
+                🟡 Binance Pay
+                <span>Próximamente disponible</span>
+            </button>
         </div>
 
-        <!-- 🏦 PAGO MÓVIL -->
+        <!-- 🏦 SOLO PAGO MÓVIL ACTIVO -->
         <div id="seccionPagoMovil">
-            <h3 class="titulo-seccion">Datos de Pago Móvil</h3>
+            <h3 class="titulo-seccion">Datos de Pago Móvil — Banco de Venezuela</h3>
             <div class="datos-pago-box">
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
-                    <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)">
+                    <div class="dato-texto"><strong>Banco:</strong> <span>(0102) Banco de Venezuela</span></div>
+                    <button class="copiar-btn" onclick="copiarTexto('0102 Banco de Venezuela', this)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -283,7 +288,7 @@ body{
                     </button>
                 </div>
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
+                    <div class="dato-texto"><strong>Cédula:</strong> <span>V-32824869</span></div>
                     <button class="copiar-btn" onclick="copiarTexto('32824869', this)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -292,7 +297,7 @@ body{
                     </button>
                 </div>
                 <div class="dato-line">
-                    <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
+                    <div class="dato-texto"><strong>Teléfono:</strong> <span>0422-824.2411</span></div>
                     <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -302,37 +307,11 @@ body{
                 </div>
                 <label style="display:block;margin-top:18px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
                 <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
+                <div style="font-size:12px;color:#94a3b8;margin-top:5px">💡 Pega la referencia tal cual aparece en el comprobante</div>
             </div>
         </div>
 
-        <!-- 🟡 BINANCE PAY — CON VERIFICACIÓN REAL -->
-        <div id="seccionPagoBinance" class="oculto">
-            <h3 class="titulo-seccion">Datos de Binance Pay</h3>
-            <div class="datos-pago-box">
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>Monto:</strong> <span style="color:#f3ba2f" id="montoBinance">$0.00 USDT</span></div>
-                    <button class="copiar-btn binance" onclick="copiarTexto(document.getElementById('montoBinance').textContent, this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </button>
-                </div>
-                <div class="dato-line">
-                    <div class="dato-texto"><strong>ID Binance:</strong> <span style="color:#f3ba2f">964617189</span></div>
-                    <button class="copiar-btn binance" onclick="copiarTexto('964617189', this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </button>
-                </div>
-                <label style="display:block;margin-top:18px;margin-bottom:8px;font-weight:600;text-align:left">Hash / Referencia de transacción:</label>
-                <input type="text" class="input-ref" id="referenciaBinance" placeholder="Pega el hash de Binance" maxlength="100">
-            </div>
-        </div>
-
-        <div class="aviso-box">⚠️ Cada referencia/hash solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
+        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad. Verifica que el pago ya se haya procesado por el banco.</div>
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
@@ -340,7 +319,7 @@ body{
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
-        <div class="texto-secundario" id="textoVerificando">Estamos buscando tu pago en el sistema...</div>
+        <div class="texto-secundario">Estamos buscando tu pago en el sistema bancario...</div>
     </div>
 
     <div id="pasoPagoConfirmado" class="paso-box">
@@ -364,9 +343,9 @@ body{
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Nombre Jugador</span><span class="resumen-valor" id="resNombreResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor" id="resMetodo">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Método de Pago</span><span class="resumen-valor">Pago Móvil</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Monto Pagado</span><span class="resumen-valor" id="resMonto">-</span></div>
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -411,32 +390,6 @@ const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-let metodoSeleccionado = 'movil';
-
-// ==============================================
-// 🎯 SELECCIÓN DE MÉTODO
-// ==============================================
-function seleccionarMetodo(metodo){
-    metodoSeleccionado = metodo;
-    
-    document.getElementById('btnMovil').classList.remove('activo');
-    document.getElementById('btnBinance').classList.remove('activo');
-    document.getElementById('seccionPagoMovil').classList.add('oculto');
-    document.getElementById('seccionPagoBinance').classList.add('oculto');
-    document.getElementById('btnVerificar').classList.remove('binance-btn');
-    
-    if(metodo === 'movil'){
-        document.getElementById('btnMovil').classList.add('activo');
-        document.getElementById('seccionPagoMovil').classList.remove('oculto');
-        document.getElementById('textoVerificando').textContent = "Estamos buscando tu pago en el sistema bancario...";
-    } else {
-        document.getElementById('btnBinance').classList.add('activo');
-        document.getElementById('seccionPagoBinance').classList.remove('oculto');
-        document.getElementById('btnVerificar').classList.add('binance-btn');
-        document.getElementById('textoVerificando').textContent = "Consultando transacción en Binance...";
-    }
-}
-
 // ==============================================
 // 📋 COPIAR TEXTO
 // ==============================================
@@ -446,7 +399,16 @@ function copiarTexto(texto, boton){
             boton.classList.add('copiado');
             setTimeout(() => boton.classList.remove('copiado'), 2000);
         })
-        .catch(err => alert("Copiado: " + texto));
+        .catch(err => {
+            const input = document.createElement('input');
+            input.value = texto;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand('copy');
+            document.body.removeChild(input);
+            boton.classList.add('copiado');
+            setTimeout(() => boton.classList.remove('copiado'), 2000);
+        });
 }
 
 // ==============================================
@@ -484,7 +446,6 @@ document.getElementById('datoId').textContent = idJugador;
 document.getElementById('datoNombre').textContent = nombreJugador;
 document.getElementById('datoProducto').textContent = producto;
 document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
-document.getElementById('montoBinance').textContent = `${precioUsd} USDT`;
 
 function generarPedido(){
     const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '1000') + 1;
@@ -519,52 +480,13 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ VERIFICACIÓN BINANCE — AQUÍ VA LA API REAL
-// ==============================================
-async function verificarBinance(hash, montoUsd) {
-    // ⚠️ REEMPLAZA ESTA URL CON LA API REAL DE BINANCE/PROVEEDOR
-    // Por ahora la estructura está lista para cuando tengas la API Key configurada
-    const BINANCE_API_URL = "https://api.pabilo.app/binancepayment/verify"; // EJEMPLO
-    const BINANCE_API_KEY = API_KEY; // Usa la misma o la que te den
-    
-    try {
-        const res = await fetch(BINANCE_API_URL, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Authorization': `Bearer ${BINANCE_API_KEY}` 
-            },
-            body: JSON.stringify({ 
-                tx_hash: hash, 
-                expected_amount: montoUsd,
-                to_user_id: "964617189"
-            })
-        });
-        
-        const datos = await res.json();
-        return res.ok && (
-            datos.status === 'paid' || 
-            datos.confirmed === true || 
-            datos.success === true ||
-            datos.message === 'payment confirmed'
-        );
-    } catch(e) {
-        console.error("Error Binance:", e);
-        // Mientras no tengas la API, devuelve false para NO aprobar pagos falsos
-        return false;
-    }
-}
-
-// ==============================================
-// ⚡ FLUJO COMPLETO — AMBOS MÉTODOS VERIFICADOS
+// ⚡ FLUJO COMPLETO — SOLO PAGO MÓVIL
 // ==============================================
 async function iniciarVerificacion(){
-    const referencia = metodoSeleccionado === 'binance' 
-        ? document.getElementById('referenciaBinance').value.trim()
-        : document.getElementById('referenciaPago').value.trim();
+    const referencia = document.getElementById('referenciaPago').value.trim();
     
     if(!referencia || referencia.length < 6) { 
-        alert("❌ Escribe la referencia del pago"); 
+        alert("❌ Escribe la referencia completa del pago"); 
         return; 
     }
 
@@ -579,37 +501,34 @@ async function iniciarVerificacion(){
     let pagoConfirmado = false;
     const fecha = new Date().toISOString().split('T')[0];
 
-    // 🏦 PAGO MÓVIL — VERIFICACIÓN CON PABILO
-    if(metodoSeleccionado === 'movil'){
-        let montoPago = String(precioBs).replace(/[.,]/g, '');
-        montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
+    // 🏦 VERIFICACIÓN CON PABILO
+    let montoPago = String(precioBs).replace(/[.,]/g, '');
+    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
+    
+    const cuerpo = { 
+        bank_reference: referencia, 
+        amount: montoPago, 
+        movement_type: "GENERIC", 
+        fecha_pago: fecha 
+    };
+    
+    try {
+        const res = await fetch(API_PABILO_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+            body: JSON.stringify(cuerpo)
+        });
+        const datos = await res.json();
+        console.log("📡 Respuesta Pabilo:", datos);
         
-        const cuerpo = { 
-            bank_reference: referencia, 
-            amount: montoPago, 
-            movement_type: "GENERIC", 
-            fecha_pago: fecha 
-        };
-        try {
-            const res = await fetch(API_PABILO_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-                body: JSON.stringify(cuerpo)
-            });
-            const datos = await res.json();
-            if(res.ok && datos) {
-                if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
-                   datos.data?.status === 'paid' || datos.success === true) {
-                    pagoConfirmado = true;
-                }
+        if(res.ok && datos) {
+            if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
+               datos.data?.status === 'paid' || datos.success === true || datos.ok === true) {
+                pagoConfirmado = true;
             }
-        } catch(e) {
-            console.error("Error Pabilo:", e);
         }
-    } 
-    // 🟡 BINANCE — VERIFICACIÓN REAL CON API
-    else {
-        pagoConfirmado = await verificarBinance(referencia, precioUsd);
+    } catch(e) {
+        console.error("❌ Error Pabilo:", e);
     }
 
     if(!pagoConfirmado) { 
@@ -632,14 +551,15 @@ async function iniciarVerificacion(){
         document.getElementById('resProducto').textContent = producto;
         document.getElementById('resNombreResumen').textContent = nombreJugador;
         document.getElementById('resIdResumen').textContent = idJugador;
-        document.getElementById('resMetodo').textContent = metodoSeleccionado === 'binance' ? 'Binance Pay' : 'Pago Móvil';
         document.getElementById('resReferencia').textContent = referencia;
-        document.getElementById('resMonto').textContent = `${precioUsd} USD`;
+        document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
         mostrarPaso('pasoRecargaExitosa');
         enviarTelegram(nroPedido, referencia, true);
-    } else {
+    } else if(resultadoRecarga.sinSaldo){
         mostrarPaso('pasoSinSaldo');
-        enviarTelegram("PAGO PENDIENTE", referencia, false);
+        enviarTelegram("PAGO CONFIRMADO — SALDO INSUFICIENTE", referencia, false);
+    } else {
+        mostrarPaso('pasoPagoNoEncontrado');
     }
 }
 
@@ -647,7 +567,6 @@ async function iniciarVerificacion(){
 // 📢 MENSAJE TELEGRAM
 // ==============================================
 function enviarTelegram(pedido, ref, todoCorrecto){
-    const metodo = metodoSeleccionado === 'binance' ? 'Binance Pay' : 'Pago Móvil';
     const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO PENDIENTE — SALDO INSUFICIENTE";
     
     const mensaje = encodeURIComponent(`
@@ -657,10 +576,10 @@ function enviarTelegram(pedido, ref, todoCorrecto){
 👤 Jugador: ${nombreJugador}
 🆔 ID: ${idJugador}
 💎 Producto: ${producto}
-💵 Valor USDT: ${precioUsd}
-💳 Método de pago: ${metodo}
-🔗 Ref: ${ref}
-💰 Monto: ${precioUsd} / ${precioBs} Bs
+💵 Valor: ${precioUsd} USD / ${precioBs} Bs
+💳 Método de pago: Pago Móvil BDV
+🔗 Referencia: ${ref}
+📋 Pedido: ${pedido}
 
 ${estado}
     `);
