@@ -306,8 +306,8 @@ const PAGONORTE = {
     apiSecret: "ns_203f626dde92e7d89812c226338b57b1c01d0823ec71b2bc"
 };
 
-let metodo = "PAGO MOVIL";
-let tasaUsdt = 975; // Valor por defecto, se actualiza solo
+let metodo = "PAGO MOVIL"; // Por defecto
+let tasaUsdt = 975; // Valor por defecto, se actualiza desde PagoNorte
 let idOk = false, nombreJugador = "", idJugadorActual = "";
 const juegoActual = "BLOOD STRIKE";
 
@@ -351,28 +351,35 @@ async function cargarTasasPagoNorte() {
 }
 
 // ==============================================
-// 💰 ACTUALIZAR PRECIOS
+// 💰 ACTUALIZAR PRECIOS SEGÚN MÉTODO DE PAGO
 // ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         const precioUsd = parseFloat(el.dataset.usd);
+        
         if (metodo === "PAGO MOVIL") {
-            el.innerText = Math.round(precioUsd * tasaUsdt).toLocaleString("es-VE") + " Bs";
+            // ✅ PAGO MÓVIL → BOLÍVARES SIEMPRE
+            const precioBs = Math.round(precioUsd * tasaUsdt);
+            el.innerText = precioBs.toLocaleString("es-VE") + " Bs";
         } else {
+            // ✅ BINANCE → DÓLARES/USDT SIEMPRE
             el.innerText = precioUsd.toFixed(2) + " USDT";
         }
     });
 }
 
+// ==============================================
+// 🔄 CAMBIAR MÉTODO DE PAGO
+// ==============================================
 window.seleccionarPago=function(m,e){
     document.querySelectorAll('.pay-box').forEach(b=>b.classList.remove('active'));
     e.classList.add('active');
-    metodo=m;
-    actualizarPrecios();
+    metodo = m;
+    actualizarPrecios(); // ✅ Cambia los precios al instante
 };
 
 // ==============================================
-// ✅ VERIFICAR ID DE JUGADOR
+// ✅ VERIFICAR ID DE JUGADOR — PAGONORTE
 // ==============================================
 async function verificarID(id){
     if(!/^\d{8,12}$/.test(id)){
@@ -380,13 +387,30 @@ async function verificarID(id){
     }
 
     try {
-        // 📋 Aquí irá la acción de validar jugador de PagoNorte
-        // Por ahora validamos formato, cuando tengamos la acción real la cambiamos
-        await new Promise(r => setTimeout(r, 600));
-        return {ok: true, nombre: `Jugador_${id.slice(-4)}`, msg: "✅ ID verificado correctamente"};
+        const formData = new URLSearchParams();
+        formData.append('action', 'bloodstrike_nombre');
+        formData.append('api_key', PAGONORTE.apiKey);
+        formData.append('api_secret', PAGONORTE.apiSecret);
+        formData.append('id_jugador', id);
+
+        const respuesta = await fetch(PAGONORTE.apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData,
+            signal: AbortSignal.timeout(12000)
+        });
+
+        const datos = await respuesta.json();
+        console.log("✅ Verificación Blood Strike:", datos);
+
+        if (datos.ok && datos.nickname) {
+            return {ok: true, nombre: datos.nickname, msg: `✅ Jugador: ${datos.nickname}`};
+        } else {
+            return {ok: false, msg: datos.mensaje || "ID no encontrado. Verifica los datos."};
+        }
     } catch (error) {
         console.error("❌ Error verificando ID:", error);
-        return {ok: false, msg: "Error al verificar. Intenta de nuevo."};
+        return {ok: false, msg: "Error de conexión. Intenta de nuevo."};
     }
 }
 
@@ -423,7 +447,7 @@ inputId.addEventListener("input", function(){
 
     if(/^\d{8,12}$/.test(id)){
         timeoutId = setTimeout(async () => {
-            mostrarEstado("Verificando jugador...", "verificando");
+            mostrarEstado("Verificando jugador en PagoNorte...", "verificando");
             const res = await verificarID(id);
             if(res.ok){ 
                 mostrarEstado(res.msg, "success"); 
@@ -435,7 +459,7 @@ inputId.addEventListener("input", function(){
                 idOk = false; 
                 nombreJugador = "";
             }
-        }, 400);
+        }, 500);
     } else {
         idOk = false;
         nombreJugador = "";
