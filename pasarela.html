@@ -436,8 +436,9 @@ function seleccionarMetodo(metodo){
         return;
     }
     metodoSeleccionado = metodo;
-    document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.metodo-btn').forEach(b => b.classList.remove('activo'));
     document.getElementById('btnMovil').classList.add('activo');
+    document.getElementById('seccionPagoMovil').classList.remove('oculto');
 }
 
 // ==============================================
@@ -503,7 +504,7 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// 🎮 DETECCIÓN DE JUEGO Y RECARGA
+// 🎮 DETECCIÓN DE JUEGO
 // ==============================================
 function getTipoJuego() {
     const juegoUpper = juego.toUpperCase();
@@ -539,6 +540,7 @@ async function procesarRecargaFreeFire() {
         }
         return { exito: true, mensaje: json.mensaje || "Recarga Free Fire procesada ✅" };
     } catch (err) {
+        console.error("❌ Error Free Fire:", err);
         return { exito: true, mensaje: "Recarga Free Fire en proceso ✅" };
     }
 }
@@ -582,6 +584,7 @@ async function procesarRecargaBloodStrike() {
         }
         return { exito: true, mensaje: json.mensaje || "Recarga Blood Strike procesada ✅" };
     } catch (err) {
+        console.error("❌ Error Blood Strike:", err);
         return { exito: true, mensaje: "Recarga Blood Strike en proceso ✅" };
     }
 }
@@ -618,8 +621,10 @@ async function iniciarVerificacion() {
         return;
     }
 
-    // Usar precio del proveedor para verificar
-    const montoPago = parseFloat(precioProveedor) || parseFloat(precioUsd);
+    // ✅ Usar el precio de VENTA (lo que pagó el cliente)
+    const montoPago = parseFloat(precioUsd);
+    console.log("💰 Verificando con monto de VENTA (cliente pagó):", montoPago);
+    
     const fecha = new Date().toISOString().split('T')[0];
 
     mostrarPaso('pasoVerificandoPago');
@@ -632,7 +637,7 @@ async function iniciarVerificacion() {
         fecha_pago: fecha
     };
 
-    console.log("📤 Verificando pago:", cuerpo);
+    console.log("📤 Enviando a Pabilo:", cuerpo);
 
     try {
         const res = await fetch(API_PABILO_URL, {
@@ -663,7 +668,6 @@ async function iniciarVerificacion() {
         return;
     }
 
-    // Marcar referencia como usada
     marcarComoUsada(referencia);
     
     mostrarPaso('pasoPagoConfirmado');
