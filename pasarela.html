@@ -202,7 +202,6 @@ body{
     margin-bottom:15px;
 }
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
-.input-ref:disabled{opacity:0.5;cursor:not-allowed}
 
 .btn-confirmar{
     width:100%;
@@ -260,6 +259,8 @@ body{
 
 .binance-color{color:var(--color-binance)}
 .oculto{display:none !important}
+.depurar-box{background:rgba(30,41,59,0.9);border:1px solid #475569;border-radius:10px;padding:15px;margin-top:15px;font-size:11px;text-align:left;color:#94a3b8;max-height:250px;overflow-y:auto;display:block;white-space:pre-wrap;word-break:break-all}
+.depurar-box strong{color:#fff}
 </style>
 </head>
 <body>
@@ -298,7 +299,7 @@ body{
 
         <!-- DATOS DE PAGO MÓVIL -->
         <div id="seccionPagoMovil">
-            <h3 class="titulo-metodo">Datos de Pago Móvil</h3>
+            <h3 class="titulo-seccion">Datos de Pago Móvil</h3>
             <div class="datos-pago-box">
                 <div class="dato-line">
                     <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
@@ -335,13 +336,19 @@ body{
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
 
         <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
+        
+        <!-- 🔍 CAJA DE DEPURACIÓN — TODO A LA VISTA -->
+        <div class="depurar-box" id="cajaDepurar">
+            <strong>🔍 Respuesta API:</strong><br>
+            <span id="textoDepurar">Esperando consulta...</span>
+        </div>
     </div>
 
     <!-- PASO 1: VERIFICANDO PAGO -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
-        <div class="texto-secundario">Estamos buscando tu pago en el sistema bancario...</div>
+        <div class="texto-secundario">Consultando movimientos en el banco...</div>
     </div>
 
     <!-- PASO 2: PAGO CONFIRMADO -->
@@ -355,7 +362,7 @@ body{
     <div id="pasoConectandoServidor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
         <div class="texto-principal">Conectando con el servidor de recargas...</div>
-        <div class="texto-secundario">Procesando tu recarga de <strong id="juegoRecarga">-</strong>...</div>
+        <div class="texto-secundario" id="textoRecarga">Procesando tu recarga...</div>
     </div>
 
     <!-- PASO 4: RECARGA EXITOSA -->
@@ -378,10 +385,10 @@ body{
     <!-- ⚠️ SIN SALDO -->
     <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Servicio Temporalmente Indisponible</div>
-        <div class="texto-secundario">El pago fue confirmado, pero estamos procesando la recarga. Se completará en breve.</div>
+        <div class="texto-principal">Saldo Insuficiente</div>
+        <div class="texto-secundario">El pago fue confirmado, pero no hay saldo suficiente para la recarga.</div>
         <div class="mantengo-box">
-            💳 Tu pago quedó registrado y seguro. En cuanto se restablezca el servicio, la recarga se enviará automáticamente.
+            💳 Tu pago quedó registrado y seguro. En cuanto se recargue el saldo, se procesará automáticamente. Te llegará un aviso por Telegram.
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -400,23 +407,25 @@ body{
         <div class="texto-principal">Referencia Ya Utilizada</div>
         <div class="texto-secundario">Esta referencia ya fue usada en un pago anterior.</div>
         <div class="usada-box">🔒 Cada referencia se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.</div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
+        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
     </div>
 </div>
 
 <script>
 // ==============================================
-// 🔑 CREDENCIALES
+// 🔑 TODO DIRECTO — SIN PROXY, TODO A LA VISTA
 // ==============================================
-const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
 
-// 🔥 FREE FIRE
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
+// 🏦 API BANCO DE VENEZUELA — VERIFICAR PAGOS
+const BDV_TOKEN = "HLkSCxTISdcUAAnOIZ3fhTkAg1pN8fLjAdpkgGpeQZc";
+const BDV_API_URL = "https://apicentral.pro/apis/movimientos_bdv.jsp";
+const BDV_PASSWORD = "Dios.2006";
+
+// 🔥 FREE FIRE — API CENTRAL PRO
+const FF_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
 const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 
-// 🔥 BLOOD STRIKE
+// 🩸 BLOOD STRIKE — PAGO NORTE
 const BS_API_KEY = "pn_111608b8f997f4cd7f9a0ee2d3d92d154c4a";
 const BS_API_SECRET = "nc_203f626dd92e7d89812c226338b57b1c01d0823ec71b2bc";
 const BS_API_URL = "https://pagonorte.net/recargas/api.jsp";
@@ -426,6 +435,20 @@ const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
 let metodoSeleccionado = 'movil';
+
+// ==============================================
+// 🎯 DETECTAR JUEGO AUTOMÁTICAMENTE
+// ==============================================
+function getTipoJuego() {
+    const juegoUpper = (localStorage.getItem('juego_seleccionado') || "").toUpperCase();
+    if (juegoUpper.includes("FREE FIRE") || juegoUpper.includes("FREEFIRE") || juegoUpper.includes("FREE")) {
+        return "freefire";
+    }
+    if (juegoUpper.includes("BLOOD STRIKE") || juegoUpper.includes("BLOODSTRIKE") || juegoUpper.includes("BLOOD")) {
+        return "bloodstrike";
+    }
+    return "desconocido";
+}
 
 // ==============================================
 // 🎯 SELECCIÓN DE MÉTODO
@@ -438,7 +461,6 @@ function seleccionarMetodo(metodo){
     metodoSeleccionado = metodo;
     document.querySelectorAll('.metodo-btn').forEach(b => b.classList.remove('activo'));
     document.getElementById('btnMovil').classList.add('activo');
-    document.getElementById('seccionPagoMovil').classList.remove('oculto');
 }
 
 // ==============================================
@@ -448,9 +470,7 @@ function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
         .then(() => {
             boton.classList.add('copiado');
-            setTimeout(() => {
-                boton.classList.remove('copiado');
-            }, 2000);
+            setTimeout(() => boton.classList.remove('copiado'), 2000);
         })
         .catch(err => alert("Copiado: " + texto));
 }
@@ -468,7 +488,7 @@ function marcarComoUsada(referencia) {
     localStorage.setItem('referencias_usadas', JSON.stringify(usadas));
 }
 function yaFueUsada(referencia) {
-    return obtenerReferenciasUsadas().includes(referencia);
+    return obtenerReferenciasUsadas().includes(referencia.trim());
 }
 
 // ==============================================
@@ -481,7 +501,6 @@ const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
-const precioProveedor = localStorage.getItem('precio_proveedor_usd') || precioUsd;
 
 // ==============================================
 // 📄 CARGAR DATOS EN PANTALLA
@@ -503,50 +522,100 @@ function mostrarPaso(idPaso) {
     document.getElementById(idPaso).classList.add('activo');
 }
 
-// ==============================================
-// 🎮 DETECCIÓN DE JUEGO
-// ==============================================
-function getTipoJuego() {
-    const juegoUpper = juego.toUpperCase();
-    if (juegoUpper.includes("FREE FIRE") || juegoUpper.includes("FREE")) {
-        return "freefire";
-    }
-    if (juegoUpper.includes("BLOOD") || juegoUpper.includes("BLOOD STRIKE")) {
-        return "bloodstrike";
-    }
-    return "desconocido";
+function mostrarDepuracion(texto) {
+    document.getElementById('textoDepurar').textContent = texto;
 }
 
 // ==============================================
-// 🔥 RECARGA FREE FIRE
+// 🔍 VERIFICAR PAGO EN BDV — API CENTRAL PRO
 // ==============================================
-async function procesarRecargaFreeFire() {
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    console.log("🔥 Recargando Free Fire:", url);
-    
+async function verificarPagoBDV(referencia) {
+    const url = `${BDV_API_URL}?token=${BDV_TOKEN}&password=${BDV_PASSWORD}`;
+    console.log("🔍 Consultando BDV:", url);
+
     try {
         const res = await fetch(url);
-        const json = await res.json();
-        console.log("📥 Respuesta Free Fire:", json);
-        
-        const esExito = json.alerta === "green" || json.estado === "exito" || json.exito === true;
-        const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo");
-        
-        if (esExito && !sinSaldo) {
-            return { exito: true, mensaje: json.mensaje || "Recarga Free Fire exitosa ✅" };
+        const texto = await res.text();
+        console.log("📥 Respuesta BDV:", texto);
+        mostrarDepuracion(texto);
+
+        let datos;
+        try {
+            datos = JSON.parse(texto);
+        } catch {
+            datos = { mensaje: texto, movimientos: [] };
         }
-        if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
+
+        // ✅ Buscar la referencia en los movimientos
+        const movimientos = datos.movimientos || datos.transacciones || [];
+        const referenciaLimpia = referencia.trim();
+        
+        const pagoEncontrado = movimientos.some(mov => {
+            const refMov = String(mov.referencia || mov.reference || "").trim();
+            return refMov === referenciaLimpia;
+        });
+
+        // ✅ Si la API devuelve el estado directamente
+        if (!pagoEncontrado) {
+            if (datos.encontrado === true) return true;
+            if (datos.pago_encontrado === true) return true;
+            if (datos.exito === true) return true;
+            if (datos.success === true) return true;
+            if (datos.status === 'paid') return true;
+            if (datos.estado === 'confirmado') return true;
+            if (datos.alerta === 'green') return true;
         }
-        return { exito: true, mensaje: json.mensaje || "Recarga Free Fire procesada ✅" };
+
+        return pagoEncontrado;
+
     } catch (err) {
-        console.error("❌ Error Free Fire:", err);
-        return { exito: true, mensaje: "Recarga Free Fire en proceso ✅" };
+        console.error("❌ Error consultando BDV:", err);
+        mostrarDepuracion("Error: " + err.message);
+        return false;
     }
 }
 
 // ==============================================
-// 🩸 RECARGA BLOOD STRIKE
+// 🔥 RECARGA FREE FIRE — API CENTRAL PRO
+// ==============================================
+async function procesarRecargaFreeFire() {
+    const url = `${FF_API_URL}?token=${FF_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
+    console.log("🔥 Recargando Free Fire:", url);
+    document.getElementById('textoRecarga').textContent = "Procesando recarga de Free Fire...";
+
+    try {
+        const res = await fetch(url);
+        const texto = await res.text();
+        console.log("📥 Respuesta Free Fire:", texto);
+        mostrarDepuracion(texto);
+
+        let datos;
+        try {
+            datos = JSON.parse(texto);
+        } catch {
+            datos = { mensaje: texto };
+        }
+
+        const exito = datos.alerta === "green" || 
+                      datos.exito === true || 
+                      datos.success === true ||
+                      texto.toLowerCase().includes("exito") ||
+                      texto.toLowerCase().includes("recarga");
+
+        const sinSaldo = datos.alerta === "red" || 
+                         texto.toLowerCase().includes("saldo") ||
+                         texto.toLowerCase().includes("insuficiente");
+
+        return { exito, sinSaldo, mensaje: datos.mensaje || texto };
+
+    } catch (err) {
+        console.error("❌ Error Free Fire:", err);
+        return { exito: true, sinSaldo: false, mensaje: "Recarga Free Fire en proceso ✅" };
+    }
+}
+
+// ==============================================
+// 🩸 RECARGA BLOOD STRIKE — PAGO NORTE
 // ==============================================
 async function procesarRecargaBloodStrike() {
     const referenciaUnica = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -563,50 +632,60 @@ async function procesarRecargaBloodStrike() {
     
     const url = `${BS_API_URL}?${params.toString()}`;
     console.log("🩸 Recargando Blood Strike:", url);
-    
+    document.getElementById('textoRecarga').textContent = "Procesando recarga de Blood Strike...";
+
     try {
         const res = await fetch(url);
-        const json = await res.json();
-        console.log("📥 Respuesta Blood Strike:", json);
-        
-        const esExito = json.ok === true || json.alerta === "green" || json.codigo_respuesta === "00";
-        const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo");
-        
-        if (esExito && !sinSaldo) {
-            return { 
-                exito: true, 
-                mensaje: json.mensaje || "Recarga Blood Strike exitosa ✅",
-                id_solicitud: json.id_solicitud || "N/A"
-            };
+        const texto = await res.text();
+        console.log("📥 Respuesta Blood Strike:", texto);
+        mostrarDepuracion(texto);
+
+        let datos;
+        try {
+            datos = JSON.parse(texto);
+        } catch {
+            datos = { mensaje: texto };
         }
-        if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        }
-        return { exito: true, mensaje: json.mensaje || "Recarga Blood Strike procesada ✅" };
+
+        const exito = datos.ok === true || 
+                      datos.alerta === "green" || 
+                      datos.codigo_respuesta === "00" ||
+                      datos.exito === true;
+
+        const sinSaldo = datos.alerta === "red" || 
+                         texto.toLowerCase().includes("saldo") ||
+                         texto.toLowerCase().includes("insuficiente");
+
+        return { 
+            exito, 
+            sinSaldo, 
+            mensaje: datos.mensaje || texto,
+            id_solicitud: datos.id_solicitud || "N/A"
+        };
+
     } catch (err) {
         console.error("❌ Error Blood Strike:", err);
-        return { exito: true, mensaje: "Recarga Blood Strike en proceso ✅" };
+        return { exito: true, sinSaldo: false, mensaje: "Recarga Blood Strike en proceso ✅" };
     }
 }
 
 // ==============================================
-// 🎯 RECARGA PRINCIPAL (DETECTA JUEGO)
+// 🎮 RECARGA PRINCIPAL — DETECTA JUEGO
 // ==============================================
 async function procesarRecarga() {
     const tipo = getTipoJuego();
-    document.getElementById('juegoRecarga').textContent = juego || "desconocido";
     
     if (tipo === "freefire") {
         return await procesarRecargaFreeFire();
     } else if (tipo === "bloodstrike") {
         return await procesarRecargaBloodStrike();
     } else {
-        return { exito: true, mensaje: "Recarga genérica procesada ✅" };
+        return { exito: true, sinSaldo: false, mensaje: "Recarga procesada ✅" };
     }
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO DE VERIFICACIÓN
+// ⚡ FLUJO COMPLETO — TODO DIRECTO
 // ==============================================
 async function iniciarVerificacion() {
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -621,84 +700,48 @@ async function iniciarVerificacion() {
         return;
     }
 
-    // ✅ Usar el precio de VENTA (lo que pagó el cliente)
-    const montoPago = parseFloat(precioUsd);
-    console.log("💰 Verificando con monto de VENTA (cliente pagó):", montoPago);
-    
-    const fecha = new Date().toISOString().split('T')[0];
-
     mostrarPaso('pasoVerificandoPago');
-    let pagoConfirmado = false;
-
-    const cuerpo = {
-        bank_reference: referencia,
-        amount: montoPago,
-        movement_type: "GENERIC",
-        fecha_pago: fecha
-    };
-
-    console.log("📤 Enviando a Pabilo:", cuerpo);
-
-    try {
-        const res = await fetch(API_PABILO_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify(cuerpo)
-        });
-        const datos = await res.json();
-        console.log("📥 Respuesta Pabilo:", datos);
-
-        if (res.ok && datos) {
-            if (datos.message === 'payment confirmed' ||
-                datos.status === 'paid' ||
-                datos.data?.status === 'paid' ||
-                datos.success === true) {
-                pagoConfirmado = true;
-            }
-        }
-    } catch (e) {
-        console.error("❌ Error en Pabilo:", e);
-    }
+    
+    // ✅ VERIFICAR PAGO EN BDV
+    const pagoConfirmado = await verificarPagoBDV(referencia);
 
     if (!pagoConfirmado) {
         setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
         return;
     }
 
+    // ✅ PAGO ENCONTRADO
     marcarComoUsada(referencia);
-    
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
+    // ✅ HACER RECARGA — SEGÚN EL JUEGO
     mostrarPaso('pasoConectandoServidor');
     const resultadoRecarga = await procesarRecarga();
     await new Promise(r => setTimeout(r, 1500));
 
-    if (resultadoRecarga.exito) {
+    if (resultadoRecarga.sinSaldo) {
+        mostrarPaso('pasoSinSaldo');
+        enviarTelegram("PAGO CONFIRMADO — SALDO INSUFICIENTE", referencia, false, resultadoRecarga.id_solicitud);
+    } else {
         const nroPedido = generarPedido();
         document.getElementById('resPedido').textContent = nroPedido;
-        document.getElementById('resJuego').textContent = juego || "No especificado";
-        document.getElementById('resProducto').textContent = producto || "No especificado";
-        document.getElementById('resIdResumen').textContent = idJugador || "No especificado";
+        document.getElementById('resJuego').textContent = juego;
+        document.getElementById('resProducto').textContent = producto;
+        document.getElementById('resIdResumen').textContent = idJugador;
         document.getElementById('resMetodo').textContent = 'Pago Móvil';
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
         mostrarPaso('pasoRecargaExitosa');
         enviarTelegram(nroPedido, referencia, true, resultadoRecarga.id_solicitud);
-    } else {
-        mostrarPaso('pasoSinSaldo');
-        enviarTelegram("PAGO PENDIENTE", referencia, false);
     }
 }
 
 // ==============================================
-// 📢 MENSAJE TELEGRAM
+// 📢 ENVIAR MENSAJE A TELEGRAM
 // ==============================================
 function enviarTelegram(pedido, ref, todoCorrecto, idSolicitud = null) {
-    const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO PENDIENTE — SALDO INSUFICIENTE";
+    const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO CONFIRMADO — SALDO INSUFICIENTE";
     const tipo = getTipoJuego();
     
     let mensaje = `
@@ -720,8 +763,13 @@ ${estado}
         mensaje += `\n📋 ID Solicitud: ${idSolicitud}`;
     }
 
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(mensaje)}`)
-        .catch(err => console.log("Error enviando Telegram:", err));
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(mensaje)}`;
+    console.log("📢 Enviando Telegram...");
+    
+    fetch(url)
+        .then(res => res.json())
+        .then(json => console.log("📡 Telegram:", json))
+        .catch(err => console.log("❌ Error Telegram:", err));
 }
 </script>
 </body>
