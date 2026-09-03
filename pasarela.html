@@ -260,6 +260,8 @@ body{
 
 .binance-color{color:var(--color-binance)}
 .oculto{display:none !important}
+.depurar-box{background:rgba(30,41,59,0.8);border:1px solid #475569;border-radius:10px;padding:15px;margin-top:15px;font-size:12px;text-align:left;color:#94a3b8;max-height:200px;overflow-y:auto;display:none}
+.depurar-box.mostrar{display:block}
 </style>
 </head>
 <body>
@@ -348,6 +350,12 @@ body{
 
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
+        
+        <!-- 🔍 CAJA DE DEPURACIÓN — para ver qué responde la API -->
+        <div class="depurar-box" id="cajaDepurar">
+            <strong>🔍 Respuesta de la API:</strong><br>
+            <span id="textoDepurar">Esperando consulta...</span>
+        </div>
     </div>
 
     <div id="pasoVerificandoPago" class="paso-box">
@@ -421,26 +429,21 @@ const API_TELEGRAM_URL = "/api/telegram";
 let metodoSeleccionado = 'movil';
 
 // ==============================================
-// 🎯 DETECTAR JUEGO Y CARGAR DATOS CORRECTOS
+// 🎯 DETECTAR JUEGO Y CARGAR DATOS
 // ==============================================
 const juego = (localStorage.getItem('juego_seleccionado') || "").toUpperCase().trim();
 
-// ✅ FUNCIÓN INTELIGENTE: busca el nombre del jugador en TODAS las posibles llaves
 function obtenerDatoJuego(claveBase) {
-    // Primero intenta con la llave genérica
     const valorDirecto = localStorage.getItem(claveBase);
     if (valorDirecto && valorDirecto.trim() !== "") return valorDirecto;
     
-    // Si no, busca con el prefijo del juego
     const prefijo = juego.replace(/\s+/g, '_').toUpperCase();
     const valorConPrefijo = localStorage.getItem(`${prefijo}_${claveBase}`);
     if (valorConPrefijo && valorConPrefijo.trim() !== "") return valorConPrefijo;
     
-    // Si no encuentra nada
     return "";
 }
 
-// ✅ CARGAR TODO — busca en TODAS las llaves posibles
 const idJugador = obtenerDatoJuego('id_jugador');
 const nombreJugador = obtenerDatoJuego('nombre_jugador');
 const producto = obtenerDatoJuego('producto_seleccionado');
@@ -448,14 +451,11 @@ const precioUsd = obtenerDatoJuego('precio_usd') || "0.00";
 const precioBs = obtenerDatoJuego('precio_en_bs') || "0";
 const paqueteCod = obtenerDatoJuego('paquete_codigo');
 
-// ==============================================
-// 📄 MOSTRAR TODO EN PANTALLA
-// ==============================================
 document.getElementById('datoJuego').textContent = juego || "-";
 document.getElementById('datoId').textContent = idJugador || "-";
-document.getElementById('datoNombre').textContent = nombreJugador || "No verificado"; // ✅ Si viene vacío, muestra esto
+document.getElementById('datoNombre').textContent = nombreJugador || "No verificado";
 document.getElementById('datoProducto').textContent = producto || "-";
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`; // ✅ PRECIO VISIBLE
+document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
 function seleccionarMetodo(metodo){
     if(metodo === 'binance'){
@@ -464,7 +464,6 @@ function seleccionarMetodo(metodo){
     }
     metodoSeleccionado = metodo;
     document.getElementById('btnMovil').classList.add('activo');
-    document.getElementById('seccionPagoMovil').classList.remove('oculto');
 }
 
 function copiarTexto(texto, boton){
@@ -498,6 +497,14 @@ function generarPedido(){
 function mostrarPaso(idPaso) {
     document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
     document.getElementById(idPaso).classList.add('activo');
+}
+
+// ✅ Función para mostrar la respuesta de la API y depurar
+function mostrarDepuracion(texto) {
+    const caja = document.getElementById('cajaDepurar');
+    const textoDep = document.getElementById('textoDepurar');
+    caja.classList.add('mostrar');
+    textoDep.textContent = texto;
 }
 
 async function procesarRecarga() {
@@ -534,33 +541,49 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
+    // ✅ CORREGIDO: Preparar monto en formato correcto para Pabilo
+    let montoPago = String(precioBs).replace(/[^0-9.]/g, ''); // Solo números y punto
+    montoPago = parseFloat(montoPago) || 0;
     const fecha = new Date().toISOString().split('T')[0];
 
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
+    let respuestaAPI = null;
 
+    // ✅ CORREGIDO: Enviar datos en el formato exacto que espera Pabilo
     const cuerpo = { 
-        bank_reference: referencia, 
-        amount: montoPago, 
-        movement_type: "GENERIC", 
-        fecha_pago: fecha 
+        reference: referencia,       // Pabilo usa "reference" NO "bank_reference"
+        amount: montoPago,
+        date: fecha
     };
+
     try {
         const res = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cuerpo)
         });
-        const datos = await res.json();
-        if(res.ok && datos) {
-            if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
-               datos.data?.status === 'paid' || datos.success === true) {
-                pagoConfirmado = true;
-            }
+        
+        respuestaAPI = await res.json();
+        console.log("📡 Respuesta Pabilo:", respuestaAPI);
+        mostrarDepuracion(JSON.stringify(respuestaAPI, null, 2));
+
+        // ✅ CORREGIDO: Verificar TODOS los posibles campos de respuesta de Pabilo
+        if(res.ok && respuestaAPI) {
+            const status = (respuestaAPI.status || respuestaAPI.estado || "").toString().toLowerCase();
+            const message = (respuestaAPI.message || respuestaAPI.mensaje || "").toLowerCase();
+            
+            pagoConfirmado = 
+                status === 'paid' || status === 'confirmado' || status === 'success' ||
+                message.includes('confirmado') || message.includes('pago encontrado') || 
+                message.includes('payment confirmed') || respuestaAPI.success === true ||
+                respuestaAPI.encontrado === true || respuestaAPI.exito === true ||
+                (respuestaAPI.data && (respuestaAPI.data.status === 'paid' || respuestaAPI.data.encontrado === true));
         }
-    } catch(e) {}
+    } catch(e) {
+        console.error("❌ Error consultando Pabilo:", e);
+        mostrarDepuracion("Error de conexión: " + e.message);
+    }
 
     if(!pagoConfirmado) { 
         setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); 
