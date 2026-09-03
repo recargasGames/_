@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Verificando Pago</title>
+
+<!-- 🔥 FIREBASE SDK v9+ -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <style>
 :root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-binance:#f3ba2f;--color-borde:rgba(51,65,85,0.5);--color-deshabilitado:#475569}
 
@@ -75,8 +80,6 @@ body{
 .resumen-etiqueta{color:#e2e8f0}
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
-.resumen-valor.azul{color:#3b82f6}
-.resumen-valor.naranja{color:#f97316}
 
 .metodo-pago-box{
     display:flex;
@@ -259,11 +262,10 @@ body{
     font-weight:600;
 }
 
-.binance-color{color:var(--color-binance)}
-.oculto{display:none !important}
 .proveedor-tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;margin-left:8px}
 .proveedor-central{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)}
 .proveedor-pagonorte{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+.oculto{display:none !important}
 </style>
 </head>
 <body>
@@ -349,23 +351,23 @@ body{
             <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
         </div>
 
-        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
+        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> en TODO el sistema. Queda registrada permanentemente en la base de datos.</div>
 
         <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
-    <!-- PASO 1: VERIFICANDO EN PÁBILO -->
+    <!-- PASO 1: VERIFICANDO EN FIREBASE + PÁBILO -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando Pago...</div>
-        <div class="texto-secundario">Consultando en Pábilo si el pago existe...</div>
+        <div class="texto-secundario">Consultando base de datos y sistema bancario...</div>
     </div>
 
     <!-- PASO 2: PAGO CONFIRMADO -->
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Pábilo verificó el pago. Conectando con el proveedor...</div>
+        <div class="texto-secundario">Referencia registrada. Conectando con el proveedor...</div>
     </div>
 
     <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
@@ -399,7 +401,7 @@ body{
         <div class="texto-principal">Saldo Insuficiente</div>
         <div class="texto-secundario" id="textoSinSaldo">El pago fue confirmado, pero no hay saldo suficiente en el proveedor.</div>
         <div class="mantengo-box">
-            💳 Tu pago quedó registrado y seguro. En cuanto se recargue el saldo, se procesará automáticamente. Te llegará un aviso por Telegram.
+            💳 Tu pago quedó registrado y seguro en la base de datos. En cuanto se recargue el saldo, se procesará automáticamente. Te llegará un aviso por Telegram.
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -412,17 +414,39 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- ⚠️ REFERENCIA YA USADA -->
+    <!-- 🔒 REFERENCIA YA USADA — BLOQUEADA DESDE FIREBASE -->
     <div id="pasoReferenciaUsada" class="paso-box">
-        <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Referencia Ya Utilizada</div>
-        <div class="texto-secundario">Esta referencia ya fue usada en un pago anterior. Usa una referencia nueva.</div>
-        <div class="usada-box">🔒 Cada referencia se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.</div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
+        <div class="icono-circle icono-error">🔒</div>
+        <div class="texto-principal">Referencia Ya Fue Utilizada</div>
+        <div class="texto-secundario">Esta referencia ya existe en la base de datos. Cada pago se registra UNA SOLA VEZ en todo el sistema.</div>
+        <div class="usada-box">🚫 NO se puede repetir desde ningún dispositivo. El sistema la detectó automáticamente.</div>
+        <a href="javascript:history.back()" class="volver-btn">← Volver a usar una referencia nueva</a>
     </div>
 </div>
 
 <script>
+// ==============================================
+// 🔥 FIREBASE — INICIALIZACIÓN
+// ==============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+  authDomain: "free-52119.firebaseapp.com",
+  databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "free-52119",
+  storageBucket: "free-52119.firebasestorage.app",
+  messagingSenderId: "632240144599",
+  appId: "1:632240144599:web:e31c25665ffe19c194b092",
+  measurementId: "G-5NLLLEPWPK"
+};
+
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const refReferencias = db.ref("referencias_usadas");
+const refPedidos = db.ref("pedidos");
+
+console.log("✅ Firebase conectado correctamente");
+
 // ==============================================
 // 🔑 DATOS DE TODOS LOS PROVEEDORES
 // ==============================================
@@ -519,49 +543,49 @@ function copiarTexto(texto, boton){
 }
 
 // ==============================================
-// 🔒 BLOQUEO DE REFERENCIAS REPETIDAS
+// 🔒 FIREBASE — BLOQUEO GLOBAL DE REFERENCIAS
 // ==============================================
-function obtenerReferenciasUsadas() {
-    const guardadas = localStorage.getItem('referencias_usadas');
-    return guardadas ? JSON.parse(guardadas) : [];
+async function verificarReferenciaEnFirebase(referencia) {
+    const snapshot = await refReferencias.child(referencia).once('value');
+    return snapshot.exists(); // true = YA existe, false = NUEVA
 }
-function marcarComoUsada(referencia) {
-    const usadas = obtenerReferenciasUsadas();
-    usadas.push(referencia);
-    localStorage.setItem('referencias_usadas', JSON.stringify(usadas));
-}
-function yaFueUsada(referencia) {
-    return obtenerReferenciasUsadas().includes(referencia);
+
+async function marcarReferenciaComoUsada(referencia, datosPedido) {
+    await refReferencias.child(referencia).set({
+        fecha_uso: new Date().toISOString(),
+        juego: juegoInfo.nombreMostrado,
+        id_jugador: idJugador,
+        producto: producto,
+        monto_usd: precioUsd,
+        proveedor: juegoInfo.proveedor,
+        ip: "registrada",
+        dispositivo: navigator.userAgent.substring(0, 100)
+    });
+    console.log("🔒 Referencia guardada en Firebase:", referencia);
 }
 
 // ==============================================
-// 💾 GUARDAR PEDIDO EN LOCALSTORAGE
+// 💾 FIREBASE — GUARDAR PEDIDO COMPLETO
 // ==============================================
-function guardarPedido(nroPedido, referencia, estado, idSolicitud = null) {
-    const pedidos = JSON.parse(localStorage.getItem('pedidos_registrados') || '[]');
-    const nuevoPedido = {
-        id: nroPedido,
+async function guardarPedidoEnFirebase(referencia, estado, idSolicitud = null) {
+    const nuevoPedido = refPedidos.push();
+    const datosPedido = {
+        referencia: referencia,
         juego: juegoInfo.nombreMostrado,
         proveedor: juegoInfo.proveedor,
-        idJugador: idJugador,
-        nombreJugador: nombreJugador,
+        id_jugador: idJugador,
+        nombre_jugador: nombreJugador,
         producto: producto,
-        montoUsd: precioUsd,
-        montoBs: precioBs,
-        referencia: referencia,
+        monto_usd: precioUsd,
+        monto_bs: precioBs,
         estado: estado,
-        idSolicitud: idSolicitud,
-        fecha: new Date().toISOString()
+        id_solicitud: idSolicitud,
+        fecha: new Date().toISOString(),
+        dispositivo: navigator.userAgent.substring(0, 100)
     };
-    pedidos.unshift(nuevoPedido);
-    localStorage.setItem('pedidos_registrados', JSON.stringify(pedidos));
-    localStorage.setItem('ultimoPedido', parseInt(nroPedido.replace('#','')));
-    return nuevoPedido;
-}
-
-function generarPedido(){
-    const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '1000') + 1;
-    return '#' + ultimo;
+    await nuevoPedido.set(datosPedido);
+    console.log("📦 Pedido guardado en Firebase:", nuevoPedido.key);
+    return nuevoPedido.key;
 }
 
 function mostrarPaso(idPaso) {
@@ -663,7 +687,7 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — PASO A PASO
+// ⚡ FLUJO COMPLETO — PASO A PASO CON FIREBASE
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -673,21 +697,26 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    if(yaFueUsada(referencia)){ 
-        mostrarPaso('pasoReferenciaUsada'); 
-        return; 
+    // ==============================================
+    // 🔒 PASO 0: VERIFICAR EN FIREBASE SI YA FUE USADA
+    // ==============================================
+    mostrarPaso('pasoVerificandoPago');
+    const referenciaExiste = await verificarReferenciaEnFirebase(referencia);
+    
+    if(referenciaExiste) {
+        console.log("🔒 REFERENCIA YA EXISTE EN FIREBASE:", referencia);
+        mostrarPaso('pasoReferenciaUsada');
+        return;
     }
 
+    // ==============================================
+    // 🏦 PASO 1: VERIFICAR EN PÁBILO
+    // ==============================================
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     const fecha = new Date().toISOString().split('T')[0];
 
-    // ==============================================
-    // PASO 1: VERIFICAR EN PÁBILO
-    // ==============================================
-    mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
-
     const cuerpo = { 
         bank_reference: referencia, 
         amount: montoPago, 
@@ -719,16 +748,20 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    marcarComoUsada(referencia);
+    // ==============================================
+    // ✅ PASO 2: PAGO CONFIRMADO → BLOQUEAR REFERENCIA EN FIREBASE
+    // ==============================================
+    await marcarReferenciaComoUsada(referencia, {
+        juego: juegoInfo.nombreMostrado,
+        id_jugador: idJugador,
+        monto_usd: precioUsd
+    });
 
-    // ==============================================
-    // PASO 2: PAGO CONFIRMADO
-    // ==============================================
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
     // ==============================================
-    // PASO 3: CONECTAR CON PROVEEDOR
+    // 🔌 PASO 3: CONECTAR CON PROVEEDOR
     // ==============================================
     document.getElementById('textoConectandoProveedor').textContent = `Conectando con ${juegoInfo.proveedor}...`;
     document.getElementById('textoProveedorSecundario').textContent = `Procesando recarga de ${juegoInfo.nombreMostrado}...`;
@@ -738,14 +771,13 @@ async function iniciarVerificacion(){
     await new Promise(r => setTimeout(r, 1500));
 
     // ==============================================
-    // PASO 4: RESULTADO FINAL
+    // 🎯 PASO 4: RESULTADO FINAL
     // ==============================================
-    const nroPedido = generarPedido();
-
     if(resultadoRecarga.exito){
-        // ✅ RECARGA EXITOSA — GUARDAR Y NOTIFICAR
-        guardarPedido(nroPedido, referencia, "COMPLETADA", resultadoRecarga.idSolicitud);
-        document.getElementById('resPedido').textContent = nroPedido;
+        // ✅ RECARGA EXITOSA — GUARDAR PEDIDO COMPLETO
+        const idPedidoFirebase = await guardarPedidoEnFirebase(referencia, "COMPLETADA", resultadoRecarga.idSolicitud);
+        
+        document.getElementById('resPedido').textContent = `#${idPedidoFirebase.substring(0, 8).toUpperCase()}`;
         document.getElementById('resJuego').textContent = juegoInfo.nombreMostrado;
         document.getElementById('resProveedor').textContent = juegoInfo.proveedor;
         document.getElementById('resProducto').textContent = producto;
@@ -753,17 +785,18 @@ async function iniciarVerificacion(){
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
         document.getElementById('textoExitoProveedor').textContent = `Tu recarga de ${juegoInfo.nombreMostrado} se procesó correctamente a través de ${juegoInfo.proveedor}. ¡Disfruta tu compra!`;
+        
         mostrarPaso('pasoRecargaExitosa');
-        enviarTelegram(nroPedido, referencia, true, resultadoRecarga.idSolicitud);
+        enviarTelegram(idPedidoFirebase, referencia, true, resultadoRecarga.idSolicitud);
     } else if(resultadoRecarga.sinSaldo){
         // ⚠️ SIN SALDO — GUARDAR COMO PENDIENTE
-        guardarPedido(nroPedido, referencia, "PENDIENTE_SALDO");
+        await guardarPedidoEnFirebase(referencia, "PENDIENTE_SALDO");
         document.getElementById('textoSinSaldo').textContent = `El pago fue confirmado, pero no hay saldo suficiente en ${juegoInfo.proveedor}.`;
         mostrarPaso('pasoSinSaldo');
-        enviarTelegram(nroPedido, referencia, false);
+        enviarTelegram("PAGO CONFIRMADO — SALDO INSUFICIENTE", referencia, false);
     } else {
         // ❌ ERROR
-        guardarPedido(nroPedido, referencia, "ERROR");
+        await guardarPedidoEnFirebase(referencia, "ERROR_RECARGA");
         mostrarPaso('pasoPagoNoEncontrado');
     }
 }
@@ -778,7 +811,7 @@ function enviarTelegram(pedido, ref, todoCorrecto, idSolicitud = null){
         : "⚠️ PAGO CONFIRMADO — SALDO INSUFICIENTE EN " + juegoInfo.proveedor;
     
     let mensajeTexto = `
-📌 NUEVO PEDIDO RECIBIDO
+📌 NUEVO PEDIDO RECIBIDO — FIREBASE
 
 🎮 Juego: ${juegoInfo.nombreMostrado}
 🏢 Proveedor: ${juegoInfo.proveedor}
@@ -791,6 +824,7 @@ function enviarTelegram(pedido, ref, todoCorrecto, idSolicitud = null){
 💰 Monto: ${precioUsd} / ${precioBs} Bs
 
 ${estado}
+🔒 Referencia registrada en base de datos
     `;
 
     if (idSolicitud) {
