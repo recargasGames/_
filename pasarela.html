@@ -19,7 +19,6 @@ body{
     padding-top:80px;
 }
 
-/* 🔒 LOGO OVALADO ARRIBA A LA IZQUIERDA */
 .header{
     position:fixed;
     top:0;
@@ -56,7 +55,6 @@ body{
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
 
-/* 📋 TARJETA TRANSPARENTE */
 .resumen-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -78,7 +76,6 @@ body{
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 
-/* 🎯 SELECCIÓN DE MÉTODO — BINANCE DESHABILITADO */
 .metodo-pago-box{
     display:flex;
     gap:12px;
@@ -102,7 +99,6 @@ body{
     background:rgba(16,185,129,0.15);
     color:var(--color-principal);
 }
-/* ❌ BINANCE DESHABILITADO — NO SE PUEDE SELECCIONAR */
 .metodo-btn.deshabilitado{
     border-color:var(--color-deshabilitado);
     background:rgba(71,85,105,0.2);
@@ -117,7 +113,6 @@ body{
     color:#94a3b8;
 }
 
-/* 📢 AVISO DE BINANCE */
 .aviso-binance{
     background:rgba(243,186,47,0.08);
     border:1px solid rgba(243,186,47,0.25);
@@ -151,7 +146,6 @@ body{
 .dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
 .dato-texto span{color:#fff}
 
-/* 📋 BOTÓN DE COPIAR — TU SVG EXACTO, TRANSPARENTE 🫩 */
 .copiar-btn{
     width:44px;
     height:44px;
@@ -283,6 +277,7 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Nombre del Jugador</span><span class="resumen-valor" id="datoNombreJugador">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
@@ -442,14 +437,12 @@ const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-// ✅ SOLO PAGO MÓVIL ACTIVO — BINANCE BLOQUEADO
 let metodoSeleccionado = 'movil';
 
 // ==============================================
 // 🎯 SELECCIÓN DE MÉTODO — SOLO PAGO MÓVIL
 // ==============================================
 function seleccionarMetodo(metodo){
-    // ❌ BINANCE NO SE PUEDE SELECCIONAR
     if(metodo === 'binance'){
         alert("🟡 Binance Pay — Pronto estará disponible. Por favor usa Pago Móvil.");
         return;
@@ -461,7 +454,7 @@ function seleccionarMetodo(metodo){
 }
 
 // ==============================================
-// 📋 COPIAR TEXTO — TU SVG + EFECTO DE CONFIRMACIÓN
+// 📋 COPIAR TEXTO
 // ==============================================
 function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
@@ -495,6 +488,7 @@ function yaFueUsada(referencia) {
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
+const nombreJugador = localStorage.getItem('nombre_jugador') || idJugador || "Sin nombre";
 const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
@@ -505,6 +499,7 @@ const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
+document.getElementById('datoNombreJugador').textContent = nombreJugador; // ← NOMBRE COMPLETO DEL JUEGO
 document.getElementById('datoProducto').textContent = producto;
 document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
@@ -544,7 +539,6 @@ async function procesarRecarga() {
 // ⚡ FLUJO COMPLETO — SOLO PAGO MÓVIL
 // ==============================================
 async function iniciarVerificacion(){
-    // ✅ SOLO SE TRABAJA CON PAGO MÓVIL
     const referencia = document.getElementById('referenciaPago').value.trim();
     
     if(!referencia || referencia.length < 6) { 
@@ -564,7 +558,6 @@ async function iniciarVerificacion(){
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
 
-    // 🏦 VERIFICAR CON PABILO
     const cuerpo = { 
         bank_reference: referencia, 
         amount: montoPago, 
@@ -616,7 +609,7 @@ async function iniciarVerificacion(){
 }
 
 // ==============================================
-// 📢 MENSAJE TELEGRAM — EXACTAMENTE COMO LO PEDISTE
+// 📢 MENSAJE TELEGRAM
 // ==============================================
 function enviarTelegram(pedido, ref, todoCorrecto){
     const metodo = 'Pago Móvil';
@@ -625,7 +618,10 @@ function enviarTelegram(pedido, ref, todoCorrecto){
     const mensaje = encodeURIComponent(`
 📌 NUEVO PEDIDO
 
-🎮 Producto: ${producto}
+🎮 Juego: ${juego}
+👤 Jugador: ${nombreJugador}
+🆔 ID: ${idJugador}
+🎁 Producto: ${producto}
 💵 Valor USDT: ${precioUsd}
 💳 Método de pago: ${metodo}
 🔗 Ref: ${ref}
