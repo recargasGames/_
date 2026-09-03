@@ -272,7 +272,6 @@ body{
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
-        <!-- 📋 TARJETA CON NOMBRE DEL JUGADOR ✅ -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -369,7 +368,6 @@ body{
         <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
     </div>
 
-    <!-- ✅ RESUMEN FINAL CON NOMBRE DEL JUGADOR ✅ -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
@@ -414,13 +412,21 @@ body{
 
 <script>
 // ==============================================
-// 🔒 SOLO LLAMADAS A PROXIES — SIN CLAVES EXPUESTAS
+// 🔒 PROXIES SIN CLAVES EXPUESTAS
 // ==============================================
 const API_PABILO_URL = "/api/pabilo";
 const API_RECARGA_URL = "/api/recarga";
 
-// ✅ SOLO PAGO MÓVIL ACTIVO
 let metodoSeleccionado = 'movil';
+
+// ==============================================
+// 🎯 FUNCIÓN AUXILIAR: Prefijo por juego ✅
+// ==============================================
+function claveJuego(clave) {
+    const juego = localStorage.getItem('juego_seleccionado') || "";
+    const nombreJuego = juego.toLowerCase().replace(/\s+/g, '_');
+    return `${nombreJuego}_${clave}`;
+}
 
 function seleccionarMetodo(metodo){
     if(metodo === 'binance'){
@@ -455,18 +461,18 @@ function yaFueUsada(referencia) {
 }
 
 // ==============================================
-// 📋 DATOS DEL PEDIDO — NOMBRE DEL JUGADOR INCLUIDO ✅
+// 📋 DATOS SEPARADOS POR JUEGO ✅ YA NO SE MEZCLAN
 // ==============================================
 const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
-const nombreJugador = localStorage.getItem('nombre_jugador') || `Jugador ${idJugador}`;
-const producto = localStorage.getItem('producto_seleccionado') || "";
-const precioUsd = localStorage.getItem('precio_usd') || "0";
-const precioBs = localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+const idJugador = localStorage.getItem(claveJuego('id_jugador')) || localStorage.getItem('id_jugador') || "";
+const nombreJugador = localStorage.getItem(claveJuego('nombre_jugador')) || `Jugador ${idJugador}`;
+const producto = localStorage.getItem(claveJuego('producto_seleccionado')) || "";
+const precioUsd = localStorage.getItem(claveJuego('precio_usd')) || "0";
+const precioBs = localStorage.getItem(claveJuego('precio_en_bs')) || "0";
+const paqueteCod = localStorage.getItem(claveJuego('paquete_codigo')) || "";
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA — NOMBRE VISIBLE ✅
+// 📄 CARGAR DATOS EN PANTALLA
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
@@ -510,7 +516,7 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — VERIFICACIÓN POR PROXY
+// ⚡ FLUJO COMPLETO
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -532,7 +538,6 @@ async function iniciarVerificacion(){
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
 
-    // 🏦 VERIFICAR PAGO POR PROXY — SIN CLAVE EXPUESTA
     const cuerpo = { 
         bank_reference: referencia, 
         amount: montoPago, 
