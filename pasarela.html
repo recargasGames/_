@@ -437,6 +437,7 @@ const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+const tipoRecarga = localStorage.getItem('tipo_recarga') || "";
 
 // ==============================================
 // 📄 CARGAR DATOS EN PANTALLA
@@ -459,23 +460,72 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// 🔥 FUNCIÓN DE RECARGA FREE FIRE
+// 🔥 RECARGA FREE FIRE — API CENTRAL PRO
 // ==============================================
-async function procesarRecarga() {
-    if(!juego.includes("FREE FIRE") || !idJugador || !paqueteCod) {
+async function recargarFreeFire() {
+    if(!idJugador || !paqueteCod) {
         return { exito: true, mensaje: "Recarga procesada" };
     }
     const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
     try {
         const res = await fetch(url);
         const json = await res.json();
+        console.log("📡 API Central Pro — Free Fire:", json);
         const esExito = json.alerta === "green" || json.estado === "exito" || json.exito === true || json.success === true || (json.mensaje && !json.alerta);
         const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.error;
         if (esExito && !sinSaldo) return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅" };
         if (sinSaldo) return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
         return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅" };
     } catch (err) {
+        console.error("❌ Error Free Fire:", err);
         return { exito: true, mensaje: "Recarga en proceso ✅" };
+    }
+}
+
+// ==============================================
+// 🔶 RECARGA BLOOD STRIKE — PAGO NORTE
+// ==============================================
+async function recargarBloodStrike(referencia) {
+    if(!idJugador || !paqueteCod) {
+        return { exito: true, mensaje: "Recarga procesada" };
+    }
+    // Llamada al proxy protegido de PagoNorte
+    try {
+        const res = await fetch("/API/recargar-bloodstrike", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                referencia: referencia,
+                monto_usd: precioUsd,
+                tipo_recarga: tipoRecarga,
+                id_jugador: idJugador,
+                paquete: paqueteCod
+            })
+        });
+        const json = await res.json();
+        console.log("📡 PagoNorte — Blood Strike:", json);
+        return json;
+    } catch (err) {
+        console.error("❌ Error Blood Strike:", err);
+        return { exito: true, mensaje: "Recarga en proceso ✅" };
+    }
+}
+
+// ==============================================
+// ⚡ FUNCIÓN PRINCIPAL DE RECARGA — DETECTA JUEGO
+// ==============================================
+async function procesarRecarga(referencia) {
+    const juegoUpper = juego.toUpperCase();
+    
+    if (juegoUpper.includes("FREE FIRE")) {
+        return await recargarFreeFire();
+    } 
+    else if (juegoUpper.includes("BLOOD STRIKE") || juegoUpper.includes("BLOODSTRIKE")) {
+        return await recargarBloodStrike(referencia);
+    }
+    else {
+        // Por defecto para otros juegos
+        return { exito: true, mensaje: "Recarga procesada ✅" };
     }
 }
 
@@ -501,7 +551,7 @@ async function iniciarVerificacion(){
     let pagoConfirmado = false;
     const fecha = new Date().toISOString().split('T')[0];
 
-    // 🏦 VERIFICACIÓN CON PABILO
+    // 🏦 VERIFICACIÓN CON PABILO — IGUAL QUE ANTES
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     
@@ -542,7 +592,7 @@ async function iniciarVerificacion(){
     await new Promise(r => setTimeout(r, 1200));
 
     mostrarPaso('pasoConectandoServidor');
-    const resultadoRecarga = await procesarRecarga();
+    const resultadoRecarga = await procesarRecarga(referencia);
     await new Promise(r => setTimeout(r, 1500));
 
     if(resultadoRecarga.exito){
