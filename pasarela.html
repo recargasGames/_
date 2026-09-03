@@ -420,7 +420,7 @@ body{
 
 <script>
 // ==============================================
-// 🔒 PROXIES SEGUROS — SIN CLAVES EXPUESTAS
+// 🔒 PROXIES SEGUROS
 // ==============================================
 const API_PABILO_URL = "/api/pabilo";
 const API_RECARGA_URL = "/api/recarga";
@@ -522,11 +522,14 @@ async function procesarRecarga() {
     }
 }
 
+// ==============================================
+// ✅ VERIFICACIÓN DE PAGO CORREGIDA
+// ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    if(!referencia || referencia.length < 6) { 
-        alert("❌ Escribe la referencia completa del pago móvil"); 
+    if(!referencia || referencia.length < 4) { 
+        alert("❌ Escribe la referencia completa del pago"); 
         return; 
     }
 
@@ -540,6 +543,7 @@ async function iniciarVerificacion(){
     let respuestaAPI = null;
 
     try {
+        // ✅ ENVIAMOS LA REFERENCIA POR EL BODY — COMO LO ESPERA PABILO
         const res = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -550,18 +554,20 @@ async function iniciarVerificacion(){
         console.log("📡 Respuesta Pabilo:", respuestaAPI);
         mostrarDepuracion(JSON.stringify(respuestaAPI, null, 2));
 
-        // ✅ DETECTAR PAGO CONFIRMADO — TODOS los formatos posibles de Pabilo
+        // ✅ DETECCIÓN COMPLETA DE TODOS LOS FORMATOS DE RESPUESTA
         if(res.ok && respuestaAPI) {
             const status = String(respuestaAPI.status || respuestaAPI.estado || "").toLowerCase();
             const message = String(respuestaAPI.message || respuestaAPI.mensaje || "").toLowerCase();
             
             pagoConfirmado = 
-                status === 'paid' || status === 'confirmado' || status === 'success' || status === 'completed' ||
+                status === 'paid' || status === 'confirmed' || status === 'confirmado' || 
+                status === 'success' || status === 'completed' ||
                 message.includes('confirmado') || message.includes('pago encontrado') || 
-                message.includes('payment confirmed') || message.includes('paid') ||
-                respuestaAPI.success === true || respuestaAPI.encontrado === true || respuestaAPI.exito === true ||
+                message.includes('paid') || message.includes('confirm') ||
+                respuestaAPI.success === true || respuestaAPI.encontrado === true || 
+                respuestaAPI.exito === true || respuestaAPI.pago_encontrado === true ||
                 (respuestaAPI.data && (
-                    respuestaAPI.data.status === 'paid' || 
+                    String(respuestaAPI.data.status || "").toLowerCase() === 'paid' ||
                     respuestaAPI.data.encontrado === true ||
                     respuestaAPI.data.success === true
                 ));
@@ -576,6 +582,7 @@ async function iniciarVerificacion(){
         return; 
     }
 
+    // ✅ PAGO ENCONTRADO — CONTINUAMOS
     marcarComoUsada(referencia);
     mostrarPaso('pasoPagoConfirmado');
     document.getElementById('mensajeConfirmacion').textContent = nombreJugador 
