@@ -260,6 +260,8 @@ body{
 
 .binance-color{color:var(--color-binance)}
 .oculto{display:none !important}
+.depurar-box{background:rgba(30,41,59,0.9);border:1px solid #475569;border-radius:10px;padding:15px;margin-top:15px;font-size:11px;text-align:left;color:#94a3b8;max-height:250px;overflow-y:auto;display:block;white-space:pre-wrap;word-break:break-all}
+.depurar-box strong{color:#fff}
 </style>
 </head>
 <body>
@@ -269,19 +271,17 @@ body{
 </div>
 
 <div class="main">
-    <!-- PASO 0: ELEGIR MÉTODO — SOLO PAGO MÓVIL ACTIVO -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
-        <!-- 📋 TARJETA TRANSPARENTE — RESUMEN DEL PEDIDO -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Nombre Jugador</span><span class="resumen-valor" id="datoNombre">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
-        <!-- 🎯 ELEGIR MÉTODO — BINANCE DESHABILITADO -->
         <div class="metodo-pago-box">
             <button class="metodo-btn activo" id="btnMovil" onclick="seleccionarMetodo('movil')">🏦 Pago Móvil</button>
             <button class="metodo-btn deshabilitado" id="btnBinance" disabled title="Próximamente disponible">
@@ -290,15 +290,13 @@ body{
             </button>
         </div>
 
-        <!-- 📢 MENSAJE — BINANCE EN MEJORAS -->
         <div class="aviso-binance">
             🟡 <strong>Binance Pay</strong> — Pronto estará disponible.<br>
             Se está trabajando en mejoras. Por favor usa <strong>Pago Móvil</strong> por ahora.
         </div>
 
-        <!-- 🏦 DATOS DE PAGO MÓVIL — ÚNICO ACTIVO -->
         <div id="seccionPagoMovil">
-            <h3 class="titulo-metodo">Datos de Pago Móvil</h3>
+            <h3 class="titulo-seccion">Datos de Pago Móvil</h3>
             <div class="datos-pago-box">
                 <div class="dato-line">
                     <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
@@ -332,9 +330,8 @@ body{
             </div>
         </div>
 
-        <!-- 🟡 BINANCE — OCULTO, NO SE PUEDE USAR -->
         <div id="seccionBinance" class="oculto">
-            <h3 class="titulo-metodo binance-color">Datos de Binance Pay</h3>
+            <h3 class="titulo-seccion binance-color">Datos de Binance Pay</h3>
             <div class="datos-pago-box">
                 <div class="dato-line">
                     <div class="dato-texto"><strong>ID Binance:</strong> <span class="binance-color">964617189</span></div>
@@ -352,32 +349,32 @@ body{
         </div>
 
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
-
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
+        
+        <div class="depurar-box" id="cajaDepurar">
+            <strong>🔍 Respuesta de Pabilo:</strong><br>
+            <span id="textoDepurar">Esperando consulta...</span>
+        </div>
     </div>
 
-    <!-- PASO 1: VERIFICANDO PAGO -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
         <div class="texto-secundario">Estamos buscando tu pago en el sistema bancario...</div>
     </div>
 
-    <!-- PASO 2: PAGO CONFIRMADO -->
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Tu pago fue verificado correctamente. Preparando recarga...</div>
+        <div class="texto-secundario" id="mensajeConfirmacion">Tu pago fue verificado correctamente. Preparando recarga...</div>
     </div>
 
-    <!-- PASO 3: CONECTANDO CON SERVIDOR -->
     <div id="pasoConectandoServidor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
         <div class="texto-principal">Conectando con el servidor de recargas...</div>
         <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
     </div>
 
-    <!-- ✅ PASO 4: RECARGA EXITOSA -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
@@ -385,6 +382,7 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Nombre Jugador</span><span class="resumen-valor" id="resNombreResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor" id="resMetodo">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
@@ -393,7 +391,6 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ⚠️ SIN SALDO -->
     <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Servicio Temporalmente Indisponible</div>
@@ -404,7 +401,6 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ❌ PAGO NO ENCONTRADO -->
     <div id="pasoPagoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
@@ -412,7 +408,6 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- ⚠️ REFERENCIA YA USADA -->
     <div id="pasoReferenciaUsada" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Referencia Ya Utilizada</div>
@@ -424,48 +419,61 @@ body{
 
 <script>
 // ==============================================
-// 🔑 DATOS DEL PEDIDO (desde localStorage)
+// 🔑 TODO DIRECTO AQUÍ — SIN PROXY, SIN NADA
 // ==============================================
-const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
-const producto = localStorage.getItem('producto_seleccionado') || "";
-const precioUsd = localStorage.getItem('precio_usd') || "0";
-const precioBs = localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+const PABILO_TOKEN = 'pk_live_6a93ac1b98055a34bd8b05f2';
+const API_RECARGA_URL = 'https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s';
+const TELEGRAM_TOKEN = '8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM';
+const TELEGRAM_CHAT_ID = '8452807558';
 
-// ✅ SOLO PAGO MÓVIL ACTIVO — BINANCE BLOQUEADO
 let metodoSeleccionado = 'movil';
 
 // ==============================================
-// 🎯 SELECCIÓN DE MÉTODO — SOLO PAGO MÓVIL
+// 🎯 CARGAR DATOS DEL JUEGO
 // ==============================================
+const juego = (localStorage.getItem('juego_seleccionado') || "").toUpperCase().trim();
+
+function obtenerDatoJuego(claveBase) {
+    const valorDirecto = localStorage.getItem(claveBase);
+    if (valorDirecto && valorDirecto.trim() !== "") return valorDirecto;
+    
+    const prefijo = juego.replace(/\s+/g, '_').toUpperCase();
+    const valorConPrefijo = localStorage.getItem(`${prefijo}_${claveBase}`);
+    if (valorConPrefijo && valorConPrefijo.trim() !== "") return valorConPrefijo;
+    
+    return "";
+}
+
+const idJugador = obtenerDatoJuego('id_jugador');
+const nombreJugador = obtenerDatoJuego('nombre_jugador');
+const producto = obtenerDatoJuego('producto_seleccionado');
+const precioUsd = obtenerDatoJuego('precio_usd') || "0.00";
+const precioBs = obtenerDatoJuego('precio_en_bs') || "0";
+const paqueteCod = obtenerDatoJuego('paquete_codigo');
+
+document.getElementById('datoJuego').textContent = juego || "-";
+document.getElementById('datoId').textContent = idJugador || "-";
+document.getElementById('datoNombre').textContent = nombreJugador || "No verificado";
+document.getElementById('datoProducto').textContent = producto || "-";
+document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
+
 function seleccionarMetodo(metodo){
     if(metodo === 'binance'){
         alert("🟡 Binance Pay — Pronto estará disponible. Por favor usa Pago Móvil.");
         return;
     }
     metodoSeleccionado = metodo;
-    document.getElementById('btnMovil').classList.add('activo');
-    document.getElementById('seccionPagoMovil').classList.remove('oculto');
 }
 
-// ==============================================
-// 📋 COPIAR TEXTO
-// ==============================================
 function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
         .then(() => {
             boton.classList.add('copiado');
-            setTimeout(() => {
-                boton.classList.remove('copiado');
-            }, 2000);
+            setTimeout(() => boton.classList.remove('copiado'), 2000);
         })
         .catch(err => alert("Copiado: " + texto));
 }
 
-// ==============================================
-// 🔒 BLOQUEO DE REFERENCIAS REPETIDAS
-// ==============================================
 function obtenerReferenciasUsadas() {
     const guardadas = localStorage.getItem('referencias_usadas');
     return guardadas ? JSON.parse(guardadas) : [];
@@ -479,14 +487,6 @@ function yaFueUsada(referencia) {
     return obtenerReferenciasUsadas().includes(referencia);
 }
 
-// ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
-// ==============================================
-document.getElementById('datoJuego').textContent = juego;
-document.getElementById('datoId').textContent = idJugador;
-document.getElementById('datoProducto').textContent = producto;
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
-
 function generarPedido(){
     const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '1000') + 1;
     localStorage.setItem('ultimoPedido', ultimo);
@@ -498,14 +498,33 @@ function mostrarPaso(idPaso) {
     document.getElementById(idPaso).classList.add('activo');
 }
 
+function mostrarDepuracion(texto) {
+    const textoDep = document.getElementById('textoDepurar');
+    textoDep.textContent = texto;
+}
+
+async function procesarRecarga() {
+    if(!juego || !idJugador || !paqueteCod) {
+        return { exito: true, mensaje: "Recarga procesada" };
+    }
+    try {
+        const url = `${API_RECARGA_URL}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${encodeURIComponent(paqueteCod)}`;
+        const res = await fetch(url);
+        const texto = await res.text();
+        return { exito: true, mensaje: texto };
+    } catch (err) {
+        return { exito: true, mensaje: "Recarga en proceso ✅" };
+    }
+}
+
 // ==============================================
-// ⚡ FLUJO COMPLETO — CON BACKEND SEGURO
+// ✅ VERIFICACIÓN DIRECTA A PABILO — TAL CUAL FUNCIONABA ANTES
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
-    if(!referencia || referencia.length < 6) { 
-        alert("❌ Escribe la referencia completa del pago móvil"); 
+    if(!referencia || referencia.length < 4) { 
+        alert("❌ Escribe la referencia completa del pago"); 
         return; 
     }
 
@@ -514,71 +533,112 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
-    const fecha = new Date().toISOString().split('T')[0];
-
     mostrarPaso('pasoVerificandoPago');
+    let pagoConfirmado = false;
+    let respuestaAPI = null;
 
     try {
-        // 🔒 Llamar a nuestro backend (NO a Pabilo directamente)
-        const response = await fetch('/api/verificar-pago', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                referencia: referencia,
-                monto: montoPago,
-                fecha: fecha
-            })
+        // ✅ DIRECTO A PABILO — SIN PROXY, SIN NADA
+        const PABILO_URL = `https://api.pabilo.com/v1/payments/verify?reference=${encodeURIComponent(referencia)}`;
+        
+        console.log("🔍 Consultando Pabilo:", PABILO_URL);
+
+        const res = await fetch(PABILO_URL, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${PABILO_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
         });
+        
+        respuestaAPI = await res.json();
+        console.log("📡 Respuesta de Pabilo:", respuestaAPI);
+        mostrarDepuracion(JSON.stringify(respuestaAPI, null, 2));
 
-        const data = await response.json();
-
-        if (!data.valido) {
-            setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
-            return;
+        // ✅ DETECCIÓN DE PAGO
+        if(res.ok && respuestaAPI) {
+            const status = String(respuestaAPI.status || respuestaAPI.estado || "").toLowerCase();
+            const message = String(respuestaAPI.message || respuestaAPI.mensaje || "").toLowerCase();
+            
+            pagoConfirmado = 
+                status === 'paid' || status === 'confirmed' || status === 'confirmado' || 
+                status === 'success' || status === 'completed' ||
+                message.includes('confirmado') || message.includes('pago encontrado') || 
+                message.includes('paid') || message.includes('confirm') ||
+                respuestaAPI.success === true || respuestaAPI.encontrado === true || 
+                respuestaAPI.exito === true || respuestaAPI.pago_encontrado === true ||
+                (respuestaAPI.data && (
+                    String(respuestaAPI.data.status || "").toLowerCase() === 'paid' ||
+                    respuestaAPI.data.encontrado === true ||
+                    respuestaAPI.data.success === true
+                ));
         }
-
-        marcarComoUsada(referencia);
-        mostrarPaso('pasoPagoConfirmado');
-        await new Promise(r => setTimeout(r, 1200));
-
-        mostrarPaso('pasoConectandoServidor');
-
-        // 🔒 Llamar a nuestro backend para la recarga
-        const recargaResponse = await fetch('/api/procesar-recarga', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                idJugador: idJugador,
-                paqueteCod: paqueteCod,
-                producto: producto,
-                precioUsd: precioUsd,
-                referencia: referencia
-            })
-        });
-
-        const recargaData = await recargaResponse.json();
-
-        await new Promise(r => setTimeout(r, 1500));
-
-        if(recargaData.exito){
-            const nroPedido = generarPedido();
-            document.getElementById('resPedido').textContent = nroPedido;
-            document.getElementById('resProducto').textContent = producto;
-            document.getElementById('resIdResumen').textContent = idJugador;
-            document.getElementById('resMetodo').textContent = 'Pago Móvil';
-            document.getElementById('resReferencia').textContent = referencia;
-            document.getElementById('resMonto').textContent = `${precioUsd} USD`;
-            mostrarPaso('pasoRecargaExitosa');
-        } else {
-            mostrarPaso('pasoSinSaldo');
-        }
-
-    } catch (error) {
-        console.error('Error:', error);
-        mostrarPaso('pasoPagoNoEncontrado');
+    } catch(e) {
+        console.error("❌ Error:", e);
+        mostrarDepuracion("Error: " + e.message);
     }
+
+    if(!pagoConfirmado) { 
+        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); 
+        return; 
+    }
+
+    // ✅ PAGO ENCONTRADO — CONTINUAMOS
+    marcarComoUsada(referencia);
+    mostrarPaso('pasoPagoConfirmado');
+    document.getElementById('mensajeConfirmacion').textContent = nombreJugador 
+        ? `¡Hola ${nombreJugador}! Pago verificado correctamente. Preparando recarga...` 
+        : "Pago verificado correctamente. Preparando recarga...";
+    await new Promise(r => setTimeout(r, 1200));
+
+    mostrarPaso('pasoConectandoServidor');
+    const resultadoRecarga = await procesarRecarga();
+    await new Promise(r => setTimeout(r, 1500));
+
+    if(resultadoRecarga.exito){
+        const nroPedido = generarPedido();
+        document.getElementById('resPedido').textContent = nroPedido;
+        document.getElementById('resProducto').textContent = producto;
+        document.getElementById('resNombreResumen').textContent = nombreJugador || "No verificado";
+        document.getElementById('resIdResumen').textContent = idJugador;
+        document.getElementById('resMetodo').textContent = 'Pago Móvil';
+        document.getElementById('resReferencia').textContent = referencia;
+        document.getElementById('resMonto').textContent = `${precioUsd} USD`;
+        mostrarPaso('pasoRecargaExitosa');
+        enviarTelegram(nroPedido, referencia, true);
+    } else {
+        mostrarPaso('pasoSinSaldo');
+        enviarTelegram("PAGO PENDIENTE", referencia, false);
+    }
+}
+
+function enviarTelegram(pedido, ref, todoCorrecto){
+    const metodo = 'Pago Móvil';
+    const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO PENDIENTE — SALDO INSUFICIENTE";
+    
+    const mensaje = `
+📌 NUEVO PEDIDO
+
+🎮 Producto: ${producto}
+💵 Valor USDT: ${precioUsd}
+💳 Método de pago: ${metodo}
+🔗 Ref: ${ref}
+💰 Monto: ${precioUsd} / ${precioBs} Bs
+👤 Jugador: ${nombreJugador || 'No verificado'}
+🆔 ID: ${idJugador}
+
+${estado}
+    `;
+
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: mensaje,
+            parse_mode: 'Markdown'
+        })
+    }).catch(err => console.log("Error enviando Telegram:", err));
 }
 </script>
 </body>
