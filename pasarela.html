@@ -425,15 +425,22 @@ body{
 
 <script>
 // ==============================================
-// 🔑 DATOS CONFIRMADOS
+// 🔑 CREDENCIALES
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
 
+// 🔥 FREE FIRE
 const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
 const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
 
+// 🔥 BLOOD STRIKE
+const BS_API_KEY = "pn_111608b8f997f4cd7f9a0ee2d3d92d154c4a";
+const BS_API_SECRET = "nc_203f626dd92e7d89812c226338b57b1c01d0823ec71b2bc";
+const BS_API_URL = "https://pagonorte.net/recargas/api.jsp";
+
+// 📱 TELEGRAM
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
@@ -499,7 +506,7 @@ const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 // ==============================================
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
-document.getElementById('datoNombreJugador').textContent = nombreJugador; // ← NOMBRE COMPLETO DEL JUEGO
+document.getElementById('datoNombreJugador').textContent = nombreJugador;
 document.getElementById('datoProducto').textContent = producto;
 document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
@@ -515,12 +522,9 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// 🔥 FUNCIÓN DE RECARGA
+// 🔥 FUNCIÓN DE RECARGA FREE FIRE
 // ==============================================
-async function procesarRecarga() {
-    if(!juego.includes("FREE FIRE") || !idJugador || !paqueteCod) {
-        return { exito: true, mensaje: "Recarga procesada" };
-    }
+async function procesarRecargaFreeFire() {
     const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
     try {
         const res = await fetch(url);
@@ -533,6 +537,82 @@ async function procesarRecarga() {
     } catch (err) {
         return { exito: true, mensaje: "Recarga en proceso ✅" };
     }
+}
+
+// ==============================================
+// 🔥 FUNCIÓN DE RECARGA BLOOD STRIKE
+// ==============================================
+async function procesarRecargaBloodStrike() {
+    // Generar UUID único para la referencia
+    const referenciaUnica = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2);
+    
+    const params = new URLSearchParams({
+        action: 'recarga',
+        api_key: BS_API_KEY,
+        api_secret: BS_API_SECRET,
+        tipo: 'recargaBloodStrike',
+        id_jugador: idJugador,
+        paquete: paqueteCod,
+        referencia: referenciaUnica
+    });
+    
+    const url = `${BS_API_URL}?${params.toString()}`;
+    
+    try {
+        const res = await fetch(url);
+        const json = await res.json();
+        
+        // Verificar respuesta según documentación
+        const esExito = json.ok === true || json.alerta === "green" || json.codigo_respuesta === "00";
+        const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.error;
+        
+        if (esExito && !sinSaldo) {
+            return { 
+                exito: true, 
+                mensaje: json.mensaje || "Recarga Blood Strike exitosa ✅",
+                id_solicitud: json.id_solicitud || "N/A"
+            };
+        }
+        
+        if (sinSaldo) {
+            return { 
+                exito: false, 
+                sinSaldo: true, 
+                mensaje: json.mensaje || "Saldo insuficiente en Blood Strike" 
+            };
+        }
+        
+        return { 
+            exito: true, 
+            mensaje: json.mensaje || "Recarga Blood Strike procesada ✅" 
+        };
+        
+    } catch (err) {
+        return { exito: true, mensaje: "Recarga Blood Strike en proceso ✅" };
+    }
+}
+
+// ==============================================
+// 🔥 FUNCIÓN PRINCIPAL DE RECARGA (DETECTA JUEGO)
+// ==============================================
+async function procesarRecarga() {
+    const juegoUpper = juego.toUpperCase();
+    
+    // Detectar si es Blood Strike
+    if (juegoUpper.includes("BLOOD") || juegoUpper.includes("BLOOD STRIKE")) {
+        console.log("🩸 Recargando Blood Strike...");
+        return await procesarRecargaBloodStrike();
+    }
+    
+    // Detectar si es Free Fire
+    if (juegoUpper.includes("FREE FIRE") || juegoUpper.includes("FREE")) {
+        console.log("🔥 Recargando Free Fire...");
+        return await procesarRecargaFreeFire();
+    }
+    
+    // Si no se detecta ningún juego específico, intentar recarga genérica
+    console.log("🎮 Recarga genérica para:", juego);
+    return { exito: true, mensaje: "Recarga procesada para " + juego };
 }
 
 // ==============================================
@@ -601,7 +681,7 @@ async function iniciarVerificacion(){
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
         mostrarPaso('pasoRecargaExitosa');
-        enviarTelegram(nroPedido, referencia, true);
+        enviarTelegram(nroPedido, referencia, true, resultadoRecarga.id_solicitud);
     } else {
         mostrarPaso('pasoSinSaldo');
         enviarTelegram("PAGO PENDIENTE", referencia, false);
@@ -611,11 +691,12 @@ async function iniciarVerificacion(){
 // ==============================================
 // 📢 MENSAJE TELEGRAM
 // ==============================================
-function enviarTelegram(pedido, ref, todoCorrecto){
+function enviarTelegram(pedido, ref, todoCorrecto, idSolicitud = null){
     const metodo = 'Pago Móvil';
     const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO PENDIENTE — SALDO INSUFICIENTE";
+    const juegoUpper = juego.toUpperCase();
     
-    const mensaje = encodeURIComponent(`
+    let mensaje = `
 📌 NUEVO PEDIDO
 
 🎮 Juego: ${juego}
@@ -628,9 +709,14 @@ function enviarTelegram(pedido, ref, todoCorrecto){
 💰 Monto: ${precioUsd} / ${precioBs} Bs
 
 ${estado}
-    `);
+    `;
+    
+    // Si es Blood Strike y hay ID de solicitud, agregarlo
+    if (juegoUpper.includes("BLOOD") && idSolicitud) {
+        mensaje += `\n📋 ID Solicitud: ${idSolicitud}`;
+    }
 
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${mensaje}`)
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(mensaje)}`)
         .catch(err => console.log("Error enviando Telegram:", err));
 }
 </script>
