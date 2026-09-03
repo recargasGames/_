@@ -272,7 +272,6 @@ body{
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
-        <!-- 📋 TARJETA EXACTAMENTE COMO LA QUE ME PASASTE -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -422,22 +421,39 @@ const API_TELEGRAM_URL = "/api/telegram";
 let metodoSeleccionado = 'movil';
 
 // ==============================================
-// 🎯 CARGAR DATOS — DIRECTO, SIN COMPLICACIONES
+// 🎯 DETECTAR JUEGO Y CARGAR DATOS CORRECTOS
 // ==============================================
-const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem('id_jugador') || "";
-const nombreJugador = localStorage.getItem('nombre_jugador') || "";  // ✅ DIRECTO, SIN PREFIJOS
-const producto = localStorage.getItem('producto_seleccionado') || "";
-const precioUsd = localStorage.getItem('precio_usd') || "0.00";
-const precioBs = localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+const juego = (localStorage.getItem('juego_seleccionado') || "").toUpperCase().trim();
+
+// ✅ FUNCIÓN INTELIGENTE: busca el nombre del jugador en TODAS las posibles llaves
+function obtenerDatoJuego(claveBase) {
+    // Primero intenta con la llave genérica
+    const valorDirecto = localStorage.getItem(claveBase);
+    if (valorDirecto && valorDirecto.trim() !== "") return valorDirecto;
+    
+    // Si no, busca con el prefijo del juego
+    const prefijo = juego.replace(/\s+/g, '_').toUpperCase();
+    const valorConPrefijo = localStorage.getItem(`${prefijo}_${claveBase}`);
+    if (valorConPrefijo && valorConPrefijo.trim() !== "") return valorConPrefijo;
+    
+    // Si no encuentra nada
+    return "";
+}
+
+// ✅ CARGAR TODO — busca en TODAS las llaves posibles
+const idJugador = obtenerDatoJuego('id_jugador');
+const nombreJugador = obtenerDatoJuego('nombre_jugador');
+const producto = obtenerDatoJuego('producto_seleccionado');
+const precioUsd = obtenerDatoJuego('precio_usd') || "0.00";
+const precioBs = obtenerDatoJuego('precio_en_bs') || "0";
+const paqueteCod = obtenerDatoJuego('paquete_codigo');
 
 // ==============================================
-// 📄 MOSTRAR TODO — PRECIO VISIBLE + NOMBRE DEL JUGADOR ✅
+// 📄 MOSTRAR TODO EN PANTALLA
 // ==============================================
 document.getElementById('datoJuego').textContent = juego || "-";
 document.getElementById('datoId').textContent = idJugador || "-";
-document.getElementById('datoNombre').textContent = nombreJugador || "No verificado"; // ✅ Si viene vacío muestra esto
+document.getElementById('datoNombre').textContent = nombreJugador || "No verificado"; // ✅ Si viene vacío, muestra esto
 document.getElementById('datoProducto').textContent = producto || "-";
 document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`; // ✅ PRECIO VISIBLE
 
