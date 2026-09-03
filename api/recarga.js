@@ -11,7 +11,6 @@ module.exports = async (req, res) => {
   try {
     const { id_jugador, paquete, juego } = req.body;
 
-    // ✅ API Central Pro — Free Fire
     const API_URL = `https://apicentral.pro/apis/freefire.jsp?token=NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s&tipo=recargaFreefire&id_jugador=${id_jugador}&paquete=${paquete}`;
 
     const respuesta = await fetch(API_URL);
