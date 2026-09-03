@@ -272,7 +272,7 @@ body{
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
-        <!-- 📋 TARJETA CON NOMBRE DEL JUGADOR ✅ -->
+        <!-- 📋 TARJETA EXACTAMENTE COMO LA QUE ME PASASTE -->
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -369,7 +369,6 @@ body{
         <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
     </div>
 
-    <!-- ✅ RESUMEN FINAL CON NOMBRE DEL JUGADOR -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
@@ -414,7 +413,7 @@ body{
 
 <script>
 // ==============================================
-// 🔒 TODO POR PROXIES — SIN CLAVES EXPUESTAS ✅
+// 🔒 TODO POR PROXIES — SIN CLAVES EXPUESTAS
 // ==============================================
 const API_PABILO_URL = "/api/pabilo";
 const API_RECARGA_URL = "/api/recarga";
@@ -423,14 +422,24 @@ const API_TELEGRAM_URL = "/api/telegram";
 let metodoSeleccionado = 'movil';
 
 // ==============================================
-// 🎯 PREFIJO POR JUEGO — NO SE MEZCLAN LOS DATOS ✅
+// 🎯 CARGAR DATOS — DIRECTO, SIN COMPLICACIONES
 // ==============================================
-function claveJuego(clave) {
-    const juego = localStorage.getItem('juego_seleccionado') || "";
-    if(!juego) return clave;
-    const nombreJuego = juego.toLowerCase().replace(/\s+/g, '_');
-    return `${nombreJuego}_${clave}`;
-}
+const juego = localStorage.getItem('juego_seleccionado') || "";
+const idJugador = localStorage.getItem('id_jugador') || "";
+const nombreJugador = localStorage.getItem('nombre_jugador') || "";  // ✅ DIRECTO, SIN PREFIJOS
+const producto = localStorage.getItem('producto_seleccionado') || "";
+const precioUsd = localStorage.getItem('precio_usd') || "0.00";
+const precioBs = localStorage.getItem('precio_en_bs') || "0";
+const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+
+// ==============================================
+// 📄 MOSTRAR TODO — PRECIO VISIBLE + NOMBRE DEL JUGADOR ✅
+// ==============================================
+document.getElementById('datoJuego').textContent = juego || "-";
+document.getElementById('datoId').textContent = idJugador || "-";
+document.getElementById('datoNombre').textContent = nombreJugador || "No verificado"; // ✅ Si viene vacío muestra esto
+document.getElementById('datoProducto').textContent = producto || "-";
+document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`; // ✅ PRECIO VISIBLE
 
 function seleccionarMetodo(metodo){
     if(metodo === 'binance'){
@@ -464,26 +473,6 @@ function yaFueUsada(referencia) {
     return obtenerReferenciasUsadas().includes(referencia);
 }
 
-// ==============================================
-// 📋 DATOS SEPARADOS POR JUEGO — NOMBRE INCLUIDO ✅
-// ==============================================
-const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem(claveJuego('id_jugador')) || localStorage.getItem('id_jugador') || "";
-const nombreJugador = localStorage.getItem(claveJuego('nombre_jugador')) || "";
-const producto = localStorage.getItem(claveJuego('producto_seleccionado')) || "";
-const precioUsd = localStorage.getItem(claveJuego('precio_usd')) || "0.00";
-const precioBs = localStorage.getItem(claveJuego('precio_en_bs')) || "0";
-const paqueteCod = localStorage.getItem(claveJuego('paquete_codigo')) || "";
-
-// ==============================================
-// 📄 MOSTRAR DATOS EN PANTALLA — NOMBRE VISIBLE ✅
-// ==============================================
-document.getElementById('datoJuego').textContent = juego || "-";
-document.getElementById('datoId').textContent = idJugador || "-";
-document.getElementById('datoNombre').textContent = nombreJugador || "No verificado";
-document.getElementById('datoProducto').textContent = producto || "-";
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
-
 function generarPedido(){
     const ultimo = parseInt(localStorage.getItem('ultimoPedido') || '1000') + 1;
     localStorage.setItem('ultimoPedido', ultimo);
@@ -495,9 +484,6 @@ function mostrarPaso(idPaso) {
     document.getElementById(idPaso).classList.add('activo');
 }
 
-// ==============================================
-// 🔥 RECARGA POR PROXY — SIN CLAVES ✅
-// ==============================================
 async function procesarRecarga() {
     if(!juego || !idJugador || !paqueteCod) {
         return { exito: true, mensaje: "Recarga procesada" };
@@ -519,9 +505,6 @@ async function procesarRecarga() {
     }
 }
 
-// ==============================================
-// ⚡ FLUJO COMPLETO — VERIFICACIÓN POR PROXY
-// ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
     
@@ -542,7 +525,6 @@ async function iniciarVerificacion(){
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
 
-    // 🏦 VERIFICAR PAGO POR PROXY — SIN CLAVES EXPUESTAS ✅
     const cuerpo = { 
         bank_reference: referencia, 
         amount: montoPago, 
@@ -597,9 +579,6 @@ async function iniciarVerificacion(){
     }
 }
 
-// ==============================================
-// 📢 TELEGRAM POR PROXY — SIN TOKEN EXPUESTO ✅
-// ==============================================
 function enviarTelegram(pedido, ref, todoCorrecto){
     const metodo = 'Pago Móvil';
     const estado = todoCorrecto ? "✅ AUTOPAGADO" : "⚠️ PAGO PENDIENTE — SALDO INSUFICIENTE";
