@@ -329,7 +329,7 @@ body{
                     </button>
                 </div>
                 <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
-                <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
+                <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" value="153205195076">
             </div>
         </div>
 
@@ -431,10 +431,6 @@ const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
 
-// 🔥 FREE FIRE
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
-
 // 🔥 BLOOD STRIKE
 const BS_API_KEY = "pn_111608b8f997f4cd7f9a0ee2d3d92d154c4a";
 const BS_API_SECRET = "nc_203f626dd92e7d89812c226338b57b1c01d0823ec71b2bc";
@@ -443,6 +439,9 @@ const BS_API_URL = "https://pagonorte.net/recargas/api.jsp";
 // 📱 TELEGRAM
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
+
+// 🔒 REFERENCIA FIJA PARA PRUEBAS
+const REFERENCIA_PRUEBA = "153205195076";
 
 let metodoSeleccionado = 'movil';
 
@@ -500,6 +499,7 @@ const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+const precioProveedor = localStorage.getItem('precio_proveedor_usd') || precioUsd;
 
 // ==============================================
 // 📄 CARGAR DATOS EN PANTALLA
@@ -522,24 +522,6 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// 🔥 FUNCIÓN DE RECARGA FREE FIRE
-// ==============================================
-async function procesarRecargaFreeFire() {
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    try {
-        const res = await fetch(url);
-        const json = await res.json();
-        const esExito = json.alerta === "green" || json.estado === "exito" || json.exito === true || json.success === true || (json.mensaje && !json.alerta);
-        const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.error;
-        if (esExito && !sinSaldo) return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅" };
-        if (sinSaldo) return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅" };
-    } catch (err) {
-        return { exito: true, mensaje: "Recarga en proceso ✅" };
-    }
-}
-
-// ==============================================
 // 🔥 FUNCIÓN DE RECARGA BLOOD STRIKE
 // ==============================================
 async function procesarRecargaBloodStrike() {
@@ -558,9 +540,17 @@ async function procesarRecargaBloodStrike() {
     
     const url = `${BS_API_URL}?${params.toString()}`;
     
+    console.log("🩸 Recargando Blood Strike:", {
+        url: url,
+        id: idJugador,
+        paquete: paqueteCod,
+        referencia: referenciaUnica
+    });
+    
     try {
         const res = await fetch(url);
         const json = await res.json();
+        console.log("📥 Respuesta Blood Strike:", json);
         
         // Verificar respuesta según documentación
         const esExito = json.ok === true || json.alerta === "green" || json.codigo_respuesta === "00";
@@ -588,6 +578,7 @@ async function procesarRecargaBloodStrike() {
         };
         
     } catch (err) {
+        console.error("❌ Error en Blood Strike:", err);
         return { exito: true, mensaje: "Recarga Blood Strike en proceso ✅" };
     }
 }
@@ -604,35 +595,32 @@ async function procesarRecarga() {
         return await procesarRecargaBloodStrike();
     }
     
-    // Detectar si es Free Fire
-    if (juegoUpper.includes("FREE FIRE") || juegoUpper.includes("FREE")) {
-        console.log("🔥 Recargando Free Fire...");
-        return await procesarRecargaFreeFire();
-    }
-    
-    // Si no se detecta ningún juego específico, intentar recarga genérica
+    // Si no se detecta ningún juego específico
     console.log("🎮 Recarga genérica para:", juego);
     return { exito: true, mensaje: "Recarga procesada para " + juego };
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — SOLO PAGO MÓVIL
+// ⚡ FLUJO COMPLETO — CON REFERENCIA FIJA
 // ==============================================
 async function iniciarVerificacion(){
-    const referencia = document.getElementById('referenciaPago').value.trim();
+    // ✅ USAR REFERENCIA FIJA PARA PRUEBAS
+    const referencia = REFERENCIA_PRUEBA;
     
-    if(!referencia || referencia.length < 6) { 
-        alert("❌ Escribe la referencia completa del pago móvil"); 
-        return; 
-    }
+    // Mostrar la referencia en el input
+    document.getElementById('referenciaPago').value = referencia;
+    
+    console.log("🔍 Verificando referencia:", referencia);
 
     if(yaFueUsada(referencia)){ 
         mostrarPaso('pasoReferenciaUsada'); 
         return; 
     }
 
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
+    // ✅ USAR PRECIO DEL PROVEEDOR PARA VERIFICACIÓN
+    const montoPago = parseFloat(precioProveedor);
+    console.log("💰 Monto a verificar (precio proveedor):", montoPago);
+    
     const fecha = new Date().toISOString().split('T')[0];
 
     mostrarPaso('pasoVerificandoPago');
@@ -644,6 +632,9 @@ async function iniciarVerificacion(){
         movement_type: "GENERIC", 
         fecha_pago: fecha 
     };
+    
+    console.log("📤 Enviando a Pabilo:", cuerpo);
+    
     try {
         const res = await fetch(API_PABILO_URL, {
             method: 'POST',
@@ -651,13 +642,17 @@ async function iniciarVerificacion(){
             body: JSON.stringify(cuerpo)
         });
         const datos = await res.json();
+        console.log("📥 Respuesta de Pabilo:", datos);
+        
         if(res.ok && datos) {
             if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
                datos.data?.status === 'paid' || datos.success === true) {
                 pagoConfirmado = true;
             }
         }
-    } catch(e) {}
+    } catch(e) {
+        console.error("❌ Error en Pabilo:", e);
+    }
 
     if(!pagoConfirmado) { 
         setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); 
