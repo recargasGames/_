@@ -113,7 +113,6 @@ body{
     transition:.2s;
 }
 .pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul)}
-.pay-box.deshabilitado{opacity:0.6;cursor:not-allowed;border-style:dashed}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
 .product-card{
     background:rgba(11,18,32,.85);
@@ -149,6 +148,11 @@ body{
     font-size:14px;
     font-weight:700;
 }
+.status-success{color:#22c55e;background:rgba(34,197,94,.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
+.status-error{color:#ef4444;background:rgba(239,68,68,.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
+.status-verificando{color:#facc15;background:rgba(250,204,21,.1);padding:8px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top:2px solid var(--color-azul);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360)}}
 .whatsapp-float{
     position:fixed;bottom:20px;right:20px;
     background:#25D366;
@@ -168,7 +172,6 @@ body{
     z-index:1000;transition:.3s;text-decoration:none;
 }
 .back-to-top.show{opacity:1;visibility:visible}
-.tasa-info{font-size:12px;color:#94a3b8;margin-top:8px;text-align:right}
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:500px){
     body{padding-top:100px}
@@ -193,8 +196,8 @@ body{
         <a href="ml.html">Mobile Legends</a>
         <a href="cod.html">COD Mobile</a>
         <a href="pubg.html">PUBG Mobile</a>
-        <a href="arenabreakout.html">Arena Breakout</a>
-        <a href="delta.html">Delta Force</a>
+        <A href="arenabreakout.html">ARENA Breakout</a>
+        <a href="delta.html">DELTA Force</a>
     </div>
 </div>
 
@@ -202,174 +205,211 @@ body{
     <div class="card-panel">
         <div class="panel-title">ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Blood Strike" autocomplete="off">
+        <div id="verificacionStatus" style="margin-top:8px"></div>
     </div>
 
     <div class="card-panel">
         <div class="panel-title">Método de Pago</div>
         <div class="payment-methods">
             <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">PAGO MOVIL</div>
-            <div class="pay-box deshabilitado" onclick="seleccionarPago('BINANCE', this)">BINANCE <small style="display:block;font-size:10px">Próximamente</small></div>
+            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">BINANCE</div>
         </div>
-        <div class="tasa-info" id="tasaInfo">Cargando tasa...</div>
     </div>
 
-    <!-- === ORO — TUS PRECIOS === -->
+    <!-- === ORO === -->
     <div class="section-divider"><span>ORO - BLOOD STRIKE</span></div>
     <div class="products-grid">
         <div class="product-card">
-            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">100 + 5 Golds</div></div>
-            <div class="product-desc">Paquete 1</div>
-            <div class="product-price" data-usd="0.90">$0.90 USD</div>
-            <button class="btn-buy" onclick="comprarProducto('100 + 5 Golds', '0.90', '1')">Comprar</button>
+            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">51 Oro</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="0.55">$0.55</div>
+            <button class="btn-buy" data-moneda="51" onclick="comprarProducto('51 Oro', '0.55')">Comprar</button>
         </div>
         <div class="product-card">
-            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">300 + 20 Golds</div></div>
-            <div class="product-desc">Paquete 2</div>
-            <div class="product-price" data-usd="2.65">$2.65 USD</div>
-            <button class="btn-buy" onclick="comprarProducto('300 + 20 Golds', '2.65', '2')">Comprar</button>
+            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">105 Oro</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="0.95">$0.95</div>
+            <button class="btn-buy" data-moneda="105" onclick="comprarProducto('105 Oro', '0.95')">Comprar</button>
         </div>
         <div class="product-card">
-            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">500 + 40 Golds</div></div>
-            <div class="product-desc">Paquete 3</div>
-            <div class="product-price" data-usd="4.40">$4.40 USD</div>
-            <button class="btn-buy" onclick="comprarProducto('500 + 40 Golds', '4.40', '3')">Comprar</button>
+            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">320 Oro</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="2.70">$2.70</div>
+            <button class="btn-buy" data-moneda="320" onclick="comprarProducto('320 Oro', '2.70')">Comprar</button>
         </div>
         <div class="product-card">
-            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">1000 + 100 Golds</div></div>
-            <div class="product-desc">Paquete 4</div>
-            <div class="product-price" data-usd="8.75">$8.75 USD</div>
-            <button class="btn-buy" onclick="comprarProducto('1000 + 100 Golds', '8.75', '4')">Comprar</button>
+            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">540 Oro</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="4.40">$4.40</div>
+            <button class="btn-buy" data-moneda="540" onclick="comprarProducto('540 Oro', '4.40')">Comprar</button>
         </div>
         <div class="product-card">
-            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">2000 + 260 Golds</div></div>
-            <div class="product-desc">Paquete 5</div>
-            <div class="product-price" data-usd="17.30">$17.30 USD</div>
-            <button class="btn-buy" onclick="comprarProducto('2000 + 260 Golds', '17.30', '5')">Comprar</button>
+            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">1100 Oro</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="8.60">$8.60</div>
+            <button class="btn-buy" data-moneda="1100" onclick="comprarProducto('1100 Oro', '8.60')">Comprar</button>
         </div>
         <div class="product-card">
-            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">5000 + 800 Golds</div></div>
-            <div class="product-desc">Paquete 6</div>
-            <div class="product-price" data-usd="42.90">$42.90 USD</div>
-            <button class="btn-buy" onclick="comprarProducto('5000 + 800 Golds', '42.90', '6')">Comprar</button>
+            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">2260 Oro</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="16.90">$16.90</div>
+            <button class="btn-buy" data-moneda="2260" onclick="comprarProducto('2260 Oro', '16.90')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">5800 Oro</div></div>
+            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-price" data-usd="41.50">$41.50</div>
+            <button class="btn-buy" data-moneda="5800" onclick="comprarProducto('5800 Oro', '41.50')">Comprar</button>
+        </div>
+    </div>
+
+    <!-- === PASES === -->
+    <div class="section-divider"><span>PASES - BLOOD STRIKE</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Season Pass</div></div>
+            <div class="product-desc">Pase de Temporada</div>
+            <div class="product-price" data-usd="1.10">$1.10</div>
+            <button class="btn-buy" onclick="comprarProducto('Season Pass', '1.10')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Level Up Pass</div></div>
+            <div class="product-desc">Pase de Mejora</div>
+            <div class="product-price" data-usd="2.00">$2.00</div>
+            <button class="btn-buy" onclick="comprarProducto('Level Up Pass', '2.00')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Strike Pass Elite</div></div>
+            <div class="product-desc">Pase Elite</div>
+            <div class="product-price" data-usd="3.80">$3.80</div>
+            <button class="btn-buy" onclick="comprarProducto('Strike Pass Elite', '3.80')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Strike Pase Premium</div></div>
+            <div class="product-desc">Pase Premium</div>
+            <div class="product-price" data-usd="8.40">$8.40</div>
+            <button class="btn-buy" onclick="comprarProducto('Strike Pase Premium', '8.40')">Comprar</button>
         </div>
     </div>
 </div>
-
-<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+    <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
-<script>
-// 🔑 PAGONORTE — TUS CREDENCIALES
-const PAGONORTE = {
-    apiUrl: "https://pagonorte.net/recargas/api.jsp",
-    apiKey: "pn_111608b8f997f4cd79a0ee2d3d92d154c4a",
-    apiSecret: "ns_203f626dde92e7d89812c226338b57b1c01d0823ec71b2bc"
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import{getDatabase}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const fbConfig={
+    apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+    authDomain:"recargasgames-14c38.firebaseapp.com",
+    databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",
+    projectId:"recargasgames-14c38",
+    storageBucket:"recargasgames-14c38.firebasestorage.app",
+    messagingSenderId:"370952235234",
+    appId:"1:370952235234:web:41a9ebd7084f1955a256bb"
 };
+const app=initializeApp(fbConfig),auth=getAuth(app);
 
-let metodo = "PAGO MOVIL";
-let tasaUsdt = 975; // Valor por defecto
+let logueado=false,metodo="PAGO MOVIL",tasa=930;
+let idOk = false, nombreOk = "", idActual = "";
 const juegoActual = "BLOOD STRIKE";
-const TIPO_RECARGA = "recargaBloodStrike";
 
-// ==============================================
-// 💰 CARGAR TASAS DESDE PAGONORTE
-// ==============================================
-async function cargarTasasPagoNorte() {
-    const tasaInfo = document.getElementById('tasaInfo');
+async function cargarTasaBinance() {
     try {
-        const formData = new URLSearchParams();
-        formData.append('action', 'tasas');
-        formData.append('api_key', PAGONORTE.apiKey);
-        formData.append('api_secret', PAGONORTE.apiSecret);
-
-        const respuesta = await fetch(PAGONORTE.apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData,
-            signal: AbortSignal.timeout(10000)
-        });
-
+        const respuesta = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", { method: 'GET', cache: 'no-cache' });
+        if (!respuesta.ok) throw new Error("Error API");
         const datos = await respuesta.json();
-        console.log("✅ Tasas PagoNorte:", datos);
-
-        if (datos.ok && datos.tasa_usdt) {
-            tasaUsdt = parseFloat(datos.tasa_usdt);
-            localStorage.setItem('tasa_usdt', tasaUsdt);
-            tasaInfo.textContent = `Tasa: ${tasaUsdt} Bs/USD`;
-            actualizarPrecios();
-        } else {
-            tasaInfo.textContent = `Tasa: ${tasaUsdt} Bs/USD (por defecto)`;
-            actualizarPrecios();
-        }
+        const precio = parseFloat(datos.price);
+        if (!precio || precio <= 0) throw new Error("Precio inválido");
+        tasa = Math.round(precio);
+        localStorage.setItem('tasa_usd_ves', tasa);
+        actualizarPrecios();
     } catch (error) {
-        console.error("❌ Error cargando tasas:", error);
-        const guardada = localStorage.getItem('tasa_usdt');
-        if (guardada) {
-            tasaUsdt = parseFloat(guardada);
-            tasaInfo.textContent = `Tasa: ${tasaUsdt} Bs/USD (guardada)`;
-        } else {
-            tasaInfo.textContent = `Tasa: ${tasaUsdt} Bs/USD (por defecto)`;
-        }
+        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 930;
         actualizarPrecios();
     }
 }
 
-// ==============================================
-// 💰 ACTUALIZAR PRECIOS SEGÚN MÉTODO
-// ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
-        const precioUsd = parseFloat(el.dataset.usd);
-        if (metodo === "PAGO MOVIL") {
-            const precioBs = Math.round(precioUsd * tasaUsdt);
-            el.innerText = precioBs.toLocaleString("es-VE") + " Bs";
-        } else {
-            el.innerText = precioUsd.toFixed(2) + " USDT";
-        }
+        let u=parseFloat(el.dataset.usd);
+        el.innerText = metodo==="PAGO MOVIL" ? Math.round(u*tasa).toLocaleString("es-VE")+" Bs" : u.toFixed(2)+" USDT";
     });
 }
 
-// ==============================================
-// 🔄 CAMBIAR MÉTODO DE PAGO
-// ==============================================
 window.seleccionarPago=function(m,e){
     document.querySelectorAll('.pay-box').forEach(b=>b.classList.remove('active'));
     e.classList.add('active');
-    metodo = m;
+    metodo=m;
     actualizarPrecios();
 };
 
-// ==============================================
-// 🛒 COMPRAR PRODUCTO — GUARDA TODO PARA LA PASARELA
-// ==============================================
-window.comprarProducto = function(producto, precioUsd, paqueteNumero){
+async function verificarID(id){
+    if(!/^\d{8,12}$/.test(id)) return {ok: false, msg: "ID inválido (8-12 dígitos)"};
+    await new Promise(r => setTimeout(r, 500));
+    return {ok: true, nombre: ID_${id}, msg: "ID verificado ✅"};
+}
+
+let timeoutId = null;
+const inputId = document.getElementById("jugadorId");
+const statusDiv = document.getElementById("verificacionStatus");
+
+function mostrarEstado(mensaje, tipo) {
+    if(!statusDiv) return;
+    let clase = "";
+    if(tipo === "verificando") { clase = "status-verificando"; mensaje = '<span class="spinner"></span> ' + mensaje; }
+    if(tipo === "success") clase = "status-success";
+    if(tipo === "error") clase = "status-error";
+    statusDiv.innerHTML = clase ? <div class="${clase}">${mensaje}</div> : "";
+}
+
+inputId.addEventListener("input", function(){
+    clearTimeout(timeoutId);
+    const id = this.value.trim();
+    if(id.length === 0){ mostrarEstado(""); idOk = false; return; }
+    if(/^\d{8,12}$/.test(id)){
+        timeoutId = setTimeout(async () => {
+            mostrarEstado("Verificando ID...", "verificando");
+            const res = await verificarID(id);
+            if(res.ok){ mostrarEstado(res.msg, "success"); idOk = true; nombreOk = res.nombre; idActual = id; }
+            else { mostrarEstado(res.msg, "error"); idOk = false; }
+        }, 300);
+    } else {
+        idOk = false;
+        if(id.length < 8) mostrarEstado(Mínimo 8 dígitos, "error");
+        else if(id.length > 12) mostrarEstado(Máximo 12 dígitos, "error");
+        else mostrarEstado("Solo números", "error");
+    }
+});
+window.comprarProducto = function(producto, precioUsd){
     const idInput = document.getElementById("jugadorId").value.trim();
     
     if(!idInput){
         alert("❌ Escribe tu ID del jugador primero");
         return;
     }
+    if(!idOk){
+        alert("⏳ Espera a que se verifique el ID antes de comprar");
+        return;
+    }
 
-    const precioBs = Math.round(parseFloat(precioUsd) * tasaUsdt);
+    const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
-    // ✅ GUARDAR TODO PARA LA PASARELA
     localStorage.setItem('id_jugador', idInput);
+    localStorage.setItem('nombre_verificado', nombreOk || ID ${idInput});
     localStorage.setItem('juego_seleccionado', juegoActual);
     localStorage.setItem('producto_seleccionado', producto);
     localStorage.setItem('precio_usd', precioUsd);
     localStorage.setItem('precio_en_bs', precioBs);
     localStorage.setItem('metodo_pago', metodo);
-    localStorage.setItem('tipo_recarga', TIPO_RECARGA);
-    localStorage.setItem('paquete_numero', paqueteNumero);
 
     window.location.href = "pasarela.html";
 };
 
-// ==============================================
-// 🔄 INICIALIZAR
-// ==============================================
-cargarTasasPagoNorte();
-setInterval(cargarTasasPagoNorte, 300000); // Actualizar cada 5 min
+onAuthStateChanged(auth,u=>{logueado=!!u;});
+cargarTasaBinance();
+setInterval(cargarTasaBinance, 60000);
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
