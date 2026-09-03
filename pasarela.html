@@ -328,7 +328,7 @@ body{
                         </svg>
                     </button>
                 </div>
-                <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
+                <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia del pago:</label>
                 <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" value="153205195076">
             </div>
         </div>
@@ -413,14 +413,7 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- ⚠️ REFERENCIA YA USADA -->
-    <div id="pasoReferenciaUsada" class="paso-box">
-        <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Referencia Ya Utilizada</div>
-        <div class="texto-secundario">Esta referencia ya fue usada en un pago anterior. Usa una referencia nueva.</div>
-        <div class="usada-box">🔒 Cada referencia se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.</div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
-    </div>
+    <!-- ⚠️ REFERENCIA YA USADA - ELIMINADO PARA PRUEBAS -->
 </div>
 
 <script>
@@ -440,7 +433,7 @@ const BS_API_URL = "https://pagonorte.net/recargas/api.jsp";
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
-// 🔒 REFERENCIA FIJA PARA PRUEBAS
+// 🔒 REFERENCIA FIJA PARA PRUEBAS (SIN BLOQUEO)
 const REFERENCIA_PRUEBA = "153205195076";
 
 let metodoSeleccionado = 'movil';
@@ -474,19 +467,19 @@ function copiarTexto(texto, boton){
 }
 
 // ==============================================
-// 🔒 BLOQUEO DE REFERENCIAS REPETIDAS
+// 🔒 BLOQUEO DE REFERENCIAS - DESACTIVADO PARA PRUEBAS
 // ==============================================
 function obtenerReferenciasUsadas() {
-    const guardadas = localStorage.getItem('referencias_usadas');
-    return guardadas ? JSON.parse(guardadas) : [];
+    // ❌ DESACTIVADO - SIEMPRE RETORNA LISTA VACÍA
+    return [];
 }
 function marcarComoUsada(referencia) {
-    const usadas = obtenerReferenciasUsadas();
-    usadas.push(referencia);
-    localStorage.setItem('referencias_usadas', JSON.stringify(usadas));
+    // ❌ DESACTIVADO - NO GUARDA NADA
+    console.log("🔓 Referencia no bloqueada (modo pruebas):", referencia);
 }
 function yaFueUsada(referencia) {
-    return obtenerReferenciasUsadas().includes(referencia);
+    // ❌ DESACTIVADO - SIEMPRE RETORNA false
+    return false;
 }
 
 // ==============================================
@@ -584,40 +577,33 @@ async function procesarRecargaBloodStrike() {
 }
 
 // ==============================================
-// 🔥 FUNCIÓN PRINCIPAL DE RECARGA (DETECTA JUEGO)
+// 🔥 FUNCIÓN PRINCIPAL DE RECARGA
 // ==============================================
 async function procesarRecarga() {
     const juegoUpper = juego.toUpperCase();
     
-    // Detectar si es Blood Strike
     if (juegoUpper.includes("BLOOD") || juegoUpper.includes("BLOOD STRIKE")) {
         console.log("🩸 Recargando Blood Strike...");
         return await procesarRecargaBloodStrike();
     }
     
-    // Si no se detecta ningún juego específico
     console.log("🎮 Recarga genérica para:", juego);
     return { exito: true, mensaje: "Recarga procesada para " + juego };
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — CON REFERENCIA FIJA
+// ⚡ FLUJO COMPLETO — CON REFERENCIA FIJA SIN BLOQUEO
 // ==============================================
 async function iniciarVerificacion(){
-    // ✅ USAR REFERENCIA FIJA PARA PRUEBAS
+    // ✅ USAR REFERENCIA FIJA
     const referencia = REFERENCIA_PRUEBA;
     
-    // Mostrar la referencia en el input
     document.getElementById('referenciaPago').value = referencia;
     
     console.log("🔍 Verificando referencia:", referencia);
+    console.log("🔓 MODO PRUEBAS - SIN BLOQUEO DE REFERENCIA");
 
-    if(yaFueUsada(referencia)){ 
-        mostrarPaso('pasoReferenciaUsada'); 
-        return; 
-    }
-
-    // ✅ USAR PRECIO DEL PROVEEDOR PARA VERIFICACIÓN
+    // ✅ USAR PRECIO DEL PROVEEDOR
     const montoPago = parseFloat(precioProveedor);
     console.log("💰 Monto a verificar (precio proveedor):", montoPago);
     
@@ -659,7 +645,9 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    marcarComoUsada(referencia);
+    // ✅ NO BLOQUEAR LA REFERENCIA
+    // marcarComoUsada(referencia); ← COMENTADO
+    
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
@@ -706,7 +694,6 @@ function enviarTelegram(pedido, ref, todoCorrecto, idSolicitud = null){
 ${estado}
     `;
     
-    // Si es Blood Strike y hay ID de solicitud, agregarlo
     if (juegoUpper.includes("BLOOD") && idSolicitud) {
         mensaje += `\n📋 ID Solicitud: ${idSolicitud}`;
     }
