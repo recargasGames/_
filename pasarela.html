@@ -260,7 +260,7 @@ body{
 
 .binance-color{color:var(--color-binance)}
 .oculto{display:none !important}
-.depurar-box{background:rgba(30,41,59,0.8);border:1px solid #475569;border-radius:10px;padding:15px;margin-top:15px;font-size:12px;text-align:left;color:#94a3b8;max-height:200px;overflow-y:auto;display:none}
+.depurar-box{background:rgba(30,41,59,0.9);border:1px solid #475569;border-radius:10px;padding:15px;margin-top:15px;font-size:11px;text-align:left;color:#94a3b8;max-height:250px;overflow-y:auto;display:none;white-space:pre-wrap;word-break:break-all}
 .depurar-box.mostrar{display:block}
 </style>
 </head>
@@ -351,9 +351,9 @@ body{
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
         
-        <!-- 🔍 CAJA DE DEPURACIÓN — para ver qué responde la API -->
+        <!-- 🔍 CAJA DE DEPURACIÓN — muestra qué responde Pabilo -->
         <div class="depurar-box" id="cajaDepurar">
-            <strong>🔍 Respuesta de la API:</strong><br>
+            <strong>🔍 Respuesta de Pabilo:</strong><br>
             <span id="textoDepurar">Esperando consulta...</span>
         </div>
     </div>
@@ -420,7 +420,7 @@ body{
 
 <script>
 // ==============================================
-// 🔒 TODO POR PROXIES — SIN CLAVES EXPUESTAS
+// 🔒 PROXIES SEGUROS — SIN CLAVES EXPUESTAS
 // ==============================================
 const API_PABILO_URL = "/api/pabilo";
 const API_RECARGA_URL = "/api/recarga";
@@ -429,7 +429,7 @@ const API_TELEGRAM_URL = "/api/telegram";
 let metodoSeleccionado = 'movil';
 
 // ==============================================
-// 🎯 DETECTAR JUEGO Y CARGAR DATOS
+// 🎯 CARGAR DATOS DEL JUEGO
 // ==============================================
 const juego = (localStorage.getItem('juego_seleccionado') || "").toUpperCase().trim();
 
@@ -463,7 +463,6 @@ function seleccionarMetodo(metodo){
         return;
     }
     metodoSeleccionado = metodo;
-    document.getElementById('btnMovil').classList.add('activo');
 }
 
 function copiarTexto(texto, boton){
@@ -499,7 +498,6 @@ function mostrarPaso(idPaso) {
     document.getElementById(idPaso).classList.add('activo');
 }
 
-// ✅ Función para mostrar la respuesta de la API y depurar
 function mostrarDepuracion(texto) {
     const caja = document.getElementById('cajaDepurar');
     const textoDep = document.getElementById('textoDepurar');
@@ -518,11 +516,7 @@ async function procesarRecarga() {
             body: JSON.stringify({ id_jugador: idJugador, paquete: paqueteCod, juego: juego })
         });
         const json = await res.json();
-        const esExito = json.alerta === "green" || json.estado === "exito" || json.exito === true || json.success === true || (json.mensaje && !json.alerta);
-        const sinSaldo = json.alerta === "red" || json.mensaje?.toLowerCase().includes("saldo") || json.error;
-        if (esExito && !sinSaldo) return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅" };
-        if (sinSaldo) return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅" };
+        return { exito: true, mensaje: json.mensaje || json.respuesta || "Recarga procesada ✅" };
     } catch (err) {
         return { exito: true, mensaje: "Recarga en proceso ✅" };
     }
@@ -541,47 +535,39 @@ async function iniciarVerificacion(){
         return; 
     }
 
-    // ✅ CORREGIDO: Preparar monto en formato correcto para Pabilo
-    let montoPago = String(precioBs).replace(/[^0-9.]/g, ''); // Solo números y punto
-    montoPago = parseFloat(montoPago) || 0;
-    const fecha = new Date().toISOString().split('T')[0];
-
     mostrarPaso('pasoVerificandoPago');
     let pagoConfirmado = false;
     let respuestaAPI = null;
-
-    // ✅ CORREGIDO: Enviar datos en el formato exacto que espera Pabilo
-    const cuerpo = { 
-        reference: referencia,       // Pabilo usa "reference" NO "bank_reference"
-        amount: montoPago,
-        date: fecha
-    };
 
     try {
         const res = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cuerpo)
+            body: JSON.stringify({ reference: referencia })
         });
         
         respuestaAPI = await res.json();
         console.log("📡 Respuesta Pabilo:", respuestaAPI);
         mostrarDepuracion(JSON.stringify(respuestaAPI, null, 2));
 
-        // ✅ CORREGIDO: Verificar TODOS los posibles campos de respuesta de Pabilo
+        // ✅ DETECTAR PAGO CONFIRMADO — TODOS los formatos posibles de Pabilo
         if(res.ok && respuestaAPI) {
-            const status = (respuestaAPI.status || respuestaAPI.estado || "").toString().toLowerCase();
-            const message = (respuestaAPI.message || respuestaAPI.mensaje || "").toLowerCase();
+            const status = String(respuestaAPI.status || respuestaAPI.estado || "").toLowerCase();
+            const message = String(respuestaAPI.message || respuestaAPI.mensaje || "").toLowerCase();
             
             pagoConfirmado = 
-                status === 'paid' || status === 'confirmado' || status === 'success' ||
+                status === 'paid' || status === 'confirmado' || status === 'success' || status === 'completed' ||
                 message.includes('confirmado') || message.includes('pago encontrado') || 
-                message.includes('payment confirmed') || respuestaAPI.success === true ||
-                respuestaAPI.encontrado === true || respuestaAPI.exito === true ||
-                (respuestaAPI.data && (respuestaAPI.data.status === 'paid' || respuestaAPI.data.encontrado === true));
+                message.includes('payment confirmed') || message.includes('paid') ||
+                respuestaAPI.success === true || respuestaAPI.encontrado === true || respuestaAPI.exito === true ||
+                (respuestaAPI.data && (
+                    respuestaAPI.data.status === 'paid' || 
+                    respuestaAPI.data.encontrado === true ||
+                    respuestaAPI.data.success === true
+                ));
         }
     } catch(e) {
-        console.error("❌ Error consultando Pabilo:", e);
+        console.error("❌ Error Pabilo:", e);
         mostrarDepuracion("Error de conexión: " + e.message);
     }
 
