@@ -195,6 +195,33 @@ body{
     font-weight:bold;
 }
 
+.copiar-todo-btn{
+    width:100%;
+    padding:14px;
+    margin-top:16px;
+    background:rgba(16,185,129,0.15);
+    border:1px solid var(--color-principal);
+    border-radius:12px;
+    color:var(--color-principal);
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+.copiar-todo-btn:hover{
+    background:rgba(16,185,129,0.25);
+    transform:scale(1.02);
+}
+.copiar-todo-btn.copiado-todo{
+    background:rgba(16,185,129,0.25);
+    color:#34d399;
+    border-color:#34d399;
+}
+
 .input-ref{
     width:100%;
     padding:14px;
@@ -283,7 +310,7 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila">
                 <span class="resumen-etiqueta">Servicio</span>
-                <span class="resumen-valor" id="datoJuego">-</span>
+                <span class="resumen-valor" id="datoServicio">-</span>
             </div>
             <div class="resumen-fila ocultar-fila" id="filaProveedor">
                 <span class="resumen-etiqueta">Proveedor</span>
@@ -352,6 +379,25 @@ body{
                     </svg>
                 </button>
             </div>
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">-</span></div>
+                <button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- ✅ BOTÓN COPIAR TODOS LOS DATOS -->
+            <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copiar todos los datos de pago
+            </button>
+
             <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
             <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
         </div>
@@ -372,7 +418,7 @@ body{
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Referencia registrada. Conectando con el servidor de recargas...</div>
+        <div class="texto-secundario">Referencia registrada. Conectando con el servidor...</div>
     </div>
 
     <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
@@ -382,7 +428,7 @@ body{
         <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu compra...</div>
     </div>
 
-    <!-- ✅ PASO 4: RECARGA EXITOSA -->
+    <!-- ✅ PASO 4: COMPRA EXITOSA -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Compra Realizada!</div>
@@ -394,7 +440,7 @@ body{
         </div>
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicio">-</span></div>
             <div class="resumen-fila ocultar-fila" id="resFilaProveedor"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedor">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
             <div class="resumen-fila ocultar-fila" id="resFilaId"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
@@ -455,17 +501,17 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// 🎯 DETECTAR TIPO DE SERVICIO Y OCULTAR CAMPOS
+// 🎯 DETECTAR TIPO DE SERVICIO
 // ==============================================
-function detectarTipoServicio(nombreJuego) {
-    const servicio = nombreJuego.toUpperCase().trim();
+function detectarTipoServicio(nombreServicio) {
+    const servicio = (nombreServicio || "").toUpperCase().trim();
     
-    // 🎬 NETFLIX Y DISNEY+ — SOLO WHATSAPP, OCULTAR TODO LO DEMÁS
-    if (servicio.includes("NETFLIX") || servicio.includes("DISNEY")) {
+    // 🎬 NETFLIX
+    if (servicio.includes("NETFLIX")) {
         return {
-            tipo: "streaming",
-            nombreMostrado: nombreJuego.includes("NETFLIX") ? "Netflix" : "Disney+",
-            proveedor: "",
+            tipo: "netflix",
+            nombreMostrado: "Netflix",
+            producto: "1 pantalla de Netflix",
             mostrarId: false,
             mostrarNombreJugador: false,
             mostrarProveedor: false,
@@ -473,17 +519,25 @@ function detectarTipoServicio(nombreJuego) {
         };
     }
     
-    // 🎮 JUEGOS NORMALES — MOSTRAR TODO, PROVEEDOR = "OFICIAL"
-    let proveedorMostrar = "Proveedor Oficial";
-    if (servicio.includes("FREE FIRE") || servicio.includes("FREEFIRE")) {
-        proveedorMostrar = "Proveedor Oficial";
-    } else if (servicio.includes("BLOOD STRIKE") || servicio.includes("BLOODSTRIKE")) {
-        proveedorMostrar = "Proveedor Oficial";
+    // 🎬 DISNEY+
+    if (servicio.includes("DISNEY")) {
+        return {
+            tipo: "disney",
+            nombreMostrado: "Disney",
+            producto: "1 pantalla de Disney",
+            mostrarId: false,
+            mostrarNombreJugador: false,
+            mostrarProveedor: false,
+            esStreaming: true
+        };
     }
     
+    // 🎮 JUEGOS NORMALES
+    let proveedorMostrar = "Proveedor Oficial";
     return {
         tipo: "juego",
-        nombreMostrado: nombreJuego,
+        nombreMostrado: nombreServicio,
+        producto: "",
         proveedor: proveedorMostrar,
         mostrarId: true,
         mostrarNombreJugador: true,
@@ -503,15 +557,28 @@ const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
-// 🔍 DETECTAR Y CONFIGURAR VISIBILIDAD
+// 🔍 DETECTAR SERVICIO
 const servicioInfo = detectarTipoServicio(juegoRecibido);
 
 // ==============================================
-// 👁️ CONFIGURAR VISIBILIDAD DE CAMPOS
+// 👁️ CONFIGURAR VISIBILIDAD Y DATOS
 // ==============================================
 function configurarVisibilidadCampos() {
-    // Siempre mostrar Servicio y Producto y Monto
-    
+    // Servicio
+    document.getElementById('datoServicio').textContent = servicioInfo.nombreMostrado;
+
+    // Producto — si es streaming, usa el texto fijo
+    const textoProducto = servicioInfo.esStreaming ? servicioInfo.producto : producto;
+    document.getElementById('datoProducto').textContent = textoProducto;
+
+    // Monto en Bs visible en datos de pago
+    document.getElementById('montoBsMostrar').textContent = precioBs + " Bs";
+
+    // WhatsApp — SIEMPRE visible
+    const filaWhatsapp = document.getElementById('filaWhatsapp');
+    filaWhatsapp.classList.remove('ocultar-fila');
+    document.getElementById('datoWhatsapp').textContent = idJugador;
+
     // Proveedor
     const filaProveedor = document.getElementById('filaProveedor');
     if (servicioInfo.mostrarProveedor) {
@@ -539,21 +606,10 @@ function configurarVisibilidadCampos() {
         filaNombreJugador.classList.add('ocultar-fila');
     }
 
-    // WhatsApp — SIEMPRE visible pero SOLO para streaming se muestra como dato principal
-    const filaWhatsapp = document.getElementById('filaWhatsapp');
-    if (servicioInfo.esStreaming) {
-        filaWhatsapp.classList.remove('ocultar-fila');
-        document.getElementById('datoWhatsapp').textContent = idJugador; // En streaming, idJugador = WhatsApp
-    } else {
-        filaWhatsapp.classList.add('ocultar-fila');
-    }
-
-    // Datos generales
-    document.getElementById('datoJuego').textContent = servicioInfo.nombreMostrado;
-    document.getElementById('datoProducto').textContent = producto;
+    // Monto Total
     document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
-    // Resumen final — también ocultar campos según tipo
+    // Resumen final — ocultar campos según tipo
     const resFilaProveedor = document.getElementById('resFilaProveedor');
     const resFilaId = document.getElementById('resFilaId');
     if (servicioInfo.mostrarProveedor) {
@@ -574,7 +630,7 @@ function configurarVisibilidadCampos() {
 configurarVisibilidadCampos();
 
 // ==============================================
-// 📋 COPIAR TEXTO
+// 📋 COPIAR TEXTO INDIVIDUAL
 // ==============================================
 function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
@@ -583,6 +639,27 @@ function copiarTexto(texto, boton){
             setTimeout(() => boton.classList.remove('copiado'), 2000);
         })
         .catch(err => alert("Copiado: " + texto));
+}
+
+// ==============================================
+// 📋 COPIAR TODOS LOS DATOS DE PAGO DE UNA VEZ
+// ==============================================
+function copiarTodosLosDatos(boton){
+    const datosCompletos = `Banco: (0102) BDV
+Cédula: 32824869
+Teléfono: 04228242411
+Monto: ${precioBs} Bs`;
+
+    navigator.clipboard.writeText(datosCompletos)
+        .then(() => {
+            boton.classList.add('copiado-todo');
+            boton.innerHTML = `✓ Datos copiados`;
+            setTimeout(() => {
+                boton.classList.remove('copiado-todo');
+                boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
+            }, 2500);
+        })
+        .catch(err => alert("No se pudo copiar automáticamente. Selecciona y copia manualmente:\n\n" + datosCompletos));
 }
 
 // ==============================================
@@ -598,8 +675,9 @@ async function marcarReferenciaComoUsada(referencia, datosPedido) {
         fecha_uso: new Date().toISOString(),
         servicio: servicioInfo.nombreMostrado,
         id_contacto: idJugador,
-        producto: producto,
+        producto: servicioInfo.esStreaming ? servicioInfo.producto : producto,
         monto_usd: precioUsd,
+        monto_bs: precioBs,
         dispositivo: navigator.userAgent.substring(0, 100)
     });
 }
@@ -613,7 +691,7 @@ async function guardarPedidoEnFirebase(referencia, estado) {
         referencia: referencia,
         servicio: servicioInfo.nombreMostrado,
         id_contacto: idJugador,
-        producto: producto,
+        producto: servicioInfo.esStreaming ? servicioInfo.producto : producto,
         monto_usd: precioUsd,
         monto_bs: precioBs,
         estado: estado,
@@ -713,10 +791,10 @@ async function iniciarVerificacion(){
     const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA");
     
     document.getElementById('resPedido').textContent = `#${idPedido.substring(0, 8).toUpperCase()}`;
-    document.getElementById('resJuego').textContent = servicioInfo.nombreMostrado;
-    document.getElementById('resProducto').textContent = producto;
+    document.getElementById('resServicio').textContent = servicioInfo.nombreMostrado;
+    document.getElementById('resProducto').textContent = servicioInfo.esStreaming ? servicioInfo.producto : producto;
     document.getElementById('resReferencia').textContent = referencia;
-    document.getElementById('resMonto').textContent = `${precioUsd} USD`;
+    document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
 
     mostrarPaso('pasoRecargaExitosa');
 }
