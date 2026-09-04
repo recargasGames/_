@@ -4,9 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
-<title>RECARGASGAMES — Disney+</title>
+<title>RECARGASGAMES - Disney+</title>
 <style>
-:root{--color-principal:#113CCF;--color-hover:#0e32b0;--color-fondo:#0f172a;--color-tarjeta:#1e293b;--color-borde:rgba(17,60,207,0.3)}
+:root{
+    --color-principal:#113CCF; /* 🔵 AZUL DISNEY */
+    --color-hover:#0e32b0;
+    --color-azul:#3b82f6;
+    --color-dorado:#facc15;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{
     background-image:url('fondo.jpg');
@@ -16,97 +21,328 @@ body{
     color:#fff;
     font-family:'Segoe UI',sans-serif;
     min-height:100vh;
-    padding-top:80px;
+    padding-top:110px;
 }
-.header{
+
+.barra-superior {
     position:fixed;
     top:0;
     left:0;
     right:0;
+    z-index:999;
     background:rgba(11,18,32,.95);
+    border-bottom:2px solid var(--color-azul);
+}
+.header{
     padding:12px 20px;
     display:flex;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items:center;
-    border-bottom:2px solid var(--color-principal);
-    z-index:999;
+    border-bottom:1px solid #2a374f;
 }
-.header img{height:50px;width:auto;border-radius:8px;object-fit:contain}
-.container{max-width:480px;margin:0 auto;padding:30px 20px}
-.titulo-pagina{text-align:center;font-size:28px;font-weight:700;margin-bottom:10px;color:var(--color-principal)}
-.subtitulo{text-align:center;color:#cbd5e1;margin-bottom:40px}
-.grid-productos{display:grid;gap:20px}
-.tarjeta-producto{
-    background:rgba(30,41,59,0.8);
-    border:2px solid var(--color-borde);
-    border-radius:16px;
-    padding:25px;
+.header img{height:50px;border-radius:12px}
+
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
     cursor:pointer;
-    transition:.3s;
-    backdrop-filter:blur(10px);
+    padding:5px 10px;
 }
-.tarjeta-producto:hover{
-    border-color:var(--color-principal);
-    transform:translateY(-4px);
-    box-shadow:0 8px 25px rgba(17,60,207,0.15);
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
 }
-.tarjeta-nombre{font-size:20px;font-weight:700;margin-bottom:10px}
-.tarjeta-descripcion{color:#94a3b8;margin-bottom:15px;font-size:14px}
-.tarjeta-precio-usd{font-size:22px;font-weight:700;color:var(--color-principal);margin-bottom:5px}
-.tarjeta-precio-bsf{font-size:15px;color:#facc15;margin-bottom:15px}
-.btn-comprar{
+.menu-flotante.activo {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.menu-opcion {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {border-bottom:none}
+.menu-opcion:hover {
+    background:rgba(59,130,246,0.15);
+    color:var(--color-azul);
+}
+
+.games-menu {
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:12px 15px;
+    scrollbar-width:none;
+}
+.games-menu::-webkit-scrollbar {display:none}
+.games-menu a {
+    text-decoration:none;
+    color:white;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+.games-menu a.active {
+    color:var(--color-principal);
+    border-bottom:2px solid var(--color-principal);
+    border-radius:0;
+}
+
+.main{padding:20px;max-width:800px;margin:0 auto}
+.titulo-pagina{text-align:center;font-size:28px;font-weight:800;margin-bottom:30px}
+.titulo-pagina span{color:var(--color-principal)}
+
+.tarjeta-whatsapp{
+    background:rgba(37,211,102,0.1);
+    border:2px solid #25D366;
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:25px;
+}
+.input-label{display:block;margin-bottom:10px;font-weight:700;font-size:16px;color:#86efac}
+.input-campo{
     width:100%;
-    padding:14px;
+    padding:14px 16px;
+    border-radius:12px;
+    background:rgba(15,23,42,0.8);
+    border:2px solid #25D366;
+    color:#fff;
+    font-size:16px;
+    outline:none;
+}
+.input-campo:focus{border-color:#86efac}
+.aviso-whatsapp{margin-top:12px;font-size:14px;color:#86efac}
+
+.section-divider{margin:30px 0 20px;text-align:center}
+.section-divider span{
+    background:var(--color-principal);
+    color:#fff;
+    padding:6px 18px;
+    border-radius:30px;
+    font-size:14px;
+    font-weight:700;
+}
+
+/* 📦 2 TARJETAS UNA AL LADO DE LA OTRA */
+.products-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-bottom:25px;
+}
+.product-card{
+    background:rgba(11,18,32,.85);
+    border:2px solid #1f2937;
+    border-radius:16px;
+    padding:25px 20px;
+    transition:.25s;
+    cursor:pointer;
+    text-align:center;
+}
+.product-card:hover{
+    border-color:var(--color-principal);
+    transform:translateY(-3px);
+    background:rgba(17,60,207,0.08);
+}
+.product-card.seleccionada{
+    border-color:var(--color-principal);
+    background:rgba(17,60,207,0.12);
+    box-shadow:0 0 15px rgba(17,60,207,0.2);
+}
+.card-header{padding-bottom:15px;margin-bottom:15px;border-bottom:1px solid #1f2937}
+.game-icon{font-size:32px;margin-bottom:10px}
+.product-title{font-size:18px;font-weight:700;margin-bottom:8px}
+.product-desc{color:#9ca3af;font-size:14px;margin-bottom:15px;line-height:1.5}
+
+/* 💰 PRECIOS EN BS Y USD */
+.product-price{
+    font-size:22px;
+    font-weight:800;
+    color:var(--color-principal);
+    margin-bottom:6px;
+}
+.product-price-bs{
+    font-size:16px;
+    font-weight:600;
+    color:#94a3b8;
+    margin-bottom:18px;
+}
+.product-price-bs span{color:#facc15;font-weight:700}
+
+.btn-buy{
     background:var(--color-principal);
     color:#fff;
     border:none;
-    border-radius:10px;
+    width:100%;
+    padding:14px;
+    border-radius:12px;
     font-size:16px;
     font-weight:700;
     cursor:pointer;
     transition:.2s;
 }
-.btn-comprar:hover{background:var(--color-hover)}
+.btn-buy:hover{background:var(--color-hover)}
+
+@media(max-width:600px){
+    .products-grid{grid-template-columns:1fr}
+    body{padding-top:100px}
+}
 </style>
 </head>
-<body>
+<body onclick="cerrarMenuSiExterior(event)">
 
-<div class="header">
-    <img src="logo.png" alt="Logo RecargasGames">
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html"><img src="logo.png" alt="Logo RecargasGames"></a>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="delta.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
+    </div>
+    <div class="games-menu">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="delta.html">Delta Force</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html" class="active">Disney+</a>
+    </div>
 </div>
 
-<div class="container">
-    <h1 class="titulo-pagina">🎬 Disney+</h1>
-    <p class="subtitulo">Elige tu plan y recarga al instante</p>
+<div class="main">
+    <h1 class="titulo-pagina"><span>Disney+</span> — Planes Automáticos</h1>
 
-    <div class="grid-productos">
-        <!-- PRODUCTO 1: Disney+ 1 Pantalla -->
-        <div class="tarjeta-producto" onclick="seleccionarProducto('recargaPerfilDisney', 'Disney+ — 1 Pantalla', 3.53, 3400.00)">
-            <div class="tarjeta-nombre">📺 1 Pantalla</div>
-            <div class="tarjeta-descripcion">Perfil individual — calidad Full HD</div>
-            <div class="tarjeta-precio-usd">$3.53 USD</div>
-            <div class="tarjeta-precio-bsf">3.400,00 Bs</div>
-            <button class="btn-comprar" onclick="event.stopPropagation();seleccionarProducto('recargaPerfilDisney', 'Disney+ — 1 Pantalla', 3.53, 3400.00)">Comprar Ahora</button>
+    <!-- 📲 WHATSAPP -->
+    <div class="tarjeta-whatsapp">
+        <label class="input-label">📲 Tu WhatsApp</label>
+        <input type="tel" class="input-campo" id="whatsappCliente" placeholder="Ej: 0424-1234567">
+        <div class="aviso-whatsapp">💬 Te enviaremos los datos de acceso automáticamente después de confirmar el pago.</div>
+    </div>
+
+    <!-- 📦 2 PLANES — PERFIL Y CUENTA -->
+    <div class="section-divider"><span>✨ ELIGE TU PLAN</span></div>
+    <div class="products-grid">
+        <!-- PAQUETE 1: PERFIL DISNEY+ -->
+        <div class="product-card" 
+             data-codigo="disney_perfil" 
+             data-nombre="Disney+ - Perfil" 
+             data-precio-usd="3.53"
+             data-precio-bs="3400">
+            <div class="card-header">
+                <div class="game-icon">👤</div>
+                <div class="product-title">Perfil Disney+</div>
+            </div>
+            <div class="product-desc">1 perfil • 30 días de servicio • Calidad Full HD</div>
+            <div class="product-price">$3.53 USD</div>
+            <div class="product-price-bs">≈ <span>3.400 Bs</span></div>
+            <button class="btn-buy" onclick="seleccionarPlan(this)">Seleccionar</button>
         </div>
 
-        <!-- PRODUCTO 2: Disney+ Cuenta Completa -->
-        <div class="tarjeta-producto" onclick="seleccionarProducto('recargaCuentaDisney', 'Disney+ — Cuenta Completa', 9.00, 8500.00)">
-            <div class="tarjeta-nombre">🎬 Cuenta Completa</div>
-            <div class="tarjeta-descripcion">Acceso completo — descargas sin límite</div>
-            <div class="tarjeta-precio-usd">$9.00 USD</div>
-            <div class="tarjeta-precio-bsf">8.500,00 Bs</div>
-            <button class="btn-comprar" onclick="event.stopPropagation();seleccionarProducto('recargaCuentaDisney', 'Disney+ — Cuenta Completa', 9.00, 8500.00)">Comprar Ahora</button>
+        <!-- PAQUETE 2: CUENTA DISNEY+ -->
+        <div class="product-card" 
+             data-codigo="disney_cuenta" 
+             data-nombre="Disney+ - Cuenta Completa" 
+             data-precio-usd="9.00"
+             data-precio-bs="8500">
+            <div class="card-header">
+                <div class="game-icon">🎬</div>
+                <div class="product-title">Cuenta Disney+</div>
+            </div>
+            <div class="product-desc">Cuenta completa • 30 días • Descargas sin límite</div>
+            <div class="product-price">$9.00 USD</div>
+            <div class="product-price-bs">≈ <span>8.500 Bs</span></div>
+            <button class="btn-buy" onclick="seleccionarPlan(this)">Seleccionar</button>
         </div>
     </div>
 </div>
 
 <script>
-function seleccionarProducto(tipo, nombre, precioUSD, precioBSF){
+// 🍔 MENÚ
+function alternarMenu() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+}
+function cerrarMenuSiExterior(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('activo');
+    }
+}
+
+// ==============================================
+// 🎯 SELECCIÓN Y ENVÍO A PASARELA
+// ==============================================
+let productoSeleccionado = null;
+
+function seleccionarPlan(boton) {
+    const tarjeta = boton.closest('.product-card');
+    
+    // Quitar selección anterior
+    document.querySelectorAll('.product-card').forEach(t => t.classList.remove('seleccionada'));
+    tarjeta.classList.add('seleccionada');
+
+    // Validar WhatsApp
+    const whatsapp = document.getElementById('whatsappCliente').value.trim();
+    if (!whatsapp) {
+        alert("❌ Escribe tu número de WhatsApp primero");
+        tarjeta.classList.remove('seleccionada');
+        return;
+    }
+
+    // Guardar datos para la pasarela
+    productoSeleccionado = {
+        codigo: tarjeta.dataset.codigo,
+        nombre: tarjeta.dataset.nombre,
+        precioUsd: tarjeta.dataset.precioUsd,
+        precioBs: tarjeta.dataset.precioBs
+    };
+
     localStorage.setItem('juego_seleccionado', 'Disney+');
-    localStorage.setItem('producto_seleccionado', nombre);
-    localStorage.setItem('paquete_tipo', tipo);
-    localStorage.setItem('precio_usd', precioUSD);
-    localStorage.setItem('precio_bs', precioBSF);
+    localStorage.setItem('id_jugador', whatsapp);
+    localStorage.setItem('nombre_jugador', whatsapp);
+    localStorage.setItem('producto_seleccionado', productoSeleccionado.nombre);
+    localStorage.setItem('precio_usd', productoSeleccionado.precioUsd);
+    localStorage.setItem('precio_en_bs', productoSeleccionado.precioBs);
+    localStorage.setItem('paquete_codigo', productoSeleccionado.codigo);
+    localStorage.setItem('proveedor', 'pagonorte');
+
+    // Ir a la pasarela
     window.location.href = 'pasarela.html';
 }
 </script>
