@@ -518,12 +518,12 @@ body{
         </div>
 
         <div class="resumen-box">
-            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicio">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedidoStreaming">#0000</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicioStreaming">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProductoStreaming">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor">Pago Móvil</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferenciaStreaming">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMontoStreaming">-</span></div>
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -539,14 +539,14 @@ body{
             🎉 ¡Gracias por tu compra!
         </div>
         <div class="resumen-box">
-            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedidoJuego">#0000</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicioJuego">-</span></div>
-            <div class="resumen-fila ocultar-fila" id="resFilaProveedorJuego"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedorJuego">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProductoJuego">-</span></div>
-            <div class="resumen-fila ocultar-fila" id="resFilaIdJuego"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumenJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicio">-</span></div>
+            <div class="resumen-fila ocultar-fila" id="resFilaProveedor"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedor">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
+            <div class="resumen-fila ocultar-fila" id="resFilaId"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor">Pago Móvil</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferenciaJuego">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMontoJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -697,7 +697,7 @@ const idJugador = localStorage.getItem('id_jugador') || "";
 const nombreJugador = localStorage.getItem('nombre_jugador') || idJugador || "";
 const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
-const precioBs = localStorage.getItem('precio_bs') || "0";
+const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "1";
 
 // 🔍 DETECTAR SERVICIO
@@ -709,10 +709,8 @@ const servicioInfo = detectarTipoServicio(juegoRecibido, producto);
 function configurarVisibilidadCampos() {
     document.getElementById('datoServicio').textContent = servicioInfo.nombreMostrado;
     document.getElementById('datoProducto').textContent = producto;
-    document.getElementById('montoBsMostrar').textContent = 
-        parseFloat(precioBs).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " Bs";
-    document.getElementById('datoMontoTotal').innerHTML = 
-        `$${parseFloat(precioUsd).toFixed(2)} USD<br><small style="color:#cbd5e1">${parseFloat(precioBs).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</small>`;
+    document.getElementById('montoBsMostrar').textContent = precioBs + " Bs";
+    document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
     document.getElementById('datoWhatsapp').textContent = idJugador;
 
     // ID Jugador
@@ -749,7 +747,11 @@ function copiarTexto(texto, boton){
 }
 
 function copiarTodosLosDatos(boton){
-    const datosCompletos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${parseFloat(precioBs).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs`;
+    const datosCompletos = `Banco: (0102) BDV
+Cédula: 32824869
+Teléfono: 04228242411
+Monto: ${precioBs} Bs`;
+
     navigator.clipboard.writeText(datosCompletos)
         .then(() => {
             boton.classList.add('copiado-todo');
@@ -758,7 +760,8 @@ function copiarTodosLosDatos(boton){
                 boton.classList.remove('copiado-todo');
                 boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
             }, 2500);
-        });
+        })
+        .catch(err => alert("No se pudo copiar. Copia manualmente:\n\n" + datosCompletos));
 }
 
 // ==============================================
@@ -875,4 +878,53 @@ async function llamarPagoNorte(referenciaUnica) {
 // 🔥 FLUJO PRINCIPAL COMPLETO
 // ==============================================
 async function iniciarVerificacion(){
-    const referencia = document.getElementById('referenciaPago
+    const referencia = document.getElementById('referenciaPago').value.trim();
+    
+    if(!referencia || referencia.length < 6) { 
+        alert("❌ Escribe la referencia completa del pago"); 
+        return; 
+    }
+
+    // PASO 1: Verificar si ya fue usada
+    mostrarPaso('pasoVerificandoPago');
+    const yaUsada = await verificarReferenciaEnFirebase(referencia);
+    
+    if(yaUsada) {
+        mostrarPaso('pasoReferenciaUsada');
+        return;
+    }
+
+    // PASO 2: Verificar en Pábilo
+    const pagoConfirmado = await verificarPagoPabilo(referencia, precioBs);
+    
+    if(!pagoConfirmado) {
+        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
+        return;
+    }
+
+    // PASO 3: Pago confirmado — bloquear referencia
+    await marcarReferenciaComoUsada(referencia, {});
+    mostrarPaso('pasoPagoConfirmado');
+    await new Promise(r => setTimeout(r, 1200));
+
+    // PASO 4: Conectando con PagoNorte
+    if(servicioInfo.tipo === "streaming") {
+        document.getElementById('textoConectandoProveedor').textContent = "Conectando con PagoNorte...";
+        document.getElementById('textoProveedorSecundario').textContent = "Generando tu cuenta de " + servicioInfo.nombreMostrado + "...";
+        mostrarPaso('pasoConectandoProveedor');
+        await new Promise(r => setTimeout(r, 1500));
+
+        // Llamar a API de PagoNorte
+        const respuestaPagoNorte = await llamarPagoNorte(referencia);
+
+        if(respuestaPagoNorte.ok) {
+            // ✅ ÉXITO — Mostrar datos de la cuenta
+            document.getElementById('streamingCorreo').textContent = respuestaPagoNorte.correo || "-";
+            document.getElementById('streamingClave').textContent = respuestaPagoNorte.clave || "-";
+            document.getElementById('streamingPerfil').textContent = respuestaPagoNorte.perfil || "-";
+            document.getElementById('streamingVencimiento').textContent = respuestaPagoNorte.fecha_vencimiento || "-";
+            document.getElementById('streamingCodigoAprobacion').textContent = respuestaPagoNorte.codigo_aprobacion || "-";
+
+            // Ocultar fila de perfil si no aplica
+            const filaPerfil = document.getElementById('filaStreamingPerfil');
+            if(!servicioInfo.mostrarPerfil) filaPerfil.style.display = "none
