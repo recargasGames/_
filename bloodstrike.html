@@ -36,7 +36,7 @@ body{
 .header{
     padding:12px 20px;
     display:flex;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items:center;
     border-bottom:1px solid #2a374f;
     margin-bottom:0;
@@ -47,6 +47,62 @@ body{
     width:auto;
     border-radius:14px;
     background:transparent;
+}
+
+/* 🍔 MENÚ HAMBURGUESA */
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
+    cursor:pointer;
+    padding:5px 10px;
+    transition:transform 0.2s;
+}
+.menu-hamburguesa:hover {
+    transform:scale(1.1);
+    color:var(--color-azul);
+}
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
+    overflow:hidden;
+}
+.menu-flotante.activo {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.menu-opcion {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:500;
+    transition:all 0.2s;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {
+    border-bottom:none;
+}
+.menu-opcion:hover {
+    background:rgba(59,130,246,0.15);
+    color:var(--color-azul);
+    padding-left:22px;
 }
 
 .games-menu{
@@ -113,6 +169,7 @@ body{
     transition:.2s;
 }
 .pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul)}
+.tasa-info{font-size:12px;color:#94a3b8;margin-top:8px;text-align:right}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
 .product-card{
     background:rgba(11,18,32,.85);
@@ -179,25 +236,44 @@ body{
     .brand img{height:45px}
     .header{padding:10px 16px}
     .games-menu{padding:10px 12px}
+    .menu-flotante{right:10px;min-width:200px}
 }
 </style>
 </head>
-<body>
+<body onclick="cerrarMenuSiExterior(event)">
 
 <div class="barra-superior">
     <div class="header">
-        <div class="brand"><img src="logo.png" alt="Logo"></div>
+        <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <!-- 📋 MENÚ FLOTANTE COMPLETO -->
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="mlbb.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="codm.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
     </div>
     <div class="games-menu">
         <a href="index.html">Inicio</a>
         <a href="freefire.html">Free Fire</a>
         <a href="bloodstrike.html" class="active">Blood Strike</a>
         <a href="roblox.html">Roblox</a>
-        <a href="ml.html">Mobile Legends</a>
-        <a href="cod.html">COD Mobile</a>
+        <a href="mlbb.html">Mobile Legends</a>
+        <a href="codm.html">COD Mobile</a>
         <a href="pubg.html">PUBG Mobile</a>
-        <A href="arenabreakout.html">ARENA Breakout</a>
-        <a href="delta.html">DELTA Force</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="deltaforce.html">Delta Force</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
     </div>
 </div>
 
@@ -214,47 +290,42 @@ body{
             <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">PAGO MOVIL</div>
             <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">BINANCE</div>
         </div>
+        <div class="tasa-info" id="tasaInfo">Tasa: cargando...</div>
     </div>
 
     <!-- === ORO === -->
-    <div class="section-divider"><span>ORO - BLOOD STRIKE</span></div>
+    <div class="section-divider"><span>🪙 ORO - BLOOD STRIKE</span></div>
     <div class="products-grid">
-        <!-- Paquete 1: 100 + 5 Golds -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">100 + 5 Golds</div></div>
             <div class="product-desc">Recarga instantánea</div>
             <div class="product-price" data-usd="0.90">$0.90</div>
             <button class="btn-buy" onclick="comprarProducto('100 + 5 Golds', '0.90', '0.77', '1')">Comprar</button>
         </div>
-        <!-- Paquete 2: 300 + 20 Golds -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">300 + 20 Golds</div></div>
             <div class="product-desc">Recarga instantánea</div>
             <div class="product-price" data-usd="2.65">$2.65</div>
             <button class="btn-buy" onclick="comprarProducto('300 + 20 Golds', '2.65', '2.31', '2')">Comprar</button>
         </div>
-        <!-- Paquete 3: 500 + 40 Golds -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">500 + 40 Golds</div></div>
             <div class="product-desc">Recarga instantánea</div>
             <div class="product-price" data-usd="4.40">$4.40</div>
             <button class="btn-buy" onclick="comprarProducto('500 + 40 Golds', '4.40', '3.85', '3')">Comprar</button>
         </div>
-        <!-- Paquete 4: 1000 + 100 Golds -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">1000 + 100 Golds</div></div>
             <div class="product-desc">Recarga instantánea</div>
             <div class="product-price" data-usd="8.75">$8.75</div>
             <button class="btn-buy" onclick="comprarProducto('1000 + 100 Golds', '8.75', '7.71', '4')">Comprar</button>
         </div>
-        <!-- Paquete 5: 2000 + 260 Golds -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">2000 + 260 Golds</div></div>
             <div class="product-desc">Recarga instantánea</div>
             <div class="product-price" data-usd="17.30">$17.30</div>
             <button class="btn-buy" onclick="comprarProducto('2000 + 260 Golds', '17.30', '15.43', '5')">Comprar</button>
         </div>
-        <!-- Paquete 6: 5000 + 800 Golds -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🪙</div><div class="product-title">5000 + 800 Golds</div></div>
             <div class="product-desc">Recarga instantánea</div>
@@ -264,37 +335,37 @@ body{
     </div>
 
     <!-- === PASES === -->
-    <div class="section-divider"><span>PASES - BLOOD STRIKE</span></div>
+    <div class="section-divider"><span>🎫 PASES - BLOOD STRIKE</span></div>
     <div class="products-grid">
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Season Pass</div></div>
             <div class="product-desc">Pase de Temporada</div>
             <div class="product-price" data-usd="1.10">$1.10</div>
-            <button class="btn-buy" onclick="comprarProducto('Season Pass', '1.10', '0.77', 'pase')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Season Pass', '1.10', '0.77', 'pase1')">Comprar</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Level Up Pass</div></div>
             <div class="product-desc">Pase de Mejora</div>
             <div class="product-price" data-usd="2.00">$2.00</div>
-            <button class="btn-buy" onclick="comprarProducto('Level Up Pass', '2.00', '2.31', 'pase')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Level Up Pass', '2.00', '2.31', 'pase2')">Comprar</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Strike Pass Elite</div></div>
             <div class="product-desc">Pase Elite</div>
             <div class="product-price" data-usd="3.80">$3.80</div>
-            <button class="btn-buy" onclick="comprarProducto('Strike Pass Elite', '3.80', '3.85', 'pase')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Strike Pass Elite', '3.80', '3.85', 'pase3')">Comprar</button>
         </div>
         <div class="product-card">
-            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Strike Pase Premium</div></div>
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Strike Pass Premium</div></div>
             <div class="product-desc">Pase Premium</div>
             <div class="product-price" data-usd="8.40">$8.40</div>
-            <button class="btn-buy" onclick="comprarProducto('Strike Pase Premium', '8.40', '7.71', 'pase')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Strike Pass Premium', '8.40', '7.71', 'pase4')">Comprar</button>
         </div>
     </div>
 </div>
 
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
-<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -316,22 +387,35 @@ let logueado=false,metodo="PAGO MOVIL",tasa=930;
 let idOk = false, nombreOk = "", idActual = "";
 const juegoActual = "BLOOD STRIKE";
 
+// ==============================================
+// 💰 TASA DE BINANCE — ACTUALIZA CADA MINUTO
+// ==============================================
 async function cargarTasaBinance() {
+    const tasaInfo = document.getElementById('tasaInfo');
     try {
-        const respuesta = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", { method: 'GET', cache: 'no-cache' });
+        const respuesta = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", { 
+            method: 'GET', 
+            cache: 'no-cache',
+            signal: AbortSignal.timeout(8000)
+        });
         if (!respuesta.ok) throw new Error("Error API");
         const datos = await respuesta.json();
         const precio = parseFloat(datos.price);
         if (!precio || precio <= 0) throw new Error("Precio inválido");
         tasa = Math.round(precio);
         localStorage.setItem('tasa_usd_ves', tasa);
+        tasaInfo.textContent = `Tasa: ${tasa} Bs/USD`;
         actualizarPrecios();
     } catch (error) {
         tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 930;
+        tasaInfo.textContent = `Tasa: ${tasa} Bs/USD (guardada)`;
         actualizarPrecios();
     }
 }
 
+// ==============================================
+// 💰 ACTUALIZAR PRECIOS SEGÚN MÉTODO DE PAGO
+// ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u=parseFloat(el.dataset.usd);
@@ -346,12 +430,18 @@ window.seleccionarPago=function(m,e){
     actualizarPrecios();
 };
 
+// ==============================================
+// ✅ VERIFICAR ID — AHORA MISMO FORMATO QUE FREE FIRE
+// ==============================================
 async function verificarID(id){
     if(!/^\d{8,12}$/.test(id)) return {ok: false, msg: "ID inválido (8-12 dígitos)"};
     await new Promise(r => setTimeout(r, 500));
-    return {ok: true, nombre: `ID_${id}`, msg: "ID verificado ✅"};
+    return {ok: true, nombre: `Jugador ${id}`, msg: "✅ Jugador verificado: ID_" + id};
 }
 
+// ==============================================
+// 📋 MANEJO DEL INPUT DEL ID
+// ==============================================
 let timeoutId = null;
 const inputId = document.getElementById("jugadorId");
 const statusDiv = document.getElementById("verificacionStatus");
@@ -368,22 +458,26 @@ function mostrarEstado(mensaje, tipo) {
 inputId.addEventListener("input", function(){
     clearTimeout(timeoutId);
     const id = this.value.trim();
-    if(id.length === 0){ mostrarEstado(""); idOk = false; return; }
+    if(id.length === 0){ mostrarEstado(""); idOk = false; nombreOk = ""; return; }
     if(/^\d{8,12}$/.test(id)){
         timeoutId = setTimeout(async () => {
             mostrarEstado("Verificando ID...", "verificando");
             const res = await verificarID(id);
             if(res.ok){ mostrarEstado(res.msg, "success"); idOk = true; nombreOk = res.nombre; idActual = id; }
-            else { mostrarEstado(res.msg, "error"); idOk = false; }
+            else { mostrarEstado(res.msg, "error"); idOk = false; nombreOk = ""; }
         }, 300);
     } else {
         idOk = false;
+        nombreOk = "";
         if(id.length < 8) mostrarEstado(`Mínimo 8 dígitos`, "error");
         else if(id.length > 12) mostrarEstado(`Máximo 12 dígitos`, "error");
         else mostrarEstado("Solo números", "error");
     }
 });
 
+// ==============================================
+// 🛒 COMPRAR — GUARDAR TODO Y IR A PASARELA
+// ==============================================
 window.comprarProducto = function(producto, precioUsd, precioProveedor, paquete){
     const idInput = document.getElementById("jugadorId").value.trim();
     
@@ -398,7 +492,6 @@ window.comprarProducto = function(producto, precioUsd, precioProveedor, paquete)
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
-    // Guardar datos para la pasarela
     localStorage.setItem('id_jugador', idInput);
     localStorage.setItem('nombre_jugador', nombreOk || `ID ${idInput}`);
     localStorage.setItem('juego_seleccionado', juegoActual);
@@ -412,14 +505,29 @@ window.comprarProducto = function(producto, precioUsd, precioProveedor, paquete)
     window.location.href = "pasarela.html";
 };
 
+// ==============================================
+// 🍔 MENÚ Y BOTÓN SUBIR ARRIBA
+// ==============================================
+window.alternarMenu = function() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+};
+window.cerrarMenuSiExterior = function(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('activo');
+    }
+};
+
 onAuthStateChanged(auth,u=>{logueado=!!u;});
 cargarTasaBinance();
-setInterval(cargarTasaBinance, 60000);
+setInterval(cargarTasaBinance, 60000); // Actualiza tasa cada minuto
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
 });
 </script>
+
 </body>
 </html>
