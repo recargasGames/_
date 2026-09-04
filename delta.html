@@ -23,6 +23,62 @@ body{
     padding-top:110px;
 }
 
+/* 🍔 MENÚ HAMBURGUESA — IGUAL A LOS DEMÁS */
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
+    cursor:pointer;
+    padding:5px 10px;
+    transition:transform 0.2s;
+}
+.menu-hamburguesa:hover {
+    transform:scale(1.1);
+    color:var(--color-azul);
+}
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
+    overflow:hidden;
+}
+.menu-flotante.activo {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.menu-opcion {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:500;
+    transition:all 0.2s;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {
+    border-bottom:none;
+}
+.menu-opcion:hover {
+    background:rgba(59,130,246,0.15);
+    color:var(--color-azul);
+    padding-left:22px;
+}
+
 .barra-superior{
     position:fixed;
     top:0;
@@ -36,7 +92,7 @@ body{
 .header{
     padding:12px 20px;
     display:flex;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items:center;
     border-bottom:1px solid #2a374f;
 }
@@ -171,15 +227,33 @@ body{
     .brand img{height:45px}
     .header{padding:10px 16px}
     .games-menu{padding:10px 12px}
+    .menu-flotante{right:10px;min-width:200px}
 }
 </style>
 </head>
-<body>
+<body onclick="cerrarMenuSiExterior(event)">
 
 <div class="barra-superior">
     <div class="header">
         <div class="brand"><img src="logo.png" alt="Logo"></div>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <!-- 📋 MENÚ FLOTANTE — CON NETFLIX Y DISNEY+ AGREGADOS -->
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="delta.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
     </div>
+    <!-- 📌 MENÚ DE JUEGOS — CON NETFLIX Y DISNEY+ AGREGADOS -->
     <div class="games-menu">
         <a href="index.html">Inicio</a>
         <a href="freefire.html">Free Fire</a>
@@ -190,6 +264,8 @@ body{
         <a href="pubg.html">PUBG Mobile</a>
         <a href="arenabreakout.html">ARENA Breakout</a>
         <a href="delta.html" class="active">Delta Force</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
     </div>
 </div>
 
@@ -391,6 +467,18 @@ window.comprarProducto = function(producto, precioUsd){
     localStorage.setItem('metodo_pago', metodo);
 
     window.location.href = "pasarela.html";
+};
+
+// 🍔 FUNCIONES DEL MENÚ HAMBURGUESA
+window.alternarMenu = function() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+};
+window.cerrarMenuSiExterior = function(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('activo');
+    }
 };
 
 onAuthStateChanged(auth,u=>{logueado=!!u; if(u)uidActual=u.uid;});
