@@ -42,57 +42,21 @@
     
     <!-- ✅ FAVICON E ICONOS -->
     <link rel="icon" type="image/png" href="/logo.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/logo.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/logo.png">
     <link rel="apple-touch-icon" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/logo.png">
-    <link rel="apple-touch-icon" sizes="57x57" href="/logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Recargas Games">
-    
-    <!-- ✅ PWA -->
-    <meta name="application-name" content="Recargas Games">
     <meta name="theme-color" content="#3b82f6">
-    <meta name="msapplication-TileColor" content="#3b82f6">
-    <meta name="msapplication-TileImage" content="/logo.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
     
-    <!-- ✅ MANIFEST -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- ✅ DATOS ESTRUCTURADOS JSON-LD -->
+    <!-- ✅ DATOS ESTRUCTURADOS -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Recargas Games",
-        "alternateName": "RecargasGames",
         "url": "https://www.recargasgames.shop/",
         "logo": "https://www.recargasgames.shop/logo.png",
-        "description": "Recargas instantáneas de diamantes y monedas para Free Fire, Roblox, Mobile Legends, Call of Duty Mobile, PUBG Mobile, Blood Strike, Delta Force y Arena Breakout. También cuentas de Netflix y Disney+. Pago seguro y entrega rápida en Venezuela.",
-        "publisher": {
-            "@type": "Organization",
-            "name": "Recargas Games",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "https://www.recargasgames.shop/logo.png",
-                "width": 512,
-                "height": 512
-            }
-        },
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://www.recargasgames.shop/?s={search_term_string}",
-            "query-input": "required name=search_term_string"
-        },
+        "description": "Recargas instantáneas de juegos y streaming en Venezuela",
+        "publisher": {"@type": "Organization", "name": "Recargas Games"},
         "inLanguage": "es",
         "areaServed": "VE"
     }
@@ -104,6 +68,7 @@
             --color-hover: #2563eb;
             --color-blanco: #ffffff;
             --color-oscuro: #111827;
+            --color-google: #4285F4;
         }
         * {
             box-sizing: border-box;
@@ -120,6 +85,7 @@
             padding-top: 110px;
         }
 
+        /* 🔒 BARRA SUPERIOR FIJA */
         .barra-superior {
             position: fixed;
             top: 0;
@@ -130,24 +96,20 @@
             border-bottom: 2px solid var(--color-azul);
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-
         .header { 
             padding: 12px 20px; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             border-bottom: 1px solid #2a374f;
-            margin-bottom: 0;
         }
-        .brand { display: flex; align-items: center; }
         .brand img { 
             height: 55px; 
             width: auto; 
             border-radius: 14px; 
-            background: transparent; 
         }
 
-        /* 🍔 BOTÓN MENÚ HAMBURGUESA */
+        /* 🍔 BOTÓN HAMBURGUESA */
         .menu-hamburguesa {
             background: transparent;
             border: none;
@@ -162,79 +124,95 @@
             color: var(--color-azul);
         }
 
-        /* 📋 MENÚ DESPLEGABLE */
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1998;
+        /* 📋 MENÚ FLOTANTE — NO SE DESLIZA, APARECE FLOTANDO */
+        .menu-flotante {
+            position: absolute;
+            top: 65px;
+            right: 20px;
+            background: rgba(17, 24, 39, 0.98);
+            border: 1px solid var(--color-azul);
+            border-radius: 14px;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transform: translateY(-10px);
+            transition: all 0.25s ease;
+            z-index: 1000;
+            overflow: hidden;
         }
-        .menu-overlay.activo {
+        .menu-flotante.activo {
             opacity: 1;
             visibility: visible;
+            transform: translateY(0);
         }
 
-        .menu-desplegable {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 280px;
-            height: 100vh;
-            background: rgba(17, 24, 39, 0.98);
-            border-left: 2px solid var(--color-azul);
-            z-index: 1999;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            padding: 80px 20px 30px;
-        }
-        .menu-desplegable.activo {
-            transform: translateX(0);
-        }
-
-        .menu-cerrar {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .menu-titulo {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--color-azul);
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #2a374f;
-        }
-
-        .menu-enlace {
+        .menu-opcion {
             display: flex;
             align-items: center;
             gap: 10px;
+            padding: 14px 18px;
             color: white;
             text-decoration: none;
-            padding: 14px 12px;
-            border-radius: 10px;
             font-size: 15px;
             font-weight: 500;
-            margin-bottom: 8px;
             transition: all 0.2s;
-            background: rgba(59, 130, 246, 0.05);
+            border-bottom: 1px solid #1f2937;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
         }
-        .menu-enlace:hover {
+        .menu-opcion:last-child {
+            border-bottom: none;
+        }
+        .menu-opcion:hover {
             background: rgba(59, 130, 246, 0.15);
             color: var(--color-azul);
-            padding-left: 16px;
+            padding-left: 22px;
+        }
+        .menu-opcion.google {
+            color: var(--color-google);
+        }
+        .menu-opcion.google:hover {
+            background: rgba(66, 133, 244, 0.1);
+            color: var(--color-google);
+        }
+
+        .usuario-info {
+            padding: 12px 18px;
+            background: rgba(59, 130, 246, 0.1);
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .usuario-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--color-azul);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            overflow: hidden;
+        }
+        .usuario-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .usuario-nombre {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        .usuario-email {
+            font-size: 11px;
+            color: #9ca3af;
         }
 
         /* 📱 BARRA DE NAVEGACIÓN DE JUEGOS */
@@ -244,16 +222,10 @@
             overflow-x: auto; 
             overflow-y: hidden;
             padding: 12px 15px; 
-            border-top: none;
-            border-bottom: none;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch; 
         }
-        .games-menu::-webkit-scrollbar { 
-            display: none; 
-            width: 0; 
-            height: 0; 
-        }
+        .games-menu::-webkit-scrollbar { display: none; }
         .games-menu a { 
             text-decoration: none; 
             color: white; 
@@ -288,7 +260,6 @@
             background-clip: text;
         }
 
-        /* 📌 TÍTULOS DE SECCIONES */
         .seccion-titulo {
             font-size: 20px;
             font-weight: 700;
@@ -335,14 +306,12 @@
         .footer p { color: #9ca3af; font-size: 12px; margin: 5px 0; }
         .footer .copyright { color: var(--color-azul); font-weight: bold; font-size: 13px; }
 
-        /* ✅ BOTÓN INSTALAR APP — Transparente y elegante */
         .install-float {
             position: fixed;
             bottom: 130px;
             right: 20px;
             background: rgba(59, 130, 246, 0.15);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             color: white;
             border: 1px solid rgba(59, 130, 246, 0.4);
             padding: 10px 18px;
@@ -352,15 +321,12 @@
             cursor: pointer;
             z-index: 1000;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            display: none;
         }
         .install-float:hover {
             background: rgba(59, 130, 246, 0.3);
-            transform: translateY(-2px);
-            border-color: rgba(59, 130, 246, 0.6);
         }
 
-        /* ✅ BOTÓN WHATSAPP */
         .whatsapp-float { 
             position: fixed; 
             bottom: 20px; 
@@ -378,9 +344,6 @@
             font-size: 28px; 
             color: white;
         }
-        .whatsapp-float:hover { transform: scale(1.1); }
-
-        /* ✅ BOTÓN SUBIR ARRIBA */
         .back-to-top { 
             position: fixed; 
             bottom: 90px; 
@@ -398,40 +361,33 @@
             opacity: 0; 
             visibility: hidden; 
             transition: 0.3s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
             font-size: 18px; 
             text-decoration: none;
         }
         .back-to-top.show { opacity: 1; visibility: visible; }
-        .back-to-top:hover { background: var(--color-hover); transform: scale(1.1); }
 
         @media (max-width: 500px) { 
             body { padding-top: 100px; }
             .game-img { height: 130px; } 
             .brand img { height: 45px; }
-            .welcome-text h2 { font-size: 18px; }
             .header { padding: 10px 16px; }
             .games-menu { padding: 10px 12px; }
-            .install-float { font-size: 12px; padding: 8px 14px; bottom: 125px; }
-            .menu-desplegable { width: 260px; }
+            .menu-flotante { right: 10px; min-width: 200px; }
         }
     </style>
 </head>
-<body>
-
-<!-- 🍔 MENÚ HAMBURGUESA DESPLEGABLE -->
-<div class="menu-overlay" id="menuOverlay" onclick="cerrarMenu()"></div>
-<div class="menu-desplegable" id="menuDesplegable">
-    <button class="menu-cerrar" onclick="cerrarMenu()">✕</button>
-    <h3 class="menu-titulo">Menú</h3>
-    <a href="mis-pedidos.html" class="menu-enlace">📋 Mis Pedidos</a>
-</div>
+<body onclick="cerrarMenuSiExterior(event)">
 
 <div class="barra-superior">
     <div class="header">
         <div class="brand"><img src="logo.png" alt="Recargas Games - Logo" loading="lazy"></div>
-        <!-- 🍔 BOTÓN HAMBURGUESA A LA DERECHA -->
-        <button class="menu-hamburguesa" id="btnMenu" onclick="abrirMenu()">☰</button>
+        <!-- 🍔 BOTÓN HAMBURGUESA → MENÚ FLOTANTE -->
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <!-- 📋 MENÚ FLOTANTE — APARECE DEBAJO, NO SE DESLIZA -->
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <!-- 🔄 Se llena dinámicamente según estado de sesión -->
+        </div>
     </div>
     <div class="games-menu">
         <a href="index.html" class="active">Inicio</a>
@@ -443,7 +399,7 @@
         <a href="pubg.html">PUBG Mobile</a>
         <a href="arenabreakout.html">ARENA Breakout</a>
         <a href="delta.html">DELTA Force</a>
-        <!-- 🎬 AGREGADOS NETFLIX Y DISNEY+ EN LA BARRA -->
+        <!-- 🎬 NETFLIX Y DISNEY+ AGREGADOS A LA BARRA -->
         <a href="netflix.html">Netflix</a>
         <a href="disney.html">Disney+</a>
     </div>
@@ -454,45 +410,42 @@
         <h2>Los mejores juegos con recargas instantáneas</h2>
     </div>
 
-    <!-- 🎮 SECCIÓN VIDEOJUEGOS -->
     <h3 class="seccion-titulo">🎮 Videojuegos</h3>
     <div class="games-grid">
         <a href="freefire.html" class="game-link">
-            <img src="ff.png" class="game-img" alt="Free Fire - Recargar Diamantes" loading="lazy" onerror="this.style.background='#3b82f6'">
+            <img src="ff.png" class="game-img" alt="Free Fire" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="bloodstrike.html" class="game-link">
-            <img src="bs.png" class="game-img" alt="Blood Strike - Recargar Oro" loading="lazy" onerror="this.style.background='#3b82f6'">
+            <img src="bs.png" class="game-img" alt="Blood Strike" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="roblox.html" class="game-link">
-            <img src="roblox.png" class="game-img" alt="Roblox - Recargar Robux" loading="lazy" onerror="this.style.background='#3b82f6'">
+            <img src="roblox.png" class="game-img" alt="Roblox" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="ml.html" class="game-link">
-            <img src="mlbb.png" class="game-img" alt="Mobile Legends - Recargar Diamantes" loading="lazy" onerror="this.style.background='#3b82f6'">
+            <img src="mlbb.png" class="game-img" alt="Mobile Legends" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="cod.html" class="game-link">
-            <img src="cod.png" class="game-img" alt="Call of Duty Mobile - Recargar CP" loading="lazy" onerror="this.style.background='#3b82f6'">
+            <img src="cod.png" class="game-img" alt="COD Mobile" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="pubg.html" class="game-link">
-            <img src="pubg.png" class="game-img" alt="PUBG Mobile - Recargar UC" loading="lazy" onerror="this.style.background='#3b82f6'">
+            <img src="pubg.png" class="game-img" alt="PUBG Mobile" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
         <a href="arenabreakout.html" class="game-link">
-            <img src="arena.png" class="game-img" alt="ARENA Breakout - Recargar Bonds" loading="lazy" onerror="this.style.background='#3b82f6'">
+            <img src="arena.png" class="game-img" alt="ARENA Breakout" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
-        <a href="deltaforce.html" class="game-link">
-            <img src="delta.png" class="game-img" alt="DELTA Force - Recargar Delta Coins" loading="lazy" onerror="this.style.background='#3b82f6'">
+        <a href="delta.html" class="game-link">
+            <img src="delta.png" class="game-img" alt="DELTA Force" loading="lazy" onerror="this.style.background='#3b82f6'">
         </a>
     </div>
 
-    <!-- 🎬 SECCIÓN STREAMING Y MÁS -->
     <h3 class="seccion-titulo">🎬 Streaming y Más</h3>
     <div class="games-grid">
         <a href="netflix.html" class="game-link">
-            <img src="netflix.png" class="game-img" alt="Netflix - Cuentas" loading="lazy" onerror="this.style.background='#E50914'">
+            <img src="netflix.png" class="game-img" alt="Netflix" loading="lazy" onerror="this.style.background='#E50914'">
         </a>
         <a href="disney.html" class="game-link">
-            <img src="disney.png" class="game-img" alt="Disney+ - Cuentas" loading="lazy" onerror="this.style.background='#113CCF'">
+            <img src="disney.png" class="game-img" alt="Disney+" loading="lazy" onerror="this.style.background='#113CCF'">
         </a>
-        <!-- Aquí agregas los demás cuando quieras -->
     </div>
 </div>
 
@@ -502,67 +455,14 @@
     <p>Recargas instantáneas · Pago seguro · Entrega rápida</p>
 </div>
 
-<!-- ✅ BOTONES FLOTANTES — En orden: Instalar App, Subir, WhatsApp -->
-<button class="install-float" id="installBtn" style="display: none;">
-    📲 Instalar App
-</button>
-
-<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">↑</a>
-
+<button class="install-float" id="installBtn">📲 Instalar App</button>
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
 
-<script>
-// 🍔 LÓGICA DEL MENÚ HAMBURGUESA
-function abrirMenu() {
-    document.getElementById('menuDesplegable').classList.add('activo');
-    document.getElementById('menuOverlay').classList.add('activo');
-    document.body.style.overflow = 'hidden';
-}
-function cerrarMenu() {
-    document.getElementById('menuDesplegable').classList.remove('activo');
-    document.getElementById('menuOverlay').classList.remove('activo');
-    document.body.style.overflow = '';
-}
-// Cerrar con tecla ESC
-document.addEventListener('keydown', e => {
-    if(e.key === 'Escape') cerrarMenu();
-});
-</script>
-
 <script type="module">
-    const CONFIG = {
-        parBinance: "USDTVES",
-        urlBinance: "https://api.binance.com/api/v3/ticker/price?symbol=",
-        tasaRespaldo: 930,
-        actualizarCada: 60000
-    };
-
-    let tasaActual = null;
-
-    async function cargarTasaBinance() {
-        try {
-            const respuesta = await fetch(CONFIG.urlBinance + CONFIG.parBinance, {
-                method: 'GET',
-                cache: 'no-cache'
-            });
-            if (!respuesta.ok) throw new Error("Error en la API");
-            const datos = await respuesta.json();
-            const precio = parseFloat(datos.price);
-            if (!precio || precio <= 0) throw new Error("Precio inválido");
-            tasaActual = Math.round(precio);
-            localStorage.setItem('tasa_usd_ves', tasaActual);
-            window.dispatchEvent(new CustomEvent('tasaActualizada', { detail: tasaActual }));
-        } catch (error) {
-            console.warn("Usando tasa de respaldo:", error);
-            tasaActual = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : CONFIG.tasaRespaldo;
-            localStorage.setItem('tasa_usd_ves', tasaActual);
-        }
-    }
-
-    cargarTasaBinance();
-    setInterval(cargarTasaBinance, CONFIG.actualizarCada);
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
     const firebaseConfig = {
         apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
         authDomain: "recargasgames-14c38.firebaseapp.com",
@@ -572,42 +472,137 @@ document.addEventListener('keydown', e => {
         messagingSenderId: "370952235234",
         appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
     };
-    initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-    window.addEventListener('scroll', function() { 
-        document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300); 
+    let usuarioActual = null;
+
+    // 🍔 ALTERNAR MENÚ
+    window.alternarMenu = function() {
+        const menu = document.getElementById('menuFlotante');
+        menu.classList.toggle('activo');
+        actualizarMenuHTML();
+    };
+
+    // Cerrar menú al hacer clic por fuera
+    window.cerrarMenuSiExterior = function(e) {
+        const menu = document.getElementById('menuFlotante');
+        const btn = document.getElementById('btnMenu');
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove('activo');
+        }
+    };
+
+    // 📝 ACTUALIZAR CONTENIDO DEL MENÚ SEGÚN SESIÓN
+    function actualizarMenuHTML() {
+        const menu = document.getElementById('menuFlotante');
+        if (usuarioActual) {
+            // ✅ USUARIO LOGUEADO → Avatar, Nombre, Mis Pedidos, Cerrar Sesión
+            const foto = usuarioActual.photoURL 
+                ? `<img src="${usuarioActual.photoURL}" alt="Avatar">` 
+                : usuarioActual.displayName 
+                    ? usuarioActual.displayName.charAt(0).toUpperCase() 
+                    : '👤';
+            
+            menu.innerHTML = `
+                <div class="usuario-info">
+                    <div class="usuario-avatar">${foto}</div>
+                    <div>
+                        <div class="usuario-nombre">${usuarioActual.displayName || 'Usuario'}</div>
+                        <div class="usuario-email">${usuarioActual.email || ''}</div>
+                    </div>
+                </div>
+                <a href="mis-pedidos.html" class="menu-opcion">📋 Mis Pedidos</a>
+                <button class="menu-opcion" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+            `;
+        } else {
+            // ❌ SIN SESIÓN → Solo Iniciar con Google
+            menu.innerHTML = `
+                <button class="menu-opcion google" onclick="iniciarSesionGoogle()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Iniciar con Google
+                </button>
+            `;
+        }
+    }
+
+    // 🔐 INICIAR SESIÓN CON GOOGLE
+    window.iniciarSesionGoogle = async function() {
+        try {
+            const resultado = await signInWithPopup(auth, provider);
+            usuarioActual = resultado.user;
+            localStorage.setItem('usuario_uid', usuarioActual.uid);
+            localStorage.setItem('usuario_nombre', usuarioActual.displayName || '');
+            localStorage.setItem('usuario_email', usuarioActual.email || '');
+            localStorage.setItem('usuario_foto', usuarioActual.photoURL || '');
+            document.getElementById('menuFlotante').classList.remove('activo');
+        } catch (error) {
+            console.error('Error al iniciar sesión:', error);
+            alert('❌ Error al iniciar sesión. Inténtalo de nuevo.');
+        }
+    };
+
+    // 🚪 CERRAR SESIÓN
+    window.cerrarSesion = async function() {
+        try {
+            await signOut(auth);
+            usuarioActual = null;
+            localStorage.removeItem('usuario_uid');
+            localStorage.removeItem('usuario_nombre');
+            localStorage.removeItem('usuario_email');
+            localStorage.removeItem('usuario_foto');
+            document.getElementById('menuFlotante').classList.remove('activo');
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+        }
+    };
+
+    // 👀 ESCUCHAR CAMBIOS DE SESIÓN
+    onAuthStateChanged(auth, (usuario) => {
+        usuarioActual = usuario;
+        actualizarMenuHTML();
     });
 
-    // ✅ LÓGICA DEL BOTÓN INSTALAR APP — Solo aparece cuando se puede instalar
+    // Cargar tasa Binance
+    async function cargarTasaBinance() {
+        try {
+            const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", { cache: 'no-cache' });
+            if (!res.ok) throw new Error();
+            const d = await res.json();
+            localStorage.setItem('tasa_usd_ves', Math.round(parseFloat(d.price)));
+        } catch {
+            localStorage.setItem('tasa_usd_ves', '930');
+        }
+    }
+    cargarTasaBinance();
+    setInterval(cargarTasaBinance, 60000);
+
+    // Botón Subir Arriba
+    window.addEventListener('scroll', () => {
+        document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
+    });
+
+    // Botón Instalar App
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
-
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
         installBtn.style.display = 'block';
     });
-
     installBtn.addEventListener('click', async () => {
         if (!deferredPrompt) return;
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            installBtn.style.display = 'none';
-        }
+        if (outcome === 'accepted') installBtn.style.display = 'none';
         deferredPrompt = null;
     });
-
-    window.addEventListener('appinstalled', () => {
-        installBtn.style.display = 'none';
-        deferredPrompt = null;
-    });
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').catch(() => {});
-        });
-    }
 </script>
 
 </body>
