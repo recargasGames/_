@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- ✅ TÍTULO PROFESIONAL -->
-    <title>Recargas Games | Recargas de Juegos y Diamantes Free Fire</title>
+    <title>Recargas Games | Recargas de Juegos, Netflix y Disney+</title>
     
     <!-- ✅ VERIFICACIÓN GOOGLE -->
     <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
@@ -103,6 +103,7 @@
             --color-azul: #3b82f6;
             --color-hover: #2563eb;
             --color-blanco: #ffffff;
+            --color-oscuro: #111827;
         }
         * {
             box-sizing: border-box;
@@ -133,11 +134,12 @@
         .header { 
             padding: 12px 20px; 
             display: flex; 
-            justify-content: flex-start; 
+            justify-content: space-between; 
             align-items: center; 
             border-bottom: 1px solid #2a374f;
             margin-bottom: 0;
         }
+        .brand { display: flex; align-items: center; }
         .brand img { 
             height: 55px; 
             width: auto; 
@@ -145,6 +147,97 @@
             background: transparent; 
         }
 
+        /* 🍔 BOTÓN MENÚ HAMBURGUESA */
+        .menu-hamburguesa {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 26px;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: transform 0.2s;
+        }
+        .menu-hamburguesa:hover {
+            transform: scale(1.1);
+            color: var(--color-azul);
+        }
+
+        /* 📋 MENÚ DESPLEGABLE */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .menu-overlay.activo {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .menu-desplegable {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(17, 24, 39, 0.98);
+            border-left: 2px solid var(--color-azul);
+            z-index: 1999;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            padding: 80px 20px 30px;
+        }
+        .menu-desplegable.activo {
+            transform: translateX(0);
+        }
+
+        .menu-cerrar {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .menu-titulo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-azul);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a374f;
+        }
+
+        .menu-enlace {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            text-decoration: none;
+            padding: 14px 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .menu-enlace:hover {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--color-azul);
+            padding-left: 16px;
+        }
+
+        /* 📱 BARRA DE NAVEGACIÓN DE JUEGOS */
         .games-menu { 
             display: flex; 
             gap: 8px; 
@@ -195,7 +288,7 @@
             background-clip: text;
         }
 
-        /* ✅ SECCIÓN JUEGOS */
+        /* 📌 TÍTULOS DE SECCIONES */
         .seccion-titulo {
             font-size: 20px;
             font-weight: 700;
@@ -320,14 +413,25 @@
             .header { padding: 10px 16px; }
             .games-menu { padding: 10px 12px; }
             .install-float { font-size: 12px; padding: 8px 14px; bottom: 125px; }
+            .menu-desplegable { width: 260px; }
         }
     </style>
 </head>
 <body>
 
+<!-- 🍔 MENÚ HAMBURGUESA DESPLEGABLE -->
+<div class="menu-overlay" id="menuOverlay" onclick="cerrarMenu()"></div>
+<div class="menu-desplegable" id="menuDesplegable">
+    <button class="menu-cerrar" onclick="cerrarMenu()">✕</button>
+    <h3 class="menu-titulo">Menú</h3>
+    <a href="mis-pedidos.html" class="menu-enlace">📋 Mis Pedidos</a>
+</div>
+
 <div class="barra-superior">
     <div class="header">
         <div class="brand"><img src="logo.png" alt="Recargas Games - Logo" loading="lazy"></div>
+        <!-- 🍔 BOTÓN HAMBURGUESA A LA DERECHA -->
+        <button class="menu-hamburguesa" id="btnMenu" onclick="abrirMenu()">☰</button>
     </div>
     <div class="games-menu">
         <a href="index.html" class="active">Inicio</a>
@@ -339,6 +443,9 @@
         <a href="pubg.html">PUBG Mobile</a>
         <a href="arenabreakout.html">ARENA Breakout</a>
         <a href="delta.html">DELTA Force</a>
+        <!-- 🎬 AGREGADOS NETFLIX Y DISNEY+ EN LA BARRA -->
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
     </div>
 </div>
 
@@ -376,7 +483,7 @@
         </a>
     </div>
 
-    <!-- 🎬 SECCIÓN STREAMING Y MÁS — AGREGADO TAL CUAL LO PEDISTE -->
+    <!-- 🎬 SECCIÓN STREAMING Y MÁS -->
     <h3 class="seccion-titulo">🎬 Streaming y Más</h3>
     <div class="games-grid">
         <a href="netflix.html" class="game-link">
@@ -403,6 +510,24 @@
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">↑</a>
 
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
+
+<script>
+// 🍔 LÓGICA DEL MENÚ HAMBURGUESA
+function abrirMenu() {
+    document.getElementById('menuDesplegable').classList.add('activo');
+    document.getElementById('menuOverlay').classList.add('activo');
+    document.body.style.overflow = 'hidden';
+}
+function cerrarMenu() {
+    document.getElementById('menuDesplegable').classList.remove('activo');
+    document.getElementById('menuOverlay').classList.remove('activo');
+    document.body.style.overflow = '';
+}
+// Cerrar con tecla ESC
+document.addEventListener('keydown', e => {
+    if(e.key === 'Escape') cerrarMenu();
+});
+</script>
 
 <script type="module">
     const CONFIG = {
