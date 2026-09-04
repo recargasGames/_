@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+    <title>Mis Pedidos | RECARGASGAMES</title>
+    
+    <style>
+        :root { 
+            --color-azul: #3b82f6;
+            --color-hover: #2563eb;
+            --color-blanco: #ffffff;
+            --color-exito: #22c55e;
+            --color-pendiente: #facc15;
+            --color-error: #ef4444;
+            --color-borde: #374151;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body { 
+            background-image: url('fondo.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            padding-top: 90px;
+            min-height: 100vh;
+        }
+
+        .barra-superior {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: rgba(11, 18, 32, 0.95);
+            border-bottom: 2px solid var(--color-azul);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .brand img { 
+            height: 50px; 
+            width: auto; 
+            border-radius: 14px; 
+        }
+        .btn-volver {
+            color: var(--color-azul);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: 1px solid var(--color-azul);
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .btn-volver:hover {
+            background: var(--color-azul);
+            color: white;
+        }
+
+        .main { 
+            padding: 20px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+
+        .titulo-pagina {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 25px;
+            color: var(--color-blanco);
+        }
+        .titulo-pagina span {
+            color: var(--color-azul);
+        }
+
+        .pedido-vacio {
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid var(--color-borde);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #9ca3af;
+        }
+        .pedido-vacio svg {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .pedido-card {
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid var(--color-borde);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 15px;
+            transition: 0.2s;
+        }
+        .pedido-card:hover {
+            border-color: var(--color-azul);
+        }
+
+        .pedido-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #1f2937;
+        }
+        .pedido-juego {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--color-azul);
+        }
+        .pedido-fecha {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .pedido-detalle {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .pedido-fila {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .pedido-etiqueta {
+            color: #9ca3af;
+        }
+        .pedido-valor {
+            color: white;
+            font-weight: 500;
+        }
+
+        .pedido-estado {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .estado-exito {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--color-exito);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .estado-pendiente {
+            background: rgba(250, 204, 21, 0.1);
+            color: var(--color-pendiente);
+            border: 1px solid rgba(250, 204, 21, 0.3);
+        }
+        .estado-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .cargando {
+            text-align: center;
+            padding: 30px;
+            color: #9ca3af;
+        }
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: var(--color-azul);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .filtros {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filtro-btn {
+            padding: 8px 14px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filtro-btn.activo, .filtro-btn:hover {
+            background: var(--color-azul);
+            color: white;
+            border-color: var(--color-azul);
+        }
+
+        @media (max-width: 500px) {
+            body { padding-top: 80px; }
+            .main { padding: 15px; }
+            .titulo-pagina { font-size: 22px; }
+            .pedido-fila { flex-direction: column; gap: 2px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="barra-superior">
+    <div class="brand"><img src="logo.png" alt="Recargas Games - Logo"></div>
+    <a href="index.html" class="btn-volver">← Volver</a>
+</div>
+
+<div class="main">
+    <h1 class="titulo-pagina">📋 Mis <span>Pedidos</span></h1>
+
+    <!-- 🔍 FILTROS -->
+    <div class="filtros">
+        <button class="filtro-btn activo" onclick="filtrarPedidos('todos', this)">Todos</button>
+        <button class="filtro-btn" onclick="filtrarPedidos('completado', this)">✅ Completados</button>
+        <button class="filtro-btn" onclick="filtrarPedidos('pendiente', this)">⏳ Pendientes</button>
+        <button class="filtro-btn" onclick="filtrarPedidos('fallido', this)">❌ Fallidos</button>
+    </div>
+
+    <!-- 📦 LISTA DE PEDIDOS -->
+    <div id="listaPedidos">
+        <div class="cargando">
+            <div class="spinner"></div>
+            <p>Cargando tus pedidos...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
+        authDomain: "recargasgames-14c38.firebaseapp.com",
+        databaseURL: "https://recargasgames-14c38-default-rtdb.firebaseio.com",
+        projectId: "recargasgames-14c38",
+        storageBucket: "recargasgames-14c38.firebasestorage.app",
+        messagingSenderId: "370952235234",
+        appId: "1:370952235234:web:41a9ebd7084f1955a256bb"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let uidUsuario = null;
+    let pedidos = [];
+    let filtroActual = 'todos';
+
+    // Formatear fecha
+    function formatearFecha(fecha) {
+        if (!fecha) return '—';
+        const d = new Date(fecha);
+        return d.toLocaleDateString('es-VE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+
+    // Obtener clase de estado
+    function obtenerEstado(estado) {
+        switch(estado?.toLowerCase()) {
+            case 'completado': case 'exitoso': case 'pagado': case 'recargado':
+                return { clase: 'estado-exito', texto: '✅ Completado' };
+            case 'pendiente': case 'procesando': case 'verificando':
+                return { clase: 'estado-pendiente', texto: '⏳ Pendiente' };
+            case 'fallido': case 'error': case 'no encontrado': case 'rechazado':
+                return { clase: 'estado-error', texto: '❌ Fallido' };
+            default:
+                return { clase: 'estado-pendiente', texto: '⏳ Pendiente' };
+        }
+    }
+
+    // Renderizar lista de pedidos
+    function renderizarPedidos() {
+        const contenedor = document.getElementById('listaPedidos');
+        let pedidosFiltrados = filtroActual === 'todos' 
+            ? pedidos 
+            : pedidos.filter(p => p.estado?.toLowerCase() === filtroActual);
+
+        if (pedidos.length === 0) {
+            contenedor.innerHTML = `
+                <div class="pedido-vacio">
+                    <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+                    <h3 style="margin-bottom: 8px; color: #9ca3af;">No tienes pedidos aún</h3>
+                    <p style="font-size: 14px;">Tus recargas aparecerán aquí cuando realices tu primera compra</p>
+                </div>
+            `;
+            return;
+        }
+
+        if (pedidosFiltrados.length === 0) {
+            contenedor.innerHTML = `
+                <div class="pedido-vacio">
+                    <div style="font-size: 48px; margin-bottom: 15px;">🔍</div>
+                    <h3 style="margin-bottom: 8px; color: #9ca3af;">No hay pedidos con ese filtro</h3>
+                    <p style="font-size: 14px;">Intenta cambiando el filtro</p>
+                </div>
+            `;
+            return;
+        }
+
+        contenedor.innerHTML = pedidosFiltrados.map(p => {
+            const estado = obtenerEstado(p.estado);
+            return `
+                <div class="pedido-card">
+                    <div class="pedido-header">
+                        <div>
+                            <div class="pedido-juego">${p.juego || 'Recarga'}</div>
+                            <div class="pedido-fecha">${formatearFecha(p.fecha)}</div>
+                        </div>
+                        <span class="pedido-estado ${estado.clase}">${estado.texto}</span>
+                    </div>
+                    <div class="pedido-detalle">
+                        <div class="pedido-fila">
+                            <span class="pedido-etiqueta">Producto:</span>
+                            <span class="pedido-valor">${p.producto || '—'}</span>
+                        </div>
+                        <div class="pedido-fila">
+                            <span class="pedido-etiqueta">ID/Jugador:</span>
+                            <span class="pedido-valor">${p.id_jugador || '—'}</span>
+                        </div>
+                        <div class="pedido-fila">
+                            <span class="pedido-etiqueta">Método de pago:</span>
+                            <span class="pedido-valor">${p.metodo_pago || '—'}</span>
+                        </div>
+                        <div class="pedido-fila">
+                            <span class="pedido-etiqueta">Monto:</span>
+                            <span class="pedido-valor">${p.precio_usd ? '$' + p.precio_usd + ' USD' : ''} ${p.precio_en_bs ? p.precio_en_bs + ' Bs' : ''}</span>
+                        </div>
+                        ${p.referencia ? `
+                        <div class="pedido-fila">
+                            <span class="pedido-etiqueta">Referencia:</span>
+                            <span class="pedido-valor" style="font-family:monospace; font-size:13px;">${p.referencia}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Cambiar filtro
+    window.filtrarPedidos = function(filtro, btn) {
+        filtroActual = filtro;
+        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        renderizarPedidos();
+    };
+
+    // Cargar pedidos de Firebase
+    async function cargarPedidos(uid) {
+        const contenedor = document.getElementById('listaPedidos');
+        contenedor.innerHTML = `
+            <div class="cargando">
+                <div class="spinner"></div>
+                <p>Cargando tus pedidos...</p>
+            </div>
+        `;
+
+        try {
+            const pedidosRef = ref(db, 'pedidos');
+            const q = query(pedidosRef, orderByChild('uid'), equalTo(uid));
+            const snapshot = await get(q);
+            
+            pedidos = [];
+            if (snapshot.exists()) {
+                const datos = snapshot.val();
+                pedidos = Object.entries(datos).map(([id, pedido]) => ({
+                    id,
+                    ...pedido
+                })).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+            }
+            renderizarPedidos();
+        } catch (error) {
+            console.error('Error cargando pedidos:', error);
+            contenedor.innerHTML = `
+                <div class="pedido-vacio">
+                    <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
+                    <h3 style="margin-bottom: 8px; color: #f87171;">Error al cargar pedidos</h3>
+                    <p style="font-size: 14px;">Intenta recargar la página</p>
+                </div>
+            `;
+        }
+    }
+
+    // Verificar autenticación
+    onAuthStateChanged(auth, (usuario) => {
+        if (usuario) {
+            uidUsuario = usuario.uid;
+            cargarPedidos(uidUsuario);
+        } else {
+            // Si no hay sesión, buscar pedidos en localStorage (modo local)
+            const pedidosGuardados = localStorage.getItem('pedidos_locales');
+            if (pedidosGuardados) {
+                pedidos = JSON.parse(pedidosGuardados).sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+            } else {
+                pedidos = [];
+            }
+            renderizarPedidos();
+        }
+    });
+</script>
+
+</body>
+</html>
