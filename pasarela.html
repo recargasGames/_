@@ -444,14 +444,14 @@ body{
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Referencia registrada. Conectando con el servidor...</div>
+        <div class="texto-secundario">Referencia registrada. Enviando recarga...</div>
     </div>
 
     <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
     <div id="pasoConectandoProveedor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
-        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el servidor...</div>
-        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu compra...</div>
+        <div class="texto-principal" id="textoConectandoProveedor">Conectando con API Central Pro...</div>
+        <div class="texto-secundario" id="textoProveedorSecundario">Enviando tus diamantes...</div>
         <div style="margin-top:15px;font-size:13px;color:#64748b;" id="tiempoEspera">⏱️ Tiempo estimado: 5 segundos</div>
     </div>
 
@@ -459,26 +459,22 @@ body{
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Compra Realizada!</div>
-        <div class="texto-secundario" id="mensajeExito">
+        <div class="texto-secundario">
             Tu compra se procesó exitosamente.<br><br>
             ✅ El pago fue verificado y registrado.<br>
-            ✅ La recarga fue enviada al proveedor.<br>
+            ✅ Los diamantes fueron enviados a tu cuenta.<br>
             🎉 ¡Gracias por tu compra!
         </div>
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicio">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedorFinal">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedor">API Central Pro</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor">Pago Móvil</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Solicitud</span><span class="resumen-valor" id="resIdSolicitud">-</span></div>
-        </div>
-        <div class="datos-recarga-box" id="datosRecargaBox" style="display:none;">
-            <strong>Datos de la cuenta:</strong><br>
-            <span id="datosCuenta"></span>
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -545,65 +541,25 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// ⚙️ CONFIGURACIÓN DE APIS — CON PROXY VERCEL
+// ⚙️ CONFIGURACIÓN DE APIS
 // ==============================================
 
-// 🔥 API CENTRAL PRO — CON PROXY PARA EVITAR CORS
+// 🔑 TOKEN CORRECTO DE API CENTRAL PRO
 const FF_API = {
-    URL: "/api/freefire", // ✅ RUTA DEL PROXY EN VERCEL
+    URL: "https://apicentral.pro/apis/freefire.jsp",
     TOKEN: "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s"
 };
 
-// PAGONORTE - BLOOD STRIKE + STREAMING
-const PAGONORTE = {
-    URL: "/api/pagonorte", // ✅ RUTA DEL PROXY
-    API_KEY: "pn_8dc8d383aa88020b5df8365052e4ecf5168a",
-    API_SECRET: "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05"
-};
-
-// PÁBILO - VERIFICACIÓN DE PAGOS — CON PROXY
+// PÁBILO - VERIFICACIÓN DE PAGOS
 const PABILO = {
-    BASE_URL: "/api/pabilo", // ✅ RUTA DEL PROXY
     USER_BANK_ID: "6a93ac1b98055a34bd8b05f2",
     API_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789"
 };
 
 // ==============================================
-// 📱 TELEGRAM - CONFIGURADO
+// 📊 MAPEO DE PAQUETES
 // ==============================================
-const TELEGRAM = {
-    BOT_TOKEN: "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM",
-    CHAT_ID: "8452807558"
-};
-
-// ==============================================
-// 📱 ENVIAR MENSAJE A TELEGRAM
-// ==============================================
-async function enviarTelegram(mensaje) {
-    try {
-        const url = `https://api.telegram.org/bot${TELEGRAM.BOT_TOKEN}/sendMessage`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: TELEGRAM.CHAT_ID,
-                text: mensaje,
-                parse_mode: 'HTML'
-            })
-        });
-        const data = await response.json();
-        console.log('📱 Telegram:', data.ok ? '✅ Enviado' : '❌ Error');
-        return data.ok;
-    } catch (error) {
-        console.error('❌ Error Telegram:', error);
-        return false;
-    }
-}
-
-// ==============================================
-// 📊 MAPEO DE PAQUETES — VERIFICA QUE COINCIDAN CON API CENTRAL PRO
-// ==============================================
-const MAPEO_FREE_FIRE = {
+const MAPEO_PAQUETES = {
     "100 Diamantes": "1",
     "310 Diamantes": "2",
     "520 Diamantes": "3",
@@ -615,40 +571,77 @@ const MAPEO_FREE_FIRE = {
     "Pase Booyah": "9"
 };
 
-const MAPEO_BLOOD_STRIKE = {
-    "100 Golds": "1",
-    "300 Golds": "2",
-    "500 Golds": "3",
-    "1000 Golds": "4",
-    "2000 Golds": "5",
-    "5000 Golds": "6"
-};
-
 // ==============================================
 // 🎯 DETECTAR TIPO DE SERVICIO
 // ==============================================
-function detectarTipoServicio(nombreServicio, producto) {
-    const serv = (nombreServicio || "").toUpperCase();
-    const prod = (producto || "").toUpperCase();
+function detectarTipoServicio(nombreServicio) {
+    const servicio = (nombreServicio || "").toUpperCase().trim();
     
-    if (serv.includes("FREE FIRE") || serv.includes("FREEFIRE") || 
-        prod.includes("DIAMANTE") || prod.includes("TARJETA") || prod.includes("BOOYAH")) {
-        return { tipo: "freefire", nombreMostrado: "Free Fire", proveedor: "API Central Pro", mostrarId: true, esStreaming: false };
+    // FREE FIRE
+    if (servicio.includes("FREE FIRE") || servicio.includes("FREEFIRE")) {
+        return {
+            tipo: "freefire",
+            nombreMostrado: "Free Fire",
+            proveedor: "API Central Pro",
+            mostrarId: true,
+            mostrarNombreJugador: true,
+            mostrarProveedor: true,
+            esStreaming: false
+        };
     }
     
-    if (serv.includes("BLOOD") || serv.includes("STRIKE") || serv.includes("BLOCK")) {
-        return { tipo: "bloodstrike", nombreMostrado: "Blood Strike", proveedor: "PagoNorte", mostrarId: true, esStreaming: false };
+    // NETFLIX
+    if (servicio.includes("NETFLIX")) {
+        return {
+            tipo: "netflix",
+            nombreMostrado: "Netflix",
+            producto: "1 pantalla de Netflix",
+            proveedor: "PagoNorte",
+            mostrarId: false,
+            mostrarNombreJugador: false,
+            mostrarProveedor: true,
+            esStreaming: true
+        };
     }
     
-    if (serv.includes("NETFLIX")) {
-        return { tipo: "netflix", nombreMostrado: "Netflix", proveedor: "PagoNorte", mostrarId: false, esStreaming: true };
+    // DISNEY+
+    if (servicio.includes("DISNEY")) {
+        return {
+            tipo: "disney",
+            nombreMostrado: "Disney+",
+            producto: "1 pantalla de Disney+",
+            proveedor: "PagoNorte",
+            mostrarId: false,
+            mostrarNombreJugador: false,
+            mostrarProveedor: true,
+            esStreaming: true
+        };
     }
     
-    if (serv.includes("DISNEY")) {
-        return { tipo: "disney", nombreMostrado: "Disney+", proveedor: "PagoNorte", mostrarId: false, esStreaming: true };
+    // BLOOD STRIKE
+    if (servicio.includes("BLOOD") || servicio.includes("STRIKE") || servicio.includes("BLOCK")) {
+        return {
+            tipo: "bloodstrike",
+            nombreMostrado: "Blood Strike",
+            proveedor: "PagoNorte",
+            mostrarId: true,
+            mostrarNombreJugador: true,
+            mostrarProveedor: true,
+            esStreaming: false
+        };
     }
     
-    return { tipo: "generico", nombreMostrado: nombreServicio || "Servicio", proveedor: "PagoNorte", mostrarId: true, esStreaming: false };
+    // OTROS
+    return {
+        tipo: "juego",
+        nombreMostrado: nombreServicio || "Servicio",
+        producto: "",
+        proveedor: "Proveedor Oficial",
+        mostrarId: true,
+        mostrarNombreJugador: true,
+        mostrarProveedor: true,
+        esStreaming: false
+    };
 }
 
 // ==============================================
@@ -662,31 +655,21 @@ const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
-const servicioInfo = detectarTipoServicio(juegoRecibido, producto);
+const servicioInfo = detectarTipoServicio(juegoRecibido);
 
 // ==============================================
 // 🎯 OBTENER CÓDIGO DEL PROVEEDOR
 // ==============================================
 function obtenerCodigoProveedor() {
     if (servicioInfo.tipo === "freefire") {
-        if (MAPEO_FREE_FIRE[producto]) return MAPEO_FREE_FIRE[producto];
-        for (const [key, value] of Object.entries(MAPEO_FREE_FIRE)) {
+        if (MAPEO_PAQUETES[producto]) return MAPEO_PAQUETES[producto];
+        for (const [key, value] of Object.entries(MAPEO_PAQUETES)) {
             if (producto.toLowerCase().includes(key.toLowerCase()) || 
                 key.toLowerCase().includes(producto.toLowerCase())) {
                 return value;
             }
         }
         return paqueteCod || "1";
-    }
-    if (servicioInfo.tipo === "bloodstrike") {
-        if (MAPEO_BLOOD_STRIKE[producto]) return MAPEO_BLOOD_STRIKE[producto];
-        for (const [key, value] of Object.entries(MAPEO_BLOOD_STRIKE)) {
-            if (producto.toLowerCase().includes(key.toLowerCase()) || 
-                key.toLowerCase().includes(producto.toLowerCase())) {
-                return value;
-            }
-        }
-        return "1";
     }
     return paqueteCod || "1";
 }
@@ -699,13 +682,17 @@ const codigoProveedor = obtenerCodigoProveedor();
 function configurarVisibilidadCampos() {
     document.getElementById('datoServicio').textContent = servicioInfo.nombreMostrado;
     document.getElementById('datoProveedor').textContent = servicioInfo.proveedor;
-    document.getElementById('datoProducto').textContent = producto || servicioInfo.nombreMostrado;
+    
+    const textoProducto = servicioInfo.esStreaming ? servicioInfo.producto : producto;
+    document.getElementById('datoProducto').textContent = textoProducto || servicioInfo.nombreMostrado;
+    
     document.getElementById('montoBsMostrar').textContent = precioBs + " Bs";
     document.getElementById('datoWhatsapp').textContent = idJugador;
     document.getElementById('datoId').textContent = idJugador;
     document.getElementById('datoNombreJugador').textContent = nombreJugador || idJugador;
     document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
+    // Mostrar/ocultar según servicio
     const filaId = document.getElementById('filaId');
     const filaNombre = document.getElementById('filaNombreJugador');
     if (servicioInfo.mostrarId) {
@@ -717,21 +704,10 @@ function configurarVisibilidadCampos() {
     }
     
     document.getElementById('resIdResumen').textContent = idJugador;
-    document.getElementById('resProveedorFinal').textContent = servicioInfo.proveedor;
+    document.getElementById('resProveedor').textContent = servicioInfo.proveedor;
 }
 
 configurarVisibilidadCampos();
-
-// ==============================================
-// 📋 VALIDACIÓN DE REFERENCIA
-// ==============================================
-const refInput = document.getElementById('referenciaPago');
-
-refInput.addEventListener('input', function(e) {
-    this.value = this.value.replace(/\D/g, '');
-    const btn = document.getElementById('btnVerificar');
-    btn.disabled = this.value.length < 6;
-});
 
 // ==============================================
 // 📋 COPIAR TEXTOS
@@ -746,7 +722,11 @@ function copiarTexto(texto, boton){
 }
 
 function copiarTodosLosDatos(boton){
-    const datosCompletos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBs} Bs`;
+    const datosCompletos = `Banco: (0102) BDV
+Cédula: 32824869
+Teléfono: 04228242411
+Monto: ${precioBs} Bs`;
+
     navigator.clipboard.writeText(datosCompletos)
         .then(() => {
             boton.classList.add('copiado-todo');
@@ -817,7 +797,7 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// ⚡ VERIFICAR PAGO - PÁBILO (CON PROXY)
+// ⚡ VERIFICAR PAGO - PÁBILO
 // ==============================================
 async function verificarPagoPabilo(referencia, montoBs) {
     let montoPago = String(montoBs).replace(/[.,]/g, '');
@@ -835,7 +815,7 @@ async function verificarPagoPabilo(referencia, montoBs) {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-        const res = await fetch(`${PABILO.BASE_URL}/${PABILO.USER_BANK_ID}/betaserio`, {
+        const res = await fetch(`https://api.pabilo.app/userbankpayment/${PABILO.USER_BANK_ID}/betaserio`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json', 
@@ -847,7 +827,7 @@ async function verificarPagoPabilo(referencia, montoBs) {
         
         clearTimeout(timeoutId);
         const datos = await res.json();
-        console.log('Respuesta Pábilo:', datos);
+        console.log('✅ Respuesta Pábilo:', datos);
         
         const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
         const dataStatus = (datos.data?.status || "").toLowerCase();
@@ -863,70 +843,265 @@ async function verificarPagoPabilo(referencia, montoBs) {
         if (e.name === 'AbortError') {
             return false;
         }
-        console.error('Error en Pábilo:', e);
+        console.error('❌ Error en Pábilo:', e);
         return false;
     }
 }
 
 // ==============================================
-// 🎮 ENVIAR FREE FIRE - API CENTRAL PRO (CON PROXY)
+// 🎮 ENVIAR RECARGA A API CENTRAL PRO - FREE FIRE
 // ==============================================
 async function enviarFreeFire(idJugador, paquete, referencia) {
-    // ✅ Validaciones antes de llamar a la API
-    if (!idJugador || idJugador.length < 5) {
-        return {
-            success: false,
-            error: "ID_JUGADOR_INVALIDO",
-            mensaje: "ID de jugador inválido. Verifica que esté bien escrito."
-        };
-    }
-
-    if (!paquete || paquete === "0") {
-        return {
-            success: false,
-            error: "PAQUETE_INVALIDO",
-            mensaje: "Paquete no reconocido. Selecciona un producto válido."
-        };
-    }
-
-    // ✅ Construir URL usando el PROXY — SIN CORS
-    const url = `${FF_API.URL}?token=${FF_API.TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paquete}`;
+    const url = new URL(FF_API.URL);
+    url.searchParams.append('token', FF_API.TOKEN);
+    url.searchParams.append('tipo', 'recargaFreefire');
+    url.searchParams.append('id_jugador', idJugador);
+    url.searchParams.append('paquete', paquete);
     
-    console.log('📤 Enviando a API Central Pro...');
-    console.log('🔗 URL:', url.replace(FF_API.TOKEN, '***OCULTO***'));
-    console.log('🆔 ID Jugador:', idJugador);
+    console.log('📤 Enviando a API Central Pro:', url.toString());
     console.log('📦 Paquete:', paquete);
-
+    console.log('🆔 ID Jugador:', idJugador);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-        const response = await fetch(url, {
+        const response = await fetch(url.toString(), {
             method: 'GET',
-            signal: controller.signal,
             headers: {
-                'Accept': 'application/json, text/plain, */*'
-            }
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            signal: controller.signal
         });
-
+        
         clearTimeout(timeoutId);
         const text = await response.text();
         console.log('📥 Respuesta API Central Pro:', text);
-        console.log('📊 Status HTTP:', response.status);
-
-        // ✅ Analizar respuesta
-        let data = {};
+        
+        let data;
         try {
             data = JSON.parse(text);
         } catch {
-            data = { mensaje: text };
+            data = { raw: text };
         }
-
-        // ✅ DETECTAR ERRORES ESPECÍFICOS
-        const respuestaTexto = (text + ' ' + (data.mensaje || data.error || '')).toLowerCase();
-
-        if (respuestaTexto.includes("saldo insuficiente") || respuestaTexto.includes("sin saldo")) {
+        
+        const esExito = 
+            data.ok === true || 
+            data.success === true || 
+            data.estado === 'exito' ||
+            data.status === 'success' ||
+            data.codigo_respuesta === '00' ||
+            text.includes('exito') ||
+            text.includes('success') ||
+            text.includes('Transaccion Exitosa') ||
+            text.includes('ok');
+        
+        return {
+            success: esExito,
+            mensaje: data.mensaje || data.message || data.msg || 'Transacción procesada',
+            id_solicitud: data.id_solicitud || data.id || 'unknown',
+            datos: data,
+            raw: text
+        };
+        
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
             return {
                 success: false,
-                error: "SALDO_INSUFICIENTE",
-                mensaje: "⚠️ Saldo insuficiente en API Central Pro. Recarga tu cuenta primero
+                error: 'Timeout',
+                mensaje: 'Tiempo de espera agotado'
+            };
+        }
+        console.error('❌ Error en API Central Pro:', error);
+        return {
+            success: false,
+            error: error.message,
+            mensaje: 'Error al conectar con el servidor'
+        };
+    }
+}
+
+// ==============================================
+// 🔥 FLUJO PRINCIPAL
+// ==============================================
+let timeoutTimer = null;
+
+async function iniciarVerificacion() {
+    const referencia = document.getElementById('referenciaPago').value.trim();
+    const btn = document.getElementById('btnVerificar');
+    
+    if (!referencia || referencia.length < 6) {
+        alert("❌ Escribe la referencia completa del pago (mínimo 6 dígitos)");
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = `<span class="loader"></span> Verificando...`;
+    
+    mostrarPaso('pasoVerificandoPago');
+    document.getElementById('progresoVerificacion').textContent = '🔍 Verificando referencia...';
+    
+    try {
+        // PASO 1: Verificar si ya fue usada
+        const yaUsada = await verificarReferenciaEnFirebase(referencia);
+        
+        if (yaUsada) {
+            mostrarPaso('pasoReferenciaUsada');
+            btn.disabled = false;
+            btn.innerHTML = '✅ Verificar Pago';
+            return;
+        }
+        
+        document.getElementById('progresoVerificacion').textContent = '💳 Consultando sistema bancario...';
+        
+        // PASO 2: Verificar en Pábilo
+        let pagoConfirmado = false;
+        let reintentos = 0;
+        
+        while (!pagoConfirmado && reintentos < 3) {
+            if (reintentos > 0) {
+                document.getElementById('progresoVerificacion').textContent = `🔄 Reintentando (${reintentos}/3)...`;
+                await new Promise(r => setTimeout(r, 2000));
+            }
+            pagoConfirmado = await verificarPagoPabilo(referencia, precioBs);
+            reintentos++;
+        }
+        
+        if (!pagoConfirmado) {
+            mostrarPaso('pasoPagoNoEncontrado');
+            btn.disabled = false;
+            btn.innerHTML = '✅ Verificar Pago';
+            return;
+        }
+        
+        // PASO 3: Marcar referencia como usada
+        document.getElementById('progresoVerificacion').textContent = '🔒 Registrando pago...';
+        await marcarReferenciaComoUsada(referencia);
+        
+        mostrarPaso('pasoPagoConfirmado');
+        await new Promise(r => setTimeout(r, 1200));
+        
+        // PASO 4: Enviar recarga a API Central Pro (SOLO FREE FIRE)
+        if (servicioInfo.tipo === "freefire") {
+            document.getElementById('textoConectandoProveedor').textContent = 'Conectando con API Central Pro...';
+            document.getElementById('textoProveedorSecundario').textContent = `Enviando ${producto} al ID ${idJugador}...`;
+            document.getElementById('tiempoEspera').textContent = '⏱️ Tiempo estimado: 5 segundos';
+            mostrarPaso('pasoConectandoProveedor');
+            
+            let tiempoRestante = 5;
+            const intervalo = setInterval(() => {
+                tiempoRestante--;
+                if (tiempoRestante > 0) {
+                    document.getElementById('tiempoEspera').textContent = `⏱️ Tiempo estimado: ${tiempoRestante} segundos`;
+                }
+            }, 1000);
+            
+            // Timeout global
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutTimer = setTimeout(() => {
+                    clearInterval(intervalo);
+                    reject(new Error('TIMEOUT'));
+                }, 30000);
+            });
+            
+            // Enviar recarga
+            const resultado = await Promise.race([
+                enviarFreeFire(idJugador, codigoProveedor, referencia),
+                timeoutPromise
+            ]);
+            
+            clearTimeout(timeoutTimer);
+            clearInterval(intervalo);
+            
+            if (!resultado.success) {
+                document.getElementById('textoErrorProveedor').textContent = 
+                    resultado.mensaje || resultado.error || 'Error al procesar la recarga';
+                mostrarPaso('pasoErrorProveedor');
+                btn.disabled = false;
+                btn.innerHTML = '✅ Verificar Pago';
+                return;
+            }
+            
+            // PASO 5: ÉXITO
+            const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA", {
+                id_solicitud: resultado.id_solicitud || 'N/A'
+            });
+            
+            document.getElementById('resPedido').textContent = `#${idPedido.substring(0, 8).toUpperCase()}`;
+            document.getElementById('resServicio').textContent = servicioInfo.nombreMostrado;
+            document.getElementById('resProveedor').textContent = 'API Central Pro';
+            document.getElementById('resProducto').textContent = producto || servicioInfo.nombreMostrado;
+            document.getElementById('resIdResumen').textContent = idJugador;
+            document.getElementById('resReferencia').textContent = referencia;
+            document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
+            document.getElementById('resIdSolicitud').textContent = resultado.id_solicitud || 'N/A';
+            
+            mostrarPaso('pasoRecargaExitosa');
+            
+            console.log('🎉 RECARGA EXITOSA!');
+            console.log('📦 Producto:', producto);
+            console.log('🆔 ID:', idJugador);
+            console.log('🔢 Paquete:', codigoProveedor);
+            console.log('📋 ID Solicitud:', resultado.id_solicitud);
+            
+        } else {
+            // Para otros servicios (Netflix, Blood Strike, etc.)
+            const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA", {
+                id_solicitud: 'manual'
+            });
+            
+            document.getElementById('resPedido').textContent = `#${idPedido.substring(0, 8).toUpperCase()}`;
+            document.getElementById('resServicio').textContent = servicioInfo.nombreMostrado;
+            document.getElementById('resProveedor').textContent = servicioInfo.proveedor;
+            document.getElementById('resProducto').textContent = producto || servicioInfo.nombreMostrado;
+            document.getElementById('resIdResumen').textContent = idJugador;
+            document.getElementById('resReferencia').textContent = referencia;
+            document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
+            document.getElementById('resIdSolicitud').textContent = 'Manual';
+            
+            mostrarPaso('pasoRecargaExitosa');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        if (error.message === 'TIMEOUT') {
+            mostrarPaso('pasoTimeout');
+        } else {
+            alert('❌ Error al verificar el pago. Intenta de nuevo.');
+            mostrarPaso('pasoDatos');
+        }
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✅ Verificar Pago';
+        if (timeoutTimer) {
+            clearTimeout(timeoutTimer);
+            timeoutTimer = null;
+        }
+    }
+}
+
+// ==============================================
+// ⌨️ ENTER
+// ==============================================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const pasoActivo = document.querySelector('.paso-box.activo');
+        if (pasoActivo && pasoActivo.id === 'pasoDatos') {
+            const btn = document.getElementById('btnVerificar');
+            if (!btn.disabled) iniciarVerificacion();
+        }
+    }
+});
+
+console.log('🚀 RECARGASGAMES - Sistema de Verificación de Pagos');
+console.log('📦 Servicio:', servicioInfo.nombreMostrado);
+console.log('🔌 Proveedor:', servicioInfo.proveedor);
+console.log('📦 Producto:', producto);
+console.log('🔢 Código Proveedor:', codigoProveedor);
+console.log('🔑 Token Free Fire:', FF_API.TOKEN);
+</script>
+
+</body>
+</html>
