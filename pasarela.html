@@ -545,24 +545,25 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// ⚙️ CONFIGURACIÓN DE APIS
+// ⚙️ CONFIGURACIÓN DE APIS — CON PROXY VERCEL
 // ==============================================
 
-// ⚠️ TOKEN CORREGIDO - El correcto es con 6O6O no 6060
+// 🔥 API CENTRAL PRO — CON PROXY PARA EVITAR CORS
 const FF_API = {
-    URL: "https://apicentral.pro/apis/freefire.jsp",
-    TOKEN: "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s"  // ✅ CORREGIDO
+    URL: "/api/freefire", // ✅ RUTA DEL PROXY EN VERCEL
+    TOKEN: "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s"
 };
 
 // PAGONORTE - BLOOD STRIKE + STREAMING
 const PAGONORTE = {
-    URL: "https://pagonorte.net/recargas/api.jsp",
+    URL: "/api/pagonorte", // ✅ RUTA DEL PROXY
     API_KEY: "pn_8dc8d383aa88020b5df8365052e4ecf5168a",
     API_SECRET: "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05"
 };
 
-// PÁBILO - VERIFICACIÓN DE PAGOS
+// PÁBILO - VERIFICACIÓN DE PAGOS — CON PROXY
 const PABILO = {
+    BASE_URL: "/api/pabilo", // ✅ RUTA DEL PROXY
     USER_BANK_ID: "6a93ac1b98055a34bd8b05f2",
     API_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789"
 };
@@ -600,9 +601,8 @@ async function enviarTelegram(mensaje) {
 }
 
 // ==============================================
-// 📊 MAPEO DE PAQUETES
+// 📊 MAPEO DE PAQUETES — VERIFICA QUE COINCIDAN CON API CENTRAL PRO
 // ==============================================
-
 const MAPEO_FREE_FIRE = {
     "100 Diamantes": "1",
     "310 Diamantes": "2",
@@ -817,7 +817,7 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// ⚡ VERIFICAR PAGO - PÁBILO
+// ⚡ VERIFICAR PAGO - PÁBILO (CON PROXY)
 // ==============================================
 async function verificarPagoPabilo(referencia, montoBs) {
     let montoPago = String(montoBs).replace(/[.,]/g, '');
@@ -835,7 +835,7 @@ async function verificarPagoPabilo(referencia, montoBs) {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-        const res = await fetch(`https://api.pabilo.app/userbankpayment/${PABILO.USER_BANK_ID}/betaserio`, {
+        const res = await fetch(`${PABILO.BASE_URL}/${PABILO.USER_BANK_ID}/betaserio`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json', 
@@ -869,408 +869,64 @@ async function verificarPagoPabilo(referencia, montoBs) {
 }
 
 // ==============================================
-// 🎮 ENVIAR FREE FIRE - API CENTRAL PRO
+// 🎮 ENVIAR FREE FIRE - API CENTRAL PRO (CON PROXY)
 // ==============================================
 async function enviarFreeFire(idJugador, paquete, referencia) {
-    const url = new URL(FF_API.URL);
-    url.searchParams.append('token', FF_API.TOKEN);
-    url.searchParams.append('tipo', 'recargaFreefire');
-    url.searchParams.append('id_jugador', idJugador);
-    url.searchParams.append('paquete', paquete);
+    // ✅ Validaciones antes de llamar a la API
+    if (!idJugador || idJugador.length < 5) {
+        return {
+            success: false,
+            error: "ID_JUGADOR_INVALIDO",
+            mensaje: "ID de jugador inválido. Verifica que esté bien escrito."
+        };
+    }
+
+    if (!paquete || paquete === "0") {
+        return {
+            success: false,
+            error: "PAQUETE_INVALIDO",
+            mensaje: "Paquete no reconocido. Selecciona un producto válido."
+        };
+    }
+
+    // ✅ Construir URL usando el PROXY — SIN CORS
+    const url = `${FF_API.URL}?token=${FF_API.TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paquete}`;
     
-    console.log('📤 Enviando Free Fire:', url.toString());
-    
+    console.log('📤 Enviando a API Central Pro...');
+    console.log('🔗 URL:', url.replace(FF_API.TOKEN, '***OCULTO***'));
+    console.log('🆔 ID Jugador:', idJugador);
+    console.log('📦 Paquete:', paquete);
+
     try {
-        const response = await fetch(url.toString(), {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+        const response = await fetch(url, {
             method: 'GET',
+            signal: controller.signal,
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Accept': 'application/json, text/plain, */*'
             }
         });
-        
+
+        clearTimeout(timeoutId);
         const text = await response.text();
-        console.log('📥 Respuesta Free Fire:', text);
-        
-        let data;
+        console.log('📥 Respuesta API Central Pro:', text);
+        console.log('📊 Status HTTP:', response.status);
+
+        // ✅ Analizar respuesta
+        let data = {};
         try {
             data = JSON.parse(text);
         } catch {
-            data = { raw: text };
+            data = { mensaje: text };
         }
-        
-        const esExito = 
-            data.ok === true || 
-            data.success === true || 
-            data.estado === 'exito' ||
-            data.status === 'success' ||
-            data.codigo_respuesta === '00' ||
-            text.includes('exito') ||
-            text.includes('success') ||
-            text.includes('Transaccion Exitosa') ||
-            text.includes('ok');
-        
-        return {
-            success: esExito,
-            mensaje: data.mensaje || data.message || data.msg || 'Transacción procesada',
-            id_solicitud: data.id_solicitud || data.id || 'unknown',
-            datos: data,
-            raw: text
-        };
-        
-    } catch (error) {
-        console.error('❌ Error Free Fire:', error);
-        return {
-            success: false,
-            error: error.message,
-            mensaje: 'Error al conectar con el servidor'
-        };
-    }
-}
 
-// ==============================================
-// 🎮 ENVIAR BLOOD STRIKE - PAGONORTE
-// ==============================================
-async function enviarBloodStrike(idJugador, paquete, referencia) {
-    const bodyParams = new URLSearchParams({
-        action: "recarga",
-        api_key: PAGONORTE.API_KEY,
-        api_secret: PAGONORTE.API_SECRET,
-        tipo: "recargaBloodStrike",
-        id_jugador: idJugador,
-        paquete: paquete,
-        referencia: referencia + "_" + Date.now()
-    });
+        // ✅ DETECTAR ERRORES ESPECÍFICOS
+        const respuestaTexto = (text + ' ' + (data.mensaje || data.error || '')).toLowerCase();
 
-    console.log('📤 Enviando Blood Strike:', bodyParams.toString());
-
-    try {
-        const response = await fetch(PAGONORTE.URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: bodyParams.toString()
-        });
-
-        const datos = await response.json();
-        console.log('📥 Respuesta Blood Strike:', datos);
-
-        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
-
-        return {
-            success: esExito,
-            mensaje: datos.mensaje || 'Transacción exitosa',
-            id_solicitud: datos.id_solicitud || 'unknown',
-            datos: datos
-        };
-    } catch (error) {
-        console.error('❌ Error Blood Strike:', error);
-        return {
-            success: false,
-            error: error.message,
-            mensaje: 'Error al conectar con PagoNorte'
-        };
-    }
-}
-
-// ==============================================
-// 🎬 ENVIAR NETFLIX - PAGONORTE
-// ==============================================
-async function enviarNetflix(email, referencia) {
-    const bodyParams = new URLSearchParams({
-        action: "recarga",
-        api_key: PAGONORTE.API_KEY,
-        api_secret: PAGONORTE.API_SECRET,
-        tipo: "recargaPerfilNetflix",
-        email: email || "usuario@email.com",
-        paquete: "1",
-        referencia: referencia + "_" + Date.now()
-    });
-
-    try {
-        const response = await fetch(PAGONORTE.URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: bodyParams.toString()
-        });
-
-        const datos = await response.json();
-        console.log('📥 Respuesta Netflix:', datos);
-
-        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
-
-        return {
-            success: esExito,
-            mensaje: datos.mensaje || 'Transacción exitosa',
-            id_solicitud: datos.id_solicitud || 'unknown',
-            datos: datos,
-            datos_extra: {
-                cuenta: datos.cuenta || null,
-                correo: datos.correo || null,
-                clave: datos.clave || null,
-                perfil: datos.perfil || null,
-                fecha_vencimiento: datos.fecha_vencimiento || null,
-                codigo_aprobacion: datos.codigo_aprobacion || null
-            }
-        };
-    } catch (error) {
-        console.error('❌ Error Netflix:', error);
-        return {
-            success: false,
-            error: error.message,
-            mensaje: 'Error al conectar con PagoNorte'
-        };
-    }
-}
-
-// ==============================================
-// 🎬 ENVIAR DISNEY+ - PAGONORTE
-// ==============================================
-async function enviarDisney(email, referencia) {
-    const bodyParams = new URLSearchParams({
-        action: "recarga",
-        api_key: PAGONORTE.API_KEY,
-        api_secret: PAGONORTE.API_SECRET,
-        tipo: "recargaPerfilDisney",
-        email: email || "usuario@email.com",
-        paquete: "1",
-        referencia: referencia + "_" + Date.now()
-    });
-
-    try {
-        const response = await fetch(PAGONORTE.URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: bodyParams.toString()
-        });
-
-        const datos = await response.json();
-        console.log('📥 Respuesta Disney+:', datos);
-
-        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
-
-        return {
-            success: esExito,
-            mensaje: datos.mensaje || 'Transacción exitosa',
-            id_solicitud: datos.id_solicitud || 'unknown',
-            datos: datos,
-            datos_extra: {
-                cuenta: datos.cuenta || null,
-                correo: datos.correo || null,
-                clave: datos.clave || null,
-                perfil: datos.perfil || null,
-                fecha_vencimiento: datos.fecha_vencimiento || null,
-                codigo_aprobacion: datos.codigo_aprobacion || null
-            }
-        };
-    } catch (error) {
-        console.error('❌ Error Disney+:', error);
-        return {
-            success: false,
-            error: error.message,
-            mensaje: 'Error al conectar con PagoNorte'
-        };
-    }
-}
-
-// ==============================================
-// 📊 RATE LIMITING
-// ==============================================
-const rateLimit = {
-    intentos: [],
-    verificar() {
-        const ahora = Date.now();
-        this.intentos = this.intentos.filter(t => t > ahora - 60000);
-        if (this.intentos.length >= 2) return false;
-        this.intentos.push(ahora);
-        return true;
-    }
-};
-
-// ==============================================
-// 🔥 FLUJO PRINCIPAL
-// ==============================================
-let timeoutTimer = null;
-
-async function iniciarVerificacion() {
-    const referencia = document.getElementById('referenciaPago').value.trim();
-    const btn = document.getElementById('btnVerificar');
-    
-    if (!referencia || referencia.length < 6) {
-        alert("❌ Escribe la referencia completa del pago (mínimo 6 dígitos)");
-        return;
-    }
-    
-    if (!rateLimit.verificar()) {
-        alert("⏳ Demasiados intentos. Espera un momento.");
-        return;
-    }
-    
-    btn.disabled = true;
-    btn.innerHTML = `<span class="loader"></span> Verificando...`;
-    
-    mostrarPaso('pasoVerificandoPago');
-    document.getElementById('progresoVerificacion').textContent = '🔍 Verificando referencia...';
-    
-    try {
-        const yaUsada = await verificarReferenciaEnFirebase(referencia);
-        if (yaUsada) {
-            mostrarPaso('pasoReferenciaUsada');
-            await enviarTelegram(`🔒 <b>REFERENCIA DUPLICADA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🔢 Referencia: ${referencia}`);
-            btn.disabled = false;
-            btn.innerHTML = '✅ Verificar Pago';
-            return;
-        }
-        
-        document.getElementById('progresoVerificacion').textContent = '💳 Consultando sistema bancario...';
-        
-        let pagoConfirmado = false;
-        let reintentos = 0;
-        
-        while (!pagoConfirmado && reintentos < 3) {
-            if (reintentos > 0) {
-                document.getElementById('progresoVerificacion').textContent = `🔄 Reintentando (${reintentos}/3)...`;
-                await new Promise(r => setTimeout(r, 2000));
-            }
-            pagoConfirmado = await verificarPagoPabilo(referencia, precioBs);
-            reintentos++;
-        }
-        
-        if (!pagoConfirmado) {
-            mostrarPaso('pasoPagoNoEncontrado');
-            await enviarTelegram(`❌ <b>PAGO NO ENCONTRADO</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🔢 Referencia: ${referencia}\n💰 Monto: ${precioBs} Bs`);
-            btn.disabled = false;
-            btn.innerHTML = '✅ Verificar Pago';
-            return;
-        }
-        
-        document.getElementById('progresoVerificacion').textContent = '🔒 Registrando pago...';
-        await marcarReferenciaComoUsada(referencia);
-        
-        mostrarPaso('pasoPagoConfirmado');
-        await enviarTelegram(`✅ <b>PAGO VERIFICADO</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🆔 ID: ${idJugador}\n📦 Producto: ${producto}\n💰 Monto: ${precioUsd} USD / ${precioBs} Bs\n🔢 Referencia: ${referencia}`);
-        
-        await new Promise(r => setTimeout(r, 1200));
-        
-        document.getElementById('textoConectandoProveedor').textContent = `Conectando con ${servicioInfo.proveedor}...`;
-        document.getElementById('textoProveedorSecundario').textContent = `Procesando tu ${servicioInfo.nombreMostrado}...`;
-        document.getElementById('tiempoEspera').textContent = '⏱️ Tiempo estimado: 5 segundos';
-        mostrarPaso('pasoConectandoProveedor');
-        
-        let tiempoRestante = 5;
-        const intervalo = setInterval(() => {
-            tiempoRestante--;
-            if (tiempoRestante > 0) {
-                document.getElementById('tiempoEspera').textContent = `⏱️ Tiempo estimado: ${tiempoRestante} segundos`;
-            }
-        }, 1000);
-        
-        const timeoutPromise = new Promise((_, reject) => {
-            timeoutTimer = setTimeout(() => {
-                clearInterval(intervalo);
-                reject(new Error('TIMEOUT'));
-            }, 30000);
-        });
-        
-        let resultado = null;
-        
-        if (servicioInfo.tipo === "freefire") {
-            const promesa = enviarFreeFire(idJugador, codigoProveedor, referencia);
-            resultado = await Promise.race([promesa, timeoutPromise]);
-        } else if (servicioInfo.tipo === "bloodstrike") {
-            const promesa = enviarBloodStrike(idJugador, codigoProveedor, referencia);
-            resultado = await Promise.race([promesa, timeoutPromise]);
-        } else if (servicioInfo.tipo === "netflix") {
-            const promesa = enviarNetflix(idJugador, referencia);
-            resultado = await Promise.race([promesa, timeoutPromise]);
-        } else if (servicioInfo.tipo === "disney") {
-            const promesa = enviarDisney(idJugador, referencia);
-            resultado = await Promise.race([promesa, timeoutPromise]);
-        } else {
-            resultado = { success: true, mensaje: 'Pago registrado correctamente', id_solicitud: 'manual' };
-        }
-        
-        clearTimeout(timeoutTimer);
-        clearInterval(intervalo);
-        
-        if (!resultado.success) {
-            document.getElementById('textoErrorProveedor').textContent = 
-                resultado.mensaje || resultado.error || 'Error al procesar la recarga';
-            mostrarPaso('pasoErrorProveedor');
-            await enviarTelegram(`❌ <b>ERROR EN RECARGA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🆔 ID: ${idJugador}\n📦 Producto: ${producto}\n🔢 Referencia: ${referencia}\n⚠️ Error: ${resultado.mensaje || resultado.error}`);
-            btn.disabled = false;
-            btn.innerHTML = '✅ Verificar Pago';
-            return;
-        }
-        
-        const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA", {
-            id_solicitud: resultado.id_solicitud || 'N/A'
-        });
-        
-        if (resultado.datos_extra && (resultado.datos_extra.cuenta || resultado.datos_extra.correo)) {
-            const box = document.getElementById('datosRecargaBox');
-            box.style.display = 'block';
-            let html = '';
-            if (resultado.datos_extra.cuenta) html += `📺 Cuenta: ${resultado.datos_extra.cuenta}<br>`;
-            if (resultado.datos_extra.correo) html += `📧 Correo: ${resultado.datos_extra.correo}<br>`;
-            if (resultado.datos_extra.clave) html += `🔑 Clave: ${resultado.datos_extra.clave}<br>`;
-            if (resultado.datos_extra.perfil) html += `👤 Perfil: ${resultado.datos_extra.perfil}<br>`;
-            if (resultado.datos_extra.fecha_vencimiento) html += `📅 Vence: ${resultado.datos_extra.fecha_vencimiento}<br>`;
-            if (resultado.datos_extra.codigo_aprobacion) html += `✅ Código: ${resultado.datos_extra.codigo_aprobacion}`;
-            document.getElementById('datosCuenta').innerHTML = html;
-        }
-        
-        document.getElementById('resPedido').textContent = `#${idPedido.substring(0, 8).toUpperCase()}`;
-        document.getElementById('resServicio').textContent = servicioInfo.nombreMostrado;
-        document.getElementById('resProveedorFinal').textContent = servicioInfo.proveedor;
-        document.getElementById('resProducto').textContent = producto || servicioInfo.nombreMostrado;
-        document.getElementById('resIdResumen').textContent = idJugador;
-        document.getElementById('resReferencia').textContent = referencia;
-        document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
-        document.getElementById('resIdSolicitud').textContent = resultado.id_solicitud || 'N/A';
-        
-        mostrarPaso('pasoRecargaExitosa');
-        
-        await enviarTelegram(`🎉 <b>COMPRA COMPLETADA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🆔 ID: ${idJugador}\n📦 Producto: ${producto}\n💰 Monto: ${precioUsd} USD / ${precioBs} Bs\n🔢 Referencia: ${referencia}\n📋 Pedido: #${idPedido.substring(0, 8).toUpperCase()}`);
-        
-    } catch (error) {
-        console.error('Error:', error);
-        if (error.message === 'TIMEOUT') {
-            mostrarPaso('pasoTimeout');
-        } else {
-            alert('❌ Error al verificar el pago. Intenta de nuevo.');
-            mostrarPaso('pasoDatos');
-        }
-        await enviarTelegram(`⚠️ <b>ERROR EN EL SISTEMA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🔢 Referencia: ${referencia}\n⚠️ Error: ${error.message}`);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '✅ Verificar Pago';
-        if (timeoutTimer) {
-            clearTimeout(timeoutTimer);
-            timeoutTimer = null;
-        }
-    }
-}
-
-// ==============================================
-// ⌨️ ENTER
-// ==============================================
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        const pasoActivo = document.querySelector('.paso-box.activo');
-        if (pasoActivo && pasoActivo.id === 'pasoDatos') {
-            const btn = document.getElementById('btnVerificar');
-            if (!btn.disabled) iniciarVerificacion();
-        }
-    }
-});
-
-console.log('🚀 RECARGASGAMES - Sistema de Verificación de Pagos');
-console.log('📦 Servicio:', servicioInfo.nombreMostrado);
-console.log('🔌 Proveedor:', servicioInfo.proveedor);
-console.log('📦 Producto:', producto);
-console.log('🔢 Código Proveedor:', codigoProveedor);
-console.log('🔑 Token Free Fire:', FF_API.TOKEN);
-</script>
-
-</body>
-</html>
+        if (respuestaTexto.includes("saldo insuficiente") || respuestaTexto.includes("sin saldo")) {
+            return {
+                success: false,
+                error: "SALDO_INSUFICIENTE",
+                mensaje: "⚠️ Saldo insuficiente en API Central Pro. Recarga tu cuenta primero
