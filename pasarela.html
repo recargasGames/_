@@ -8,12 +8,9 @@
 <!-- 🔥 FIREBASE SDK v9+ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
 
 <style>
-:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-borde:rgba(51,65,85,0.5);--color-deshabilitado:#475569}
-
-*{box-sizing:border-box;margin:0;padding:0}
+:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-binance:#f3ba2f;--color-borde:rgba(51,65,85,0.5);--color-deshabilitado:#475569}
 
 body{
     background-image:url('fondo.jpg');
@@ -35,7 +32,7 @@ body{
     background:rgba(11,18,32,.95);
     padding:12px 20px;
     display:flex;
-    justify-content:space-between;
+    justify-content:flex-start;
     align-items:center;
     border-bottom:2px solid var(--color-principal);
     z-index:999;
@@ -45,25 +42,6 @@ body{
     width:auto;
     border-radius:50%;
     object-fit:contain;
-}
-.header-status{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    color:#94a3b8;
-    font-size:14px;
-}
-.status-dot{
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    background:var(--color-principal);
-    animation:pulse-dot 2s infinite;
-}
-@keyframes pulse-dot{
-    0%{opacity:1}
-    50%{opacity:0.3}
-    100%{opacity:1}
 }
 
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
@@ -82,9 +60,6 @@ body{
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.8;max-width:340px;margin:0 auto}
 
-/* ==========================================
-   RESUMEN DEL PEDIDO
-   ========================================== */
 .resumen-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -103,13 +78,10 @@ body{
 }
 .resumen-fila:last-child{border-bottom:none}
 .resumen-etiqueta{color:#e2e8f0}
-.resumen-valor{font-weight:600;color:#fff;text-align:right}
+.resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 .resumen-fila.ocultar-fila{display:none !important}
 
-/* ==========================================
-   MÉTODOS DE PAGO
-   ========================================== */
 .metodo-pago-box{
     display:flex;
     gap:12px;
@@ -158,9 +130,6 @@ body{
     text-align:center;
 }
 
-/* ==========================================
-   📋 DATOS DE PAGO - ESTILO LIMPIO
-   ========================================== */
 .datos-pago-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -169,88 +138,90 @@ body{
     margin-bottom:20px;
     backdrop-filter:blur(10px);
 }
-.titulo-seccion{
-    font-size:18px;
-    font-weight:700;
-    margin-bottom:20px;
-    text-align:center;
-    color:var(--color-principal);
-}
-
-/* 📦 LÍNEA DE DATOS - ESTILO LIMPIO */
-.dato-linea{
+.titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
+.dato-line{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:10px 0;
-    border-bottom:1px solid rgba(51,65,85,0.2);
+    padding:14px 16px;
+    background:rgba(15,23,42,0.6);
+    border-radius:12px;
+    margin-bottom:12px;
 }
-.dato-linea:last-child{
-    border-bottom:none;
-}
-.dato-linea .etiqueta{
-    color:#94a3b8;
-    font-size:14px;
-    font-weight:500;
-}
-.dato-linea .valor{
-    color:#fff;
-    font-size:15px;
-    font-weight:600;
-}
-.dato-linea .valor.monto{
-    color:var(--color-principal);
-    font-size:17px;
-}
+.dato-line:last-child{margin-bottom:0}
+.dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
+.dato-texto span{color:#fff}
 
-/* Botón copiar individual - estilo minimalista */
-.copiar-btn-mini{
-    background:transparent;
+.copiar-btn{
+    width:44px;
+    height:44px;
+    border-radius:10px;
+    background:rgba(59,130,246,0.15);
     border:none;
-    color:#64748b;
+    color:#93c5fd;
     cursor:pointer;
-    padding:4px 8px;
-    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     transition:.2s;
-    border-radius:6px;
+    backdrop-filter:blur(4px);
+    flex-shrink:0;
+    padding:0;
 }
-.copiar-btn-mini:hover{
-    color:var(--color-principal);
-    background:rgba(16,185,129,0.1);
+.copiar-btn svg{
+    width:20px;
+    height:20px;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    fill:none;
+    opacity:0.7;
+    transition:.2s;
 }
-.copiar-btn-mini.copiado{
-    color:var(--color-principal);
+.copiar-btn:hover{
+    background:rgba(59,130,246,0.25);
+    transform:scale(1.05);
 }
-.copiar-btn-mini.copiado::before{
-    content:'✓ ';
+.copiar-btn:hover svg{opacity:1}
+.copiar-btn.copiado{
+    background:rgba(16,185,129,0.2);
+    color:#34d399;
+}
+.copiar-btn.copiado svg{display:none}
+.copiar-btn.copiado::after{
+    content:'✓';
+    font-size:20px;
+    font-weight:bold;
 }
 
-/* Botón copiar todo - estilo limpio */
 .copiar-todo-btn{
     width:100%;
-    padding:12px;
+    padding:14px;
     margin-top:16px;
-    background:rgba(16,185,129,0.08);
-    border:1px solid rgba(16,185,129,0.2);
-    border-radius:10px;
+    background:rgba(16,185,129,0.15);
+    border:1px solid var(--color-principal);
+    border-radius:12px;
     color:var(--color-principal);
-    font-size:14px;
+    font-size:15px;
     font-weight:600;
     cursor:pointer;
     transition:.2s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
 }
 .copiar-todo-btn:hover{
-    background:rgba(16,185,129,0.15);
+    background:rgba(16,185,129,0.25);
+    transform:scale(1.02);
 }
 .copiar-todo-btn.copiado-todo{
-    background:rgba(16,185,129,0.15);
+    background:rgba(16,185,129,0.25);
     color:#34d399;
     border-color:#34d399;
 }
 
-/* ==========================================
-   INPUT Y BOTONES
-   ========================================== */
 .input-ref{
     width:100%;
     padding:14px;
@@ -260,15 +231,10 @@ body{
     color:#fff;
     font-size:16px;
     box-sizing:border-box;
-    margin-top:8px;
-    margin-bottom:12px;
-    transition:border-color .3s;
-    font-weight:600;
-    letter-spacing:1px;
+    margin-top:10px;
+    margin-bottom:15px;
 }
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
-.input-ref.valido{border-color:var(--color-principal)}
-.input-ref.invalido{border-color:var(--color-error)}
 
 .btn-confirmar{
     width:100%;
@@ -283,7 +249,7 @@ body{
     margin-top:10px;
     transition:.2s;
 }
-.btn-confirmar:hover:not(:disabled){background:var(--color-hover)}
+.btn-confirmar:hover{background:var(--color-hover)}
 .btn-confirmar:disabled{
     opacity:0.5;
     cursor:not-allowed;
@@ -311,21 +277,15 @@ body{
 }
 .volver-btn:hover{color:#fff}
 
-/* ==========================================
-   AVISOS
-   ========================================== */
 .aviso-box{
-    background:rgba(251,191,36,.08);
-    border:1px solid rgba(251,191,36,.15);
-    border-radius:10px;
-    padding:12px 16px;
-    margin-top:12px;
-    font-size:13px;
+    background:rgba(251,191,36,.1);
+    border:1px solid rgba(251,191,36,.3);
+    border-radius:12px;
+    padding:15px;
+    margin-top:15px;
+    font-size:14px;
     color:#fcd34d;
-    text-align:center;
 }
-.aviso-box strong{color:#fbbf24}
-
 .usada-box{
     background:rgba(239,68,68,.15);
     border:2px solid rgba(239,68,68,.5);
@@ -344,66 +304,32 @@ body{
     color:#93c5fd;
     font-weight:600;
 }
-
-/* ==========================================
-   TOAST
-   ========================================== */
-.toast-container{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    z-index:9999;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-.toast{
-    padding:14px 20px;
+.datos-recarga-box{
+    background:rgba(16,185,129,.1);
+    border:1px solid rgba(16,185,129,.3);
     border-radius:12px;
-    background:rgba(17,24,39,0.95);
-    border:1px solid var(--color-borde);
-    backdrop-filter:blur(10px);
-    color:#fff;
+    padding:15px;
+    margin-top:15px;
+    color:#6ee7b7;
     font-size:14px;
-    min-width:250px;
-    max-width:400px;
-    animation:slideIn .3s ease;
+    text-align:left;
 }
-.toast.success{border-color:var(--color-principal)}
-.toast.error{border-color:var(--color-error)}
-.toast.warning{border-color:var(--color-cargando)}
-@keyframes slideIn{
-    from{transform:translateX(100%);opacity:0}
-    to{transform:translateX(0);opacity:1}
-}
+.datos-recarga-box strong{color:#fff}
 
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-@media(max-width:480px){
-    .header{padding:10px 15px}
-    .header img{height:40px}
-    .main{padding:20px 15px}
-    .texto-principal{font-size:22px}
-    .resumen-fila{flex-direction:column;align-items:flex-start;gap:4px}
-    .resumen-valor{text-align:left}
-}
+.proveedor-tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;margin-left:8px}
+.proveedor-central{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)}
+.proveedor-pagonorte{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+.oculto{display:none !important}
 </style>
 </head>
 <body>
 
 <div class="header">
     <img src="logo.png" alt="Logo RecargasGames">
-    <div class="header-status">
-        <span class="status-dot"></span>
-        <span>Seguro</span>
-    </div>
 </div>
 
 <div class="main">
-    <!-- ==========================================
-    PASO 0: DATOS DEL PEDIDO
-    ========================================== -->
+    <!-- PASO 0: DATOS DEL PEDIDO -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
@@ -412,7 +338,7 @@ body{
                 <span class="resumen-etiqueta">Servicio</span>
                 <span class="resumen-valor" id="datoServicio">-</span>
             </div>
-            <div class="resumen-fila">
+            <div class="resumen-fila ocultar-fila" id="filaProveedor">
                 <span class="resumen-etiqueta">Proveedor</span>
                 <span class="resumen-valor" id="datoProveedor">-</span>
             </div>
@@ -421,7 +347,7 @@ body{
                 <span class="resumen-valor" id="datoId">-</span>
             </div>
             <div class="resumen-fila ocultar-fila" id="filaNombreJugador">
-                <span class="resumen-etiqueta">Nombre</span>
+                <span class="resumen-etiqueta">Nombre del Jugador</span>
                 <span class="resumen-valor" id="datoNombreJugador">-</span>
             </div>
             <div class="resumen-fila">
@@ -450,69 +376,63 @@ body{
             Se está trabajando en mejoras. Por favor usa <strong>Pago Móvil</strong> por ahora.
         </div>
 
-        <!-- ==========================================
-        📋 DATOS DE PAGO - ESTILO LIMPIO
-        ========================================== -->
         <div class="datos-pago-box">
-            <h3 class="titulo-seccion">Datos de Pago Móvil</h3>
-
-            <!-- Banco -->
-            <div class="dato-linea">
-                <span class="etiqueta">Banco:</span>
-                <span class="valor">(0102) BDV</span>
-                <button class="copiar-btn-mini" onclick="copiarTexto('(0102) BDV', this)">Copiar</button>
+            <h3 class="titulo-seccion" style="margin-top:0;">Datos de Pago Móvil</h3>
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
+                <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
+                <button class="copiar-btn" onclick="copiarTexto('32824869', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
+                <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="dato-line">
+                <div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">-</span></div>
+                <button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
             </div>
 
-            <!-- Cédula -->
-            <div class="dato-linea">
-                <span class="etiqueta">Cédula:</span>
-                <span class="valor">32824869</span>
-                <button class="copiar-btn-mini" onclick="copiarTexto('32824869', this)">Copiar</button>
-            </div>
-
-            <!-- Teléfono -->
-            <div class="dato-linea">
-                <span class="etiqueta">Teléfono:</span>
-                <span class="valor">04228242411</span>
-                <button class="copiar-btn-mini" onclick="copiarTexto('04228242411', this)">Copiar</button>
-            </div>
-
-            <!-- Monto -->
-            <div class="dato-linea" style="border-bottom:2px solid rgba(16,185,129,0.15);padding-bottom:12px;">
-                <span class="etiqueta">Monto Bs:</span>
-                <span class="valor monto" id="montoBsMostrar">- Bs</span>
-                <button class="copiar-btn-mini" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)">Copiar</button>
-            </div>
-
-            <!-- Botón Copiar Todo -->
             <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
-                📋 Copiar todos los datos de pago
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copiar todos los datos de pago
             </button>
 
-            <!-- Referencia -->
-            <label style="display:block;margin-top:20px;margin-bottom:6px;font-weight:600;text-align:left;color:#e2e8f0;font-size:15px;">
-                Referencia del pago:
-            </label>
-            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" inputmode="numeric" pattern="[0-9]*">
-            <div id="refValidation" style="font-size:13px;text-align:left;margin-top:-6px;margin-bottom:10px;display:none;"></div>
+            <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">Referencia completa del pago:</label>
+            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
         </div>
 
-        <div class="aviso-box">
-            ⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.
-        </div>
+        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> en TODO el sistema. Queda registrada permanentemente en la base de datos.</div>
 
-        <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✔ Verificar Pago</button>
-
-        <!-- 💬 Respuesta API -->
-        <div style="margin-top:20px;padding:12px 16px;background:rgba(15,23,42,0.3);border-radius:10px;border:1px solid rgba(51,65,85,0.2);text-align:left;">
-            <div style="font-size:12px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">💬 Respuesta API:</div>
-            <div id="respuestaAPI" style="font-size:14px;color:#94a3b8;margin-top:4px;font-family:monospace;">Esperando consulta...</div>
-        </div>
+        <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
-    <!-- ==========================================
-    PASO 1: VERIFICANDO
-    ========================================== -->
+    <!-- PASO 1: VERIFICANDO EN FIREBASE + PÁBILO -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando Pago...</div>
@@ -520,32 +440,26 @@ body{
         <div style="margin-top:20px;font-size:14px;color:#94a3b8;" id="progresoVerificacion">Iniciando verificación...</div>
     </div>
 
-    <!-- ==========================================
-    PASO 2: PAGO CONFIRMADO
-    ========================================== -->
+    <!-- PASO 2: PAGO CONFIRMADO -->
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Referencia registrada. Procesando recarga...</div>
+        <div class="texto-secundario">Referencia registrada. Conectando con el servidor...</div>
     </div>
 
-    <!-- ==========================================
-    PASO 3: CONECTANDO CON PROVEEDOR
-    ========================================== -->
+    <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
     <div id="pasoConectandoProveedor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
-        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el proveedor...</div>
-        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu recarga...</div>
+        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el servidor...</div>
+        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu compra...</div>
         <div style="margin-top:15px;font-size:13px;color:#64748b;" id="tiempoEspera">⏱️ Tiempo estimado: 5 segundos</div>
     </div>
 
-    <!-- ==========================================
-    ✅ PASO 4: COMPRA EXITOSA
-    ========================================== -->
+    <!-- ✅ PASO 4: COMPRA EXITOSA -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Compra Realizada!</div>
-        <div class="texto-secundario">
+        <div class="texto-secundario" id="mensajeExito">
             Tu compra se procesó exitosamente.<br><br>
             ✅ El pago fue verificado y registrado.<br>
             ✅ La recarga fue enviada al proveedor.<br>
@@ -562,12 +476,14 @@ body{
             <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Solicitud</span><span class="resumen-valor" id="resIdSolicitud">-</span></div>
         </div>
+        <div class="datos-recarga-box" id="datosRecargaBox" style="display:none;">
+            <strong>Datos de la cuenta:</strong><br>
+            <span id="datosCuenta"></span>
+        </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ==========================================
-    ❌ PAGO NO ENCONTRADO
-    ========================================== -->
+    <!-- ❌ PAGO NO ENCONTRADO -->
     <div id="pasoPagoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
@@ -575,9 +491,7 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- ==========================================
-    🔒 REFERENCIA YA USADA
-    ========================================== -->
+    <!-- 🔒 REFERENCIA YA USADA -->
     <div id="pasoReferenciaUsada" class="paso-box">
         <div class="icono-circle icono-error">🔒</div>
         <div class="texto-principal">Referencia Ya Fue Utilizada</div>
@@ -586,9 +500,7 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a usar una referencia nueva</a>
     </div>
 
-    <!-- ==========================================
-    ❌ ERROR PROVEEDOR
-    ========================================== -->
+    <!-- ❌ ERROR PROVEEDOR -->
     <div id="pasoErrorProveedor" class="paso-box">
         <div class="icono-circle icono-error">❌</div>
         <div class="texto-principal">Error en el Proveedor</div>
@@ -600,9 +512,7 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ==========================================
-    ⏱️ TIMEOUT
-    ========================================== -->
+    <!-- ⏱️ TIMEOUT -->
     <div id="pasoTimeout" class="paso-box">
         <div class="icono-circle icono-error">⏱️</div>
         <div class="texto-principal">Tiempo de Espera Agotado</div>
@@ -613,11 +523,6 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Intentar de nuevo</a>
     </div>
 </div>
-
-<!-- ==========================================
-TOAST CONTAINER
-========================================== -->
-<div class="toast-container" id="toastContainer"></div>
 
 <script>
 // ==============================================
@@ -638,20 +543,70 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
-const analytics = firebase.analytics();
 
 // ==============================================
-// ⚙️ CONFIGURACIÓN DE API CENTRAL PRO - FREE FIRE
+// ⚙️ CONFIGURACIÓN DE APIS
 // ==============================================
+
+// 1. API CENTRAL PRO - FREE FIRE
 const FF_API = {
     URL: "https://apicentral.pro/apis/freefire.jsp",
     TOKEN: "NTPvkKmEe0DckQSx6060j7XVq84A2iScZE31CpXxv3s"
 };
 
+// 2. PAGONORTE - BLOOD STRIKE + STREAMING
+const PAGONORTE = {
+    URL: "https://pagonorte.net/recargas/api.jsp",
+    API_KEY: "pn_8dc8d383aa88020b5df8365052e4ecf5168a",
+    API_SECRET: "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05"
+};
+
+// 3. PÁBILO - VERIFICACIÓN DE PAGOS
+const PABILO = {
+    USER_BANK_ID: "6a93ac1b98055a34bd8b05f2",
+    API_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789"
+};
+
 // ==============================================
-// 📊 MAPEO: Producto Cliente → Código Proveedor
+// 📱 TELEGRAM - CONFIGURADO
 // ==============================================
-const MAPEO_PAQUETES = {
+const TELEGRAM = {
+    BOT_TOKEN: "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM",
+    CHAT_ID: "8452807558"
+};
+
+// ==============================================
+// 📱 ENVIAR MENSAJE A TELEGRAM
+// ==============================================
+async function enviarTelegram(mensaje) {
+    try {
+        const url = `https://api.telegram.org/bot${TELEGRAM.BOT_TOKEN}/sendMessage`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM.CHAT_ID,
+                text: mensaje,
+                parse_mode: 'HTML'
+            })
+        });
+        
+        const data = await response.json();
+        console.log('📱 Telegram:', data.ok ? '✅ Enviado' : '❌ Error:', data.description);
+        return data.ok;
+    } catch (error) {
+        console.error('❌ Error Telegram:', error);
+        return false;
+    }
+}
+
+// ==============================================
+// 📊 MAPEO DE PAQUETES
+// ==============================================
+
+// FREE FIRE - Producto Cliente → Código Proveedor
+const MAPEO_FREE_FIRE = {
     "100 Diamantes": "1",
     "310 Diamantes": "2",
     "520 Diamantes": "3",
@@ -663,142 +618,211 @@ const MAPEO_PAQUETES = {
     "Pase Booyah": "9"
 };
 
+// BLOOD STRIKE - Producto Cliente → Código Proveedor
+const MAPEO_BLOOD_STRIKE = {
+    "100 Golds": "1",
+    "300 Golds": "2",
+    "500 Golds": "3",
+    "1000 Golds": "4",
+    "2000 Golds": "5",
+    "5000 Golds": "6"
+};
+
+// ==============================================
+// 🎯 DETECTAR TIPO DE SERVICIO
+// ==============================================
+function detectarTipoServicio(nombreServicio, producto) {
+    const serv = (nombreServicio || "").toUpperCase();
+    const prod = (producto || "").toUpperCase();
+    
+    // FREE FIRE
+    if (serv.includes("FREE FIRE") || serv.includes("FREEFIRE") || 
+        prod.includes("DIAMANTE") || prod.includes("TARJETA") || prod.includes("BOOYAH")) {
+        return {
+            tipo: "freefire",
+            nombreMostrado: "Free Fire",
+            proveedor: "API Central Pro",
+            mostrarId: true,
+            esStreaming: false
+        };
+    }
+    
+    // BLOOD STRIKE
+    if (serv.includes("BLOOD") || serv.includes("STRIKE") || serv.includes("BLOCK")) {
+        return {
+            tipo: "bloodstrike",
+            nombreMostrado: "Blood Strike",
+            proveedor: "PagoNorte",
+            mostrarId: true,
+            esStreaming: false
+        };
+    }
+    
+    // NETFLIX
+    if (serv.includes("NETFLIX")) {
+        return {
+            tipo: "netflix",
+            nombreMostrado: "Netflix",
+            proveedor: "PagoNorte",
+            mostrarId: false,
+            esStreaming: true
+        };
+    }
+    
+    // DISNEY+
+    if (serv.includes("DISNEY")) {
+        return {
+            tipo: "disney",
+            nombreMostrado: "Disney+",
+            proveedor: "PagoNorte",
+            mostrarId: false,
+            esStreaming: true
+        };
+    }
+    
+    // HBO
+    if (serv.includes("HBO")) {
+        return {
+            tipo: "hbo",
+            nombreMostrado: "HBO",
+            proveedor: "PagoNorte",
+            mostrarId: false,
+            esStreaming: true
+        };
+    }
+    
+    // Default
+    return {
+        tipo: "generico",
+        nombreMostrado: nombreServicio || "Servicio",
+        proveedor: "PagoNorte",
+        mostrarId: true,
+        esStreaming: false
+    };
+}
+
 // ==============================================
 // 📋 LEER DATOS DEL LOCALSTORAGE
 // ==============================================
-const juegoRecibido = localStorage.getItem('juego_seleccionado') || "Free Fire";
+const juegoRecibido = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || "";
 const nombreJugador = localStorage.getItem('nombre_jugador') || idJugador || "";
 const producto = localStorage.getItem('producto_seleccionado') || "";
-const paqueteCodigo = localStorage.getItem('paquete_codigo') || "1";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
+const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+
+const servicioInfo = detectarTipoServicio(juegoRecibido, producto);
 
 // ==============================================
 // 🎯 OBTENER CÓDIGO DEL PROVEEDOR
 // ==============================================
-function obtenerCodigoProveedor(productoCliente) {
-    if (MAPEO_PAQUETES[productoCliente]) {
-        return MAPEO_PAQUETES[productoCliente];
-    }
-    for (const [key, value] of Object.entries(MAPEO_PAQUETES)) {
-        if (productoCliente.toLowerCase().includes(key.toLowerCase()) || 
-            key.toLowerCase().includes(productoCliente.toLowerCase())) {
-            return value;
+function obtenerCodigoProveedor() {
+    if (servicioInfo.tipo === "freefire") {
+        if (MAPEO_FREE_FIRE[producto]) return MAPEO_FREE_FIRE[producto];
+        for (const [key, value] of Object.entries(MAPEO_FREE_FIRE)) {
+            if (producto.toLowerCase().includes(key.toLowerCase()) || 
+                key.toLowerCase().includes(producto.toLowerCase())) {
+                return value;
+            }
         }
+        return paqueteCod || "1";
     }
-    return paqueteCodigo || "1";
+    
+    if (servicioInfo.tipo === "bloodstrike") {
+        if (MAPEO_BLOOD_STRIKE[producto]) return MAPEO_BLOOD_STRIKE[producto];
+        for (const [key, value] of Object.entries(MAPEO_BLOOD_STRIKE)) {
+            if (producto.toLowerCase().includes(key.toLowerCase()) || 
+                key.toLowerCase().includes(producto.toLowerCase())) {
+                return value;
+            }
+        }
+        return "1";
+    }
+    
+    return paqueteCod || "1";
 }
 
-const codigoProveedor = obtenerCodigoProveedor(producto);
+const codigoProveedor = obtenerCodigoProveedor();
 
 // ==============================================
 // 👁️ CONFIGURAR VISIBILIDAD
 // ==============================================
-document.getElementById('datoServicio').textContent = 'Free Fire';
-document.getElementById('datoProveedor').textContent = 'API Central Pro';
-document.getElementById('datoProducto').textContent = producto || '100 Diamantes';
-document.getElementById('montoBsMostrar').textContent = precioBs + ' Bs';
-document.getElementById('datoWhatsapp').textContent = idJugador;
-document.getElementById('datoId').textContent = idJugador;
-document.getElementById('datoNombreJugador').textContent = nombreJugador || idJugador;
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
+function configurarVisibilidadCampos() {
+    document.getElementById('datoServicio').textContent = servicioInfo.nombreMostrado;
+    document.getElementById('datoProveedor').textContent = servicioInfo.proveedor;
+    document.getElementById('datoProducto').textContent = producto || servicioInfo.nombreMostrado;
+    document.getElementById('montoBsMostrar').textContent = precioBs + " Bs";
+    document.getElementById('datoWhatsapp').textContent = idJugador;
+    document.getElementById('datoId').textContent = idJugador;
+    document.getElementById('datoNombreJugador').textContent = nombreJugador || idJugador;
+    document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
-document.getElementById('filaId').classList.remove('ocultar-fila');
-document.getElementById('filaNombreJugador').classList.remove('ocultar-fila');
-document.getElementById('resIdResumen').textContent = idJugador;
-document.getElementById('resProveedorFinal').textContent = 'API Central Pro';
+    // Mostrar/ocultar campos según servicio
+    const filaId = document.getElementById('filaId');
+    const filaNombre = document.getElementById('filaNombreJugador');
+    if (servicioInfo.mostrarId) {
+        filaId.classList.remove('ocultar-fila');
+        filaNombre.classList.remove('ocultar-fila');
+    } else {
+        filaId.classList.add('ocultar-fila');
+        filaNombre.classList.add('ocultar-fila');
+    }
+    
+    // Resumen final
+    document.getElementById('resIdResumen').textContent = idJugador;
+    document.getElementById('resProveedorFinal').textContent = servicioInfo.proveedor;
+}
+
+configurarVisibilidadCampos();
 
 // ==============================================
 // 📋 VALIDACIÓN DE REFERENCIA
 // ==============================================
 const refInput = document.getElementById('referenciaPago');
-const refValidation = document.getElementById('refValidation');
-const respuestaAPI = document.getElementById('respuestaAPI');
 
 refInput.addEventListener('input', function(e) {
     this.value = this.value.replace(/\D/g, '');
-    respuestaAPI.textContent = 'Esperando consulta...';
-    respuestaAPI.style.color = '#94a3b8';
-    
-    if (this.value.length > 0 && this.value.length < 6) {
-        this.className = 'input-ref invalido';
-        refValidation.style.display = 'block';
-        refValidation.style.color = '#ef4444';
-        refValidation.textContent = '⚠️ Mínimo 6 dígitos';
-        document.getElementById('btnVerificar').disabled = true;
-    } else if (this.value.length >= 6) {
-        this.className = 'input-ref valido';
-        refValidation.style.display = 'block';
-        refValidation.style.color = '#10b981';
-        refValidation.textContent = '✅ Referencia válida';
-        document.getElementById('btnVerificar').disabled = false;
+    const btn = document.getElementById('btnVerificar');
+    if (this.value.length >= 6) {
+        btn.disabled = false;
     } else {
-        this.className = 'input-ref';
-        refValidation.style.display = 'none';
-        document.getElementById('btnVerificar').disabled = true;
+        btn.disabled = true;
     }
 });
 
 // ==============================================
 // 📋 COPIAR TEXTOS
 // ==============================================
-function copiarTexto(texto, boton) {
+function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
         .then(() => {
             boton.classList.add('copiado');
-            boton.textContent = 'Copiado';
-            setTimeout(() => {
-                boton.classList.remove('copiado');
-                boton.textContent = 'Copiar';
-            }, 2000);
+            setTimeout(() => boton.classList.remove('copiado'), 2000);
         })
-        .catch(() => {
-            const textarea = document.createElement('textarea');
-            textarea.value = texto;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            boton.classList.add('copiado');
-            boton.textContent = 'Copiado';
-            setTimeout(() => {
-                boton.classList.remove('copiado');
-                boton.textContent = 'Copiar';
-            }, 2000);
-        });
+        .catch(err => alert("Copiado: " + texto));
 }
 
-function copiarTodosLosDatos(boton) {
-    const datos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBs} Bs`;
-    
-    navigator.clipboard.writeText(datos)
+function copiarTodosLosDatos(boton){
+    const datosCompletos = `Banco: (0102) BDV
+Cédula: 32824869
+Teléfono: 04228242411
+Monto: ${precioBs} Bs`;
+
+    navigator.clipboard.writeText(datosCompletos)
         .then(() => {
             boton.classList.add('copiado-todo');
-            boton.textContent = '✓ Datos copiados';
+            boton.innerHTML = `✓ Datos copiados`;
             setTimeout(() => {
                 boton.classList.remove('copiado-todo');
-                boton.textContent = '📋 Copiar todos los datos de pago';
+                boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
             }, 2500);
         })
-        .catch(() => {
-            const textarea = document.createElement('textarea');
-            textarea.value = datos;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            boton.classList.add('copiado-todo');
-            boton.textContent = '✓ Datos copiados';
-            setTimeout(() => {
-                boton.classList.remove('copiado-todo');
-                boton.textContent = '📋 Copiar todos los datos de pago';
-            }, 2500);
-        });
+        .catch(err => alert("No se pudo copiar automáticamente. Selecciona y copia manualmente:\n\n" + datosCompletos));
 }
 
 // ==============================================
-// 🔥 FIREBASE - REFERENCIAS
+// 🔒 FIREBASE — REFERENCIAS
 // ==============================================
 async function verificarReferenciaEnFirebase(referencia) {
     try {
@@ -814,13 +838,13 @@ async function marcarReferenciaComoUsada(referencia) {
     try {
         await refReferencias.child(referencia).set({
             fecha_uso: new Date().toISOString(),
-            servicio: 'Free Fire',
+            servicio: servicioInfo.nombreMostrado,
             id_contacto: idJugador,
             producto: producto,
             monto_usd: precioUsd,
             monto_bs: precioBs,
             paquete_proveedor: codigoProveedor,
-            proveedor: 'API Central Pro',
+            proveedor: servicioInfo.proveedor,
             dispositivo: navigator.userAgent.substring(0, 100)
         });
     } catch (error) {
@@ -833,15 +857,15 @@ async function guardarPedidoEnFirebase(referencia, estado, datosExtra = {}) {
     const nuevoPedido = refPedidos.push();
     const datosPedido = {
         referencia: referencia,
-        servicio: 'Free Fire',
+        servicio: servicioInfo.nombreMostrado,
         id_contacto: idJugador,
         producto: producto,
-        paquete_proveedor: codigoProveedor,
         monto_usd: precioUsd,
         monto_bs: precioBs,
         estado: estado,
         fecha: new Date().toISOString(),
-        proveedor: 'API Central Pro',
+        proveedor: servicioInfo.proveedor,
+        paquete_proveedor: codigoProveedor,
         dispositivo: navigator.userAgent.substring(0, 100),
         ...datosExtra
     };
@@ -849,29 +873,18 @@ async function guardarPedidoEnFirebase(referencia, estado, datosExtra = {}) {
     return nuevoPedido.key;
 }
 
-// ==============================================
-// 📊 ANALYTICS
-// ==============================================
-function logEvent(evento, datos = {}) {
-    try {
-        analytics.logEvent(evento, {
-            ...datos,
-            servicio: 'Free Fire',
-            proveedor: 'API Central Pro',
-            paquete_proveedor: codigoProveedor,
-            monto_usd: precioUsd,
-            timestamp: new Date().toISOString()
-        });
-    } catch (e) {
-        console.log('Analytics error:', e);
-    }
+function mostrarPaso(idPaso) {
+    document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
+    const paso = document.getElementById(idPaso);
+    if (paso) paso.classList.add('activo');
 }
 
 // ==============================================
 // ⚡ VERIFICAR PAGO - PÁBILO
 // ==============================================
 async function verificarPagoPabilo(referencia, montoBs) {
-    const montoPago = parseInt(String(montoBs).replace(/[.,]/g, '')) || Math.round(parseFloat(montoBs));
+    let montoPago = String(montoBs).replace(/[.,]/g, '');
+    montoPago = parseInt(montoPago) || Math.round(parseFloat(montoBs));
     const fecha = new Date().toISOString().split('T')[0];
 
     const cuerpo = { 
@@ -885,11 +898,11 @@ async function verificarPagoPabilo(referencia, montoBs) {
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
     try {
-        const res = await fetch(`https://api.pabilo.app/userbankpayment/6a93ac1b98055a34bd8b05f2/betaserio`, {
+        const res = await fetch(`https://api.pabilo.app/userbankpayment/${PABILO.USER_BANK_ID}/betaserio`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json', 
-                'Authorization': 'Bearer 5349b9e7-1c73-406d-ac8c-ad4345241789' 
+                'Authorization': `Bearer ${PABILO.API_KEY}` 
             },
             body: JSON.stringify(cuerpo),
             signal: controller.signal
@@ -912,7 +925,6 @@ async function verificarPagoPabilo(referencia, montoBs) {
     } catch(e) {
         clearTimeout(timeoutId);
         if (e.name === 'AbortError') {
-            showToast('⏱️ El servidor está demorando, reintentando...', 'warning');
             return false;
         }
         console.error('Error en Pábilo:', e);
@@ -921,7 +933,7 @@ async function verificarPagoPabilo(referencia, montoBs) {
 }
 
 // ==============================================
-// 🎮 ENVIAR A API CENTRAL PRO - FREE FIRE
+// 🎮 ENVIAR FREE FIRE - API CENTRAL PRO
 // ==============================================
 async function enviarFreeFire(idJugador, paquete, referencia) {
     const url = new URL(FF_API.URL);
@@ -930,12 +942,7 @@ async function enviarFreeFire(idJugador, paquete, referencia) {
     url.searchParams.append('id_jugador', idJugador);
     url.searchParams.append('paquete', paquete);
     
-    console.log('📤 Enviando a API Central Pro:', url.toString());
-    console.log('📦 Paquete enviado:', paquete);
-    
-    // Actualizar respuesta API
-    respuestaAPI.textContent = '⏳ Enviando solicitud a API Central Pro...';
-    respuestaAPI.style.color = '#facc15';
+    console.log('📤 Enviando Free Fire:', url.toString());
     
     try {
         const response = await fetch(url.toString(), {
@@ -947,11 +954,7 @@ async function enviarFreeFire(idJugador, paquete, referencia) {
         });
         
         const text = await response.text();
-        console.log('📥 Respuesta cruda:', text);
-        
-        // Mostrar respuesta en el panel
-        respuestaAPI.textContent = text.substring(0, 150) + (text.length > 150 ? '...' : '');
-        respuestaAPI.style.color = '#94a3b8';
+        console.log('📥 Respuesta Free Fire:', text);
         
         let data;
         try {
@@ -973,20 +976,165 @@ async function enviarFreeFire(idJugador, paquete, referencia) {
         
         return {
             success: esExito,
-            mensaje: data.mensaje || data.message || data.msg || text || 'Transacción procesada',
-            id_solicitud: data.id_solicitud || data.id || data.order_id || 'unknown',
+            mensaje: data.mensaje || data.message || data.msg || 'Transacción procesada',
+            id_solicitud: data.id_solicitud || data.id || 'unknown',
             datos: data,
             raw: text
         };
         
     } catch (error) {
-        console.error('❌ Error en API Central Pro:', error);
-        respuestaAPI.textContent = '❌ Error: ' + error.message;
-        respuestaAPI.style.color = '#ef4444';
+        console.error('❌ Error Free Fire:', error);
         return {
             success: false,
             error: error.message,
             mensaje: 'Error al conectar con el servidor'
+        };
+    }
+}
+
+// ==============================================
+// 🎮 ENVIAR BLOOD STRIKE - PAGONORTE
+// ==============================================
+async function enviarBloodStrike(idJugador, paquete, referencia) {
+    const bodyParams = new URLSearchParams({
+        action: "recarga",
+        api_key: PAGONORTE.API_KEY,
+        api_secret: PAGONORTE.API_SECRET,
+        tipo: "recargaBloodStrike",
+        id_jugador: idJugador,
+        paquete: paquete,
+        referencia: referencia + "_" + Date.now()
+    });
+
+    console.log('📤 Enviando Blood Strike:', bodyParams.toString());
+
+    try {
+        const response = await fetch(PAGONORTE.URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyParams.toString()
+        });
+
+        const datos = await response.json();
+        console.log('📥 Respuesta Blood Strike:', datos);
+
+        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
+
+        return {
+            success: esExito,
+            mensaje: datos.mensaje || 'Transacción exitosa',
+            id_solicitud: datos.id_solicitud || 'unknown',
+            datos: datos
+        };
+    } catch (error) {
+        console.error('❌ Error Blood Strike:', error);
+        return {
+            success: false,
+            error: error.message,
+            mensaje: 'Error al conectar con PagoNorte'
+        };
+    }
+}
+
+// ==============================================
+// 🎬 ENVIAR NETFLIX - PAGONORTE
+// ==============================================
+async function enviarNetflix(email, referencia) {
+    const bodyParams = new URLSearchParams({
+        action: "recarga",
+        api_key: PAGONORTE.API_KEY,
+        api_secret: PAGONORTE.API_SECRET,
+        tipo: "recargaPerfilNetflix",
+        email: email || "usuario@email.com",
+        paquete: "1",
+        referencia: referencia + "_" + Date.now()
+    });
+
+    console.log('📤 Enviando Netflix:', bodyParams.toString());
+
+    try {
+        const response = await fetch(PAGONORTE.URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyParams.toString()
+        });
+
+        const datos = await response.json();
+        console.log('📥 Respuesta Netflix:', datos);
+
+        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
+
+        return {
+            success: esExito,
+            mensaje: datos.mensaje || 'Transacción exitosa',
+            id_solicitud: datos.id_solicitud || 'unknown',
+            datos: datos,
+            datos_extra: {
+                cuenta: datos.cuenta || null,
+                correo: datos.correo || null,
+                clave: datos.clave || null,
+                perfil: datos.perfil || null,
+                numero_perfil: datos.numero_perfil || null,
+                fecha_vencimiento: datos.fecha_vencimiento || null,
+                codigo_aprobacion: datos.codigo_aprobacion || null
+            }
+        };
+    } catch (error) {
+        console.error('❌ Error Netflix:', error);
+        return {
+            success: false,
+            error: error.message,
+            mensaje: 'Error al conectar con PagoNorte'
+        };
+    }
+}
+
+// ==============================================
+// 🎬 ENVIAR DISNEY+ - PAGONORTE
+// ==============================================
+async function enviarDisney(email, referencia) {
+    const bodyParams = new URLSearchParams({
+        action: "recarga",
+        api_key: PAGONORTE.API_KEY,
+        api_secret: PAGONORTE.API_SECRET,
+        tipo: "recargaPerfilDisney",
+        email: email || "usuario@email.com",
+        paquete: "1",
+        referencia: referencia + "_" + Date.now()
+    });
+
+    try {
+        const response = await fetch(PAGONORTE.URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyParams.toString()
+        });
+
+        const datos = await response.json();
+        console.log('📥 Respuesta Disney+:', datos);
+
+        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
+
+        return {
+            success: esExito,
+            mensaje: datos.mensaje || 'Transacción exitosa',
+            id_solicitud: datos.id_solicitud || 'unknown',
+            datos: datos,
+            datos_extra: {
+                cuenta: datos.cuenta || null,
+                correo: datos.correo || null,
+                clave: datos.clave || null,
+                perfil: datos.perfil || null,
+                fecha_vencimiento: datos.fecha_vencimiento || null,
+                codigo_aprobacion: datos.codigo_aprobacion || null
+            }
+        };
+    } catch (error) {
+        console.error('❌ Error Disney+:', error);
+        return {
+            success: false,
+            error: error.message,
+            mensaje: 'Error al conectar con PagoNorte'
         };
     }
 }
@@ -1005,12 +1153,6 @@ const rateLimit = {
     }
 };
 
-function mostrarPaso(idPaso) {
-    document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
-    const paso = document.getElementById(idPaso);
-    if (paso) paso.classList.add('activo');
-}
-
 // ==============================================
 // 🔥 FLUJO PRINCIPAL
 // ==============================================
@@ -1021,12 +1163,12 @@ async function iniciarVerificacion() {
     const btn = document.getElementById('btnVerificar');
     
     if (!referencia || referencia.length < 6) {
-        showToast('❌ Ingresa una referencia válida (mínimo 6 dígitos)', 'error');
+        alert("❌ Escribe la referencia completa del pago (mínimo 6 dígitos)");
         return;
     }
     
     if (!rateLimit.verificar()) {
-        showToast('⏳ Demasiados intentos. Espera un momento.', 'warning');
+        alert("⏳ Demasiados intentos. Espera un momento.");
         return;
     }
     
@@ -1035,32 +1177,27 @@ async function iniciarVerificacion() {
     
     mostrarPaso('pasoVerificandoPago');
     document.getElementById('progresoVerificacion').textContent = '🔍 Verificando referencia...';
-    respuestaAPI.textContent = '🔍 Verificando referencia en Firebase...';
-    respuestaAPI.style.color = '#facc15';
     
     try {
+        // PASO 1: Verificar si ya fue usada
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
             mostrarPaso('pasoReferenciaUsada');
-            logEvent('referencia_duplicada', { referencia });
-            respuestaAPI.textContent = '❌ Referencia ya utilizada';
-            respuestaAPI.style.color = '#ef4444';
+            await enviarTelegram(`🔒 <b>REFERENCIA DUPLICADA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🔢 Referencia: ${referencia}`);
             btn.disabled = false;
-            btn.innerHTML = '✔ Verificar Pago';
+            btn.innerHTML = '✅ Verificar Pago';
             return;
         }
         
         document.getElementById('progresoVerificacion').textContent = '💳 Consultando sistema bancario...';
-        respuestaAPI.textContent = '💳 Consultando Pábilo API...';
-        respuestaAPI.style.color = '#facc15';
         
+        // PASO 2: Verificar en Pábilo
         let pagoConfirmado = false;
         let reintentos = 0;
         
         while (!pagoConfirmado && reintentos < 3) {
             if (reintentos > 0) {
                 document.getElementById('progresoVerificacion').textContent = `🔄 Reintentando (${reintentos}/3)...`;
-                respuestaAPI.textContent = `🔄 Reintentando (${reintentos}/3)...`;
                 await new Promise(r => setTimeout(r, 2000));
             }
             pagoConfirmado = await verificarPagoPabilo(referencia, precioBs);
@@ -1069,28 +1206,28 @@ async function iniciarVerificacion() {
         
         if (!pagoConfirmado) {
             mostrarPaso('pasoPagoNoEncontrado');
-            logEvent('pago_no_encontrado', { referencia });
-            respuestaAPI.textContent = '❌ Pago no encontrado';
-            respuestaAPI.style.color = '#ef4444';
+            await enviarTelegram(`❌ <b>PAGO NO ENCONTRADO</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🔢 Referencia: ${referencia}\n💰 Monto: ${precioBs} Bs`);
             btn.disabled = false;
-            btn.innerHTML = '✔ Verificar Pago';
+            btn.innerHTML = '✅ Verificar Pago';
             return;
         }
         
+        // PASO 3: Marcar referencia como usada
         document.getElementById('progresoVerificacion').textContent = '🔒 Registrando pago...';
-        respuestaAPI.textContent = '🔒 Registrando referencia en Firebase...';
-        respuestaAPI.style.color = '#facc15';
         await marcarReferenciaComoUsada(referencia);
         
         mostrarPaso('pasoPagoConfirmado');
-        logEvent('pago_verificado', { referencia });
+        await enviarTelegram(`✅ <b>PAGO VERIFICADO</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🆔 ID: ${idJugador}\n📦 Producto: ${producto}\n💰 Monto: ${precioUsd} USD / ${precioBs} Bs\n🔢 Referencia: ${referencia}`);
+        
         await new Promise(r => setTimeout(r, 1200));
         
-        document.getElementById('textoConectandoProveedor').textContent = 'Conectando con API Central Pro...';
-        document.getElementById('textoProveedorSecundario').textContent = `Procesando tu recarga de Free Fire...`;
+        // PASO 4: Enviar al proveedor según el servicio
+        document.getElementById('textoConectandoProveedor').textContent = `Conectando con ${servicioInfo.proveedor}...`;
+        document.getElementById('textoProveedorSecundario').textContent = `Procesando tu ${servicioInfo.nombreMostrado}...`;
         document.getElementById('tiempoEspera').textContent = '⏱️ Tiempo estimado: 5 segundos';
         mostrarPaso('pasoConectandoProveedor');
         
+        // Timer
         let tiempoRestante = 5;
         const intervalo = setInterval(() => {
             tiempoRestante--;
@@ -1106,10 +1243,38 @@ async function iniciarVerificacion() {
             }, 30000);
         });
         
-        const resultado = await Promise.race([
-            enviarFreeFire(idJugador, codigoProveedor, referencia), 
-            timeoutPromise
-        ]);
+        let resultado = null;
+        
+        // FREE FIRE
+        if (servicioInfo.tipo === "freefire") {
+            const promesa = enviarFreeFire(idJugador, codigoProveedor, referencia);
+            resultado = await Promise.race([promesa, timeoutPromise]);
+        }
+        // BLOOD STRIKE
+        else if (servicioInfo.tipo === "bloodstrike") {
+            const promesa = enviarBloodStrike(idJugador, codigoProveedor, referencia);
+            resultado = await Promise.race([promesa, timeoutPromise]);
+        }
+        // NETFLIX
+        else if (servicioInfo.tipo === "netflix") {
+            const promesa = enviarNetflix(idJugador, referencia);
+            resultado = await Promise.race([promesa, timeoutPromise]);
+        }
+        // DISNEY+
+        else if (servicioInfo.tipo === "disney") {
+            const promesa = enviarDisney(idJugador, referencia);
+            resultado = await Promise.race([promesa, timeoutPromise]);
+        }
+        // OTROS
+        else {
+            // Si es otro servicio, solo registrar el pago
+            resultado = {
+                success: true,
+                mensaje: 'Pago registrado correctamente',
+                id_solicitud: 'manual'
+            };
+        }
+        
         clearTimeout(timeoutTimer);
         clearInterval(intervalo);
         
@@ -1117,65 +1282,56 @@ async function iniciarVerificacion() {
             document.getElementById('textoErrorProveedor').textContent = 
                 resultado.mensaje || resultado.error || 'Error al procesar la recarga';
             mostrarPaso('pasoErrorProveedor');
-            respuestaAPI.textContent = '❌ Error: ' + (resultado.mensaje || resultado.error);
-            respuestaAPI.style.color = '#ef4444';
-            logEvent('error_proveedor', { 
-                referencia, 
-                proveedor: 'API Central Pro',
-                error: resultado.error,
-                mensaje: resultado.mensaje,
-                paquete: codigoProveedor
-            });
+            await enviarTelegram(`❌ <b>ERROR EN RECARGA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🆔 ID: ${idJugador}\n📦 Producto: ${producto}\n🔢 Referencia: ${referencia}\n⚠️ Error: ${resultado.mensaje || resultado.error}`);
             btn.disabled = false;
-            btn.innerHTML = '✔ Verificar Pago';
+            btn.innerHTML = '✅ Verificar Pago';
             return;
         }
         
+        // PASO 5: ÉXITO
         const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA", {
-            id_solicitud: resultado.id_solicitud,
-            paquete_proveedor: codigoProveedor
+            id_solicitud: resultado.id_solicitud || 'N/A'
         });
         
+        // Mostrar datos extra (cuentas de streaming)
+        if (resultado.datos_extra && (resultado.datos_extra.cuenta || resultado.datos_extra.correo)) {
+            const box = document.getElementById('datosRecargaBox');
+            box.style.display = 'block';
+            let html = '';
+            if (resultado.datos_extra.cuenta) html += `📺 Cuenta: ${resultado.datos_extra.cuenta}<br>`;
+            if (resultado.datos_extra.correo) html += `📧 Correo: ${resultado.datos_extra.correo}<br>`;
+            if (resultado.datos_extra.clave) html += `🔑 Clave: ${resultado.datos_extra.clave}<br>`;
+            if (resultado.datos_extra.perfil) html += `👤 Perfil: ${resultado.datos_extra.perfil}<br>`;
+            if (resultado.datos_extra.fecha_vencimiento) html += `📅 Vence: ${resultado.datos_extra.fecha_vencimiento}<br>`;
+            if (resultado.datos_extra.codigo_aprobacion) html += `✅ Código: ${resultado.datos_extra.codigo_aprobacion}`;
+            document.getElementById('datosCuenta').innerHTML = html;
+        }
+        
         document.getElementById('resPedido').textContent = `#${idPedido.substring(0, 8).toUpperCase()}`;
-        document.getElementById('resServicio').textContent = 'Free Fire';
-        document.getElementById('resProveedorFinal').textContent = 'API Central Pro';
-        document.getElementById('resProducto').textContent = producto || '100 Diamantes';
+        document.getElementById('resServicio').textContent = servicioInfo.nombreMostrado;
+        document.getElementById('resProveedorFinal').textContent = servicioInfo.proveedor;
+        document.getElementById('resProducto').textContent = producto || servicioInfo.nombreMostrado;
         document.getElementById('resIdResumen').textContent = idJugador;
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
         document.getElementById('resIdSolicitud').textContent = resultado.id_solicitud || 'N/A';
         
-        respuestaAPI.textContent = '✅ ¡Transacción exitosa! ID: ' + (resultado.id_solicitud || 'N/A');
-        respuestaAPI.style.color = '#10b981';
-        
         mostrarPaso('pasoRecargaExitosa');
-        logEvent('compra_exitosa', { 
-            referencia, 
-            pedido: idPedido,
-            servicio: 'Free Fire',
-            proveedor: 'API Central Pro',
-            paquete: codigoProveedor,
-            id_solicitud: resultado.id_solicitud
-        });
         
-        showToast('🎉 ¡Compra realizada con éxito!', 'success', 5000);
+        await enviarTelegram(`🎉 <b>COMPRA COMPLETADA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🆔 ID: ${idJugador}\n📦 Producto: ${producto}\n💰 Monto: ${precioUsd} USD / ${precioBs} Bs\n🔢 Referencia: ${referencia}\n📋 Pedido: #${idPedido.substring(0, 8).toUpperCase()}`);
         
     } catch (error) {
         console.error('Error:', error);
         if (error.message === 'TIMEOUT') {
             mostrarPaso('pasoTimeout');
-            respuestaAPI.textContent = '⏱️ Tiempo de espera agotado';
-            respuestaAPI.style.color = '#ef4444';
-            logEvent('timeout_verificacion', { referencia });
         } else {
-            showToast('❌ Error al verificar el pago. Intenta de nuevo.', 'error');
-            respuestaAPI.textContent = '❌ Error: ' + error.message;
-            respuestaAPI.style.color = '#ef4444';
+            alert('❌ Error al verificar el pago. Intenta de nuevo.');
             mostrarPaso('pasoDatos');
         }
+        await enviarTelegram(`⚠️ <b>ERROR EN EL SISTEMA</b>\n\n📦 Servicio: ${servicioInfo.nombreMostrado}\n🔢 Referencia: ${referencia}\n⚠️ Error: ${error.message}`);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '✔ Verificar Pago';
+        btn.innerHTML = '✅ Verificar Pago';
         if (timeoutTimer) {
             clearTimeout(timeoutTimer);
             timeoutTimer = null;
@@ -1196,48 +1352,11 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// ==============================================
-// 📋 LOG
-// ==============================================
 console.log('🚀 RECARGASGAMES - Sistema de Verificación de Pagos');
-console.log('📦 Servicio: Free Fire');
-console.log('🔌 Proveedor: API Central Pro');
-console.log('📦 Producto Cliente:', producto);
+console.log('📦 Servicio:', servicioInfo.nombreMostrado);
+console.log('🔌 Proveedor:', servicioInfo.proveedor);
+console.log('📦 Producto:', producto);
 console.log('🔢 Código Proveedor:', codigoProveedor);
-
-logEvent('pagina_cargada', {
-    servicio: 'Free Fire',
-    proveedor: 'API Central Pro',
-    producto: producto,
-    paquete: codigoProveedor
-});
-
-// ==============================================
-// ⚠️ ERRORES GLOBALES
-// ==============================================
-window.addEventListener('unhandledrejection', function(e) {
-    console.error('Error no manejado:', e.reason);
-    showToast('⚠️ Ocurrió un error inesperado', 'error');
-    logEvent('error_no_manejado', { error: e.reason?.message || 'unknown' });
-});
-
-// ==============================================
-// 📦 TOAST
-// ==============================================
-function showToast(mensaje, tipo = 'info', duracion = 3000) {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${tipo}`;
-    toast.textContent = mensaje;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
-        toast.style.transition = 'all 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, duracion);
-}
 </script>
 
 </body>
