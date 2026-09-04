@@ -15,6 +15,7 @@
     --color-borde:rgba(51,65,85,0.5);
     --color-deshabilitado:#475569;
     --color-azul:#3b82f6; /* Para la barra de navegación */
+    --color-dorado:#facc15; /* ✨ Resaltado WhatsApp */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -25,7 +26,7 @@ body{
     color:#fff;
     font-family:'Segoe UI',sans-serif;
     min-height:100vh;
-    padding-top:110px; /* Aumentado por la barra de navegación */
+    padding-top:110px;
 }
 
 /* 🔒 BARRA SUPERIOR FIJA — IGUAL QUE EN EL INDEX */
@@ -139,85 +140,117 @@ body{
     border-radius:0;
 }
 
-.main{padding:30px 20px;max-width:480px;margin:0 auto}
+.main{padding:20px;max-width:800px;margin:0 auto}
 .titulo-pagina{text-align:center;font-size:28px;font-weight:800;margin-bottom:30px;color:var(--color-blanco)}
 .titulo-pagina span{color:var(--color-principal)}
-.tarjeta-producto{
-    background:rgba(17,24,39,0.55);
-    border:2px solid var(--color-borde);
+
+/* 📲 WHATSAPP — RESALTADO / BRILLANTE ✨ */
+.tarjeta-whatsapp{
+    background:rgba(37,211,102,0.1);
+    border:2px solid #25D366;
     border-radius:16px;
     padding:20px;
-    margin-bottom:15px;
-    cursor:pointer;
-    transition:.25s;
-    backdrop-filter:blur(10px);
+    margin-bottom:25px;
+    box-shadow:0 0 15px rgba(37,211,102,0.25), inset 0 0 10px rgba(37,211,102,0.08);
+    animation:brillar 2s ease-in-out infinite alternate;
 }
-.tarjeta-producto:hover{
+@keyframes brillar{
+    from{box-shadow:0 0 15px rgba(37,211,102,0.25), inset 0 0 10px rgba(37,211,102,0.08)}
+    to{box-shadow:0 0 25px rgba(37,211,102,0.4), inset 0 0 15px rgba(37,211,102,0.12)}
+}
+.tarjeta-whatsapp .input-label{
+    display:block;
+    margin-bottom:10px;
+    font-weight:700;
+    font-size:16px;
+    color:#86efac;
+}
+.tarjeta-whatsapp .input-campo{
+    width:100%;
+    padding:14px 16px;
+    border-radius:12px;
+    background:rgba(15,23,42,0.8);
+    border:2px solid #25D366;
+    color:#fff;
+    font-size:16px;
+    font-weight:600;
+    box-sizing:border-box;
+    outline:none;
+    transition:.2s;
+}
+.tarjeta-whatsapp .input-campo:focus{
+    border-color:var(--color-dorado);
+    box-shadow:0 0 12px rgba(250,204,21,0.3);
+}
+.aviso-whatsapp{
+    margin-top:12px;
+    font-size:14px;
+    color:#86efac;
+    line-height:1.5;
+}
+
+/* 🎬 PLANES — TARJETAS IGUALITAS A LOS JUEGOS */
+.section-divider{margin:30px 0 20px;text-align:center}
+.section-divider span{
+    background:var(--color-principal);
+    color:#fff;
+    padding:6px 18px;
+    border-radius:30px;
+    font-size:14px;
+    font-weight:700;
+}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin-bottom:25px}
+.product-card{
+    background:rgba(11,18,32,.85);
+    border:2px solid #1f2937;
+    border-radius:16px;
+    padding:20px;
+    transition:.25s;
+    cursor:pointer;
+}
+.product-card:hover{
     border-color:var(--color-principal);
     transform:translateY(-3px);
     background:rgba(229,9,20,0.08);
 }
-.tarjeta-producto.seleccionada{
+.product-card.seleccionada{
     border-color:var(--color-principal);
     background:rgba(229,9,20,0.12);
     box-shadow:0 0 15px rgba(229,9,20,0.2);
 }
-.producto-nombre{font-size:18px;font-weight:700;margin-bottom:8px}
-.producto-descripcion{font-size:14px;color:#94a3b8;margin-bottom:12px}
-.producto-precio{font-size:22px;font-weight:800;color:var(--color-principal)}
-.seccion{margin-bottom:30px}
-.seccion-titulo{font-size:20px;font-weight:700;margin-bottom:15px;color:#e5e7eb}
-.input-group{margin-bottom:20px}
-.input-label{display:block;margin-bottom:8px;font-weight:600;color:#e5e7eb}
-.input-campo{
-    width:100%;
-    padding:14px 16px;
-    border-radius:12px;
-    background:rgba(15,23,42,0.6);
-    border:1px solid var(--color-borde);
-    color:#fff;
-    font-size:16px;
-    box-sizing:border-box;
-}
-.input-campo:focus{outline:none;border-color:var(--color-principal)}
-.btn-comprar{
-    width:100%;
-    padding:16px;
+.card-header{display:flex;align-items:center;gap:12px;border-bottom:1px solid #1f2937;padding-bottom:12px;margin-bottom:12px}
+.game-icon{background:rgba(229,9,20,0.15);padding:10px;border-radius:12px;font-size:22px}
+.product-title{font-size:17px;font-weight:700}
+.product-desc{color:#9ca3af;font-size:13px;margin-bottom:12px;line-height:1.4}
+.product-price{font-size:24px;font-weight:800;color:var(--color-principal);margin-bottom:15px}
+.btn-buy{
     background:var(--color-principal);
     color:#fff;
     border:none;
+    width:100%;height:44px;
     border-radius:12px;
-    font-size:18px;
+    font-size:15px;
     font-weight:700;
     cursor:pointer;
     transition:.2s;
-    margin-top:10px;
 }
-.btn-comprar:hover{background:var(--color-hover)}
-.btn-comprar:disabled{background:var(--color-deshabilitado);cursor:not-allowed;opacity:0.6}
-.aviso-whatsapp{
-    background:rgba(37,211,102,0.1);
-    border:1px solid rgba(37,211,102,0.3);
-    border-radius:12px;
-    padding:14px;
-    margin:15px 0;
-    font-size:14px;
-    color:#86efac;
-    text-align:center;
-}
+.btn-buy:hover{background:var(--color-hover)}
+.btn-buy:disabled{background:var(--color-deshabilitado);cursor:not-allowed;opacity:0.6}
 
-@media (max-width:500px) {
+@media(min-width:550px){.products-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){
     body { padding-top:100px; }
     .header img { height:45px; }
     .header { padding:10px 16px; }
     .games-menu { padding:10px 12px; }
     .menu-flotante { right:10px; min-width:200px; }
+    .products-grid { grid-template-columns:1fr; }
 }
 </style>
 </head>
 <body onclick="cerrarMenuSiExterior(event)">
 
-<!-- 🔒 BARRA SUPERIOR COMPLETA — IGUAL QUE EN EL INDEX -->
+<!-- 🔒 BARRA SUPERIOR COMPLETA -->
 <div class="barra-superior">
     <div class="header">
         <a href="index.html"><img src="logo.png" alt="Logo RecargasGames"></a>
@@ -225,14 +258,15 @@ body{
         
         <!-- 📋 MENÚ FLOTANTE -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
             <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
             <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
             <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
-            <a href="mlbb.html" class="menu-opcion">⚔️ Mobile Legends</a>
-            <a href="codm.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
             <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
             <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
-            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="delta.html" class="menu-opcion">💥 Delta Force</a>
             <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
             <a href="disney.html" class="menu-opcion">✨ Disney+</a>
         </div>
@@ -242,58 +276,63 @@ body{
         <a href="freefire.html">Free Fire</a>
         <a href="bloodstrike.html">Blood Strike</a>
         <a href="roblox.html">Roblox</a>
-        <a href="mlbb.html">Mobile Legends</a>
-        <a href="codm.html">COD Mobile</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
         <a href="pubg.html">PUBG Mobile</a>
         <a href="arenabreakout.html">Arena Breakout</a>
-        <a href="deltaforce.html">Delta Force</a>
+        <a href="delta.html">Delta Force</a>
         <a href="netflix.html" class="active">Netflix</a>
         <a href="disney.html">Disney+</a>
     </div>
 </div>
 
 <div class="main">
-    <h1 class="titulo-pagina"><span>Netflix</span> — Cuentas</h1>
+    <h1 class="titulo-pagina"><span>Netflix</span> — Planes y Cuentas</h1>
 
-    <!-- 📲 WHATSAPP DEL CLIENTE -->
-    <div class="seccion">
-        <label class="input-label">📲 Tu WhatsApp</label>
-        <input type="tel" class="input-campo" id="whatsappCliente" placeholder="04XX-XXXXXXX">
-        <div class="aviso-whatsapp">💬 Te enviaremos los datos de tu cuenta de Netflix por WhatsApp</div>
+    <!-- 📲 WHATSAPP — RESALTADO Y BRILLANTE ✨ -->
+    <div class="tarjeta-whatsapp">
+        <label class="input-label">📲 Tu WhatsApp (donde te enviaremos los datos)</label>
+        <input type="tel" class="input-campo" id="whatsappCliente" placeholder="Ej: 0424-1234567">
+        <div class="aviso-whatsapp">💬 ¡Importante! Escribe tu WhatsApp correcto aquí. Te enviaremos los datos de acceso a tu cuenta de Netflix por este número.</div>
     </div>
 
-    <!-- 📦 PLANES DE NETFLIX -->
-    <div class="seccion">
-        <h2 class="seccion-titulo">📋 Elige tu Plan</h2>
-
-        <div class="tarjeta-producto" data-codigo="netflix_1pantalla" data-nombre="Netflix - 1 Pantalla" data-precio-bs="3200">
-            <div class="producto-nombre">📱 1 Pantalla</div>
-            <div class="producto-descripcion">Calidad estándar • 1 dispositivo a la vez</div>
-            <div class="producto-precio">3.200 Bs</div>
+    <!-- 📦 PLANES DE NETFLIX — TARJETAS IGUALES A LOS JUEGOS -->
+    <div class="section-divider"><span>🎬 ELIGE TU PLAN</span></div>
+    <div class="products-grid">
+        <div class="product-card" data-codigo="netflix_1pantalla_30d" data-nombre="Netflix - 1 Pantalla (30 días)" data-precio-bs="3600">
+            <div class="card-header"><div class="game-icon">📱</div><div class="product-title">1 Pantalla — 30 Días</div></div>
+            <div class="product-desc">Calidad estándar • 1 dispositivo a la vez • 30 días de servicio</div>
+            <div class="product-price">3.600 Bs</div>
+            <button class="btn-buy" onclick="seleccionarPlan(this)">Seleccionar</button>
         </div>
 
-        <div class="tarjeta-producto" data-codigo="netflix_2pantallas" data-nombre="Netflix - 2 Pantallas" data-precio-bs="6200">
-            <div class="producto-nombre">📱📱 2 Pantallas</div>
-            <div class="producto-descripcion">Alta definición • 2 dispositivos a la vez</div>
-            <div class="producto-precio">6.200 Bs</div>
+        <div class="product-card" data-codigo="netflix_1pantalla_60d" data-nombre="Netflix - 1 Pantalla (60 días)" data-precio-bs="7500">
+            <div class="card-header"><div class="game-icon">📱</div><div class="product-title">1 Pantalla — 60 Días</div></div>
+            <div class="product-desc">Calidad estándar • 1 dispositivo a la vez • 60 días de servicio</div>
+            <div class="product-price">7.500 Bs</div>
+            <button class="btn-buy" onclick="seleccionarPlan(this)">Seleccionar</button>
         </div>
 
-        <div class="tarjeta-producto" data-codigo="netflix_3pantallas" data-nombre="Netflix - 3 Pantallas" data-precio-bs="9500">
-            <div class="producto-nombre">📱📱📱 3 Pantallas</div>
-            <div class="producto-descripcion">Alta definición • 3 dispositivos a la vez</div>
-            <div class="producto-precio">9.500 Bs</div>
+        <div class="product-card" data-codigo="netflix_2pantallas_30d" data-nombre="Netflix - 2 Pantallas (30 días)" data-precio-bs="7000">
+            <div class="card-header"><div class="game-icon">📱📱</div><div class="product-title">2 Pantallas — 30 Días</div></div>
+            <div class="product-desc">Alta definición • 2 dispositivos a la vez • 30 días de servicio</div>
+            <div class="product-price">7.000 Bs</div>
+            <button class="btn-buy" onclick="seleccionarPlan(this)">Seleccionar</button>
+        </div>
+
+        <div class="product-card" data-codigo="netflix_5pantallas_30d" data-nombre="Netflix - 5 Pantallas (30 días)" data-precio-bs="11000">
+            <div class="card-header"><div class="game-icon">📱📱📱</div><div class="product-title">5 Pantallas — 30 Días</div></div>
+            <div class="product-desc">Ultra HD • 5 dispositivos a la vez • 30 días de servicio</div>
+            <div class="product-price">11.000 Bs</div>
+            <button class="btn-buy" onclick="seleccionarPlan(this)">Seleccionar</button>
         </div>
     </div>
-
-    <!-- ✅ BOTÓN COMPRAR -->
-    <button class="btn-comprar" id="btnComprar" disabled>🛒 Selecciona un plan</button>
 </div>
 
 <script>
 // 🍔 ABRIR Y CERRAR MENÚ
 function alternarMenu() {
-    const menu = document.getElementById('menuFlotante');
-    menu.classList.toggle('activo');
+    document.getElementById('menuFlotante').classList.toggle('activo');
 }
 function cerrarMenuSiExterior(e) {
     const menu = document.getElementById('menuFlotante');
@@ -319,32 +358,28 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 // ==============================================
-// 📦 SELECCIÓN DE PRODUCTO
+// 📦 SELECCIÓN DE PLAN
 // ==============================================
 let productoSeleccionado = null;
 
-document.querySelectorAll('.tarjeta-producto').forEach(tarjeta => {
-    tarjeta.addEventListener('click', () => {
-        document.querySelectorAll('.tarjeta-producto').forEach(t => t.classList.remove('seleccionada'));
-        tarjeta.classList.add('seleccionada');
-        productoSeleccionado = {
-            codigo: tarjeta.dataset.codigo,
-            nombre: tarjeta.dataset.nombre,
-            precioBs: tarjeta.dataset.precioBs
-        };
-        const btn = document.getElementById('btnComprar');
-        btn.disabled = false;
-        btn.textContent = `🛒 Comprar — ${productoSeleccionado.nombre}`;
-    });
-});
+function seleccionarPlan(boton) {
+    const tarjeta = boton.closest('.product-card');
+    document.querySelectorAll('.product-card').forEach(t => t.classList.remove('seleccionada'));
+    tarjeta.classList.add('seleccionada');
+    productoSeleccionado = {
+        codigo: tarjeta.dataset.codigo,
+        nombre: tarjeta.dataset.nombre,
+        precioBs: tarjeta.dataset.precioBs
+    };
 
-// ==============================================
-// 🛒 IR A PASARELA
-// ==============================================
-document.getElementById('btnComprar').addEventListener('click', () => {
+    // Ir a pasarela automáticamente con validación
     const whatsapp = document.getElementById('whatsappCliente').value.trim();
-    if(!whatsapp) { alert("❌ Escribe tu número de WhatsApp"); return; }
-    if(!productoSeleccionado) { alert("❌ Selecciona un plan"); return; }
+    if(!whatsapp) { 
+        alert("❌ Escribe tu número de WhatsApp primero"); 
+        tarjeta.classList.remove('seleccionada');
+        productoSeleccionado = null;
+        return; 
+    }
 
     localStorage.setItem('juego_seleccionado', 'Netflix');
     localStorage.setItem('id_jugador', whatsapp);
@@ -355,7 +390,7 @@ document.getElementById('btnComprar').addEventListener('click', () => {
     localStorage.setItem('paquete_codigo', productoSeleccionado.codigo);
 
     window.location.href = 'pasarela.html';
-});
+}
 </script>
 
 </body>
