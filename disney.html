@@ -10,10 +10,11 @@
 <style>
 :root{
     --color-principal:#113CCF; /* 🔵 AZUL DISNEY+ */
-    --color-hover:#0e32b3;
+    --color-hover:#0d2ea3;
     --color-blanco:#ffffff;
     --color-borde:rgba(51,65,85,0.5);
     --color-deshabilitado:#475569;
+    --color-azul:#3b82f6; /* Para la barra de navegación */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{
@@ -24,27 +25,120 @@ body{
     color:#fff;
     font-family:'Segoe UI',sans-serif;
     min-height:100vh;
-    padding-top:80px;
+    padding-top:110px;
 }
-.header{
+
+/* 🔒 BARRA SUPERIOR FIJA — IGUAL QUE EN EL INDEX */
+.barra-superior {
     position:fixed;
     top:0;
     left:0;
     right:0;
+    z-index:999;
     background:rgba(11,18,32,.95);
+    border-bottom:2px solid var(--color-azul);
+    box-shadow:0 2px 10px rgba(0,0,0,0.3);
+}
+.header{
     padding:12px 20px;
     display:flex;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items:center;
-    border-bottom:2px solid var(--color-principal);
-    z-index:999;
+    border-bottom:1px solid #2a374f;
 }
 .header img{
     height:50px;
     width:auto;
-    border-radius:50%;
+    border-radius:12px;
     object-fit:contain;
 }
+
+/* 🍔 BOTÓN MENÚ */
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
+    cursor:pointer;
+    padding:5px 10px;
+    transition:transform 0.2s;
+}
+.menu-hamburguesa:hover {
+    transform:scale(1.1);
+    color:var(--color-azul);
+}
+
+/* 📋 MENÚ FLOTANTE */
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
+    overflow:hidden;
+}
+.menu-flotante.activo {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.menu-opcion {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:500;
+    transition:all 0.2s;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {
+    border-bottom:none;
+}
+.menu-opcion:hover {
+    background:rgba(59,130,246,0.15);
+    color:var(--color-azul);
+    padding-left:22px;
+}
+
+/* 📱 BARRA DE JUEGOS */
+.games-menu {
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:12px 15px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+}
+.games-menu::-webkit-scrollbar { display:none; }
+.games-menu a {
+    text-decoration:none;
+    color:white;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:bold;
+    white-space:nowrap;
+    transition:0.2s;
+}
+.games-menu a:hover { color:var(--color-azul); }
+.games-menu a.active {
+    color:var(--color-azul);
+    border-bottom:2px solid var(--color-azul);
+    border-radius:0;
+}
+
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
 .titulo-pagina{text-align:center;font-size:28px;font-weight:800;margin-bottom:30px;color:var(--color-blanco)}
 .titulo-pagina span{color:var(--color-principal)}
@@ -111,12 +205,51 @@ body{
     color:#86efac;
     text-align:center;
 }
+
+@media (max-width:500px) {
+    body { padding-top:100px; }
+    .header img { height:45px; }
+    .header { padding:10px 16px; }
+    .games-menu { padding:10px 12px; }
+    .menu-flotante { right:10px; min-width:200px; }
+}
 </style>
 </head>
-<body>
+<body onclick="cerrarMenuSiExterior(event)">
 
-<div class="header">
-    <img src="logo.png" alt="Logo RecargasGames">
+<!-- 🔒 BARRA SUPERIOR COMPLETA — IGUAL QUE EN EL INDEX -->
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html"><img src="logo.png" alt="Logo RecargasGames"></a>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <!-- 📋 MENÚ FLOTANTE -->
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="mlbb.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="codm.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
+    </div>
+    <div class="games-menu">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="mlbb.html">Mobile Legends</a>
+        <a href="codm.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="deltaforce.html">Delta Force</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html" class="active">Disney+</a>
+    </div>
 </div>
 
 <div class="main">
@@ -131,24 +264,24 @@ body{
 
     <!-- 📦 PLANES DE DISNEY+ -->
     <div class="seccion">
-        <h2 class="seccion-titulo">🏰 Elige tu Plan</h2>
+        <h2 class="seccion-titulo">📋 Elige tu Plan</h2>
 
-        <div class="tarjeta-producto" data-codigo="disney_1pantalla" data-nombre="Disney+ - 1 Pantalla" data-precio-bs="3200">
+        <div class="tarjeta-producto" data-codigo="disney_1pantalla" data-nombre="Disney+ - 1 Pantalla" data-precio-bs="2800">
             <div class="producto-nombre">📱 1 Pantalla</div>
             <div class="producto-descripcion">Calidad estándar • 1 dispositivo a la vez</div>
-            <div class="producto-precio">3.200 Bs</div>
+            <div class="producto-precio">2.800 Bs</div>
         </div>
 
-        <div class="tarjeta-producto" data-codigo="disney_2pantallas" data-nombre="Disney+ - 2 Pantallas" data-precio-bs="6200">
+        <div class="tarjeta-producto" data-codigo="disney_2pantallas" data-nombre="Disney+ - 2 Pantallas" data-precio-bs="5500">
             <div class="producto-nombre">📱📱 2 Pantallas</div>
             <div class="producto-descripcion">Alta definición • 2 dispositivos a la vez</div>
-            <div class="producto-precio">6.200 Bs</div>
+            <div class="producto-precio">5.500 Bs</div>
         </div>
 
-        <div class="tarjeta-producto" data-codigo="disney_3pantallas" data-nombre="Disney+ - 3 Pantallas" data-precio-bs="9500">
-            <div class="producto-nombre">📱📱📱 3 Pantallas</div>
-            <div class="producto-descripcion">Alta definición • 3 dispositivos a la vez</div>
-            <div class="producto-precio">9.500 Bs</div>
+        <div class="tarjeta-producto" data-codigo="disney_4pantallas" data-nombre="Disney+ - 4 Pantallas" data-precio-bs="8500">
+            <div class="producto-nombre">📱📱📱📱 4 Pantallas</div>
+            <div class="producto-descripcion">4K Ultra HD • 4 dispositivos a la vez</div>
+            <div class="producto-precio">8.500 Bs</div>
         </div>
     </div>
 
@@ -157,6 +290,19 @@ body{
 </div>
 
 <script>
+// 🍔 ABRIR Y CERRAR MENÚ
+function alternarMenu() {
+    const menu = document.getElementById('menuFlotante');
+    menu.classList.toggle('activo');
+}
+function cerrarMenuSiExterior(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('activo');
+    }
+}
+
 // ==============================================
 // 🔥 FIREBASE — MISMA CONFIGURACIÓN
 // ==============================================
@@ -211,5 +357,6 @@ document.getElementById('btnComprar').addEventListener('click', () => {
     window.location.href = 'pasarela.html';
 });
 </script>
+
 </body>
 </html>
