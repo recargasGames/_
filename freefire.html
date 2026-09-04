@@ -36,7 +36,7 @@ body{
 .header{
     padding:12px 20px;
     display:flex;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items:center;
     border-bottom:1px solid #2a374f;
     margin-bottom:0;
@@ -47,6 +47,62 @@ body{
     width:auto;
     border-radius:14px;
     background:transparent;
+}
+
+/* 🍔 MENÚ HAMBURGUESA */
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
+    cursor:pointer;
+    padding:5px 10px;
+    transition:transform 0.2s;
+}
+.menu-hamburguesa:hover {
+    transform:scale(1.1);
+    color:var(--color-azul);
+}
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
+    overflow:hidden;
+}
+.menu-flotante.activo {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.menu-opcion {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:500;
+    transition:all 0.2s;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {
+    border-bottom:none;
+}
+.menu-opcion:hover {
+    background:rgba(59,130,246,0.15);
+    color:var(--color-azul);
+    padding-left:22px;
 }
 
 .games-menu{
@@ -180,25 +236,44 @@ body{
     .brand img{height:45px}
     .header{padding:10px 16px}
     .games-menu{padding:10px 12px}
+    .menu-flotante{right:10px;min-width:200px}
 }
 </style>
 </head>
-<body>
+<body onclick="cerrarMenuSiExterior(event)">
 
 <div class="barra-superior">
     <div class="header">
-        <div class="brand"><img src="logo.png" alt="Logo"></div>
+        <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <!-- 📋 MENÚ FLOTANTE COMPLETO -->
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="mlbb.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="codm.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
     </div>
     <div class="games-menu">
         <a href="index.html">Inicio</a>
         <a href="freefire.html" class="active">Free Fire</a>
         <a href="bloodstrike.html">Blood Strike</a>
         <a href="roblox.html">Roblox</a>
-        <a href="ml.html">Mobile Legends</a>
-        <a href="cod.html">COD Mobile</a>
+        <a href="mlbb.html">Mobile Legends</a>
+        <a href="codm.html">COD Mobile</a>
         <a href="pubg.html">PUBG Mobile</a>
-        <a href="arenabreakout.html">ARENA Breakout</a>
-        <a href="delta.html">DELTA Force</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="deltaforce.html">Delta Force</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
     </div>
 </div>
 
@@ -215,7 +290,7 @@ body{
             <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">PAGO MOVIL</div>
             <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">BINANCE</div>
         </div>
-        <div class="tasa-info" id="tasaInfo">Tasa: 970 Bs/USD</div>
+        <div class="tasa-info" id="tasaInfo">Tasa: 940 Bs/USD</div>
     </div>
 
     <div class="section-divider"><span>💎 DIAMANTES - FREE FIRE</span></div>
@@ -253,7 +328,7 @@ body{
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">5600 Diamantes</div></div>
             <div class="product-desc">+560 gratis • Recarga instantánea</div>
-            <div class="product-price" data-usd="39.40">$39.50</div>
+            <div class="product-price" data-usd="39.50">$39.50</div>
             <button class="btn-buy" onclick="comprarProducto('5600 Diamantes', '39.50', '6')">Comprar</button>
         </div>
     </div>
@@ -282,15 +357,25 @@ body{
 </div>
 
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
-<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
 
 <script>
+// 🍔 ABRIR Y CERRAR MENÚ
+function alternarMenu() {
+    const menu = document.getElementById('menuFlotante');
+    menu.classList.toggle('activo');
+}
+function cerrarMenuSiExterior(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('activo');
+    }
+}
+
 // 🔑 CONFIGURACIÓN
 const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
 const FF_API_BASE_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-// ✅ TU PROXY — EL QUE YA TIENES EN GitHub / Vercel
-// DEBE SER: https://recargagames.shop/api/proxy-freefire (o la URL que te dé Vercel)
 const TU_PROXY_URL = "/api/proxy-freefire"; 
 
 let metodo = "PAGO MOVIL";
@@ -301,7 +386,7 @@ let idJugadorActual = "";
 const juegoActual = "FREE FIRE";
 
 // ==============================================
-// 💰 PRECIOS — SIN LLAMADA A BINANCE (da error el símbolo)
+// 💰 ACTUALIZAR PRECIOS SEGÚN MÉTODO DE PAGO
 // ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
@@ -318,7 +403,7 @@ window.seleccionarPago=function(m,e){
 };
 
 // ==============================================
-// ✅ VERIFICAR ID — LLAMANDO A TU PROXY (RÁPIDO Y SIN CORS)
+// ✅ VERIFICAR ID — LLAMANDO AL PROXY
 // ==============================================
 async function verificarID(id){
     if(!/^\d{4,12}$/.test(id)){
@@ -326,7 +411,6 @@ async function verificarID(id){
     }
 
     try {
-        // 📋 Enviamos los datos a TU proxy (no al navegador directo)
         const respuesta = await fetch(TU_PROXY_URL, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -335,7 +419,7 @@ async function verificarID(id){
                 tipo: 'validarJugador',
                 id_jugador: id
             }),
-            signal: AbortSignal.timeout(8000) // ⏱️ 8 segundos máximo
+            signal: AbortSignal.timeout(8000)
         });
         
         if (!respuesta.ok) throw new Error(`Error HTTP: ${respuesta.status}`);
@@ -343,12 +427,11 @@ async function verificarID(id){
         const datos = await respuesta.json();
         console.log("✅ Respuesta API:", datos);
 
-        // ✅ Leemos la respuesta igual que antes
-        if(datos.code === "true"){
-            const nombre = datos.nickname || `Jugador ${id}`;
-            return {ok: true, nombre: nombre, msg: ": " + nombre};
+        if(datos.code === "true" || datos.exito === "true"){
+            const nombre = datos.nickname || datos.nombre || `Jugador ${id}`;
+            return {ok: true, nombre: nombre, msg: "✅ Jugador: " + nombre};
         } else {
-            return {ok: false, msg: datos.mensaje || "Jugador no encontrado ❌"};
+            return {ok: false, msg: datos.mensaje || datos.error || "Jugador no encontrado ❌"};
         }
     } catch (error) {
         console.error("❌ Error verificando ID:", error);
@@ -361,7 +444,7 @@ async function verificarID(id){
 }
 
 // ==============================================
-// 📋 MANEJO DEL INPUT
+// 📋 MANEJO DEL INPUT DEL ID
 // ==============================================
 let timeoutId = null;
 const inputId = document.getElementById("jugadorId");
@@ -413,7 +496,7 @@ inputId.addEventListener("input", function(){
 });
 
 // ==============================================
-// 🛒 COMPRAR
+// 🛒 COMPRAR — GUARDAR TODO Y IR A PASARELA
 // ==============================================
 window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
@@ -442,7 +525,7 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
 };
 
 // ==============================================
-// 🔄 INICIO
+// 🔄 INICIO Y BOTÓN SUBIR ARRIBA
 // ==============================================
 actualizarPrecios();
 
@@ -451,5 +534,6 @@ window.addEventListener('scroll',()=>{
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
 });
 </script>
+
 </body>
 </html>
