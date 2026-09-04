@@ -7,7 +7,7 @@
 <title>RECARGASGAMES - Arena Breakout Mobile</title>
 <style>
 :root{
-    --color-principal:#3b82f6; /* 🔵 AZUL — IGUAL A MOBILE LEGENDS Y TODOS LOS DEMÁS */
+    --color-principal:#3b82f6; /* 🔵 AZUL — IGUAL A TODOS */
     --color-hover:#2563eb;
     --color-azul:#3b82f6;
     --color-blanco:#ffffff;
@@ -23,7 +23,63 @@ body{
     padding-top:110px;
 }
 
-/* 🔒 BARRA FIJA — IGUAL A TODOS */
+/* 🍔 MENÚ HAMBURGUESA — SOLO LO QUE SE AGREGÓ */
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
+    cursor:pointer;
+    padding:5px 10px;
+    transition:transform 0.2s;
+}
+.menu-hamburguesa:hover {
+    transform:scale(1.1);
+    color:var(--color-azul);
+}
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
+    overflow:hidden;
+}
+.menu-flotante.activo {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.menu-opcion {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:500;
+    transition:all 0.2s;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {
+    border-bottom:none;
+}
+.menu-opcion:hover {
+    background:rgba(59,130,246,0.15);
+    color:var(--color-azul);
+    padding-left:22px;
+}
+
+/* 🔒 BARRA FIJA — IGUAL A COMO ESTABA */
 .barra-superior{
     position:fixed;
     top:0;
@@ -37,7 +93,7 @@ body{
 .header{
     padding:12px 20px;
     display:flex;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items:center;
     border-bottom:1px solid #2a374f;
     margin-bottom:0;
@@ -50,7 +106,7 @@ body{
     background:transparent;
 }
 
-/* MENÚ — IGUAL A TODOS */
+/* MENÚ INFERIOR — TAL CUAL ESTABA */
 .games-menu{
     display:flex;
     gap:8px;
@@ -79,7 +135,7 @@ body{
     border-radius:0;
 }
 
-/* CONTENIDO — MISMO DISEÑO EXACTO */
+/* RESTO DEL DISEÑO — TODO IGUAL, SIN TOCAR NADA */
 .main{
     padding:20px;
     padding-top:30px;
@@ -182,16 +238,34 @@ body{
     .brand img{height:45px}
     .header{padding:10px 16px}
     .games-menu{padding:10px 12px}
+    .menu-flotante{right:10px;min-width:200px}
 }
 </style>
 </head>
-<body>
+<body onclick="cerrarMenuSiExterior(event)">
 
-<!-- 🔒 BARRA FIJA — IGUAL A TODOS -->
+<!-- 🔒 BARRA FIJA — LOGO + BOTÓN HAMBURGUESA -->
 <div class="barra-superior">
     <div class="header">
         <div class="brand"><img src="logo.png" alt="Logo"></div>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <!-- 📋 MENÚ FLOTANTE — SOLO AGREGADO -->
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="delta.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
     </div>
+    <!-- MENÚ DE JUEGOS — TAL CUAL ESTABA -->
     <div class="games-menu">
         <a href="index.html">Inicio</a>
         <a href="freefire.html">Free Fire</a>
@@ -206,7 +280,7 @@ body{
 </div>
 
 <div class="main">
-    <!-- ✅ TARJETA DEL ID — MISMO DISEÑO -->
+    <!-- ✅ TARJETA DEL ID — TAL CUAL ESTABA -->
     <div class="card-panel">
         <div class="panel-title">ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Arena Breakout Mobile" autocomplete="off">
@@ -221,7 +295,7 @@ body{
         </div>
     </div>
 
-    <!-- 💰 BONDS -->
+    <!-- 💰 BONDS — TAL CUAL ESTABA -->
     <div class="section-divider"><span>💰 BONDS - ARENA BREAKOUT</span></div>
     <div class="products-grid">
         <div class="product-card">
@@ -262,7 +336,7 @@ body{
         </div>
     </div>
 
-    <!-- 🎫 PASES -->
+    <!-- 🎫 PASES — TAL CUAL ESTABA -->
     <div class="section-divider"><span>🎫 PASES DE BATALLA</span></div>
     <div class="products-grid">
         <div class="product-card">
@@ -408,6 +482,18 @@ window.comprarProducto = function(producto, precioUsd){
     localStorage.setItem('metodo_pago', metodo);
 
     window.location.href = "pasarela.html";
+};
+
+// 🍔 FUNCIONES DEL MENÚ HAMBURGUESA — LO ÚNICO QUE SE AGREGÓ
+window.alternarMenu = function() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+};
+window.cerrarMenuSiExterior = function(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('activo');
+    }
 };
 
 onAuthStateChanged(auth,u=>{logueado=!!u; if(u)uidActual=u.uid;});
