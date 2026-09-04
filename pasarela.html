@@ -548,20 +548,20 @@ const refPedidos = db.ref("pedidos");
 // ⚙️ CONFIGURACIÓN DE APIS
 // ==============================================
 
-// 1. API CENTRAL PRO - FREE FIRE
+// ⚠️ TOKEN CORREGIDO - El correcto es con 6O6O no 6060
 const FF_API = {
     URL: "https://apicentral.pro/apis/freefire.jsp",
-    TOKEN: "NTPvkKmEe0DckQSx6060j7XVq84A2iScZE31CpXxv3s"
+    TOKEN: "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s"  // ✅ CORREGIDO
 };
 
-// 2. PAGONORTE - BLOOD STRIKE + STREAMING
+// PAGONORTE - BLOOD STRIKE + STREAMING
 const PAGONORTE = {
     URL: "https://pagonorte.net/recargas/api.jsp",
     API_KEY: "pn_8dc8d383aa88020b5df8365052e4ecf5168a",
     API_SECRET: "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05"
 };
 
-// 3. PÁBILO - VERIFICACIÓN DE PAGOS
+// PÁBILO - VERIFICACIÓN DE PAGOS
 const PABILO = {
     USER_BANK_ID: "6a93ac1b98055a34bd8b05f2",
     API_KEY: "5349b9e7-1c73-406d-ac8c-ad4345241789"
@@ -581,7 +581,6 @@ const TELEGRAM = {
 async function enviarTelegram(mensaje) {
     try {
         const url = `https://api.telegram.org/bot${TELEGRAM.BOT_TOKEN}/sendMessage`;
-        
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -591,9 +590,8 @@ async function enviarTelegram(mensaje) {
                 parse_mode: 'HTML'
             })
         });
-        
         const data = await response.json();
-        console.log('📱 Telegram:', data.ok ? '✅ Enviado' : '❌ Error:', data.description);
+        console.log('📱 Telegram:', data.ok ? '✅ Enviado' : '❌ Error');
         return data.ok;
     } catch (error) {
         console.error('❌ Error Telegram:', error);
@@ -605,7 +603,6 @@ async function enviarTelegram(mensaje) {
 // 📊 MAPEO DE PAQUETES
 // ==============================================
 
-// FREE FIRE - Producto Cliente → Código Proveedor
 const MAPEO_FREE_FIRE = {
     "100 Diamantes": "1",
     "310 Diamantes": "2",
@@ -618,7 +615,6 @@ const MAPEO_FREE_FIRE = {
     "Pase Booyah": "9"
 };
 
-// BLOOD STRIKE - Producto Cliente → Código Proveedor
 const MAPEO_BLOOD_STRIKE = {
     "100 Golds": "1",
     "300 Golds": "2",
@@ -635,70 +631,24 @@ function detectarTipoServicio(nombreServicio, producto) {
     const serv = (nombreServicio || "").toUpperCase();
     const prod = (producto || "").toUpperCase();
     
-    // FREE FIRE
     if (serv.includes("FREE FIRE") || serv.includes("FREEFIRE") || 
         prod.includes("DIAMANTE") || prod.includes("TARJETA") || prod.includes("BOOYAH")) {
-        return {
-            tipo: "freefire",
-            nombreMostrado: "Free Fire",
-            proveedor: "API Central Pro",
-            mostrarId: true,
-            esStreaming: false
-        };
+        return { tipo: "freefire", nombreMostrado: "Free Fire", proveedor: "API Central Pro", mostrarId: true, esStreaming: false };
     }
     
-    // BLOOD STRIKE
     if (serv.includes("BLOOD") || serv.includes("STRIKE") || serv.includes("BLOCK")) {
-        return {
-            tipo: "bloodstrike",
-            nombreMostrado: "Blood Strike",
-            proveedor: "PagoNorte",
-            mostrarId: true,
-            esStreaming: false
-        };
+        return { tipo: "bloodstrike", nombreMostrado: "Blood Strike", proveedor: "PagoNorte", mostrarId: true, esStreaming: false };
     }
     
-    // NETFLIX
     if (serv.includes("NETFLIX")) {
-        return {
-            tipo: "netflix",
-            nombreMostrado: "Netflix",
-            proveedor: "PagoNorte",
-            mostrarId: false,
-            esStreaming: true
-        };
+        return { tipo: "netflix", nombreMostrado: "Netflix", proveedor: "PagoNorte", mostrarId: false, esStreaming: true };
     }
     
-    // DISNEY+
     if (serv.includes("DISNEY")) {
-        return {
-            tipo: "disney",
-            nombreMostrado: "Disney+",
-            proveedor: "PagoNorte",
-            mostrarId: false,
-            esStreaming: true
-        };
+        return { tipo: "disney", nombreMostrado: "Disney+", proveedor: "PagoNorte", mostrarId: false, esStreaming: true };
     }
     
-    // HBO
-    if (serv.includes("HBO")) {
-        return {
-            tipo: "hbo",
-            nombreMostrado: "HBO",
-            proveedor: "PagoNorte",
-            mostrarId: false,
-            esStreaming: true
-        };
-    }
-    
-    // Default
-    return {
-        tipo: "generico",
-        nombreMostrado: nombreServicio || "Servicio",
-        proveedor: "PagoNorte",
-        mostrarId: true,
-        esStreaming: false
-    };
+    return { tipo: "generico", nombreMostrado: nombreServicio || "Servicio", proveedor: "PagoNorte", mostrarId: true, esStreaming: false };
 }
 
 // ==============================================
@@ -728,7 +678,6 @@ function obtenerCodigoProveedor() {
         }
         return paqueteCod || "1";
     }
-    
     if (servicioInfo.tipo === "bloodstrike") {
         if (MAPEO_BLOOD_STRIKE[producto]) return MAPEO_BLOOD_STRIKE[producto];
         for (const [key, value] of Object.entries(MAPEO_BLOOD_STRIKE)) {
@@ -739,7 +688,6 @@ function obtenerCodigoProveedor() {
         }
         return "1";
     }
-    
     return paqueteCod || "1";
 }
 
@@ -758,7 +706,6 @@ function configurarVisibilidadCampos() {
     document.getElementById('datoNombreJugador').textContent = nombreJugador || idJugador;
     document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
-    // Mostrar/ocultar campos según servicio
     const filaId = document.getElementById('filaId');
     const filaNombre = document.getElementById('filaNombreJugador');
     if (servicioInfo.mostrarId) {
@@ -769,7 +716,6 @@ function configurarVisibilidadCampos() {
         filaNombre.classList.add('ocultar-fila');
     }
     
-    // Resumen final
     document.getElementById('resIdResumen').textContent = idJugador;
     document.getElementById('resProveedorFinal').textContent = servicioInfo.proveedor;
 }
@@ -784,11 +730,7 @@ const refInput = document.getElementById('referenciaPago');
 refInput.addEventListener('input', function(e) {
     this.value = this.value.replace(/\D/g, '');
     const btn = document.getElementById('btnVerificar');
-    if (this.value.length >= 6) {
-        btn.disabled = false;
-    } else {
-        btn.disabled = true;
-    }
+    btn.disabled = this.value.length < 6;
 });
 
 // ==============================================
@@ -804,11 +746,7 @@ function copiarTexto(texto, boton){
 }
 
 function copiarTodosLosDatos(boton){
-    const datosCompletos = `Banco: (0102) BDV
-Cédula: 32824869
-Teléfono: 04228242411
-Monto: ${precioBs} Bs`;
-
+    const datosCompletos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBs} Bs`;
     navigator.clipboard.writeText(datosCompletos)
         .then(() => {
             boton.classList.add('copiado-todo');
@@ -875,8 +813,7 @@ async function guardarPedidoEnFirebase(referencia, estado, datosExtra = {}) {
 
 function mostrarPaso(idPaso) {
     document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
-    const paso = document.getElementById(idPaso);
-    if (paso) paso.classList.add('activo');
+    document.getElementById(idPaso).classList.add('activo');
 }
 
 // ==============================================
@@ -910,7 +847,6 @@ async function verificarPagoPabilo(referencia, montoBs) {
         
         clearTimeout(timeoutId);
         const datos = await res.json();
-        
         console.log('Respuesta Pábilo:', datos);
         
         const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
@@ -1050,8 +986,6 @@ async function enviarNetflix(email, referencia) {
         referencia: referencia + "_" + Date.now()
     });
 
-    console.log('📤 Enviando Netflix:', bodyParams.toString());
-
     try {
         const response = await fetch(PAGONORTE.URL, {
             method: 'POST',
@@ -1074,7 +1008,6 @@ async function enviarNetflix(email, referencia) {
                 correo: datos.correo || null,
                 clave: datos.clave || null,
                 perfil: datos.perfil || null,
-                numero_perfil: datos.numero_perfil || null,
                 fecha_vencimiento: datos.fecha_vencimiento || null,
                 codigo_aprobacion: datos.codigo_aprobacion || null
             }
@@ -1179,7 +1112,6 @@ async function iniciarVerificacion() {
     document.getElementById('progresoVerificacion').textContent = '🔍 Verificando referencia...';
     
     try {
-        // PASO 1: Verificar si ya fue usada
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
             mostrarPaso('pasoReferenciaUsada');
@@ -1191,7 +1123,6 @@ async function iniciarVerificacion() {
         
         document.getElementById('progresoVerificacion').textContent = '💳 Consultando sistema bancario...';
         
-        // PASO 2: Verificar en Pábilo
         let pagoConfirmado = false;
         let reintentos = 0;
         
@@ -1212,7 +1143,6 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // PASO 3: Marcar referencia como usada
         document.getElementById('progresoVerificacion').textContent = '🔒 Registrando pago...';
         await marcarReferenciaComoUsada(referencia);
         
@@ -1221,13 +1151,11 @@ async function iniciarVerificacion() {
         
         await new Promise(r => setTimeout(r, 1200));
         
-        // PASO 4: Enviar al proveedor según el servicio
         document.getElementById('textoConectandoProveedor').textContent = `Conectando con ${servicioInfo.proveedor}...`;
         document.getElementById('textoProveedorSecundario').textContent = `Procesando tu ${servicioInfo.nombreMostrado}...`;
         document.getElementById('tiempoEspera').textContent = '⏱️ Tiempo estimado: 5 segundos';
         mostrarPaso('pasoConectandoProveedor');
         
-        // Timer
         let tiempoRestante = 5;
         const intervalo = setInterval(() => {
             tiempoRestante--;
@@ -1245,34 +1173,20 @@ async function iniciarVerificacion() {
         
         let resultado = null;
         
-        // FREE FIRE
         if (servicioInfo.tipo === "freefire") {
             const promesa = enviarFreeFire(idJugador, codigoProveedor, referencia);
             resultado = await Promise.race([promesa, timeoutPromise]);
-        }
-        // BLOOD STRIKE
-        else if (servicioInfo.tipo === "bloodstrike") {
+        } else if (servicioInfo.tipo === "bloodstrike") {
             const promesa = enviarBloodStrike(idJugador, codigoProveedor, referencia);
             resultado = await Promise.race([promesa, timeoutPromise]);
-        }
-        // NETFLIX
-        else if (servicioInfo.tipo === "netflix") {
+        } else if (servicioInfo.tipo === "netflix") {
             const promesa = enviarNetflix(idJugador, referencia);
             resultado = await Promise.race([promesa, timeoutPromise]);
-        }
-        // DISNEY+
-        else if (servicioInfo.tipo === "disney") {
+        } else if (servicioInfo.tipo === "disney") {
             const promesa = enviarDisney(idJugador, referencia);
             resultado = await Promise.race([promesa, timeoutPromise]);
-        }
-        // OTROS
-        else {
-            // Si es otro servicio, solo registrar el pago
-            resultado = {
-                success: true,
-                mensaje: 'Pago registrado correctamente',
-                id_solicitud: 'manual'
-            };
+        } else {
+            resultado = { success: true, mensaje: 'Pago registrado correctamente', id_solicitud: 'manual' };
         }
         
         clearTimeout(timeoutTimer);
@@ -1288,12 +1202,10 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // PASO 5: ÉXITO
         const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA", {
             id_solicitud: resultado.id_solicitud || 'N/A'
         });
         
-        // Mostrar datos extra (cuentas de streaming)
         if (resultado.datos_extra && (resultado.datos_extra.cuenta || resultado.datos_extra.correo)) {
             const box = document.getElementById('datosRecargaBox');
             box.style.display = 'block';
@@ -1357,6 +1269,7 @@ console.log('📦 Servicio:', servicioInfo.nombreMostrado);
 console.log('🔌 Proveedor:', servicioInfo.proveedor);
 console.log('📦 Producto:', producto);
 console.log('🔢 Código Proveedor:', codigoProveedor);
+console.log('🔑 Token Free Fire:', FF_API.TOKEN);
 </script>
 
 </body>
