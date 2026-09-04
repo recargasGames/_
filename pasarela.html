@@ -80,6 +80,7 @@ body{
 .resumen-etiqueta{color:#e2e8f0}
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
+.resumen-fila.ocultar-fila{display:none !important}
 
 .metodo-pago-box{
     display:flex;
@@ -281,18 +282,18 @@ body{
         
         <div class="resumen-box">
             <div class="resumen-fila">
-                <span class="resumen-etiqueta">Juego</span>
+                <span class="resumen-etiqueta">Servicio</span>
                 <span class="resumen-valor" id="datoJuego">-</span>
             </div>
-            <div class="resumen-fila">
+            <div class="resumen-fila ocultar-fila" id="filaProveedor">
                 <span class="resumen-etiqueta">Proveedor</span>
                 <span class="resumen-valor" id="datoProveedor">-</span>
             </div>
-            <div class="resumen-fila">
+            <div class="resumen-fila ocultar-fila" id="filaId">
                 <span class="resumen-etiqueta">ID Jugador</span>
                 <span class="resumen-valor" id="datoId">-</span>
             </div>
-            <div class="resumen-fila">
+            <div class="resumen-fila ocultar-fila" id="filaNombreJugador">
                 <span class="resumen-etiqueta">Nombre del Jugador</span>
                 <span class="resumen-valor" id="datoNombreJugador">-</span>
             </div>
@@ -303,6 +304,10 @@ body{
             <div class="resumen-fila">
                 <span class="resumen-etiqueta">Total</span>
                 <span class="resumen-valor verde" id="datoMontoTotal">-</span>
+            </div>
+            <div class="resumen-fila" id="filaWhatsapp">
+                <span class="resumen-etiqueta">📲 WhatsApp</span>
+                <span class="resumen-valor" id="datoWhatsapp">-</span>
             </div>
         </div>
 
@@ -367,32 +372,32 @@ body{
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Referencia registrada. Conectando con el proveedor de recargas...</div>
+        <div class="texto-secundario">Referencia registrada. Conectando con el servidor de recargas...</div>
     </div>
 
     <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
     <div id="pasoConectandoProveedor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
-        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el servidor de recargas...</div>
-        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu recarga...</div>
+        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el servidor...</div>
+        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu compra...</div>
     </div>
 
-    <!-- ✅ PASO 4: RECARGA EXITOSA — MENSAJE COMO LO QUERÍAS -->
+    <!-- ✅ PASO 4: RECARGA EXITOSA -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
-        <div class="texto-principal">¡Recarga Realizada!</div>
+        <div class="texto-principal">¡Compra Realizada!</div>
         <div class="texto-secundario">
-            Tu recarga se acreditará automáticamente en unos momentos.<br><br>
-            ✅ El pago fue procesado exitosamente.<br>
-            💰 El dinero fue enviado automáticamente a tu cuenta.<br>
-            🎉 ¡Disfruta tu compra!
+            Tu compra se procesó exitosamente.<br><br>
+            ✅ El pago fue verificado y registrado.<br>
+            📲 Te llegará la información por WhatsApp.<br>
+            🎉 ¡Gracias por tu compra!
         </div>
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="resJuego">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedor">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resJuego">-</span></div>
+            <div class="resumen-fila ocultar-fila" id="resFilaProveedor"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedor">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
+            <div class="resumen-fila ocultar-fila" id="resFilaId"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor">Pago Móvil</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
@@ -404,9 +409,9 @@ body{
     <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Saldo Insuficiente</div>
-        <div class="texto-secundario" id="textoSinSaldo">El pago fue confirmado, pero no hay saldo suficiente en el proveedor.</div>
+        <div class="texto-secundario" id="textoSinSaldo">El pago fue confirmado, pero no hay saldo disponible en este momento.</div>
         <div class="mantengo-box">
-            💳 Tu pago quedó registrado y seguro en la base de datos. En cuanto se recargue el saldo, se procesará automáticamente. Te llegará un aviso por Telegram.
+            💳 Tu pago quedó registrado y seguro en la base de datos. En cuanto se procese, te llegará la información por WhatsApp.
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -419,12 +424,12 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- 🔒 REFERENCIA YA USADA — BLOQUEADA DESDE FIREBASE -->
+    <!-- 🔒 REFERENCIA YA USADA -->
     <div id="pasoReferenciaUsada" class="paso-box">
         <div class="icono-circle icono-error">🔒</div>
         <div class="texto-principal">Referencia Ya Fue Utilizada</div>
-        <div class="texto-secundario">Esta referencia ya existe en la base de datos. Cada pago se registra UNA SOLA VEZ en todo el sistema.</div>
-        <div class="usada-box">🚫 NO se puede repetir desde ningún dispositivo. El sistema la detectó automáticamente.</div>
+        <div class="texto-secundario">Esta referencia ya existe en la base de datos. Cada pago se registra UNA SOLA VEZ.</div>
+        <div class="usada-box">🚫 No se puede repetir. El sistema la detectó automáticamente.</div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a usar una referencia nueva</a>
     </div>
 </div>
@@ -444,96 +449,129 @@ const firebaseConfig = {
   measurementId: "G-5NLLLEPWPK"
 };
 
-// Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
-console.log("✅ Firebase conectado correctamente");
-
 // ==============================================
-// 🔑 DATOS DE TODOS LOS PROVEEDORES
+// 🎯 DETECTAR TIPO DE SERVICIO Y OCULTAR CAMPOS
 // ==============================================
-
-// 🏦 PÁBILO — VERIFICACIÓN DE PAGOS
-const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
-
-// 🔥 FREE FIRE → API CENTRAL PRO
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-// 🔵 BLOOD STRIKE → PAGO NORTE
-const PN_API_KEY = "pn_111608b8f997f4cd7f9a0ee2d3d92d154c4a";
-const PN_API_SECRET = "nc_203f626dd92e7d89812c226338b57b1c01d0823ec71b2bc";
-const PN_API_URL = "https://pagonorte.net/recargas/api.jsp";
-
-// 📲 TELEGRAM — NOTIFICACIONES
-const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
-const TELEGRAM_CHAT_ID = "8452807558";
-
-// ==============================================
-// 🎯 DETECTAR JUEGO Y ASIGNAR PROVEEDOR
-// ==============================================
-function detectarJuegoYProveedor(nombreJuego) {
-    const juego = nombreJuego.toUpperCase().trim();
+function detectarTipoServicio(nombreJuego) {
+    const servicio = nombreJuego.toUpperCase().trim();
     
-    if (juego.includes("FREE FIRE") || juego.includes("FREEFIRE")) {
+    // 🎬 NETFLIX Y DISNEY+ — SOLO WHATSAPP, OCULTAR TODO LO DEMÁS
+    if (servicio.includes("NETFLIX") || servicio.includes("DISNEY")) {
         return {
-            tipo: "freefire",
-            nombreMostrado: "Free Fire",
-            proveedor: "Central Pro",
-            etiquetaClase: "proveedor-central",
-            apiUrl: FF_API_URL,
-            apiToken: FF_API_TOKEN
+            tipo: "streaming",
+            nombreMostrado: nombreJuego.includes("NETFLIX") ? "Netflix" : "Disney+",
+            proveedor: "",
+            mostrarId: false,
+            mostrarNombreJugador: false,
+            mostrarProveedor: false,
+            esStreaming: true
         };
     }
-    if (juego.includes("BLOOD STRIKE") || juego.includes("BLOODSTRIKE") || juego.includes("BLOOD")) {
-        return {
-            tipo: "bloodstrike",
-            nombreMostrado: "Blood Strike",
-            proveedor: "PagoNorte",
-            etiquetaClase: "proveedor-pagonorte",
-            apiUrl: PN_API_URL,
-            apiKey: PN_API_KEY,
-            apiSecret: PN_API_SECRET
-        };
+    
+    // 🎮 JUEGOS NORMALES — MOSTRAR TODO, PROVEEDOR = "OFICIAL"
+    let proveedorMostrar = "Proveedor Oficial";
+    if (servicio.includes("FREE FIRE") || servicio.includes("FREEFIRE")) {
+        proveedorMostrar = "Proveedor Oficial";
+    } else if (servicio.includes("BLOOD STRIKE") || servicio.includes("BLOODSTRIKE")) {
+        proveedorMostrar = "Proveedor Oficial";
     }
+    
     return {
-        tipo: "desconocido",
+        tipo: "juego",
         nombreMostrado: nombreJuego,
-        proveedor: "No asignado",
-        etiquetaClase: "",
-        apiUrl: null
+        proveedor: proveedorMostrar,
+        mostrarId: true,
+        mostrarNombreJugador: true,
+        mostrarProveedor: true,
+        esStreaming: false
     };
 }
 
 // ==============================================
-// 📋 LEER PARÁMETROS DE LA URL
+// 📋 LEER DATOS DEL LOCALSTORAGE
 // ==============================================
-const params = new URLSearchParams(window.location.search);
-const juegoRecibido = params.get('juego') || params.get('game') || localStorage.getItem('juego_seleccionado') || "";
-const idJugador = params.get('id_jugador') || localStorage.getItem('id_jugador') || "";
-const nombreJugador = params.get('nombre_jugador') || localStorage.getItem('nombre_jugador') || idJugador || "Sin nombre";
-const producto = params.get('producto') || localStorage.getItem('producto_seleccionado') || "";
-const precioUsd = params.get('precio') || localStorage.getItem('precio_usd') || "0";
-const precioBs = params.get('precio_bs') || localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = params.get('paquete_codigo') || localStorage.getItem('paquete_codigo') || "";
+const juegoRecibido = localStorage.getItem('juego_seleccionado') || "";
+const idJugador = localStorage.getItem('id_jugador') || "";
+const nombreJugador = localStorage.getItem('nombre_jugador') || idJugador || "";
+const producto = localStorage.getItem('producto_seleccionado') || "";
+const precioUsd = localStorage.getItem('precio_usd') || "0";
+const precioBs = localStorage.getItem('precio_en_bs') || "0";
+const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
-// 🔍 IDENTIFICAR JUEGO Y PROVEEDOR AUTOMÁTICAMENTE
-const juegoInfo = detectarJuegoYProveedor(juegoRecibido);
+// 🔍 DETECTAR Y CONFIGURAR VISIBILIDAD
+const servicioInfo = detectarTipoServicio(juegoRecibido);
 
 // ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
+// 👁️ CONFIGURAR VISIBILIDAD DE CAMPOS
 // ==============================================
-document.getElementById('datoJuego').textContent = juegoInfo.nombreMostrado;
-document.getElementById('datoProveedor').innerHTML = `<span class="proveedor-tag ${juegoInfo.etiquetaClase}">${juegoInfo.proveedor}</span>`;
-document.getElementById('datoId').textContent = idJugador;
-document.getElementById('datoNombreJugador').textContent = nombreJugador;
-document.getElementById('datoProducto').textContent = producto;
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
+function configurarVisibilidadCampos() {
+    // Siempre mostrar Servicio y Producto y Monto
+    
+    // Proveedor
+    const filaProveedor = document.getElementById('filaProveedor');
+    if (servicioInfo.mostrarProveedor) {
+        filaProveedor.classList.remove('ocultar-fila');
+        document.getElementById('datoProveedor').textContent = servicioInfo.proveedor;
+    } else {
+        filaProveedor.classList.add('ocultar-fila');
+    }
+
+    // ID Jugador
+    const filaId = document.getElementById('filaId');
+    if (servicioInfo.mostrarId) {
+        filaId.classList.remove('ocultar-fila');
+        document.getElementById('datoId').textContent = idJugador;
+    } else {
+        filaId.classList.add('ocultar-fila');
+    }
+
+    // Nombre del Jugador
+    const filaNombreJugador = document.getElementById('filaNombreJugador');
+    if (servicioInfo.mostrarNombreJugador) {
+        filaNombreJugador.classList.remove('ocultar-fila');
+        document.getElementById('datoNombreJugador').textContent = nombreJugador;
+    } else {
+        filaNombreJugador.classList.add('ocultar-fila');
+    }
+
+    // WhatsApp — SIEMPRE visible pero SOLO para streaming se muestra como dato principal
+    const filaWhatsapp = document.getElementById('filaWhatsapp');
+    if (servicioInfo.esStreaming) {
+        filaWhatsapp.classList.remove('ocultar-fila');
+        document.getElementById('datoWhatsapp').textContent = idJugador; // En streaming, idJugador = WhatsApp
+    } else {
+        filaWhatsapp.classList.add('ocultar-fila');
+    }
+
+    // Datos generales
+    document.getElementById('datoJuego').textContent = servicioInfo.nombreMostrado;
+    document.getElementById('datoProducto').textContent = producto;
+    document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
+
+    // Resumen final — también ocultar campos según tipo
+    const resFilaProveedor = document.getElementById('resFilaProveedor');
+    const resFilaId = document.getElementById('resFilaId');
+    if (servicioInfo.mostrarProveedor) {
+        resFilaProveedor.classList.remove('ocultar-fila');
+        document.getElementById('resProveedor').textContent = servicioInfo.proveedor;
+    } else {
+        resFilaProveedor.classList.add('ocultar-fila');
+    }
+    if (servicioInfo.mostrarId) {
+        resFilaId.classList.remove('ocultar-fila');
+        document.getElementById('resIdResumen').textContent = idJugador;
+    } else {
+        resFilaId.classList.add('ocultar-fila');
+    }
+}
+
+// Ejecutar al cargar
+configurarVisibilidadCampos();
 
 // ==============================================
 // 📋 COPIAR TEXTO
@@ -548,47 +586,41 @@ function copiarTexto(texto, boton){
 }
 
 // ==============================================
-// 🔒 FIREBASE — BLOQUEO GLOBAL DE REFERENCIAS
+// 🔒 FIREBASE — BLOQUEO DE REFERENCIAS
 // ==============================================
 async function verificarReferenciaEnFirebase(referencia) {
     const snapshot = await refReferencias.child(referencia).once('value');
-    return snapshot.exists(); // true = YA existe, false = NUEVA
+    return snapshot.exists();
 }
 
 async function marcarReferenciaComoUsada(referencia, datosPedido) {
     await refReferencias.child(referencia).set({
         fecha_uso: new Date().toISOString(),
-        juego: juegoInfo.nombreMostrado,
-        id_jugador: idJugador,
+        servicio: servicioInfo.nombreMostrado,
+        id_contacto: idJugador,
         producto: producto,
         monto_usd: precioUsd,
-        proveedor: juegoInfo.proveedor,
         dispositivo: navigator.userAgent.substring(0, 100)
     });
-    console.log("🔒 Referencia guardada en Firebase:", referencia);
 }
 
 // ==============================================
-// 💾 FIREBASE — GUARDAR PEDIDO COMPLETO
+// 💾 GUARDAR PEDIDO EN FIREBASE
 // ==============================================
-async function guardarPedidoEnFirebase(referencia, estado, idSolicitud = null) {
+async function guardarPedidoEnFirebase(referencia, estado) {
     const nuevoPedido = refPedidos.push();
     const datosPedido = {
         referencia: referencia,
-        juego: juegoInfo.nombreMostrado,
-        proveedor: juegoInfo.proveedor,
-        id_jugador: idJugador,
-        nombre_jugador: nombreJugador,
+        servicio: servicioInfo.nombreMostrado,
+        id_contacto: idJugador,
         producto: producto,
         monto_usd: precioUsd,
         monto_bs: precioBs,
         estado: estado,
-        id_solicitud: idSolicitud,
         fecha: new Date().toISOString(),
         dispositivo: navigator.userAgent.substring(0, 100)
     };
     await nuevoPedido.set(datosPedido);
-    console.log("📦 Pedido guardado en Firebase:", nuevoPedido.key);
     return nuevoPedido.key;
 }
 
@@ -598,167 +630,23 @@ function mostrarPaso(idPaso) {
 }
 
 // ==============================================
-// 🔥 RECARGA FREE FIRE — CENTRAL PRO
+// ⚡ VERIFICACIÓN DE PAGO — PÁBILO
 // ==============================================
-async function recargarFreeFire() {
-    if(!idJugador || !paqueteCod) {
-        return { exito: false, mensaje: "Faltan datos: ID de jugador o paquete" };
-    }
-    
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    console.log("🔥 Llamando a Central Pro (Free Fire):", url);
+const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
+const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
+const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
 
-    try {
-        const res = await fetch(url);
-        const texto = await res.text();
-        console.log("📥 Respuesta Central Pro:", texto);
-
-        let datos = {};
-        try { 
-            datos = JSON.parse(texto); 
-            console.log("✅ JSON parseado correctamente:", datos);
-        } catch (e) { 
-            datos = { mensaje: texto }; 
-            console.log("⚠️ No es JSON, texto plano:", texto);
-        }
-
-        const exito = datos.alerta === "green" || 
-                      datos.exito === true || 
-                      datos.success === true || 
-                      datos.estado === "completado" ||
-                      texto.toLowerCase().includes("exito") ||
-                      texto.toLowerCase().includes("correcto") ||
-                      texto.toLowerCase().includes("procesado");
-                      
-        const sinSaldo = datos.alerta === "red" || 
-                         texto.toLowerCase().includes("saldo insuficiente") || 
-                         texto.toLowerCase().includes("sin saldo") ||
-                         texto.toLowerCase().includes("insuficiente");
-
-        if (exito && !sinSaldo) {
-            return { exito: true, mensaje: datos.mensaje || "Recarga exitosa ✅", idSolicitud: datos.id_solicitud || datos.id };
-        } else if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: datos.mensaje || "Saldo insuficiente en Central Pro" };
-        } else {
-            return { exito: false, mensaje: datos.mensaje || "Error: " + texto };
-        }
-    } catch (err) {
-        console.error("❌ Error Central Pro:", err);
-        return { exito: false, mensaje: "Error de conexión con Central Pro: " + err.message };
-    }
-}
-
-// ==============================================
-// 🔵 RECARGA BLOOD STRIKE — PAGO NORTE
-// ==============================================
-async function recargarBloodStrike() {
-    if(!idJugador || !paqueteCod) {
-        return { exito: false, mensaje: "Faltan datos: ID de jugador o paquete" };
-    }
-
-    const url = `${PN_API_URL}?action=recarga&api_key=${PN_API_KEY}&api_secret=${PN_API_SECRET}&tipo=recargaBloodStrike&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    console.log("🔵 Llamando a PagoNorte (Blood Strike):", url);
-
-    try {
-        const res = await fetch(url);
-        const texto = await res.text();
-        console.log("📥 Respuesta PagoNorte:", texto);
-
-        let datos = {};
-        try { 
-            datos = JSON.parse(texto); 
-            console.log("✅ JSON parseado correctamente:", datos);
-        } catch (e) { 
-            datos = { mensaje: texto }; 
-            console.log("⚠️ No es JSON, texto plano:", texto);
-        }
-
-        const exito = datos.ok === true || 
-                      datos.alerta === "green" || 
-                      datos.exito === true || 
-                      datos.codigo_respuesta === "00" ||
-                      texto.toLowerCase().includes("exito") ||
-                      texto.toLowerCase().includes("correcto") ||
-                      texto.toLowerCase().includes("procesado");
-                      
-        const sinSaldo = datos.alerta === "red" || 
-                         texto.toLowerCase().includes("saldo insuficiente") || 
-                         texto.toLowerCase().includes("sin saldo") ||
-                         texto.toLowerCase().includes("insuficiente");
-
-        if (exito && !sinSaldo) {
-            return { exito: true, mensaje: datos.mensaje || "Recarga exitosa ✅", idSolicitud: datos.id_solicitud || datos.id };
-        } else if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: datos.mensaje || "Saldo insuficiente en PagoNorte" };
-        } else {
-            return { exito: false, mensaje: datos.mensaje || "Error: " + texto };
-        }
-    } catch (err) {
-        console.error("❌ Error PagoNorte:", err);
-        return { exito: false, mensaje: "Error de conexión con PagoNorte: " + err.message };
-    }
-}
-
-// ==============================================
-// 🎮 FUNCIÓN PRINCIPAL DE RECARGA — DETECTA Y DIRIGE
-// ==============================================
-async function procesarRecarga() {
-    if (!juegoInfo.apiUrl) {
-        return { exito: false, mensaje: "Juego no soportado aún" };
-    }
-
-    if (!idJugador || !paqueteCod) {
-        return { exito: false, mensaje: "Faltan datos para procesar la recarga" };
-    }
-
-    if (juegoInfo.tipo === "freefire") {
-        return await recargarFreeFire();
-    } else if (juegoInfo.tipo === "bloodstrike") {
-        return await recargarBloodStrike();
-    } else {
-        return { exito: false, mensaje: "Proveedor no configurado para este juego" };
-    }
-}
-
-// ==============================================
-// ⚡ FLUJO COMPLETO — PASO A PASO CON FIREBASE + DETECCIÓN MEJORADA DE PÁBILO
-// ==============================================
-async function iniciarVerificacion(){
-    const referencia = document.getElementById('referenciaPago').value.trim();
-    
-    if(!referencia || referencia.length < 6) { 
-        alert("❌ Escribe la referencia completa del pago móvil"); 
-        return; 
-    }
-
-    // ==============================================
-    // 🔒 PASO 0: VERIFICAR EN FIREBASE SI YA FUE USADA
-    // ==============================================
-    mostrarPaso('pasoVerificandoPago');
-    const referenciaExiste = await verificarReferenciaEnFirebase(referencia);
-    
-    if(referenciaExiste) {
-        console.log("🔒 REFERENCIA YA EXISTE EN FIREBASE:", referencia);
-        mostrarPaso('pasoReferenciaUsada');
-        return;
-    }
-
-    // ==============================================
-    // 🏦 PASO 1: VERIFICAR EN PÁBILO — DETECCIÓN MEJORADA
-    // ==============================================
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
+async function verificarPagoPabilo(referencia, montoBs) {
+    let montoPago = String(montoBs).replace(/[.,]/g, '');
+    montoPago = parseInt(montoPago) || Math.round(parseFloat(montoBs));
     const fecha = new Date().toISOString().split('T')[0];
 
-    let pagoConfirmado = false;
     const cuerpo = { 
         bank_reference: referencia, 
         amount: montoPago, 
         movement_type: "GENERIC", 
         fecha_pago: fecha 
     };
-
-    console.log("📤 Enviando a Pábilo:", cuerpo);
 
     try {
         const res = await fetch(API_PABILO_URL, {
@@ -768,138 +656,71 @@ async function iniciarVerificacion(){
         });
         
         const datos = await res.json();
-        console.log("🏦 Respuesta COMPLETA de Pábilo:", datos);
-        console.log("📡 Status:", res.status);
+        const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
+        const dataStatus = (datos.data?.status || "").toLowerCase();
         
-        // ✅ DETECCIÓN DE PAGO CONFIRMADO — TODAS LAS POSIBLES RESPUESTAS
-        if(res.ok && datos) {
-            const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
-            const dataStatus = (datos.data?.status || "").toLowerCase();
-            
-            console.log("🔍 Mensaje recibido:", msg);
-            console.log("🔍 Status en data:", dataStatus);
-            
-            pagoConfirmado = 
-                msg === 'payment confirmed' || 
-                msg === 'paid' || 
-                msg === 'confirmado' ||
-                msg === 'aprobado' ||
-                msg.includes('confirmado') ||
-                msg.includes('aprobado') ||
-                msg.includes('pagado') ||
-                dataStatus === 'paid' ||
-                dataStatus === 'confirmado' ||
-                dataStatus === 'aprobado' ||
-                datos.success === true ||
-                datos.exito === true ||
-                datos.paid === true ||
-                datos.confirmed === true;
-        }
-        
-        console.log("✅ Pago confirmado?", pagoConfirmado);
-        
+        return res.ok && (
+            msg === 'payment confirmed' || msg === 'paid' || msg === 'confirmado' || 
+            msg === 'aprobado' || msg.includes('confirmado') || msg.includes('aprobado') || 
+            msg.includes('pagado') || dataStatus === 'paid' || dataStatus === 'confirmado' ||
+            datos.success === true || datos.exito === true || datos.paid === true
+        );
     } catch(e) {
-        console.error("❌ Error llamando a Pábilo:", e);
-        pagoConfirmado = false;
+        return false;
     }
+}
 
-    if(!pagoConfirmado) { 
-        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); 
+// ==============================================
+// 🔥 FLUJO PRINCIPAL
+// ==============================================
+async function iniciarVerificacion(){
+    const referencia = document.getElementById('referenciaPago').value.trim();
+    
+    if(!referencia || referencia.length < 6) { 
+        alert("❌ Escribe la referencia completa del pago"); 
         return; 
     }
 
-    // ==============================================
-    // ✅ PASO 2: PAGO CONFIRMADO → BLOQUEAR REFERENCIA EN FIREBASE
-    // ==============================================
-    await marcarReferenciaComoUsada(referencia, {
-        juego: juegoInfo.nombreMostrado,
-        id_jugador: idJugador,
-        monto_usd: precioUsd
-    });
+    // PASO 1: Verificar si ya fue usada
+    mostrarPaso('pasoVerificandoPago');
+    const yaUsada = await verificarReferenciaEnFirebase(referencia);
+    
+    if(yaUsada) {
+        mostrarPaso('pasoReferenciaUsada');
+        return;
+    }
 
+    // PASO 2: Verificar en Pábilo
+    const pagoConfirmado = await verificarPagoPabilo(referencia, precioBs);
+    
+    if(!pagoConfirmado) {
+        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
+        return;
+    }
+
+    // PASO 3: Pago confirmado — bloquear referencia
+    await marcarReferenciaComoUsada(referencia, {});
     mostrarPaso('pasoPagoConfirmado');
     await new Promise(r => setTimeout(r, 1200));
 
-    // ==============================================
-    // 🔌 PASO 3: CONECTAR CON PROVEEDOR
-    // ==============================================
-    document.getElementById('textoConectandoProveedor').textContent = `Conectando con el servidor de recargas...`;
-    document.getElementById('textoProveedorSecundario').textContent = `Procesando tu recarga de ${juegoInfo.nombreMostrado}...`;
+    // PASO 4: Conectando al servidor
+    document.getElementById('textoConectandoProveedor').textContent = `Conectando con el servidor...`;
+    document.getElementById('textoProveedorSecundario').textContent = `Procesando tu compra de ${servicioInfo.nombreMostrado}...`;
     mostrarPaso('pasoConectandoProveedor');
-
-    const resultadoRecarga = await procesarRecarga();
     await new Promise(r => setTimeout(r, 1500));
 
-    // ==============================================
-    // 🎯 PASO 4: RESULTADO FINAL
-    // ==============================================
-    if(resultadoRecarga.exito){
-        // ✅ RECARGA EXITOSA — GUARDAR PEDIDO COMPLETO
-        const idPedidoFirebase = await guardarPedidoEnFirebase(referencia, "COMPLETADA", resultadoRecarga.idSolicitud);
-        
-        document.getElementById('resPedido').textContent = `#${idPedidoFirebase.substring(0, 8).toUpperCase()}`;
-        document.getElementById('resJuego').textContent = juegoInfo.nombreMostrado;
-        document.getElementById('resProveedor').textContent = juegoInfo.proveedor;
-        document.getElementById('resProducto').textContent = producto;
-        document.getElementById('resIdResumen').textContent = idJugador;
-        document.getElementById('resReferencia').textContent = referencia;
-        document.getElementById('resMonto').textContent = `${precioUsd} USD`;
-        
-        mostrarPaso('pasoRecargaExitosa');
-        enviarTelegram(idPedidoFirebase, referencia, true, resultadoRecarga.idSolicitud);
-    } else if(resultadoRecarga.sinSaldo){
-        // ⚠️ SIN SALDO — GUARDAR COMO PENDIENTE
-        await guardarPedidoEnFirebase(referencia, "PENDIENTE_SALDO");
-        document.getElementById('textoSinSaldo').textContent = `El pago fue confirmado, pero no hay saldo suficiente en ${juegoInfo.proveedor}.`;
-        mostrarPaso('pasoSinSaldo');
-        enviarTelegram("PAGO CONFIRMADO — SALDO INSUFICIENTE", referencia, false);
-    } else {
-        // ❌ ERROR EN LA RECARGA — PERO EL PAGO SÍ ESTÁ CONFIRMADO
-        await guardarPedidoEnFirebase(referencia, "ERROR_RECARGA");
-        // ⚠️ IMPORTANTE: El pago fue confirmado por Pábilo, así que NO decimos "no encontrado"
-        document.querySelector('#pasoPagoNoEncontrado .texto-principal').textContent = "Pago Confirmado — Error en Recarga";
-        document.querySelector('#pasoPagoNoEncontrado .texto-secundario').textContent = 
-            "El pago fue verificado correctamente, pero hubo un problema procesando la recarga. Te lo revisaremos manualmente.";
-        mostrarPaso('pasoPagoNoEncontrado');
-    }
-}
-
-// ==============================================
-// 📲 ENVIAR NOTIFICACIÓN A TELEGRAM
-// ==============================================
-function enviarTelegram(pedido, ref, todoCorrecto, idSolicitud = null){
-    const metodo = 'Pago Móvil';
-    const estado = todoCorrecto 
-        ? "✅ AUTOPAGADO — " + juegoInfo.proveedor 
-        : "⚠️ PAGO CONFIRMADO — SALDO INSUFICIENTE EN " + juegoInfo.proveedor;
+    // PASO 5: ÉXITO — Mostrar resumen
+    const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA");
     
-    let mensajeTexto = `
-📌 NUEVO PEDIDO RECIBIDO — FIREBASE
+    document.getElementById('resPedido').textContent = `#${idPedido.substring(0, 8).toUpperCase()}`;
+    document.getElementById('resJuego').textContent = servicioInfo.nombreMostrado;
+    document.getElementById('resProducto').textContent = producto;
+    document.getElementById('resReferencia').textContent = referencia;
+    document.getElementById('resMonto').textContent = `${precioUsd} USD`;
 
-🎮 Juego: ${juegoInfo.nombreMostrado}
-🏢 Proveedor: ${juegoInfo.proveedor}
-👤 Jugador: ${nombreJugador}
-🆔 ID: ${idJugador}
-🎁 Producto: ${producto}
-💵 Valor USDT: ${precioUsd}
-💳 Método de pago: ${metodo}
-🔗 Ref: ${ref}
-💰 Monto: ${precioUsd} / ${precioBs} Bs
-
-${estado}
-🔒 Referencia registrada en base de datos
-    `;
-
-    if (idSolicitud) {
-        mensajeTexto += `\n📋 ID Solicitud: ${idSolicitud}`;
-    }
-
-    const mensaje = encodeURIComponent(mensajeTexto);
-
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${mensaje}`)
-        .then(() => console.log("📲 Telegram notificado"))
-        .catch(err => console.log("Error enviando Telegram:", err));
+    mostrarPaso('pasoRecargaExitosa');
 }
 </script>
+
 </body>
 </html>
