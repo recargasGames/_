@@ -7,7 +7,7 @@
 <title>RECARGASGAMES - Call of Duty Mobile</title>
 <style>
 :root{
-    --color-principal:#3b82f6; /* 🔵 TODO EN AZUL */
+    --color-principal:#3b82f6;
     --color-hover:#2563eb;
     --color-azul:#3b82f6;
     --color-blanco:#ffffff;
@@ -23,7 +23,6 @@ body{
     padding-top:110px;
 }
 
-/* 🔒 BARRA FIJA — SOLO LOGO, SIN NOMBRE, SIN BOTONES */
 .barra-superior{
     position:fixed;
     top:0;
@@ -37,9 +36,9 @@ body{
 .header{
     padding:12px 20px;
     display:flex;
-    justify-content:flex-start;
+    justify-content:space-between;
     align-items:center;
-    border-bottom:1px solid #2a374f; /* ✅ LÍNEA EN MEDIO RELLENA */
+    border-bottom:1px solid #2a374f;
     margin-bottom:0;
 }
 .brand{display:flex;align-items:center}
@@ -49,9 +48,63 @@ body{
     border-radius:14px;
     background:transparent;
 }
-/* ❌ SIN TEXTO, SIN BOTONES DE PERFIL */
 
-/* MENÚ — SIN BRAWL STARS, SIN BARRA DE SCROLL */
+/* 🍔 MENÚ HAMBURGUESA */
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
+    cursor:pointer;
+    padding:5px 10px;
+    transition:transform 0.2s;
+}
+.menu-hamburguesa:hover {
+    transform:scale(1.1);
+    color:var(--color-azul);
+}
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
+    overflow:hidden;
+}
+.menu-flotante.activo {
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.menu-opcion {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    color:white;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:500;
+    transition:all 0.2s;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {
+    border-bottom:none;
+}
+.menu-opcion:hover {
+    background:rgba(59,130,246,0.15);
+    color:var(--color-azul);
+    padding-left:22px;
+}
+
 .games-menu{
     display:flex;
     gap:8px;
@@ -80,10 +133,9 @@ body{
     border-radius:0;
 }
 
-/* CONTENIDO — TARJETA BAJITA Y SEPARADITA */
 .main{
     padding:20px;
-    padding-top:30px; /* ✅ SEPARADITA como 1cm del menú */
+    padding-top:30px;
     max-width:800px;
     margin:0 auto;
 }
@@ -119,7 +171,9 @@ body{
     transition:.2s;
 }
 .pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul)}
+.tasa-info{font-size:12px;color:#94a3b8;margin-top:8px;text-align:right}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
+@media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 .product-card{
     background:rgba(11,18,32,.85);
     border:1px solid #1f2937;
@@ -134,7 +188,7 @@ body{
 .product-desc{color:#9ca3af;font-size:11px;margin-bottom:10px}
 .product-price{font-size:22px;font-weight:700;color:var(--color-azul);margin-bottom:12px}
 .btn-buy{
-    background:var(--color-azul); /* 🔵 BOTÓN AZUL */
+    background:var(--color-azul);
     color:#fff;
     border:none;
     width:100%;height:40px;
@@ -147,7 +201,7 @@ body{
 .btn-buy:hover{background:var(--color-hover)}
 .section-divider{margin:25px 0 15px;text-align:center}
 .section-divider span{
-    background:var(--color-azul); /* 🔵 ETIQUETA AZUL */
+    background:var(--color-azul);
     color:#fff;
     padding:6px 18px;
     border-radius:30px;
@@ -176,47 +230,63 @@ body{
     z-index:1000;transition:.3s;text-decoration:none;
 }
 .back-to-top.show{opacity:1;visibility:visible}
-@media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:500px){
     body{padding-top:100px}
     .main{padding-top:25px}
     .brand img{height:45px}
     .header{padding:10px 16px}
     .games-menu{padding:10px 12px}
+    .menu-flotante{right:10px;min-width:200px}
 }
 </style>
 </head>
-<body>
+<body onclick="cerrarMenuSiExterior(event)">
 
-<!-- 🔒 BARRA FIJA — SOLO LOGO, SIN NOMBRE, SIN BOTONES, SIN BRAWL STARS -->
 <div class="barra-superior">
     <div class="header">
-        <div class="brand"><img src="logo.png" alt="Logo"></div>
+        <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        
+        <!-- 📋 MENÚ FLOTANTE COMPLETO -->
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="mlbb.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="codm.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
     </div>
     <div class="games-menu">
         <a href="index.html">Inicio</a>
         <a href="freefire.html">Free Fire</a>
         <a href="bloodstrike.html">Blood Strike</a>
         <a href="roblox.html">Roblox</a>
-        <a href="ml.html">Mobile Legends</a>
-        <a href="cod.html" class="active">COD Mobile</a>
+        <a href="mlbb.html">Mobile Legends</a>
+        <a href="codm.html" class="active">COD Mobile</a>
         <a href="pubg.html">PUBG Mobile</a>
-         <a href="arenabreakout.html">ARENA Breakout</a>
-         <a href="delta.html">DELTA Force</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="deltaforce.html">Delta Force</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
     </div>
 </div>
 
 <div class="main">
-    <!-- ✅ TARJETA DE DATOS — BAJITA Y SEPARADITA -->
     <div class="card-panel">
         <div class="panel-title">Datos para la Recarga</div>
         <div class="form-group">
-            <label>Correo Electrónico</label>
-            <input type="email" class="form-input" id="codEmail" placeholder="ejemplo@correo.com">
+            <label>Correo Electrónico / ID de Jugador</label>
+            <input type="text" class="form-input" id="codEmail" placeholder="ejemplo@correo.com o ID de jugador" autocomplete="off">
         </div>
         <div class="form-group">
             <label>Número de WhatsApp</label>
-            <input type="tel" class="form-input" id="codWhatsapp" placeholder="Ej: 04121234567">
+            <input type="tel" class="form-input" id="codWhatsapp" placeholder="Ej: 04121234567" autocomplete="tel">
         </div>
         <div id="verificacionStatus" style="margin-top:8px"></div>
     </div>
@@ -227,6 +297,7 @@ body{
             <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">PAGO MOVIL</div>
             <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">BINANCE</div>
         </div>
+        <div class="tasa-info" id="tasaInfo">Tasa: cargando...</div>
     </div>
     
     <div class="section-divider"><span>🎮 CP - PUNTOS COD</span></div>
@@ -287,7 +358,7 @@ body{
 </div>
 
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
-<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -305,26 +376,39 @@ const fbConfig={
 };
 const app=initializeApp(fbConfig),auth=getAuth(app),db=getDatabase(app);
 
-let logueado=false,metodo="PAGO MOVIL",tasa=930,uidActual=null;
+let logueado=false,metodo="PAGO MOVIL",tasa=930;
 let emailOk = false, whatsappOk = false;
 const juegoActual = "CALL OF DUTY MOBILE";
 
+// ==============================================
+// 💰 TASA DE BINANCE — ACTUALIZA CADA MINUTO
+// ==============================================
 async function cargarTasaBinance() {
+    const tasaInfo = document.getElementById('tasaInfo');
     try {
-        const respuesta = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", { method: 'GET', cache: 'no-cache' });
+        const respuesta = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", { 
+            method: 'GET', 
+            cache: 'no-cache',
+            signal: AbortSignal.timeout(8000)
+        });
         if (!respuesta.ok) throw new Error("Error API");
         const datos = await respuesta.json();
         const precio = parseFloat(datos.price);
         if (!precio || precio <= 0) throw new Error("Precio inválido");
         tasa = Math.round(precio);
         localStorage.setItem('tasa_usd_ves', tasa);
+        tasaInfo.textContent = `Tasa: ${tasa} Bs/USD`;
         actualizarPrecios();
     } catch (error) {
         tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 930;
+        tasaInfo.textContent = `Tasa: ${tasa} Bs/USD (guardada)`;
         actualizarPrecios();
     }
 }
 
+// ==============================================
+// 💰 ACTUALIZAR PRECIOS SEGÚN MÉTODO DE PAGO
+// ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u=parseFloat(el.dataset.usd);
@@ -339,6 +423,9 @@ window.seleccionarPago=function(m,e){
     actualizarPrecios();
 };
 
+// ==============================================
+// ✅ VALIDACIONES DE CORREO/WHATSAPP
+// ==============================================
 function validarEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
 function validarWhatsapp(whatsapp){ return /^\d{10,12}$/.test(whatsapp); }
 
@@ -359,25 +446,62 @@ function mostrarEstado(mensaje, tipo) {
 function verificarCampos(){
     const email = emailInput.value.trim();
     const whatsapp = whatsappInput.value.trim();
-    if(!email && !whatsapp) { mostrarEstado(""); emailOk = false; whatsappOk = false; return; }
-    if(!email) { mostrarEstado("Ingresa tu correo", "error"); emailOk = false; return; }
-    if(!whatsapp) { mostrarEstado("Ingresa tu WhatsApp", "error"); whatsappOk = false; return; }
-    if(!validarEmail(email)) { mostrarEstado("Correo inválido", "error"); emailOk = false; return; }
-    if(!validarWhatsapp(whatsapp)) { mostrarEstado("WhatsApp inválido (10-12 dígitos)", "error"); whatsappOk = false; return; }
-    mostrarEstado("Datos válidos ✅", "success");
-    emailOk = true; whatsappOk = true;
+    
+    if(!email && !whatsapp) { 
+        mostrarEstado(""); 
+        emailOk = false; 
+        whatsappOk = false; 
+        return; 
+    }
+    if(!email) { 
+        mostrarEstado("Ingresa tu correo o ID de jugador", "error"); 
+        emailOk = false; 
+        return; 
+    }
+    if(!whatsapp) { 
+        mostrarEstado("Ingresa tu número de WhatsApp", "error"); 
+        whatsappOk = false; 
+        return; 
+    }
+    // Acepta tanto correo como ID (solo números)
+    const esValido = validarEmail(email) || /^\d+$/.test(email);
+    if(!esValido) { 
+        mostrarEstado("Formato inválido — usa correo o ID numérico", "error"); 
+        emailOk = false; 
+        return; 
+    }
+    if(!validarWhatsapp(whatsapp)) { 
+        mostrarEstado("WhatsApp inválido (10-12 dígitos)", "error"); 
+        whatsappOk = false; 
+        return; 
+    }
+    mostrarEstado("✅ Datos verificados — ¡Listo para comprar!", "success");
+    emailOk = true; 
+    whatsappOk = true;
 }
 
 emailInput.addEventListener("input", ()=>{ clearTimeout(timeoutId); timeoutId = setTimeout(verificarCampos, 300); });
 whatsappInput.addEventListener("input", ()=>{ clearTimeout(timeoutId); timeoutId = setTimeout(verificarCampos, 300); });
 
+// ==============================================
+// 🛒 COMPRAR — GUARDAR TODO Y IR A PASARELA
+// ==============================================
 window.comprarProducto = function(producto, precioUsd){
     const email = emailInput.value.trim();
     const whatsapp = whatsappInput.value.trim();
     
-    if(!email){ alert("❌ Ingresa tu correo electrónico"); return; }
-    if(!whatsapp){ alert("❌ Ingresa tu número de WhatsApp"); return; }
-    if(!emailOk || !whatsappOk){ alert("⏳ Verifica tus datos antes de comprar"); return; }
+    if(!email){
+        alert("❌ Ingresa tu correo o ID de jugador");
+        return;
+    }
+    if(!whatsapp){
+        alert("❌ Ingresa tu número de WhatsApp");
+        return;
+    }
+    if(!emailOk || !whatsappOk){
+        alert("⏳ Verifica tus datos antes de comprar");
+        return;
+    }
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
     const cp = event.target.dataset.cp || 0;
@@ -394,14 +518,29 @@ window.comprarProducto = function(producto, precioUsd){
     window.location.href = "pasarela.html";
 };
 
-onAuthStateChanged(auth,u=>{logueado=!!u; if(u)uidActual=u.uid;});
+// ==============================================
+// 🍔 MENÚ Y BOTÓN SUBIR ARRIBA
+// ==============================================
+window.alternarMenu = function() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+};
+window.cerrarMenuSiExterior = function(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('activo');
+    }
+};
+
+onAuthStateChanged(auth,u=>{logueado=!!u;});
 cargarTasaBinance();
-setInterval(cargarTasaBinance, 60000);
+setInterval(cargarTasaBinance, 60000); // Actualiza tasa cada minuto
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
 });
 </script>
+
 </body>
 </html>
