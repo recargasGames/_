@@ -13,6 +13,8 @@
 <style>
 :root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-borde:rgba(51,65,85,0.5);--color-deshabilitado:#475569}
 
+*{box-sizing:border-box;margin:0;padding:0}
+
 body{
     background-image:url('fondo.jpg');
     background-size:cover;
@@ -68,6 +70,9 @@ body{
 .paso-box{text-align:center;padding:20px 10px;display:none}
 .paso-box.activo{display:block}
 
+/* ==============================================
+   SPINNERS Y ICONOS
+   ============================================== */
 .spinner-circle{width:80px;height:80px;border:3px solid rgba(51,65,85,0.5);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
 .spinner-amarillo{border-top-color:var(--color-cargando)}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
@@ -77,9 +82,15 @@ body{
 .icono-amarillo{border-color:var(--color-cargando);color:var(--color-cargando)}
 .icono-error{border-color:var(--color-error);color:var(--color-error)}
 
+/* ==============================================
+   TEXTOS
+   ============================================== */
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.8;max-width:340px;margin:0 auto}
 
+/* ==============================================
+   RESUMEN DEL PEDIDO
+   ============================================== */
 .resumen-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -98,10 +109,13 @@ body{
 }
 .resumen-fila:last-child{border-bottom:none}
 .resumen-etiqueta{color:#e2e8f0}
-.resumen-valor{font-weight:600;color:#fff}
+.resumen-valor{font-weight:600;color:#fff;text-align:right}
 .resumen-valor.verde{color:var(--color-principal)}
 .resumen-fila.ocultar-fila{display:none !important}
 
+/* ==============================================
+   MÉTODOS DE PAGO
+   ============================================== */
 .metodo-pago-box{
     display:flex;
     gap:12px;
@@ -150,6 +164,9 @@ body{
     text-align:center;
 }
 
+/* ==============================================
+   📋 DATOS DE PAGO - MEJORADO Y ORDENADO
+   ============================================== */
 .datos-pago-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -158,68 +175,118 @@ body{
     margin-bottom:20px;
     backdrop-filter:blur(10px);
 }
-.titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
-.dato-line{
+.titulo-seccion{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:20px;
+    text-align:center;
+    color:var(--color-principal);
+}
+
+/* 📦 TARJETA DE DATOS DE PAGO */
+.pago-card{
+    background:rgba(15,23,42,0.6);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:14px 16px;
-    background:rgba(15,23,42,0.6);
-    border-radius:12px;
-    margin-bottom:12px;
+    transition:all .2s;
+    border:1px solid transparent;
 }
-.dato-line:last-child{margin-bottom:0}
-.dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
-.dato-texto span{color:#fff}
+.pago-card:hover{
+    border-color:rgba(16,185,129,0.2);
+}
+.pago-card:last-child{margin-bottom:0}
 
-.copiar-btn{
-    width:44px;
-    height:44px;
+.pago-info{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex:1;
+}
+.pago-icono{
+    width:38px;
+    height:38px;
     border-radius:10px;
-    background:rgba(59,130,246,0.15);
-    border:none;
+    background:rgba(59,130,246,0.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    flex-shrink:0;
+}
+.pago-texto{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+}
+.pago-texto .label{
+    font-size:11px;
+    color:#94a3b8;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+.pago-texto .value{
+    font-size:16px;
+    font-weight:600;
+    color:#fff;
+}
+.pago-texto .value.monto{
+    color:var(--color-principal);
+    font-size:18px;
+}
+
+.pago-accion{
+    flex-shrink:0;
+}
+
+/* Botón copiar individual */
+.copiar-btn-sm{
+    width:36px;
+    height:36px;
+    border-radius:10px;
+    background:rgba(59,130,246,0.12);
+    border:1px solid rgba(59,130,246,0.15);
     color:#93c5fd;
     cursor:pointer;
     display:flex;
     align-items:center;
     justify-content:center;
     transition:.2s;
-    backdrop-filter:blur(4px);
-    flex-shrink:0;
-    padding:0;
 }
-.copiar-btn svg{
-    width:20px;
-    height:20px;
+.copiar-btn-sm:hover{
+    background:rgba(59,130,246,0.25);
+    transform:scale(1.05);
+}
+.copiar-btn-sm svg{
+    width:16px;
+    height:16px;
     stroke:currentColor;
     stroke-width:2;
     stroke-linecap:round;
     stroke-linejoin:round;
     fill:none;
-    opacity:0.7;
-    transition:.2s;
 }
-.copiar-btn:hover{
-    background:rgba(59,130,246,0.25);
-    transform:scale(1.05);
-}
-.copiar-btn:hover svg{opacity:1}
-.copiar-btn.copiado{
+.copiar-btn-sm.copiado{
     background:rgba(16,185,129,0.2);
     color:#34d399;
+    border-color:#34d399;
 }
-.copiar-btn.copiado svg{display:none}
-.copiar-btn.copiado::after{
+.copiar-btn-sm.copiado svg{display:none}
+.copiar-btn-sm.copiado::after{
     content:'✓';
-    font-size:20px;
+    font-size:16px;
     font-weight:bold;
 }
 
+/* Botón copiar todo */
 .copiar-todo-btn{
     width:100%;
     padding:14px;
     margin-top:16px;
-    background:rgba(16,185,129,0.15);
+    background:rgba(16,185,129,0.12);
     border:1px solid var(--color-principal);
     border-radius:12px;
     color:var(--color-principal);
@@ -230,18 +297,30 @@ body{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:8px;
+    gap:10px;
 }
 .copiar-todo-btn:hover{
-    background:rgba(16,185,129,0.25);
-    transform:scale(1.02);
+    background:rgba(16,185,129,0.2);
+    transform:scale(1.01);
 }
 .copiar-todo-btn.copiado-todo{
-    background:rgba(16,185,129,0.25);
+    background:rgba(16,185,129,0.2);
     color:#34d399;
     border-color:#34d399;
 }
+.copiar-todo-btn svg{
+    width:18px;
+    height:18px;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    fill:none;
+}
 
+/* ==============================================
+   INPUT Y BOTONES
+   ============================================== */
 .input-ref{
     width:100%;
     padding:14px;
@@ -309,6 +388,7 @@ body{
     margin-top:15px;
     font-size:14px;
     color:#fcd34d;
+    text-align:center;
 }
 .usada-box{
     background:rgba(239,68,68,.15);
@@ -328,23 +408,10 @@ body{
     color:#93c5fd;
     font-weight:600;
 }
-.datos-recarga-box{
-    background:rgba(16,185,129,.1);
-    border:1px solid rgba(16,185,129,.3);
-    border-radius:12px;
-    padding:15px;
-    margin-top:15px;
-    color:#6ee7b7;
-    font-size:14px;
-    text-align:left;
-}
-.datos-recarga-box strong{color:#fff}
 
-.proveedor-tag{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;margin-left:8px}
-.proveedor-api-central{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)}
-.proveedor-pagonorte{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
-.oculto{display:none !important}
-
+/* ==============================================
+   TOAST
+   ============================================== */
 .toast-container{
     position:fixed;
     bottom:20px;
@@ -374,13 +441,22 @@ body{
     to{transform:translateX(0);opacity:1}
 }
 
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
 @media(max-width:480px){
     .header{padding:10px 15px}
     .header img{height:40px}
     .main{padding:20px 15px}
     .texto-principal{font-size:22px}
-    .dato-line{flex-direction:column;align-items:stretch;gap:8px}
-    .copiar-btn{align-self:flex-end}
+    .pago-card{
+        flex-wrap:wrap;
+        gap:10px;
+    }
+    .pago-info{flex:1 1 100%}
+    .pago-accion{align-self:flex-end}
+    .resumen-fila{flex-direction:column;align-items:flex-start;gap:4px}
+    .resumen-valor{text-align:left}
 }
 </style>
 </head>
@@ -395,7 +471,9 @@ body{
 </div>
 
 <div class="main">
-    <!-- PASO 0: DATOS DEL PEDIDO -->
+    <!-- ==========================================
+    PASO 0: DATOS DEL PEDIDO
+    ========================================== -->
     <div id="pasoDatos" class="paso-box activo">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
         
@@ -413,7 +491,7 @@ body{
                 <span class="resumen-valor" id="datoId">-</span>
             </div>
             <div class="resumen-fila ocultar-fila" id="filaNombreJugador">
-                <span class="resumen-etiqueta">Nombre del Jugador</span>
+                <span class="resumen-etiqueta">Nombre</span>
                 <span class="resumen-valor" id="datoNombreJugador">-</span>
             </div>
             <div class="resumen-fila">
@@ -442,69 +520,101 @@ body{
             Se está trabajando en mejoras. Por favor usa <strong>Pago Móvil</strong> por ahora.
         </div>
 
+        <!-- ==========================================
+        📋 DATOS DE PAGO - MEJORADO Y ORDENADO
+        ========================================== -->
         <div class="datos-pago-box">
-            <h3 class="titulo-seccion" style="margin-top:0;">Datos de Pago Móvil</h3>
-            <div class="dato-line">
-                <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
-                <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="dato-line">
-                <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
-                <button class="copiar-btn" onclick="copiarTexto('32824869', this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="dato-line">
-                <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
-                <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
-            </div>
-            <div class="dato-line">
-                <div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">-</span></div>
-                <button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                </button>
+            <h3 class="titulo-seccion">💳 Datos de Pago Móvil</h3>
+
+            <!-- Banco -->
+            <div class="pago-card">
+                <div class="pago-info">
+                    <div class="pago-icono">🏦</div>
+                    <div class="pago-texto">
+                        <span class="label">Banco</span>
+                        <span class="value">Banco de Venezuela (0102)</span>
+                    </div>
+                </div>
+                <div class="pago-accion">
+                    <button class="copiar-btn-sm" onclick="copiarTexto('Banco de Venezuela (0102)', this)">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
             </div>
 
+            <!-- Cédula -->
+            <div class="pago-card">
+                <div class="pago-info">
+                    <div class="pago-icono">🆔</div>
+                    <div class="pago-texto">
+                        <span class="label">Cédula / RIF</span>
+                        <span class="value">V-32.824.869</span>
+                    </div>
+                </div>
+                <div class="pago-accion">
+                    <button class="copiar-btn-sm" onclick="copiarTexto('V-32.824.869', this)">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="pago-card">
+                <div class="pago-info">
+                    <div class="pago-icono">📱</div>
+                    <div class="pago-texto">
+                        <span class="label">Teléfono / Usuario</span>
+                        <span class="value">0422-8242411</span>
+                    </div>
+                </div>
+                <div class="pago-accion">
+                    <button class="copiar-btn-sm" onclick="copiarTexto('0422-8242411', this)">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Monto -->
+            <div class="pago-card" style="border-color:rgba(16,185,129,0.2);background:rgba(16,185,129,0.05);">
+                <div class="pago-info">
+                    <div class="pago-icono" style="background:rgba(16,185,129,0.15);">💰</div>
+                    <div class="pago-texto">
+                        <span class="label">Monto a pagar</span>
+                        <span class="value monto" id="montoBsMostrar">- Bs</span>
+                    </div>
+                </div>
+                <div class="pago-accion">
+                    <button class="copiar-btn-sm" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)">
+                        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botón Copiar Todo -->
             <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                 Copiar todos los datos de pago
             </button>
 
-            <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left">
-                Referencia completa del pago:
-                <span style="font-weight:400;color:#94a3b8;font-size:14px;display:block;margin-top:4px;">
+            <!-- Referencia -->
+            <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:600;text-align:left;color:#e2e8f0;">
+                📝 Referencia del pago
+                <span style="font-weight:400;color:#94a3b8;font-size:13px;display:block;margin-top:3px;">
                     (Solo números, mínimo 6 dígitos)
                 </span>
             </label>
             <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" inputmode="numeric" pattern="[0-9]*">
-            <div id="refValidation" style="font-size:14px;text-align:left;margin-top:-10px;margin-bottom:15px;display:none;"></div>
+            <div id="refValidation" style="font-size:13px;text-align:left;margin-top:-8px;margin-bottom:15px;display:none;"></div>
         </div>
 
-        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> en TODO el sistema. Queda registrada permanentemente en la base de datos.</div>
+        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong>. Queda registrada permanentemente.</div>
 
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
 
-    <!-- PASO 1: VERIFICANDO EN FIREBASE + PÁBILO -->
+    <!-- ==========================================
+    PASO 1: VERIFICANDO
+    ========================================== -->
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando Pago...</div>
@@ -512,35 +622,41 @@ body{
         <div style="margin-top:20px;font-size:14px;color:#94a3b8;" id="progresoVerificacion">Iniciando verificación...</div>
     </div>
 
-    <!-- PASO 2: PAGO CONFIRMADO -->
+    <!-- ==========================================
+    PASO 2: PAGO CONFIRMADO
+    ========================================== -->
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Referencia registrada. Conectando con API Central Pro...</div>
+        <div class="texto-secundario">Referencia registrada. Procesando recarga...</div>
     </div>
 
-    <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
+    <!-- ==========================================
+    PASO 3: CONECTANDO CON PROVEEDOR
+    ========================================== -->
     <div id="pasoConectandoProveedor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
-        <div class="texto-principal" id="textoConectandoProveedor">Conectando con API Central Pro...</div>
-        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu recarga de Free Fire...</div>
-        <div style="margin-top:15px;font-size:13px;color:#64748b;" id="tiempoEspera">Tiempo estimado: 5 segundos</div>
+        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el proveedor...</div>
+        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu recarga...</div>
+        <div style="margin-top:15px;font-size:13px;color:#64748b;" id="tiempoEspera">⏱️ Tiempo estimado: 5 segundos</div>
     </div>
 
-    <!-- ✅ PASO 4: COMPRA EXITOSA -->
+    <!-- ==========================================
+    ✅ PASO 4: COMPRA EXITOSA
+    ========================================== -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Compra Realizada!</div>
-        <div class="texto-secundario" id="mensajeExito">
+        <div class="texto-secundario">
             Tu compra se procesó exitosamente.<br><br>
             ✅ El pago fue verificado y registrado.<br>
-            ✅ La recarga fue enviada a API Central Pro.<br>
+            ✅ La recarga fue enviada al proveedor.<br>
             🎉 ¡Gracias por tu compra!
         </div>
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicio">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedorFinal">API Central Pro</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedorFinal">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor">Pago Móvil</span></div>
@@ -551,7 +667,9 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ❌ PAGO NO ENCONTRADO -->
+    <!-- ==========================================
+    ❌ PAGO NO ENCONTRADO
+    ========================================== -->
     <div id="pasoPagoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
@@ -559,7 +677,9 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- 🔒 REFERENCIA YA USADA -->
+    <!-- ==========================================
+    🔒 REFERENCIA YA USADA
+    ========================================== -->
     <div id="pasoReferenciaUsada" class="paso-box">
         <div class="icono-circle icono-error">🔒</div>
         <div class="texto-principal">Referencia Ya Fue Utilizada</div>
@@ -568,7 +688,9 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a usar una referencia nueva</a>
     </div>
 
-    <!-- ❌ ERROR PROVEEDOR -->
+    <!-- ==========================================
+    ❌ ERROR PROVEEDOR
+    ========================================== -->
     <div id="pasoErrorProveedor" class="paso-box">
         <div class="icono-circle icono-error">❌</div>
         <div class="texto-principal">Error en el Proveedor</div>
@@ -580,7 +702,9 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ⏱️ TIMEOUT -->
+    <!-- ==========================================
+    ⏱️ TIMEOUT
+    ========================================== -->
     <div id="pasoTimeout" class="paso-box">
         <div class="icono-circle icono-error">⏱️</div>
         <div class="texto-principal">Tiempo de Espera Agotado</div>
@@ -592,7 +716,9 @@ body{
     </div>
 </div>
 
-<!-- 📦 TOAST CONTAINER -->
+<!-- ==========================================
+TOAST CONTAINER
+========================================== -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
@@ -625,10 +751,9 @@ const FF_API = {
 };
 
 // ==============================================
-// 📊 MAPEO CORRECTO: Producto Cliente → Código Proveedor
+// 📊 MAPEO: Producto Cliente → Código Proveedor
 // ==============================================
 const MAPEO_PAQUETES = {
-    // Lo que TÚ vendes → Código que espera el PROVEEDOR
     "100 Diamantes": "1",
     "310 Diamantes": "2",
     "520 Diamantes": "3",
@@ -638,22 +763,6 @@ const MAPEO_PAQUETES = {
     "Tarjeta Semanal": "7",
     "Tarjeta Mensual": "8",
     "Pase Booyah": "9"
-};
-
-// ==============================================
-// 📦 PAQUETES DEL PROVEEDOR (para referencia)
-// ==============================================
-const PAQUETES_PROVEEDOR = {
-    "1": { nombre: "100+10 Diamantes", costo: 0.72 },
-    "2": { nombre: "310+31 Diamantes", costo: 2.17 },
-    "3": { nombre: "520+52 Diamantes", costo: 3.67 },
-    "4": { nombre: "1060+106 Diamantes", costo: 6.83 },
-    "5": { nombre: "2180+218 Diamantes", costo: 13.49 },
-    "6": { nombre: "5600+560 Diamantes", costo: 34.36 },
-    "7": { nombre: "Tarjeta básica", costo: 0.50 },
-    "8": { nombre: "Tarjeta semanal", costo: 1.63 },
-    "9": { nombre: "Tarjeta mensual", costo: 7.42 },
-    "10": { nombre: "Pase Booyah", costo: 2.50 }
 };
 
 // ==============================================
@@ -671,29 +780,19 @@ const precioBs = localStorage.getItem('precio_en_bs') || "0";
 // 🎯 OBTENER CÓDIGO DEL PROVEEDOR
 // ==============================================
 function obtenerCodigoProveedor(productoCliente) {
-    // Buscar coincidencia exacta
     if (MAPEO_PAQUETES[productoCliente]) {
         return MAPEO_PAQUETES[productoCliente];
     }
-    
-    // Buscar coincidencia parcial
     for (const [key, value] of Object.entries(MAPEO_PAQUETES)) {
         if (productoCliente.toLowerCase().includes(key.toLowerCase()) || 
             key.toLowerCase().includes(productoCliente.toLowerCase())) {
             return value;
         }
     }
-    
-    // Si no encuentra, usar el código que vino de la tienda
     return paqueteCodigo || "1";
 }
 
-// Obtener el código correcto del proveedor
 const codigoProveedor = obtenerCodigoProveedor(producto);
-
-console.log('📦 Producto Cliente:', producto);
-console.log('🔢 Código Proveedor:', codigoProveedor);
-console.log('📊 Paquete Proveedor:', PAQUETES_PROVEEDOR[codigoProveedor]);
 
 // ==============================================
 // 👁️ CONFIGURAR VISIBILIDAD
@@ -707,11 +806,8 @@ document.getElementById('datoId').textContent = idJugador;
 document.getElementById('datoNombreJugador').textContent = nombreJugador || idJugador;
 document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 
-// Mostrar campos de ID
 document.getElementById('filaId').classList.remove('ocultar-fila');
 document.getElementById('filaNombreJugador').classList.remove('ocultar-fila');
-
-// Resumen final
 document.getElementById('resIdResumen').textContent = idJugador;
 document.getElementById('resProveedorFinal').textContent = 'API Central Pro';
 
@@ -767,7 +863,7 @@ function copiarTexto(texto, boton) {
 }
 
 function copiarTodosLosDatos(boton) {
-    const datos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBs} Bs`;
+    const datos = `Banco: Banco de Venezuela (0102)\nCédula: V-32.824.869\nTeléfono: 0422-8242411\nMonto: ${precioBs} Bs`;
     
     navigator.clipboard.writeText(datos)
         .then(() => {
@@ -776,7 +872,7 @@ function copiarTodosLosDatos(boton) {
             showToast('✓ Todos los datos copiados', 'success');
             setTimeout(() => {
                 boton.classList.remove('copiado-todo');
-                boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
+                boton.innerHTML = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar todos los datos de pago`;
             }, 2500);
         })
         .catch(() => {
@@ -791,7 +887,7 @@ function copiarTodosLosDatos(boton) {
             showToast('✓ Todos los datos copiados', 'success');
             setTimeout(() => {
                 boton.classList.remove('copiado-todo');
-                boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
+                boton.innerHTML = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar todos los datos de pago`;
             }, 2500);
         });
 }
@@ -923,16 +1019,14 @@ async function verificarPagoPabilo(referencia, montoBs) {
 // 🎮 ENVIAR A API CENTRAL PRO - FREE FIRE
 // ==============================================
 async function enviarFreeFire(idJugador, paquete, referencia) {
-    // Construir URL con el código del proveedor
     const url = new URL(FF_API.URL);
     url.searchParams.append('token', FF_API.TOKEN);
     url.searchParams.append('tipo', 'recargaFreefire');
     url.searchParams.append('id_jugador', idJugador);
-    url.searchParams.append('paquete', paquete); // Aquí va el código mapeado
+    url.searchParams.append('paquete', paquete);
     
     console.log('📤 Enviando a API Central Pro:', url.toString());
     console.log('📦 Paquete enviado:', paquete);
-    console.log('📊 Paquete del proveedor:', PAQUETES_PROVEEDOR[paquete]);
     
     try {
         const response = await fetch(url.toString(), {
@@ -946,7 +1040,6 @@ async function enviarFreeFire(idJugador, paquete, referencia) {
         const text = await response.text();
         console.log('📥 Respuesta cruda:', text);
         
-        // Intentar parsear JSON
         let data;
         try {
             data = JSON.parse(text);
@@ -954,7 +1047,6 @@ async function enviarFreeFire(idJugador, paquete, referencia) {
             data = { raw: text };
         }
         
-        // Verificar éxito
         const esExito = 
             data.ok === true || 
             data.success === true || 
@@ -1030,7 +1122,6 @@ async function iniciarVerificacion() {
     document.getElementById('progresoVerificacion').textContent = '🔍 Verificando referencia...';
     
     try {
-        // Verificar referencia en Firebase
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
             mostrarPaso('pasoReferenciaUsada');
@@ -1042,7 +1133,6 @@ async function iniciarVerificacion() {
         
         document.getElementById('progresoVerificacion').textContent = '💳 Consultando sistema bancario...';
         
-        // Verificar pago en Pábilo
         let pagoConfirmado = false;
         let reintentos = 0;
         
@@ -1063,7 +1153,6 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // Marcar referencia como usada
         document.getElementById('progresoVerificacion').textContent = '🔒 Registrando pago...';
         await marcarReferenciaComoUsada(referencia);
         
@@ -1071,13 +1160,11 @@ async function iniciarVerificacion() {
         logEvent('pago_verificado', { referencia });
         await new Promise(r => setTimeout(r, 1200));
         
-        // Conectar con API Central Pro
         document.getElementById('textoConectandoProveedor').textContent = 'Conectando con API Central Pro...';
         document.getElementById('textoProveedorSecundario').textContent = `Procesando tu recarga de Free Fire...`;
         document.getElementById('tiempoEspera').textContent = '⏱️ Tiempo estimado: 5 segundos';
         mostrarPaso('pasoConectandoProveedor');
         
-        // Timer
         let tiempoRestante = 5;
         const intervalo = setInterval(() => {
             tiempoRestante--;
@@ -1086,7 +1173,6 @@ async function iniciarVerificacion() {
             }
         }, 1000);
         
-        // Timeout
         const timeoutPromise = new Promise((_, reject) => {
             timeoutTimer = setTimeout(() => {
                 clearInterval(intervalo);
@@ -1094,7 +1180,6 @@ async function iniciarVerificacion() {
             }, 30000);
         });
         
-        // Enviar a API Central Pro con el código mapeado
         const resultado = await Promise.race([
             enviarFreeFire(idJugador, codigoProveedor, referencia), 
             timeoutPromise
@@ -1118,7 +1203,6 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // ÉXITO
         const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA", {
             id_solicitud: resultado.id_solicitud,
             paquete_proveedor: codigoProveedor
@@ -1185,7 +1269,6 @@ console.log('📦 Servicio: Free Fire');
 console.log('🔌 Proveedor: API Central Pro');
 console.log('📦 Producto Cliente:', producto);
 console.log('🔢 Código Proveedor:', codigoProveedor);
-console.log('💵 Monto:', precioUsd, 'USD /', precioBs, 'Bs');
 
 logEvent('pagina_cargada', {
     servicio: 'Free Fire',
