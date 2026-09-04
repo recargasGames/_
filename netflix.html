@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+<title>RECARGASGAMES - Netflix</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+:root{
+    --color-principal:#E50914; /* 🔴 ROJO NETFLIX */
+    --color-hover:#c20812;
+    --color-blanco:#ffffff;
+    --color-borde:rgba(51,65,85,0.5);
+    --color-deshabilitado:#475569;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    background-image:url('fondo.jpg');
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    min-height:100vh;
+    padding-top:80px;
+}
+.header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    background:rgba(11,18,32,.95);
+    padding:12px 20px;
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    border-bottom:2px solid var(--color-principal);
+    z-index:999;
+}
+.header img{
+    height:50px;
+    width:auto;
+    border-radius:50%;
+    object-fit:contain;
+}
+.main{padding:30px 20px;max-width:480px;margin:0 auto}
+.titulo-pagina{text-align:center;font-size:28px;font-weight:800;margin-bottom:30px;color:var(--color-blanco)}
+.titulo-pagina span{color:var(--color-principal)}
+.tarjeta-producto{
+    background:rgba(17,24,39,0.55);
+    border:2px solid var(--color-borde);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:15px;
+    cursor:pointer;
+    transition:.25s;
+    backdrop-filter:blur(10px);
+}
+.tarjeta-producto:hover{
+    border-color:var(--color-principal);
+    transform:translateY(-3px);
+    background:rgba(229,9,20,0.08);
+}
+.tarjeta-producto.seleccionada{
+    border-color:var(--color-principal);
+    background:rgba(229,9,20,0.12);
+    box-shadow:0 0 15px rgba(229,9,20,0.2);
+}
+.producto-nombre{font-size:18px;font-weight:700;margin-bottom:8px}
+.producto-descripcion{font-size:14px;color:#94a3b8;margin-bottom:12px}
+.producto-precio{font-size:22px;font-weight:800;color:var(--color-principal)}
+.seccion{margin-bottom:30px}
+.seccion-titulo{font-size:20px;font-weight:700;margin-bottom:15px;color:#e5e7eb}
+.input-group{margin-bottom:20px}
+.input-label{display:block;margin-bottom:8px;font-weight:600;color:#e5e7eb}
+.input-campo{
+    width:100%;
+    padding:14px 16px;
+    border-radius:12px;
+    background:rgba(15,23,42,0.6);
+    border:1px solid var(--color-borde);
+    color:#fff;
+    font-size:16px;
+    box-sizing:border-box;
+}
+.input-campo:focus{outline:none;border-color:var(--color-principal)}
+.btn-comprar{
+    width:100%;
+    padding:16px;
+    background:var(--color-principal);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+    margin-top:10px;
+}
+.btn-comprar:hover{background:var(--color-hover)}
+.btn-comprar:disabled{background:var(--color-deshabilitado);cursor:not-allowed;opacity:0.6}
+.aviso-whatsapp{
+    background:rgba(37,211,102,0.1);
+    border:1px solid rgba(37,211,102,0.3);
+    border-radius:12px;
+    padding:14px;
+    margin:15px 0;
+    font-size:14px;
+    color:#86efac;
+    text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <img src="logo.png" alt="Logo RecargasGames">
+</div>
+
+<div class="main">
+    <h1 class="titulo-pagina"><span>Netflix</span> — Cuentas</h1>
+
+    <!-- 📲 WHATSAPP DEL CLIENTE -->
+    <div class="seccion">
+        <label class="input-label">📲 Tu WhatsApp</label>
+        <input type="tel" class="input-campo" id="whatsappCliente" placeholder="04XX-XXXXXXX">
+        <div class="aviso-whatsapp">💬 Te enviaremos los datos de tu cuenta de Netflix por WhatsApp</div>
+    </div>
+
+    <!-- 📦 PLANES DE NETFLIX -->
+    <div class="seccion">
+        <h2 class="seccion-titulo">📋 Elige tu Plan</h2>
+
+        <div class="tarjeta-producto" data-codigo="netflix_1pantalla" data-nombre="Netflix - 1 Pantalla" data-precio-bs="3200">
+            <div class="producto-nombre">📱 1 Pantalla</div>
+            <div class="producto-descripcion">Calidad estándar • 1 dispositivo a la vez</div>
+            <div class="producto-precio">3.200 Bs</div>
+        </div>
+
+        <div class="tarjeta-producto" data-codigo="netflix_2pantallas" data-nombre="Netflix - 2 Pantallas" data-precio-bs="6200">
+            <div class="producto-nombre">📱📱 2 Pantallas</div>
+            <div class="producto-descripcion">Alta definición • 2 dispositivos a la vez</div>
+            <div class="producto-precio">6.200 Bs</div>
+        </div>
+
+        <div class="tarjeta-producto" data-codigo="netflix_3pantallas" data-nombre="Netflix - 3 Pantallas" data-precio-bs="9500">
+            <div class="producto-nombre">📱📱📱 3 Pantallas</div>
+            <div class="producto-descripcion">Alta definición • 3 dispositivos a la vez</div>
+            <div class="producto-precio">9.500 Bs</div>
+        </div>
+    </div>
+
+    <!-- ✅ BOTÓN COMPRAR -->
+    <button class="btn-comprar" id="btnComprar" disabled>🛒 Selecciona un plan</button>
+</div>
+
+<script>
+// ==============================================
+// 🔥 FIREBASE — MISMA CONFIGURACIÓN
+// ==============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+  authDomain: "free-52119.firebaseapp.com",
+  databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "free-52119",
+  storageBucket: "free-52119.firebasestorage.app",
+  messagingSenderId: "632240144599",
+  appId: "1:632240144599:web:e31c25665ffe19c194b092",
+  measurementId: "G-5NLLLEPWPK"
+};
+firebase.initializeApp(firebaseConfig);
+
+// ==============================================
+// 📦 SELECCIÓN DE PRODUCTO
+// ==============================================
+let productoSeleccionado = null;
+
+document.querySelectorAll('.tarjeta-producto').forEach(tarjeta => {
+    tarjeta.addEventListener('click', () => {
+        document.querySelectorAll('.tarjeta-producto').forEach(t => t.classList.remove('seleccionada'));
+        tarjeta.classList.add('seleccionada');
+        productoSeleccionado = {
+            codigo: tarjeta.dataset.codigo,
+            nombre: tarjeta.dataset.nombre,
+            precioBs: tarjeta.dataset.precioBs
+        };
+        const btn = document.getElementById('btnComprar');
+        btn.disabled = false;
+        btn.textContent = `🛒 Comprar — ${productoSeleccionado.nombre}`;
+    });
+});
+
+// ==============================================
+// 🛒 IR A PASARELA
+// ==============================================
+document.getElementById('btnComprar').addEventListener('click', () => {
+    const whatsapp = document.getElementById('whatsappCliente').value.trim();
+    if(!whatsapp) { alert("❌ Escribe tu número de WhatsApp"); return; }
+    if(!productoSeleccionado) { alert("❌ Selecciona un plan"); return; }
+
+    localStorage.setItem('juego_seleccionado', 'Netflix');
+    localStorage.setItem('id_jugador', whatsapp);
+    localStorage.setItem('nombre_jugador', whatsapp);
+    localStorage.setItem('producto_seleccionado', productoSeleccionado.nombre);
+    localStorage.setItem('precio_en_bs', productoSeleccionado.precioBs);
+    localStorage.setItem('precio_usd', "0"); // Se calcula en la pasarela según tasa
+    localStorage.setItem('paquete_codigo', productoSeleccionado.codigo);
+
+    window.location.href = 'pasarela.html';
+});
+</script>
+</body>
+</html>
