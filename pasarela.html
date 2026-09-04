@@ -58,7 +58,7 @@ body{
 .icono-error{border-color:var(--color-error);color:var(--color-error)}
 
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
-.texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
+.texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.8;max-width:340px;margin:0 auto}
 
 .resumen-box{
     background:rgba(17,24,39,0.55);
@@ -367,21 +367,26 @@ body{
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Referencia registrada. Conectando con el proveedor...</div>
+        <div class="texto-secundario">Referencia registrada. Conectando con el proveedor de recargas...</div>
     </div>
 
     <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
     <div id="pasoConectandoProveedor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
-        <div class="texto-principal" id="textoConectandoProveedor">Conectando con Proveedor...</div>
-        <div class="texto-secundario" id="textoProveedorSecundario">Procesando recarga...</div>
+        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el servidor de recargas...</div>
+        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu recarga...</div>
     </div>
 
-    <!-- ✅ PASO 4: RECARGA EXITOSA -->
+    <!-- ✅ PASO 4: RECARGA EXITOSA — MENSAJE COMO LO QUERÍAS -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
-        <div class="texto-principal">¡Recarga Exitosa!</div>
-        <div class="texto-secundario" id="textoExitoProveedor">Tu recarga se procesó correctamente. ¡Disfruta tu compra!</div>
+        <div class="texto-principal">¡Recarga Realizada!</div>
+        <div class="texto-secundario">
+            Tu recarga se acreditará automáticamente en unos momentos.<br><br>
+            ✅ El pago fue procesado exitosamente.<br>
+            💰 El dinero fue enviado automáticamente a tu cuenta.<br>
+            🎉 ¡Disfruta tu compra!
+        </div>
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="resJuego">-</span></div>
@@ -558,7 +563,6 @@ async function marcarReferenciaComoUsada(referencia, datosPedido) {
         producto: producto,
         monto_usd: precioUsd,
         proveedor: juegoInfo.proveedor,
-        ip: "registrada",
         dispositivo: navigator.userAgent.substring(0, 100)
     });
     console.log("🔒 Referencia guardada en Firebase:", referencia);
@@ -609,23 +613,38 @@ async function recargarFreeFire() {
         const texto = await res.text();
         console.log("📥 Respuesta Central Pro:", texto);
 
-        let datos;
-        try { datos = JSON.parse(texto); } 
-        catch { datos = { mensaje: texto }; }
+        let datos = {};
+        try { 
+            datos = JSON.parse(texto); 
+            console.log("✅ JSON parseado correctamente:", datos);
+        } catch (e) { 
+            datos = { mensaje: texto }; 
+            console.log("⚠️ No es JSON, texto plano:", texto);
+        }
 
-        const exito = datos.alerta === "green" || datos.exito === true || datos.success === true;
-        const sinSaldo = datos.alerta === "red" || texto.toLowerCase().includes("saldo") || texto.toLowerCase().includes("insuficiente");
+        const exito = datos.alerta === "green" || 
+                      datos.exito === true || 
+                      datos.success === true || 
+                      datos.estado === "completado" ||
+                      texto.toLowerCase().includes("exito") ||
+                      texto.toLowerCase().includes("correcto") ||
+                      texto.toLowerCase().includes("procesado");
+                      
+        const sinSaldo = datos.alerta === "red" || 
+                         texto.toLowerCase().includes("saldo insuficiente") || 
+                         texto.toLowerCase().includes("sin saldo") ||
+                         texto.toLowerCase().includes("insuficiente");
 
         if (exito && !sinSaldo) {
             return { exito: true, mensaje: datos.mensaje || "Recarga exitosa ✅", idSolicitud: datos.id_solicitud || datos.id };
         } else if (sinSaldo) {
             return { exito: false, sinSaldo: true, mensaje: datos.mensaje || "Saldo insuficiente en Central Pro" };
         } else {
-            return { exito: false, mensaje: datos.mensaje || "Error en la recarga" };
+            return { exito: false, mensaje: datos.mensaje || "Error: " + texto };
         }
     } catch (err) {
         console.error("❌ Error Central Pro:", err);
-        return { exito: false, mensaje: "Error de conexión con Central Pro" };
+        return { exito: false, mensaje: "Error de conexión con Central Pro: " + err.message };
     }
 }
 
@@ -645,23 +664,38 @@ async function recargarBloodStrike() {
         const texto = await res.text();
         console.log("📥 Respuesta PagoNorte:", texto);
 
-        let datos;
-        try { datos = JSON.parse(texto); } 
-        catch { datos = { mensaje: texto }; }
+        let datos = {};
+        try { 
+            datos = JSON.parse(texto); 
+            console.log("✅ JSON parseado correctamente:", datos);
+        } catch (e) { 
+            datos = { mensaje: texto }; 
+            console.log("⚠️ No es JSON, texto plano:", texto);
+        }
 
-        const exito = datos.ok === true || datos.alerta === "green" || datos.exito === true || datos.codigo_respuesta === "00";
-        const sinSaldo = datos.alerta === "red" || texto.toLowerCase().includes("saldo") || texto.toLowerCase().includes("insuficiente");
+        const exito = datos.ok === true || 
+                      datos.alerta === "green" || 
+                      datos.exito === true || 
+                      datos.codigo_respuesta === "00" ||
+                      texto.toLowerCase().includes("exito") ||
+                      texto.toLowerCase().includes("correcto") ||
+                      texto.toLowerCase().includes("procesado");
+                      
+        const sinSaldo = datos.alerta === "red" || 
+                         texto.toLowerCase().includes("saldo insuficiente") || 
+                         texto.toLowerCase().includes("sin saldo") ||
+                         texto.toLowerCase().includes("insuficiente");
 
         if (exito && !sinSaldo) {
             return { exito: true, mensaje: datos.mensaje || "Recarga exitosa ✅", idSolicitud: datos.id_solicitud || datos.id };
         } else if (sinSaldo) {
             return { exito: false, sinSaldo: true, mensaje: datos.mensaje || "Saldo insuficiente en PagoNorte" };
         } else {
-            return { exito: false, mensaje: datos.mensaje || "Error en la recarga" };
+            return { exito: false, mensaje: datos.mensaje || "Error: " + texto };
         }
     } catch (err) {
         console.error("❌ Error PagoNorte:", err);
-        return { exito: false, mensaje: "Error de conexión con PagoNorte" };
+        return { exito: false, mensaje: "Error de conexión con PagoNorte: " + err.message };
     }
 }
 
@@ -687,7 +721,7 @@ async function procesarRecarga() {
 }
 
 // ==============================================
-// ⚡ FLUJO COMPLETO — PASO A PASO CON FIREBASE
+// ⚡ FLUJO COMPLETO — PASO A PASO CON FIREBASE + DETECCIÓN MEJORADA DE PÁBILO
 // ==============================================
 async function iniciarVerificacion(){
     const referencia = document.getElementById('referenciaPago').value.trim();
@@ -710,7 +744,7 @@ async function iniciarVerificacion(){
     }
 
     // ==============================================
-    // 🏦 PASO 1: VERIFICAR EN PÁBILO
+    // 🏦 PASO 1: VERIFICAR EN PÁBILO — DETECCIÓN MEJORADA
     // ==============================================
     let montoPago = String(precioBs).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
@@ -724,23 +758,49 @@ async function iniciarVerificacion(){
         fecha_pago: fecha 
     };
 
+    console.log("📤 Enviando a Pábilo:", cuerpo);
+
     try {
         const res = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
             body: JSON.stringify(cuerpo)
         });
-        const datos = await res.json();
-        console.log("🏦 Respuesta Pábilo:", datos);
         
+        const datos = await res.json();
+        console.log("🏦 Respuesta COMPLETA de Pábilo:", datos);
+        console.log("📡 Status:", res.status);
+        
+        // ✅ DETECCIÓN DE PAGO CONFIRMADO — TODAS LAS POSIBLES RESPUESTAS
         if(res.ok && datos) {
-            if(datos.message === 'payment confirmed' || datos.status === 'paid' || 
-               datos.data?.status === 'paid' || datos.success === true) {
-                pagoConfirmado = true;
-            }
+            const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
+            const dataStatus = (datos.data?.status || "").toLowerCase();
+            
+            console.log("🔍 Mensaje recibido:", msg);
+            console.log("🔍 Status en data:", dataStatus);
+            
+            pagoConfirmado = 
+                msg === 'payment confirmed' || 
+                msg === 'paid' || 
+                msg === 'confirmado' ||
+                msg === 'aprobado' ||
+                msg.includes('confirmado') ||
+                msg.includes('aprobado') ||
+                msg.includes('pagado') ||
+                dataStatus === 'paid' ||
+                dataStatus === 'confirmado' ||
+                dataStatus === 'aprobado' ||
+                datos.success === true ||
+                datos.exito === true ||
+                datos.paid === true ||
+                datos.confirmed === true;
         }
+        
+        console.log("✅ Pago confirmado?", pagoConfirmado);
+        
     } catch(e) {
-        console.error("❌ Error Pábilo:", e);
+        console.error("❌ Error llamando a Pábilo:", e);
+        pagoConfirmado = false;
     }
 
     if(!pagoConfirmado) { 
@@ -763,8 +823,8 @@ async function iniciarVerificacion(){
     // ==============================================
     // 🔌 PASO 3: CONECTAR CON PROVEEDOR
     // ==============================================
-    document.getElementById('textoConectandoProveedor').textContent = `Conectando con ${juegoInfo.proveedor}...`;
-    document.getElementById('textoProveedorSecundario').textContent = `Procesando recarga de ${juegoInfo.nombreMostrado}...`;
+    document.getElementById('textoConectandoProveedor').textContent = `Conectando con el servidor de recargas...`;
+    document.getElementById('textoProveedorSecundario').textContent = `Procesando tu recarga de ${juegoInfo.nombreMostrado}...`;
     mostrarPaso('pasoConectandoProveedor');
 
     const resultadoRecarga = await procesarRecarga();
@@ -784,7 +844,6 @@ async function iniciarVerificacion(){
         document.getElementById('resIdResumen').textContent = idJugador;
         document.getElementById('resReferencia').textContent = referencia;
         document.getElementById('resMonto').textContent = `${precioUsd} USD`;
-        document.getElementById('textoExitoProveedor').textContent = `Tu recarga de ${juegoInfo.nombreMostrado} se procesó correctamente a través de ${juegoInfo.proveedor}. ¡Disfruta tu compra!`;
         
         mostrarPaso('pasoRecargaExitosa');
         enviarTelegram(idPedidoFirebase, referencia, true, resultadoRecarga.idSolicitud);
@@ -795,8 +854,12 @@ async function iniciarVerificacion(){
         mostrarPaso('pasoSinSaldo');
         enviarTelegram("PAGO CONFIRMADO — SALDO INSUFICIENTE", referencia, false);
     } else {
-        // ❌ ERROR
+        // ❌ ERROR EN LA RECARGA — PERO EL PAGO SÍ ESTÁ CONFIRMADO
         await guardarPedidoEnFirebase(referencia, "ERROR_RECARGA");
+        // ⚠️ IMPORTANTE: El pago fue confirmado por Pábilo, así que NO decimos "no encontrado"
+        document.querySelector('#pasoPagoNoEncontrado .texto-principal').textContent = "Pago Confirmado — Error en Recarga";
+        document.querySelector('#pasoPagoNoEncontrado .texto-secundario').textContent = 
+            "El pago fue verificado correctamente, pero hubo un problema procesando la recarga. Te lo revisaremos manualmente.";
         mostrarPaso('pasoPagoNoEncontrado');
     }
 }
