@@ -294,6 +294,39 @@ body{
 .proveedor-central{background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)}
 .proveedor-pagonorte{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
 .oculto{display:none !important}
+
+/* 🎬 STREAMING — DATOS DE CUENTA */
+.streaming-datos-box{
+    background:rgba(16,185,129,0.08);
+    border:1px solid rgba(16,185,129,0.3);
+    border-radius:16px;
+    padding:20px;
+    margin:20px 0;
+    text-align:left;
+}
+.streaming-dato-line{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 0;
+    border-bottom:1px solid rgba(51,65,85,0.3);
+}
+.streaming-dato-line:last-child{border-bottom:none}
+.streaming-etiqueta{color:#94a3b8;font-size:14px}
+.streaming-valor{color:#fff;font-weight:600;font-size:15px}
+.streaming-codigo-aprobacion{
+    background:rgba(250,204,21,0.1);
+    border:1px solid rgba(250,204,21,0.3);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-top:15px;
+    text-align:center;
+    font-family:monospace;
+    font-size:18px;
+    font-weight:bold;
+    color:#facc15;
+    letter-spacing:2px;
+}
 </style>
 </head>
 <body>
@@ -314,7 +347,7 @@ body{
             </div>
             <div class="resumen-fila ocultar-fila" id="filaProveedor">
                 <span class="resumen-etiqueta">Proveedor</span>
-                <span class="resumen-valor" id="datoProveedor">-</span>
+                <span class="resumen-valor proveedor-tag proveedor-pagonorte">PagoNorte</span>
             </div>
             <div class="resumen-fila ocultar-fila" id="filaId">
                 <span class="resumen-etiqueta">ID Jugador</span>
@@ -389,7 +422,6 @@ body{
                 </button>
             </div>
 
-            <!-- ✅ BOTÓN COPIAR TODOS LOS DATOS -->
             <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -402,7 +434,7 @@ body{
             <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
         </div>
 
-        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> en TODO el sistema. Queda registrada permanentemente en la base de datos.</div>
+        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> en TODO el sistema. Queda registrada permanentemente.</div>
 
         <button class="btn-confirmar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
     </div>
@@ -418,17 +450,85 @@ body{
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Referencia registrada. Conectando con el servidor...</div>
+        <div class="texto-secundario">Referencia registrada. Conectando con PagoNorte...</div>
     </div>
 
-    <!-- PASO 3: CONECTANDO CON PROVEEDOR -->
+    <!-- PASO 3: CONECTANDO CON PAGONORTE -->
     <div id="pasoConectandoProveedor" class="paso-box">
         <div class="spinner-circle spinner-amarillo"></div>
-        <div class="texto-principal" id="textoConectandoProveedor">Conectando con el servidor...</div>
-        <div class="texto-secundario" id="textoProveedorSecundario">Procesando tu compra...</div>
+        <div class="texto-principal" id="textoConectandoProveedor">Conectando con PagoNorte...</div>
+        <div class="texto-secundario" id="textoProveedorSecundario">Generando tu cuenta...</div>
     </div>
 
-    <!-- ✅ PASO 4: COMPRA EXITOSA -->
+    <!-- ✅ PASO 4: CUENTA CREADA EXITOSAMENTE (STREAMING) -->
+    <div id="pasoRecargaExitosaStreaming" class="paso-box">
+        <div class="icono-circle icono-exito">✓</div>
+        <div class="texto-principal">¡Cuenta Creada Exitosamente!</div>
+        <div class="texto-secundario">
+            Tu cuenta fue generada y activada.<br>
+            📲 Te llegará la información por WhatsApp.
+        </div>
+
+        <div class="streaming-datos-box">
+            <div class="streaming-dato-line">
+                <div>
+                    <div class="streaming-etiqueta">Correo / Usuario</div>
+                    <div class="streaming-valor" id="streamingCorreo">-</div>
+                </div>
+                <button class="copiar-btn" onclick="copiarTexto(document.getElementById('streamingCorreo').textContent, this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="streaming-dato-line">
+                <div>
+                    <div class="streaming-etiqueta">Contraseña</div>
+                    <div class="streaming-valor" id="streamingClave">-</div>
+                </div>
+                <button class="copiar-btn" onclick="copiarTexto(document.getElementById('streamingClave').textContent, this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="streaming-dato-line" id="filaStreamingPerfil">
+                <div>
+                    <div class="streaming-etiqueta">Perfil</div>
+                    <div class="streaming-valor" id="streamingPerfil">-</div>
+                </div>
+                <button class="copiar-btn" onclick="copiarTexto(document.getElementById('streamingPerfil').textContent, this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="streaming-dato-line">
+                <div>
+                    <div class="streaming-etiqueta">Vencimiento</div>
+                    <div class="streaming-valor" id="streamingVencimiento">-</div>
+                </div>
+            </div>
+            <div class="streaming-codigo-aprobacion">
+                Código de Aprobación: <span id="streamingCodigoAprobacion">-</span>
+            </div>
+        </div>
+
+        <div class="resumen-box">
+            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicio">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor">Pago Móvil</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
+        </div>
+        <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
+    </div>
+
+    <!-- ✅ PASO 4: COMPRA EXITOSA (JUEGOS) -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Compra Realizada!</div>
@@ -439,25 +539,25 @@ body{
             🎉 ¡Gracias por tu compra!
         </div>
         <div class="resumen-box">
-            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicio">-</span></div>
-            <div class="resumen-fila ocultar-fila" id="resFilaProveedor"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedor">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
-            <div class="resumen-fila ocultar-fila" id="resFilaId"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedidoJuego">#0000</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Servicio</span><span class="resumen-valor" id="resServicioJuego">-</span></div>
+            <div class="resumen-fila ocultar-fila" id="resFilaProveedorJuego"><span class="resumen-etiqueta">Proveedor</span><span class="resumen-valor" id="resProveedorJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProductoJuego">-</span></div>
+            <div class="resumen-fila ocultar-fila" id="resFilaIdJuego"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumenJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor">Pago Móvil</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferenciaJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMontoJuego">-</span></div>
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
 
-    <!-- ⚠️ SIN SALDO -->
+    <!-- ⚠️ SIN SALDO / ERROR PAGONORTE -->
     <div id="pasoSinSaldo" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Saldo Insuficiente</div>
-        <div class="texto-secundario" id="textoSinSaldo">El pago fue confirmado, pero no hay saldo disponible en este momento.</div>
+        <div class="texto-principal">Sin Saldo o Error</div>
+        <div class="texto-secundario" id="textoSinSaldo">El pago fue confirmado, pero no se pudo generar la cuenta.</div>
         <div class="mantengo-box">
-            💳 Tu pago quedó registrado y seguro en la base de datos. En cuanto se procese, te llegará la información por WhatsApp.
+            💳 Tu pago quedó registrado y seguro. Te contactaremos pronto para resolverlo.
         </div>
         <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
     </div>
@@ -501,48 +601,91 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// 🎯 DETECTAR TIPO DE SERVICIO
+// 🔑 CREDENCIALES PAGONORTE
 // ==============================================
-function detectarTipoServicio(nombreServicio) {
+const PAGONORTE_API_KEY = "pn_8dc8d383aa88020b5df8365052e4ecf5168a";
+const PAGONORTE_API_SECRET = "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05";
+const PAGONORTE_API_URL = "https://pagonorte.net/recargas/api.jsp";
+
+// ==============================================
+// 🎯 DETECTAR TIPO DE SERVICIO Y MAPEAR A PAGONORTE
+// ==============================================
+function detectarTipoServicio(nombreServicio, producto = "") {
     const servicio = (nombreServicio || "").toUpperCase().trim();
+    const prod = (producto || "").toUpperCase().trim();
     
     // 🎬 NETFLIX
     if (servicio.includes("NETFLIX")) {
+        if (prod.includes("CUENTA") || prod.includes("COMPLETA")) {
+            return {
+                tipo: "streaming",
+                proveedorTipo: "recargaCuentaNetflix",
+                nombreMostrado: "Netflix",
+                mostrarPerfil: false,
+                mostrarId: false,
+                mostrarNombreJugador: false
+            };
+        }
         return {
-            tipo: "netflix",
+            tipo: "streaming",
+            proveedorTipo: "recargaPerfilNetflix",
             nombreMostrado: "Netflix",
-            producto: "1 pantalla de Netflix",
+            mostrarPerfil: true,
             mostrarId: false,
-            mostrarNombreJugador: false,
-            mostrarProveedor: false,
-            esStreaming: true
+            mostrarNombreJugador: false
         };
     }
     
     // 🎬 DISNEY+
     if (servicio.includes("DISNEY")) {
+        if (prod.includes("CUENTA") || prod.includes("COMPLETA")) {
+            return {
+                tipo: "streaming",
+                proveedorTipo: "recargaCuentaDisney",
+                nombreMostrado: "Disney+",
+                mostrarPerfil: false,
+                mostrarId: false,
+                mostrarNombreJugador: false
+            };
+        }
         return {
-            tipo: "disney",
-            nombreMostrado: "Disney",
-            producto: "1 pantalla de Disney",
+            tipo: "streaming",
+            proveedorTipo: "recargaPerfilDisney",
+            nombreMostrado: "Disney+",
+            mostrarPerfil: true,
             mostrarId: false,
-            mostrarNombreJugador: false,
-            mostrarProveedor: false,
-            esStreaming: true
+            mostrarNombreJugador: false
         };
     }
     
-    // 🎮 JUEGOS NORMALES
-    let proveedorMostrar = "Proveedor Oficial";
+    // 🎬 HBO
+    if (servicio.includes("HBO")) {
+        if (prod.includes("CUENTA") || prod.includes("COMPLETA")) {
+            return {
+                tipo: "streaming",
+                proveedorTipo: "recargaCuentaHBO",
+                nombreMostrado: "HBO",
+                mostrarPerfil: false,
+                mostrarId: false,
+                mostrarNombreJugador: false
+            };
+        }
+        return {
+            tipo: "streaming",
+            proveedorTipo: "recargaPerfilHBO",
+            nombreMostrado: "HBO",
+            mostrarPerfil: true,
+            mostrarId: false,
+            mostrarNombreJugador: false
+        };
+    }
+    
+    // 🎮 JUEGOS
     return {
         tipo: "juego",
         nombreMostrado: nombreServicio,
-        producto: "",
-        proveedor: proveedorMostrar,
         mostrarId: true,
-        mostrarNombreJugador: true,
-        mostrarProveedor: true,
-        esStreaming: false
+        mostrarNombreJugador: true
     };
 }
 
@@ -554,39 +697,23 @@ const idJugador = localStorage.getItem('id_jugador') || "";
 const nombreJugador = localStorage.getItem('nombre_jugador') || idJugador || "";
 const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
-const precioBs = localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+const precioBs = localStorage.getItem('precio_bs') || "0";
+const paqueteCod = localStorage.getItem('paquete_codigo') || "1";
 
 // 🔍 DETECTAR SERVICIO
-const servicioInfo = detectarTipoServicio(juegoRecibido);
+const servicioInfo = detectarTipoServicio(juegoRecibido, producto);
 
 // ==============================================
 // 👁️ CONFIGURAR VISIBILIDAD Y DATOS
 // ==============================================
 function configurarVisibilidadCampos() {
-    // Servicio
     document.getElementById('datoServicio').textContent = servicioInfo.nombreMostrado;
-
-    // Producto — si es streaming, usa el texto fijo
-    const textoProducto = servicioInfo.esStreaming ? servicioInfo.producto : producto;
-    document.getElementById('datoProducto').textContent = textoProducto;
-
-    // Monto en Bs visible en datos de pago
-    document.getElementById('montoBsMostrar').textContent = precioBs + " Bs";
-
-    // WhatsApp — SIEMPRE visible
-    const filaWhatsapp = document.getElementById('filaWhatsapp');
-    filaWhatsapp.classList.remove('ocultar-fila');
+    document.getElementById('datoProducto').textContent = producto;
+    document.getElementById('montoBsMostrar').textContent = 
+        parseFloat(precioBs).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " Bs";
+    document.getElementById('datoMontoTotal').innerHTML = 
+        `$${parseFloat(precioUsd).toFixed(2)} USD<br><small style="color:#cbd5e1">${parseFloat(precioBs).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</small>`;
     document.getElementById('datoWhatsapp').textContent = idJugador;
-
-    // Proveedor
-    const filaProveedor = document.getElementById('filaProveedor');
-    if (servicioInfo.mostrarProveedor) {
-        filaProveedor.classList.remove('ocultar-fila');
-        document.getElementById('datoProveedor').textContent = servicioInfo.proveedor;
-    } else {
-        filaProveedor.classList.add('ocultar-fila');
-    }
 
     // ID Jugador
     const filaId = document.getElementById('filaId');
@@ -605,32 +732,12 @@ function configurarVisibilidadCampos() {
     } else {
         filaNombreJugador.classList.add('ocultar-fila');
     }
-
-    // Monto Total
-    document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
-
-    // Resumen final — ocultar campos según tipo
-    const resFilaProveedor = document.getElementById('resFilaProveedor');
-    const resFilaId = document.getElementById('resFilaId');
-    if (servicioInfo.mostrarProveedor) {
-        resFilaProveedor.classList.remove('ocultar-fila');
-        document.getElementById('resProveedor').textContent = servicioInfo.proveedor;
-    } else {
-        resFilaProveedor.classList.add('ocultar-fila');
-    }
-    if (servicioInfo.mostrarId) {
-        resFilaId.classList.remove('ocultar-fila');
-        document.getElementById('resIdResumen').textContent = idJugador;
-    } else {
-        resFilaId.classList.add('ocultar-fila');
-    }
 }
 
-// Ejecutar al cargar
 configurarVisibilidadCampos();
 
 // ==============================================
-// 📋 COPIAR TEXTO INDIVIDUAL
+// 📋 COPIAR TEXTO
 // ==============================================
 function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
@@ -641,15 +748,8 @@ function copiarTexto(texto, boton){
         .catch(err => alert("Copiado: " + texto));
 }
 
-// ==============================================
-// 📋 COPIAR TODOS LOS DATOS DE PAGO DE UNA VEZ
-// ==============================================
 function copiarTodosLosDatos(boton){
-    const datosCompletos = `Banco: (0102) BDV
-Cédula: 32824869
-Teléfono: 04228242411
-Monto: ${precioBs} Bs`;
-
+    const datosCompletos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${parseFloat(precioBs).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs`;
     navigator.clipboard.writeText(datosCompletos)
         .then(() => {
             boton.classList.add('copiado-todo');
@@ -658,8 +758,7 @@ Monto: ${precioBs} Bs`;
                 boton.classList.remove('copiado-todo');
                 boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
             }, 2500);
-        })
-        .catch(err => alert("No se pudo copiar automáticamente. Selecciona y copia manualmente:\n\n" + datosCompletos));
+        });
 }
 
 // ==============================================
@@ -670,33 +769,28 @@ async function verificarReferenciaEnFirebase(referencia) {
     return snapshot.exists();
 }
 
-async function marcarReferenciaComoUsada(referencia, datosPedido) {
+async function marcarReferenciaComoUsada(referencia, datosExtra = {}) {
     await refReferencias.child(referencia).set({
         fecha_uso: new Date().toISOString(),
         servicio: servicioInfo.nombreMostrado,
-        id_contacto: idJugador,
-        producto: servicioInfo.esStreaming ? servicioInfo.producto : producto,
+        producto: producto,
         monto_usd: precioUsd,
         monto_bs: precioBs,
-        dispositivo: navigator.userAgent.substring(0, 100)
+        ...datosExtra
     });
 }
 
-// ==============================================
-// 💾 GUARDAR PEDIDO EN FIREBASE
-// ==============================================
-async function guardarPedidoEnFirebase(referencia, estado) {
+async function guardarPedidoEnFirebase(referencia, estado, datosExtra = {}) {
     const nuevoPedido = refPedidos.push();
     const datosPedido = {
         referencia: referencia,
         servicio: servicioInfo.nombreMostrado,
-        id_contacto: idJugador,
-        producto: servicioInfo.esStreaming ? servicioInfo.producto : producto,
+        producto: producto,
         monto_usd: precioUsd,
         monto_bs: precioBs,
         estado: estado,
         fecha: new Date().toISOString(),
-        dispositivo: navigator.userAgent.substring(0, 100)
+        ...datosExtra
     };
     await nuevoPedido.set(datosPedido);
     return nuevoPedido.key;
@@ -711,7 +805,7 @@ function mostrarPaso(idPaso) {
 // ⚡ VERIFICACIÓN DE PAGO — PÁBILO
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
+const API_KEY_PABILO = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
 
 async function verificarPagoPabilo(referencia, montoBs) {
@@ -729,7 +823,7 @@ async function verificarPagoPabilo(referencia, montoBs) {
     try {
         const res = await fetch(API_PABILO_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY_PABILO}` },
             body: JSON.stringify(cuerpo)
         });
         
@@ -744,61 +838,41 @@ async function verificarPagoPabilo(referencia, montoBs) {
             datos.success === true || datos.exito === true || datos.paid === true
         );
     } catch(e) {
+        console.error("Error Pábilo:", e);
         return false;
     }
 }
 
 // ==============================================
-// 🔥 FLUJO PRINCIPAL
+// 🚀 LLAMADA A PAGONORTE — CREAR CUENTA
+// ==============================================
+async function llamarPagoNorte(referenciaUnica) {
+    const formData = new URLSearchParams();
+    formData.append('action', 'recarga');
+    formData.append('api_key', PAGONORTE_API_KEY);
+    formData.append('api_secret', PAGONORTE_API_SECRET);
+    formData.append('tipo', servicioInfo.proveedorTipo);
+    formData.append('paquete', paqueteCod);
+    formData.append('referencia', referenciaUnica);
+
+    try {
+        const res = await fetch(PAGONORTE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+        
+        const datos = await res.json();
+        console.log("✅ Respuesta PagoNorte:", datos);
+        return datos;
+    } catch(e) {
+        console.error("❌ Error PagoNorte:", e);
+        return { ok: false, mensaje: "Error de conexión con PagoNorte" };
+    }
+}
+
+// ==============================================
+// 🔥 FLUJO PRINCIPAL COMPLETO
 // ==============================================
 async function iniciarVerificacion(){
-    const referencia = document.getElementById('referenciaPago').value.trim();
-    
-    if(!referencia || referencia.length < 6) { 
-        alert("❌ Escribe la referencia completa del pago"); 
-        return; 
-    }
-
-    // PASO 1: Verificar si ya fue usada
-    mostrarPaso('pasoVerificandoPago');
-    const yaUsada = await verificarReferenciaEnFirebase(referencia);
-    
-    if(yaUsada) {
-        mostrarPaso('pasoReferenciaUsada');
-        return;
-    }
-
-    // PASO 2: Verificar en Pábilo
-    const pagoConfirmado = await verificarPagoPabilo(referencia, precioBs);
-    
-    if(!pagoConfirmado) {
-        setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
-        return;
-    }
-
-    // PASO 3: Pago confirmado — bloquear referencia
-    await marcarReferenciaComoUsada(referencia, {});
-    mostrarPaso('pasoPagoConfirmado');
-    await new Promise(r => setTimeout(r, 1200));
-
-    // PASO 4: Conectando al servidor
-    document.getElementById('textoConectandoProveedor').textContent = `Conectando con el servidor...`;
-    document.getElementById('textoProveedorSecundario').textContent = `Procesando tu compra de ${servicioInfo.nombreMostrado}...`;
-    mostrarPaso('pasoConectandoProveedor');
-    await new Promise(r => setTimeout(r, 1500));
-
-    // PASO 5: ÉXITO — Mostrar resumen
-    const idPedido = await guardarPedidoEnFirebase(referencia, "COMPLETADA");
-    
-    document.getElementById('resPedido').textContent = `#${idPedido.substring(0, 8).toUpperCase()}`;
-    document.getElementById('resServicio').textContent = servicioInfo.nombreMostrado;
-    document.getElementById('resProducto').textContent = servicioInfo.esStreaming ? servicioInfo.producto : producto;
-    document.getElementById('resReferencia').textContent = referencia;
-    document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
-
-    mostrarPaso('pasoRecargaExitosa');
-}
-</script>
-
-</body>
-</html>
+    const referencia = document.getElementById('referenciaPago
