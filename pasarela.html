@@ -389,7 +389,6 @@ body{
                 </button>
             </div>
 
-            <!-- Botón Copiar Todos los Datos -->
             <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -441,7 +440,6 @@ body{
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
         </div>
-        <!-- Mostrar datos extra de la cuenta (streaming) -->
         <div class="datos-recarga-box" id="datosRecargaBox" style="display:none;">
             <strong>📺 Datos de tu cuenta:</strong><br>
             <span id="datosCuenta"></span>
@@ -480,8 +478,13 @@ body{
 
 <script>
 // ==============================================
-// 🔥 FIREBASE — INICIALIZACIÓN
+// 📤 LLAMAR A LA API DE VERCEL (SEGURA)
 // ==============================================
+
+// 🔒 TODAS LAS CREDENCIALES ESTÁN EN VERCEL, NO AQUÍ
+const API_URL = "https://recargasgames-api.vercel.app/api"; // ⬅️ CAMBIA POR TU URL DE VERCEL
+
+// 🔥 FIREBASE — INICIALIZACIÓN
 const firebaseConfig = {
   apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
   authDomain: "free-52119.firebaseapp.com",
@@ -497,27 +500,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
-
-// ==============================================
-// 🔑 CONFIGURACIÓN DE APIS
-// ==============================================
-// Págilo (verificación de pagos)
-const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
-
-// 🔴 FREE FIRE — API Central Pro (NO TOCAR)
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-// 🟢 PAGONORTE — Netflix, Disney+, Blood Strike (integrado desde prueba)
-const PAGONORTE_URL = "https://pagonorte.net/recargas/api.jsp";
-const PAGONORTE_API_KEY = "pn_8dc8d383aa88020b5df8365052e4ecf5168a";
-const PAGONORTE_API_SECRET = "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05";
-
-// TELEGRAM
-const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
-const TELEGRAM_CHAT_ID = "8452807558";
 
 // ==============================================
 // 📋 DATOS DEL PEDIDO
@@ -642,215 +624,70 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud = '', pro
 }
 
 // ==============================================
-// 📢 ENVIAR MENSAJE A TELEGRAM
+// 📢 ENVIAR MENSAJE A TELEGRAM (VÍA VERCEL)
 // ==============================================
-function enviarTelegram(mensaje) {
-    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-    fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: mensaje,
-            parse_mode: 'HTML'
-        })
-    }).catch(err => console.log("Error enviando Telegram:", err));
-}
-
-// ==============================================
-// 🎮 ENVIAR RECARGA A API CENTRAL PRO - FREE FIRE
-// 🔴 NO TOCAR ESTA FUNCIÓN
-// ==============================================
-async function enviarRecargaFreeFire() {
-    if (!juego.toUpperCase().includes("FREE FIRE") || !idJugador || !paqueteCod) {
-        return { exito: true, mensaje: "Servicio procesado correctamente" };
-    }
-    
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    
-    console.log('📤 Enviando a API Central Pro:', url);
-    
+async function enviarTelegram(mensaje) {
     try {
-        const res = await fetch(url);
-        const text = await res.text();
-        console.log('📥 Respuesta:', text);
-        
-        let json;
-        try {
-            json = JSON.parse(text);
-        } catch {
-            json = { raw: text };
-        }
-        
-        const esExito = 
-            json.alerta === "green" || 
-            json.estado === "exito" || 
-            json.exito === true || 
-            json.success === true || 
-            json.codigo_respuesta === "00" ||
-            (json.mensaje && (json.mensaje.includes("exito") || json.mensaje.includes("exitosa")));
-        
-        const sinSaldo = 
-            json.alerta === "red" || 
-            json.mensaje?.toLowerCase().includes("saldo") || 
-            json.error;
-        
-        if (esExito && !sinSaldo) {
-            return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        }
-        
-        if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        }
-        
-        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        
-    } catch (error) {
-        console.error('❌ Error en recarga:', error);
-        return { exito: true, mensaje: "Recarga en proceso ✅" };
-    }
-}
-
-// ==============================================
-// 🟢 ENVIAR RECARGA A PAGONORTE - Netflix, Disney+, Blood Strike
-// ¡Integración probada y funcionando!
-// ==============================================
-async function enviarRecargaPagoNorte() {
-    // Determinar el tipo según el juego
-    let tipo = '';
-    let proveedor = 'PagoNorte';
-    
-    const juegoUpper = juego.toUpperCase();
-    
-    if (juegoUpper.includes('NETFLIX')) {
-        tipo = 'recargaPerfilNetflix';
-        proveedor = 'PagoNorte - Netflix';
-    } else if (juegoUpper.includes('DISNEY')) {
-        tipo = 'recargaPerfilDisney';
-        proveedor = 'PagoNorte - Disney+';
-    } else if (juegoUpper.includes('BLOOD') || juegoUpper.includes('STRIKE') || juegoUpper.includes('BLOOD STRIKE')) {
-        tipo = 'recargaBloodStrike';
-        proveedor = 'PagoNorte - Blood Strike';
-    } else {
-        // Si no es ninguno de estos, no hacer nada
-        return { exito: true, mensaje: "Servicio procesado correctamente" };
-    }
-    
-    // Construir parámetros (igual que en la prueba)
-    const params = new URLSearchParams({
-        action: 'recarga',
-        api_key: PAGONORTE_API_KEY,
-        api_secret: PAGONORTE_API_SECRET,
-        tipo: tipo,
-        paquete: paqueteCod || '1',
-        referencia: Date.now() + '_' + Math.random().toString(36).substring(2, 10)
-    });
-    
-    // Para streaming (Netflix, Disney+) se envía email
-    if (juegoUpper.includes('NETFLIX') || juegoUpper.includes('DISNEY')) {
-        params.append('email', idJugador || 'usuario@email.com');
-    }
-    // Para Blood Strike se usa id_jugador (ya se envía como id_jugador en el paquete? En la prueba usan id_jugador)
-    // En la prueba de Blood Strike se usa id_jugador, pero en la documentación de la prueba no lo vi.
-    // Como en la pasarela original se usaba id_jugador, lo añadimos para Blood Strike.
-    if (juegoUpper.includes('BLOOD') || juegoUpper.includes('STRIKE')) {
-        params.append('id_jugador', idJugador || '000000000');
-    }
-    
-    console.log('📤 Enviando a PagoNorte:', params.toString());
-    
-    try {
-        const res = await fetch(PAGONORTE_URL, {
+        const response = await fetch(`${API_URL}/telegram`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: params.toString()
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensaje })
         });
-        
-        const datos = await res.json();
-        console.log('📥 Respuesta PagoNorte:', datos);
-        
-        // Verificar éxito igual que en la prueba
-        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
-        
-        if (esExito) {
-            return {
-                exito: true,
-                mensaje: datos.mensaje || 'Recarga exitosa ✅',
-                id_solicitud: datos.id_solicitud || 'N/A',
-                proveedor: proveedor,
-                datos_extra: {
-                    cuenta: datos.cuenta || null,
-                    correo: datos.correo || null,
-                    clave: datos.clave || null,
-                    perfil: datos.perfil || null,
-                    numero_perfil: datos.numero_perfil || null,
-                    fecha_vencimiento: datos.fecha_vencimiento || null,
-                    codigo_aprobacion: datos.codigo_aprobacion || null
-                }
-            };
-        } else {
-            return {
-                exito: false,
-                mensaje: datos.mensaje || 'Error en la recarga',
-                error: datos.alerta || 'Error'
-            };
-        }
-        
+        return await response.json();
     } catch (error) {
-        console.error('❌ Error en PagoNorte:', error);
-        return {
-            exito: true,
-            mensaje: "Recarga en proceso ✅",
-            proveedor: proveedor
-        };
+        console.error('Error enviando Telegram:', error);
+        return { success: false };
     }
 }
 
 // ==============================================
-// ⚡ VERIFICAR PAGO EN PÁBILO
+// 📤 VERIFICAR PAGO (VÍA VERCEL)
 // ==============================================
-async function verificarPagoPabilo(referencia) {
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
-    const fecha = new Date().toISOString().split('T')[0];
-
-    const cuerpo = { 
-        bank_reference: referencia, 
-        amount: montoPago, 
-        movement_type: "GENERIC", 
-        fecha_pago: fecha 
-    };
-
+async function verificarPago(referencia, montoBs) {
     try {
-        const res = await fetch(API_PABILO_URL, {
+        const response = await fetch(`${API_URL}/verificar-pago`, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Authorization': `Bearer ${API_KEY}` 
-            },
-            body: JSON.stringify(cuerpo)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ referencia, montoBs })
         });
-        
-        const datos = await res.json();
-        console.log('📥 Respuesta Pábilo:', datos);
-        
-        if (res.ok && datos) {
-            const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
-            const dataStatus = (datos.data?.status || "").toLowerCase();
-            
-            return res.ok && (
-                msg === 'payment confirmed' || msg === 'paid' || msg === 'confirmado' || 
-                msg === 'aprobado' || msg.includes('confirmado') || msg.includes('aprobado') || 
-                msg.includes('pagado') || dataStatus === 'paid' || dataStatus === 'confirmado' ||
-                datos.success === true || datos.exito === true || datos.paid === true
-            );
-        }
-        return false;
-    } catch(error) {
-        console.error('❌ Error en Pábilo:', error);
-        return false;
+        return await response.json();
+    } catch (error) {
+        console.error('Error verificando pago:', error);
+        return { success: false, mensaje: 'Error de conexión' };
+    }
+}
+
+// ==============================================
+// 📤 RECARGA FREE FIRE (VÍA VERCEL)
+// ==============================================
+async function enviarFreeFire(idJugador, paquete, referencia) {
+    try {
+        const response = await fetch(`${API_URL}/recarga-freefire`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_jugador, paquete, referencia })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en recarga Free Fire:', error);
+        return { success: false, mensaje: 'Error de conexión' };
+    }
+}
+
+// ==============================================
+// 📤 RECARGA PAGONORTE (VÍA VERCEL)
+// ==============================================
+async function enviarPagoNorte(tipo, idJugador, paquete, referencia, email) {
+    try {
+        const response = await fetch(`${API_URL}/recarga-pagonorte`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tipo, id_jugador: idJugador, paquete, referencia, email })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en recarga PagoNorte:', error);
+        return { success: false, mensaje: 'Error de conexión' };
     }
 }
 
@@ -886,10 +723,10 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // PASO 2: Verificar en Pábilo
-        const pagoConfirmado = await verificarPagoPabilo(referencia);
+        // PASO 2: Verificar en Pábilo (vía Vercel)
+        const pagoConfirmado = await verificarPago(referencia, precioBs);
         
-        if (!pagoConfirmado) {
+        if (!pagoConfirmado.success) {
             setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
             btn.disabled = false;
             btn.innerHTML = '✅ Verificar Pago';
@@ -905,7 +742,6 @@ async function iniciarVerificacion() {
         // PASO 4: Conectar con servidor - MENSAJES PERSONALIZADOS
         mostrarPaso('pasoConectandoServidor');
         
-        // Detectar servicio y mostrar mensaje específico
         const juegoUpper = juego.toUpperCase();
         let mensajeConectando = '';
         let mensajeProcesando = '';
@@ -932,20 +768,25 @@ async function iniciarVerificacion() {
         
         let resultadoRecarga = null;
         
-        // 🔴 FREE FIRE - API Central Pro (NO TOCAR)
+        // 🔴 FREE FIRE - API Central Pro (vía Vercel)
         if (juegoUpper.includes('FREE FIRE')) {
-            resultadoRecarga = await enviarRecargaFreeFire();
+            resultadoRecarga = await enviarFreeFire(idJugador, paqueteCod, referencia);
         } 
-        // 🟢 NETFLIX, DISNEY+, BLOOD STRIKE - PagoNorte
+        // 🟢 NETFLIX, DISNEY+, BLOOD STRIKE - PagoNorte (vía Vercel)
         else if (juegoUpper.includes('NETFLIX') || 
                  juegoUpper.includes('DISNEY') || 
                  juegoUpper.includes('BLOOD') || 
                  juegoUpper.includes('STRIKE')) {
-            resultadoRecarga = await enviarRecargaPagoNorte();
+            let tipo = '';
+            if (juegoUpper.includes('NETFLIX')) tipo = 'recargaPerfilNetflix';
+            else if (juegoUpper.includes('DISNEY')) tipo = 'recargaPerfilDisney';
+            else if (juegoUpper.includes('BLOOD') || juegoUpper.includes('STRIKE')) tipo = 'recargaBloodStrike';
+            
+            resultadoRecarga = await enviarPagoNorte(tipo, idJugador, paqueteCod, referencia, idJugador);
         } 
         // OTROS SERVICIOS
         else {
-            resultadoRecarga = { exito: true, mensaje: "Servicio procesado correctamente", proveedor: 'Manual' };
+            resultadoRecarga = { success: true, mensaje: "Servicio procesado correctamente", proveedor: 'Manual' };
         }
         
         await new Promise(r => setTimeout(r, 1500));
@@ -953,14 +794,14 @@ async function iniciarVerificacion() {
         // PASO 5: Guardar pedido en Firebase
         const idPedido = await guardarPedidoEnFirebase(
             referencia, 
-            resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
+            resultadoRecarga.success ? "COMPLETADA" : "PENDIENTE",
             resultadoRecarga.id_solicitud || '',
             resultadoRecarga.proveedor || '',
             { datos_extra: resultadoRecarga.datos_extra || {} }
         );
         
         // PASO 6: Mostrar resultado
-        if (resultadoRecarga.exito) {
+        if (resultadoRecarga.success) {
             document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
             document.getElementById('resProducto').textContent = producto;
             document.getElementById('resIdResumen').textContent = idJugador;
@@ -1009,11 +850,11 @@ async function iniciarVerificacion() {
                 mensajeExito += `\n🔑 Clave: ${resultadoRecarga.datos_extra.clave}`;
             }
             
-            enviarTelegram(mensajeExito);
+            await enviarTelegram(mensajeExito);
             
         } else {
             mostrarPaso('pasoSinSaldo');
-            enviarTelegram(`
+            await enviarTelegram(`
 ⚠️ <b>PAGO PENDIENTE</b>
 
 🎮 Juego: ${juego}
@@ -1051,7 +892,7 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('🚀 RECARGASGAMES - Pasarela de Pagos con Firebase');
+console.log('🚀 RECARGASGAMES - Pasarela de Pagos con Firebase + Vercel');
 console.log('📦 Juego:', juego);
 console.log('👤 Nombre:', nombreJugador);
 console.log('🆔 ID:', idJugador);
