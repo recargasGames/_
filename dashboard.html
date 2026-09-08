@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Cuenta - Recargas Games</title>
+    <title>Mi Panel - Recargas Games</title>
     <style>
         * {
             margin: 0;
@@ -11,259 +11,613 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0b1220, #1a1a2e);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b1220;
+            color: white;
             min-height: 100vh;
-            padding: 20px;
+            padding-top: 80px;
         }
-        .dashboard-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .header-dashboard {
-            background: rgba(17, 24, 39, 0.95);
-            padding: 20px 30px;
-            border-radius: 20px;
-            border: 1px solid #3b82f6;
+
+        /* ====== BARRA SUPERIOR ====== */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: rgba(11, 18, 32, 0.95);
+            border-bottom: 2px solid #3b82f6;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
         }
-        .user-info {
+        .topbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .topbar .logo img {
+            height: 45px;
+            border-radius: 10px;
+        }
+        .topbar .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+        .topbar .logo h1 span {
+            color: #3b82f6;
+        }
+        .topbar-actions {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        .user-avatar {
-            width: 50px;
-            height: 50px;
+        .topbar-actions .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59, 130, 246, 0.15);
+            padding: 6px 14px 6px 6px;
+            border-radius: 25px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .topbar-actions .user-badge .avatar {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: #3b82f6;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            color: white;
             font-weight: bold;
-        }
-        .user-details h2 {
-            color: white;
-            font-size: 18px;
-        }
-        .user-details p {
-            color: #9ca3af;
             font-size: 14px;
         }
-        .btn-logout {
-            padding: 10px 24px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .btn-logout:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-        }
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .card {
-            background: rgba(17, 24, 39, 0.95);
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid #374151;
-            transition: all 0.3s;
-        }
-        .card:hover {
-            border-color: #3b82f6;
-            transform: translateY(-5px);
-        }
-        .card h3 {
-            color: white;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        .card p {
-            color: #9ca3af;
+        .topbar-actions .user-badge .name {
             font-size: 14px;
+            font-weight: 500;
         }
-        .card .icon {
-            font-size: 30px;
-            margin-bottom: 10px;
+        .topbar-actions .btn-back {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+            padding: 6px 12px;
+            border-radius: 8px;
         }
-        .welcome-section {
-            background: rgba(17, 24, 39, 0.95);
-            padding: 30px;
+        .topbar-actions .btn-back:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+
+        /* ====== CONTENEDOR PRINCIPAL ====== */
+        .dashboard-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ====== TARJETA DE BIENVENIDA ====== */
+        .welcome-card {
+            background: linear-gradient(135deg, #1a2744, #0f1a2e);
             border-radius: 20px;
-            border: 1px solid #374151;
-            text-align: center;
+            padding: 30px;
+            border: 1px solid #2a3a5a;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
         }
-        .welcome-section h1 {
-            color: white;
-            font-size: 28px;
-            margin-bottom: 10px;
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent);
+            border-radius: 50%;
         }
-        .welcome-section p {
+        .welcome-card .greeting {
+            font-size: 14px;
             color: #9ca3af;
-            font-size: 16px;
+            margin-bottom: 5px;
         }
-        .loading {
-            color: white;
-            text-align: center;
-            font-size: 20px;
-            padding: 50px;
+        .welcome-card h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
         }
-        .go-home {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 30px;
+        .welcome-card h2 span {
+            color: #3b82f6;
+        }
+        .welcome-card p {
+            color: #9ca3af;
+            font-size: 15px;
+        }
+        .welcome-card .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .welcome-card .actions a {
+            padding: 10px 22px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .welcome-card .actions .btn-primary {
             background: #3b82f6;
             color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: all 0.3s;
         }
-        .go-home:hover {
+        .welcome-card .actions .btn-primary:hover {
             background: #2563eb;
             transform: translateY(-2px);
         }
-        .history-section {
-            margin-top: 30px;
-            background: rgba(17, 24, 39, 0.95);
-            padding: 25px;
-            border-radius: 20px;
+        .welcome-card .actions .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            color: white;
             border: 1px solid #374151;
         }
-        .history-section h3 {
-            color: white;
-            margin-bottom: 15px;
+        .welcome-card .actions .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
         }
-        .history-item {
+
+        /* ====== ESTADÍSTICAS ====== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(17, 24, 39, 0.9);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #1f2937;
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-3px);
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+        .stat-card .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .stat-card.blue .number { color: #3b82f6; }
+        .stat-card.yellow .number { color: #f59e0b; }
+        .stat-card.green .number { color: #22c55e; }
+
+        /* ====== SECCIÓN DE PEDIDOS ====== */
+        .pedidos-section {
+            background: rgba(17, 24, 39, 0.9);
+            border-radius: 16px;
+            border: 1px solid #1f2937;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .pedidos-section .header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #1f2937;
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #1f2937;
-            color: #9ca3af;
+            align-items: center;
         }
-        .history-item:last-child {
+        .pedidos-section .header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .pedidos-section .header .ver-todos {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .pedidos-section .header .ver-todos:hover {
+            text-decoration: underline;
+        }
+
+        /* ====== ITEM DE PEDIDO ====== */
+        .pedido-item {
+            padding: 18px 24px;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .pedido-item:last-child {
             border-bottom: none;
+        }
+        .pedido-item:hover {
+            background: rgba(255,255,255,0.03);
+        }
+        .pedido-item .info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .pedido-item .info .pedido-id {
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+        }
+        .pedido-item .info .pedido-id span {
+            color: #3b82f6;
+        }
+        .pedido-item .info .fecha {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .pedido-item .info .productos {
+            font-size: 14px;
+            color: #9ca3af;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pedido-item .info .productos .tag {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .pedido-item .detalle {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .pedido-item .detalle .precio {
+            font-size: 18px;
+            font-weight: 700;
+            color: #22c55e;
+        }
+        .pedido-item .detalle .metodo {
+            font-size: 12px;
+            color: #6b7280;
+            background: rgba(255,255,255,0.05);
+            padding: 2px 12px;
+            border-radius: 12px;
+        }
+        .pedido-item .detalle .estado {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 12px;
+        }
+        .pedido-item .detalle .estado.completado {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .pedido-item .detalle .estado.pendiente {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        .pedido-item .detalle .estado.cancelado {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* ====== JUEGOS DESTACADOS EN DASHBOARD ====== */
+        .juegos-rapidos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .juego-rapido {
+            background: rgba(17, 24, 39, 0.9);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #1f2937;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s;
+        }
+        .juego-rapido:hover {
+            border-color: #3b82f6;
+            transform: translateY(-3px);
+        }
+        .juego-rapido .icono {
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+        .juego-rapido .nombre {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            .stat-card .number {
+                font-size: 24px;
+            }
+            .pedido-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .pedido-item .detalle {
+                align-items: flex-start;
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .welcome-card h2 {
+                font-size: 22px;
+            }
+            .topbar .logo h1 {
+                font-size: 16px;
+            }
+            .topbar-actions .user-badge .name {
+                display: none;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 14px 10px;
+            }
+            .stat-card .number {
+                font-size: 20px;
+            }
+            .stat-card .label {
+                font-size: 11px;
+            }
+            .welcome-card {
+                padding: 20px;
+            }
+            .welcome-card .actions a {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            .pedido-item {
+                padding: 14px 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <div class="header-dashboard">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">👤</div>
-                <div class="user-details">
-                    <h2 id="userName">Cargando...</h2>
-                    <p id="userEmail">cargando@email.com</p>
+
+<!-- ====== BARRA SUPERIOR ====== -->
+<header class="topbar">
+    <div class="logo">
+        <img src="logo.png" alt="Recargas Games">
+        <h1>Recargas<span>Games</span></h1>
+    </div>
+    <div class="topbar-actions">
+        <div class="user-badge">
+            <div class="avatar" id="avatarInicial">A</div>
+            <span class="name" id="nombreUsuario">Angel</span>
+        </div>
+        <a href="index.html" class="btn-back">← Volver</a>
+    </div>
+</header>
+
+<!-- ====== CONTENIDO ====== -->
+<div class="dashboard-container">
+
+    <!-- TARJETA DE BIENVENIDA -->
+    <div class="welcome-card">
+        <div class="greeting">👋 Hola,</div>
+        <h2 id="bienvenidaNombre">Angel <span>👋</span></h2>
+        <p>Bienvenido a tu panel de cliente</p>
+        <div class="actions">
+            <a href="perfil.html" class="btn-primary">✏️ Editar Perfil</a>
+            <a href="productos.html" class="btn-secondary">📦 Ver Productos</a>
+        </div>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <div class="icon">📦</div>
+            <div class="number" id="totalPedidos">3</div>
+            <div class="label">Total Pedidos</div>
+        </div>
+        <div class="stat-card yellow">
+            <div class="icon">⏳</div>
+            <div class="number" id="pedidosPendientes">0</div>
+            <div class="label">Pendientes</div>
+        </div>
+        <div class="stat-card green">
+            <div class="icon">✅</div>
+            <div class="number" id="pedidosCompletados">3</div>
+            <div class="label">Completados</div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE PEDIDOS -->
+    <div class="pedidos-section">
+        <div class="header">
+            <h3>📋 Mis Pedidos</h3>
+            <a href="pedidos.html" class="ver-todos">Ver todos →</a>
+        </div>
+
+        <!-- PEDIDO 1 -->
+        <div class="pedido-item">
+            <div class="info">
+                <div class="pedido-id">#<span>7976</span></div>
+                <div class="fecha">📅 2026-08-31 14:08</div>
+                <div class="productos">
+                    <span class="tag">🔥 Free Fire</span>
+                    <span class="tag">110 Diamantes</span>
+                </div>
+                <div style="font-size:12px;color:#6b7280;margin-top:2px;">
+                    Ref: 140812829752
                 </div>
             </div>
-            <button class="btn-logout" id="logoutBtn">Cerrar Sesión</button>
-        </div>
-
-        <!-- Bienvenida -->
-        <div class="welcome-section">
-            <h1>🎮 ¡Bienvenido a Recargas Games!</h1>
-            <p>Aquí puedes ver tu historial de compras y acceder a todas las recargas</p>
-            <a href="index.html" class="go-home">📱 Ir a la Tienda</a>
-        </div>
-
-        <!-- Cards de acceso rápido -->
-        <div class="cards-grid">
-            <div class="card">
-                <div class="icon">🔥</div>
-                <h3>Recargas Free Fire</h3>
-                <p>Diamantes y pases exclusivos</p>
-            </div>
-            <div class="card">
-                <div class="icon">🎮</div>
-                <h3>Otros Juegos</h3>
-                <p>Roblox, ML, COD, PUBG y más</p>
-            </div>
-            <div class="card">
-                <div class="icon">🎬</div>
-                <h3>Streaming</h3>
-                <p>Netflix y Disney+ disponibles</p>
+            <div class="detalle">
+                <div class="precio">$0.80</div>
+                <div class="metodo">BS|PAGO MOVIL</div>
+                <div class="estado completado">✅ Completado</div>
             </div>
         </div>
 
-        <!-- Historial de compras -->
-        <div class="history-section">
-            <h3>📜 Historial de Compras</h3>
-            <div id="historyContainer">
-                <p style="color: #6b7280;">Cargando historial...</p>
+        <!-- PEDIDO 2 -->
+        <div class="pedido-item">
+            <div class="info">
+                <div class="pedido-id">#<span>7975</span></div>
+                <div class="fecha">📅 2026-08-30 22:15</div>
+                <div class="productos">
+                    <span class="tag">⚔️ Blood Strike</span>
+                    <span class="tag">Pase de Batalla</span>
+                </div>
+                <div style="font-size:12px;color:#6b7280;margin-top:2px;">
+                    Ref: 140812829751
+                </div>
+            </div>
+            <div class="detalle">
+                <div class="precio">$1.20</div>
+                <div class="metodo">BINANCE</div>
+                <div class="estado completado">✅ Completado</div>
+            </div>
+        </div>
+
+        <!-- PEDIDO 3 -->
+        <div class="pedido-item">
+            <div class="info">
+                <div class="pedido-id">#<span>7974</span></div>
+                <div class="fecha">📅 2026-08-29 18:45</div>
+                <div class="productos">
+                    <span class="tag">🧱 Roblox</span>
+                    <span class="tag">800 Robux</span>
+                </div>
+                <div style="font-size:12px;color:#6b7280;margin-top:2px;">
+                    Ref: 140812829750
+                </div>
+            </div>
+            <div class="detalle">
+                <div class="precio">$2.50</div>
+                <div class="metodo">PAGO MOVIL</div>
+                <div class="estado completado">✅ Completado</div>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { auth, db } from './firebase-config.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    <!-- JUEGOS RÁPIDOS -->
+    <div style="margin-top:10px;">
+        <h4 style="font-size:16px;font-weight:600;margin-bottom:12px;color:#9ca3af;">🎮 Recargas Rápidas</h4>
+        <div class="juegos-rapidos">
+            <a href="freefire.html" class="juego-rapido">
+                <div class="icono">🔥</div>
+                <div class="nombre">Free Fire</div>
+            </a>
+            <a href="bloodstrike.html" class="juego-rapido">
+                <div class="icono">⚔️</div>
+                <div class="nombre">Blood Strike</div>
+            </a>
+            <a href="roblox.html" class="juego-rapido">
+                <div class="icono">🧱</div>
+                <div class="nombre">Roblox</div>
+            </a>
+            <a href="ml.html" class="juego-rapido">
+                <div class="icono">⚔️</div>
+                <div class="nombre">MLBB</div>
+            </a>
+            <a href="netflix.html" class="juego-rapido">
+                <div class="icono">🎬</div>
+                <div class="nombre">Netflix</div>
+            </a>
+            <a href="disney.html" class="juego-rapido">
+                <div class="icono">✨</div>
+                <div class="nombre">Disney+</div>
+            </a>
+        </div>
+    </div>
 
-        // Verificar autenticación
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
+    <!-- INFO ADICIONAL -->
+    <div style="margin-top:25px;padding:16px 20px;background:rgba(17,24,39,0.7);border-radius:12px;border:1px solid #1f2937;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#6b7280;">🎮 ID de Jugador:</span>
+            <span style="font-weight:600;">83795</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#6b7280;">👤 Nombre:</span>
+            <span style="font-weight:600;" id="nombreJugador">2/3</span>
+        </div>
+        <button onclick="window.location.href='index.html'" style="background:#3b82f6;border:none;color:white;padding:6px 18px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">
+            📲 Ir a la Tienda
+        </button>
+    </div>
 
-            // Mostrar datos del usuario
-            document.getElementById('userName').textContent = user.displayName || 'Usuario';
-            document.getElementById('userEmail').textContent = user.email;
-            
-            // Avatar con inicial
-            const initial = (user.displayName || 'U')[0].toUpperCase();
-            document.getElementById('userAvatar').textContent = initial;
+</div>
 
-            // Cargar historial (ejemplo con datos simulados)
-            await cargarHistorial(user.uid);
-        });
+<script type="module">
+    import { auth } from './firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-        // Cerrar sesión
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (error) {
-                alert('Error al cerrar sesión: ' + error.message);
-            }
-        });
-
-        // Función para cargar historial (simulado por ahora)
-        async function cargarHistorial(userId) {
-            const container = document.getElementById('historyContainer');
-            
-            // Ejemplo de datos simulados (cuando tengas Firestore configurado, reemplaza esto)
-            const historialSimulado = [
-                { producto: 'Free Fire - 100 Diamantes', fecha: '2026-09-08', estado: 'Completado' },
-                { producto: 'Netflix - 1 Mes Premium', fecha: '2026-09-05', estado: 'Completado' },
-                { producto: 'Roblox - 800 Robux', fecha: '2026-09-01', estado: 'Pendiente' }
-            ];
-
-            if (historialSimulado.length === 0) {
-                container.innerHTML = '<p style="color: #6b7280;">No tienes compras registradas aún.</p>';
-                return;
-            }
-
-            container.innerHTML = historialSimulado.map(item => `
-                <div class="history-item">
-                    <span>${item.producto}</span>
-                    <span>${item.fecha} • ${item.estado}</span>
-                </div>
-            `).join('');
+    // ====== ACTUALIZAR DATOS DEL USUARIO ======
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Si no está logueado, redirigir al login
+            window.location.href = 'login.html';
+            return;
         }
-    </script>
+
+        const nombre = user.displayName || 'Usuario';
+        const inicial = nombre.charAt(0).toUpperCase();
+
+        // Actualizar elementos
+        document.getElementById('bienvenidaNombre').innerHTML = `${nombre} <span>👋</span>`;
+        document.getElementById('nombreUsuario').textContent = nombre;
+        document.getElementById('avatarInicial').textContent = inicial;
+        document.getElementById('nombreJugador').textContent = nombre;
+    });
+
+    // ====== FUNCIÓN PARA ACTUALIZAR ESTADÍSTICAS (ejemplo) ======
+    // Puedes conectar esto con Firestore para datos reales
+    function actualizarEstadisticas(pedidos) {
+        const total = pedidos.length;
+        const completados = pedidos.filter(p => p.estado === 'completado').length;
+        const pendientes = pedidos.filter(p => p.estado === 'pendiente').length;
+
+        document.getElementById('totalPedidos').textContent = total;
+        document.getElementById('pedidosCompletados').textContent = completados;
+        document.getElementById('pedidosPendientes').textContent = pendientes;
+    }
+
+    // Ejemplo de datos (cuando tengas Firestore, reemplaza esto)
+    const pedidosEjemplo = [
+        { id: 7976, estado: 'completado' },
+        { id: 7975, estado: 'completado' },
+        { id: 7974, estado: 'completado' }
+    ];
+    actualizarEstadisticas(pedidosEjemplo);
+</script>
+
 </body>
 </html>
