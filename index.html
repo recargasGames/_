@@ -4,19 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- ✅ TÍTULO PROFESIONAL -->
     <title>Recargas Games | Recargas de Juegos, Netflix y Disney+</title>
-    
-    <!-- ✅ VERIFICACIÓN GOOGLE -->
     <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
-    
-    <!-- ✅ META SEO -->
-    <meta name="description" content="Recargas Games: recargas instantáneas de diamantes Free Fire, Roblox, Mobile Legends, COD Mobile, PUBG, Blood Strike y más juegos. También cuentas de Netflix y Disney+. Pago seguro con Pago Móvil y Binance. Entrega rápida en Venezuela.">
-    <meta name="keywords" content="Recargas Games, RecargasGames, recargas de juegos, diamantes Free Fire, recargas Free Fire, Free Fire Venezuela, comprar diamantes Free Fire, recargas Roblox, recargas Mobile Legends, recargas instantáneas, pago seguro, recargas Venezuela, Netflix Venezuela, Disney+ Venezuela, cuentas Netflix, cuentas Disney+">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="description" content="Recargas Games: recargas instantáneas de diamantes Free Fire, Roblox, Mobile Legends, COD Mobile, PUBG, Blood Strike y más juegos.">
+    <meta name="keywords" content="Recargas Games, RecargasGames, recargas de juegos, diamantes Free Fire, recargas Free Fire">
+    <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://www.recargasgames.shop/">
     
-    <!-- ✅ REDES SOCIALES -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.recargasgames.shop/">
     <meta property="og:title" content="Recargas Games | Recargas de Juegos, Netflix y Disney+">
@@ -29,7 +23,6 @@
     <meta name="twitter:description" content="Recargas Games: recargas instantáneas de juegos y cuentas de streaming en Venezuela.">
     <meta name="twitter:image" content="https://www.recargasgames.shop/logo.png">
     
-    <!-- ✅ FAVICON -->
     <link rel="icon" type="image/png" href="/logo.png">
     <link rel="apple-touch-icon" href="/logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -42,6 +35,8 @@
             --color-hover: #2563eb;
             --color-blanco: #ffffff;
             --color-oscuro: #111827;
+            --color-error: #ef4444;
+            --color-success: #22c55e;
         }
         * {
             box-sizing: border-box;
@@ -58,7 +53,6 @@
             padding-top: 110px;
         }
 
-        /* 🔒 BARRA SUPERIOR FIJA */
         .barra-superior {
             position: fixed;
             top: 0;
@@ -76,13 +70,65 @@
             align-items: center; 
             border-bottom: 1px solid #2a374f;
         }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
         .brand img { 
             height: 55px; 
             width: auto; 
             border-radius: 12px; 
         }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .btn-auth {
+            background: transparent;
+            border: 1px solid var(--color-azul);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .btn-auth:hover {
+            background: var(--color-azul);
+            transform: translateY(-2px);
+        }
+        .btn-auth.primary {
+            background: var(--color-azul);
+        }
+        .btn-auth.primary:hover {
+            background: var(--color-hover);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--color-azul);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
 
-        /* 🍔 BOTÓN MENÚ — TRES RAYITAS */
         .menu-hamburguesa {
             background: transparent;
             border: none;
@@ -97,7 +143,6 @@
             color: var(--color-azul);
         }
 
-        /* 📋 MENÚ FLOTANTE — SOLO ENLACES RÁPIDOS */
         .menu-flotante {
             position: absolute;
             top: 65px;
@@ -119,7 +164,6 @@
             visibility: visible;
             transform: translateY(0);
         }
-
         .menu-opcion {
             display: flex;
             align-items: center;
@@ -140,8 +184,11 @@
             color: var(--color-azul);
             padding-left: 22px;
         }
+        .menu-divider {
+            border-top: 1px solid #1f2937;
+            margin: 5px 0;
+        }
 
-        /* 📱 BARRA DE JUEGOS ABAJO */
         .games-menu { 
             display: flex; 
             gap: 8px; 
@@ -223,6 +270,130 @@
             background: rgba(59, 130, 246, 0.2);
         }
 
+        /* 🔐 MODAL DE LOGIN */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-login {
+            background: rgba(17, 24, 39, 0.98);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--color-azul);
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: modalSlide 0.3s ease;
+        }
+        @keyframes modalSlide {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-login h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: white;
+        }
+        .modal-login .form-group {
+            margin-bottom: 18px;
+        }
+        .modal-login .form-group label {
+            color: #9ca3af;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .modal-login .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .modal-login .form-group input:focus {
+            outline: none;
+            border-color: var(--color-azul);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .modal-login .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--color-azul);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .modal-login .btn-submit:hover {
+            background: var(--color-hover);
+            transform: translateY(-2px);
+        }
+        .modal-login .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .modal-login .auth-links {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        .modal-login .auth-links a {
+            color: var(--color-azul);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .modal-login .auth-links a:hover {
+            text-decoration: underline;
+        }
+        .modal-login .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .modal-login .message {
+            text-align: center;
+            margin-top: 12px;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+        .modal-login .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--color-error);
+            display: block;
+        }
+        .modal-login .message.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--color-success);
+            display: block;
+        }
+
         .footer { 
             background: rgba(11, 18, 32, 0.9); 
             border-top: 1px solid #1f2937; 
@@ -300,18 +471,30 @@
             .header { padding: 10px 16px; }
             .games-menu { padding: 10px 12px; }
             .menu-flotante { right: 10px; min-width: 200px; }
+            .modal-login { padding: 25px; }
+            .btn-auth { font-size: 12px; padding: 6px 12px; }
+            .user-name { font-size: 12px; }
         }
     </style>
 </head>
 <body onclick="cerrarMenuSiExterior(event)">
 
+<!-- BARRA SUPERIOR -->
 <div class="barra-superior">
     <div class="header">
-        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
-        <!-- 🍔 SOLO LAS TRES RAYITAS — SIN LOGIN -->
-        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        <div class="header-left">
+            <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
+        </div>
+        <div class="header-right">
+            <!-- Zona de usuario DINÁMICA -->
+            <div id="authSection">
+                <a href="#" class="btn-auth" id="loginBtnModal" onclick="abrirModalLogin()">🔑 Iniciar Sesión</a>
+                <a href="register.html" class="btn-auth primary">📝 Registrarse</a>
+            </div>
+            <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        </div>
         
-        <!-- 📋 MENÚ FLOTANTE — SOLO ENLACES RÁPIDOS A JUEGOS -->
+        <!-- MENÚ FLOTANTE -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
             <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
             <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
@@ -323,8 +506,13 @@
             <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
             <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
             <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+            <div class="menu-divider"></div>
+            <a href="dashboard.html" class="menu-opcion" id="menuDashboard">👤 Mi Cuenta</a>
+            <a href="#" class="menu-opcion" id="menuLogout" style="color: #ef4444;">🚪 Cerrar Sesión</a>
         </div>
     </div>
+    
+    <!-- BARRA DE JUEGOS -->
     <div class="games-menu">
         <a href="index.html" class="active">Inicio</a>
         <a href="freefire.html">Free Fire</a>
@@ -340,6 +528,33 @@
     </div>
 </div>
 
+<!-- MODAL DE LOGIN -->
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-login">
+        <div style="text-align: right;">
+            <button onclick="cerrarModalLogin()" style="background:none;border:none;color:#9ca3af;font-size:24px;cursor:pointer;">✕</button>
+        </div>
+        <h2>🔑 Iniciar Sesión</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>📧 Correo electrónico</label>
+                <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>🔑 Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="Tu contraseña" required>
+            </div>
+            <button type="submit" class="btn-submit" id="loginBtn">Ingresar</button>
+        </form>
+        <div id="loginMessage" class="message"></div>
+        <div class="auth-links">
+            <p>¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></p>
+            <p><a href="#" id="resetPasswordLink">¿Olvidaste tu contraseña?</a></p>
+        </div>
+    </div>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
 <div class="main">
     <div class="welcome-text">
         <h2>Los mejores juegos con recargas instantáneas</h2>
@@ -394,28 +609,176 @@
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
 <a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
 
-<script>
-    // 🍔 ABRIR Y CERRAR MENÚ
-    function alternarMenu() {
-        const menu = document.getElementById('menuFlotante');
-        menu.classList.toggle('activo');
-    }
+<!-- SCRIPTS -->
+<script type="module">
+    import { auth } from './firebase-config.js';
+    import { 
+        onAuthStateChanged, 
+        signInWithEmailAndPassword, 
+        signOut,
+        sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    // ❌ CERRAR MENÚ AL HACER CLIC POR FUERA
-    function cerrarMenuSiExterior(e) {
+    // ========== ELEMENTOS DOM ==========
+    const authSection = document.getElementById('authSection');
+    const menuDashboard = document.getElementById('menuDashboard');
+    const menuLogout = document.getElementById('menuLogout');
+    const modalLogin = document.getElementById('modalLogin');
+    const loginForm = document.getElementById('loginForm');
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginMessage = document.getElementById('loginMessage');
+
+    // ========== ESTADO DE AUTENTICACIÓN ==========
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Usuario LOGUEADO
+            const nombre = user.displayName || 'Usuario';
+            const inicial = nombre.charAt(0).toUpperCase();
+            
+            authSection.innerHTML = `
+                <div class="user-info">
+                    <div class="user-avatar">${inicial}</div>
+                    <span class="user-name">${nombre}</span>
+                </div>
+                <a href="dashboard.html" class="btn-auth primary" style="padding:6px 12px;font-size:13px;">👤 Cuenta</a>
+            `;
+            
+            menuDashboard.style.display = 'flex';
+            menuLogout.style.display = 'flex';
+            
+            // Cerrar sesión desde menú
+            menuLogout.onclick = async (e) => {
+                e.preventDefault();
+                if (confirm('¿Seguro que quieres cerrar sesión?')) {
+                    await signOut(auth);
+                    window.location.reload();
+                }
+            };
+        } else {
+            // Usuario NO LOGUEADO
+            authSection.innerHTML = `
+                <a href="#" class="btn-auth" onclick="abrirModalLogin()">🔑 Iniciar Sesión</a>
+                <a href="register.html" class="btn-auth primary">📝 Registrarse</a>
+            `;
+            menuDashboard.style.display = 'none';
+            menuLogout.style.display = 'none';
+        }
+    });
+
+    // ========== FUNCIONES GLOBALES ==========
+    window.abrirModalLogin = function() {
+        modalLogin.classList.add('active');
+        loginMessage.className = 'message';
+        loginMessage.style.display = 'none';
+        loginEmail.value = '';
+        loginPassword.value = '';
+    };
+
+    window.cerrarModalLogin = function() {
+        modalLogin.classList.remove('active');
+    };
+
+    // Cerrar modal al hacer clic fuera
+    modalLogin.addEventListener('click', (e) => {
+        if (e.target === modalLogin) cerrarModalLogin();
+    });
+
+    // ========== LOGIN ==========
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value;
+
+        loginMessage.className = 'message';
+        loginMessage.style.display = 'none';
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Ingresando...';
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            
+            loginMessage.className = 'message success';
+            loginMessage.textContent = '✅ ¡Bienvenido!';
+            loginMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                cerrarModalLogin();
+                window.location.reload();
+            }, 1000);
+
+        } catch (error) {
+            let errorMsg = '❌ ';
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    errorMsg += 'Usuario no encontrado';
+                    break;
+                case 'auth/wrong-password':
+                    errorMsg += 'Contraseña incorrecta';
+                    break;
+                case 'auth/invalid-email':
+                    errorMsg += 'Correo inválido';
+                    break;
+                case 'auth/too-many-requests':
+                    errorMsg += 'Demasiados intentos. Intenta más tarde';
+                    break;
+                default:
+                    errorMsg += error.message;
+            }
+            
+            loginMessage.className = 'message error';
+            loginMessage.textContent = errorMsg;
+            loginMessage.style.display = 'block';
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Ingresar';
+        }
+    });
+
+    // ========== RECUPERAR CONTRASEÑA ==========
+    document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = loginEmail.value.trim();
+        
+        if (!email) {
+            loginMessage.className = 'message error';
+            loginMessage.textContent = '❌ Ingresa tu correo para restablecer la contraseña';
+            loginMessage.style.display = 'block';
+            return;
+        }
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            loginMessage.className = 'message success';
+            loginMessage.textContent = '✅ Correo de restablecimiento enviado. Revisa tu bandeja.';
+            loginMessage.style.display = 'block';
+        } catch (error) {
+            loginMessage.className = 'message error';
+            loginMessage.textContent = '❌ Error: ' + error.message;
+            loginMessage.style.display = 'block';
+        }
+    });
+
+    // ========== MENÚ HAMBURGUESA ==========
+    window.alternarMenu = function() {
+        document.getElementById('menuFlotante').classList.toggle('activo');
+    };
+
+    window.cerrarMenuSiExterior = function(e) {
         const menu = document.getElementById('menuFlotante');
         const btn = document.getElementById('btnMenu');
         if (!menu.contains(e.target) && !btn.contains(e.target)) {
             menu.classList.remove('activo');
         }
-    }
+    };
 
-    // ⬆️ BOTÓN SUBIR ARRIBA
+    // ========== SCROLL Y BOTONES ==========
     window.addEventListener('scroll', () => {
         document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
     });
 
-    // 📲 INSTALAR APP
+    // ========== INSTALAR APP ==========
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
     window.addEventListener('beforeinstallprompt', (e) => {
