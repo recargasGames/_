@@ -54,6 +54,7 @@
             padding-top: 110px;
         }
 
+        /* ====== BARRA SUPERIOR ====== */
         .barra-superior {
             position: fixed;
             top: 0;
@@ -63,6 +64,7 @@
             background: rgba(11, 18, 32, 0.95);
             border-bottom: 2px solid var(--color-azul);
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
         }
         .header { 
             padding: 12px 20px; 
@@ -84,10 +86,10 @@
         .header-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
-        /* ====== BOTÓN PERFIL / AVATAR ====== */
+        /* ====== BOTÓN PERFIL ====== */
         .btn-perfil {
             background: transparent;
             border: none;
@@ -150,12 +152,12 @@
         /* ====== MENÚ DESPLEGABLE DE PERFIL ====== */
         .menu-perfil {
             position: absolute;
-            top: 58px;
+            top: 52px;
             right: 0;
             background: rgba(17, 24, 39, 0.98);
             border: 1px solid var(--color-azul);
             border-radius: 14px;
-            min-width: 240px;
+            min-width: 250px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.5);
             opacity: 0;
             visibility: hidden;
@@ -171,7 +173,6 @@
             transform: translateY(0) scale(1);
         }
 
-        /* Cabecera del menú de perfil */
         .menu-perfil-header {
             padding: 16px 20px;
             border-bottom: 1px solid #1f2937;
@@ -201,7 +202,6 @@
             font-size: 12px;
         }
 
-        /* Opciones del menú */
         .menu-perfil-opcion {
             display: flex;
             align-items: center;
@@ -263,7 +263,7 @@
         /* ====== MENÚ FLOTANTE (HAMBURGUESA) ====== */
         .menu-flotante {
             position: absolute;
-            top: 65px;
+            top: 58px;
             right: 0;
             background: rgba(17, 24, 39, 0.98);
             border: 1px solid var(--color-azul);
@@ -623,7 +623,7 @@
             <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
         </div>
         <div class="header-right">
-            <!-- ====== BOTÓN DE PERFIL ====== -->
+            <!-- BOTÓN DE PERFIL (se muestra cuando está logueado) -->
             <div id="perfilContainer" style="position:relative;display:none;">
                 <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
                     <div class="avatar-circle" id="avatarCircle">
@@ -645,20 +645,17 @@
                     </div>
                     
                     <a href="dashboard.html" class="menu-perfil-opcion">
-                        <span class="icono">👤</span> Mi Perfil
+                        <span class="icono">📊</span> Mi Panel
+                    </a>
+                    <a href="perfil.html" class="menu-perfil-opcion">
+                        <span class="icono">👤</span> Editar Perfil
                     </a>
                     <a href="pedidos.html" class="menu-perfil-opcion">
                         <span class="icono">📦</span> Mis Pedidos
                         <span class="badge">3</span>
                     </a>
-                    <a href="recargas.html" class="menu-perfil-opcion">
-                        <span class="icono">🎮</span> Mis Recargas
-                    </a>
                     <a href="favoritos.html" class="menu-perfil-opcion">
                         <span class="icono">❤️</span> Favoritos
-                    </a>
-                    <a href="configuracion.html" class="menu-perfil-opcion">
-                        <span class="icono">⚙️</span> Configuración
                     </a>
                     <div style="border-top:1px solid #1f2937;margin:5px 0;"></div>
                     <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion">
@@ -667,7 +664,7 @@
                 </div>
             </div>
 
-            <!-- ====== BOTONES DE LOGIN/REGISTRO (cuando NO está logueado) ====== -->
+            <!-- BOTONES LOGIN/REGISTRO (cuando NO está logueado) -->
             <div id="authButtons" style="display:flex;align-items:center;gap:8px;">
                 <a href="#" class="btn-auth" id="loginBtnModal" onclick="abrirModalLogin()" style="background:transparent;border:1px solid #3b82f6;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;">
                     🔑 Ingresar
@@ -677,7 +674,7 @@
                 </a>
             </div>
 
-            <!-- ====== BOTÓN HAMBURGUESA ====== -->
+            <!-- BOTÓN HAMBURGUESA -->
             <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         </div>
         
@@ -694,9 +691,10 @@
             <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
             <a href="disney.html" class="menu-opcion">✨ Disney+</a>
             <div class="menu-divider"></div>
-            <a href="#" class="menu-opcion" id="menuHamburguesaLogin" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
+            <!-- Opciones dinámicas del menú hamburguesa -->
+            <a href="#" class="menu-opcion" id="menuHamburguesaL login" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
             <a href="register.html" class="menu-opcion" id="menuHamburguesaRegister">📝 Registrarse</a>
-            <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">👤 Mi Cuenta</a>
+            <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">📊 Mi Panel</a>
             <a href="#" class="menu-opcion" id="menuHamburguesaLogout" style="display:none;color:#ef4444;">🚪 Cerrar Sesión</a>
         </div>
     </div>
@@ -838,7 +836,7 @@
     // Cerrar sesión
     const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 
-    // ====== FUNCIÓN PARA ACTUALIZAR UI SEGÚN ESTADO ======
+    // ====== FUNCIÓN PARA ACTUALIZAR UI ======
     function actualizarUI(user) {
         if (user) {
             // Usuario LOGUEADO
@@ -885,27 +883,24 @@
     window.toggleMenuPerfil = function() {
         menuPerfil.classList.toggle('activo');
         perfilFlecha.classList.toggle('abierta');
-        // Cerrar menú hamburguesa si está abierto
         menuFlotante.classList.remove('activo');
     };
 
     // ====== ABRIR/CERRAR MENÚ HAMBURGUESA ======
     window.alternarMenu = function() {
         menuFlotante.classList.toggle('activo');
-        // Cerrar menú perfil si está abierto
         menuPerfil.classList.remove('activo');
         perfilFlecha.classList.remove('abierta');
     };
 
     // ====== CERRAR TODOS LOS MENÚS ======
     window.cerrarTodosLosMenus = function(e) {
-        // Cerrar menú perfil
+        const btnMenu = document.getElementById('btnMenu');
+        
         if (!menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
             menuPerfil.classList.remove('activo');
             perfilFlecha.classList.remove('abierta');
         }
-        // Cerrar menú hamburguesa
-        const btnMenu = document.getElementById('btnMenu');
         if (!menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
             menuFlotante.classList.remove('activo');
         }
@@ -918,7 +913,6 @@
         loginMessage.style.display = 'none';
         loginEmail.value = '';
         loginPassword.value = '';
-        // Cerrar menús
         menuPerfil.classList.remove('activo');
         perfilFlecha.classList.remove('abierta');
         menuFlotante.classList.remove('activo');
@@ -928,7 +922,6 @@
         modalLogin.classList.remove('active');
     };
 
-    // Cerrar modal al hacer clic fuera
     modalLogin.addEventListener('click', (e) => {
         if (e.target === modalLogin) cerrarModalLogin();
     });
@@ -1019,7 +1012,6 @@
         }
     });
 
-    // También desde el menú hamburguesa
     menuHamburguesaLogout.addEventListener('click', async (e) => {
         e.preventDefault();
         if (confirm('¿Seguro que quieres cerrar sesión?')) {
