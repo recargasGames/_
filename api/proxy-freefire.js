@@ -21,18 +21,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { token, tipo, id_jugador } = req.body;
+    const { tipo, id_jugador } = req.body;
+    const token = process.env.FF_API_TOKEN || process.env.FF_TOKEN;
 
-    // Validar que todos los campos estén presentes
     if (!token || !tipo || !id_jugador) {
       return res.status(400).json({
         error: 'Faltan parámetros requeridos',
-        required: ['token', 'tipo', 'id_jugador'],
-        received: { token: !!token, tipo: !!tipo, id_jugador: !!id_jugador }
+        required: ['tipo', 'id_jugador'],
+        received: { tipo: !!tipo, id_jugador: !!id_jugador }
       });
     }
 
-    console.log('📡 Proxy recibió:', { token: token.slice(0,10)+'...', tipo, id_jugador });
+    console.log('📡 Proxy recibió:', { tipo, id_jugador });
 
     // Construir URL de la API externa
     const apiUrl = `https://apicentral.pro/apis/freefire.jsp?token=${encodeURIComponent(token)}&tipo=${encodeURIComponent(tipo)}&id_jugador=${encodeURIComponent(id_jugador)}`;

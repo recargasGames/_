@@ -1,6 +1,3 @@
-const TELEGRAM_BOT_TOKEN = "8995715863:AAGUVR-U-Gf59EEClR1VXgUqW0XjYc9puFs";
-const TELEGRAM_CHAT_ID = "1935104549";
-
 async function enviarTelegram(producto, precio, jugador, metodo, juego, referencia) {
     let mensaje = `
 🛒 NUEVO PEDIDO
@@ -16,23 +13,20 @@ async function enviarTelegram(producto, precio, jugador, metodo, juego, referenc
 `;
 
     try {
-        let response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CHAT_ID,
-                text: mensaje
-            })
+        const response = await fetch('/api/telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensaje })
         });
-        
-        let data = await response.json();
-        
-        if(data.ok) {
-            console.log("✅ Pedido enviado a Telegram");
+
+        const data = await response.json();
+
+        if (data.success) {
+            console.log('✅ Pedido enviado a Telegram');
         } else {
-            console.error("❌ Error Telegram:", data);
+            console.error('❌ Error Telegram:', data);
         }
-    } catch(error) {
-        console.error("❌ Error de conexión:", error);
+    } catch (error) {
+        console.error('❌ Error de conexión:', error);
     }
 }

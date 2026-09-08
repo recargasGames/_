@@ -487,44 +487,13 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// 🔑 CONFIGURACIÓN DE APIS
+// 🔑 CONFIGURACIÓN DE APIS (SIN SECRETS EN EL CLIENTE)
 // ==============================================
-const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
-
-// 🔴 FREE FIRE - NO TOCAR (API Central Pro)
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-// 🟢 PAGONORTE - Netflix, Blood Strike, Disney+
-const PAGONORTE_URL = "https://pagonorte.net/recargas/api.jsp";
-const PAGONORTE_API_KEY = "pn_8dc8d383aa88020b5df8365052e4ecf5168a";
-const PAGONORTE_API_SECRET = "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05";
-
-// TELEGRAM
-const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
-const TELEGRAM_CHAT_ID = "8452807558";
-
-// ==============================================
-// 📋 DATOS DEL PEDIDO
-// ==============================================
-const juego = localStorage.getItem('juego_seleccionado') || "";
-const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
-const nombreJugador = localStorage.getItem('nombre_jugador') || idJugador || "Sin nombre";
-const producto = localStorage.getItem('producto_seleccionado') || "";
-const precioUsd = localStorage.getItem('precio_usd') || "0";
-const precioBs = localStorage.getItem('precio_en_bs') || "0";
-const paqueteCod = localStorage.getItem('paquete_codigo') || "";
-
-// ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
-// ==============================================
-document.getElementById('datoJuego').textContent = juego;
-document.getElementById('datoId').textContent = idJugador;
-document.getElementById('datoNombreJugador').textContent = nombreJugador;
-document.getElementById('datoProducto').textContent = producto;
-document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+const PABILO_VERIFY_URL = `${API_BASE_URL}/api/verificar-pago`;
+const TELEGRAM_SEND_URL = `${API_BASE_URL}/api/telegram`;
+const FREEFIRE_API_URL = `${API_BASE_URL}/api/recarga-freefire`;
+const PAGONORTE_API_URL = `${API_BASE_URL}/api/recarga-pagonorte`;
 document.getElementById('montoBsMostrar').textContent = precioBs + " Bs";
 
 // ==============================================
@@ -631,15 +600,10 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud = '', pro
 // 📢 ENVIAR MENSAJE A TELEGRAM
 // ==============================================
 function enviarTelegram(mensaje) {
-    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-    fetch(url, {
+    fetch(TELEGRAM_SEND_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: mensaje,
-            parse_mode: 'HTML'
-        })
+        body: JSON.stringify({ mensaje })
     }).catch(err => console.log("Error enviando Telegram:", err));
 }
 
@@ -651,49 +615,38 @@ async function enviarRecargaFreeFire() {
     if (!juego.toUpperCase().includes("FREE FIRE") || !idJugador || !paqueteCod) {
         return { exito: true, mensaje: "Servicio procesado correctamente" };
     }
-    
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    
-    console.log('📤 Enviando a API Central Pro:', url);
-    
+
     try {
-        const res = await fetch(url);
-        const text = await res.text();
-        console.log('📥 Respuesta:', text);
-        
-        let json;
-        try {
-            json = JSON.parse(text);
-        } catch {
-            json = { raw: text };
+        const res = await fetch(FREEFIRE_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id_jugador: idJugador,
+                paquete: paqueteCod,
+                referencia: Date.now().toString()
+            })
+        });
+
+        const json = await res.json();
+        const esExito = json.success === true || json.exito === true || json.estado === 'exito';
+
+        if (!esExito) {
+            return {
+                exito: false,
+                sinSaldo: !!(json.mensaje && json.mensaje.toLowerCase().includes('saldo')),
+                mensaje: json.mensaje || 'No se pudo completar la recarga'
+            };
         }
-        
-        const esExito = 
-            json.alerta === "green" || 
-            json.estado === "exito" || 
-            json.exito === true || 
-            json.success === true || 
-            json.codigo_respuesta === "00" ||
-            (json.mensaje && (json.mensaje.includes("exito") || json.mensaje.includes("exitosa")));
-        
-        const sinSaldo = 
-            json.alerta === "red" || 
-            json.mensaje?.toLowerCase().includes("saldo") || 
-            json.error;
-        
-        if (esExito && !sinSaldo) {
-            return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        }
-        
-        if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        }
-        
-        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        
+
+        return {
+            exito: true,
+            mensaje: json.mensaje || 'Recarga exitosa ✅',
+            id_solicitud: json.id_solicitud || json.id || 'N/A',
+            proveedor: 'API Central Pro'
+        };
     } catch (error) {
         console.error('❌ Error en recarga:', error);
-        return { exito: true, mensaje: "Recarga en proceso ✅" };
+        return { exito: true, mensaje: 'Recarga en proceso ✅' };
     }
 }
 
@@ -701,12 +654,11 @@ async function enviarRecargaFreeFire() {
 // 🟢 ENVIAR RECARGA A PAGONORTE - Netflix, Blood Strike, Disney+
 // ==============================================
 async function enviarRecargaPagoNorte() {
-    // Determinar el tipo según el juego
     let tipo = '';
     let proveedor = 'PagoNorte';
-    
+
     const juegoUpper = juego.toUpperCase();
-    
+
     if (juegoUpper.includes('NETFLIX')) {
         tipo = 'recargaPerfilNetflix';
         proveedor = 'PagoNorte - Netflix';
@@ -717,70 +669,45 @@ async function enviarRecargaPagoNorte() {
         tipo = 'recargaBloodStrike';
         proveedor = 'PagoNorte - Blood Strike';
     } else {
-        // Si no es ninguno de estos, no hacer nada
-        return { exito: true, mensaje: "Servicio procesado correctamente" };
+        return { exito: true, mensaje: 'Servicio procesado correctamente' };
     }
-    
-    // Construir parámetros
-    const params = new URLSearchParams({
-        action: 'recarga',
-        api_key: PAGONORTE_API_KEY,
-        api_secret: PAGONORTE_API_SECRET,
-        tipo: tipo,
-        id_jugador: idJugador || '000000000',
-        paquete: paqueteCod || '1',
-        referencia: Date.now() + '_' + Math.random().toString(36).substring(2, 8)
-    });
-    
-    // Para streaming (Netflix, Disney+) se envía email
-    if (juegoUpper.includes('NETFLIX') || juegoUpper.includes('DISNEY')) {
-        params.append('email', idJugador || 'usuario@email.com');
-    }
-    
-    console.log('📤 Enviando a PagoNorte:', params.toString());
-    
+
     try {
-        const res = await fetch(PAGONORTE_URL, {
+        const res = await fetch(PAGONORTE_API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: params.toString()
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tipo,
+                id_jugador: idJugador || '000000000',
+                paquete: paqueteCod || '1',
+                referencia: Date.now() + '_' + Math.random().toString(36).substring(2, 8),
+                email: (juegoUpper.includes('NETFLIX') || juegoUpper.includes('DISNEY')) ? (idJugador || 'usuario@email.com') : undefined
+            })
         });
-        
+
         const datos = await res.json();
-        console.log('📥 Respuesta PagoNorte:', datos);
-        
-        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
-        
+        const esExito = datos.success === true || (datos.success === undefined && datos.ok === true && datos.alerta === 'green');
+
         if (esExito) {
             return {
                 exito: true,
                 mensaje: datos.mensaje || 'Recarga exitosa ✅',
                 id_solicitud: datos.id_solicitud || 'N/A',
                 proveedor: proveedor,
-                datos_extra: {
-                    cuenta: datos.cuenta || null,
-                    correo: datos.correo || null,
-                    clave: datos.clave || null,
-                    perfil: datos.perfil || null,
-                    fecha_vencimiento: datos.fecha_vencimiento || null,
-                    codigo_aprobacion: datos.codigo_aprobacion || null
-                }
-            };
-        } else {
-            return {
-                exito: false,
-                mensaje: datos.mensaje || 'Error en la recarga',
-                error: datos.alerta || 'Error'
+                datos_extra: datos.datos_extra || {}
             };
         }
-        
+
+        return {
+            exito: false,
+            mensaje: datos.mensaje || 'Error en la recarga',
+            error: datos.error || 'Error'
+        };
     } catch (error) {
         console.error('❌ Error en PagoNorte:', error);
         return {
             exito: true,
-            mensaje: "Recarga en proceso ✅",
+            mensaje: 'Recarga en proceso ✅',
             proveedor: proveedor
         };
     }
@@ -790,43 +717,20 @@ async function enviarRecargaPagoNorte() {
 // ⚡ VERIFICAR PAGO EN PÁBILO
 // ==============================================
 async function verificarPagoPabilo(referencia) {
-    let montoPago = String(precioBs).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
-    const fecha = new Date().toISOString().split('T')[0];
-
-    const cuerpo = { 
-        bank_reference: referencia, 
-        amount: montoPago, 
-        movement_type: "GENERIC", 
-        fecha_pago: fecha 
-    };
-
     try {
-        const res = await fetch(API_PABILO_URL, {
+        const res = await fetch(PABILO_VERIFY_URL, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Authorization': `Bearer ${API_KEY}` 
-            },
-            body: JSON.stringify(cuerpo)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                referencia,
+                montoBs: precioBs
+            })
         });
-        
+
         const datos = await res.json();
         console.log('📥 Respuesta Pábilo:', datos);
-        
-        if (res.ok && datos) {
-            const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
-            const dataStatus = (datos.data?.status || "").toLowerCase();
-            
-            return res.ok && (
-                msg === 'payment confirmed' || msg === 'paid' || msg === 'confirmado' || 
-                msg === 'aprobado' || msg.includes('confirmado') || msg.includes('aprobado') || 
-                msg.includes('pagado') || dataStatus === 'paid' || dataStatus === 'confirmado' ||
-                datos.success === true || datos.exito === true || datos.paid === true
-            );
-        }
-        return false;
-    } catch(error) {
+        return !!(datos && datos.success === true);
+    } catch (error) {
         console.error('❌ Error en Pábilo:', error);
         return false;
     }

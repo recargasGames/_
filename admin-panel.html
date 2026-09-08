@@ -186,8 +186,6 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
 const ADMIN_EMAIL="aa3964063@gmail.com";
-const TELEGRAM_BOT_TOKEN="8995715863:AAGUVR-U-Gf59EEClR1VXgUqW0XjYc9puFs";
-const TELEGRAM_CHAT_ID="1935104549";
 
 let pedidos=[];
 let usuarios=[];
@@ -461,10 +459,10 @@ window.notificarPendientes=async()=>{
     if(pendientes.length===0){mostrarToast("No hay pedidos pendientes", "warning");return;}
     const mensaje=`📋 RECORDATORIO: Tienes ${pendientes.length} pedido(s) pendiente(s) por revisar en el panel admin.`;
     try{
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
-            method:"POST",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({chat_id:TELEGRAM_CHAT_ID,text:mensaje,parse_mode:"Markdown"})
-        });
+            await fetch('/api/telegram', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensaje })
         mostrarToast(`✅ Notificación enviada: ${pendientes.length} pedidos pendientes`);
     }catch(e){mostrarToast("❌ Error al enviar", "error");}
 };
@@ -475,9 +473,10 @@ window.enviarMensajeATodos=()=>{
         const mensaje=document.getElementById('mensajeMasivo').value.trim();
         if(!mensaje){mostrarToast("❌ Escribe un mensaje", "error");return;}
         try{
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
-                method:"POST",headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({chat_id:TELEGRAM_CHAT_ID,text:`📢 MENSAJE ADMIN:\n${mensaje}`,parse_mode:"Markdown"})
+            await fetch('/api/telegram', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mensaje: `📢 MENSAJE ADMIN:\n${mensaje}` })
             });
             mostrarToast("✅ Mensaje enviado a Telegram");
             cerrarModalMensaje();
@@ -488,9 +487,10 @@ window.enviarMensajeATodos=()=>{
 window.enviarATodos=()=>{
     const mensaje=prompt("📢 Escribe el mensaje que quieres enviar a todos los usuarios por Telegram:");
     if(mensaje){
-        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
-            method:"POST",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({chat_id:TELEGRAM_CHAT_ID,text:`📢 MENSAJE PARA CLIENTES:\n${mensaje}`,parse_mode:"Markdown"})
+        fetch('/api/telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensaje: `📢 MENSAJE PARA CLIENTES:\n${mensaje}` })
         }).then(()=>mostrarToast("✅ Mensaje enviado")).catch(()=>mostrarToast("❌ Error","error"));
     }
 };

@@ -31,8 +31,10 @@ module.exports = async (req, res) => {
 
         console.log('📤 Verificando pago en Pábilo:', referencia);
 
+        const userBankId = process.env.USER_BANK_ID || process.env.PABILO_USER_BANK_ID;
+
         const response = await fetch(
-            `https://api.pabilo.app/userbankpayment/${process.env.PABILO_USER_BANK_ID}/betaserio`,
+            `https://api.pabilo.app/userbankpayment/${userBankId}/betaserio`,
             {
                 method: 'POST',
                 headers: {

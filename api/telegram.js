@@ -20,12 +20,12 @@ module.exports = async (req, res) => {
         }
 
         const response = await fetch(
-            `https://api.telegram.org/bot${process.env.TG_BOT_TOKEN}/sendMessage`,
+            `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    chat_id: process.env.TG_CHAT_ID,
+                    chat_id: process.env.TELEGRAM_CHAT_ID,
                     text: mensaje,
                     parse_mode: 'HTML'
                 })
