@@ -3,198 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - RECARGASGAMES</title>
+    <title>Registro - Recargas Games</title>
     <style>
-        body { 
-            background-image: url('fondo.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            background-attachment: fixed; 
-            font-family: 'Segoe UI', sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .register-box { 
-            background: rgba(11, 18, 32, 0.95); 
-            padding: 30px; 
-            border-radius: 24px; 
-            border: 1px solid #dc2626; 
-            width: 90%; 
-            max-width: 380px; 
-            text-align: center; 
-            backdrop-filter: blur(10px);
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0b1220, #1a1a2e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        h2 { color: #dc2626; margin-bottom: 20px; }
-        .input-group { margin: 12px 0; }
-        input { 
-            width: 100%; 
-            height: 48px; 
-            border-radius: 12px; 
-            border: 1px solid #1f2937; 
-            background: #0b1220; 
-            color: white; 
-            padding: 12px;
-            box-sizing: border-box; 
-            font-size: 14px; 
+        .register-container {
+            background: rgba(17, 24, 39, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #3b82f6;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo img {
+            height: 60px;
+        }
+        .logo h1 {
+            color: white;
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            color: #9ca3af;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #374151;
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn-register:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #9ca3af;
+        }
+        .login-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 10px;
             text-align: center;
         }
-        input:focus { outline: none; border-color: #dc2626; }
-        button { 
-            width: 100%; 
-            height: 48px; 
-            background: #dc2626; 
-            color: white; 
-            border: none;
-            border-radius: 12px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            margin-top: 15px; 
-            font-size: 16px;
-            transition: 0.2s;
+        .success-message {
+            color: #22c55e;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
         }
-        button:hover { background: #b91c1c; }
-        a { color: #60a5fa; text-decoration: none; display: block; margin-top: 15px; font-size: 14px; }
-        a:hover { text-decoration: underline; }
-        .error-msg { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; }
-        .success-msg { color: #10b981; font-size: 13px; margin-top: 10px; display: none; }
-        .logo { margin-bottom: 20px; }
-        .logo img { height: 50px; width: auto; }
-        .info-text { font-size: 11px; color: #64748b; margin-top: 10px; text-align: center; }
-        .info-text a { color: #10b981; display: inline; margin: 0; }
+        .password-requirements {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
-
-<div class="register-box">
-    <div class="logo"><img src="logo.png" alt="Logo" onerror="this.style.display='none'"></div>
-    <h2>📝 Crear Cuenta</h2>
-    
-    <form id="registerForm">
-        <div class="input-group">
-            <input type="text" id="nombre" placeholder="Nombre completo" autocomplete="name" required>
+    <div class="register-container">
+        <div class="logo">
+            <img src="logo.png" alt="Recargas Games">
+            <h1>Crear Cuenta</h1>
         </div>
-        
-        <div class="input-group">
-            <input type="email" id="email" placeholder="Correo electrónico" autocomplete="email" required>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label>👤 Nombre completo</label>
+                <input type="text" id="fullName" placeholder="Ej: Juan Pérez" required>
+            </div>
+
+            <div class="form-group">
+                <label>📧 Correo electrónico</label>
+                <input type="email" id="email" placeholder="tu@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>🔑 Contraseña</label>
+                <input type="password" id="password" placeholder="Mínimo 6 caracteres" required minlength="6">
+                <div class="password-requirements">* La contraseña debe tener al menos 6 caracteres</div>
+            </div>
+
+            <div class="form-group">
+                <label>✅ Confirmar contraseña</label>
+                <input type="password" id="confirmPassword" placeholder="Repite tu contraseña" required>
+            </div>
+
+            <button type="submit" class="btn-register" id="registerBtn">Registrarse</button>
+        </form>
+
+        <div id="message"></div>
+
+        <div class="login-link">
+            ¿Ya tienes cuenta? <a href="login.html">Iniciar sesión</a>
         </div>
-        
-        <div class="input-group">
-            <input type="tel" id="telefono" placeholder="WhatsApp (ej: 04241234567)" autocomplete="tel">
-        </div>
-        
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="new-password" required>
-        </div>
-        
-        <div class="input-group">
-            <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" autocomplete="new-password" required>
-        </div>
-        
-        <button type="submit">Registrarme</button>
-    </form>
-    
-    <div id="errorMsg" class="error-msg"></div>
-    <div id="successMsg" class="success-msg"></div>
-    
-    <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
-    <div class="info-text">💡 Agrega tu WhatsApp para recibir notificaciones de tus pedidos</div>
-</div>
+    </div>
 
-<!-- === LIBRERÍA DE SUPABASE === -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script type="module">
+        import { auth } from './firebase-config.js';
+        import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-<script>
-// ================== TUS DATOS — YA CONFIGURADOS ==================
-const SUPABASE_URL = "https://fbjutmjclfxbcciiuqxr.supabase.co";
-const SUPABASE_KEY = "sb_publishable_-eyCjY3CZfVt-83D7K4JZw_gX0-Fac3";
-// ===================================================================
+        const form = document.getElementById('registerForm');
+        const messageDiv = document.getElementById('message');
 
-// Inicializar Supabase
-const { createClient } = supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('registerBtn');
 
-const form = document.getElementById("registerForm");
-const errorMsg = document.getElementById("errorMsg");
-const successMsg = document.getElementById("successMsg");
+            // Validaciones
+            if (password !== confirmPassword) {
+                messageDiv.innerHTML = '<div class="error-message">❌ Las contraseñas no coinciden</div>';
+                return;
+            }
 
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
-    errorMsg.style.display = "none";
-    successMsg.style.display = "none";
-    
-    const nombre = document.getElementById("nombre").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const telefono = document.getElementById("telefono").value.trim();
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-    
-    // Validaciones
-    if (!nombre || !email || !password || !confirmPassword) {
-        errorMsg.textContent = "❌ Completa todos los campos obligatorios";
-        errorMsg.style.display = "block";
-        return;
-    }
-    
-    if (password !== confirmPassword) {
-        errorMsg.textContent = "❌ Las contraseñas no coinciden";
-        errorMsg.style.display = "block";
-        return;
-    }
-    
-    if (password.length < 6) {
-        errorMsg.textContent = "❌ La contraseña debe tener al menos 6 caracteres";
-        errorMsg.style.display = "block";
-        return;
-    }
-    
-    const btn = document.querySelector("button[type='submit']");
-    btn.textContent = "Registrando...";
-    btn.disabled = true;
-    
-    try {
-        // 📝 REGISTRAR USUARIO
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    nombre: nombre,
-                    telefono: telefono
+            if (password.length < 6) {
+                messageDiv.innerHTML = '<div class="error-message">❌ La contraseña debe tener al menos 6 caracteres</div>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Registrando...';
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Actualizar nombre de usuario
+                await updateProfile(user, {
+                    displayName: fullName
+                });
+
+                messageDiv.innerHTML = '<div class="success-message">✅ ¡Cuenta creada exitosamente! Redirigiendo...</div>';
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                let errorMsg = '❌ Error al registrarse: ';
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMsg += 'Este correo ya está registrado';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMsg += 'Correo electrónico inválido';
+                        break;
+                    case 'auth/weak-password':
+                        errorMsg += 'La contraseña es muy débil';
+                        break;
+                    default:
+                        errorMsg += error.message;
                 }
+                messageDiv.innerHTML = `<div class="error-message">${errorMsg}</div>`;
+                btn.disabled = false;
+                btn.textContent = 'Registrarse';
             }
         });
-        
-        if (error) throw error;
-        
-        // ✅ ÉXITO
-        successMsg.textContent = "✅ Cuenta creada exitosamente. Revisa tu correo para confirmar.";
-        successMsg.style.display = "block";
-        
-        setTimeout(() => {
-            window.location.href = "login.html";
-        }, 2000);
-        
-    } catch (error) {
-        // ❌ ERRORES
-        const msg = error.message || "";
-        if (msg.includes("User already registered") || msg.includes("email-already-in-use")) {
-            errorMsg.textContent = "❌ Este correo ya está registrado";
-        } else if (msg.includes("Password should be at least 6 characters")) {
-            errorMsg.textContent = "❌ Contraseña demasiado débil (mínimo 6 caracteres)";
-        } else if (msg.includes("invalid email")) {
-            errorMsg.textContent = "❌ Correo electrónico inválido";
-        } else {
-            errorMsg.textContent = "❌ Error: " + error.message;
-        }
-        errorMsg.style.display = "block";
-        btn.textContent = "Registrarme";
-        btn.disabled = false;
-    }
-});
-</script>
+    </script>
 </body>
 </html>
