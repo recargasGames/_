@@ -294,6 +294,7 @@
             font-weight: 500;
             transition: all 0.2s;
             border-bottom: 1px solid #1f2937;
+            cursor: pointer;
         }
         .menu-opcion:last-child {
             border-bottom: none;
@@ -664,36 +665,15 @@
                 </div>
             </div>
 
-            <!-- BOTONES LOGIN/REGISTRO (cuando NO está logueado) -->
-            <div id="authButtons" style="display:flex;align-items:center;gap:8px;">
-                <a href="#" class="btn-auth" id="loginBtnModal" onclick="abrirModalLogin()" style="background:transparent;border:1px solid #3b82f6;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;">
-                    🔑 Ingresar
-                </a>
-                <a href="register.html" class="btn-auth primary" style="background:#3b82f6;border:none;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;">
-                    📝 Registrarse
-                </a>
-            </div>
-
             <!-- BOTÓN HAMBURGUESA -->
             <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         </div>
         
-        <!-- MENÚ FLOTANTE (HAMBURGUESA) -->
+        <!-- MENÚ FLOTANTE (HAMBURGUESA) - SOLO INICIAR SESIÓN Y CREAR CUENTA -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
-            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
-            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
-            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
-            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
-            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
-            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
-            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
-            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
-            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
-            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+            <a href="#" class="menu-opcion" id="menuHamburguesaLogin" onclick="abrirModalLogin(); return false;" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuHamburguesaRegister">📝 Crear Cuenta</a>
             <div class="menu-divider"></div>
-            <!-- Opciones dinámicas del menú hamburguesa -->
-            <a href="#" class="menu-opcion" id="menuHamburguesaL login" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
-            <a href="register.html" class="menu-opcion" id="menuHamburguesaRegister">📝 Registrarse</a>
             <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">📊 Mi Panel</a>
             <a href="#" class="menu-opcion" id="menuHamburguesaLogout" style="display:none;color:#ef4444;">🚪 Cerrar Sesión</a>
         </div>
@@ -808,8 +788,6 @@
 
     // ====== ELEMENTOS DOM ======
     const perfilContainer = document.getElementById('perfilContainer');
-    const authButtons = document.getElementById('authButtons');
-    const btnPerfil = document.getElementById('btnPerfil');
     const menuPerfil = document.getElementById('menuPerfil');
     const avatarLetra = document.getElementById('avatarLetra');
     const avatarGrande = document.getElementById('avatarGrande');
@@ -820,7 +798,7 @@
     
     // Menú hamburguesa
     const menuFlotante = document.getElementById('menuFlotante');
-    const menuHamburguesaL login = document.getElementById('menuHamburguesaL login');
+    const menuHamburguesaLogin = document.getElementById('menuHamburguesaLogin');
     const menuHamburguesaRegister = document.getElementById('menuHamburguesaRegister');
     const menuHamburguesaDashboard = document.getElementById('menuHamburguesaDashboard');
     const menuHamburguesaLogout = document.getElementById('menuHamburguesaLogout');
@@ -844,9 +822,8 @@
             const email = user.email || 'usuario@email.com';
             const inicial = nombre.charAt(0).toUpperCase();
 
-            // Mostrar perfil, ocultar botones auth
+            // Mostrar perfil
             perfilContainer.style.display = 'block';
-            authButtons.style.display = 'none';
 
             // Actualizar avatar y nombre
             avatarLetra.textContent = inicial;
@@ -855,8 +832,8 @@
             nombreCompleto.textContent = nombre;
             emailUsuario.textContent = email;
 
-            // Menú hamburguesa
-            menuHamburguesaL login.style.display = 'none';
+            // Menú hamburguesa: ocultar login/registro, mostrar panel/logout
+            menuHamburguesaLogin.style.display = 'none';
             menuHamburguesaRegister.style.display = 'none';
             menuHamburguesaDashboard.style.display = 'flex';
             menuHamburguesaLogout.style.display = 'flex';
@@ -864,10 +841,9 @@
         } else {
             // Usuario NO LOGUEADO
             perfilContainer.style.display = 'none';
-            authButtons.style.display = 'flex';
 
-            // Menú hamburguesa
-            menuHamburguesaL login.style.display = 'flex';
+            // Menú hamburguesa: mostrar login/registro, ocultar panel/logout
+            menuHamburguesaLogin.style.display = 'flex';
             menuHamburguesaRegister.style.display = 'flex';
             menuHamburguesaDashboard.style.display = 'none';
             menuHamburguesaLogout.style.display = 'none';
@@ -896,6 +872,7 @@
     // ====== CERRAR TODOS LOS MENÚS ======
     window.cerrarTodosLosMenus = function(e) {
         const btnMenu = document.getElementById('btnMenu');
+        const btnPerfil = document.getElementById('btnPerfil');
         
         if (!menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
             menuPerfil.classList.remove('activo');
