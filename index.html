@@ -7,7 +7,7 @@
     <title>Recargas Games | Recargas de Juegos, Netflix y Disney+</title>
     <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
     <meta name="description" content="Recargas Games: recargas instantáneas de diamantes Free Fire, Roblox, Mobile Legends, COD Mobile, PUBG, Blood Strike y más juegos.">
-    <meta name="keywords" content="Recargas Games, RecargasGames, recargas de juegos, diamantes Free Fire, recargas Free Fire">
+    <meta name="keywords" content="Recargas Games, RecargasGames, recargas de juegos, diamantes Free Fire">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://www.recargasgames.shop/">
     
@@ -37,6 +37,7 @@
             --color-oscuro: #111827;
             --color-error: #ef4444;
             --color-success: #22c55e;
+            --color-verde: #22c55e;
         }
         * {
             box-sizing: border-box;
@@ -83,70 +84,187 @@
         .header-right {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
-        .btn-auth {
+
+        /* ====== BOTÓN PERFIL / AVATAR ====== */
+        .btn-perfil {
             background: transparent;
-            border: 1px solid var(--color-azul);
+            border: none;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-        .btn-auth:hover {
-            background: var(--color-azul);
-            transform: translateY(-2px);
-        }
-        .btn-auth.primary {
-            background: var(--color-azul);
-        }
-        .btn-auth.primary:hover {
-            background: var(--color-hover);
-        }
-        .user-info {
+            padding: 0;
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: white;
+            gap: 8px;
+            transition: all 0.3s;
+            position: relative;
         }
-        .user-avatar {
-            width: 35px;
-            height: 35px;
+        .btn-perfil:hover .avatar-circle {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        .btn-perfil .avatar-circle {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: var(--color-azul);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             font-size: 16px;
+            color: white;
+            transition: all 0.3s;
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
         }
-        .user-name {
+        .btn-perfil .avatar-circle .online-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--color-verde);
+            border-radius: 50%;
+            border: 2px solid #0b1220;
+        }
+        .btn-perfil .perfil-nombre {
             font-size: 14px;
             font-weight: 500;
+            color: white;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .btn-perfil .perfil-flecha {
+            font-size: 12px;
+            color: #9ca3af;
+            transition: transform 0.3s;
+        }
+        .btn-perfil .perfil-flecha.abierta {
+            transform: rotate(180deg);
         }
 
+        /* ====== MENÚ DESPLEGABLE DE PERFIL ====== */
+        .menu-perfil {
+            position: absolute;
+            top: 58px;
+            right: 0;
+            background: rgba(17, 24, 39, 0.98);
+            border: 1px solid var(--color-azul);
+            border-radius: 14px;
+            min-width: 240px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px) scale(0.95);
+            transition: all 0.25s ease;
+            z-index: 1000;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .menu-perfil.activo {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Cabecera del menú de perfil */
+        .menu-perfil-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .menu-perfil-header .avatar-grande {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
+        .menu-perfil-header .info h4 {
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .menu-perfil-header .info p {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        /* Opciones del menú */
+        .menu-perfil-opcion {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-bottom: 1px solid #1f2937;
+            cursor: pointer;
+        }
+        .menu-perfil-opcion:last-child {
+            border-bottom: none;
+        }
+        .menu-perfil-opcion:hover {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--color-azul);
+            padding-left: 26px;
+        }
+        .menu-perfil-opcion .icono {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        .menu-perfil-opcion .badge {
+            background: var(--color-azul);
+            color: white;
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-left: auto;
+        }
+        .menu-perfil-opcion.danger {
+            color: #ef4444;
+        }
+        .menu-perfil-opcion.danger:hover {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+        }
+
+        /* ====== BOTÓN HAMBURGUESA ====== */
         .menu-hamburguesa {
             background: transparent;
             border: none;
             color: white;
-            font-size: 26px;
+            font-size: 28px;
             cursor: pointer;
-            padding: 5px 10px;
+            padding: 5px 8px;
             transition: transform 0.2s;
+            line-height: 1;
         }
         .menu-hamburguesa:hover {
             transform: scale(1.1);
             color: var(--color-azul);
         }
 
+        /* ====== MENÚ FLOTANTE (HAMBURGUESA) ====== */
         .menu-flotante {
             position: absolute;
             top: 65px;
-            right: 20px;
+            right: 0;
             background: rgba(17, 24, 39, 0.98);
             border: 1px solid var(--color-azul);
             border-radius: 14px;
@@ -156,7 +274,7 @@
             visibility: hidden;
             transform: translateY(-10px);
             transition: all 0.25s ease;
-            z-index: 1000;
+            z-index: 999;
             overflow: hidden;
         }
         .menu-flotante.activo {
@@ -164,6 +282,7 @@
             visibility: visible;
             transform: translateY(0);
         }
+
         .menu-opcion {
             display: flex;
             align-items: center;
@@ -189,6 +308,7 @@
             margin: 5px 0;
         }
 
+        /* ====== JUEGOS MENU ====== */
         .games-menu { 
             display: flex; 
             gap: 8px; 
@@ -216,6 +336,7 @@
             border-radius: 0; 
         }
 
+        /* ====== CONTENIDO ====== */
         .main { padding: 20px; max-width: 600px; margin: 0 auto; }
         .welcome-text { 
             text-align: center; 
@@ -270,7 +391,7 @@
             background: rgba(59, 130, 246, 0.2);
         }
 
-        /* 🔐 MODAL DE LOGIN */
+        /* ====== MODAL LOGIN ====== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -289,17 +410,33 @@
         }
         .modal-login {
             background: rgba(17, 24, 39, 0.98);
-            padding: 40px;
+            padding: 35px 40px 40px;
             border-radius: 20px;
             border: 1px solid var(--color-azul);
             max-width: 400px;
             width: 90%;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             animation: modalSlide 0.3s ease;
+            position: relative;
         }
         @keyframes modalSlide {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform: translateY(-50px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .modal-login .close-modal-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .modal-login .close-modal-btn:hover {
+            color: white;
+            transform: rotate(90deg);
         }
         .modal-login h2 {
             text-align: center;
@@ -314,6 +451,7 @@
             display: block;
             margin-bottom: 5px;
             font-size: 14px;
+            font-weight: 500;
         }
         .modal-login .form-group input {
             width: 100%;
@@ -350,6 +488,7 @@
         .modal-login .btn-submit:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
         .modal-login .auth-links {
             text-align: center;
@@ -365,16 +504,6 @@
         .modal-login .auth-links a:hover {
             text-decoration: underline;
         }
-        .modal-login .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: #9ca3af;
-            font-size: 24px;
-            cursor: pointer;
-        }
         .modal-login .message {
             text-align: center;
             margin-top: 12px;
@@ -384,16 +513,17 @@
             display: none;
         }
         .modal-login .message.error {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.15);
             color: var(--color-error);
             display: block;
         }
         .modal-login .message.success {
-            background: rgba(34, 197, 94, 0.2);
+            background: rgba(34, 197, 94, 0.15);
             color: var(--color-success);
             display: block;
         }
 
+        /* ====== FOOTER ====== */
         .footer { 
             background: rgba(11, 18, 32, 0.9); 
             border-top: 1px solid #1f2937; 
@@ -464,7 +594,8 @@
         }
         .back-to-top.show { opacity: 1; visibility: visible; }
 
-        @media (max-width: 500px) { 
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 600px) { 
             body { padding-top: 100px; }
             .game-img { height: 130px; } 
             .brand img { height: 45px; }
@@ -472,29 +603,85 @@
             .games-menu { padding: 10px 12px; }
             .menu-flotante { right: 10px; min-width: 200px; }
             .modal-login { padding: 25px; }
-            .btn-auth { font-size: 12px; padding: 6px 12px; }
-            .user-name { font-size: 12px; }
+            .btn-perfil .perfil-nombre { display: none; }
+            .btn-perfil .perfil-flecha { display: none; }
+            .menu-perfil { right: 0; min-width: 220px; }
+        }
+
+        @media (max-width: 400px) {
+            .btn-perfil .avatar-circle { width: 34px; height: 34px; font-size: 14px; }
+            .btn-perfil .avatar-circle .online-dot { width: 10px; height: 10px; }
         }
     </style>
 </head>
-<body onclick="cerrarMenuSiExterior(event)">
+<body onclick="cerrarTodosLosMenus(event)">
 
-<!-- BARRA SUPERIOR -->
+<!-- ====== BARRA SUPERIOR ====== -->
 <div class="barra-superior">
     <div class="header">
         <div class="header-left">
             <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
         </div>
         <div class="header-right">
-            <!-- Zona de usuario DINÁMICA -->
-            <div id="authSection">
-                <a href="#" class="btn-auth" id="loginBtnModal" onclick="abrirModalLogin()">🔑 Iniciar Sesión</a>
-                <a href="register.html" class="btn-auth primary">📝 Registrarse</a>
+            <!-- ====== BOTÓN DE PERFIL ====== -->
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <span id="avatarLetra">U</span>
+                        <span class="online-dot"></span>
+                    </div>
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+                </button>
+
+                <!-- MENÚ DESPLEGABLE DE PERFIL -->
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                    <div class="menu-perfil-header">
+                        <div class="avatar-grande" id="avatarGrande">U</div>
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
+                        </div>
+                    </div>
+                    
+                    <a href="dashboard.html" class="menu-perfil-opcion">
+                        <span class="icono">👤</span> Mi Perfil
+                    </a>
+                    <a href="pedidos.html" class="menu-perfil-opcion">
+                        <span class="icono">📦</span> Mis Pedidos
+                        <span class="badge">3</span>
+                    </a>
+                    <a href="recargas.html" class="menu-perfil-opcion">
+                        <span class="icono">🎮</span> Mis Recargas
+                    </a>
+                    <a href="favoritos.html" class="menu-perfil-opcion">
+                        <span class="icono">❤️</span> Favoritos
+                    </a>
+                    <a href="configuracion.html" class="menu-perfil-opcion">
+                        <span class="icono">⚙️</span> Configuración
+                    </a>
+                    <div style="border-top:1px solid #1f2937;margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion">
+                        <span class="icono">🚪</span> Cerrar Sesión
+                    </a>
+                </div>
             </div>
+
+            <!-- ====== BOTONES DE LOGIN/REGISTRO (cuando NO está logueado) ====== -->
+            <div id="authButtons" style="display:flex;align-items:center;gap:8px;">
+                <a href="#" class="btn-auth" id="loginBtnModal" onclick="abrirModalLogin()" style="background:transparent;border:1px solid #3b82f6;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;">
+                    🔑 Ingresar
+                </a>
+                <a href="register.html" class="btn-auth primary" style="background:#3b82f6;border:none;color:white;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;">
+                    📝 Registrarse
+                </a>
+            </div>
+
+            <!-- ====== BOTÓN HAMBURGUESA ====== -->
             <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         </div>
         
-        <!-- MENÚ FLOTANTE -->
+        <!-- MENÚ FLOTANTE (HAMBURGUESA) -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
             <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
             <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
@@ -507,8 +694,10 @@
             <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
             <a href="disney.html" class="menu-opcion">✨ Disney+</a>
             <div class="menu-divider"></div>
-            <a href="dashboard.html" class="menu-opcion" id="menuDashboard">👤 Mi Cuenta</a>
-            <a href="#" class="menu-opcion" id="menuLogout" style="color: #ef4444;">🚪 Cerrar Sesión</a>
+            <a href="#" class="menu-opcion" id="menuHamburguesaLogin" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuHamburguesaRegister">📝 Registrarse</a>
+            <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">👤 Mi Cuenta</a>
+            <a href="#" class="menu-opcion" id="menuHamburguesaLogout" style="display:none;color:#ef4444;">🚪 Cerrar Sesión</a>
         </div>
     </div>
     
@@ -528,12 +717,10 @@
     </div>
 </div>
 
-<!-- MODAL DE LOGIN -->
+<!-- ====== MODAL LOGIN ====== -->
 <div class="modal-overlay" id="modalLogin">
     <div class="modal-login">
-        <div style="text-align: right;">
-            <button onclick="cerrarModalLogin()" style="background:none;border:none;color:#9ca3af;font-size:24px;cursor:pointer;">✕</button>
-        </div>
+        <button class="close-modal-btn" onclick="cerrarModalLogin()">✕</button>
         <h2>🔑 Iniciar Sesión</h2>
         <form id="loginForm">
             <div class="form-group">
@@ -554,7 +741,7 @@
     </div>
 </div>
 
-<!-- CONTENIDO PRINCIPAL -->
+<!-- ====== CONTENIDO PRINCIPAL ====== -->
 <div class="main">
     <div class="welcome-text">
         <h2>Los mejores juegos con recargas instantáneas</h2>
@@ -599,17 +786,19 @@
     </div>
 </div>
 
+<!-- ====== FOOTER ====== -->
 <div class="footer">
     <p class="copyright">© 2026 RECARGASGAMES</p>
     <p>Todos los derechos reservados</p>
     <p>Recargas instantáneas · Pago seguro · Entrega rápida</p>
 </div>
 
+<!-- ====== BOTONES FLOTANTES ====== -->
 <button class="install-float" id="installBtn">📲 Instalar App</button>
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
 <a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
 
-<!-- SCRIPTS -->
+<!-- ====== SCRIPTS ====== -->
 <script type="module">
     import { auth } from './firebase-config.js';
     import { 
@@ -619,10 +808,26 @@
         sendPasswordResetEmail
     } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-    // ========== ELEMENTOS DOM ==========
-    const authSection = document.getElementById('authSection');
-    const menuDashboard = document.getElementById('menuDashboard');
-    const menuLogout = document.getElementById('menuLogout');
+    // ====== ELEMENTOS DOM ======
+    const perfilContainer = document.getElementById('perfilContainer');
+    const authButtons = document.getElementById('authButtons');
+    const btnPerfil = document.getElementById('btnPerfil');
+    const menuPerfil = document.getElementById('menuPerfil');
+    const avatarLetra = document.getElementById('avatarLetra');
+    const avatarGrande = document.getElementById('avatarGrande');
+    const perfilNombre = document.getElementById('perfilNombre');
+    const nombreCompleto = document.getElementById('nombreCompleto');
+    const emailUsuario = document.getElementById('emailUsuario');
+    const perfilFlecha = document.getElementById('perfilFlecha');
+    
+    // Menú hamburguesa
+    const menuFlotante = document.getElementById('menuFlotante');
+    const menuHamburguesaL login = document.getElementById('menuHamburguesaL login');
+    const menuHamburguesaRegister = document.getElementById('menuHamburguesaRegister');
+    const menuHamburguesaDashboard = document.getElementById('menuHamburguesaDashboard');
+    const menuHamburguesaLogout = document.getElementById('menuHamburguesaLogout');
+
+    // Modal
     const modalLogin = document.getElementById('modalLogin');
     const loginForm = document.getElementById('loginForm');
     const loginEmail = document.getElementById('loginEmail');
@@ -630,50 +835,93 @@
     const loginBtn = document.getElementById('loginBtn');
     const loginMessage = document.getElementById('loginMessage');
 
-    // ========== ESTADO DE AUTENTICACIÓN ==========
-    onAuthStateChanged(auth, (user) => {
+    // Cerrar sesión
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+
+    // ====== FUNCIÓN PARA ACTUALIZAR UI SEGÚN ESTADO ======
+    function actualizarUI(user) {
         if (user) {
             // Usuario LOGUEADO
             const nombre = user.displayName || 'Usuario';
+            const email = user.email || 'usuario@email.com';
             const inicial = nombre.charAt(0).toUpperCase();
-            
-            authSection.innerHTML = `
-                <div class="user-info">
-                    <div class="user-avatar">${inicial}</div>
-                    <span class="user-name">${nombre}</span>
-                </div>
-                <a href="dashboard.html" class="btn-auth primary" style="padding:6px 12px;font-size:13px;">👤 Cuenta</a>
-            `;
-            
-            menuDashboard.style.display = 'flex';
-            menuLogout.style.display = 'flex';
-            
-            // Cerrar sesión desde menú
-            menuLogout.onclick = async (e) => {
-                e.preventDefault();
-                if (confirm('¿Seguro que quieres cerrar sesión?')) {
-                    await signOut(auth);
-                    window.location.reload();
-                }
-            };
+
+            // Mostrar perfil, ocultar botones auth
+            perfilContainer.style.display = 'block';
+            authButtons.style.display = 'none';
+
+            // Actualizar avatar y nombre
+            avatarLetra.textContent = inicial;
+            avatarGrande.textContent = inicial;
+            perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+            nombreCompleto.textContent = nombre;
+            emailUsuario.textContent = email;
+
+            // Menú hamburguesa
+            menuHamburguesaL login.style.display = 'none';
+            menuHamburguesaRegister.style.display = 'none';
+            menuHamburguesaDashboard.style.display = 'flex';
+            menuHamburguesaLogout.style.display = 'flex';
+
         } else {
             // Usuario NO LOGUEADO
-            authSection.innerHTML = `
-                <a href="#" class="btn-auth" onclick="abrirModalLogin()">🔑 Iniciar Sesión</a>
-                <a href="register.html" class="btn-auth primary">📝 Registrarse</a>
-            `;
-            menuDashboard.style.display = 'none';
-            menuLogout.style.display = 'none';
+            perfilContainer.style.display = 'none';
+            authButtons.style.display = 'flex';
+
+            // Menú hamburguesa
+            menuHamburguesaL login.style.display = 'flex';
+            menuHamburguesaRegister.style.display = 'flex';
+            menuHamburguesaDashboard.style.display = 'none';
+            menuHamburguesaLogout.style.display = 'none';
         }
+    }
+
+    // ====== OBSERVADOR DE AUTENTICACIÓN ======
+    onAuthStateChanged(auth, (user) => {
+        actualizarUI(user);
     });
 
-    // ========== FUNCIONES GLOBALES ==========
+    // ====== ABRIR/CERRAR MENÚ PERFIL ======
+    window.toggleMenuPerfil = function() {
+        menuPerfil.classList.toggle('activo');
+        perfilFlecha.classList.toggle('abierta');
+        // Cerrar menú hamburguesa si está abierto
+        menuFlotante.classList.remove('activo');
+    };
+
+    // ====== ABRIR/CERRAR MENÚ HAMBURGUESA ======
+    window.alternarMenu = function() {
+        menuFlotante.classList.toggle('activo');
+        // Cerrar menú perfil si está abierto
+        menuPerfil.classList.remove('activo');
+        perfilFlecha.classList.remove('abierta');
+    };
+
+    // ====== CERRAR TODOS LOS MENÚS ======
+    window.cerrarTodosLosMenus = function(e) {
+        // Cerrar menú perfil
+        if (!menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+            menuPerfil.classList.remove('activo');
+            perfilFlecha.classList.remove('abierta');
+        }
+        // Cerrar menú hamburguesa
+        const btnMenu = document.getElementById('btnMenu');
+        if (!menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
+            menuFlotante.classList.remove('activo');
+        }
+    };
+
+    // ====== MODAL LOGIN ======
     window.abrirModalLogin = function() {
         modalLogin.classList.add('active');
         loginMessage.className = 'message';
         loginMessage.style.display = 'none';
         loginEmail.value = '';
         loginPassword.value = '';
+        // Cerrar menús
+        menuPerfil.classList.remove('activo');
+        perfilFlecha.classList.remove('abierta');
+        menuFlotante.classList.remove('activo');
     };
 
     window.cerrarModalLogin = function() {
@@ -685,7 +933,7 @@
         if (e.target === modalLogin) cerrarModalLogin();
     });
 
-    // ========== LOGIN ==========
+    // ====== LOGIN ======
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -736,7 +984,7 @@
         }
     });
 
-    // ========== RECUPERAR CONTRASEÑA ==========
+    // ====== RECUPERAR CONTRASEÑA ======
     document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
         e.preventDefault();
         const email = loginEmail.value.trim();
@@ -760,25 +1008,33 @@
         }
     });
 
-    // ========== MENÚ HAMBURGUESA ==========
-    window.alternarMenu = function() {
-        document.getElementById('menuFlotante').classList.toggle('activo');
-    };
-
-    window.cerrarMenuSiExterior = function(e) {
-        const menu = document.getElementById('menuFlotante');
-        const btn = document.getElementById('btnMenu');
-        if (!menu.contains(e.target) && !btn.contains(e.target)) {
-            menu.classList.remove('activo');
+    // ====== CERRAR SESIÓN ======
+    btnCerrarSesion.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm('¿Seguro que quieres cerrar sesión?')) {
+            await signOut(auth);
+            menuPerfil.classList.remove('activo');
+            perfilFlecha.classList.remove('abierta');
+            window.location.reload();
         }
-    };
+    });
 
-    // ========== SCROLL Y BOTONES ==========
+    // También desde el menú hamburguesa
+    menuHamburguesaLogout.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm('¿Seguro que quieres cerrar sesión?')) {
+            await signOut(auth);
+            menuFlotante.classList.remove('activo');
+            window.location.reload();
+        }
+    });
+
+    // ====== SCROLL Y BOTONES ======
     window.addEventListener('scroll', () => {
         document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
     });
 
-    // ========== INSTALAR APP ==========
+    // ====== INSTALAR APP ======
     let deferredPrompt;
     const installBtn = document.getElementById('installBtn');
     window.addEventListener('beforeinstallprompt', (e) => {
