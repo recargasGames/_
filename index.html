@@ -555,12 +555,12 @@
             gap: 8px;
             align-items: center;
         }
+        .install-float.visible {
+            display: flex;
+        }
         .install-float:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
-        }
-        .install-float.visible {
-            display: flex;
         }
 
         .whatsapp-float { 
@@ -1015,34 +1015,21 @@
         document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
     });
 
-    // ====== 📲 INSTALAR APP (PWA) ======
+    // ====== 📲 INSTALAR APP ======
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevenir que el navegador muestre su propio diálogo
         e.preventDefault();
-        // Guardar el evento para usarlo después
         deferredPrompt = e;
-        // Mostrar el botón de instalar
         installBtn.classList.add('visible');
     });
 
     installBtn.addEventListener('click', async () => {
         if (!deferredPrompt) return;
-        // Mostrar el diálogo de instalación nativo
         deferredPrompt.prompt();
-        // Esperar la respuesta del usuario
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-            // Usuario aceptó: ocultar el botón
             installBtn.classList.remove('visible');
         }
-        // Limpiar la referencia ya que se usó
         deferredPrompt = null;
-    });
-
-    // Si la app ya está instalada, ocultar el botón
-    window.addEventListener('appinstalled', () => {
-        deferredPrompt = null;
-        installBtn.classList.remove('visible');
     });
 </script>
 
