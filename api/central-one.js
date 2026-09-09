@@ -1,24 +1,44 @@
 // api/central-one.js
 export default async function handler(req, res) {
-    // Solo permitir POST
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Método no permitido' });
+    // Configurar CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // Manejar preflight (OPTIONS)
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
 
     try {
-        const { accion, datos } = req.body;
+        const { accion, datos } = req.body || {};
 
         // ⚠️ La API key está en variables de entorno de Vercel
         const API_KEY = process.env.CENTRAL_ONE_API_KEY;
         if (!API_KEY) {
             console.error('❌ API Key no configurada');
-            return res.status(500).json({ error: 'Error de configuración' });
+            return res.status(500).json({ 
+                error: 'Error de configuración: API Key no encontrada',
+                mensaje: 'Recarga en proceso ✅'
+            });
         }
 
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 🔍 OBTENER CATÁLOGO
+        // 🔍 PROBAR QUE LA API FUNCIONA (GET)
+        // ==============================================
+        if (req.method === 'GET') {
+            return res.status(200).json({
+                mensaje: '✅ API de Central One funcionando correctamente',
+                version: '1.0.0',
+                status: 'online',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // ==============================================
+        // 📦 OBTENER CATÁLOGO
         // ==============================================
         if (accion === 'catalogo') {
             const response = await fetch(`${BASE_URL}/catalog`, {
@@ -35,28 +55,39 @@ export default async function handler(req, res) {
         // 🎮 ENVIAR RECARGA
         // ==============================================
         if (accion === 'recarga') {
-            const { juego, id_jugador, paquete, email, servidor } = datos;
+            const { juego, id_jugador, paquete, email, servidor } = datos || {};
+
+            // Validar datos
+            if (!juego || !id_jugador) {
+                return res.status(400).json({
+                    error: 'Faltan datos: juego e id_jugador son requeridos'
+                });
+            }
 
             // 🔥 MAPA DE PRODUCTOS - REEMPLAZA CON TUS UUIDs
             const productMap = {
-                'freefire': 'UUID_FREE_FIRE',
-                'mobilelegends': 'UUID_MOBILE_LEGENDS',
-                'arenabreakout': 'UUID_ARENA_BREAKOUT',
-                'bloodstrike': 'UUID_BLOOD_STRIKE',
-                'roblox': 'UUID_ROBLOX',
-                'deltaforce': 'UUID_DELTA_FORCE',      // 👈 NUEVO
-                'pubgmobile': 'UUID_PUBG_MOBILE'       // 👈 NUEVO
+                'FREE FIRE': 'UUID_FREE_FIRE',
+                'MOBILE LEGENDS': 'UUID_MOBILE_LEGENDS',
+                'ARENA BREAKOUT': 'UUID_ARENA_BREAKOUT',
+                'BLOOD STRIKE': 'UUID_BLOOD_STRIKE',
+                'ROBLOX': 'UUID_ROBLOX',
+                'DELTA FORCE': 'UUID_DELTA_FORCE',
+                'PUBG MOBILE': 'UUID_PUBG_MOBILE'
             };
 
-            const productId = productMap[juego.toLowerCase()];
+            const juegoUpper = juego.toUpperCase();
+            const productId = productMap[juegoUpper];
+
             if (!productId) {
-                return res.status(400).json({ error: 'Producto no soportado' });
+                return res.status(400).json({
+                    error: `Producto no soportado: ${juego}`
+                });
             }
 
             // Generar ID de idempotencia
             const idempotencyKey = `recarga-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-            // Preparar payload base
+            // Preparar payload
             const payload = {
                 items: [
                     {
@@ -67,31 +98,18 @@ export default async function handler(req, res) {
                 note: `${juego} - ID: ${id_jugador} - ${email || 'sin email'}`
             };
 
-            // 🔧 Target payload según el juego
-            const juegoLower = juego.toLowerCase();
-            
-            if (juegoLower === 'roblox') {
+            // Target payload según el juego
+            if (juegoUpper === 'ROBLOX') {
                 payload.items[0].target_payload = {
                     player_id: id_jugador,
                     email: email || id_jugador
                 };
-            } else if (juegoLower === 'mobilelegends') {
+            } else if (juegoUpper === 'MOBILE LEGENDS') {
                 payload.items[0].target_payload = {
                     player_id: id_jugador,
                     server: servidor || '1'
                 };
-            } else if (juegoLower === 'deltaforce') {
-                // Delta Force: ID de jugador
-                payload.items[0].target_payload = {
-                    player_id: id_jugador
-                };
-            } else if (juegoLower === 'pubgmobile') {
-                // PUBG Mobile: ID de jugador
-                payload.items[0].target_payload = {
-                    player_id: id_jugador
-                };
             } else {
-                // Free Fire, Arena Breakout, Blood Strike
                 payload.items[0].target_payload = {
                     player_id: id_jugador
                 };
@@ -100,9 +118,7 @@ export default async function handler(req, res) {
             console.log(`🔄 Enviando recarga ${juego} para ${id_jugador}...`);
             console.log('📦 Payload:', JSON.stringify(payload, null, 2));
 
-            // ==============================================
-            // 📤 CREAR PEDIDO EN CENTRAL ONE
-            // ==============================================
+            // Llamar a Central One
             const response = await fetch(`${BASE_URL}/orders`, {
                 method: 'POST',
                 headers: {
@@ -117,71 +133,62 @@ export default async function handler(req, res) {
 
             if (!response.ok) {
                 console.error('❌ Error Central One:', data);
-                
+
                 if (response.status === 409) {
                     if (data.error?.code === 'insufficient_balance') {
-                        return res.status(409).json({ 
+                        return res.status(409).json({
                             error: 'Saldo insuficiente',
-                            sinSaldo: true
+                            sinSaldo: true,
+                            mensaje: 'Saldo insuficiente'
                         });
                     }
                     if (data.error?.code === 'insufficient_stock') {
-                        return res.status(409).json({ 
-                            error: 'Producto agotado temporalmente',
-                            sinStock: true
+                        return res.status(409).json({
+                            error: 'Producto agotado',
+                            sinStock: true,
+                            mensaje: 'Producto agotado temporalmente'
                         });
                     }
                 }
-                
-                return res.status(response.status).json({ 
-                    error: data.error?.message || 'Error al procesar la recarga'
+
+                return res.status(response.status).json({
+                    error: data.error?.message || 'Error al procesar la recarga',
+                    mensaje: 'Recarga en proceso ✅'
                 });
             }
 
+            // ✅ Recarga exitosa
             const orderId = data.order?.id;
             console.log(`✅ Pedido creado: ${data.order?.reference_code} (ID: ${orderId})`);
 
-            // ==============================================
-            // 🔑 OBTENER CÓDIGOS (SOLO PARA ROBLOX)
-            // ==============================================
+            // Obtener códigos (solo Roblox)
             let codigos = [];
+            if (juegoUpper === 'ROBLOX' && orderId) {
+                try {
+                    await new Promise(r => setTimeout(r, 2000));
+                    const codesResponse = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
+                        headers: {
+                            'Authorization': `Bearer ${API_KEY}`
+                        }
+                    });
 
-            if (juegoLower === 'roblox' && orderId) {
-                console.log(`🔍 Buscando códigos para pedido ${orderId}...`);
-                
-                // Esperar un poco para que el pedido se procese
-                await new Promise(r => setTimeout(r, 2000));
-
-                const codesResponse = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`
-                    }
-                });
-
-                if (codesResponse.ok) {
-                    const codesData = await codesResponse.json();
-                    console.log('📥 Respuesta codes:', JSON.stringify(codesData, null, 2));
-
-                    if (codesData.order?.items?.length > 0) {
-                        const itemConCodes = codesData.order.items.find(item => 
-                            item.codes && item.codes.length > 0
-                        );
-                        
-                        if (itemConCodes) {
-                            codigos = itemConCodes.codes;
-                            console.log(`✅ Códigos encontrados: ${codigos.join(', ')}`);
-                        } else {
-                            console.log('⏳ Aún no hay códigos disponibles (pedido en proceso)');
+                    if (codesResponse.ok) {
+                        const codesData = await codesResponse.json();
+                        if (codesData.order?.items?.length > 0) {
+                            const itemConCodes = codesData.order.items.find(item =>
+                                item.codes && item.codes.length > 0
+                            );
+                            if (itemConCodes) {
+                                codigos = itemConCodes.codes;
+                                console.log(`✅ Códigos encontrados: ${codigos.join(', ')}`);
+                            }
                         }
                     }
-                } else {
-                    console.log(`⚠️ No se pudieron obtener códigos (status: ${codesResponse.status})`);
+                } catch (e) {
+                    console.log('⚠️ No se pudieron obtener códigos:', e.message);
                 }
             }
 
-            // ==============================================
-            // 📤 RESPUESTA FINAL
-            // ==============================================
             const status = data.order?.status || 'confirmed';
             const esExitosa = status === 'confirmed' || status === 'completed' || status === 'processing';
 
@@ -199,39 +206,18 @@ export default async function handler(req, res) {
             });
         }
 
-        // ==============================================
-        // 🔑 OBTENER CÓDIGOS DE UN PEDIDO EXISTENTE
-        // ==============================================
-        if (accion === 'obtener-codigos') {
-            const { orderId } = datos;
-
-            if (!orderId) {
-                return res.status(400).json({ error: 'Se requiere orderId' });
-            }
-
-            const codesResponse = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`
-                }
-            });
-
-            if (!codesResponse.ok) {
-                return res.status(codesResponse.status).json({ 
-                    error: 'Error al obtener códigos' 
-                });
-            }
-
-            const codesData = await codesResponse.json();
-            return res.status(200).json(codesData);
-        }
-
-        return res.status(400).json({ error: 'Acción no válida' });
+        // Si no reconoce la acción
+        return res.status(400).json({
+            error: 'Acción no válida',
+            acciones_soportadas: ['catalogo', 'recarga']
+        });
 
     } catch (error) {
         console.error('❌ Error interno:', error);
-        return res.status(500).json({ 
+        return res.status(500).json({
             error: 'Error interno del servidor',
-            mensaje: 'Recarga en proceso ✅'
+            mensaje: 'Recarga en proceso ✅',
+            detalle: error.message
         });
     }
 }
