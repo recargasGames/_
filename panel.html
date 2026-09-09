@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Panel de Administración</title>
 
-<!-- 🔥 FIREBASE SDK v9+ — MISMA BASE DE DATOS -->
+<!-- 🔥 FIREBASE SDK v9+ + STORAGE para subir imágenes -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <style>
 :root{
@@ -29,23 +30,15 @@ body{
     min-height:100vh;
 }
 
-/* 🔑 PANTALLA DE LOGIN */
+/* 🔑 LOGIN */
 .login-container{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-height:100vh;
-    padding:20px;
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;padding:20px;
 }
 .login-box{
-    background:var(--color-tarjeta);
-    border:1px solid var(--color-borde);
-    border-radius:20px;
-    padding:40px 30px;
-    width:100%;
-    max-width:420px;
-    backdrop-filter:blur(10px);
-    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+    background:var(--color-tarjeta);border:1px solid var(--color-borde);
+    border-radius:20px;padding:40px 30px;width:100%;max-width:420px;
+    backdrop-filter:blur(10px);box-shadow:0 10px 40px rgba(0,0,0,0.4);
 }
 .login-titulo{font-size:28px;font-weight:700;text-align:center;margin-bottom:8px;color:#fff}
 .login-subtitulo{text-align:center;color:#94a3b8;margin-bottom:30px}
@@ -53,153 +46,116 @@ body{
 .input-group{margin-bottom:20px}
 .input-group label{display:block;margin-bottom:8px;font-weight:600;color:#cbd5e1}
 .input-group input{
-    width:100%;
-    padding:14px 16px;
-    border-radius:10px;
-    background:rgba(15,23,42,0.8);
-    border:1px solid var(--color-borde);
-    color:#fff;
-    font-size:16px;
+    width:100%;padding:14px 16px;border-radius:10px;
+    background:rgba(15,23,42,0.8);border:1px solid var(--color-borde);
+    color:#fff;font-size:16px;
 }
 .input-group input:focus{outline:none;border-color:var(--color-principal);box-shadow:0 0 0 3px rgba(59,130,246,0.2)}
 .btn-login{
-    width:100%;
-    padding:15px;
-    background:var(--color-principal);
-    color:#fff;
-    border:none;
-    border-radius:12px;
-    font-size:17px;
-    font-weight:700;
-    cursor:pointer;
-    transition:.2s;
+    width:100%;padding:15px;background:var(--color-principal);
+    color:#fff;border:none;border-radius:12px;font-size:17px;
+    font-weight:700;cursor:pointer;transition:.2s;
 }
 .btn-login:hover{background:#2563eb;transform:translateY(-1px)}
 .error-login{
-    color:var(--color-peligro);
-    text-align:center;
-    margin-top:15px;
-    padding:10px;
-    background:rgba(239,68,68,0.1);
-    border-radius:8px;
-    display:none;
+    color:var(--color-peligro);text-align:center;margin-top:15px;
+    padding:10px;background:rgba(239,68,68,0.1);border-radius:8px;display:none;
 }
 
 /* 📱 PANEL PRINCIPAL */
 .panel-container{display:none;padding:20px;max-width:1200px;margin:0 auto}
 .panel-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 0;
-    margin-bottom:30px;
-    border-bottom:1px solid var(--color-borde);
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 0;margin-bottom:30px;border-bottom:1px solid var(--color-borde);
 }
 .panel-titulo{font-size:26px;font-weight:700;color:#fff}
 .btn-cerrar{
-    padding:10px 20px;
-    background:var(--color-peligro);
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    font-weight:600;
-    cursor:pointer;
+    padding:10px 20px;background:var(--color-peligro);
+    color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;
 }
 .btn-cerrar:hover{background:#dc2626}
 
-/* 📊 PESTAÑAS */
+/* 📑 PESTAÑAS */
 .tabs{display:flex;gap:10px;margin-bottom:25px;flex-wrap:wrap}
 .tab{
-    padding:12px 20px;
-    background:rgba(30,41,59,0.5);
-    border:1px solid var(--color-borde);
-    border-radius:10px;
-    color:#94a3b8;
-    cursor:pointer;
-    font-weight:600;
-    transition:.2s
+    padding:12px 20px;background:rgba(30,41,59,0.5);
+    border:1px solid var(--color-borde);border-radius:10px;
+    color:#94a3b8;cursor:pointer;font-weight:600;transition:.2s
 }
 .tab.activa{background:var(--color-principal);color:#fff;border-color:var(--color-principal)}
 .tab:hover{border-color:var(--color-principal);color:#fff}
 
 /* 📦 TARJETAS */
 .tarjeta{
-    background:var(--color-tarjeta);
-    border:1px solid var(--color-borde);
-    border-radius:16px;
-    padding:25px;
-    margin-bottom:25px;
-    backdrop-filter:blur(10px);
+    background:var(--color-tarjeta);border:1px solid var(--color-borde);
+    border-radius:16px;padding:25px;margin-bottom:25px;backdrop-filter:blur(10px);
 }
 .tarjeta-titulo{font-size:18px;font-weight:700;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:10px}
-.grupo-input{margin-bottom:18px}
+.grupo-input{margin-bottom:20px}
 .grupo-input label{display:block;margin-bottom:8px;color:#cbd5e1;font-weight:500}
-.grupo-input input, .grupo-input textarea{
-    width:100%;
-    padding:12px 15px;
-    background:rgba(15,23,42,0.6);
-    border:1px solid var(--color-borde);
-    border-radius:8px;
-    color:#fff;
-    font-size:15px;
+.grupo-input input[type="text"], .grupo-input input[type="number"]{
+    width:100%;padding:12px 15px;background:rgba(15,23,42,0.6);
+    border:1px solid var(--color-borde);border-radius:8px;color:#fff;font-size:15px;
 }
-.grupo-input input:focus, .grupo-input textarea:focus{outline:none;border-color:var(--color-principal)}
+.grupo-input input:focus{outline:none;border-color:var(--color-principal)}
+
+/* 📤 SUBIR IMAGEN */
+.subir-imagen-zone{
+    border:2px dashed var(--color-borde);border-radius:12px;padding:30px;text-align:center;
+    cursor:pointer;transition:.2s;margin-bottom:15px;
+}
+.subir-imagen-zone:hover{border-color:var(--color-principal);background:rgba(59,130,246,0.05)}
+.subir-imagen-zone.activa{border-color:var(--color-exito);background:rgba(16,185,129,0.05)}
+.preview-imagen{width:100%;max-height:150px;object-fit:contain;border-radius:8px;margin-top:10px;display:none}
+.progreso-barra{width:100%;height:8px;background:rgba(51,65,85,0.5);border-radius:4px;margin-top:10px;overflow:hidden;display:none}
+.progreso-fill{height:100%;background:var(--color-exito);width:0%;transition:.3s}
+
 .btn-guardar{
-    padding:12px 25px;
-    background:var(--color-exito);
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    font-weight:600;
-    cursor:pointer;
-    font-size:15px;
+    padding:12px 25px;background:var(--color-exito);
+    color:#fff;border:none;border-radius:8px;font-weight:600;
+    cursor:pointer;font-size:15px;
 }
 .btn-guardar:hover{background:#059669}
+.btn-imagen{
+    padding:10px 18px;background:var(--color-principal);
+    color:#fff;border:none;border-radius:8px;font-weight:600;
+    cursor:pointer;font-size:14px;margin-left:10px;
+}
+.btn-imagen:hover{background:#2563eb}
 
-/* 📋 TABLA DE PEDIDOS */
+/* 📋 TABLA */
 .tabla-container{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th,td{
-    padding:14px 12px;
-    text-align:left;
-    border-bottom:1px solid var(--color-borde);
-    font-size:14px;
+    padding:14px 12px;text-align:left;border-bottom:1px solid var(--color-borde);font-size:14px;
 }
 th{background:rgba(30,41,59,0.5);color:#fff;font-weight:600}
 tr:hover{background:rgba(59,130,246,0.05)}
 .estado-pendiente{color:var(--color-amarillo);font-weight:600}
 .estado-exito{color:var(--color-exito);font-weight:600}
 .estado-error{color:var(--color-peligro);font-weight:600}
+.ref-falsa{border-left:3px solid var(--color-peligro)}
 
 /* 📈 ESTADÍSTICAS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:30px}
 .stat-card{
-    background:var(--color-tarjeta);
-    border:1px solid var(--color-borde);
-    border-radius:14px;
-    padding:20px;
-    text-align:center;
+    background:var(--color-tarjeta);border:1px solid var(--color-borde);
+    border-radius:14px;padding:20px;text-align:center;
 }
 .stat-valor{font-size:32px;font-weight:700;color:#fff;margin-bottom:5px}
 .stat-etiqueta{color:#94a3b8;font-size:14px}
 
-/* ⚠️ REFERENCIAS FALSAS */
-.ref-falsa{border-left:3px solid var(--color-peligro)}
-
 .oculto{display:none !important}
 .mensaje-guardado{
-    background:rgba(16,185,129,0.1);
-    color:#10b981;
-    padding:10px 15px;
-    border-radius:8px;
-    margin-top:15px;
-    display:none;
+    background:rgba(16,185,129,0.1);color:#10b981;
+    padding:10px 15px;border-radius:8px;margin-top:15px;display:none;
 }
+.cargando{color:#94a3b8;text-align:center;padding:30px}
 </style>
 </head>
 <body>
 
-<!-- 🔑 PANTALLA DE LOGIN -->
+<!-- 🔑 LOGIN -->
 <div class="login-container" id="pantallaLogin">
     <div class="login-box">
         <div class="logo-login">🎮</div>
@@ -229,13 +185,14 @@ tr:hover{background:rgba(59,130,246,0.05)}
         <button class="btn-cerrar" onclick="cerrarSesion()">Cerrar Sesión</button>
     </div>
 
-    <!-- 📊 PESTAÑAS -->
+    <!-- 📑 PESTAÑAS -->
     <div class="tabs">
         <div class="tab activa" onclick="cambiarTab('estadisticas')">📈 Estadísticas</div>
-        <div class="tab" onclick="cambiarTab('pedidos')">📋 Todos los Pedidos</div>
-        <div class="tab" onclick="cambiarTab('referencias')">⚠️ Referencias Falsas</div>
-        <div class="tab" onclick="cambiarTab('imagenes')">🖼️ Imágenes del Sitio</div>
-        <div class="tab" onclick="cambiarTab('tasa')">💰 Tasa del Dólar</div>
+        <div class="tab" onclick="cambiarTab('pedidos')">📋 Pedidos</div>
+        <div class="tab" onclick="cambiarTab('referencias')">⚠️ Ref. Falsas</div>
+        <div class="tab" onclick="cambiarTab('usuarios')">👤 Usuarios</div>
+        <div class="tab" onclick="cambiarTab('imagenes')">🖼️ Imágenes</div>
+        <div class="tab" onclick="cambiarTab('tasa')">💰 Tasa USD</div>
     </div>
 
     <!-- 📈 ESTADÍSTICAS -->
@@ -250,35 +207,39 @@ tr:hover{background:rgba(59,130,246,0.05)}
                 <div class="stat-etiqueta">Pedidos Hoy</div>
             </div>
             <div class="stat-card">
+                <div class="stat-valor" id="totalUsuarios">0</div>
+                <div class="stat-etiqueta">Usuarios Registrados</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-valor" id="referenciasFalsas">0</div>
                 <div class="stat-etiqueta">Referencias Falsas</div>
             </div>
             <div class="stat-card">
-                <div class="stat-valor" id="tasaDolar">0</div>
-                <div class="stat-etiqueta">Tasa USD/BS</div>
+                <div class="stat-valor" id="tasaDolar">—</div>
+                <div class="stat-etiqueta">Tasa USD → Bs</div>
             </div>
         </div>
     </div>
 
-    <!-- 📋 TODOS LOS PEDIDOS -->
+    <!-- 📋 PEDIDOS -->
     <div id="tab-pedidos" class="contenido-tab oculto">
         <div class="tarjeta">
-            <h3 class="tarjeta-titulo">📋 Lista de Todos los Pedidos</h3>
+            <h3 class="tarjeta-titulo">📋 Todos los Pedidos</h3>
             <div class="tabla-container">
-                <table id="tablaPedidos">
+                <table>
                     <thead>
                         <tr>
                             <th>Fecha</th>
                             <th>Juego/Servicio</th>
                             <th>Producto</th>
-                            <th>ID/Usuario</th>
+                            <th>Usuario/ID</th>
                             <th>Monto</th>
                             <th>Referencia</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody id="listaPedidos">
-                        <tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">Cargando pedidos...</td></tr>
+                        <tr><td colspan="7" class="cargando">Cargando pedidos...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -288,79 +249,141 @@ tr:hover{background:rgba(59,130,246,0.05)}
     <!-- ⚠️ REFERENCIAS FALSAS -->
     <div id="tab-referencias" class="contenido-tab oculto">
         <div class="tarjeta">
-            <h3 class="tarjeta-titulo">⚠️ Referencias Falsas / Pagos No Encontrados</h3>
+            <h3 class="tarjeta-titulo">⚠️ Referencias Falsas / No Encontradas</h3>
             <div class="tabla-container">
-                <table id="tablaReferencias">
+                <table>
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Juego/Servicio</th>
+                            <th>Juego</th>
                             <th>Referencia Ingresada</th>
                             <th>Monto</th>
-                            <th>ID/Usuario</th>
+                            <th>Usuario/ID</th>
                             <th>Método de Pago</th>
                         </tr>
                     </thead>
                     <tbody id="listaReferencias">
-                        <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:30px">Cargando datos...</td></tr>
+                        <tr><td colspan="6" class="cargando">Cargando datos...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- 🖼️ IMÁGENES DEL SITIO -->
+    <!-- 👤 USUARIOS REGISTRADOS -->
+    <div id="tab-usuarios" class="contenido-tab oculto">
+        <div class="tarjeta">
+            <h3 class="tarjeta-titulo">👤 Usuarios Registrados</h3>
+            <div class="tabla-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha de Registro</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>WhatsApp</th>
+                            <th>Total Pedidos</th>
+                            <th>Última Actividad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaUsuarios">
+                        <tr><td colspan="6" class="cargando">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🖼️ IMÁGENES DEL SITIO — CON SUBIDA DE ARCHIVOS -->
     <div id="tab-imagenes" class="contenido-tab oculto">
         <div class="tarjeta">
-            <h3 class="tarjeta-titulo">🖼️ Configurar Imágenes del Sitio</h3>
-            
+            <h3 class="tarjeta-titulo">🖼️ Administrar Imágenes del Sitio</h3>
+            <p style="color:#94a3b8;margin-bottom:20px">Selecciona una imagen desde tu galería o pega un enlace directo. Al guardar, se actualiza en TODOS los índices automáticamente.</p>
+
+            <!-- FREE FIRE -->
             <div class="grupo-input">
-                <label>URL Imagen Free Fire</label>
-                <input type="text" id="imgFreeFire" placeholder="https://.../freefire.png">
-            </div>
-            
-            <div class="grupo-input">
-                <label>URL Imagen Roblox</label>
-                <input type="text" id="imgRoblox" placeholder="https://.../roblox.png">
-            </div>
-            
-            <div class="grupo-input">
-                <label>URL Imagen Blood Strike</label>
-                <input type="text" id="imgBloodStrike" placeholder="https://.../bloodstrike.png">
-            </div>
-            
-            <div class="grupo-input">
-                <label>URL Imagen Netflix</label>
-                <input type="text" id="imgNetflix" placeholder="https://.../netflix.png">
-            </div>
-            
-            <div class="grupo-input">
-                <label>URL Imagen Disney+</label>
-                <input type="text" id="imgDisney" placeholder="https://.../disney.png">
-            </div>
-            
-            <div class="grupo-input">
-                <label>URL Imagen de Fondo del Sitio</label>
-                <input type="text" id="imgFondo" placeholder="https://.../fondo.jpg">
+                <label>🎮 Imagen Free Fire</label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <input type="file" id="archivoFreeFire" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgFreeFirePreview', 'imgFreeFireUrl')">
+                    <button class="btn-imagen" onclick="document.getElementById('archivoFreeFire').click()">📤 Subir desde galería</button>
+                    <input type="text" id="imgFreeFireUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                </div>
+                <img id="imgFreeFirePreview" class="preview-imagen" alt="Vista previa">
             </div>
 
-            <button class="btn-guardar" onclick="guardarImagenes()">💾 Guardar Imágenes</button>
-            <div class="mensaje-guardado" id="msgImagenes">✅ Imágenes guardadas correctamente</div>
+            <!-- ROBLOX -->
+            <div class="grupo-input">
+                <label>🎮 Imagen Roblox</label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <input type="file" id="archivoRoblox" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgRobloxPreview', 'imgRobloxUrl')">
+                    <button class="btn-imagen" onclick="document.getElementById('archivoRoblox').click()">📤 Subir desde galería</button>
+                    <input type="text" id="imgRobloxUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                </div>
+                <img id="imgRobloxPreview" class="preview-imagen" alt="Vista previa">
+            </div>
+
+            <!-- BLOOD STRIKE -->
+            <div class="grupo-input">
+                <label>🎮 Imagen Blood Strike</label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <input type="file" id="archivoBloodStrike" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgBloodStrikePreview', 'imgBloodStrikeUrl')">
+                    <button class="btn-imagen" onclick="document.getElementById('archivoBloodStrike').click()">📤 Subir desde galería</button>
+                    <input type="text" id="imgBloodStrikeUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                </div>
+                <img id="imgBloodStrikePreview" class="preview-imagen" alt="Vista previa">
+            </div>
+
+            <!-- NETFLIX -->
+            <div class="grupo-input">
+                <label>📺 Imagen Netflix</label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <input type="file" id="archivoNetflix" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgNetflixPreview', 'imgNetflixUrl')">
+                    <button class="btn-imagen" onclick="document.getElementById('archivoNetflix').click()">📤 Subir desde galería</button>
+                    <input type="text" id="imgNetflixUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                </div>
+                <img id="imgNetflixPreview" class="preview-imagen" alt="Vista previa">
+            </div>
+
+            <!-- DISNEY -->
+            <div class="grupo-input">
+                <label>🎬 Imagen Disney+</label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <input type="file" id="archivoDisney" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgDisneyPreview', 'imgDisneyUrl')">
+                    <button class="btn-imagen" onclick="document.getElementById('archivoDisney').click()">📤 Subir desde galería</button>
+                    <input type="text" id="imgDisneyUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                </div>
+                <img id="imgDisneyPreview" class="preview-imagen" alt="Vista previa">
+            </div>
+
+            <!-- FONDO DEL SITIO -->
+            <div class="grupo-input">
+                <label>🌄 Imagen de Fondo del Sitio</label>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                    <input type="file" id="archivoFondo" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgFondoPreview', 'imgFondoUrl')">
+                    <button class="btn-imagen" onclick="document.getElementById('archivoFondo').click()">📤 Subir desde galería</button>
+                    <input type="text" id="imgFondoUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                </div>
+                <img id="imgFondoPreview" class="preview-imagen" alt="Vista previa">
+            </div>
+
+            <button class="btn-guardar" onclick="guardarImagenes()">💾 Guardar Todo y Sincronizar con los Índices</button>
+            <div class="mensaje-guardado" id="msgImagenes">✅ ¡Imágenes guardadas y sincronizadas con todos los índices!</div>
         </div>
     </div>
 
     <!-- 💰 TASA DEL DÓLAR -->
     <div id="tab-tasa" class="contenido-tab oculto">
         <div class="tarjeta">
-            <h3 class="tarjeta-titulo">💰 Tasa de Cambio Dólar → Bolívares</h3>
+            <h3 class="tarjeta-titulo">💰 Tasa de Cambio — Dólar a Bolívares</h3>
+            <p style="color:#94a3b8;margin-bottom:20px">Al actualizar la tasa, se refleja automáticamente en TODOS los productos y métodos de pago.</p>
             
             <div class="grupo-input">
-                <label>1 USD = ? Bs (Tasa oficial del día)</label>
+                <label>1 USD = ? Bs (Tasa del día)</label>
                 <input type="number" step="0.01" id="tasaDolarInput" placeholder="850.00">
             </div>
 
             <button class="btn-guardar" onclick="guardarTasa()">💾 Actualizar Tasa</button>
-            <div class="mensaje-guardado" id="msgTasa">✅ Tasa actualizada correctamente</div>
+            <div class="mensaje-guardado" id="msgTasa">✅ Tasa actualizada y sincronizada con todo el sitio</div>
         </div>
     </div>
 
@@ -371,7 +394,7 @@ tr:hover{background:rgba(59,130,246,0.05)}
 const ADMIN_CORREO = "aa3964063@gmail.com";
 const ADMIN_CONTRASENA = "Dios.411";
 
-// 🔥 FIREBASE — MISMA BASE DE DATOS DE LA PASARELA
+// 🔥 FIREBASE — MISMA BASE DE DATOS
 const firebaseConfig = {
   apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
   authDomain: "free-52119.firebaseapp.com",
@@ -382,11 +405,10 @@ const firebaseConfig = {
   appId: "1:452093403979:web:8a8b7c6d5e4f3a2b1c0d9e"
 };
 
-// Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const storage = firebase.storage();
 
-// Estado de sesión
 let sesionActiva = false;
 
 // 🔑 INICIAR SESIÓN
@@ -415,7 +437,7 @@ function cerrarSesion() {
     document.getElementById('contrasena').value = '';
 }
 
-// 📄 CAMBIAR PESTAÑA
+// 📑 CAMBIAR PESTAÑA
 function cambiarTab(nombre) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('activa'));
     document.querySelectorAll('.contenido-tab').forEach(c => c.classList.add('oculto'));
@@ -423,25 +445,40 @@ function cambiarTab(nombre) {
     document.getElementById('tab-' + nombre).classList.remove('oculto');
 }
 
-// 📊 CARGAR TODOS LOS DATOS DEL PANEL
+// 📤 PREVISUALIZAR IMAGEN SELECCIONADA
+function previewImagen(input, previewId, urlId) {
+    const archivo = input.files[0];
+    if (!archivo) return;
+
+    const lector = new FileReader();
+    lector.onload = function(e) {
+        const preview = document.getElementById(previewId);
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById(urlId).value = e.target.result;
+    };
+    lector.readAsDataURL(archivo);
+}
+
+// 📊 CARGAR TODO
 async function cargarDatosPanel() {
     await Promise.all([
         cargarPedidos(),
         cargarReferenciasFalsas(),
+        cargarUsuarios(),
         cargarConfiguracion(),
         cargarEstadisticas()
     ]);
 }
 
-// 📋 CARGAR PEDIDOS
+// 📋 PEDIDOS
 async function cargarPedidos() {
-    const ref = db.ref('pedidos');
-    const snapshot = await ref.orderByChild('fecha').limitToLast(50).once('value');
+    const snapshot = await db.ref('pedidos').orderByChild('fecha').limitToLast(50).once('value');
     const datos = snapshot.val();
     const lista = document.getElementById('listaPedidos');
     
     if (!datos) {
-        lista.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">No hay pedidos registrados</td></tr>';
+        lista.innerHTML = '<tr><td colspan="7" class="cargando">No hay pedidos registrados</td></tr>';
         return;
     }
 
@@ -449,8 +486,8 @@ async function cargarPedidos() {
     lista.innerHTML = '';
     
     pedidos.forEach(p => {
-        const estadoClase = p.estado === 'Completado' ? 'estado-exito' : 
-                            p.estado === 'Pendiente' ? 'estado-pendiente' : 'estado-error';
+        const clase = p.estado === 'Completado' ? 'estado-exito' : 
+                      p.estado === 'Pendiente' ? 'estado-pendiente' : 'estado-error';
         lista.innerHTML += `
             <tr>
                 <td>${p.fecha || '—'}</td>
@@ -459,29 +496,27 @@ async function cargarPedidos() {
                 <td>${p.usuarioId || p.whatsapp || '—'}</td>
                 <td>${p.monto || '—'}</td>
                 <td>${p.referencia || '—'}</td>
-                <td class="${estadoClase}">${p.estado || 'Desconocido'}</td>
+                <td class="${clase}">${p.estado || 'Desconocido'}</td>
             </tr>
         `;
     });
 }
 
-// ⚠️ CARGAR REFERENCIAS FALSAS
+// ⚠️ REFERENCIAS FALSAS
 async function cargarReferenciasFalsas() {
-    const ref = db.ref('referencias_falsas');
-    const snapshot = await ref.orderByChild('fecha').limitToLast(50).once('value');
+    const snapshot = await db.ref('referencias_falsas').orderByChild('fecha').limitToLast(50).once('value');
     const datos = snapshot.val();
     const lista = document.getElementById('listaReferencias');
     
     document.getElementById('referenciasFalsas').textContent = datos ? Object.keys(datos).length : 0;
     
     if (!datos) {
-        lista.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#10b981;padding:30px">✅ No hay referencias falsas registradas</td></tr>';
+        lista.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#10b981;padding:30px">✅ No hay referencias falsas</td></tr>';
         return;
     }
 
     const refs = Object.values(datos).reverse();
     lista.innerHTML = '';
-    
     refs.forEach(r => {
         lista.innerHTML += `
             <tr class="ref-falsa">
@@ -496,12 +531,39 @@ async function cargarReferenciasFalsas() {
     });
 }
 
-// 📈 CARGAR ESTADÍSTICAS
-async function cargarEstadisticas() {
-    const pedidosRef = db.ref('pedidos');
-    const snapshot = await pedidosRef.once('value');
-    const datos = snapshot.val() || {};
+// 👤 USUARIOS REGISTRADOS
+async function cargarUsuarios() {
+    const snapshot = await db.ref('usuarios').orderByChild('fechaRegistro').limitToLast(50).once('value');
+    const datos = snapshot.val();
+    const lista = document.getElementById('listaUsuarios');
     
+    document.getElementById('totalUsuarios').textContent = datos ? Object.keys(datos).length : 0;
+    
+    if (!datos) {
+        lista.innerHTML = '<tr><td colspan="6" class="cargando">No hay usuarios registrados</td></tr>';
+        return;
+    }
+
+    const usuarios = Object.values(datos).reverse();
+    lista.innerHTML = '';
+    usuarios.forEach(u => {
+        lista.innerHTML += `
+            <tr>
+                <td>${u.fechaRegistro || '—'}</td>
+                <td>${u.nombre || '—'}</td>
+                <td>${u.correo || '—'}</td>
+                <td>${u.whatsapp || '—'}</td>
+                <td>${u.totalPedidos || 0}</td>
+                <td>${u.ultimaActividad || '—'}</td>
+            </tr>
+        `;
+    });
+}
+
+// 📈 ESTADÍSTICAS
+async function cargarEstadisticas() {
+    const pedidosSnap = await db.ref('pedidos').once('value');
+    const datos = pedidosSnap.val() || {};
     const total = Object.keys(datos).length;
     const hoy = new Date().toLocaleDateString('es-VE');
     const pedidosHoy = Object.values(datos).filter(p => p.fecha && p.fecha.includes(hoy)).length;
@@ -510,55 +572,55 @@ async function cargarEstadisticas() {
     document.getElementById('pedidosHoy').textContent = pedidosHoy;
 }
 
-// 🖼️ CARGAR CONFIGURACIÓN (imágenes y tasa)
+// 🖼️ CARGAR CONFIGURACIÓN GUARDADA
 async function cargarConfiguracion() {
-    const ref = db.ref('configuracion');
-    const snapshot = await ref.once('value');
+    const snapshot = await db.ref('configuracion').once('value');
     const cfg = snapshot.val() || {};
     
-    document.getElementById('imgFreeFire').value = cfg.imgFreeFire || '';
-    document.getElementById('imgRoblox').value = cfg.imgRoblox || '';
-    document.getElementById('imgBloodStrike').value = cfg.imgBloodStrike || '';
-    document.getElementById('imgNetflix').value = cfg.imgNetflix || '';
-    document.getElementById('imgDisney').value = cfg.imgDisney || '';
-    document.getElementById('imgFondo').value = cfg.imgFondo || '';
+    document.getElementById('imgFreeFireUrl').value = cfg.imgFreeFire || '';
+    document.getElementById('imgRobloxUrl').value = cfg.imgRoblox || '';
+    document.getElementById('imgBloodStrikeUrl').value = cfg.imgBloodStrike || '';
+    document.getElementById('imgNetflixUrl').value = cfg.imgNetflix || '';
+    document.getElementById('imgDisneyUrl').value = cfg.imgDisney || '';
+    document.getElementById('imgFondoUrl').value = cfg.imgFondo || '';
     document.getElementById('tasaDolarInput').value = cfg.tasaDolar || '';
     document.getElementById('tasaDolar').textContent = cfg.tasaDolar || '—';
 }
 
-// 💾 GUARDAR IMÁGENES
+// 💾 GUARDAR IMÁGENES — SINCRONIZA CON TODOS LOS ÍNDICES
 async function guardarImagenes() {
     await db.ref('configuracion').update({
-        imgFreeFire: document.getElementById('imgFreeFire').value.trim(),
-        imgRoblox: document.getElementById('imgRoblox').value.trim(),
-        imgBloodStrike: document.getElementById('imgBloodStrike').value.trim(),
-        imgNetflix: document.getElementById('imgNetflix').value.trim(),
-        imgDisney: document.getElementById('imgDisney').value.trim(),
-        imgFondo: document.getElementById('imgFondo').value.trim()
+        imgFreeFire: document.getElementById('imgFreeFireUrl').value.trim(),
+        imgRoblox: document.getElementById('imgRobloxUrl').value.trim(),
+        imgBloodStrike: document.getElementById('imgBloodStrikeUrl').value.trim(),
+        imgNetflix: document.getElementById('imgNetflixUrl').value.trim(),
+        imgDisney: document.getElementById('imgDisneyUrl').value.trim(),
+        imgFondo: document.getElementById('imgFondoUrl').value.trim(),
+        ultimaActualizacion: new Date().toLocaleString('es-VE')
     });
     
     const msg = document.getElementById('msgImagenes');
     msg.style.display = 'block';
-    setTimeout(() => msg.style.display = 'none', 3000);
+    setTimeout(() => msg.style.display = 'none', 4000);
 }
 
 // 💰 GUARDAR TASA DEL DÓLAR
 async function guardarTasa() {
     const tasa = parseFloat(document.getElementById('tasaDolarInput').value);
     if (!tasa || tasa <= 0) {
-        alert('Por favor ingresa una tasa válida');
+        alert('⚠️ Por favor ingresa una tasa válida mayor a 0');
         return;
     }
     
     await db.ref('configuracion').update({
         tasaDolar: tasa,
-        ultimaActualizacion: new Date().toLocaleString('es-VE')
+        ultimaActualizacionTasa: new Date().toLocaleString('es-VE')
     });
     
     document.getElementById('tasaDolar').textContent = tasa;
     const msg = document.getElementById('msgTasa');
     msg.style.display = 'block';
-    setTimeout(() => msg.style.display = 'none', 3000);
+    setTimeout(() => msg.style.display = 'none', 4000);
 }
 
 // ⌨️ ENTER para iniciar sesión
