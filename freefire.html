@@ -252,15 +252,15 @@ body{
         <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
         <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         
-        <!-- 📋 MENÚ FLOTANTE LIMPIO — SOLO Iniciar Sesión y Crear Cuenta -->
+        <!-- 📋 MENÚ FLOTANTE LIMPIO — SESIÓN COMPARTIDA CON INDEX -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
             <a href="index.html" class="menu-opcion">🏠 Inicio</a>
             <div class="menu-divider"></div>
-            <a href="#" class="menu-opcion" onclick="abrirModalLogin(); return false;" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
-            <a href="register.html" class="menu-opcion">📝 Crear Cuenta</a>
+            <a href="#" class="menu-opcion" id="menuBtnLogin" onclick="abrirModalLogin(); return false;" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuBtnRegistro">📝 Crear Cuenta</a>
             <div class="menu-divider"></div>
-            <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">📊 Mi Panel</a>
-            <a href="#" class="menu-opcion" id="menuHamburguesaLogout" style="display:none;color:#ef4444;">🚪 Cerrar Sesión</a>
+            <a href="dashboard.html" class="menu-opcion" id="menuBtnPanel" style="display:none;">👤 Mi Panel</a>
+            <a href="#" class="menu-opcion" id="menuBtnLogout" style="display:none;color:#ef4444;" onclick="cerrarSesionGlobal(); return false;">🚪 Cerrar Sesión</a>
         </div>
     </div>
     <div class="games-menu">
@@ -374,16 +374,63 @@ function cerrarMenuSiExterior(e) {
     }
 }
 
-// 🔑 MODAL LOGIN (compatible con index.html)
+// 🔑 MODAL LOGIN — llama al del Index si existe
 function abrirModalLogin() {
     if(window.parent && window.parent.abrirModalLogin) {
         window.parent.abrirModalLogin();
     } else {
-        alert("🔑 Iniciar Sesión — ve a la página principal para iniciar sesión");
+        window.location.href = "index.html#login";
     }
     const menu = document.getElementById('menuFlotante');
-    menu.classList.remove('activo');
+    if(menu) menu.classList.remove('activo');
 }
+
+// ==============================================
+// 🔐 SESIÓN COMPARTIDA CON INDEX — NO PIDE LOGIN 2 VECES
+// ==============================================
+function verificarSesionGlobal() {
+    const logueado = localStorage.getItem('usuario_logueado') === 'true';
+    const usuarioNombre = localStorage.getItem('usuario_nombre') || '';
+    
+    const btnLogin = document.getElementById('menuBtnLogin');
+    const btnRegistro = document.getElementById('menuBtnRegistro');
+    const btnPanel = document.getElementById('menuBtnPanel');
+    const btnLogout = document.getElementById('menuBtnLogout');
+
+    if (logueado) {
+        // ✅ Ya inició sesión en Index → ocultar Login/Registro, mostrar Panel/Logout
+        if(btnLogin) btnLogin.style.display = 'none';
+        if(btnRegistro) btnRegistro.style.display = 'none';
+        if(btnPanel) btnPanel.style.display = 'flex';
+        if(btnLogout) btnLogout.style.display = 'flex';
+        if(btnPanel && usuarioNombre) btnPanel.innerHTML = '👤 ' + usuarioNombre;
+    } else {
+        // ❌ No ha iniciado sesión → mostrar Login/Registro
+        if(btnLogin) btnLogin.style.display = 'flex';
+        if(btnRegistro) btnRegistro.style.display = 'flex';
+        if(btnPanel) btnPanel.style.display = 'none';
+        if(btnLogout) btnLogout.style.display = 'none';
+    }
+}
+
+// 🚪 CERRAR SESIÓN — se actualiza en TODAS las páginas
+function cerrarSesionGlobal() {
+    localStorage.removeItem('usuario_logueado');
+    localStorage.removeItem('usuario_nombre');
+    localStorage.removeItem('usuario_email');
+    localStorage.removeItem('usuario_uid');
+    verificarSesionGlobal();
+    const menu = document.getElementById('menuFlotante');
+    if(menu) menu.classList.remove('activo');
+    alert('✅ Sesión cerrada correctamente');
+}
+
+// 📡 ESCUCHAR CAMBIOS — si cierra sesión en otra pestaña, se actualiza aquí
+window.addEventListener('storage', function(e) {
+    if(e.key === 'usuario_logueado') {
+        verificarSesionGlobal();
+    }
+});
 
 // 🔑 CONFIGURACIÓN
 const TU_PROXY_URL = "/api/proxy-freefire"; 
@@ -537,6 +584,7 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
 // 🔄 INICIO Y BOTÓN SUBIR ARRIBA
 // ==============================================
 actualizarPrecios();
+verificarSesionGlobal(); // 🔐 Verificar sesión al cargar la página
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
