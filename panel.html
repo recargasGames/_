@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RECARGASGAMES - Panel de Administración</title>
 
-<!-- 🔥 FIREBASE SDK v9+ + STORAGE para subir imágenes -->
+<!-- 🔥 FIREBASE SDK v9+ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
@@ -105,10 +105,7 @@ body{
     cursor:pointer;transition:.2s;margin-bottom:15px;
 }
 .subir-imagen-zone:hover{border-color:var(--color-principal);background:rgba(59,130,246,0.05)}
-.subir-imagen-zone.activa{border-color:var(--color-exito);background:rgba(16,185,129,0.05)}
 .preview-imagen{width:100%;max-height:150px;object-fit:contain;border-radius:8px;margin-top:10px;display:none}
-.progreso-barra{width:100%;height:8px;background:rgba(51,65,85,0.5);border-radius:4px;margin-top:10px;overflow:hidden;display:none}
-.progreso-fill{height:100%;background:var(--color-exito);width:0%;transition:.3s}
 
 .btn-guardar{
     padding:12px 25px;background:var(--color-exito);
@@ -116,12 +113,25 @@ body{
     cursor:pointer;font-size:15px;
 }
 .btn-guardar:hover{background:#059669}
+.btn-peligro{
+    padding:12px 25px;background:var(--color-peligro);
+    color:#fff;border:none;border-radius:8px;font-weight:600;
+    cursor:pointer;font-size:15px;
+}
+.btn-peligro:hover{background:#dc2626}
 .btn-imagen{
     padding:10px 18px;background:var(--color-principal);
     color:#fff;border:none;border-radius:8px;font-weight:600;
     cursor:pointer;font-size:14px;margin-left:10px;
 }
 .btn-imagen:hover{background:#2563eb}
+
+/* 🚨 MANTENIMIENTO */
+.estado-mantenimiento{
+    padding:20px;border-radius:12px;text-align:center;margin-bottom:25px;font-size:18px;font-weight:700;
+}
+.estado-activo{background:rgba(239,68,68,0.15);border:2px solid var(--color-peligro);color:#fca5a5}
+.estado-inactivo{background:rgba(16,185,129,0.15);border:2px solid var(--color-exito);color:#6ee7b7}
 
 /* 📋 TABLA */
 .tabla-container{overflow-x:auto}
@@ -193,6 +203,7 @@ tr:hover{background:rgba(59,130,246,0.05)}
         <div class="tab" onclick="cambiarTab('usuarios')">👤 Usuarios</div>
         <div class="tab" onclick="cambiarTab('imagenes')">🖼️ Imágenes</div>
         <div class="tab" onclick="cambiarTab('tasa')">💰 Tasa USD</div>
+        <div class="tab" onclick="cambiarTab('mantenimiento')">🚧 Mantenimiento</div>
     </div>
 
     <!-- 📈 ESTADÍSTICAS -->
@@ -294,80 +305,74 @@ tr:hover{background:rgba(59,130,246,0.05)}
         </div>
     </div>
 
-    <!-- 🖼️ IMÁGENES DEL SITIO — CON SUBIDA DE ARCHIVOS -->
+    <!-- 🖼️ IMÁGENES DEL SITIO -->
     <div id="tab-imagenes" class="contenido-tab oculto">
         <div class="tarjeta">
             <h3 class="tarjeta-titulo">🖼️ Administrar Imágenes del Sitio</h3>
             <p style="color:#94a3b8;margin-bottom:20px">Selecciona una imagen desde tu galería o pega un enlace directo. Al guardar, se actualiza en TODOS los índices automáticamente.</p>
 
-            <!-- FREE FIRE -->
             <div class="grupo-input">
                 <label>🎮 Imagen Free Fire</label>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                     <input type="file" id="archivoFreeFire" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgFreeFirePreview', 'imgFreeFireUrl')">
                     <button class="btn-imagen" onclick="document.getElementById('archivoFreeFire').click()">📤 Subir desde galería</button>
-                    <input type="text" id="imgFreeFireUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                    <input type="text" id="imgFreeFireUrl" placeholder="O pega el enlace" style="flex:1;min-width:200px">
                 </div>
                 <img id="imgFreeFirePreview" class="preview-imagen" alt="Vista previa">
             </div>
 
-            <!-- ROBLOX -->
             <div class="grupo-input">
                 <label>🎮 Imagen Roblox</label>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                     <input type="file" id="archivoRoblox" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgRobloxPreview', 'imgRobloxUrl')">
                     <button class="btn-imagen" onclick="document.getElementById('archivoRoblox').click()">📤 Subir desde galería</button>
-                    <input type="text" id="imgRobloxUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                    <input type="text" id="imgRobloxUrl" placeholder="O pega el enlace" style="flex:1;min-width:200px">
                 </div>
                 <img id="imgRobloxPreview" class="preview-imagen" alt="Vista previa">
             </div>
 
-            <!-- BLOOD STRIKE -->
             <div class="grupo-input">
                 <label>🎮 Imagen Blood Strike</label>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                     <input type="file" id="archivoBloodStrike" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgBloodStrikePreview', 'imgBloodStrikeUrl')">
                     <button class="btn-imagen" onclick="document.getElementById('archivoBloodStrike').click()">📤 Subir desde galería</button>
-                    <input type="text" id="imgBloodStrikeUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                    <input type="text" id="imgBloodStrikeUrl" placeholder="O pega el enlace" style="flex:1;min-width:200px">
                 </div>
                 <img id="imgBloodStrikePreview" class="preview-imagen" alt="Vista previa">
             </div>
 
-            <!-- NETFLIX -->
             <div class="grupo-input">
                 <label>📺 Imagen Netflix</label>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                     <input type="file" id="archivoNetflix" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgNetflixPreview', 'imgNetflixUrl')">
                     <button class="btn-imagen" onclick="document.getElementById('archivoNetflix').click()">📤 Subir desde galería</button>
-                    <input type="text" id="imgNetflixUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                    <input type="text" id="imgNetflixUrl" placeholder="O pega el enlace" style="flex:1;min-width:200px">
                 </div>
                 <img id="imgNetflixPreview" class="preview-imagen" alt="Vista previa">
             </div>
 
-            <!-- DISNEY -->
             <div class="grupo-input">
                 <label>🎬 Imagen Disney+</label>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                     <input type="file" id="archivoDisney" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgDisneyPreview', 'imgDisneyUrl')">
                     <button class="btn-imagen" onclick="document.getElementById('archivoDisney').click()">📤 Subir desde galería</button>
-                    <input type="text" id="imgDisneyUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                    <input type="text" id="imgDisneyUrl" placeholder="O pega el enlace" style="flex:1;min-width:200px">
                 </div>
                 <img id="imgDisneyPreview" class="preview-imagen" alt="Vista previa">
             </div>
 
-            <!-- FONDO DEL SITIO -->
             <div class="grupo-input">
                 <label>🌄 Imagen de Fondo del Sitio</label>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                     <input type="file" id="archivoFondo" accept="image/*" style="display:none" onchange="previewImagen(this, 'imgFondoPreview', 'imgFondoUrl')">
                     <button class="btn-imagen" onclick="document.getElementById('archivoFondo').click()">📤 Subir desde galería</button>
-                    <input type="text" id="imgFondoUrl" placeholder="O pega el enlace de la imagen" style="flex:1;min-width:200px">
+                    <input type="text" id="imgFondoUrl" placeholder="O pega el enlace" style="flex:1;min-width:200px">
                 </div>
                 <img id="imgFondoPreview" class="preview-imagen" alt="Vista previa">
             </div>
 
-            <button class="btn-guardar" onclick="guardarImagenes()">💾 Guardar Todo y Sincronizar con los Índices</button>
-            <div class="mensaje-guardado" id="msgImagenes">✅ ¡Imágenes guardadas y sincronizadas con todos los índices!</div>
+            <button class="btn-guardar" onclick="guardarImagenes()">💾 Guardar y Sincronizar con los Índices</button>
+            <div class="mensaje-guardado" id="msgImagenes">✅ ¡Imágenes guardadas y sincronizadas!</div>
         </div>
     </div>
 
@@ -375,7 +380,7 @@ tr:hover{background:rgba(59,130,246,0.05)}
     <div id="tab-tasa" class="contenido-tab oculto">
         <div class="tarjeta">
             <h3 class="tarjeta-titulo">💰 Tasa de Cambio — Dólar a Bolívares</h3>
-            <p style="color:#94a3b8;margin-bottom:20px">Al actualizar la tasa, se refleja automáticamente en TODOS los productos y métodos de pago.</p>
+            <p style="color:#94a3b8;margin-bottom:20px">Al actualizar la tasa, se refleja automáticamente en TODO el sitio.</p>
             
             <div class="grupo-input">
                 <label>1 USD = ? Bs (Tasa del día)</label>
@@ -383,18 +388,37 @@ tr:hover{background:rgba(59,130,246,0.05)}
             </div>
 
             <button class="btn-guardar" onclick="guardarTasa()">💾 Actualizar Tasa</button>
-            <div class="mensaje-guardado" id="msgTasa">✅ Tasa actualizada y sincronizada con todo el sitio</div>
+            <div class="mensaje-guardado" id="msgTasa">✅ Tasa actualizada y sincronizada</div>
+        </div>
+    </div>
+
+    <!-- 🚨 MANTENIMIENTO — LO QUE PEDISTE PAPÁ -->
+    <div id="tab-mantenimiento" class="contenido-tab oculto">
+        <div class="tarjeta">
+            <h3 class="tarjeta-titulo">🚧 Modo Mantenimiento</h3>
+            <p style="color:#94a3b8;margin-bottom:25px">Actívalo cuando estés actualizando códigos o haciendo cambios. Los usuarios verán un aviso y NO podrán realizar compras.</p>
+
+            <div id="estadoMantenimiento" class="estado-mantenimiento estado-inactivo">
+                ✅ EL SITIO ESTÁ DISPONIBLE — Mantenimiento DESACTIVADO
+            </div>
+
+            <div style="display:flex;gap:15px;flex-wrap:wrap">
+                <button class="btn-peligro" onclick="activarMantenimiento()">🚧 Activar Mantenimiento</button>
+                <button class="btn-guardar" onclick="desactivarMantenimiento()">✅ Desactivar Mantenimiento</button>
+            </div>
+
+            <div class="mensaje-guardado" id="msgMantenimiento">✅ Estado de mantenimiento actualizado</div>
         </div>
     </div>
 
 </div>
 
 <script>
-// 🔑 DATOS DE ACCESO — SOLO TU
+// 🔑 DATOS DE ACCESO
 const ADMIN_CORREO = "aa3964063@gmail.com";
 const ADMIN_CONTRASENA = "Dios.411";
 
-// 🔥 FIREBASE — MISMA BASE DE DATOS
+// 🔥 FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
   authDomain: "free-52119.firebaseapp.com",
@@ -443,9 +467,11 @@ function cambiarTab(nombre) {
     document.querySelectorAll('.contenido-tab').forEach(c => c.classList.add('oculto'));
     event.target.classList.add('activa');
     document.getElementById('tab-' + nombre).classList.remove('oculto');
+    
+    if (nombre === 'mantenimiento') cargarEstadoMantenimiento();
 }
 
-// 📤 PREVISUALIZAR IMAGEN SELECCIONADA
+// 📤 PREVISUALIZAR IMAGEN
 function previewImagen(input, previewId, urlId) {
     const archivo = input.files[0];
     if (!archivo) return;
@@ -460,6 +486,47 @@ function previewImagen(input, previewId, urlId) {
     lector.readAsDataURL(archivo);
 }
 
+// 🚨 MANTENIMIENTO
+async function cargarEstadoMantenimiento() {
+    const snapshot = await db.ref('mantenimiento/activo').once('value');
+    const activo = snapshot.val() || false;
+    actualizarVistaMantenimiento(activo);
+}
+
+function actualizarVistaMantenimiento(activo) {
+    const estado = document.getElementById('estadoMantenimiento');
+    if (activo) {
+        estado.className = 'estado-mantenimiento estado-activo';
+        estado.innerHTML = '🚧 SITIO EN MANTENIMIENTO — Los usuarios NO pueden comprar';
+    } else {
+        estado.className = 'estado-mantenimiento estado-inactivo';
+        estado.innerHTML = '✅ EL SITIO ESTÁ DISPONIBLE — Mantenimiento DESACTIVADO';
+    }
+}
+
+async function activarMantenimiento() {
+    await db.ref('mantenimiento').update({
+        activo: true,
+        mensaje: '⚠️ RECARGASGAMES EN MANTENIMIENTO — Pronto estará disponible',
+        fechaActivacion: new Date().toLocaleString('es-VE')
+    });
+    actualizarVistaMantenimiento(true);
+    const msg = document.getElementById('msgMantenimiento');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+async function desactivarMantenimiento() {
+    await db.ref('mantenimiento').update({
+        activo: false,
+        fechaDesactivacion: new Date().toLocaleString('es-VE')
+    });
+    actualizarVistaMantenimiento(false);
+    const msg = document.getElementById('msgMantenimiento');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+}
+
 // 📊 CARGAR TODO
 async function cargarDatosPanel() {
     await Promise.all([
@@ -467,7 +534,8 @@ async function cargarDatosPanel() {
         cargarReferenciasFalsas(),
         cargarUsuarios(),
         cargarConfiguracion(),
-        cargarEstadisticas()
+        cargarEstadisticas(),
+        cargarEstadoMantenimiento()
     ]);
 }
 
@@ -484,7 +552,6 @@ async function cargarPedidos() {
 
     const pedidos = Object.values(datos).reverse();
     lista.innerHTML = '';
-    
     pedidos.forEach(p => {
         const clase = p.estado === 'Completado' ? 'estado-exito' : 
                       p.estado === 'Pendiente' ? 'estado-pendiente' : 'estado-error';
@@ -507,7 +574,6 @@ async function cargarReferenciasFalsas() {
     const snapshot = await db.ref('referencias_falsas').orderByChild('fecha').limitToLast(50).once('value');
     const datos = snapshot.val();
     const lista = document.getElementById('listaReferencias');
-    
     document.getElementById('referenciasFalsas').textContent = datos ? Object.keys(datos).length : 0;
     
     if (!datos) {
@@ -531,12 +597,11 @@ async function cargarReferenciasFalsas() {
     });
 }
 
-// 👤 USUARIOS REGISTRADOS
+// 👤 USUARIOS
 async function cargarUsuarios() {
     const snapshot = await db.ref('usuarios').orderByChild('fechaRegistro').limitToLast(50).once('value');
     const datos = snapshot.val();
     const lista = document.getElementById('listaUsuarios');
-    
     document.getElementById('totalUsuarios').textContent = datos ? Object.keys(datos).length : 0;
     
     if (!datos) {
@@ -572,7 +637,7 @@ async function cargarEstadisticas() {
     document.getElementById('pedidosHoy').textContent = pedidosHoy;
 }
 
-// 🖼️ CARGAR CONFIGURACIÓN GUARDADA
+// 🖼️ CARGAR CONFIGURACIÓN
 async function cargarConfiguracion() {
     const snapshot = await db.ref('configuracion').once('value');
     const cfg = snapshot.val() || {};
@@ -587,7 +652,7 @@ async function cargarConfiguracion() {
     document.getElementById('tasaDolar').textContent = cfg.tasaDolar || '—';
 }
 
-// 💾 GUARDAR IMÁGENES — SINCRONIZA CON TODOS LOS ÍNDICES
+// 💾 GUARDAR IMÁGENES
 async function guardarImagenes() {
     await db.ref('configuracion').update({
         imgFreeFire: document.getElementById('imgFreeFireUrl').value.trim(),
@@ -604,7 +669,7 @@ async function guardarImagenes() {
     setTimeout(() => msg.style.display = 'none', 4000);
 }
 
-// 💰 GUARDAR TASA DEL DÓLAR
+// 💰 GUARDAR TASA
 async function guardarTasa() {
     const tasa = parseFloat(document.getElementById('tasaDolarInput').value);
     if (!tasa || tasa <= 0) {
