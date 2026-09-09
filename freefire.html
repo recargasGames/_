@@ -204,11 +204,6 @@ body{
     font-size:14px;
     font-weight:700;
 }
-.status-success{color:#22c55e;background:rgba(34,197,94,.1);padding:10px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
-.status-error{color:#ef4444;background:rgba(239,68,68,.1);padding:10px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
-.status-verificando{color:#facc15;background:rgba(250,204,21,.1);padding:10px 12px;border-radius:10px;display:inline-block;width:100%;text-align:center}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top:2px solid var(--color-azul);border-radius:50%;animation:spin .8s linear infinite;margin-right:8px;vertical-align:middle}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360)}}
 .whatsapp-float{
     position:fixed;bottom:20px;right:20px;
     background:#25D366;
@@ -281,7 +276,6 @@ body{
     <div class="card-panel">
         <div class="panel-title">ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
-        <div id="verificacionStatus" style="margin-top:12px"></div>
     </div>
 
     <div class="card-panel">
@@ -373,14 +367,9 @@ function cerrarMenuSiExterior(e) {
     }
 }
 
-// 🔑 CONFIGURACIÓN
-const TU_PROXY_URL = "/api/proxy-freefire"; 
-
+// 💰 CONFIGURACIÓN
 let metodo = "PAGO MOVIL";
 let tasa = 940;
-let idOk = false;
-let nombreJugador = "";
-let idJugadorActual = "";
 const juegoActual = "FREE FIRE";
 
 // ==============================================
@@ -401,99 +390,7 @@ window.seleccionarPago=function(m,e){
 };
 
 // ==============================================
-// ✅ VERIFICAR ID — LLAMANDO AL PROXY
-// ==============================================
-async function verificarID(id){
-    if(!/^\d{4,12}$/.test(id)){
-        return {ok: false, msg: "ID inválido — solo números, 4-12 dígitos"};
-    }
-
-    try {
-        const respuesta = await fetch(TU_PROXY_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                tipo: 'validarJugador',
-                id_jugador: id
-            }),
-            signal: AbortSignal.timeout(8000)
-        });
-        
-        if (!respuesta.ok) throw new Error(`Error HTTP: ${respuesta.status}`);
-        
-        const datos = await respuesta.json();
-        console.log("✅ Respuesta API:", datos);
-
-        if(datos.code === "true" || datos.exito === "true"){
-            const nombre = datos.nickname || datos.nombre || `Jugador ${id}`;
-            return {ok: true, nombre: nombre, msg: "✅ Jugador: " + nombre};
-        } else {
-            return {ok: false, msg: datos.mensaje || datos.error || "Jugador no encontrado ❌"};
-        }
-    } catch (error) {
-        console.error("❌ Error verificando ID:", error);
-        
-        if(error.name === 'AbortError' || error.name === 'TimeoutError'){
-            return {ok: false, msg: "⏳ Tiempo agotado. Intenta de nuevo."};
-        }
-        return {ok: false, msg: "Error de conexión. Intenta en unos minutos."};
-    }
-}
-
-// ==============================================
-// 📋 MANEJO DEL INPUT DEL ID
-// ==============================================
-let timeoutId = null;
-const inputId = document.getElementById("jugadorId");
-const statusDiv = document.getElementById("verificacionStatus");
-
-function mostrarEstado(mensaje, tipo) {
-    if(!statusDiv) return;
-    let clase = "";
-    if(tipo === "verificando") { 
-        clase = "status-verificando"; 
-        mensaje = '<span class="spinner"></span> ' + mensaje; 
-    }
-    if(tipo === "success") clase = "status-success";
-    if(tipo === "error") clase = "status-error";
-    statusDiv.innerHTML = clase ? `<div class="${clase}">${mensaje}</div>` : "";
-}
-
-inputId.addEventListener("input", function(){
-    clearTimeout(timeoutId);
-    const id = this.value.trim();
-    
-    if(id.length === 0){ 
-        mostrarEstado(""); 
-        idOk = false; 
-        nombreJugador = "";
-        return; 
-    }
-
-    if(/^\d{4,12}$/.test(id)){
-        timeoutId = setTimeout(async () => {
-            mostrarEstado("Verificando jugador...", "verificando");
-            const res = await verificarID(id);
-            if(res.ok){ 
-                mostrarEstado(res.msg, "success"); 
-                idOk = true; 
-                nombreJugador = res.nombre;
-                idJugadorActual = id;
-            } else { 
-                mostrarEstado(res.msg, "error"); 
-                idOk = false; 
-                nombreJugador = "";
-            }
-        }, 500);
-    } else {
-        idOk = false;
-        nombreJugador = "";
-        mostrarEstado("ID inválido — solo números (4-12 dígitos)", "error");
-    }
-});
-
-// ==============================================
-// 🛒 COMPRAR — GUARDAR TODO Y IR A PASARELA
+// 🛒 COMPRAR — SIN VERIFICACIÓN, DIRECTO
 // ==============================================
 window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
@@ -502,15 +399,11 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
         alert("❌ Escribe tu ID del jugador primero");
         return;
     }
-    if(!idOk){
-        alert("⏳ Espera a que se verifique el ID antes de comprar");
-        return;
-    }
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
     localStorage.setItem('id_jugador', idInput);
-    localStorage.setItem('nombre_jugador', nombreJugador || `ID ${idInput}`);
+    localStorage.setItem('nombre_jugador', "");
     localStorage.setItem('juego_seleccionado', juegoActual);
     localStorage.setItem('producto_seleccionado', producto);
     localStorage.setItem('paquete_codigo', paqueteCodigo);
