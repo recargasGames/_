@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+<title>RECARGASGAMES - Free Fire</title>
+<style>
+:root{
+    --color-principal:#3b82f6;
+    --color-hover:#2563eb;
+    --color-azul:#3b82f6;
+    --color-blanco:#ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    background-image:url('fondo.jpg');
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    padding-top:110px;
+}
+
+.barra-superior{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:999;
+    background:rgba(11,18,32,.95);
+    border-bottom:2px solid var(--color-azul);
+    box-shadow:0 2px 10px rgba(0,0,0,.3);
+}
+.header{
+    padding:12px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #2a374f;
+    margin-bottom:0;
+}
+.brand{display:flex;align-items:center}
+.brand img{height:55px;width:auto;border-radius:14px;background:transparent;}
+
+.menu-hamburguesa {
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:26px;
+    cursor:pointer;
+    padding:5px 10px;
+    transition:transform 0.2s;
+}
+.menu-hamburguesa:hover {transform:scale(1.1);color:var(--color-azul);}
+.menu-flotante {
+    position:absolute;
+    top:65px;
+    right:20px;
+    background:rgba(17,24,39,0.98);
+    border:1px solid var(--color-azul);
+    border-radius:14px;
+    min-width:220px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:all 0.25s ease;
+    z-index:1000;
+    overflow:hidden;
+}
+.menu-flotante.activo {opacity:1;visibility:visible;transform:translateY(0);}
+.menu-opcion {
+    display:flex;align-items:center;gap:10px;
+    padding:14px 18px;color:white;text-decoration:none;
+    font-size:15px;font-weight:500;transition:all 0.2s;
+    border-bottom:1px solid #1f2937;
+}
+.menu-opcion:last-child {border-bottom:none;}
+.menu-opcion:hover {background:rgba(59,130,246,0.15);color:var(--color-azul);padding-left:22px;}
+
+.games-menu{
+    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
+    padding:12px 15px;border-top:none;border-bottom:none;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.games-menu::-webkit-scrollbar{display:none;width:0;height:0}
+.games-menu a{
+    text-decoration:none;color:#fff;padding:6px 12px;
+    border-radius:20px;font-size:14px;font-weight:700;
+    white-space:nowrap;transition:.2s;
+}
+.games-menu a:hover,.games-menu a.active{color:var(--color-azul);border-bottom:2px solid var(--color-azul);border-radius:0;}
+
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto;}
+.card-panel{background:rgba(11,18,32,.85);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px;}
+.panel-title{font-size:15px;font-weight:700;margin:0 0 12px;color:var(--color-azul)}
+.form-input{
+    width:100%;height:50px;border-radius:14px;
+    background:#111827;color:#fff;padding:12px;
+    border:1px solid #1f2937;font-size:16px;
+}
+.form-input:focus{outline:none;border-color:var(--color-azul)}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.pay-box{
+    background:#111827;border:2px solid #1f2937;
+    border-radius:16px;padding:12px;text-align:center;
+    cursor:pointer;font-weight:700;transition:.2s;
+}
+.pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul)}
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
+.product-card{
+    background:rgba(11,18,32,.85);border:1px solid #1f2937;
+    border-radius:16px;padding:15px;transition:.2s;
+}
+.product-card:hover{border-color:var(--color-azul);transform:translateY(-2px)}
+.card-header{display:flex;align-items:center;gap:12px;border-bottom:1px solid #1f2937;padding-bottom:10px;margin-bottom:10px}
+.game-icon{background:#1a2333;padding:8px;border-radius:12px;font-size:18px}
+.product-title{font-size:16px;font-weight:700}
+.product-desc{color:#9ca3af;font-size:11px;margin-bottom:10px}
+.product-price{font-size:22px;font-weight:700;color:var(--color-azul);margin-bottom:12px}
+.btn-buy{
+    background:var(--color-azul);color:#fff;border:none;
+    width:100%;height:40px;border-radius:12px;
+    font-size:14px;font-weight:700;cursor:pointer;transition:.2s;
+}
+.btn-buy:hover{background:var(--color-hover)}
+.section-divider{margin:25px 0 15px;text-align:center}
+.section-divider span{
+    background:var(--color-azul);color:#fff;padding:6px 18px;
+    border-radius:30px;font-size:14px;font-weight:700;
+}
+.whatsapp-float{
+    position:fixed;bottom:20px;right:20px;background:#25D366;
+    width:55px;height:55px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;font-size:28px;z-index:1000;
+}
+.back-to-top{
+    position:fixed;bottom:90px;right:20px;background:var(--color-azul);
+    color:#fff;width:45px;height:45px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;visibility:hidden;
+    z-index:1000;transition:.3s;text-decoration:none;
+}
+.back-to-top.show{opacity:1;visibility:visible}
+.tasa-info{font-size:12px;color:#94a3b8;margin-top:8px;text-align:right}
+@media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:500px){
+    body{padding-top:100px}
+    .main{padding-top:25px}
+    .brand img{height:45px}
+    .header{padding:10px 16px}
+    .games-menu{padding:10px 12px}
+    .menu-flotante{right:10px;min-width:200px}
+}
+</style>
+</head>
+<body onclick="cerrarMenuSiExterior(event)">
+
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
+        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+        </div>
+    </div>
+    <div class="games-menu">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html" class="active">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="mlbb.html">Mobile Legends</a>
+        <a href="codm.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="deltaforce.html">Delta Force</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="card-panel">
+        <div class="panel-title">ID del Jugador</div>
+        <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
+    </div>
+
+    <div class="card-panel">
+        <div class="panel-title">Método de Pago</div>
+        <div class="payment-methods">
+            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">PAGO MOVIL</div>
+            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">BINANCE</div>
+        </div>
+        <div class="tasa-info" id="tasaInfo">Tasa: 940 Bs/USD</div>
+    </div>
+
+    <div class="section-divider"><span>💎 DIAMANTES - FREE FIRE</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">100 Diamantes</div></div>
+            <div class="product-desc">+10 gratis • Recarga instantánea</div>
+            <div class="product-price" data-usd="0.84">$0.84</div>
+            <button class="btn-buy" onclick="comprarProducto('100 Diamantes', '0.84', '1')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">310 Diamantes</div></div>
+            <div class="product-desc">+31 gratis • Recarga instantánea</div>
+            <div class="product-price" data-usd="2.70">$2.70</div>
+            <button class="btn-buy" onclick="comprarProducto('310 Diamantes', '2.70', '2')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">520 Diamantes</div></div>
+            <div class="product-desc">+52 gratis • Recarga instantánea</div>
+            <div class="product-price" data-usd="4.20">$4.20</div>
+            <button class="btn-buy" onclick="comprarProducto('520 Diamantes', '4.20', '3')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">1060 Diamantes</div></div>
+            <div class="product-desc">+106 gratis • Recarga instantánea</div>
+            <div class="product-price" data-usd="7.90">$7.90</div>
+            <button class="btn-buy" onclick="comprarProducto('1060 Diamantes', '7.90', '4')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">2180 Diamantes</div></div>
+            <div class="product-desc">+218 gratis • Recarga instantánea</div>
+            <div class="product-price" data-usd="16.00">$16.00</div>
+            <button class="btn-buy" onclick="comprarProducto('2180 Diamantes', '16.00', '5')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">5600 Diamantes</div></div>
+            <div class="product-desc">+560 gratis • Recarga instantánea</div>
+            <div class="product-price" data-usd="39.50">$39.50</div>
+            <button class="btn-buy" onclick="comprarProducto('5600 Diamantes', '39.50', '6')">Comprar</button>
+        </div>
+    </div>
+
+    <div class="section-divider"><span>🎫 TARJETAS Y PASES</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Semanal</div></div>
+            <div class="product-desc">7 días de beneficios</div>
+            <div class="product-price" data-usd="2.40">$2.40</div>
+            <button class="btn-buy" onclick="comprarProducto('Tarjeta Semanal', '2.40', '7')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Mensual</div></div>
+            <div class="product-desc">30 días de beneficios</div>
+            <div class="product-price" data-usd="11.00">$11.00</div>
+            <button class="btn-buy" onclick="comprarProducto('Tarjeta Mensual', '11.00', '8')">Comprar</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Pase Booyah</div></div>
+            <div class="product-desc">Pase de evento exclusivo</div>
+            <div class="product-price" data-usd="3.00">$3.00</div>
+            <button class="btn-buy" onclick="comprarProducto('Pase Booyah', '3.00', '9')">Comprar</button>
+        </div>
+    </div>
+</div>
+
+<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank" rel="noopener">💬</a>
+
+<script>
+function alternarMenu() {document.getElementById('menuFlotante').classList.toggle('activo');}
+function cerrarMenuSiExterior(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('activo');
+}
+
+let metodo = "PAGO MOVIL";
+let tasa = 940;
+const juegoActual = "FREE FIRE";
+
+function actualizarPrecios(){
+    document.querySelectorAll('.product-price').forEach(el=>{
+        let u=parseFloat(el.dataset.usd);
+        el.innerText = metodo==="PAGO MOVIL" ? Math.round(u*tasa).toLocaleString("es-VE")+" Bs" : u.toFixed(2)+" USDT";
+    });
+}
+
+window.seleccionarPago=function(m,e){
+    document.querySelectorAll('.pay-box').forEach(b=>b.classList.remove('active'));
+    e.classList.add('active');
+    metodo=m;
+    actualizarPrecios();
+};
+
+window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
+    const idInput = document.getElementById("jugadorId").value.trim();
+    if(!idInput){alert("❌ Escribe tu ID del jugador primero");return;}
+    const precioBs = Math.round(parseFloat(precioUsd) * tasa);
+    localStorage.setItem('id_jugador', idInput);
+    localStorage.setItem('nombre_jugador', "");
+    localStorage.setItem('juego_seleccionado', juegoActual);
+    localStorage.setItem('producto_seleccionado', producto);
+    localStorage.setItem('paquete_codigo', paqueteCodigo);
+    localStorage.setItem('precio_usd', precioUsd);
+    localStorage.setItem('precio_en_bs', precioBs);
+    localStorage.setItem('metodo_pago', metodo);
+    window.location.href = "pasarela.html";
+};
+
+actualizarPrecios();
+window.addEventListener('scroll',()=>{
+    const b=document.getElementById('backToTop');
+    if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
+});
+</script>
+</body>
+</html>
