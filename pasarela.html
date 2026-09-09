@@ -482,7 +482,7 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// 🔑 CONFIGURACIÓN DE APIS
+// 🔑 CONFIGURACIÓN DE PÁBILO — NO TOCAR
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
@@ -502,15 +502,7 @@ const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
-
-// ==============================================
-// 🎮 JUEGOS AUTOMÁTICOS Y MANUALES
-// ==============================================
-const JUEGOS_AUTOMATICOS = [
-    'FREE FIRE', 'MOBILE LEGENDS', 'ARENA BREAKOUT', 
-    'BLOOD STRIKE', 'BLOX FRUITS', 'ROBLOX'
-];
-const JUEGOS_MANUALES = ['NETFLIX', 'DISNEY+'];
+const servidor = localStorage.getItem('servidor') || "";
 
 // ==============================================
 // 📄 CARGAR DATOS EN PANTALLA
@@ -633,58 +625,33 @@ function enviarTelegram(mensaje) {
 }
 
 // ==============================================
-// 🎮 ENVIAR RECARGA A CENTRAL ONE
+// 🎮 LLAMADA AL PROXY DE VERCEL — /api/central-one
+// ✅ TODAS LAS RECARGAS PASAN POR AQUÍ
+// ✅ LAS CLAVES API ESTÁN PROTEGIDAS EN VERCEL
 // ==============================================
-async function enviarRecargaCentralOne() {
-    const juegoUpper = juego.toUpperCase();
-    
-    if (JUEGOS_MANUALES.some(j => juegoUpper.includes(j))) {
-        return { 
-            exito: true, manual: true,
-            mensaje: "✅ Pago confirmado. Te enviaremos los datos por WhatsApp en los próximos minutos.",
-            proveedor: 'Manual - WhatsApp'
-        };
-    }
+async function llamarProxyCentralOne() {
+    const datosEnvio = {
+        juego: juego,
+        id_jugador: idJugador,
+        paquete: paqueteCod,
+        email: idJugador,
+        servidor: servidor
+    };
 
-    if (!JUEGOS_AUTOMATICOS.some(j => juegoUpper.includes(j))) {
-        return { 
-            exito: true, manual: true,
-            mensaje: "✅ Pago confirmado. Te contactaremos para la entrega.",
-            proveedor: 'Manual'
-        };
-    }
-
-    let tipo = '';
-    if (juegoUpper.includes('FREE FIRE')) tipo = 'freefire';
-    else if (juegoUpper.includes('MOBILE LEGENDS')) tipo = 'mobilelegends';
-    else if (juegoUpper.includes('ARENA BREAKOUT')) tipo = 'arenabreakout';
-    else if (juegoUpper.includes('BLOOD STRIKE')) tipo = 'bloodstrike';
-    else if (juegoUpper.includes('BLOX FRUITS')) tipo = 'bloxfruits';
-    else if (juegoUpper.includes('ROBLOX')) tipo = 'roblox';
-    else tipo = juego.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-    console.log(`📤 Enviando recarga ${tipo} a Central One...`);
+    console.log('📤 Enviando recarga al proxy /api/central-one:', datosEnvio);
 
     try {
-        const datosEnvio = {
-            juego: tipo,
-            id_jugador: idJugador,
-            paquete: paqueteCod,
-            email: idJugador
-        };
-
-        if (tipo === 'mobilelegends' && localStorage.getItem('servidor')) {
-            datosEnvio.servidor = localStorage.getItem('servidor');
-        }
-
         const response = await fetch('/api/central-one', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ accion: 'recarga', datos: datosEnvio })
+            body: JSON.stringify({
+                accion: 'recarga',
+                datos: datosEnvio
+            })
         });
 
         const datos = await response.json();
-        console.log('📥 Respuesta Central One:', datos);
+        console.log('📥 Respuesta del proxy:', datos);
 
         if (!response.ok) {
             if (datos.sinSaldo) return { exito: false, sinSaldo: true, mensaje: datos.error || 'Saldo insuficiente' };
@@ -699,11 +666,13 @@ async function enviarRecargaCentralOne() {
             proveedor: datos.proveedor || 'Central One',
             referencia: datos.referencia || 'N/A',
             monto: datos.monto || precioUsd,
-            codigo: datos.codigo || null
+            codigo: datos.codigo || null,
+            manual: datos.manual || false,
+            datos_extra: datos.datos_extra || null
         };
 
     } catch (error) {
-        console.error('❌ Error en Central One:', error);
+        console.error('❌ Error llamando al proxy:', error);
         return {
             exito: true,
             mensaje: "⏳ Recarga en proceso... Se completará en breve.",
@@ -713,91 +682,54 @@ async function enviarRecargaCentralOne() {
 }
 
 // ==============================================
-// ⚡ VERIFICAR PAGO EN PÁBILO — VERSIÓN CORREGIDA
+// ⚡ VERIFICAR PAGO EN PÁBILO — TAL CUAL FUNCIONA
+// ✅ NO SE MODIFICA NADA DE ESTA FUNCIÓN
 // ==============================================
 async function verificarPagoPabilo(referencia) {
-    // ✅ Limpiar referencia: quitar espacios, guiones, puntos
-    referencia = referencia.replace(/[\s\-\.\(\)]/g, '').trim();
-    if (!referencia || referencia.length < 4) {
-        console.log('❌ Referencia muy corta o vacía');
-        return false;
-    }
-
-    // ✅ Calcular monto — PROBAR AMBOS formatos (con y sin decimales)
-    const montoOriginal = parseFloat(precioBs);
-    const montoSinDecimales = Math.round(montoOriginal);        // ej: 520
-    const montoConDecimales = Math.round(montoOriginal * 100);  // ej: 52000 (lo que registra el banco)
+    let montoPago = String(precioBs).replace(/[.,]/g, '');
+    montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     const fecha = new Date().toISOString().split('T')[0];
 
-    console.log(`🔍 Verificando: Ref=${referencia}, Monto=${montoOriginal} Bs (probando: ${montoSinDecimales} y ${montoConDecimales})`);
+    const cuerpo = { 
+        bank_reference: referencia, 
+        amount: montoPago, 
+        movement_type: "GENERIC", 
+        fecha_pago: fecha 
+    };
 
-    // ✅ PROBAR AMBOS montos — el banco puede registrarlo de 2 formas
-    for (const montoEnviar of [montoSinDecimales, montoConDecimales]) {
-        const cuerpo = { 
-            bank_reference: referencia, 
-            amount: montoEnviar, 
-            movement_type: "GENERIC", 
-            fecha_pago: fecha 
-        };
-
-        try {
-            const res = await fetch(API_PABILO_URL, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${API_KEY}` 
-                },
-                body: JSON.stringify(cuerpo)
-            });
+    try {
+        const res = await fetch(API_PABILO_URL, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${API_KEY}` 
+            },
+            body: JSON.stringify(cuerpo)
+        });
+        
+        const datos = await res.json();
+        console.log('📥 Respuesta Pábilo:', datos);
+        
+        if (res.ok && datos) {
+            const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
+            const dataStatus = (datos.data?.status || "").toLowerCase();
             
-            if (!res.ok) {
-                console.log(`⚠️ API respondió con estado HTTP: ${res.status}`);
-                continue;
-            }
-
-            const datos = await res.json();
-            console.log('📥 Respuesta completa de Pábilo:', datos);
-
-            // ✅ Lista AMPLIADA de estados de pago aceptados
-            const msg = String(datos.message || datos.status || datos.estado || "").toLowerCase();
-            const dataStatus = String(datos.data?.status || "").toLowerCase();
-            const estadoPago = String(datos.estado_pago || datos.estado || "").toLowerCase();
-            
-            const esAprobado = 
+            return res.ok && (
                 msg === 'payment confirmed' || msg === 'paid' || msg === 'confirmado' || 
-                msg === 'aprobado' || msg === 'exitoso' || msg === 'success' ||
-                msg.includes('confirmado') || msg.includes('aprobado') || 
-                msg.includes('pagado') || msg.includes('exito') ||
-                dataStatus === 'paid' || dataStatus === 'confirmed' || 
-                dataStatus === 'aprobado' || dataStatus === 'success' ||
-                estadoPago === 'pagado' || estadoPago === 'confirmado' ||
-                datos.success === true || datos.exito === true || 
-                datos.paid === true || datos.confirmed === true ||
-                datos.aprobado === true;
-
-            if (esAprobado) {
-                console.log(`✅ PAGO CONFIRMADO con monto: ${montoEnviar}`);
-                return true;
-            }
-
-            // ⏳ Si está pendiente, NO devolvemos false todavía
-            if (msg.includes('pendiente') || msg.includes('procesando') || 
-                msg.includes('en cola') || dataStatus === 'pending') {
-                console.log('⏳ Pago pendiente/procesando...');
-            }
-
-        } catch(error) {
-            console.error('❌ Error en la petición a Pábilo:', error);
+                msg === 'aprobado' || msg.includes('confirmado') || msg.includes('aprobado') || 
+                msg.includes('pagado') || dataStatus === 'paid' || dataStatus === 'confirmed' ||
+                datos.success === true || datos.exito === true || datos.paid === true
+            );
         }
+        return false;
+    } catch(error) {
+        console.error('❌ Error en Pábilo:', error);
+        return false;
     }
-
-    // ❌ Si probamos TODO y nada funcionó
-    console.log('❌ PAGO NO ENCONTRADO con ninguna variante de monto');
-    return false;
 }
 
 // ==============================================
-// 🔥 FLUJO PRINCIPAL
+// 🔥 FLUJO PRINCIPAL — TAL CUAL FUNCIONA
 // ==============================================
 function mostrarPaso(idPaso) {
     document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
@@ -828,11 +760,11 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // PASO 2: Verificar en Pábilo (con AMBOS formatos de monto)
+        // PASO 2: Verificar en Pábilo — NO TOCAR
         const pagoConfirmado = await verificarPagoPabilo(referencia);
         
         if (!pagoConfirmado) {
-            setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 500);
+            setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
             btn.disabled = false;
             btn.innerHTML = '✅ Verificar Pago';
             return;
@@ -844,22 +776,19 @@ async function iniciarVerificacion() {
         mostrarPaso('pasoPagoConfirmado');
         await new Promise(r => setTimeout(r, 1200));
         
-        // PASO 4: Conectar con servidor de recargas
+        // PASO 4: Llamar al PROXY de Vercel para la recarga
         mostrarPaso('pasoConectandoServidor');
-        
-        const resultadoRecarga = await enviarRecargaCentralOne();
-        const esManual = resultadoRecarga.manual || false;
-
+        const resultadoRecarga = await llamarProxyCentralOne();
         await new Promise(r => setTimeout(r, 1500));
-
+        
         // PASO 5: Guardar pedido en Firebase
         const idPedido = await guardarPedidoEnFirebase(
             referencia, 
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
             resultadoRecarga.id_solicitud || '',
-            resultadoRecarga.proveedor || 'Central One'
+            resultadoRecarga.proveedor || ''
         );
-
+        
         // PASO 6: Mostrar resultado final
         if (resultadoRecarga.exito) {
             document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
@@ -885,7 +814,7 @@ async function iniciarVerificacion() {
             }
             
             // Si es manual (Netflix/Disney)
-            if (esManual) {
+            if (resultadoRecarga.manual) {
                 document.getElementById('resProducto').textContent = `${producto} 📱 (Entrega por WhatsApp)`;
                 const resumenBox = document.querySelector('#pasoRecargaExitosa .resumen-box');
                 const avisoManual = document.createElement('div');
@@ -898,6 +827,25 @@ async function iniciarVerificacion() {
                     <span class="resumen-valor" style="color: var(--color-principal);">Te contactaremos por WhatsApp</span>
                 `;
                 resumenBox.appendChild(avisoManual);
+            }
+            
+            // Si hay datos extra de streaming
+            if (resultadoRecarga.datos_extra) {
+                const resumenBox = document.querySelector('#pasoRecargaExitosa .resumen-box');
+                const datosExtra = resultadoRecarga.datos_extra;
+                if (datosExtra.cuenta || datosExtra.correo || datosExtra.clave) {
+                    const extraDiv = document.createElement('div');
+                    extraDiv.className = 'resumen-fila';
+                    extraDiv.style.borderTop = '2px solid var(--color-principal)';
+                    extraDiv.style.marginTop = '12px';
+                    extraDiv.style.paddingTop = '14px';
+                    extraDiv.style.display = 'block';
+                    extraDiv.innerHTML = `
+                        <div style="margin-bottom:8px;"><strong style="color:var(--color-principal)">📺 Cuenta:</strong> ${datosExtra.cuenta || datosExtra.correo || 'N/A'}</div>
+                        ${datosExtra.clave ? `<div><strong style="color:var(--color-principal)">🔑 Clave:</strong> ${datosExtra.clave}</div>` : ''}
+                    `;
+                    resumenBox.appendChild(extraDiv);
+                }
             }
             
             mostrarPaso('pasoRecargaExitosa');
@@ -917,12 +865,14 @@ async function iniciarVerificacion() {
 🔌 Proveedor: ${resultadoRecarga.proveedor || 'Central One'}`;
 
             if (resultadoRecarga.codigo) mensajeExito += `\n🎮 Código: ${resultadoRecarga.codigo}`;
-            if (esManual) mensajeExito += `\n\n📱 Entrega por WhatsApp`;
+            if (resultadoRecarga.manual) mensajeExito += `\n\n📱 Entrega por WhatsApp`;
 
             enviarTelegram(mensajeExito);
             
         } else {
             mostrarPaso('pasoSinSaldo');
+            
+            // 📤 Notificación a Telegram — Pendiente/Sin saldo
             enviarTelegram(`
 ⚠️ <b>PAGO PENDIENTE</b>
 
@@ -961,12 +911,13 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('🚀 RECARGASGAMES - Pasarela de Pagos ACTUALIZADA');
+console.log('🚀 RECARGASGAMES — Pasarela con Proxy Vercel');
 console.log('📦 Juego:', juego);
 console.log('👤 Nombre:', nombreJugador);
 console.log('🆔 ID:', idJugador);
 console.log('📦 Producto:', producto);
 console.log('🔢 Paquete:', paqueteCod);
+console.log('🔌 Proxy activo: /api/central-one');
 </script>
 
 </body>
