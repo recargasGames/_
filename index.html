@@ -535,25 +535,32 @@
         .footer p { color: #9ca3af; font-size: 12px; margin: 5px 0; }
         .footer .copyright { color: var(--color-azul); font-weight: bold; font-size: 13px; }
 
+        /* ====== BOTÓN INSTALAR APP ====== */
         .install-float {
             position: fixed;
             bottom: 130px;
             right: 20px;
-            background: rgba(59, 130, 246, 0.15);
-            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            padding: 10px 18px;
-            border-radius: 30px;
-            font-size: 13px;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 50px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             z-index: 1000;
             transition: all 0.3s ease;
             display: none;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            gap: 8px;
+            align-items: center;
         }
         .install-float:hover {
-            background: rgba(59, 130, 246, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+        }
+        .install-float.visible {
+            display: flex;
         }
 
         .whatsapp-float { 
@@ -607,6 +614,7 @@
             .btn-perfil .perfil-nombre { display: none; }
             .btn-perfil .perfil-flecha { display: none; }
             .menu-perfil { right: 0; min-width: 220px; }
+            .install-float { right: 15px; bottom: 120px; font-size: 13px; padding: 10px 18px; }
         }
 
         @media (max-width: 400px) {
@@ -814,6 +822,10 @@
     // Cerrar sesión
     const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 
+    // Botón Instalar App
+    const installBtn = document.getElementById('installBtn');
+    let deferredPrompt;
+
     // ====== FUNCIÓN PARA ACTUALIZAR UI ======
     function actualizarUI(user) {
         if (user) {
@@ -1003,20 +1015,34 @@
         document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
     });
 
-    // ====== INSTALAR APP ======
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
+    // ====== 📲 INSTALAR APP (PWA) ======
     window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevenir que el navegador muestre su propio diálogo
         e.preventDefault();
+        // Guardar el evento para usarlo después
         deferredPrompt = e;
-        installBtn.style.display = 'block';
+        // Mostrar el botón de instalar
+        installBtn.classList.add('visible');
     });
+
     installBtn.addEventListener('click', async () => {
         if (!deferredPrompt) return;
+        // Mostrar el diálogo de instalación nativo
         deferredPrompt.prompt();
+        // Esperar la respuesta del usuario
         const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') installBtn.style.display = 'none';
+        if (outcome === 'accepted') {
+            // Usuario aceptó: ocultar el botón
+            installBtn.classList.remove('visible');
+        }
+        // Limpiar la referencia ya que se usó
         deferredPrompt = null;
+    });
+
+    // Si la app ya está instalada, ocultar el botón
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        installBtn.classList.remove('visible');
     });
 </script>
 
