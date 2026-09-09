@@ -95,7 +95,6 @@ body{
     font-weight:500;
     transition:all 0.2s;
     border-bottom:1px solid #1f2937;
-    cursor:pointer;
 }
 .menu-opcion:last-child {
     border-bottom:none;
@@ -104,10 +103,6 @@ body{
     background:rgba(59,130,246,0.15);
     color:var(--color-azul);
     padding-left:22px;
-}
-.menu-divider {
-    border-top:1px solid #1f2937;
-    margin:5px 0;
 }
 
 .games-menu{
@@ -252,15 +247,19 @@ body{
         <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
         <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         
-        <!-- 📋 MENÚ FLOTANTE LIMPIO — SESIÓN COMPARTIDA CON INDEX -->
+        <!-- 📋 MENÚ FLOTANTE COMPLETO -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
             <a href="index.html" class="menu-opcion">🏠 Inicio</a>
-            <div class="menu-divider"></div>
-            <a href="#" class="menu-opcion" id="menuBtnLogin" onclick="abrirModalLogin(); return false;" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
-            <a href="register.html" class="menu-opcion" id="menuBtnRegistro">📝 Crear Cuenta</a>
-            <div class="menu-divider"></div>
-            <a href="dashboard.html" class="menu-opcion" id="menuBtnPanel" style="display:none;">👤 Mi Panel</a>
-            <a href="#" class="menu-opcion" id="menuBtnLogout" style="display:none;color:#ef4444;" onclick="cerrarSesionGlobal(); return false;">🚪 Cerrar Sesión</a>
+            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
+            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
+            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
+            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
+            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
+            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
+            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
+            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
+            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
+            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
         </div>
     </div>
     <div class="games-menu">
@@ -373,64 +372,6 @@ function cerrarMenuSiExterior(e) {
         menu.classList.remove('activo');
     }
 }
-
-// 🔑 MODAL LOGIN — llama al del Index si existe
-function abrirModalLogin() {
-    if(window.parent && window.parent.abrirModalLogin) {
-        window.parent.abrirModalLogin();
-    } else {
-        window.location.href = "index.html#login";
-    }
-    const menu = document.getElementById('menuFlotante');
-    if(menu) menu.classList.remove('activo');
-}
-
-// ==============================================
-// 🔐 SESIÓN COMPARTIDA CON INDEX — NO PIDE LOGIN 2 VECES
-// ==============================================
-function verificarSesionGlobal() {
-    const logueado = localStorage.getItem('usuario_logueado') === 'true';
-    const usuarioNombre = localStorage.getItem('usuario_nombre') || '';
-    
-    const btnLogin = document.getElementById('menuBtnLogin');
-    const btnRegistro = document.getElementById('menuBtnRegistro');
-    const btnPanel = document.getElementById('menuBtnPanel');
-    const btnLogout = document.getElementById('menuBtnLogout');
-
-    if (logueado) {
-        // ✅ Ya inició sesión en Index → ocultar Login/Registro, mostrar Panel/Logout
-        if(btnLogin) btnLogin.style.display = 'none';
-        if(btnRegistro) btnRegistro.style.display = 'none';
-        if(btnPanel) btnPanel.style.display = 'flex';
-        if(btnLogout) btnLogout.style.display = 'flex';
-        if(btnPanel && usuarioNombre) btnPanel.innerHTML = '👤 ' + usuarioNombre;
-    } else {
-        // ❌ No ha iniciado sesión → mostrar Login/Registro
-        if(btnLogin) btnLogin.style.display = 'flex';
-        if(btnRegistro) btnRegistro.style.display = 'flex';
-        if(btnPanel) btnPanel.style.display = 'none';
-        if(btnLogout) btnLogout.style.display = 'none';
-    }
-}
-
-// 🚪 CERRAR SESIÓN — se actualiza en TODAS las páginas
-function cerrarSesionGlobal() {
-    localStorage.removeItem('usuario_logueado');
-    localStorage.removeItem('usuario_nombre');
-    localStorage.removeItem('usuario_email');
-    localStorage.removeItem('usuario_uid');
-    verificarSesionGlobal();
-    const menu = document.getElementById('menuFlotante');
-    if(menu) menu.classList.remove('activo');
-    alert('✅ Sesión cerrada correctamente');
-}
-
-// 📡 ESCUCHAR CAMBIOS — si cierra sesión en otra pestaña, se actualiza aquí
-window.addEventListener('storage', function(e) {
-    if(e.key === 'usuario_logueado') {
-        verificarSesionGlobal();
-    }
-});
 
 // 🔑 CONFIGURACIÓN
 const TU_PROXY_URL = "/api/proxy-freefire"; 
@@ -584,7 +525,6 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
 // 🔄 INICIO Y BOTÓN SUBIR ARRIBA
 // ==============================================
 actualizarPrecios();
-verificarSesionGlobal(); // 🔐 Verificar sesión al cargar la página
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
