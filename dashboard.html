@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Panel - Recargas Games</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -16,6 +23,10 @@
             color: white;
             min-height: 100vh;
             padding-top: 80px;
+            background-image: url('fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
         /* ====== BARRA SUPERIOR ====== */
@@ -101,10 +112,11 @@
 
         /* ====== TARJETA DE BIENVENIDA ====== */
         .welcome-card {
-            background: linear-gradient(135deg, #1a2744, #0f1a2e);
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 30px;
-            border: 1px solid #2a3a5a;
+            border: 1px solid rgba(255,255,255,0.08);
             margin-bottom: 25px;
             position: relative;
             overflow: hidden;
@@ -179,11 +191,12 @@
             margin-bottom: 30px;
         }
         .stat-card {
-            background: rgba(17, 24, 39, 0.9);
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 20px;
             text-align: center;
-            border: 1px solid #1f2937;
+            border: 1px solid rgba(255,255,255,0.06);
             transition: all 0.3s;
         }
         .stat-card:hover {
@@ -210,15 +223,16 @@
 
         /* ====== SECCIÓN DE PEDIDOS ====== */
         .pedidos-section {
-            background: rgba(17, 24, 39, 0.9);
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
             border-radius: 16px;
-            border: 1px solid #1f2937;
+            border: 1px solid rgba(255,255,255,0.06);
             overflow: hidden;
             margin-bottom: 25px;
         }
         .pedidos-section .header {
             padding: 18px 24px;
-            border-bottom: 1px solid #1f2937;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -240,7 +254,7 @@
         /* ====== ITEM DE PEDIDO ====== */
         .pedido-item {
             padding: 18px 24px;
-            border-bottom: 1px solid #1f2937;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -320,8 +334,12 @@
             background: rgba(239, 68, 68, 0.2);
             color: #ef4444;
         }
+        .pedido-item .detalle .estado.procesando {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
 
-        /* ====== JUEGOS DESTACADOS EN DASHBOARD ====== */
+        /* ====== JUEGOS DESTACADOS ====== */
         .juegos-rapidos {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -329,11 +347,12 @@
             margin-top: 20px;
         }
         .juego-rapido {
-            background: rgba(17, 24, 39, 0.9);
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 16px;
             text-align: center;
-            border: 1px solid #1f2937;
+            border: 1px solid rgba(255,255,255,0.06);
             text-decoration: none;
             color: white;
             transition: all 0.3s;
@@ -349,6 +368,74 @@
         .juego-rapido .nombre {
             font-size: 13px;
             font-weight: 500;
+        }
+
+        /* ====== INFO ADICIONAL ====== */
+        .info-bar {
+            margin-top: 25px;
+            padding: 16px 20px;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+        }
+        .info-bar .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .info-bar .info-item strong {
+            color: white;
+        }
+        .btn-tienda {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .btn-tienda:hover {
+            background: #2563eb;
+            transform: scale(1.02);
+        }
+
+        /* ====== CARGANDO ====== */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .sin-pedidos {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        .sin-pedidos .icono-grande {
+            font-size: 48px;
+            margin-bottom: 10px;
         }
 
         /* ====== RESPONSIVE ====== */
@@ -381,6 +468,14 @@
             .topbar-actions .user-badge .name {
                 display: none;
             }
+            .info-bar {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .info-bar .info-item {
+                justify-content: center;
+            }
         }
 
         @media (max-width: 500px) {
@@ -406,6 +501,12 @@
             }
             .pedido-item {
                 padding: 14px 16px;
+            }
+            .pedido-item .info .pedido-id {
+                font-size: 14px;
+            }
+            .pedido-item .detalle .precio {
+                font-size: 15px;
             }
         }
     </style>
@@ -437,7 +538,7 @@
         <p>Bienvenido a tu panel de cliente</p>
         <div class="actions">
             <a href="perfil.html" class="btn-primary">✏️ Editar Perfil</a>
-            <a href="productos.html" class="btn-secondary">📦 Ver Productos</a>
+            <a href="index.html" class="btn-secondary">📦 Ver Productos</a>
         </div>
     </div>
 
@@ -445,7 +546,7 @@
     <div class="stats-grid">
         <div class="stat-card blue">
             <div class="icon">📦</div>
-            <div class="number" id="totalPedidos">3</div>
+            <div class="number" id="totalPedidos">0</div>
             <div class="label">Total Pedidos</div>
         </div>
         <div class="stat-card yellow">
@@ -455,7 +556,7 @@
         </div>
         <div class="stat-card green">
             <div class="icon">✅</div>
-            <div class="number" id="pedidosCompletados">3</div>
+            <div class="number" id="pedidosCompletados">0</div>
             <div class="label">Completados</div>
         </div>
     </div>
@@ -466,64 +567,11 @@
             <h3>📋 Mis Pedidos</h3>
             <a href="pedidos.html" class="ver-todos">Ver todos →</a>
         </div>
-
-        <!-- PEDIDO 1 -->
-        <div class="pedido-item">
-            <div class="info">
-                <div class="pedido-id">#<span>7976</span></div>
-                <div class="fecha">📅 2026-08-31 14:08</div>
-                <div class="productos">
-                    <span class="tag">🔥 Free Fire</span>
-                    <span class="tag">110 Diamantes</span>
-                </div>
-                <div style="font-size:12px;color:#6b7280;margin-top:2px;">
-                    Ref: 140812829752
-                </div>
-            </div>
-            <div class="detalle">
-                <div class="precio">$0.80</div>
-                <div class="metodo">BS|PAGO MOVIL</div>
-                <div class="estado completado">✅ Completado</div>
-            </div>
-        </div>
-
-        <!-- PEDIDO 2 -->
-        <div class="pedido-item">
-            <div class="info">
-                <div class="pedido-id">#<span>7975</span></div>
-                <div class="fecha">📅 2026-08-30 22:15</div>
-                <div class="productos">
-                    <span class="tag">⚔️ Blood Strike</span>
-                    <span class="tag">Pase de Batalla</span>
-                </div>
-                <div style="font-size:12px;color:#6b7280;margin-top:2px;">
-                    Ref: 140812829751
-                </div>
-            </div>
-            <div class="detalle">
-                <div class="precio">$1.20</div>
-                <div class="metodo">BINANCE</div>
-                <div class="estado completado">✅ Completado</div>
-            </div>
-        </div>
-
-        <!-- PEDIDO 3 -->
-        <div class="pedido-item">
-            <div class="info">
-                <div class="pedido-id">#<span>7974</span></div>
-                <div class="fecha">📅 2026-08-29 18:45</div>
-                <div class="productos">
-                    <span class="tag">🧱 Roblox</span>
-                    <span class="tag">800 Robux</span>
-                </div>
-                <div style="font-size:12px;color:#6b7280;margin-top:2px;">
-                    Ref: 140812829750
-                </div>
-            </div>
-            <div class="detalle">
-                <div class="precio">$2.50</div>
-                <div class="metodo">PAGO MOVIL</div>
-                <div class="estado completado">✅ Completado</div>
+        <div id="listaPedidos">
+            <!-- Los pedidos se cargan aquí con JavaScript -->
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando tus pedidos...</p>
             </div>
         </div>
     </div>
@@ -548,6 +596,10 @@
                 <div class="icono">⚔️</div>
                 <div class="nombre">MLBB</div>
             </a>
+            <a href="arenabreakout.html" class="juego-rapido">
+                <div class="icono">🎯</div>
+                <div class="nombre">Arena Breakout</div>
+            </a>
             <a href="netflix.html" class="juego-rapido">
                 <div class="icono">🎬</div>
                 <div class="nombre">Netflix</div>
@@ -560,63 +612,229 @@
     </div>
 
     <!-- INFO ADICIONAL -->
-    <div style="margin-top:25px;padding:16px 20px;background:rgba(17,24,39,0.7);border-radius:12px;border:1px solid #1f2937;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-            <span style="color:#6b7280;">🎮 ID de Jugador:</span>
-            <span style="font-weight:600;">83795</span>
+    <div class="info-bar">
+        <div class="info-item">
+            🎮 <strong>ID Jugador:</strong> <span id="infoIdJugador">-</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-            <span style="color:#6b7280;">👤 Nombre:</span>
-            <span style="font-weight:600;" id="nombreJugador">2/3</span>
+        <div class="info-item">
+            👤 <strong>Nombre:</strong> <span id="infoNombreJugador">-</span>
         </div>
-        <button onclick="window.location.href='index.html'" style="background:#3b82f6;border:none;color:white;padding:6px 18px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">
+        <button class="btn-tienda" onclick="window.location.href='index.html'">
             📲 Ir a la Tienda
         </button>
     </div>
 
 </div>
 
-<script type="module">
-    import { auth } from './firebase-config.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+<script>
+    // ==============================================
+    // 🔥 FIREBASE - CONFIGURACIÓN
+    // ==============================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+        authDomain: "free-52119.firebaseapp.com",
+        databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "free-52119",
+        storageBucket: "free-52119.firebasestorage.app",
+        messagingSenderId: "632240144599",
+        appId: "1:632240144599:web:e31c25665ffe19c194b092",
+        measurementId: "G-5NLLLEPWPK"
+    };
 
-    // ====== ACTUALIZAR DATOS DEL USUARIO ======
-    onAuthStateChanged(auth, (user) => {
-        if (!user) {
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // ==============================================
+    // 👤 OBTENER USUARIO ACTUAL
+    // ==============================================
+    let usuarioActual = null;
+    let uidActual = null;
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            usuarioActual = user;
+            uidActual = user.uid;
+            const nombre = user.displayName || 'Usuario';
+            const inicial = nombre.charAt(0).toUpperCase();
+
+            // Actualizar UI
+            document.getElementById('bienvenidaNombre').innerHTML = `${nombre} <span>👋</span>`;
+            document.getElementById('nombreUsuario').textContent = nombre;
+            document.getElementById('avatarInicial').textContent = inicial;
+            document.getElementById('infoNombreJugador').textContent = nombre;
+
+            // Cargar pedidos del usuario
+            cargarPedidos(uidActual);
+            
+            // Cargar ID del jugador desde localStorage
+            const idJugador = localStorage.getItem('id_jugador') || 'No registrado';
+            document.getElementById('infoIdJugador').textContent = idJugador;
+
+        } else {
             // Si no está logueado, redirigir al login
             window.location.href = 'login.html';
-            return;
         }
-
-        const nombre = user.displayName || 'Usuario';
-        const inicial = nombre.charAt(0).toUpperCase();
-
-        // Actualizar elementos
-        document.getElementById('bienvenidaNombre').innerHTML = `${nombre} <span>👋</span>`;
-        document.getElementById('nombreUsuario').textContent = nombre;
-        document.getElementById('avatarInicial').textContent = inicial;
-        document.getElementById('nombreJugador').textContent = nombre;
     });
 
-    // ====== FUNCIÓN PARA ACTUALIZAR ESTADÍSTICAS (ejemplo) ======
-    // Puedes conectar esto con Firestore para datos reales
+    // ==============================================
+    // 📋 CARGAR PEDIDOS DESDE FIREBASE
+    // ==============================================
+    function cargarPedidos(uid) {
+        const pedidosRef = db.ref('pedidos');
+        
+        pedidosRef.orderByChild('uid').equalTo(uid).on('value', (snapshot) => {
+            const pedidos = [];
+            
+            snapshot.forEach((childSnapshot) => {
+                const pedido = childSnapshot.val();
+                pedido.key = childSnapshot.key;
+                pedidos.push(pedido);
+            });
+
+            // Ordenar por fecha (más reciente primero)
+            pedidos.sort((a, b) => {
+                if (a.fecha && b.fecha) {
+                    return new Date(b.fecha) - new Date(a.fecha);
+                }
+                return 0;
+            });
+
+            // Actualizar estadísticas
+            actualizarEstadisticas(pedidos);
+            
+            // Mostrar pedidos en la lista
+            mostrarPedidos(pedidos);
+            
+        }, (error) => {
+            console.error('Error cargando pedidos:', error);
+            document.getElementById('listaPedidos').innerHTML = `
+                <div class="sin-pedidos">
+                    <div class="icono-grande">❌</div>
+                    <p>Error al cargar tus pedidos</p>
+                    <p style="font-size:14px;color:#6b7280;">${error.message}</p>
+                </div>
+            `;
+        });
+    }
+
+    // ==============================================
+    // 📊 ACTUALIZAR ESTADÍSTICAS
+    // ==============================================
     function actualizarEstadisticas(pedidos) {
         const total = pedidos.length;
-        const completados = pedidos.filter(p => p.estado === 'completado').length;
-        const pendientes = pedidos.filter(p => p.estado === 'pendiente').length;
+        const completados = pedidos.filter(p => p.estado === 'COMPLETADA' || p.estado === 'completado').length;
+        const pendientes = pedidos.filter(p => p.estado === 'PENDIENTE' || p.estado === 'pendiente' || p.estado === 'procesando').length;
 
         document.getElementById('totalPedidos').textContent = total;
         document.getElementById('pedidosCompletados').textContent = completados;
         document.getElementById('pedidosPendientes').textContent = pendientes;
     }
 
-    // Ejemplo de datos (cuando tengas Firestore, reemplaza esto)
-    const pedidosEjemplo = [
-        { id: 7976, estado: 'completado' },
-        { id: 7975, estado: 'completado' },
-        { id: 7974, estado: 'completado' }
-    ];
-    actualizarEstadisticas(pedidosEjemplo);
+    // ==============================================
+    // 🖥️ MOSTRAR PEDIDOS EN LA LISTA
+    // ==============================================
+    function mostrarPedidos(pedidos) {
+        const contenedor = document.getElementById('listaPedidos');
+
+        if (pedidos.length === 0) {
+            contenedor.innerHTML = `
+                <div class="sin-pedidos">
+                    <div class="icono-grande">📭</div>
+                    <p>No tienes pedidos aún</p>
+                    <p style="font-size:14px;color:#6b7280;">Haz tu primera recarga ahora</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        
+        // Mostrar solo los últimos 5 pedidos
+        const pedidosMostrar = pedidos.slice(0, 5);
+
+        pedidosMostrar.forEach((pedido, index) => {
+            const estado = pedido.estado || 'pendiente';
+            const estadoLower = estado.toLowerCase();
+            
+            let estadoClase = 'pendiente';
+            let estadoTexto = '⏳ Pendiente';
+            
+            if (estadoLower === 'completada' || estadoLower === 'completado') {
+                estadoClase = 'completado';
+                estadoTexto = '✅ Completado';
+            } else if (estadoLower === 'cancelado' || estadoLower === 'cancelada') {
+                estadoClase = 'cancelado';
+                estadoTexto = '❌ Cancelado';
+            } else if (estadoLower === 'procesando' || estadoLower === 'processing') {
+                estadoClase = 'procesando';
+                estadoTexto = '🔄 Procesando';
+            }
+
+            // Formatear fecha
+            let fechaTexto = 'Fecha no disponible';
+            if (pedido.fecha) {
+                try {
+                    const fecha = new Date(pedido.fecha);
+                    fechaTexto = `📅 ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString()}`;
+                } catch (e) {
+                    fechaTexto = `📅 ${pedido.fecha}`;
+                }
+            }
+
+            // ID del pedido (usar key o referencia)
+            const idPedido = pedido.referencia || pedido.key || `#${String(index + 1).padStart(4, '0')}`;
+            
+            // Producto
+            const producto = pedido.producto || pedido.juego || 'Producto';
+            
+            // Monto
+            const monto = pedido.monto_usd || pedido.monto || '$0.00';
+            
+            // Método de pago
+            const metodo = pedido.metodo || 'Pago Móvil';
+
+            // Tags de productos
+            let tagsHtml = `<span class="tag">🎮 ${producto}</span>`;
+            if (pedido.paquete) {
+                tagsHtml += ` <span class="tag">📦 ${pedido.paquete}</span>`;
+            }
+
+            html += `
+                <div class="pedido-item">
+                    <div class="info">
+                        <div class="pedido-id">#<span>${idPedido}</span></div>
+                        <div class="fecha">${fechaTexto}</div>
+                        <div class="productos">
+                            ${tagsHtml}
+                        </div>
+                        ${pedido.referencia_pago ? `<div style="font-size:12px;color:#6b7280;margin-top:2px;">Ref: ${pedido.referencia_pago}</div>` : ''}
+                    </div>
+                    <div class="detalle">
+                        <div class="precio">$${monto}</div>
+                        <div class="metodo">${metodo}</div>
+                        <div class="estado ${estadoClase}">${estadoTexto}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        contenedor.innerHTML = html;
+    }
+
+    // ==============================================
+    // 🚪 CERRAR SESIÓN (opcional)
+    // ==============================================
+    function cerrarSesion() {
+        auth.signOut().then(() => {
+            window.location.href = 'login.html';
+        }).catch((error) => {
+            console.error('Error al cerrar sesión:', error);
+        });
+    }
+
+    console.log('📋 Panel de cliente cargado correctamente');
 </script>
 
 </body>
