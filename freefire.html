@@ -146,6 +146,16 @@ body{
 }
 .back-to-top.show{opacity:1;visibility:visible}
 .tasa-info{font-size:12px;color:#94a3b8;margin-top:8px;text-align:right}
+.id-verificado {
+    color: #22c55e;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 8px;
+    display: none;
+}
+.id-verificado.mostrar {
+    display: block;
+}
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:500px){
     body{padding-top:100px}
@@ -195,7 +205,8 @@ body{
 <div class="main">
     <div class="card-panel">
         <div class="panel-title">🆔 ID del Jugador</div>
-        <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off">
+        <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Free Fire" autocomplete="off" oninput="verificarIDSolo()">
+        <div class="id-verificado" id="idVerificado">✅ ID Verificado</div>
     </div>
 
     <div class="card-panel">
@@ -262,7 +273,27 @@ function cerrarMenuSiExterior(e) {
 let metodo = "PAGO MOVIL";
 let tasa = 940;
 const juegoActual = "FREE FIRE";
+let idVerificado = false;
 
+// ==============================================
+// ✅ VERIFICAR ID SOLO (SIN PROXY)
+// ==============================================
+function verificarIDSolo() {
+    const idInput = document.getElementById("jugadorId").value.trim();
+    const verificado = document.getElementById("idVerificado");
+    
+    if (idInput && idInput.length >= 5) {
+        verificado.classList.add('mostrar');
+        idVerificado = true;
+    } else {
+        verificado.classList.remove('mostrar');
+        idVerificado = false;
+    }
+}
+
+// ==============================================
+// 💰 ACTUALIZAR PRECIOS
+// ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u=parseFloat(el.dataset.usd);
@@ -277,26 +308,47 @@ window.seleccionarPago=function(m,e){
     actualizarPrecios();
 };
 
+// ==============================================
+// 🛒 COMPRAR PRODUCTO
+// ==============================================
 window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
-    if(!idInput){alert("❌ Escribe tu ID del jugador primero");return;}
+    
+    // SOLO VERIFICAR QUE EL ID NO ESTÉ VACÍO
+    if(!idInput || idInput.length < 5){
+        alert("❌ Escribe tu ID del jugador primero (mínimo 5 dígitos)");
+        return;
+    }
+    
+    // ✅ ID VERIFICADO - GUARDAR Y REDIRIGIR
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
     localStorage.setItem('id_jugador', idInput);
-    // ❌ ELIMINADO: ya no guarda nombre_jugador
     localStorage.setItem('juego_seleccionado', juegoActual);
     localStorage.setItem('producto_seleccionado', producto);
     localStorage.setItem('paquete_codigo', paqueteCodigo);
     localStorage.setItem('precio_usd', precioUsd);
     localStorage.setItem('precio_en_bs', precioBs);
     localStorage.setItem('metodo_pago', metodo);
+    
+    // Redirigir a la pasarela
     window.location.href = "pasarela.html";
 };
 
+// ==============================================
+// 🔄 INICIALIZAR
+// ==============================================
 actualizarPrecios();
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
 });
+
+// Verificar si ya hay un ID guardado
+const idGuardado = localStorage.getItem('id_jugador') || '';
+if (idGuardado) {
+    document.getElementById('jugadorId').value = idGuardado;
+    verificarIDSolo();
+}
 </script>
 </body>
 </html>
