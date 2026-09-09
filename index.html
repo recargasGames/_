@@ -11,14 +11,14 @@
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://www.recargasgames.shop/">
     
-    <!-- ====== ICONOS PARA CUANDO SE INSTALE LA APP ====== -->
-    <link rel="icon" type="image/png" href="/logo.png">
-    <link rel="apple-touch-icon" href="/logo.png">
+    <!-- ====== 🔑 MANIFEST PARA PWA (INSTALAR APP) ====== -->
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RecargasGames">
     <meta name="theme-color" content="#3b82f6">
-    <meta name="description" content="RecargasGames - Recargas instantáneas de juegos y streaming">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="apple-touch-icon" href="/logo.png">
     
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.recargasgames.shop/">
@@ -557,6 +557,11 @@
         }
         .install-app-btn.visible {
             display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .install-app-btn:hover {
             background: rgba(59, 130, 246, 0.4);
@@ -680,7 +685,7 @@
             <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
         </div>
         <div class="header-right">
-            <!-- BOTÓN DE PERFIL (se muestra cuando está logueado) con LOGO -->
+            <!-- BOTÓN DE PERFIL con LOGO -->
             <div id="perfilContainer" style="position:relative;display:none;">
                 <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
                     <div class="avatar-circle" id="avatarCircle">
@@ -1072,21 +1077,41 @@
         document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
     });
 
-    // ====== 📲 INSTALAR APLICACIÓN ======
+    // ====== 📲 INSTALAR APLICACIÓN PWA ======
     window.addEventListener('beforeinstallprompt', (e) => {
+        // ¡EVITAR QUE SALGA AUTOMÁTICO!
         e.preventDefault();
+        // GUARDAR EL EVENTO PARA USARLO DESPUÉS
         deferredPrompt = e;
+        // MOSTRAR NUESTRO BOTÓN
         installAppBtn.classList.add('visible');
+        console.log('✅ Prompt de instalación disponible — Botón mostrado');
     });
 
     installAppBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
+        if (!deferredPrompt) {
+            alert('⚠️ La aplicación ya está instalada o no se puede instalar en este navegador.');
+            return;
+        }
+        // MOSTRAR EL PROMPT DE INSTALACIÓN
         deferredPrompt.prompt();
+        // ESPERAR LA RESPUESTA DEL USUARIO
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
             installAppBtn.classList.remove('visible');
+            console.log('✅ Usuario aceptó instalar la app');
+        } else {
+            console.log('❌ Usuario rechazó instalar la app');
         }
+        // LIMPIAR EL EVENTO PARA NO VOLVER A USARLO
         deferredPrompt = null;
+    });
+
+    // ====== DETECTAR SI LA APP YA ESTÁ INSTALADA ======
+    window.addEventListener('appinstalled', () => {
+        installAppBtn.classList.remove('visible');
+        deferredPrompt = null;
+        console.log('✅ La aplicación fue instalada exitosamente');
     });
 </script>
 
