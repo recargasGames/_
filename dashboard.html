@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
         * {
@@ -641,20 +640,17 @@
         measurementId: "G-5NLLLEPWPK"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
+    let uidActual = null;
+
     // ==============================================
     // 👤 OBTENER USUARIO ACTUAL
     // ==============================================
-    let usuarioActual = null;
-    let uidActual = null;
-
     auth.onAuthStateChanged((user) => {
         if (user) {
-            usuarioActual = user;
             uidActual = user.uid;
             const nombre = user.displayName || 'Usuario';
             const inicial = nombre.charAt(0).toUpperCase();
@@ -673,7 +669,6 @@
             document.getElementById('infoIdJugador').textContent = idJugador;
 
         } else {
-            // Si no está logueado, redirigir al login
             window.location.href = 'login.html';
         }
     });
@@ -772,7 +767,6 @@
                 estadoTexto = '🔄 Procesando';
             }
 
-            // Formatear fecha
             let fechaTexto = 'Fecha no disponible';
             if (pedido.fecha) {
                 try {
@@ -783,26 +777,18 @@
                 }
             }
 
-            // ID del pedido (usar key o referencia)
             const idPedido = pedido.referencia || pedido.key || `#${String(index + 1).padStart(4, '0')}`;
-            
-            // Producto
             const producto = pedido.producto || pedido.juego || 'Producto';
-            
-            // Monto
             const monto = pedido.monto_usd || pedido.monto || '$0.00';
-            
-            // Método de pago
             const metodo = pedido.metodo || 'Pago Móvil';
 
-            // Tags de productos
             let tagsHtml = `<span class="tag">🎮 ${producto}</span>`;
             if (pedido.paquete) {
                 tagsHtml += ` <span class="tag">📦 ${pedido.paquete}</span>`;
             }
 
             html += `
-                <div class="pedido-item">
+                <div class="pedido-item" onclick="verDetalle('${pedido.key || ''}')">
                     <div class="info">
                         <div class="pedido-id">#<span>${idPedido}</span></div>
                         <div class="fecha">${fechaTexto}</div>
@@ -824,17 +810,17 @@
     }
 
     // ==============================================
-    // 🚪 CERRAR SESIÓN (opcional)
+    // 📄 VER DETALLE DEL PEDIDO
     // ==============================================
-    function cerrarSesion() {
-        auth.signOut().then(() => {
-            window.location.href = 'login.html';
-        }).catch((error) => {
-            console.error('Error al cerrar sesión:', error);
-        });
+    function verDetalle(pedidoKey) {
+        if (pedidoKey) {
+            window.location.href = `detalle-pedido.html?id=${pedidoKey}`;
+        } else {
+            alert('Detalle no disponible');
+        }
     }
 
-    console.log('📋 Panel de cliente cargado correctamente');
+    console.log('📋 Dashboard cargado correctamente');
 </script>
 
 </body>
