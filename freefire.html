@@ -95,6 +95,7 @@ body{
     font-weight:500;
     transition:all 0.2s;
     border-bottom:1px solid #1f2937;
+    cursor:pointer;
 }
 .menu-opcion:last-child {
     border-bottom:none;
@@ -103,6 +104,10 @@ body{
     background:rgba(59,130,246,0.15);
     color:var(--color-azul);
     padding-left:22px;
+}
+.menu-divider {
+    border-top:1px solid #1f2937;
+    margin:5px 0;
 }
 
 .games-menu{
@@ -247,19 +252,15 @@ body{
         <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
         <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         
-        <!-- 📋 MENÚ FLOTANTE COMPLETO -->
+        <!-- 📋 MENÚ FLOTANTE LIMPIO — SOLO Iniciar Sesión y Crear Cuenta -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
             <a href="index.html" class="menu-opcion">🏠 Inicio</a>
-            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
-            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
-            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
-            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
-            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
-            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
-            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
-            <a href="deltaforce.html" class="menu-opcion">💥 Delta Force</a>
-            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
-            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+            <div class="menu-divider"></div>
+            <a href="#" class="menu-opcion" onclick="abrirModalLogin(); return false;" style="color:#3b82f6;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion">📝 Crear Cuenta</a>
+            <div class="menu-divider"></div>
+            <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">📊 Mi Panel</a>
+            <a href="#" class="menu-opcion" id="menuHamburguesaLogout" style="display:none;color:#ef4444;">🚪 Cerrar Sesión</a>
         </div>
     </div>
     <div class="games-menu">
@@ -371,6 +372,17 @@ function cerrarMenuSiExterior(e) {
     if (!menu.contains(e.target) && !btn.contains(e.target)) {
         menu.classList.remove('activo');
     }
+}
+
+// 🔑 MODAL LOGIN (compatible con index.html)
+function abrirModalLogin() {
+    if(window.parent && window.parent.abrirModalLogin) {
+        window.parent.abrirModalLogin();
+    } else {
+        alert("🔑 Iniciar Sesión — ve a la página principal para iniciar sesión");
+    }
+    const menu = document.getElementById('menuFlotante');
+    menu.classList.remove('activo');
 }
 
 // 🔑 CONFIGURACIÓN
