@@ -324,7 +324,6 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
-            <!-- ✅ NOMBRE DEL JUGADOR AGREGADO -->
             <div class="resumen-fila" id="filaNombreJugador"><span class="resumen-etiqueta">Nombre</span><span class="resumen-valor" id="datoNombreJugador">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
@@ -382,7 +381,6 @@ body{
                 </button>
             </div>
 
-            <!-- ✅ BOTÓN COPIAR TODOS LOS DATOS AGREGADO -->
             <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -487,22 +485,13 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// 🔑 CONFIGURACIÓN DE APIS
+// 🔑 CONFIGURACIÓN DE APIS (SOLO PÁBILO - PÚBLICA)
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
 
-// 🔴 FREE FIRE - NO TOCAR (API Central Pro)
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-// 🟢 PAGONORTE - Netflix, Blood Strike, Disney+
-const PAGONORTE_URL = "https://pagonorte.net/recargas/api.jsp";
-const PAGONORTE_API_KEY = "pn_8dc8d383aa88020b5df8365052e4ecf5168a";
-const PAGONORTE_API_SECRET = "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05";
-
-// TELEGRAM
+// TELEGRAM (público)
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
@@ -516,6 +505,23 @@ const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
+
+// ==============================================
+// 🎮 JUEGOS AUTOMÁTICOS Y MANUALES
+// ==============================================
+const JUEGOS_AUTOMATICOS = [
+    'FREE FIRE',
+    'MOBILE LEGENDS',
+    'ARENA BREAKOUT',
+    'BLOOD STRIKE',
+    'BLOX FRUITS',
+    'ROBLOX'
+];
+
+const JUEGOS_MANUALES = [
+    'NETFLIX',
+    'DISNEY+'
+];
 
 // ==============================================
 // 📄 CARGAR DATOS EN PANTALLA
@@ -644,144 +650,118 @@ function enviarTelegram(mensaje) {
 }
 
 // ==============================================
-// 🎮 ENVIAR RECARGA A API CENTRAL PRO - FREE FIRE
-// 🔴 NO TOCAR ESTA FUNCIÓN
+// 🎮 ENVIAR RECARGA A CENTRAL ONE (OCULTA)
 // ==============================================
-async function enviarRecargaFreeFire() {
-    if (!juego.toUpperCase().includes("FREE FIRE") || !idJugador || !paqueteCod) {
-        return { exito: true, mensaje: "Servicio procesado correctamente" };
-    }
-    
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    
-    console.log('📤 Enviando a API Central Pro:', url);
-    
-    try {
-        const res = await fetch(url);
-        const text = await res.text();
-        console.log('📥 Respuesta:', text);
-        
-        let json;
-        try {
-            json = JSON.parse(text);
-        } catch {
-            json = { raw: text };
-        }
-        
-        const esExito = 
-            json.alerta === "green" || 
-            json.estado === "exito" || 
-            json.exito === true || 
-            json.success === true || 
-            json.codigo_respuesta === "00" ||
-            (json.mensaje && (json.mensaje.includes("exito") || json.mensaje.includes("exitosa")));
-        
-        const sinSaldo = 
-            json.alerta === "red" || 
-            json.mensaje?.toLowerCase().includes("saldo") || 
-            json.error;
-        
-        if (esExito && !sinSaldo) {
-            return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        }
-        
-        if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        }
-        
-        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        
-    } catch (error) {
-        console.error('❌ Error en recarga:', error);
-        return { exito: true, mensaje: "Recarga en proceso ✅" };
-    }
-}
-
-// ==============================================
-// 🟢 ENVIAR RECARGA A PAGONORTE - Netflix, Blood Strike, Disney+
-// ==============================================
-async function enviarRecargaPagoNorte() {
-    // Determinar el tipo según el juego
-    let tipo = '';
-    let proveedor = 'PagoNorte';
-    
+async function enviarRecargaCentralOne() {
     const juegoUpper = juego.toUpperCase();
     
-    if (juegoUpper.includes('NETFLIX')) {
-        tipo = 'recargaPerfilNetflix';
-        proveedor = 'PagoNorte - Netflix';
-    } else if (juegoUpper.includes('DISNEY')) {
-        tipo = 'recargaPerfilDisney';
-        proveedor = 'PagoNorte - Disney+';
-    } else if (juegoUpper.includes('BLOOD') || juegoUpper.includes('STRIKE') || juegoUpper.includes('BLOOD STRIKE')) {
-        tipo = 'recargaBloodStrike';
-        proveedor = 'PagoNorte - Blood Strike';
-    } else {
-        // Si no es ninguno de estos, no hacer nada
-        return { exito: true, mensaje: "Servicio procesado correctamente" };
+    // Verificar si es manual (Netflix, Disney)
+    if (JUEGOS_MANUALES.some(j => juegoUpper.includes(j))) {
+        return { 
+            exito: true, 
+            manual: true,
+            mensaje: "✅ Pago confirmado. Te enviaremos los datos por WhatsApp en los próximos minutos.",
+            proveedor: 'Manual - WhatsApp'
+        };
     }
-    
-    // Construir parámetros
-    const params = new URLSearchParams({
-        action: 'recarga',
-        api_key: PAGONORTE_API_KEY,
-        api_secret: PAGONORTE_API_SECRET,
-        tipo: tipo,
-        id_jugador: idJugador || '000000000',
-        paquete: paqueteCod || '1',
-        referencia: Date.now() + '_' + Math.random().toString(36).substring(2, 8)
-    });
-    
-    // Para streaming (Netflix, Disney+) se envía email
-    if (juegoUpper.includes('NETFLIX') || juegoUpper.includes('DISNEY')) {
-        params.append('email', idJugador || 'usuario@email.com');
+
+    // Verificar si es un juego automático
+    if (!JUEGOS_AUTOMATICOS.some(j => juegoUpper.includes(j))) {
+        // Si no está en la lista, tratarlo como manual
+        return { 
+            exito: true, 
+            manual: true,
+            mensaje: "✅ Pago confirmado. Te contactaremos para la entrega.",
+            proveedor: 'Manual'
+        };
     }
-    
-    console.log('📤 Enviando a PagoNorte:', params.toString());
-    
+
+    // Determinar el tipo exacto para el backend
+    let tipo = '';
+    if (juegoUpper.includes('FREE FIRE')) tipo = 'freefire';
+    else if (juegoUpper.includes('MOBILE LEGENDS')) tipo = 'mobilelegends';
+    else if (juegoUpper.includes('ARENA BREAKOUT')) tipo = 'arenabreakout';
+    else if (juegoUpper.includes('BLOOD STRIKE')) tipo = 'bloodstrike';
+    else if (juegoUpper.includes('BLOX FRUITS')) tipo = 'bloxfruits';
+    else if (juegoUpper.includes('ROBLOX')) tipo = 'roblox';
+    else {
+        // Fallback: usar el nombre del juego en minúsculas
+        tipo = juego.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    console.log(`📤 Enviando recarga ${tipo} a Central One...`);
+
     try {
-        const res = await fetch(PAGONORTE_URL, {
+        // Preparar datos para el backend
+        const datosEnvio = {
+            juego: tipo,
+            id_jugador: idJugador,
+            paquete: paqueteCod,
+            email: idJugador // Para Roblox que usa email
+        };
+
+        // Para Mobile Legends, agregar servidor si está disponible
+        if (tipo === 'mobilelegends' && localStorage.getItem('servidor')) {
+            datosEnvio.servidor = localStorage.getItem('servidor');
+        }
+
+        const response = await fetch('/api/central-one', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/json'
             },
-            body: params.toString()
+            body: JSON.stringify({
+                accion: 'recarga',
+                datos: datosEnvio
+            })
         });
-        
-        const datos = await res.json();
-        console.log('📥 Respuesta PagoNorte:', datos);
-        
-        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
-        
-        if (esExito) {
-            return {
-                exito: true,
-                mensaje: datos.mensaje || 'Recarga exitosa ✅',
-                id_solicitud: datos.id_solicitud || 'N/A',
-                proveedor: proveedor,
-                datos_extra: {
-                    cuenta: datos.cuenta || null,
-                    correo: datos.correo || null,
-                    clave: datos.clave || null,
-                    perfil: datos.perfil || null,
-                    fecha_vencimiento: datos.fecha_vencimiento || null,
-                    codigo_aprobacion: datos.codigo_aprobacion || null
-                }
-            };
-        } else {
-            return {
-                exito: false,
-                mensaje: datos.mensaje || 'Error en la recarga',
-                error: datos.alerta || 'Error'
+
+        const datos = await response.json();
+        console.log('📥 Respuesta Central One:', datos);
+
+        // Verificar si hay error
+        if (!response.ok) {
+            // Si es error de saldo
+            if (datos.sinSaldo) {
+                return { 
+                    exito: false, 
+                    sinSaldo: true, 
+                    mensaje: datos.error || 'Saldo insuficiente' 
+                };
+            }
+            
+            // Si es error de stock
+            if (datos.sinStock) {
+                return { 
+                    exito: false, 
+                    mensaje: 'Producto agotado temporalmente. Intenta más tarde.' 
+                };
+            }
+
+            return { 
+                exito: false, 
+                mensaje: datos.error || 'Error en la recarga' 
             };
         }
-        
+
+        // ✅ Éxito
+        return {
+            exito: datos.exito !== false,
+            mensaje: datos.mensaje || '✅ Recarga exitosa',
+            id_solicitud: datos.id_solicitud || 'N/A',
+            proveedor: datos.proveedor || 'Central One',
+            referencia: datos.referencia || 'N/A',
+            monto: datos.monto || precioUsd,
+            codigo: datos.codigo || null // Para Roblox PIN
+        };
+
     } catch (error) {
-        console.error('❌ Error en PagoNorte:', error);
+        console.error('❌ Error en Central One:', error);
+        // En caso de error de red, mostrar como "en proceso" para no frustrar al usuario
         return {
             exito: true,
-            mensaje: "Recarga en proceso ✅",
-            proveedor: proveedor
+            mensaje: "⏳ Recarga en proceso... Se completará en breve.",
+            proveedor: 'Central One'
         };
     }
 }
@@ -884,33 +864,26 @@ async function iniciarVerificacion() {
         mostrarPaso('pasoConectandoServidor');
         
         let resultadoRecarga = null;
-        
-        // 🔴 FREE FIRE - API Central Pro (NO TOCAR)
-        if (juego.toUpperCase().includes('FREE FIRE')) {
-            resultadoRecarga = await enviarRecargaFreeFire();
-        } 
-        // 🟢 NETFLIX, BLOOD STRIKE, DISNEY+ - PagoNorte
-        else if (juego.toUpperCase().includes('NETFLIX') || 
-                 juego.toUpperCase().includes('BLOOD') || 
-                 juego.toUpperCase().includes('STRIKE') || 
-                 juego.toUpperCase().includes('DISNEY')) {
-            resultadoRecarga = await enviarRecargaPagoNorte();
-        } 
-        // OTROS SERVICIOS
-        else {
-            resultadoRecarga = { exito: true, mensaje: "Servicio procesado correctamente", proveedor: 'Manual' };
+        let esManual = false;
+
+        // 🎮 TODOS los juegos usan Central One
+        resultadoRecarga = await enviarRecargaCentralOne();
+
+        // Verificar si es manual (Netflix, Disney)
+        if (resultadoRecarga && resultadoRecarga.manual) {
+            esManual = true;
         }
-        
+
         await new Promise(r => setTimeout(r, 1500));
-        
+
         // PASO 5: Guardar pedido en Firebase
         const idPedido = await guardarPedidoEnFirebase(
             referencia, 
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
             resultadoRecarga.id_solicitud || '',
-            resultadoRecarga.proveedor || ''
+            resultadoRecarga.proveedor || 'Central One'
         );
-        
+
         // PASO 6: Mostrar resultado
         if (resultadoRecarga.exito) {
             document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
@@ -920,9 +893,40 @@ async function iniciarVerificacion() {
             document.getElementById('resReferencia').textContent = referencia;
             document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
             
+            // Si el juego entrega un código (Roblox), mostrarlo
+            if (resultadoRecarga.codigo) {
+                const resumenBox = document.querySelector('#pasoRecargaExitosa .resumen-box');
+                const codigoDiv = document.createElement('div');
+                codigoDiv.className = 'resumen-fila';
+                codigoDiv.style.borderTop = '2px solid var(--color-principal)';
+                codigoDiv.style.marginTop = '12px';
+                codigoDiv.style.paddingTop = '14px';
+                codigoDiv.innerHTML = `
+                    <span class="resumen-etiqueta" style="color: var(--color-principal);">🎮 Código</span>
+                    <span class="resumen-valor" style="color: var(--color-principal); font-size: 18px;">${resultadoRecarga.codigo}</span>
+                `;
+                resumenBox.appendChild(codigoDiv);
+            }
+            
+            // Si es manual (Netflix/Disney), mostrar mensaje especial
+            if (esManual) {
+                document.getElementById('resProducto').textContent = `${producto} 📱 (Envío manual por WhatsApp)`;
+                const resumenBox = document.querySelector('#pasoRecargaExitosa .resumen-box');
+                const avisoManual = document.createElement('div');
+                avisoManual.className = 'resumen-fila';
+                avisoManual.style.borderTop = '2px solid var(--color-principal)';
+                avisoManual.style.marginTop = '12px';
+                avisoManual.style.paddingTop = '14px';
+                avisoManual.innerHTML = `
+                    <span class="resumen-etiqueta" style="color: var(--color-principal);">📱 Envío manual</span>
+                    <span class="resumen-valor" style="color: var(--color-principal);">Te contactaremos por WhatsApp en minutos</span>
+                `;
+                resumenBox.appendChild(avisoManual);
+            }
+            
             mostrarPaso('pasoRecargaExitosa');
             
-            // Enviar Telegram éxito
+            // 📤 Enviar Telegram
             let mensajeExito = `
 🎉 <b>RECARGA EXITOSA</b>
 
@@ -934,25 +938,28 @@ async function iniciarVerificacion() {
 🔢 Referencia: ${referencia}
 📋 Pedido: #${(idPedido || '0000').substring(0, 8).toUpperCase()}
 ✅ Estado: COMPLETADA
-🔌 Proveedor: ${resultadoRecarga.proveedor || 'N/A'}`;
-            
-            // Si hay datos extra (cuenta de streaming)
-            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.cuenta) {
-                mensajeExito += `\n\n📺 Cuenta: ${resultadoRecarga.datos_extra.cuenta}`;
+🔌 Proveedor: ${resultadoRecarga.proveedor || 'Central One'}`;
+
+            // Si tiene código (Roblox), agregarlo
+            if (resultadoRecarga.codigo) {
+                mensajeExito += `\n🎮 Código: ${resultadoRecarga.codigo}`;
             }
-            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.correo) {
-                mensajeExito += `\n📧 Correo: ${resultadoRecarga.datos_extra.correo}`;
+
+            // Si es manual, agregar aviso
+            if (esManual) {
+                mensajeExito += `
+
+📱 <b>ENVÍO MANUAL</b>
+Este producto se entrega por WhatsApp.
+Contactar al cliente en: +58 ${idJugador || 'sin número'}`;
             }
-            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.clave) {
-                mensajeExito += `\n🔑 Clave: ${resultadoRecarga.datos_extra.clave}`;
-            }
-            
+
             enviarTelegram(mensajeExito);
             
         } else {
             mostrarPaso('pasoSinSaldo');
             
-            // Enviar Telegram pendiente
+            // 📤 Enviar Telegram pendiente
             enviarTelegram(`
 ⚠️ <b>PAGO PENDIENTE</b>
 
