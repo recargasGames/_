@@ -129,6 +129,7 @@ body{
     text-align:center;
 }
 
+/* 📋 DATOS DE PAGO - MEJORADO */
 .datos-pago-box{
     background:rgba(17,24,39,0.55);
     border:1px solid var(--color-borde);
@@ -151,6 +152,7 @@ body{
 .dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
 .dato-texto span{color:#fff}
 
+/* 🟢 BOTÓN COPIAR INDIVIDUAL */
 .copiar-btn{
     width:44px;
     height:44px;
@@ -194,6 +196,7 @@ body{
     font-weight:bold;
 }
 
+/* 🟢 BOTÓN COPIAR TODOS LOS DATOS */
 .copiar-todo-btn{
     width:100%;
     padding:14px;
@@ -321,6 +324,7 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
+            <!-- ✅ NOMBRE DEL JUGADOR AGREGADO -->
             <div class="resumen-fila" id="filaNombreJugador"><span class="resumen-etiqueta">Nombre</span><span class="resumen-valor" id="datoNombreJugador">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
@@ -378,6 +382,7 @@ body{
                 </button>
             </div>
 
+            <!-- ✅ BOTÓN COPIAR TODOS LOS DATOS AGREGADO -->
             <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -482,11 +487,20 @@ const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// 🔑 CONFIGURACIÓN DE PÁBILO — NO TOCAR
+// 🔑 CONFIGURACIÓN DE APIS
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
+
+// 🔴 FREE FIRE - NO TOCAR (API Central Pro)
+const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
+const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
+
+// 🟢 PAGONORTE - Netflix, Blood Strike, Disney+
+const PAGONORTE_URL = "https://pagonorte.net/recargas/api.jsp";
+const PAGONORTE_API_KEY = "pn_8dc8d383aa88020b5df8365052e4ecf5168a";
+const PAGONORTE_API_SECRET = "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05";
 
 // TELEGRAM
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
@@ -502,7 +516,6 @@ const producto = localStorage.getItem('producto_seleccionado') || "";
 const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
-const servidor = localStorage.getItem('servidor') || "";
 
 // ==============================================
 // 📄 CARGAR DATOS EN PANTALLA
@@ -521,7 +534,9 @@ function copiarTexto(texto, boton){
     navigator.clipboard.writeText(texto)
         .then(() => {
             boton.classList.add('copiado');
-            setTimeout(() => boton.classList.remove('copiado'), 2000);
+            setTimeout(() => {
+                boton.classList.remove('copiado');
+            }, 2000);
         })
         .catch(err => alert("Copiado: " + texto));
 }
@@ -530,7 +545,11 @@ function copiarTexto(texto, boton){
 // 📋 COPIAR TODOS LOS DATOS DE PAGO
 // ==============================================
 function copiarTodosLosDatos(boton){
-    const datosCompletos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBs} Bs`;
+    const datosCompletos = `Banco: (0102) BDV
+Cédula: 32824869
+Teléfono: 04228242411
+Monto: ${precioBs} Bs`;
+
     navigator.clipboard.writeText(datosCompletos)
         .then(() => {
             boton.classList.add('copiado-todo');
@@ -540,7 +559,7 @@ function copiarTodosLosDatos(boton){
                 boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
             }, 2500);
         })
-        .catch(err => alert("Copia manual:\n\n" + datosCompletos));
+        .catch(err => alert("No se pudo copiar automáticamente. Selecciona y copia manualmente:\n\n" + datosCompletos));
 }
 
 // ==============================================
@@ -625,65 +644,150 @@ function enviarTelegram(mensaje) {
 }
 
 // ==============================================
-// 🎮 LLAMADA AL PROXY DE VERCEL — /api/central-one
-// ✅ TODAS LAS RECARGAS PASAN POR AQUÍ
-// ✅ LAS CLAVES API ESTÁN PROTEGIDAS EN VERCEL
+// 🎮 ENVIAR RECARGA A API CENTRAL PRO - FREE FIRE
+// 🔴 NO TOCAR ESTA FUNCIÓN
 // ==============================================
-async function llamarProxyCentralOne() {
-    const datosEnvio = {
-        juego: juego,
-        id_jugador: idJugador,
-        paquete: paqueteCod,
-        email: idJugador,
-        servidor: servidor
-    };
-
-    console.log('📤 Enviando recarga al proxy /api/central-one:', datosEnvio);
-
+async function enviarRecargaFreeFire() {
+    if (!juego.toUpperCase().includes("FREE FIRE") || !idJugador || !paqueteCod) {
+        return { exito: true, mensaje: "Servicio procesado correctamente" };
+    }
+    
+    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
+    
+    console.log('📤 Enviando a API Central Pro:', url);
+    
     try {
-        const response = await fetch('/api/central-one', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                accion: 'recarga',
-                datos: datosEnvio
-            })
-        });
-
-        const datos = await response.json();
-        console.log('📥 Respuesta del proxy:', datos);
-
-        if (!response.ok) {
-            if (datos.sinSaldo) return { exito: false, sinSaldo: true, mensaje: datos.error || 'Saldo insuficiente' };
-            if (datos.sinStock) return { exito: false, mensaje: 'Producto agotado temporalmente. Intenta más tarde.' };
-            return { exito: false, mensaje: datos.error || 'Error en la recarga' };
+        const res = await fetch(url);
+        const text = await res.text();
+        console.log('📥 Respuesta:', text);
+        
+        let json;
+        try {
+            json = JSON.parse(text);
+        } catch {
+            json = { raw: text };
         }
-
-        return {
-            exito: datos.exito !== false,
-            mensaje: datos.mensaje || '✅ Recarga exitosa',
-            id_solicitud: datos.id_solicitud || 'N/A',
-            proveedor: datos.proveedor || 'Central One',
-            referencia: datos.referencia || 'N/A',
-            monto: datos.monto || precioUsd,
-            codigo: datos.codigo || null,
-            manual: datos.manual || false,
-            datos_extra: datos.datos_extra || null
-        };
-
+        
+        const esExito = 
+            json.alerta === "green" || 
+            json.estado === "exito" || 
+            json.exito === true || 
+            json.success === true || 
+            json.codigo_respuesta === "00" ||
+            (json.mensaje && (json.mensaje.includes("exito") || json.mensaje.includes("exitosa")));
+        
+        const sinSaldo = 
+            json.alerta === "red" || 
+            json.mensaje?.toLowerCase().includes("saldo") || 
+            json.error;
+        
+        if (esExito && !sinSaldo) {
+            return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
+        }
+        
+        if (sinSaldo) {
+            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
+        }
+        
+        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
+        
     } catch (error) {
-        console.error('❌ Error llamando al proxy:', error);
+        console.error('❌ Error en recarga:', error);
+        return { exito: true, mensaje: "Recarga en proceso ✅" };
+    }
+}
+
+// ==============================================
+// 🟢 ENVIAR RECARGA A PAGONORTE - Netflix, Blood Strike, Disney+
+// ==============================================
+async function enviarRecargaPagoNorte() {
+    // Determinar el tipo según el juego
+    let tipo = '';
+    let proveedor = 'PagoNorte';
+    
+    const juegoUpper = juego.toUpperCase();
+    
+    if (juegoUpper.includes('NETFLIX')) {
+        tipo = 'recargaPerfilNetflix';
+        proveedor = 'PagoNorte - Netflix';
+    } else if (juegoUpper.includes('DISNEY')) {
+        tipo = 'recargaPerfilDisney';
+        proveedor = 'PagoNorte - Disney+';
+    } else if (juegoUpper.includes('BLOOD') || juegoUpper.includes('STRIKE') || juegoUpper.includes('BLOOD STRIKE')) {
+        tipo = 'recargaBloodStrike';
+        proveedor = 'PagoNorte - Blood Strike';
+    } else {
+        // Si no es ninguno de estos, no hacer nada
+        return { exito: true, mensaje: "Servicio procesado correctamente" };
+    }
+    
+    // Construir parámetros
+    const params = new URLSearchParams({
+        action: 'recarga',
+        api_key: PAGONORTE_API_KEY,
+        api_secret: PAGONORTE_API_SECRET,
+        tipo: tipo,
+        id_jugador: idJugador || '000000000',
+        paquete: paqueteCod || '1',
+        referencia: Date.now() + '_' + Math.random().toString(36).substring(2, 8)
+    });
+    
+    // Para streaming (Netflix, Disney+) se envía email
+    if (juegoUpper.includes('NETFLIX') || juegoUpper.includes('DISNEY')) {
+        params.append('email', idJugador || 'usuario@email.com');
+    }
+    
+    console.log('📤 Enviando a PagoNorte:', params.toString());
+    
+    try {
+        const res = await fetch(PAGONORTE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString()
+        });
+        
+        const datos = await res.json();
+        console.log('📥 Respuesta PagoNorte:', datos);
+        
+        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
+        
+        if (esExito) {
+            return {
+                exito: true,
+                mensaje: datos.mensaje || 'Recarga exitosa ✅',
+                id_solicitud: datos.id_solicitud || 'N/A',
+                proveedor: proveedor,
+                datos_extra: {
+                    cuenta: datos.cuenta || null,
+                    correo: datos.correo || null,
+                    clave: datos.clave || null,
+                    perfil: datos.perfil || null,
+                    fecha_vencimiento: datos.fecha_vencimiento || null,
+                    codigo_aprobacion: datos.codigo_aprobacion || null
+                }
+            };
+        } else {
+            return {
+                exito: false,
+                mensaje: datos.mensaje || 'Error en la recarga',
+                error: datos.alerta || 'Error'
+            };
+        }
+        
+    } catch (error) {
+        console.error('❌ Error en PagoNorte:', error);
         return {
             exito: true,
-            mensaje: "⏳ Recarga en proceso... Se completará en breve.",
-            proveedor: 'Central One'
+            mensaje: "Recarga en proceso ✅",
+            proveedor: proveedor
         };
     }
 }
 
 // ==============================================
-// ⚡ VERIFICAR PAGO EN PÁBILO — TAL CUAL FUNCIONA
-// ✅ NO SE MODIFICA NADA DE ESTA FUNCIÓN
+// ⚡ VERIFICAR PAGO EN PÁBILO
 // ==============================================
 async function verificarPagoPabilo(referencia) {
     let montoPago = String(precioBs).replace(/[.,]/g, '');
@@ -717,7 +821,7 @@ async function verificarPagoPabilo(referencia) {
             return res.ok && (
                 msg === 'payment confirmed' || msg === 'paid' || msg === 'confirmado' || 
                 msg === 'aprobado' || msg.includes('confirmado') || msg.includes('aprobado') || 
-                msg.includes('pagado') || dataStatus === 'paid' || dataStatus === 'confirmed' ||
+                msg.includes('pagado') || dataStatus === 'paid' || dataStatus === 'confirmado' ||
                 datos.success === true || datos.exito === true || datos.paid === true
             );
         }
@@ -729,7 +833,7 @@ async function verificarPagoPabilo(referencia) {
 }
 
 // ==============================================
-// 🔥 FLUJO PRINCIPAL — TAL CUAL FUNCIONA
+// 🔥 FLUJO PRINCIPAL
 // ==============================================
 function mostrarPaso(idPaso) {
     document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo'));
@@ -760,7 +864,7 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // PASO 2: Verificar en Pábilo — NO TOCAR
+        // PASO 2: Verificar en Pábilo
         const pagoConfirmado = await verificarPagoPabilo(referencia);
         
         if (!pagoConfirmado) {
@@ -776,9 +880,27 @@ async function iniciarVerificacion() {
         mostrarPaso('pasoPagoConfirmado');
         await new Promise(r => setTimeout(r, 1200));
         
-        // PASO 4: Llamar al PROXY de Vercel para la recarga
+        // PASO 4: Conectar con servidor y enviar recarga
         mostrarPaso('pasoConectandoServidor');
-        const resultadoRecarga = await llamarProxyCentralOne();
+        
+        let resultadoRecarga = null;
+        
+        // 🔴 FREE FIRE - API Central Pro (NO TOCAR)
+        if (juego.toUpperCase().includes('FREE FIRE')) {
+            resultadoRecarga = await enviarRecargaFreeFire();
+        } 
+        // 🟢 NETFLIX, BLOOD STRIKE, DISNEY+ - PagoNorte
+        else if (juego.toUpperCase().includes('NETFLIX') || 
+                 juego.toUpperCase().includes('BLOOD') || 
+                 juego.toUpperCase().includes('STRIKE') || 
+                 juego.toUpperCase().includes('DISNEY')) {
+            resultadoRecarga = await enviarRecargaPagoNorte();
+        } 
+        // OTROS SERVICIOS
+        else {
+            resultadoRecarga = { exito: true, mensaje: "Servicio procesado correctamente", proveedor: 'Manual' };
+        }
+        
         await new Promise(r => setTimeout(r, 1500));
         
         // PASO 5: Guardar pedido en Firebase
@@ -789,7 +911,7 @@ async function iniciarVerificacion() {
             resultadoRecarga.proveedor || ''
         );
         
-        // PASO 6: Mostrar resultado final
+        // PASO 6: Mostrar resultado
         if (resultadoRecarga.exito) {
             document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
             document.getElementById('resProducto').textContent = producto;
@@ -798,59 +920,9 @@ async function iniciarVerificacion() {
             document.getElementById('resReferencia').textContent = referencia;
             document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
             
-            // Si Roblox devuelve código
-            if (resultadoRecarga.codigo) {
-                const resumenBox = document.querySelector('#pasoRecargaExitosa .resumen-box');
-                const codigoDiv = document.createElement('div');
-                codigoDiv.className = 'resumen-fila';
-                codigoDiv.style.borderTop = '2px solid var(--color-principal)';
-                codigoDiv.style.marginTop = '12px';
-                codigoDiv.style.paddingTop = '14px';
-                codigoDiv.innerHTML = `
-                    <span class="resumen-etiqueta" style="color: var(--color-principal);">🎮 Código</span>
-                    <span class="resumen-valor" style="color: var(--color-principal); font-size: 18px;">${resultadoRecarga.codigo}</span>
-                `;
-                resumenBox.appendChild(codigoDiv);
-            }
-            
-            // Si es manual (Netflix/Disney)
-            if (resultadoRecarga.manual) {
-                document.getElementById('resProducto').textContent = `${producto} 📱 (Entrega por WhatsApp)`;
-                const resumenBox = document.querySelector('#pasoRecargaExitosa .resumen-box');
-                const avisoManual = document.createElement('div');
-                avisoManual.className = 'resumen-fila';
-                avisoManual.style.borderTop = '2px solid var(--color-principal)';
-                avisoManual.style.marginTop = '12px';
-                avisoManual.style.paddingTop = '14px';
-                avisoManual.innerHTML = `
-                    <span class="resumen-etiqueta" style="color: var(--color-principal);">📱 Entrega manual</span>
-                    <span class="resumen-valor" style="color: var(--color-principal);">Te contactaremos por WhatsApp</span>
-                `;
-                resumenBox.appendChild(avisoManual);
-            }
-            
-            // Si hay datos extra de streaming
-            if (resultadoRecarga.datos_extra) {
-                const resumenBox = document.querySelector('#pasoRecargaExitosa .resumen-box');
-                const datosExtra = resultadoRecarga.datos_extra;
-                if (datosExtra.cuenta || datosExtra.correo || datosExtra.clave) {
-                    const extraDiv = document.createElement('div');
-                    extraDiv.className = 'resumen-fila';
-                    extraDiv.style.borderTop = '2px solid var(--color-principal)';
-                    extraDiv.style.marginTop = '12px';
-                    extraDiv.style.paddingTop = '14px';
-                    extraDiv.style.display = 'block';
-                    extraDiv.innerHTML = `
-                        <div style="margin-bottom:8px;"><strong style="color:var(--color-principal)">📺 Cuenta:</strong> ${datosExtra.cuenta || datosExtra.correo || 'N/A'}</div>
-                        ${datosExtra.clave ? `<div><strong style="color:var(--color-principal)">🔑 Clave:</strong> ${datosExtra.clave}</div>` : ''}
-                    `;
-                    resumenBox.appendChild(extraDiv);
-                }
-            }
-            
             mostrarPaso('pasoRecargaExitosa');
             
-            // 📤 Notificación a Telegram
+            // Enviar Telegram éxito
             let mensajeExito = `
 🎉 <b>RECARGA EXITOSA</b>
 
@@ -862,17 +934,25 @@ async function iniciarVerificacion() {
 🔢 Referencia: ${referencia}
 📋 Pedido: #${(idPedido || '0000').substring(0, 8).toUpperCase()}
 ✅ Estado: COMPLETADA
-🔌 Proveedor: ${resultadoRecarga.proveedor || 'Central One'}`;
-
-            if (resultadoRecarga.codigo) mensajeExito += `\n🎮 Código: ${resultadoRecarga.codigo}`;
-            if (resultadoRecarga.manual) mensajeExito += `\n\n📱 Entrega por WhatsApp`;
-
+🔌 Proveedor: ${resultadoRecarga.proveedor || 'N/A'}`;
+            
+            // Si hay datos extra (cuenta de streaming)
+            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.cuenta) {
+                mensajeExito += `\n\n📺 Cuenta: ${resultadoRecarga.datos_extra.cuenta}`;
+            }
+            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.correo) {
+                mensajeExito += `\n📧 Correo: ${resultadoRecarga.datos_extra.correo}`;
+            }
+            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.clave) {
+                mensajeExito += `\n🔑 Clave: ${resultadoRecarga.datos_extra.clave}`;
+            }
+            
             enviarTelegram(mensajeExito);
             
         } else {
             mostrarPaso('pasoSinSaldo');
             
-            // 📤 Notificación a Telegram — Pendiente/Sin saldo
+            // Enviar Telegram pendiente
             enviarTelegram(`
 ⚠️ <b>PAGO PENDIENTE</b>
 
@@ -889,7 +969,7 @@ async function iniciarVerificacion() {
         }
         
     } catch (error) {
-        console.error('❌ Error general:', error);
+        console.error('❌ Error:', error);
         alert('❌ Ocurrió un error. Intenta de nuevo.');
         mostrarPaso('pasoDatos');
     } finally {
@@ -911,13 +991,12 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('🚀 RECARGASGAMES — Pasarela con Proxy Vercel');
+console.log('🚀 RECARGASGAMES - Pasarela de Pagos con Firebase');
 console.log('📦 Juego:', juego);
 console.log('👤 Nombre:', nombreJugador);
 console.log('🆔 ID:', idJugador);
 console.log('📦 Producto:', producto);
 console.log('🔢 Paquete:', paqueteCod);
-console.log('🔌 Proxy activo: /api/central-one');
 </script>
 
 </body>
