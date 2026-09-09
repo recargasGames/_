@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECARGASGAMES - Panel de Administración</title>
+
+<!-- 🔥 FIREBASE SDK v9+ — MISMA BASE DE DATOS -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+:root{
+    --color-principal:#3b82f6;
+    --color-exito:#10b981;
+    --color-peligro:#ef4444;
+    --color-amarillo:#f59e0b;
+    --color-fondo:#0b1220;
+    --color-tarjeta:rgba(17,24,39,0.7);
+    --color-borde:rgba(51,65,85,0.5);
+    --color-texto:#e2e8f0;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    background:linear-gradient(135deg, #0b1220 0%, #1a2744 100%);
+    color:var(--color-texto);
+    font-family:'Segoe UI',sans-serif;
+    min-height:100vh;
+}
+
+/* 🔑 PANTALLA DE LOGIN */
+.login-container{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:20px;
+}
+.login-box{
+    background:var(--color-tarjeta);
+    border:1px solid var(--color-borde);
+    border-radius:20px;
+    padding:40px 30px;
+    width:100%;
+    max-width:420px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 40px rgba(0,0,0,0.4);
+}
+.login-titulo{font-size:28px;font-weight:700;text-align:center;margin-bottom:8px;color:#fff}
+.login-subtitulo{text-align:center;color:#94a3b8;margin-bottom:30px}
+.logo-login{text-align:center;margin-bottom:20px;font-size:40px}
+.input-group{margin-bottom:20px}
+.input-group label{display:block;margin-bottom:8px;font-weight:600;color:#cbd5e1}
+.input-group input{
+    width:100%;
+    padding:14px 16px;
+    border-radius:10px;
+    background:rgba(15,23,42,0.8);
+    border:1px solid var(--color-borde);
+    color:#fff;
+    font-size:16px;
+}
+.input-group input:focus{outline:none;border-color:var(--color-principal);box-shadow:0 0 0 3px rgba(59,130,246,0.2)}
+.btn-login{
+    width:100%;
+    padding:15px;
+    background:var(--color-principal);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-size:17px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+}
+.btn-login:hover{background:#2563eb;transform:translateY(-1px)}
+.error-login{
+    color:var(--color-peligro);
+    text-align:center;
+    margin-top:15px;
+    padding:10px;
+    background:rgba(239,68,68,0.1);
+    border-radius:8px;
+    display:none;
+}
+
+/* 📱 PANEL PRINCIPAL */
+.panel-container{display:none;padding:20px;max-width:1200px;margin:0 auto}
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 0;
+    margin-bottom:30px;
+    border-bottom:1px solid var(--color-borde);
+}
+.panel-titulo{font-size:26px;font-weight:700;color:#fff}
+.btn-cerrar{
+    padding:10px 20px;
+    background:var(--color-peligro);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+}
+.btn-cerrar:hover{background:#dc2626}
+
+/* 📊 PESTAÑAS */
+.tabs{display:flex;gap:10px;margin-bottom:25px;flex-wrap:wrap}
+.tab{
+    padding:12px 20px;
+    background:rgba(30,41,59,0.5);
+    border:1px solid var(--color-borde);
+    border-radius:10px;
+    color:#94a3b8;
+    cursor:pointer;
+    font-weight:600;
+    transition:.2s
+}
+.tab.activa{background:var(--color-principal);color:#fff;border-color:var(--color-principal)}
+.tab:hover{border-color:var(--color-principal);color:#fff}
+
+/* 📦 TARJETAS */
+.tarjeta{
+    background:var(--color-tarjeta);
+    border:1px solid var(--color-borde);
+    border-radius:16px;
+    padding:25px;
+    margin-bottom:25px;
+    backdrop-filter:blur(10px);
+}
+.tarjeta-titulo{font-size:18px;font-weight:700;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:10px}
+.grupo-input{margin-bottom:18px}
+.grupo-input label{display:block;margin-bottom:8px;color:#cbd5e1;font-weight:500}
+.grupo-input input, .grupo-input textarea{
+    width:100%;
+    padding:12px 15px;
+    background:rgba(15,23,42,0.6);
+    border:1px solid var(--color-borde);
+    border-radius:8px;
+    color:#fff;
+    font-size:15px;
+}
+.grupo-input input:focus, .grupo-input textarea:focus{outline:none;border-color:var(--color-principal)}
+.btn-guardar{
+    padding:12px 25px;
+    background:var(--color-exito);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+    cursor:pointer;
+    font-size:15px;
+}
+.btn-guardar:hover{background:#059669}
+
+/* 📋 TABLA DE PEDIDOS */
+.tabla-container{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{
+    padding:14px 12px;
+    text-align:left;
+    border-bottom:1px solid var(--color-borde);
+    font-size:14px;
+}
+th{background:rgba(30,41,59,0.5);color:#fff;font-weight:600}
+tr:hover{background:rgba(59,130,246,0.05)}
+.estado-pendiente{color:var(--color-amarillo);font-weight:600}
+.estado-exito{color:var(--color-exito);font-weight:600}
+.estado-error{color:var(--color-peligro);font-weight:600}
+
+/* 📈 ESTADÍSTICAS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:30px}
+.stat-card{
+    background:var(--color-tarjeta);
+    border:1px solid var(--color-borde);
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+}
+.stat-valor{font-size:32px;font-weight:700;color:#fff;margin-bottom:5px}
+.stat-etiqueta{color:#94a3b8;font-size:14px}
+
+/* ⚠️ REFERENCIAS FALSAS */
+.ref-falsa{border-left:3px solid var(--color-peligro)}
+
+.oculto{display:none !important}
+.mensaje-guardado{
+    background:rgba(16,185,129,0.1);
+    color:#10b981;
+    padding:10px 15px;
+    border-radius:8px;
+    margin-top:15px;
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<!-- 🔑 PANTALLA DE LOGIN -->
+<div class="login-container" id="pantallaLogin">
+    <div class="login-box">
+        <div class="logo-login">🎮</div>
+        <h1 class="login-titulo">RECARGASGAMES</h1>
+        <p class="login-subtitulo">Panel de Administración</p>
+        
+        <div class="input-group">
+            <label>Correo Electrónico</label>
+            <input type="email" id="correo" placeholder="tu@email.com">
+        </div>
+        
+        <div class="input-group">
+            <label>Contraseña</label>
+            <input type="password" id="contrasena" placeholder="••••••••">
+        </div>
+        
+        <button class="btn-login" onclick="iniciarSesion()">Ingresar al Panel</button>
+        
+        <div class="error-login" id="errorLogin">Correo o contraseña incorrectos</div>
+    </div>
+</div>
+
+<!-- 📱 PANEL PRINCIPAL -->
+<div class="panel-container" id="panelPrincipal">
+    <div class="panel-header">
+        <h1 class="panel-titulo">🎮 Panel de Administración</h1>
+        <button class="btn-cerrar" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+
+    <!-- 📊 PESTAÑAS -->
+    <div class="tabs">
+        <div class="tab activa" onclick="cambiarTab('estadisticas')">📈 Estadísticas</div>
+        <div class="tab" onclick="cambiarTab('pedidos')">📋 Todos los Pedidos</div>
+        <div class="tab" onclick="cambiarTab('referencias')">⚠️ Referencias Falsas</div>
+        <div class="tab" onclick="cambiarTab('imagenes')">🖼️ Imágenes del Sitio</div>
+        <div class="tab" onclick="cambiarTab('tasa')">💰 Tasa del Dólar</div>
+    </div>
+
+    <!-- 📈 ESTADÍSTICAS -->
+    <div id="tab-estadisticas" class="contenido-tab">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-valor" id="totalPedidos">0</div>
+                <div class="stat-etiqueta">Total Pedidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-valor" id="pedidosHoy">0</div>
+                <div class="stat-etiqueta">Pedidos Hoy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-valor" id="referenciasFalsas">0</div>
+                <div class="stat-etiqueta">Referencias Falsas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-valor" id="tasaDolar">0</div>
+                <div class="stat-etiqueta">Tasa USD/BS</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📋 TODOS LOS PEDIDOS -->
+    <div id="tab-pedidos" class="contenido-tab oculto">
+        <div class="tarjeta">
+            <h3 class="tarjeta-titulo">📋 Lista de Todos los Pedidos</h3>
+            <div class="tabla-container">
+                <table id="tablaPedidos">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Juego/Servicio</th>
+                            <th>Producto</th>
+                            <th>ID/Usuario</th>
+                            <th>Monto</th>
+                            <th>Referencia</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPedidos">
+                        <tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">Cargando pedidos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚠️ REFERENCIAS FALSAS -->
+    <div id="tab-referencias" class="contenido-tab oculto">
+        <div class="tarjeta">
+            <h3 class="tarjeta-titulo">⚠️ Referencias Falsas / Pagos No Encontrados</h3>
+            <div class="tabla-container">
+                <table id="tablaReferencias">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Juego/Servicio</th>
+                            <th>Referencia Ingresada</th>
+                            <th>Monto</th>
+                            <th>ID/Usuario</th>
+                            <th>Método de Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaReferencias">
+                        <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:30px">Cargando datos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🖼️ IMÁGENES DEL SITIO -->
+    <div id="tab-imagenes" class="contenido-tab oculto">
+        <div class="tarjeta">
+            <h3 class="tarjeta-titulo">🖼️ Configurar Imágenes del Sitio</h3>
+            
+            <div class="grupo-input">
+                <label>URL Imagen Free Fire</label>
+                <input type="text" id="imgFreeFire" placeholder="https://.../freefire.png">
+            </div>
+            
+            <div class="grupo-input">
+                <label>URL Imagen Roblox</label>
+                <input type="text" id="imgRoblox" placeholder="https://.../roblox.png">
+            </div>
+            
+            <div class="grupo-input">
+                <label>URL Imagen Blood Strike</label>
+                <input type="text" id="imgBloodStrike" placeholder="https://.../bloodstrike.png">
+            </div>
+            
+            <div class="grupo-input">
+                <label>URL Imagen Netflix</label>
+                <input type="text" id="imgNetflix" placeholder="https://.../netflix.png">
+            </div>
+            
+            <div class="grupo-input">
+                <label>URL Imagen Disney+</label>
+                <input type="text" id="imgDisney" placeholder="https://.../disney.png">
+            </div>
+            
+            <div class="grupo-input">
+                <label>URL Imagen de Fondo del Sitio</label>
+                <input type="text" id="imgFondo" placeholder="https://.../fondo.jpg">
+            </div>
+
+            <button class="btn-guardar" onclick="guardarImagenes()">💾 Guardar Imágenes</button>
+            <div class="mensaje-guardado" id="msgImagenes">✅ Imágenes guardadas correctamente</div>
+        </div>
+    </div>
+
+    <!-- 💰 TASA DEL DÓLAR -->
+    <div id="tab-tasa" class="contenido-tab oculto">
+        <div class="tarjeta">
+            <h3 class="tarjeta-titulo">💰 Tasa de Cambio Dólar → Bolívares</h3>
+            
+            <div class="grupo-input">
+                <label>1 USD = ? Bs (Tasa oficial del día)</label>
+                <input type="number" step="0.01" id="tasaDolarInput" placeholder="850.00">
+            </div>
+
+            <button class="btn-guardar" onclick="guardarTasa()">💾 Actualizar Tasa</button>
+            <div class="mensaje-guardado" id="msgTasa">✅ Tasa actualizada correctamente</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// 🔑 DATOS DE ACCESO — SOLO TU
+const ADMIN_CORREO = "aa3964063@gmail.com";
+const ADMIN_CONTRASENA = "Dios.411";
+
+// 🔥 FIREBASE — MISMA BASE DE DATOS DE LA PASARELA
+const firebaseConfig = {
+  apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+  authDomain: "free-52119.firebaseapp.com",
+  databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "free-52119",
+  storageBucket: "free-52119.appspot.com",
+  messagingSenderId: "452093403979",
+  appId: "1:452093403979:web:8a8b7c6d5e4f3a2b1c0d9e"
+};
+
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Estado de sesión
+let sesionActiva = false;
+
+// 🔑 INICIAR SESIÓN
+function iniciarSesion() {
+    const correo = document.getElementById('correo').value.trim();
+    const contrasena = document.getElementById('contrasena').value;
+    const error = document.getElementById('errorLogin');
+
+    if (correo === ADMIN_CORREO && contrasena === ADMIN_CONTRASENA) {
+        sesionActiva = true;
+        document.getElementById('pantallaLogin').style.display = 'none';
+        document.getElementById('panelPrincipal').style.display = 'block';
+        cargarDatosPanel();
+    } else {
+        error.style.display = 'block';
+        setTimeout(() => error.style.display = 'none', 3000);
+    }
+}
+
+// 🔒 CERRAR SESIÓN
+function cerrarSesion() {
+    sesionActiva = false;
+    document.getElementById('panelPrincipal').style.display = 'none';
+    document.getElementById('pantallaLogin').style.display = 'flex';
+    document.getElementById('correo').value = '';
+    document.getElementById('contrasena').value = '';
+}
+
+// 📄 CAMBIAR PESTAÑA
+function cambiarTab(nombre) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('activa'));
+    document.querySelectorAll('.contenido-tab').forEach(c => c.classList.add('oculto'));
+    event.target.classList.add('activa');
+    document.getElementById('tab-' + nombre).classList.remove('oculto');
+}
+
+// 📊 CARGAR TODOS LOS DATOS DEL PANEL
+async function cargarDatosPanel() {
+    await Promise.all([
+        cargarPedidos(),
+        cargarReferenciasFalsas(),
+        cargarConfiguracion(),
+        cargarEstadisticas()
+    ]);
+}
+
+// 📋 CARGAR PEDIDOS
+async function cargarPedidos() {
+    const ref = db.ref('pedidos');
+    const snapshot = await ref.orderByChild('fecha').limitToLast(50).once('value');
+    const datos = snapshot.val();
+    const lista = document.getElementById('listaPedidos');
+    
+    if (!datos) {
+        lista.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:30px">No hay pedidos registrados</td></tr>';
+        return;
+    }
+
+    const pedidos = Object.values(datos).reverse();
+    lista.innerHTML = '';
+    
+    pedidos.forEach(p => {
+        const estadoClase = p.estado === 'Completado' ? 'estado-exito' : 
+                            p.estado === 'Pendiente' ? 'estado-pendiente' : 'estado-error';
+        lista.innerHTML += `
+            <tr>
+                <td>${p.fecha || '—'}</td>
+                <td>${p.juego || '—'}</td>
+                <td>${p.producto || '—'}</td>
+                <td>${p.usuarioId || p.whatsapp || '—'}</td>
+                <td>${p.monto || '—'}</td>
+                <td>${p.referencia || '—'}</td>
+                <td class="${estadoClase}">${p.estado || 'Desconocido'}</td>
+            </tr>
+        `;
+    });
+}
+
+// ⚠️ CARGAR REFERENCIAS FALSAS
+async function cargarReferenciasFalsas() {
+    const ref = db.ref('referencias_falsas');
+    const snapshot = await ref.orderByChild('fecha').limitToLast(50).once('value');
+    const datos = snapshot.val();
+    const lista = document.getElementById('listaReferencias');
+    
+    document.getElementById('referenciasFalsas').textContent = datos ? Object.keys(datos).length : 0;
+    
+    if (!datos) {
+        lista.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#10b981;padding:30px">✅ No hay referencias falsas registradas</td></tr>';
+        return;
+    }
+
+    const refs = Object.values(datos).reverse();
+    lista.innerHTML = '';
+    
+    refs.forEach(r => {
+        lista.innerHTML += `
+            <tr class="ref-falsa">
+                <td>${r.fecha || '—'}</td>
+                <td>${r.juego || '—'}</td>
+                <td><strong style="color:#ef4444">${r.referencia || '—'}</strong></td>
+                <td>${r.monto || '—'}</td>
+                <td>${r.usuarioId || r.whatsapp || '—'}</td>
+                <td>${r.metodoPago || '—'}</td>
+            </tr>
+        `;
+    });
+}
+
+// 📈 CARGAR ESTADÍSTICAS
+async function cargarEstadisticas() {
+    const pedidosRef = db.ref('pedidos');
+    const snapshot = await pedidosRef.once('value');
+    const datos = snapshot.val() || {};
+    
+    const total = Object.keys(datos).length;
+    const hoy = new Date().toLocaleDateString('es-VE');
+    const pedidosHoy = Object.values(datos).filter(p => p.fecha && p.fecha.includes(hoy)).length;
+    
+    document.getElementById('totalPedidos').textContent = total;
+    document.getElementById('pedidosHoy').textContent = pedidosHoy;
+}
+
+// 🖼️ CARGAR CONFIGURACIÓN (imágenes y tasa)
+async function cargarConfiguracion() {
+    const ref = db.ref('configuracion');
+    const snapshot = await ref.once('value');
+    const cfg = snapshot.val() || {};
+    
+    document.getElementById('imgFreeFire').value = cfg.imgFreeFire || '';
+    document.getElementById('imgRoblox').value = cfg.imgRoblox || '';
+    document.getElementById('imgBloodStrike').value = cfg.imgBloodStrike || '';
+    document.getElementById('imgNetflix').value = cfg.imgNetflix || '';
+    document.getElementById('imgDisney').value = cfg.imgDisney || '';
+    document.getElementById('imgFondo').value = cfg.imgFondo || '';
+    document.getElementById('tasaDolarInput').value = cfg.tasaDolar || '';
+    document.getElementById('tasaDolar').textContent = cfg.tasaDolar || '—';
+}
+
+// 💾 GUARDAR IMÁGENES
+async function guardarImagenes() {
+    await db.ref('configuracion').update({
+        imgFreeFire: document.getElementById('imgFreeFire').value.trim(),
+        imgRoblox: document.getElementById('imgRoblox').value.trim(),
+        imgBloodStrike: document.getElementById('imgBloodStrike').value.trim(),
+        imgNetflix: document.getElementById('imgNetflix').value.trim(),
+        imgDisney: document.getElementById('imgDisney').value.trim(),
+        imgFondo: document.getElementById('imgFondo').value.trim()
+    });
+    
+    const msg = document.getElementById('msgImagenes');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+// 💰 GUARDAR TASA DEL DÓLAR
+async function guardarTasa() {
+    const tasa = parseFloat(document.getElementById('tasaDolarInput').value);
+    if (!tasa || tasa <= 0) {
+        alert('Por favor ingresa una tasa válida');
+        return;
+    }
+    
+    await db.ref('configuracion').update({
+        tasaDolar: tasa,
+        ultimaActualizacion: new Date().toLocaleString('es-VE')
+    });
+    
+    document.getElementById('tasaDolar').textContent = tasa;
+    const msg = document.getElementById('msgTasa');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+// ⌨️ ENTER para iniciar sesión
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !sesionActiva) iniciarSesion();
+});
+</script>
+
+</body>
+</html>
