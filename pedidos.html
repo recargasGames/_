@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos - Recargas Games</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b1220;
+            color: white;
+            min-height: 100vh;
+            padding-top: 80px;
+            background-image: url('fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* ====== BARRA SUPERIOR ====== */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: rgba(11, 18, 32, 0.95);
+            border-bottom: 2px solid #3b82f6;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .topbar .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .topbar .logo img {
+            height: 45px;
+            border-radius: 10px;
+        }
+        .topbar .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+        .topbar .logo h1 span {
+            color: #3b82f6;
+        }
+        .topbar .btn-back {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+        .topbar .btn-back:hover {
+            background: rgba(255,255,255,0.05);
+            color: white;
+        }
+
+        /* ====== CONTENEDOR ====== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ====== TÍTULO ====== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-header h2 {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .page-header h2 span {
+            color: #3b82f6;
+        }
+        .page-header .total {
+            font-size: 14px;
+            color: #9ca3af;
+            background: rgba(17, 24, 39, 0.7);
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+
+        /* ====== FILTROS ====== */
+        .filtros {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filtros input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            color: white;
+            font-size: 14px;
+        }
+        .filtros input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .filtros select {
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .filtros select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .filtros select option {
+            background: #0b1220;
+        }
+
+        /* ====== LISTA DE PEDIDOS ====== */
+        .pedidos-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pedido-card {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 18px 22px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .pedido-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .pedido-card .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .pedido-card .top .info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .pedido-card .top .info .id {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .pedido-card .top .info .id span {
+            color: #3b82f6;
+        }
+        .pedido-card .top .info .fecha {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .pedido-card .top .info .ref {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .pedido-card .top .detalle {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .pedido-card .top .detalle .precio {
+            font-size: 20px;
+            font-weight: 700;
+            color: #22c55e;
+        }
+        .pedido-card .top .detalle .metodo {
+            font-size: 12px;
+            color: #9ca3af;
+            background: rgba(255,255,255,0.05);
+            padding: 2px 12px;
+            border-radius: 12px;
+        }
+        .pedido-card .top .detalle .estado {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 14px;
+            border-radius: 12px;
+        }
+        .estado.completado {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .estado.pendiente {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+        .estado.cancelado {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        .estado.procesando {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .pedido-card .bottom {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pedido-card .bottom .tag {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .pedido-card .bottom .tag.juego {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+        }
+
+        /* ====== SIN PEDIDOS ====== */
+        .sin-pedidos {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(17, 24, 39, 0.7);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .sin-pedidos .icono {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        .sin-pedidos h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        .sin-pedidos p {
+            color: #9ca3af;
+            font-size: 15px;
+        }
+        .sin-pedidos .btn-tienda {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 12px 30px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .sin-pedidos .btn-tienda:hover {
+            background: #2563eb;
+            transform: scale(1.02);
+        }
+
+        /* ====== CARGANDO ====== */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .pedido-card .top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .pedido-card .top .detalle {
+                align-items: flex-start;
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .filtros {
+                flex-direction: column;
+            }
+            .filtros input {
+                min-width: unset;
+            }
+            .filtros select {
+                width: 100%;
+            }
+        }
+        @media (max-width: 500px) {
+            .topbar .logo h1 {
+                font-size: 16px;
+            }
+            .pedido-card {
+                padding: 14px 16px;
+            }
+            .pedido-card .top .info .id {
+                font-size: 15px;
+            }
+            .pedido-card .top .detalle .precio {
+                font-size: 17px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ====== BARRA SUPERIOR ====== -->
+<header class="topbar">
+    <div class="logo">
+        <img src="logo.png" alt="Recargas Games">
+        <h1>Recargas<span>Games</span></h1>
+    </div>
+    <button class="btn-back" onclick="window.history.back()">← Volver</button>
+</header>
+
+<!-- ====== CONTENIDO ====== -->
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <h2>📋 Mis <span>Pedidos</span></h2>
+        <span class="total" id="totalPedidos">0 pedidos</span>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filtros">
+        <input type="text" id="buscarInput" placeholder="🔍 Buscar por ID, referencia o juego..." oninput="filtrarPedidos()">
+        <select id="filtroEstado" onchange="filtrarPedidos()">
+            <option value="todos">📊 Todos los estados</option>
+            <option value="completado">✅ Completados</option>
+            <option value="pendiente">⏳ Pendientes</option>
+            <option value="procesando">🔄 Procesando</option>
+            <option value="cancelado">❌ Cancelados</option>
+        </select>
+    </div>
+
+    <!-- LISTA DE PEDIDOS -->
+    <div class="pedidos-list" id="listaPedidos">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Cargando tus pedidos...</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ==============================================
+    // 🔥 FIREBASE - CONFIGURACIÓN
+    // ==============================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+        authDomain: "free-52119.firebaseapp.com",
+        databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "free-52119",
+        storageBucket: "free-52119.firebasestorage.app",
+        messagingSenderId: "632240144599",
+        appId: "1:632240144599:web:e31c25665ffe19c194b092",
+        measurementId: "G-5NLLLEPWPK"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    let todosPedidos = [];
+    let uidActual = null;
+
+    // ==============================================
+    // 👤 VERIFICAR AUTENTICACIÓN
+    // ==============================================
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        uidActual = user.uid;
+        cargarPedidos();
+    });
+
+    // ==============================================
+    // 📋 CARGAR PEDIDOS DESDE FIREBASE
+    // ==============================================
+    function cargarPedidos() {
+        const pedidosRef = db.ref('pedidos');
+        
+        pedidosRef.orderByChild('uid').equalTo(uidActual).on('value', (snapshot) => {
+            todosPedidos = [];
+            
+            snapshot.forEach((childSnapshot) => {
+                const pedido = childSnapshot.val();
+                pedido.key = childSnapshot.key;
+                todosPedidos.push(pedido);
+            });
+
+            // Ordenar por fecha (más reciente primero)
+            todosPedidos.sort((a, b) => {
+                if (a.fecha && b.fecha) {
+                    return new Date(b.fecha) - new Date(a.fecha);
+                }
+                return 0;
+            });
+
+            // Actualizar total
+            document.getElementById('totalPedidos').textContent = `${todosPedidos.length} pedidos`;
+
+            // Mostrar pedidos
+            filtrarPedidos();
+            
+        }, (error) => {
+            console.error('Error cargando pedidos:', error);
+            document.getElementById('listaPedidos').innerHTML = `
+                <div class="sin-pedidos">
+                    <div class="icono">❌</div>
+                    <h3>Error al cargar</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+        });
+    }
+
+    // ==============================================
+    // 🔍 FILTRAR PEDIDOS
+    // ==============================================
+    function filtrarPedidos() {
+        const busqueda = document.getElementById('buscarInput').value.toLowerCase().trim();
+        const estadoFiltro = document.getElementById('filtroEstado').value;
+
+        let filtrados = todosPedidos;
+
+        // Filtrar por estado
+        if (estadoFiltro !== 'todos') {
+            filtrados = filtrados.filter(p => {
+                const estado = (p.estado || 'pendiente').toLowerCase();
+                return estado === estadoFiltro;
+            });
+        }
+
+        // Filtrar por búsqueda
+        if (busqueda) {
+            filtrados = filtrados.filter(p => {
+                const id = p.referencia || p.key || '';
+                const juego = p.juego || p.producto || '';
+                const ref = p.referencia_pago || '';
+                return id.toLowerCase().includes(busqueda) ||
+                       juego.toLowerCase().includes(busqueda) ||
+                       ref.toLowerCase().includes(busqueda);
+            });
+        }
+
+        mostrarPedidos(filtrados);
+    }
+
+    // ==============================================
+    // 🖥️ MOSTRAR PEDIDOS
+    // ==============================================
+    function mostrarPedidos(pedidos) {
+        const contenedor = document.getElementById('listaPedidos');
+
+        if (pedidos.length === 0) {
+            contenedor.innerHTML = `
+                <div class="sin-pedidos">
+                    <div class="icono">📭</div>
+                    <h3>No hay pedidos</h3>
+                    <p>${todosPedidos.length === 0 ? 'Aún no has hecho ninguna recarga.' : 'No hay pedidos que coincidan con tu búsqueda.'}</p>
+                    <a href="index.html" class="btn-tienda">📲 Ir a la Tienda</a>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        
+        pedidos.forEach((pedido) => {
+            // Determinar estado
+            const estado = pedido.estado || 'pendiente';
+            const estadoLower = estado.toLowerCase();
+            
+            let estadoClase = 'pendiente';
+            let estadoTexto = '⏳ Pendiente';
+            
+            if (estadoLower === 'completada' || estadoLower === 'completado') {
+                estadoClase = 'completado';
+                estadoTexto = '✅ Completado';
+            } else if (estadoLower === 'cancelado' || estadoLower === 'cancelada') {
+                estadoClase = 'cancelado';
+                estadoTexto = '❌ Cancelado';
+            } else if (estadoLower === 'procesando' || estadoLower === 'processing') {
+                estadoClase = 'procesando';
+                estadoTexto = '🔄 Procesando';
+            }
+
+            // Formatear fecha
+            let fechaTexto = 'Fecha no disponible';
+            if (pedido.fecha) {
+                try {
+                    const fecha = new Date(pedido.fecha);
+                    fechaTexto = `📅 ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString()}`;
+                } catch (e) {
+                    fechaTexto = `📅 ${pedido.fecha}`;
+                }
+            }
+
+            // ID del pedido
+            const idPedido = pedido.referencia || pedido.key || 'N/A';
+            
+            // Producto y juego
+            const juego = pedido.juego || 'Producto';
+            const producto = pedido.producto || '';
+            
+            // Monto
+            const monto = pedido.monto_usd || pedido.monto || '0.00';
+            
+            // Método de pago
+            const metodo = pedido.metodo || 'Pago Móvil';
+
+            // Tags
+            let tagsHtml = `<span class="tag juego">🎮 ${juego}</span>`;
+            if (producto) {
+                tagsHtml += ` <span class="tag">📦 ${producto}</span>`;
+            }
+            if (pedido.paquete) {
+                tagsHtml += ` <span class="tag">#${pedido.paquete}</span>`;
+            }
+
+            html += `
+                <div class="pedido-card" onclick="verDetalle('${pedido.key || ''}')">
+                    <div class="top">
+                        <div class="info">
+                            <div class="id">#<span>${idPedido}</span></div>
+                            <div class="fecha">${fechaTexto}</div>
+                            ${pedido.referencia_pago ? `<div class="ref">Ref: ${pedido.referencia_pago}</div>` : ''}
+                        </div>
+                        <div class="detalle">
+                            <div class="precio">$${monto}</div>
+                            <div class="metodo">${metodo}</div>
+                            <div class="estado ${estadoClase}">${estadoTexto}</div>
+                        </div>
+                    </div>
+                    <div class="bottom">
+                        ${tagsHtml}
+                    </div>
+                </div>
+            `;
+        });
+
+        contenedor.innerHTML = html;
+    }
+
+    // ==============================================
+    // 📄 VER DETALLE DEL PEDIDO
+    // ==============================================
+    function verDetalle(pedidoKey) {
+        if (pedidoKey) {
+            window.location.href = `detalle-pedido.html?id=${pedidoKey}`;
+        } else {
+            alert('Detalle no disponible');
+        }
+    }
+
+    console.log('📋 Página de pedidos cargada correctamente');
+</script>
+
+</body>
+</html>
