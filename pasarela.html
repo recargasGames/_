@@ -7,10 +7,11 @@
 
 <!-- 🔥 FIREBASE SDK v9+ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-binance:#f3ba2f;--color-borde:rgba(51,65,85,0.5);--color-deshabilitado:#475569}
+:root{--color-principal:#10b981;--color-hover:#059669;--color-cargando:#facc15;--color-error:#ef4444;--color-borde:rgba(51,65,85,0.5)}
 
 body{
     background-image:url('fondo.jpg');
@@ -25,31 +26,20 @@ body{
 }
 
 .header{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
+    position:fixed;top:0;left:0;right:0;
     background:rgba(11,18,32,.95);
     padding:12px 20px;
-    display:flex;
-    justify-content:flex-start;
-    align-items:center;
+    display:flex;justify-content:flex-start;align-items:center;
     border-bottom:2px solid var(--color-principal);
     z-index:999;
 }
-.header img{
-    height:50px;
-    width:auto;
-    border-radius:50%;
-    object-fit:contain;
-}
+.header img{height:50px;width:auto;border-radius:50%;object-fit:contain;}
 
 .main{padding:30px 20px;max-width:480px;margin:0 auto}
 .paso-box{text-align:center;padding:20px 10px;display:none}
 .paso-box.activo{display:block}
 
 .spinner-circle{width:80px;height:80px;border:3px solid rgba(51,65,85,0.5);border-top-color:var(--color-principal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px}
-.spinner-amarillo{border-top-color:var(--color-cargando)}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 
 .icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold}
@@ -60,254 +50,75 @@ body{
 .texto-principal{font-size:26px;font-weight:700;margin-bottom:10px}
 .texto-secundario{font-size:16px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto}
 
-.resumen-box{
-    background:rgba(17,24,39,0.55);
-    border:1px solid var(--color-borde);
-    border-radius:16px;
-    padding:22px;
-    text-align:left;
-    margin:25px 0;
-    backdrop-filter:blur(10px);
-}
-.resumen-fila{
-    display:flex;
-    justify-content:space-between;
-    padding:12px 0;
-    border-bottom:1px solid rgba(51,65,85,0.35);
-    font-size:16px;
-}
+.resumen-box{background:rgba(17,24,39,0.55);border:1px solid var(--color-borde);border-radius:16px;padding:22px;text-align:left;margin:25px 0;backdrop-filter:blur(10px);}
+.resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(51,65,85,0.35);font-size:16px;}
 .resumen-fila:last-child{border-bottom:none}
 .resumen-etiqueta{color:#e2e8f0}
 .resumen-valor{font-weight:600;color:#fff}
 .resumen-valor.verde{color:var(--color-principal)}
 
-.metodo-pago-box{
-    display:flex;
-    gap:12px;
-    margin:25px 0;
-}
-.metodo-btn{
-    flex:1;
-    padding:15px;
-    background:rgba(17,24,39,0.55);
-    border:2px solid rgba(51,65,85,0.5);
-    border-radius:12px;
-    color:#fff;
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
-    transition:.2s;
-    backdrop-filter:blur(10px);
-}
-.metodo-btn.activo{
-    border-color:var(--color-principal);
-    background:rgba(16,185,129,0.15);
-    color:var(--color-principal);
-}
-.metodo-btn.deshabilitado{
-    border-color:var(--color-deshabilitado);
-    background:rgba(71,85,105,0.2);
-    color:#94a3b8;
-    cursor:not-allowed;
-    opacity:0.7;
-}
-.metodo-btn.deshabilitado small{
-    display:block;
-    font-size:11px;
-    margin-top:4px;
-    color:#94a3b8;
-}
-
-.aviso-binance{
-    background:rgba(243,186,47,0.08);
-    border:1px solid rgba(243,186,47,0.25);
-    border-radius:12px;
-    padding:14px;
-    margin:15px 0;
-    color:#fcd34d;
-    font-size:14px;
-    text-align:center;
-}
-
-/* 📋 DATOS DE PAGO - MEJORADO */
-.datos-pago-box{
-    background:rgba(17,24,39,0.55);
-    border:1px solid var(--color-borde);
-    border-radius:16px;
-    padding:22px;
-    margin-bottom:20px;
-    backdrop-filter:blur(10px);
-}
+.datos-pago-box{background:rgba(17,24,39,0.55);border:1px solid var(--color-borde);border-radius:16px;padding:22px;margin-bottom:20px;backdrop-filter:blur(10px);}
 .titulo-seccion{font-size:18px;font-weight:700;margin-bottom:20px;text-align:center}
-.dato-line{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:14px 16px;
-    background:rgba(15,23,42,0.6);
-    border-radius:12px;
-    margin-bottom:12px;
-}
+.dato-line{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px;}
 .dato-line:last-child{margin-bottom:0}
 .dato-texto strong{color:#e2e8f0;display:inline-block;width:90px}
 .dato-texto span{color:#fff}
 
-/* 🟢 BOTÓN COPIAR INDIVIDUAL */
-.copiar-btn{
-    width:44px;
-    height:44px;
-    border-radius:10px;
-    background:rgba(59,130,246,0.15);
-    border:none;
-    color:#93c5fd;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:.2s;
-    backdrop-filter:blur(4px);
-    flex-shrink:0;
-    padding:0;
-}
-.copiar-btn svg{
-    width:20px;
-    height:20px;
-    stroke:currentColor;
-    stroke-width:2;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    fill:none;
-    opacity:0.7;
-    transition:.2s;
-}
-.copiar-btn:hover{
-    background:rgba(59,130,246,0.25);
-    transform:scale(1.05);
-}
-.copiar-btn:hover svg{opacity:1}
-.copiar-btn.copiado{
-    background:rgba(16,185,129,0.2);
-    color:#34d399;
-}
+.copiar-btn{width:44px;height:44px;border-radius:10px;background:rgba(59,130,246,0.15);border:none;color:#93c5fd;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;padding:0;}
+.copiar-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;opacity:0.7;}
+.copiar-btn:hover{background:rgba(59,130,246,0.25);transform:scale(1.05);}
+.copiar-btn.copiado{background:rgba(16,185,129,0.2);color:#34d399;}
 .copiar-btn.copiado svg{display:none}
-.copiar-btn.copiado::after{
-    content:'✓';
-    font-size:20px;
-    font-weight:bold;
-}
+.copiar-btn.copiado::after{content:'✓';font-size:20px;font-weight:bold;}
 
-/* 🟢 BOTÓN COPIAR TODOS LOS DATOS */
-.copiar-todo-btn{
-    width:100%;
-    padding:14px;
-    margin-top:16px;
-    background:rgba(16,185,129,0.12);
-    border:1px solid var(--color-principal);
-    border-radius:12px;
-    color:var(--color-principal);
-    font-size:15px;
-    font-weight:600;
-    cursor:pointer;
-    transition:.2s;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-}
-.copiar-todo-btn:hover{
-    background:rgba(16,185,129,0.2);
-    transform:scale(1.02);
-}
-.copiar-todo-btn.copiado-todo{
-    background:rgba(16,185,129,0.2);
-    color:#34d399;
-    border-color:#34d399;
-}
-.copiar-todo-btn svg{
-    width:18px;
-    height:18px;
-    stroke:currentColor;
-    stroke-width:2;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    fill:none;
-}
+.copiar-todo-btn{width:100%;padding:14px;margin-top:16px;background:rgba(16,185,129,0.12);border:1px solid var(--color-principal);border-radius:12px;color:var(--color-principal);font-size:15px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.copiar-todo-btn:hover{background:rgba(16,185,129,0.2);transform:scale(1.02);}
+.copiar-todo-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;}
 
-.input-ref{
-    width:100%;
-    padding:14px;
-    border-radius:10px;
-    background:rgba(15,23,42,0.5);
-    border:1px solid rgba(51,65,85,0.5);
-    color:#fff;
-    font-size:16px;
-    box-sizing:border-box;
-    margin-top:10px;
-    margin-bottom:15px;
-}
+.input-ref{width:100%;padding:14px;border-radius:10px;background:rgba(15,23,42,0.5);border:1px solid rgba(51,65,85,0.5);color:#fff;font-size:16px;box-sizing:border-box;margin-top:10px;margin-bottom:15px;}
 .input-ref:focus{outline:none;border-color:var(--color-principal)}
-.input-ref:disabled{opacity:0.5;cursor:not-allowed}
 
-.btn-confirmar{
-    width:100%;
-    padding:16px;
-    background:var(--color-principal);
-    color:#000;
-    border:none;
-    border-radius:12px;
-    font-size:18px;
-    font-weight:700;
-    cursor:pointer;
-    margin-top:10px;
-    transition:.2s;
-}
+.btn-confirmar{width:100%;padding:16px;background:var(--color-principal);color:#000;border:none;border-radius:12px;font-size:18px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s;}
 .btn-confirmar:hover{background:var(--color-hover)}
-.btn-confirmar:disabled{
-    opacity:0.5;
-    cursor:not-allowed;
-}
+.btn-confirmar:disabled{opacity:0.5;cursor:not-allowed;}
 
-.volver-btn{
-    display:inline-block;
-    margin-top:25px;
-    color:#94a3b8;
-    text-decoration:none;
-    text-align:center;
-    width:100%;
-    font-size:16px;
-}
+.volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%;font-size:16px;}
 .volver-btn:hover{color:#fff}
 
-.aviso-box{
-    background:rgba(251,191,36,.1);
-    border:1px solid rgba(251,191,36,.3);
-    border-radius:12px;
-    padding:15px;
-    margin-top:15px;
-    font-size:14px;
-    color:#fcd34d;
-}
-.usada-box{
-    background:rgba(239,68,68,.15);
-    border:2px solid rgba(239,68,68,.5);
-    border-radius:12px;
-    padding:20px;
-    margin-top:15px;
-    color:#fca5a5;
-    font-weight:600;
-}
-.mantengo-box{
-    background:rgba(59,130,246,.15);
-    border:2px solid rgba(59,130,246,.5);
-    border-radius:12px;
-    padding:20px;
-    margin-top:15px;
-    color:#93c5fd;
-    font-weight:600;
-}
+.aviso-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#fcd34d;}
 
-.binance-color{color:var(--color-binance)}
-.oculto{display:none !important}
+/* 🔑 PIN DE ROBLOX */
+.pin-box {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(34, 197, 94, 0.15);
+    border: 2px solid #22c55e;
+    border-radius: 12px;
+    text-align: center;
+}
+.pin-box .pin-label {
+    font-size: 11px; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 2px;
+}
+.pin-box .pin-value {
+    font-size: 28px; font-weight: 700;
+    color: #22c55e; letter-spacing: 3px;
+    margin: 10px 0; word-break: break-all;
+}
+.pin-box .btn-copiar-pin {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+.pin-box .btn-copiar-pin:hover {
+    background: rgba(34, 197, 94, 0.3);
+}
 </style>
 </head>
 <body>
@@ -324,22 +135,8 @@ body{
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
-            <!-- ✅ NOMBRE DEL JUGADOR AGREGADO -->
-            <div class="resumen-fila" id="filaNombreJugador"><span class="resumen-etiqueta">Nombre</span><span class="resumen-valor" id="datoNombreJugador">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
-        </div>
-
-        <div class="metodo-pago-box">
-            <button class="metodo-btn activo" id="btnMovil">🏦 Pago Móvil</button>
-            <button class="metodo-btn deshabilitado" disabled>
-                🟡 Binance Pay <small>Próximamente</small>
-            </button>
-        </div>
-
-        <div class="aviso-binance">
-            🟡 <strong>Binance Pay</strong> — Pronto estará disponible.<br>
-            Se está trabajando en mejoras. Por favor usa <strong>Pago Móvil</strong> por ahora.
         </div>
 
         <div class="datos-pago-box">
@@ -348,46 +145,30 @@ body{
             <div class="dato-line">
                 <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
                 <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
             </div>
             <div class="dato-line">
                 <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
                 <button class="copiar-btn" onclick="copiarTexto('32824869', this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
             </div>
             <div class="dato-line">
                 <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
                 <button class="copiar-btn" onclick="copiarTexto('04228242411', this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
             </div>
             <div class="dato-line">
                 <div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">-</span></div>
                 <button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 </button>
             </div>
 
-            <!-- ✅ BOTÓN COPIAR TODOS LOS DATOS AGREGADO -->
-            <button class="copiar-todo-btn" id="btnCopiarTodo" onclick="copiarTodosLosDatos(this)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
+            <button class="copiar-todo-btn" onclick="copiarTodosLosDatos(this)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 Copiar todos los datos de pago
             </button>
 
@@ -411,44 +192,33 @@ body{
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Tu pago fue verificado correctamente. Preparando recarga...</div>
+        <div class="texto-secundario">Tu pago fue verificado correctamente. Procesando recarga...</div>
     </div>
 
-    <!-- PASO 3: CONECTANDO CON SERVIDOR -->
+    <!-- PASO 3: PROCESANDO RECARGA -->
     <div id="pasoConectandoServidor" class="paso-box">
-        <div class="spinner-circle spinner-amarillo"></div>
-        <div class="texto-principal">Conectando con el servidor de recargas...</div>
-        <div class="texto-secundario">Verificando disponibilidad y procesando tu orden...</div>
+        <div class="spinner-circle"></div>
+        <div class="texto-principal">Procesando tu recarga...</div>
+        <div class="texto-secundario">Conectando con Central One. No cierres esta ventana.</div>
     </div>
 
-    <!-- ✅ PASO 4: RECARGA EXITOSA -->
+    <!-- PASO 4: RECARGA EXITOSA -->
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Recarga Exitosa!</div>
-        <div class="texto-secundario">Tu recarga se procesó correctamente. ¡Disfruta tu compra!</div>
+        <div class="texto-secundario">Tu recarga se procesó correctamente.</div>
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">ID Jugador</span><span class="resumen-valor" id="resIdResumen">-</span></div>
-            <div class="resumen-fila"><span class="resumen-etiqueta">Método</span><span class="resumen-valor" id="resMetodo">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">ID</span><span class="resumen-valor" id="resIdResumen">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
         </div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
+        <div id="pinContainer"></div>
+        <a href="pedidos.html" class="volver-btn">📋 Ver mis pedidos</a>
     </div>
 
-    <!-- ⚠️ SIN SALDO -->
-    <div id="pasoSinSaldo" class="paso-box">
-        <div class="icono-circle icono-amarillo">⚠</div>
-        <div class="texto-principal">Servicio Temporalmente Indisponible</div>
-        <div class="texto-secundario">El pago fue confirmado, pero estamos procesando la recarga. Se completará en breve.</div>
-        <div class="mantengo-box">
-            💳 Tu pago quedó registrado y seguro. En cuanto se restablezca el servicio, la recarga se enviará automáticamente. Te llegará un aviso por Telegram.
-        </div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a la tienda</a>
-    </div>
-
-    <!-- ❌ PAGO NO ENCONTRADO -->
+    <!-- ERROR -->
     <div id="pasoPagoNoEncontrado" class="paso-box">
         <div class="icono-circle icono-error">✕</div>
         <div class="texto-principal">Pago No Encontrado</div>
@@ -456,13 +226,11 @@ body{
         <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 
-    <!-- ⚠️ REFERENCIA YA USADA -->
     <div id="pasoReferenciaUsada" class="paso-box">
         <div class="icono-circle icono-amarillo">⚠</div>
         <div class="texto-principal">Referencia Ya Utilizada</div>
-        <div class="texto-secundario">Esta referencia ya fue usada en un pago anterior. Usa una referencia nueva.</div>
-        <div class="usada-box">🔒 Cada referencia se puede usar <strong>UNA SOLA VEZ</strong> por seguridad.</div>
-        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar con otra referencia</a>
+        <div class="texto-secundario">Esta referencia ya fue usada. Usa una nueva.</div>
+        <a href="javascript:history.back()" class="volver-btn">← Volver a intentar</a>
     </div>
 </div>
 
@@ -471,38 +239,27 @@ body{
 // 🔥 FIREBASE — INICIALIZACIÓN
 // ==============================================
 const firebaseConfig = {
-  apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
-  authDomain: "free-52119.firebaseapp.com",
-  databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "free-52119",
-  storageBucket: "free-52119.firebasestorage.app",
-  messagingSenderId: "632240144599",
-  appId: "1:632240144599:web:e31c25665ffe19c194b092",
-  measurementId: "G-5NLLLEPWPK"
+    apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+    authDomain: "free-52119.firebaseapp.com",
+    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "free-52119",
+    storageBucket: "free-52119.firebasestorage.app",
+    messagingSenderId: "632240144599",
+    appId: "1:632240144599:web:e31c25665ffe19c194b092"
 };
 
 firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 const db = firebase.database();
 const refReferencias = db.ref("referencias_usadas");
 const refPedidos = db.ref("pedidos");
 
 // ==============================================
-// 🔑 CONFIGURACIÓN DE APIS
+// 🔑 CONFIGURACIÓN
 // ==============================================
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
-
-// 🔴 FREE FIRE - NO TOCAR (API Central Pro)
-const FF_API_TOKEN = "NTPvkKmEe0DckQSx6O6Oj7XVq84A2iScZE31CpXxv3s";
-const FF_API_URL = "https://apicentral.pro/apis/freefire.jsp";
-
-// 🟢 PAGONORTE - Netflix, Blood Strike, Disney+
-const PAGONORTE_URL = "https://pagonorte.net/recargas/api.jsp";
-const PAGONORTE_API_KEY = "pn_8dc8d383aa88020b5df8365052e4ecf5168a";
-const PAGONORTE_API_SECRET = "ps_d2560b3ebbcf815216020d4a8b167c2e7fca7fb059d11b05";
-
-// TELEGRAM
 const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
 const TELEGRAM_CHAT_ID = "8452807558";
 
@@ -517,94 +274,64 @@ const precioUsd = localStorage.getItem('precio_usd') || "0";
 const precioBs = localStorage.getItem('precio_en_bs') || "0";
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 
-// ==============================================
-// 📄 CARGAR DATOS EN PANTALLA
-// ==============================================
+// Mostrar datos
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
-document.getElementById('datoNombreJugador').textContent = nombreJugador;
 document.getElementById('datoProducto').textContent = producto;
 document.getElementById('datoMontoTotal').innerHTML = `${precioUsd} USD<br><small style="color:#cbd5e1">${precioBs} Bs</small>`;
 document.getElementById('montoBsMostrar').textContent = precioBs + " Bs";
 
 // ==============================================
-// 📋 COPIAR TEXTO INDIVIDUAL
+// 📋 COPIAR
 // ==============================================
 function copiarTexto(texto, boton){
-    navigator.clipboard.writeText(texto)
-        .then(() => {
-            boton.classList.add('copiado');
-            setTimeout(() => {
-                boton.classList.remove('copiado');
-            }, 2000);
-        })
-        .catch(err => alert("Copiado: " + texto));
+    navigator.clipboard.writeText(texto).then(() => {
+        boton.classList.add('copiado');
+        setTimeout(() => boton.classList.remove('copiado'), 2000);
+    }).catch(err => alert("Copiado: " + texto));
 }
 
-// ==============================================
-// 📋 COPIAR TODOS LOS DATOS DE PAGO
-// ==============================================
 function copiarTodosLosDatos(boton){
-    const datosCompletos = `Banco: (0102) BDV
-Cédula: 32824869
-Teléfono: 04228242411
-Monto: ${precioBs} Bs`;
-
-    navigator.clipboard.writeText(datosCompletos)
-        .then(() => {
-            boton.classList.add('copiado-todo');
-            boton.innerHTML = `✓ Datos copiados`;
-            setTimeout(() => {
-                boton.classList.remove('copiado-todo');
-                boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
-            }, 2500);
-        })
-        .catch(err => alert("No se pudo copiar automáticamente. Selecciona y copia manualmente:\n\n" + datosCompletos));
+    const datos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBs} Bs`;
+    navigator.clipboard.writeText(datos).then(() => {
+        boton.innerHTML = `✓ Datos copiados`;
+        setTimeout(() => {
+            boton.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar todos los datos de pago`;
+        }, 2500);
+    }).catch(() => alert("Copia manualmente:\n\n" + datos));
 }
 
 // ==============================================
-// 🔒 FIREBASE — VERIFICAR REFERENCIA
+// 🔒 FIREBASE - REFERENCIAS
 // ==============================================
-async function verificarReferenciaEnFirebase(referencia) {
+async function verificarReferenciaEnFirebase(ref) {
     try {
-        const snapshot = await refReferencias.child(referencia).once('value');
-        return snapshot.exists();
-    } catch (error) {
-        console.error('Error verificando referencia:', error);
-        return false;
-    }
+        const snap = await refReferencias.child(ref).once('value');
+        return snap.exists();
+    } catch (e) { return false; }
 }
 
-// ==============================================
-// 🔒 FIREBASE — MARCAR REFERENCIA COMO USADA
-// ==============================================
-async function marcarReferenciaComoUsada(referencia) {
+async function marcarReferenciaComoUsada(ref) {
     try {
-        await refReferencias.child(referencia).set({
+        await refReferencias.child(ref).set({
             fecha_uso: new Date().toISOString(),
-            juego: juego,
-            id_jugador: idJugador,
-            nombre_jugador: nombreJugador,
-            producto: producto,
-            monto_usd: precioUsd,
-            monto_bs: precioBs,
-            paquete: paqueteCod,
-            dispositivo: navigator.userAgent.substring(0, 100)
+            juego, id_jugador: idJugador, producto,
+            monto_usd: precioUsd, monto_bs: precioBs,
+            paquete: paqueteCod
         });
         return true;
-    } catch (error) {
-        console.error('Error marcando referencia:', error);
-        return false;
-    }
+    } catch (e) { return false; }
 }
 
 // ==============================================
-// 💾 FIREBASE — GUARDAR PEDIDO
+// 💾 FIREBASE - GUARDAR PEDIDO (CON UID)
 // ==============================================
-async function guardarPedidoEnFirebase(referencia, estado, idSolicitud = '', proveedor = '') {
+async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos) {
     try {
+        const user = auth.currentUser;
         const nuevoPedido = refPedidos.push();
         await nuevoPedido.set({
+            uid: user ? user.uid : 'anonimo',
             referencia: referencia,
             juego: juego,
             id_jugador: idJugador,
@@ -614,11 +341,14 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud = '', pro
             monto_bs: precioBs,
             paquete: paqueteCod,
             estado: estado,
-            id_solicitud: idSolicitud,
-            proveedor: proveedor,
+            id_solicitud: idSolicitud || '',
+            proveedor: proveedor || '',
             fecha: new Date().toISOString(),
             metodo: 'Pago Móvil',
-            dispositivo: navigator.userAgent.substring(0, 100)
+            referencia_pago: referencia,
+            // 🔑 PIN para Roblox
+            pin: codigos && codigos.length > 0 ? codigos[0] : null,
+            codigos: codigos || []
         });
         return nuevoPedido.key;
     } catch (error) {
@@ -628,11 +358,10 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud = '', pro
 }
 
 // ==============================================
-// 📢 ENVIAR MENSAJE A TELEGRAM
+// 📢 TELEGRAM
 // ==============================================
 function enviarTelegram(mensaje) {
-    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-    fetch(url, {
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -640,150 +369,7 @@ function enviarTelegram(mensaje) {
             text: mensaje,
             parse_mode: 'HTML'
         })
-    }).catch(err => console.log("Error enviando Telegram:", err));
-}
-
-// ==============================================
-// 🎮 ENVIAR RECARGA A API CENTRAL PRO - FREE FIRE
-// 🔴 NO TOCAR ESTA FUNCIÓN
-// ==============================================
-async function enviarRecargaFreeFire() {
-    if (!juego.toUpperCase().includes("FREE FIRE") || !idJugador || !paqueteCod) {
-        return { exito: true, mensaje: "Servicio procesado correctamente" };
-    }
-    
-    const url = `${FF_API_URL}?token=${FF_API_TOKEN}&tipo=recargaFreefire&id_jugador=${encodeURIComponent(idJugador)}&paquete=${paqueteCod}`;
-    
-    console.log('📤 Enviando a API Central Pro:', url);
-    
-    try {
-        const res = await fetch(url);
-        const text = await res.text();
-        console.log('📥 Respuesta:', text);
-        
-        let json;
-        try {
-            json = JSON.parse(text);
-        } catch {
-            json = { raw: text };
-        }
-        
-        const esExito = 
-            json.alerta === "green" || 
-            json.estado === "exito" || 
-            json.exito === true || 
-            json.success === true || 
-            json.codigo_respuesta === "00" ||
-            (json.mensaje && (json.mensaje.includes("exito") || json.mensaje.includes("exitosa")));
-        
-        const sinSaldo = 
-            json.alerta === "red" || 
-            json.mensaje?.toLowerCase().includes("saldo") || 
-            json.error;
-        
-        if (esExito && !sinSaldo) {
-            return { exito: true, mensaje: json.mensaje || "Recarga exitosa ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        }
-        
-        if (sinSaldo) {
-            return { exito: false, sinSaldo: true, mensaje: json.mensaje || "Saldo insuficiente" };
-        }
-        
-        return { exito: true, mensaje: json.mensaje || "Recarga procesada ✅", id_solicitud: json.id_solicitud || json.id || 'N/A', proveedor: 'API Central Pro' };
-        
-    } catch (error) {
-        console.error('❌ Error en recarga:', error);
-        return { exito: true, mensaje: "Recarga en proceso ✅" };
-    }
-}
-
-// ==============================================
-// 🟢 ENVIAR RECARGA A PAGONORTE - Netflix, Blood Strike, Disney+
-// ==============================================
-async function enviarRecargaPagoNorte() {
-    // Determinar el tipo según el juego
-    let tipo = '';
-    let proveedor = 'PagoNorte';
-    
-    const juegoUpper = juego.toUpperCase();
-    
-    if (juegoUpper.includes('NETFLIX')) {
-        tipo = 'recargaPerfilNetflix';
-        proveedor = 'PagoNorte - Netflix';
-    } else if (juegoUpper.includes('DISNEY')) {
-        tipo = 'recargaPerfilDisney';
-        proveedor = 'PagoNorte - Disney+';
-    } else if (juegoUpper.includes('BLOOD') || juegoUpper.includes('STRIKE') || juegoUpper.includes('BLOOD STRIKE')) {
-        tipo = 'recargaBloodStrike';
-        proveedor = 'PagoNorte - Blood Strike';
-    } else {
-        // Si no es ninguno de estos, no hacer nada
-        return { exito: true, mensaje: "Servicio procesado correctamente" };
-    }
-    
-    // Construir parámetros
-    const params = new URLSearchParams({
-        action: 'recarga',
-        api_key: PAGONORTE_API_KEY,
-        api_secret: PAGONORTE_API_SECRET,
-        tipo: tipo,
-        id_jugador: idJugador || '000000000',
-        paquete: paqueteCod || '1',
-        referencia: Date.now() + '_' + Math.random().toString(36).substring(2, 8)
-    });
-    
-    // Para streaming (Netflix, Disney+) se envía email
-    if (juegoUpper.includes('NETFLIX') || juegoUpper.includes('DISNEY')) {
-        params.append('email', idJugador || 'usuario@email.com');
-    }
-    
-    console.log('📤 Enviando a PagoNorte:', params.toString());
-    
-    try {
-        const res = await fetch(PAGONORTE_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: params.toString()
-        });
-        
-        const datos = await res.json();
-        console.log('📥 Respuesta PagoNorte:', datos);
-        
-        const esExito = datos.ok === true && datos.alerta === "green" && datos.codigo_respuesta === "00";
-        
-        if (esExito) {
-            return {
-                exito: true,
-                mensaje: datos.mensaje || 'Recarga exitosa ✅',
-                id_solicitud: datos.id_solicitud || 'N/A',
-                proveedor: proveedor,
-                datos_extra: {
-                    cuenta: datos.cuenta || null,
-                    correo: datos.correo || null,
-                    clave: datos.clave || null,
-                    perfil: datos.perfil || null,
-                    fecha_vencimiento: datos.fecha_vencimiento || null,
-                    codigo_aprobacion: datos.codigo_aprobacion || null
-                }
-            };
-        } else {
-            return {
-                exito: false,
-                mensaje: datos.mensaje || 'Error en la recarga',
-                error: datos.alerta || 'Error'
-            };
-        }
-        
-    } catch (error) {
-        console.error('❌ Error en PagoNorte:', error);
-        return {
-            exito: true,
-            mensaje: "Recarga en proceso ✅",
-            proveedor: proveedor
-        };
-    }
+    }).catch(err => console.log("Error Telegram:", err));
 }
 
 // ==============================================
@@ -794,13 +380,6 @@ async function verificarPagoPabilo(referencia) {
     montoPago = parseInt(montoPago) || Math.round(parseFloat(precioBs));
     const fecha = new Date().toISOString().split('T')[0];
 
-    const cuerpo = { 
-        bank_reference: referencia, 
-        amount: montoPago, 
-        movement_type: "GENERIC", 
-        fecha_pago: fecha 
-    };
-
     try {
         const res = await fetch(API_PABILO_URL, {
             method: 'POST',
@@ -808,27 +387,78 @@ async function verificarPagoPabilo(referencia) {
                 'Content-Type': 'application/json', 
                 'Authorization': `Bearer ${API_KEY}` 
             },
-            body: JSON.stringify(cuerpo)
+            body: JSON.stringify({ 
+                bank_reference: referencia, 
+                amount: montoPago, 
+                movement_type: "GENERIC", 
+                fecha_pago: fecha 
+            })
         });
         
         const datos = await res.json();
-        console.log('📥 Respuesta Pábilo:', datos);
+        console.log('📥 Pábilo:', datos);
         
         if (res.ok && datos) {
             const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
             const dataStatus = (datos.data?.status || "").toLowerCase();
-            
-            return res.ok && (
-                msg === 'payment confirmed' || msg === 'paid' || msg === 'confirmado' || 
-                msg === 'aprobado' || msg.includes('confirmado') || msg.includes('aprobado') || 
-                msg.includes('pagado') || dataStatus === 'paid' || dataStatus === 'confirmado' ||
-                datos.success === true || datos.exito === true || datos.paid === true
-            );
+            return msg.includes('confirmado') || msg.includes('aprobado') || 
+                   msg.includes('pagado') || dataStatus === 'paid' || 
+                   datos.success === true || datos.paid === true;
         }
         return false;
     } catch(error) {
-        console.error('❌ Error en Pábilo:', error);
+        console.error('❌ Error Pábilo:', error);
         return false;
+    }
+}
+
+// ==============================================
+// 🎮 ENVIAR RECARGA A CENTRAL ONE (API OCULTA)
+// ==============================================
+async function enviarRecargaCentralOne() {
+    try {
+        const res = await fetch('/api/central-one', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                accion: 'recarga',
+                datos: {
+                    juego: juego.toUpperCase(),
+                    id_jugador: idJugador,
+                    paquete: paqueteCod,
+                    email: idJugador
+                }
+            })
+        });
+
+        const data = await res.json();
+        console.log('📥 Central One:', data);
+
+        if (!res.ok) {
+            if (data.sinSaldo) {
+                return { exito: false, sinSaldo: true, mensaje: data.error || 'Saldo insuficiente' };
+            }
+            if (data.sinStock) {
+                return { exito: false, mensaje: 'Producto agotado' };
+            }
+            return { exito: false, mensaje: data.error || 'Error en la recarga' };
+        }
+
+        return {
+            exito: data.exito !== false,
+            mensaje: data.mensaje || 'Recarga exitosa ✅',
+            id_solicitud: data.id_solicitud || 'N/A',
+            referencia: data.referencia || 'N/A',
+            codigos: data.codigos || [],
+            codigo: data.codigo || null
+        };
+
+    } catch (error) {
+        console.error('❌ Error Central One:', error);
+        return {
+            exito: false,
+            mensaje: "Error de conexión. Intenta en unos minutos."
+        };
     }
 }
 
@@ -845,17 +475,16 @@ async function iniciarVerificacion() {
     const btn = document.getElementById('btnVerificar');
     
     if (!referencia || referencia.length < 6) {
-        alert("❌ Escribe la referencia completa del pago (mínimo 6 dígitos)");
+        alert("❌ Escribe la referencia completa (mínimo 6 dígitos)");
         return;
     }
     
     btn.disabled = true;
     btn.innerHTML = '⏳ Verificando...';
-    
     mostrarPaso('pasoVerificandoPago');
     
     try {
-        // PASO 1: Verificar en Firebase si ya fue usada
+        // 1. Verificar en Firebase
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
             mostrarPaso('pasoReferenciaUsada');
@@ -864,7 +493,7 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // PASO 2: Verificar en Pábilo
+        // 2. Verificar en Pábilo
         const pagoConfirmado = await verificarPagoPabilo(referencia);
         
         if (!pagoConfirmado) {
@@ -874,98 +503,66 @@ async function iniciarVerificacion() {
             return;
         }
         
-        // PASO 3: Marcar referencia como usada en Firebase
+        // 3. Marcar referencia
         await marcarReferenciaComoUsada(referencia);
-        
         mostrarPaso('pasoPagoConfirmado');
         await new Promise(r => setTimeout(r, 1200));
         
-        // PASO 4: Conectar con servidor y enviar recarga
+        // 4. Procesar recarga con Central One
         mostrarPaso('pasoConectandoServidor');
         
-        let resultadoRecarga = null;
+        let resultadoRecarga = await enviarRecargaCentralOne();
         
-        // 🔴 FREE FIRE - API Central Pro (NO TOCAR)
-        if (juego.toUpperCase().includes('FREE FIRE')) {
-            resultadoRecarga = await enviarRecargaFreeFire();
-        } 
-        // 🟢 NETFLIX, BLOOD STRIKE, DISNEY+ - PagoNorte
-        else if (juego.toUpperCase().includes('NETFLIX') || 
-                 juego.toUpperCase().includes('BLOOD') || 
-                 juego.toUpperCase().includes('STRIKE') || 
-                 juego.toUpperCase().includes('DISNEY')) {
-            resultadoRecarga = await enviarRecargaPagoNorte();
-        } 
-        // OTROS SERVICIOS
-        else {
-            resultadoRecarga = { exito: true, mensaje: "Servicio procesado correctamente", proveedor: 'Manual' };
-        }
+        await new Promise(r => setTimeout(r, 1000));
         
-        await new Promise(r => setTimeout(r, 1500));
-        
-        // PASO 5: Guardar pedido en Firebase
+        // 5. Guardar en Firebase
         const idPedido = await guardarPedidoEnFirebase(
-            referencia, 
+            referencia,
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
             resultadoRecarga.id_solicitud || '',
-            resultadoRecarga.proveedor || ''
+            'Central One',
+            resultadoRecarga.codigos || []
         );
         
-        // PASO 6: Mostrar resultado
+        // 6. Mostrar resultado
         if (resultadoRecarga.exito) {
             document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
             document.getElementById('resProducto').textContent = producto;
             document.getElementById('resIdResumen').textContent = idJugador;
-            document.getElementById('resMetodo').textContent = 'Pago Móvil';
             document.getElementById('resReferencia').textContent = referencia;
             document.getElementById('resMonto').textContent = `${precioUsd} USD / ${precioBs} Bs`;
             
+            // 🔑 Mostrar PIN si es Roblox
+            if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
+                const pin = resultadoRecarga.codigos[0];
+                document.getElementById('pinContainer').innerHTML = `
+                    <div class="pin-box">
+                        <div class="pin-label">🎮 TU PIN DE ROBLOX</div>
+                        <div class="pin-value">${pin}</div>
+                        <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pin}'); alert('✅ PIN copiado')">
+                            📋 Copiar PIN
+                        </button>
+                        <div style="font-size: 11px; color: #9ca3af; margin-top: 10px;">
+                            ⚠️ Guarda este PIN. También lo verás en "Mis Pedidos".
+                        </div>
+                    </div>
+                `;
+            }
+            
             mostrarPaso('pasoRecargaExitosa');
             
-            // Enviar Telegram éxito
-            let mensajeExito = `
-🎉 <b>RECARGA EXITOSA</b>
-
-🎮 Juego: ${juego}
-👤 Nombre: ${nombreJugador}
-🆔 ID: ${idJugador}
-📦 Producto: ${producto}
-💰 Monto: ${precioUsd} USD / ${precioBs} Bs
-🔢 Referencia: ${referencia}
-📋 Pedido: #${(idPedido || '0000').substring(0, 8).toUpperCase()}
-✅ Estado: COMPLETADA
-🔌 Proveedor: ${resultadoRecarga.proveedor || 'N/A'}`;
-            
-            // Si hay datos extra (cuenta de streaming)
-            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.cuenta) {
-                mensajeExito += `\n\n📺 Cuenta: ${resultadoRecarga.datos_extra.cuenta}`;
+            // Telegram
+            let msg = `🎉 <b>RECARGA EXITOSA</b>\n\n🎮 ${juego}\n🆔 ${idJugador}\n📦 ${producto}\n💰 ${precioUsd} USD\n🔢 ${referencia}\n📋 Pedido: #${(idPedido || '').substring(0, 8).toUpperCase()}`;
+            if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
+                msg += `\n🎮 PIN: ${resultadoRecarga.codigos[0]}`;
             }
-            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.correo) {
-                mensajeExito += `\n📧 Correo: ${resultadoRecarga.datos_extra.correo}`;
-            }
-            if (resultadoRecarga.datos_extra && resultadoRecarga.datos_extra.clave) {
-                mensajeExito += `\n🔑 Clave: ${resultadoRecarga.datos_extra.clave}`;
-            }
-            
-            enviarTelegram(mensajeExito);
+            enviarTelegram(msg);
             
         } else {
-            mostrarPaso('pasoSinSaldo');
+            mostrarPaso('pasoPagoNoEncontrado');
+            document.querySelector('#pasoPagoNoEncontrado .texto-secundario').textContent = resultadoRecarga.mensaje;
             
-            // Enviar Telegram pendiente
-            enviarTelegram(`
-⚠️ <b>PAGO PENDIENTE</b>
-
-🎮 Juego: ${juego}
-👤 Nombre: ${nombreJugador}
-🆔 ID: ${idJugador}
-📦 Producto: ${producto}
-💰 Monto: ${precioUsd} USD / ${precioBs} Bs
-🔢 Referencia: ${referencia}
-📋 Pedido: #${(idPedido || '0000').substring(0, 8).toUpperCase()}
-⏳ Estado: PENDIENTE
-⚠️ Motivo: ${resultadoRecarga.mensaje || 'Saldo insuficiente'}
-            `);
+            enviarTelegram(`⚠️ <b>RECARGA FALLIDA</b>\n\n🎮 ${juego}\n🆔 ${idJugador}\n📦 ${producto}\n⚠️ ${resultadoRecarga.mensaje}`);
         }
         
     } catch (error) {
@@ -978,9 +575,7 @@ async function iniciarVerificacion() {
     }
 }
 
-// ==============================================
-// ⌨️ ENTER PARA ENVIAR
-// ==============================================
+// ENTER para enviar
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
         const pasoActivo = document.querySelector('.paso-box.activo');
@@ -991,13 +586,11 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-console.log('🚀 RECARGASGAMES - Pasarela de Pagos con Firebase');
-console.log('📦 Juego:', juego);
-console.log('👤 Nombre:', nombreJugador);
+console.log('🚀 Pasarela cargada');
+console.log('🎮 Juego:', juego);
 console.log('🆔 ID:', idJugador);
 console.log('📦 Producto:', producto);
 console.log('🔢 Paquete:', paqueteCod);
 </script>
-
 </body>
 </html>
