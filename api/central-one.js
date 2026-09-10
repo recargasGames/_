@@ -153,7 +153,7 @@ export default async function handler(req, res) {
                     esProductoConPin = true;
                 }
                 // ==============================================
-                // ⚔️ MOBILE LEGENDS (FALTA CONFIGURAR)
+                // ⚔️ MOBILE LEGENDS
                 // ==============================================
                 else if (juegoUpper === 'MOBILE LEGENDS') {
                     const uuidMap = {
@@ -336,3 +336,4 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Error interno', detalle: error.message });
     }
 }
+
