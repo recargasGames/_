@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 🎮 SOLO ESTOS JUEGOS APARECEN EN EL CATÁLOGO
+        // 🎮 SOLO ESTOS JUEGOS APARECEN
         // ==============================================
         const JUEGOS_PERMITIDOS = [
             'FREE FIRE',
@@ -31,6 +31,11 @@ export default async function handler(req, res) {
         ];
 
         // ==============================================
+        // 🚫 EXCLUIR PRODUCTOS CON PIN
+        // ==============================================
+        const EXCLUIR = ['PIN', 'CODE', 'CODIGO', 'GIFTCARD', 'GIFT CARD'];
+
+        // ==============================================
         // 📌 GET - PRUEBA Y CATÁLOGO FILTRADO
         // ==============================================
         if (req.method === 'GET') {
@@ -42,22 +47,31 @@ export default async function handler(req, res) {
                 });
                 const data = await response.json();
 
-                // ✅ FILTRAR: Solo mostrar los juegos permitidos
                 if (data.items && Array.isArray(data.items)) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
-                        
-                        return JUEGOS_PERMITIDOS.some(juego => 
+
+                        // 1. ¿Es de un juego permitido?
+                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
+
+                        // 2. ¿Tiene PIN/CODE?
+                        const tienePin = EXCLUIR.some(palabra =>
+                            nombre.includes(palabra) || sku.includes(palabra)
+                        );
+
+                        // ✅ Solo mostrar si ES juego permitido Y NO tiene PIN
+                        return esJuegoPermitido && !tienePin;
                     });
 
                     return res.status(200).json({
                         items: itemsFiltrados,
                         total_filtrado: itemsFiltrados.length,
                         total_original: data.items.length,
-                        juegos_permitidos: JUEGOS_PERMITIDOS
+                        juegos_permitidos: JUEGOS_PERMITIDOS,
+                        excluidos: EXCLUIR
                     });
                 }
 
@@ -68,7 +82,8 @@ export default async function handler(req, res) {
                 mensaje: '✅ API de Central One funcionando',
                 status: 'online',
                 hora: new Date().toISOString(),
-                juegos_soportados: JUEGOS_PERMITIDOS
+                juegos_soportados: JUEGOS_PERMITIDOS,
+                nota: 'Catálogo filtrado solo con recargas directas (sin PIN)'
             });
         }
 
@@ -77,8 +92,6 @@ export default async function handler(req, res) {
         // ==============================================
         if (req.method === 'POST') {
             const { accion, datos } = req.body || {};
-
-            console.log('📥 Acción:', accion);
 
             // ==============================================
             // 📦 CATÁLOGO FILTRADO
@@ -89,22 +102,26 @@ export default async function handler(req, res) {
                 });
                 const data = await response.json();
 
-                // ✅ FILTRAR solo tus juegos
                 if (data.items && Array.isArray(data.items)) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
-                        
-                        return JUEGOS_PERMITIDOS.some(juego => 
+
+                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
+
+                        const tienePin = EXCLUIR.some(palabra =>
+                            nombre.includes(palabra) || sku.includes(palabra)
+                        );
+
+                        return esJuegoPermitido && !tienePin;
                     });
 
                     return res.status(200).json({
                         items: itemsFiltrados,
                         total_filtrado: itemsFiltrados.length,
-                        total_original: data.items.length,
-                        juegos_permitidos: JUEGOS_PERMITIDOS
+                        total_original: data.items.length
                     });
                 }
 
@@ -125,7 +142,7 @@ export default async function handler(req, res) {
                 let productId = null;
                 let esProductoConPin = false;
 
-                // 🔥 FREE FIRE
+                // 🔥 FREE FIRE - RECARGA DIRECTA (UUIDs reales)
                 if (juegoUpper === 'FREE FIRE' || juegoUpper === 'FREE_FIRE') {
                     const uuidMap = {
                         '110': 'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
@@ -145,7 +162,7 @@ export default async function handler(req, res) {
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete Blood Strike no encontrado: ${paquete}` });
                 }
-                // 🧱 ROBLOX (ÚNICO CON PIN)
+                // 🧱 ROBLOX - ÚNICO CON PIN
                 else if (juegoUpper === 'ROBLOX') {
                     const uuidMap = {
                         '10': 'UUID_ROBLOX_10USD',
