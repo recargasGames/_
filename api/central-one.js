@@ -10,7 +10,6 @@ export default async function handler(req, res) {
     }
 
     try {
-        // ⚠️ API Key desde Vercel
         const API_KEY = process.env.CENTRAL_ONE_API_KEY;
         if (!API_KEY) {
             console.error('❌ API Key no configurada');
@@ -27,28 +26,21 @@ export default async function handler(req, res) {
         if (req.method === 'GET') {
             const accion = req.query?.accion;
 
-            // 📦 OBTENER CATÁLOGO (para ver UUIDs)
             if (accion === 'catalogo') {
                 const response = await fetch(`${BASE_URL}/catalog`, {
                     headers: {
                         'Authorization': `Bearer ${API_KEY}`
                     }
                 });
-
                 const data = await response.json();
                 return res.status(response.status).json(data);
             }
 
-            // ✅ Respuesta de prueba por defecto
             return res.status(200).json({
                 mensaje: '✅ API de Central One funcionando',
                 status: 'online',
                 version: '1.0.0',
-                hora: new Date().toISOString(),
-                acciones: {
-                    catalogo: 'GET /api/central-one?accion=catalogo',
-                    recarga: 'POST /api/central-one con {accion: "recarga", datos: {...}}'
-                }
+                hora: new Date().toISOString()
             });
         }
 
@@ -62,7 +54,7 @@ export default async function handler(req, res) {
             console.log('📥 Datos:', JSON.stringify(datos));
 
             // ==============================================
-            // 📦 CATÁLOGO (también por POST)
+            // 📦 CATÁLOGO
             // ==============================================
             if (accion === 'catalogo') {
                 const response = await fetch(`${BASE_URL}/catalog`, {
@@ -70,7 +62,6 @@ export default async function handler(req, res) {
                         'Authorization': `Bearer ${API_KEY}`
                     }
                 });
-
                 const data = await response.json();
                 return res.status(response.status).json(data);
             }
@@ -87,21 +78,47 @@ export default async function handler(req, res) {
                     });
                 }
 
-                // 🔥 MAPA DE PRODUCTOS - REEMPLAZA CON TUS UUIDs
-                const productMap = {
-                    'FREE FIRE': 'UUID_FREE_FIRE',
-                    'MOBILE LEGENDS': 'UUID_MOBILE_LEGENDS',
-                    'ARENA BREAKOUT': 'UUID_ARENA_BREAKOUT',
-                    'BLOOD STRIKE': 'UUID_BLOOD_STRIKE',
-                    'ROBLOX': 'UUID_ROBLOX',
-                    'DELTA FORCE': 'UUID_DELTA_FORCE',
-                    'PUBG MOBILE': 'UUID_PUBG_MOBILE'
-                };
-
                 const juegoUpper = juego.toUpperCase();
-                const productId = productMap[juegoUpper];
+                let productId = null;
 
-                if (!productId) {
+                // 🔥 FREE FIRE - UUIDs REALES
+                if (juegoUpper === 'FREE FIRE' || juegoUpper === 'FREE_FIRE') {
+                    const uuidMap = {
+                        '110': 'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
+                        '1166': 'afad588d-54f9-4227-9c0b-9889a9135370',
+                        '2398': '72b92180-b858-41fc-8e9d-bc402c16db80',
+                        '110-PIN': '761db66e-9d2c-4eb3-8fde-acedea51b0e7',
+                        '1166-PIN': 'a2c30a7f-a7d7-4c26-b08b-06c386a66748'
+                    };
+
+                    productId = uuidMap[String(paquete)];
+
+                    if (!productId) {
+                        return res.status(400).json({
+                            error: `Paquete de Free Fire no encontrado: ${paquete}`
+                        });
+                    }
+                }
+                // 🔥 OTROS JUEGOS
+                else if (juegoUpper === 'MOBILE LEGENDS') {
+                    productId = 'UUID_MOBILE_LEGENDS';
+                }
+                else if (juegoUpper === 'ROBLOX') {
+                    productId = 'UUID_ROBLOX';
+                }
+                else if (juegoUpper === 'ARENA BREAKOUT') {
+                    productId = 'UUID_ARENA_BREAKOUT';
+                }
+                else if (juegoUpper === 'BLOOD STRIKE') {
+                    productId = 'UUID_BLOOD_STRIKE';
+                }
+                else if (juegoUpper === 'DELTA FORCE') {
+                    productId = 'UUID_DELTA_FORCE';
+                }
+                else if (juegoUpper === 'PUBG MOBILE') {
+                    productId = 'UUID_PUBG_MOBILE';
+                }
+                else {
                     return res.status(400).json({
                         error: `Producto no soportado: ${juego}`
                     });
@@ -114,12 +131,15 @@ export default async function handler(req, res) {
                 const payload = {
                     items: [{
                         catalog_item_id: productId,
-                        quantity: 1
+                        quantity: 1,
+                        target_payload: {
+                            player_id: id_jugador
+                        }
                     }],
-                    note: `${juego} - ID: ${id_jugador}`
+                    note: `${juego} - ID: ${id_jugador} - Paquete: ${paquete}`
                 };
 
-                // Target payload según el juego
+                // Para Roblox y Mobile Legends, target_payload especial
                 if (juegoUpper === 'ROBLOX') {
                     payload.items[0].target_payload = {
                         player_id: id_jugador,
@@ -129,10 +149,6 @@ export default async function handler(req, res) {
                     payload.items[0].target_payload = {
                         player_id: id_jugador,
                         server: servidor || '1'
-                    };
-                } else {
-                    payload.items[0].target_payload = {
-                        player_id: id_jugador
                     };
                 }
 
@@ -178,14 +194,11 @@ export default async function handler(req, res) {
                 const orderId = data.order?.id;
                 console.log(`✅ Pedido creado: ${data.order?.reference_code} (ID: ${orderId})`);
 
-                // ==============================================
-                // 🔑 OBTENER PIN (SOLO ROBLOX)
-                // ==============================================
+                // 🔑 OBTENER PIN (SOLO PRODUCTOS PIN)
                 let codigos = [];
 
-                if (juegoUpper === 'ROBLOX' && orderId) {
+                if (String(paquete).includes('PIN') || juegoUpper === 'ROBLOX') {
                     console.log('🔍 Iniciando sondeo para PIN...');
-
                     const maxIntentos = 30;
                     let intento = 0;
 
@@ -193,7 +206,6 @@ export default async function handler(req, res) {
                         intento++;
                         const espera = intento <= 15 ? 2000 : 5000;
                         await new Promise(r => setTimeout(r, espera));
-
                         console.log(`🔍 Intento ${intento}/${maxIntentos}...`);
 
                         try {
@@ -228,7 +240,6 @@ export default async function handler(req, res) {
                     }
                 }
 
-                // Respuesta final
                 const status = data.order?.status || 'confirmed';
                 const esExitosa = status === 'confirmed' || status === 'completed' || status === 'processing';
 
@@ -247,7 +258,7 @@ export default async function handler(req, res) {
             }
 
             // ==============================================
-            // 🔑 CONSULTAR CÓDIGOS DE UN PEDIDO
+            // 🔑 CONSULTAR CÓDIGOS
             // ==============================================
             if (accion === 'obtener-codigos') {
                 const { orderId } = datos || {};
