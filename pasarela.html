@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Procesando Pago - Recargas Games</title>
+    <title>Procesando Recarga - Recargas Games</title>
     <style>
         * {
             margin: 0;
@@ -196,6 +196,7 @@
             margin-top: 15px;
             display: none;
             font-weight: 600;
+            white-space: pre-line;
         }
         .resultado.exito {
             display: block;
@@ -341,7 +342,7 @@
         document.getElementById('resTotal').textContent = `${precioUsd} USD / ${precioBs} Bs`;
 
         // ==============================================
-        // 🚀 PROCESAR RECARGA (SOLO API)
+        // 🚀 PROCESAR RECARGA
         // ==============================================
         async function procesarRecarga() {
             const btn = document.getElementById('btnProcesar');
@@ -361,7 +362,7 @@
             btn.textContent = '⏳ Procesando...';
             spinner.style.display = 'block';
             resultado.className = 'resultado procesando';
-            resultado.textContent = '⏳ Enviando recarga a Central One...';
+            resultado.textContent = '⏳ Enviando recarga...';
             pinContainer.style.display = 'none';
 
             try {
@@ -373,8 +374,10 @@
                     email: idJugador
                 };
 
-                // Llamar a la API
-                const response = await fetch('/api/central-one', {
+                console.log('📤 Enviando:', datosEnvio);
+
+                // ✅ LLAMAR A LA API CON URL COMPLETA
+                const response = await fetch('https://www.recargasgames.shop/api/central-one', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -385,10 +388,21 @@
                     })
                 });
 
+                console.log('📥 Status:', response.status);
+                console.log('📥 Content-Type:', response.headers.get('content-type'));
+
+                // Verificar que la respuesta sea JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const texto = await response.text();
+                    console.error('❌ Respuesta no es JSON:', texto.substring(0, 200));
+                    throw new Error('La API no devolvió JSON. Revisa el backend.');
+                }
+
                 const data = await response.json();
                 console.log('📥 Respuesta:', data);
 
-                // Verificar respuesta
+                // Verificar errores
                 if (!response.ok) {
                     if (data.sinSaldo) {
                         resultado.className = 'resultado error';
@@ -408,16 +422,15 @@
                     resultado.className = 'resultado exito';
                     resultado.textContent = `✅ ${data.mensaje || 'Recarga exitosa'}`;
                     
-                    // Mostrar PIN si es Roblox y hay códigos
+                    if (data.referencia) {
+                        resultado.textContent += `\n📋 Ref: ${data.referencia}`;
+                    }
+
+                    // Mostrar PIN si es Roblox
                     if (data.codigos && data.codigos.length > 0) {
                         pinContainer.style.display = 'block';
                         document.getElementById('pinValue').textContent = data.codigos[0];
-                        resultado.textContent += ' 🎮 PIN generado!';
-                    }
-                    
-                    // Mostrar referencia
-                    if (data.referencia) {
-                        resultado.textContent += `\n📋 Ref: ${data.referencia}`;
+                        resultado.textContent += '\n🎮 PIN generado!';
                     }
 
                 } else {
@@ -428,7 +441,7 @@
             } catch (error) {
                 console.error('❌ Error:', error);
                 resultado.className = 'resultado error';
-                resultado.textContent = `❌ Error de conexión: ${error.message}`;
+                resultado.textContent = `❌ Error: ${error.message}`;
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🔄 Reintentar';
@@ -458,7 +471,6 @@
         // ==============================================
         // ⏳ PROCESAMIENTO AUTOMÁTICO AL CARGAR
         // ==============================================
-        // Si hay datos, procesar automáticamente
         if (idJugador && idJugador.length >= 5) {
             setTimeout(() => {
                 procesarRecarga();
