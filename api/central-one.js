@@ -1,6 +1,5 @@
 // api/central-one.js
 export default async function handler(req, res) {
-    // Configurar CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -12,35 +11,64 @@ export default async function handler(req, res) {
     try {
         const API_KEY = process.env.CENTRAL_ONE_API_KEY;
         if (!API_KEY) {
-            console.error('❌ API Key no configurada');
-            return res.status(500).json({
-                error: 'API Key no configurada'
-            });
+            return res.status(500).json({ error: 'API Key no configurada' });
         }
 
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 📌 GET - PRUEBA Y CATÁLOGO
+        // 🎮 SOLO ESTOS JUEGOS APARECEN EN EL CATÁLOGO
+        // ==============================================
+        const JUEGOS_PERMITIDOS = [
+            'FREE FIRE',
+            'BLOOD STRIKE',
+            'ROBLOX',
+            'MOBILE LEGENDS',
+            'CALL OF DUTY',
+            'PUBG MOBILE',
+            'ARENA BREAKOUT',
+            'DELTA FORCE'
+        ];
+
+        // ==============================================
+        // 📌 GET - PRUEBA Y CATÁLOGO FILTRADO
         // ==============================================
         if (req.method === 'GET') {
             const accion = req.query?.accion;
 
             if (accion === 'catalogo') {
                 const response = await fetch(`${BASE_URL}/catalog`, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`
-                    }
+                    headers: { 'Authorization': `Bearer ${API_KEY}` }
                 });
                 const data = await response.json();
+
+                // ✅ FILTRAR: Solo mostrar los juegos permitidos
+                if (data.items && Array.isArray(data.items)) {
+                    const itemsFiltrados = data.items.filter(item => {
+                        const nombre = (item.name || '').toUpperCase();
+                        const sku = (item.sku || '').toUpperCase();
+                        
+                        return JUEGOS_PERMITIDOS.some(juego => 
+                            nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
+                        );
+                    });
+
+                    return res.status(200).json({
+                        items: itemsFiltrados,
+                        total_filtrado: itemsFiltrados.length,
+                        total_original: data.items.length,
+                        juegos_permitidos: JUEGOS_PERMITIDOS
+                    });
+                }
+
                 return res.status(response.status).json(data);
             }
 
             return res.status(200).json({
                 mensaje: '✅ API de Central One funcionando',
                 status: 'online',
-                version: '1.0.0',
-                hora: new Date().toISOString()
+                hora: new Date().toISOString(),
+                juegos_soportados: JUEGOS_PERMITIDOS
             });
         }
 
@@ -51,18 +79,35 @@ export default async function handler(req, res) {
             const { accion, datos } = req.body || {};
 
             console.log('📥 Acción:', accion);
-            console.log('📥 Datos:', JSON.stringify(datos));
 
             // ==============================================
-            // 📦 CATÁLOGO
+            // 📦 CATÁLOGO FILTRADO
             // ==============================================
             if (accion === 'catalogo') {
                 const response = await fetch(`${BASE_URL}/catalog`, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`
-                    }
+                    headers: { 'Authorization': `Bearer ${API_KEY}` }
                 });
                 const data = await response.json();
+
+                // ✅ FILTRAR solo tus juegos
+                if (data.items && Array.isArray(data.items)) {
+                    const itemsFiltrados = data.items.filter(item => {
+                        const nombre = (item.name || '').toUpperCase();
+                        const sku = (item.sku || '').toUpperCase();
+                        
+                        return JUEGOS_PERMITIDOS.some(juego => 
+                            nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
+                        );
+                    });
+
+                    return res.status(200).json({
+                        items: itemsFiltrados,
+                        total_filtrado: itemsFiltrados.length,
+                        total_original: data.items.length,
+                        juegos_permitidos: JUEGOS_PERMITIDOS
+                    });
+                }
+
                 return res.status(response.status).json(data);
             }
 
@@ -73,88 +118,119 @@ export default async function handler(req, res) {
                 const { juego, id_jugador, paquete, email, servidor } = datos || {};
 
                 if (!juego || !id_jugador) {
-                    return res.status(400).json({
-                        error: 'Faltan datos: juego e id_jugador'
-                    });
+                    return res.status(400).json({ error: 'Faltan datos' });
                 }
 
                 const juegoUpper = juego.toUpperCase();
                 let productId = null;
+                let esProductoConPin = false;
 
-                // 🔥 FREE FIRE - UUIDs REALES
+                // 🔥 FREE FIRE
                 if (juegoUpper === 'FREE FIRE' || juegoUpper === 'FREE_FIRE') {
                     const uuidMap = {
                         '110': 'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
                         '1166': 'afad588d-54f9-4227-9c0b-9889a9135370',
-                        '2398': '72b92180-b858-41fc-8e9d-bc402c16db80',
-                        '110-PIN': '761db66e-9d2c-4eb3-8fde-acedea51b0e7',
-                        '1166-PIN': 'a2c30a7f-a7d7-4c26-b08b-06c386a66748'
+                        '2398': '72b92180-b858-41fc-8e9d-bc402c16db80'
                     };
-
                     productId = uuidMap[String(paquete)];
-
-                    if (!productId) {
-                        return res.status(400).json({
-                            error: `Paquete de Free Fire no encontrado: ${paquete}`
-                        });
-                    }
+                    if (!productId) return res.status(400).json({ error: `Paquete Free Fire no encontrado: ${paquete}` });
                 }
-                // 🔥 OTROS JUEGOS
-                else if (juegoUpper === 'MOBILE LEGENDS') {
-                    productId = 'UUID_MOBILE_LEGENDS';
-                }
-                else if (juegoUpper === 'ROBLOX') {
-                    productId = 'UUID_ROBLOX';
-                }
-                else if (juegoUpper === 'ARENA BREAKOUT') {
-                    productId = 'UUID_ARENA_BREAKOUT';
-                }
+                // ⚔️ BLOOD STRIKE
                 else if (juegoUpper === 'BLOOD STRIKE') {
-                    productId = 'UUID_BLOOD_STRIKE';
+                    const uuidMap = {
+                        '100': 'UUID_BLOOD_STRIKE_100',
+                        '500': 'UUID_BLOOD_STRIKE_500',
+                        '1000': 'UUID_BLOOD_STRIKE_1000'
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete Blood Strike no encontrado: ${paquete}` });
                 }
+                // 🧱 ROBLOX (ÚNICO CON PIN)
+                else if (juegoUpper === 'ROBLOX') {
+                    const uuidMap = {
+                        '10': 'UUID_ROBLOX_10USD',
+                        '20': 'UUID_ROBLOX_20USD',
+                        '50': 'UUID_ROBLOX_50USD'
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete Roblox no encontrado: ${paquete}` });
+                    esProductoConPin = true;
+                }
+                // ⚔️ MOBILE LEGENDS
+                else if (juegoUpper === 'MOBILE LEGENDS') {
+                    const uuidMap = {
+                        '100': 'UUID_ML_100',
+                        '500': 'UUID_ML_500',
+                        '1000': 'UUID_ML_1000'
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete Mobile Legends no encontrado: ${paquete}` });
+                }
+                // 🔫 CALL OF DUTY
+                else if (juegoUpper === 'CALL OF DUTY' || juegoUpper === 'COD') {
+                    const uuidMap = {
+                        '100': 'UUID_COD_100',
+                        '500': 'UUID_COD_500',
+                        '1000': 'UUID_COD_1000'
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete COD no encontrado: ${paquete}` });
+                }
+                // 🪖 PUBG MOBILE
+                else if (juegoUpper === 'PUBG MOBILE' || juegoUpper === 'PUBG') {
+                    const uuidMap = {
+                        '60': 'UUID_PUBG_60',
+                        '325': 'UUID_PUBG_325',
+                        '660': 'UUID_PUBG_660'
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete PUBG no encontrado: ${paquete}` });
+                }
+                // 🎯 ARENA BREAKOUT
+                else if (juegoUpper === 'ARENA BREAKOUT') {
+                    const uuidMap = {
+                        '100': 'UUID_ARENA_100',
+                        '500': 'UUID_ARENA_500',
+                        '1000': 'UUID_ARENA_1000'
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete Arena no encontrado: ${paquete}` });
+                }
+                // 💥 DELTA FORCE
                 else if (juegoUpper === 'DELTA FORCE') {
-                    productId = 'UUID_DELTA_FORCE';
-                }
-                else if (juegoUpper === 'PUBG MOBILE') {
-                    productId = 'UUID_PUBG_MOBILE';
+                    const uuidMap = {
+                        '100': 'UUID_DELTA_100',
+                        '500': 'UUID_DELTA_500',
+                        '1000': 'UUID_DELTA_1000'
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete Delta Force no encontrado: ${paquete}` });
                 }
                 else {
-                    return res.status(400).json({
-                        error: `Producto no soportado: ${juego}`
-                    });
+                    return res.status(400).json({ error: `Producto no soportado: ${juego}` });
                 }
 
-                // Generar idempotency key
                 const idempotencyKey = `recarga-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-                // Preparar payload
                 const payload = {
                     items: [{
                         catalog_item_id: productId,
-                        quantity: 1,
-                        target_payload: {
-                            player_id: id_jugador
-                        }
+                        quantity: 1
                     }],
                     note: `${juego} - ID: ${id_jugador} - Paquete: ${paquete}`
                 };
 
-                // Para Roblox y Mobile Legends, target_payload especial
+                // Target payload
                 if (juegoUpper === 'ROBLOX') {
-                    payload.items[0].target_payload = {
-                        player_id: id_jugador,
-                        email: email || id_jugador
-                    };
+                    payload.items[0].target_payload = { player_id: id_jugador, email: email || id_jugador };
                 } else if (juegoUpper === 'MOBILE LEGENDS') {
-                    payload.items[0].target_payload = {
-                        player_id: id_jugador,
-                        server: servidor || '1'
-                    };
+                    payload.items[0].target_payload = { player_id: id_jugador, server: servidor || '1' };
+                } else {
+                    payload.items[0].target_payload = { player_id: id_jugador };
                 }
 
-                console.log('📤 Enviando a Central One:', JSON.stringify(payload));
+                console.log('📤 Enviando:', JSON.stringify(payload));
 
-                // Crear pedido en Central One
                 const response = await fetch(`${BASE_URL}/orders`, {
                     method: 'POST',
                     headers: {
@@ -166,77 +242,47 @@ export default async function handler(req, res) {
                 });
 
                 const data = await response.json();
-                console.log('📥 Respuesta:', JSON.stringify(data));
 
                 if (!response.ok) {
-                    console.error('❌ Error Central One:', data);
-
                     if (response.status === 409) {
                         if (data.error?.code === 'insufficient_balance') {
-                            return res.status(409).json({
-                                error: 'Saldo insuficiente',
-                                sinSaldo: true
-                            });
+                            return res.status(409).json({ error: 'Saldo insuficiente', sinSaldo: true });
                         }
                         if (data.error?.code === 'insufficient_stock') {
-                            return res.status(409).json({
-                                error: 'Producto agotado',
-                                sinStock: true
-                            });
+                            return res.status(409).json({ error: 'Producto agotado', sinStock: true });
                         }
                     }
-
-                    return res.status(response.status).json({
-                        error: data.error?.message || 'Error en la recarga'
-                    });
+                    return res.status(response.status).json({ error: data.error?.message || 'Error en la recarga' });
                 }
 
                 const orderId = data.order?.id;
-                console.log(`✅ Pedido creado: ${data.order?.reference_code} (ID: ${orderId})`);
 
-                // 🔑 OBTENER PIN (SOLO PRODUCTOS PIN)
+                // 🔑 OBTENER PIN (SOLO ROBLOX)
                 let codigos = [];
-
-                if (String(paquete).includes('PIN') || juegoUpper === 'ROBLOX') {
-                    console.log('🔍 Iniciando sondeo para PIN...');
+                if (esProductoConPin && orderId) {
                     const maxIntentos = 30;
                     let intento = 0;
-
                     while (intento < maxIntentos && codigos.length === 0) {
                         intento++;
                         const espera = intento <= 15 ? 2000 : 5000;
                         await new Promise(r => setTimeout(r, espera));
-                        console.log(`🔍 Intento ${intento}/${maxIntentos}...`);
 
                         try {
                             const codesResponse = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
-                                headers: {
-                                    'Authorization': `Bearer ${API_KEY}`
-                                }
+                                headers: { 'Authorization': `Bearer ${API_KEY}` }
                             });
-
-                            if (!codesResponse.ok) {
-                                if (codesResponse.status === 403) {
-                                    console.error('❌ Falta el scope codes:read');
-                                    break;
-                                }
-                                continue;
-                            }
+                            if (!codesResponse.ok) continue;
 
                             const codesData = await codesResponse.json();
-
                             if (codesData.order?.items?.length > 0) {
                                 for (const item of codesData.order.items) {
-                                    if (item.codes && item.codes.length > 0 && item.status === 'completed') {
+                                    if (item.codes?.length > 0 && item.status === 'completed') {
                                         codigos = item.codes;
-                                        console.log(`✅ PIN encontrado:`, codigos);
                                         break;
                                     }
                                 }
                             }
-                        } catch (err) {
-                            console.log(`⚠️ Error intento ${intento}:`, err.message);
-                        }
+                        } catch (err) {}
                     }
                 }
 
@@ -257,45 +303,13 @@ export default async function handler(req, res) {
                 });
             }
 
-            // ==============================================
-            // 🔑 CONSULTAR CÓDIGOS
-            // ==============================================
-            if (accion === 'obtener-codigos') {
-                const { orderId } = datos || {};
-
-                if (!orderId) {
-                    return res.status(400).json({ error: 'Se requiere orderId' });
-                }
-
-                const codesResponse = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`
-                    }
-                });
-
-                if (!codesResponse.ok) {
-                    return res.status(codesResponse.status).json({
-                        error: `Error ${codesResponse.status}`
-                    });
-                }
-
-                const codesData = await codesResponse.json();
-                return res.status(200).json(codesData);
-            }
-
-            return res.status(400).json({
-                error: 'Acción no válida',
-                acciones_soportadas: ['catalogo', 'recarga', 'obtener-codigos']
-            });
+            return res.status(400).json({ error: 'Acción no válida' });
         }
 
         return res.status(405).json({ error: 'Método no permitido' });
 
     } catch (error) {
-        console.error('❌ Error interno:', error);
-        return res.status(500).json({
-            error: 'Error interno del servidor',
-            detalle: error.message
-        });
+        console.error('❌ Error:', error);
+        return res.status(500).json({ error: 'Error interno', detalle: error.message });
     }
 }
