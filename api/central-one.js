@@ -17,10 +17,17 @@ export default async function handler(req, res) {
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 🎯 SOLO ESTE JUEGO APARECE EN EL CATÁLOGO
+        // 🎯 TODOS LOS JUEGOS APARECEN EN EL CATÁLOGO
         // ==============================================
         const JUEGOS_PERMITIDOS = [
-            'MOBILE LEGENDS'
+            'FREE FIRE',
+            'BLOOD STRIKE',
+            'ROBLOX',
+            'MOBILE LEGENDS',
+            'CALL OF DUTY',
+            'PUBG MOBILE',
+            'ARENA BREAKOUT',
+            'DELTA FORCE'
         ];
 
         const EXCLUIR = ['PIN', 'CODE', 'CODIGO'];
@@ -41,9 +48,20 @@ export default async function handler(req, res) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
-                        return JUEGOS_PERMITIDOS.some(juego =>
+                        const region = (item.region || '').toUpperCase();
+
+                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
+
+                        if (!esJuegoPermitido) return false;
+
+                        // Roblox: solo GLOBAL
+                        if (nombre.includes('ROBLOX') || sku.includes('ROBLOX')) {
+                            return region === 'GLOBAL';
+                        }
+
+                        return true;
                     });
 
                     return res.status(200).json({
@@ -78,9 +96,19 @@ export default async function handler(req, res) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
-                        return JUEGOS_PERMITIDOS.some(juego =>
+                        const region = (item.region || '').toUpperCase();
+
+                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
+
+                        if (!esJuegoPermitido) return false;
+
+                        if (nombre.includes('ROBLOX') || sku.includes('ROBLOX')) {
+                            return region === 'GLOBAL';
+                        }
+
+                        return true;
                     });
 
                     return res.status(200).json({
@@ -190,6 +218,16 @@ export default async function handler(req, res) {
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete COD no encontrado: ${paquete}` });
+                }
+                // ==============================================
+                // 🪖 PUBG MOBILE
+                // ==============================================
+                else if (juegoUpper === 'PUBG MOBILE' || juegoUpper === 'PUBG') {
+                    const uuidMap = {
+                        // 🔴 FALTAN UUIDs
+                    };
+                    productId = uuidMap[String(paquete)];
+                    if (!productId) return res.status(400).json({ error: `Paquete PUBG no encontrado: ${paquete}` });
                 }
                 // ==============================================
                 // 🎯 ARENA BREAKOUT
@@ -336,4 +374,3 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Error interno', detalle: error.message });
     }
 }
-
