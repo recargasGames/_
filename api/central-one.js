@@ -157,7 +157,23 @@ export default async function handler(req, res) {
                 // 💥 DELTA FORCE
                 else if (juegoUpper === 'DELTA FORCE') {
                     const uuidMap = {
-                        // Agregar cuando tengas los paquetes definidos
+                     // 💥 DELTA FORCE
+else if (juegoUpper === 'DELTA FORCE') {
+    const uuidMap = {
+        '60': 'e0ff073e-4668-433c-b96e-8ce7c0df4be9',
+        '320': 'a10c6c07-3baf-445a-ab68-6229a07b073b',
+        '750': 'd92a09a6-d96d-42cd-a5c1-75ff56896730',
+        '1480': '85cf6d19-4589-4321-953b-c6a5758050c6',
+        '1980': '7f5c9c92-e88d-4609-997a-848103ab9d9b',
+        '3950': '881a5bb7-1e6f-4e5b-ba89-012b2ad55830',
+        '8100': 'ee0eab5c-14aa-48ea-a8f9-0b9ab1dc8b98',
+        'sp_ops': '68861512-6043-4c50-bd1e-e77178ccb03f',
+        'sp_war': '70a63345-0c33-4a24-a117-39cee4084c27',
+        'sp_dlx': '6d273271-9d52-42c1-b6fc-d4a1eebefc02'
+    };
+    productId = uuidMap[String(paquete)];
+    if (!productId) return res.status(400).json({ error: `Paquete Delta Force no encontrado: ${paquete}` });
+}   // Agregar cuando tengas los paquetes definidos
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete Delta no encontrado: ${paquete}` });
