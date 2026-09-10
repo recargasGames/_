@@ -17,15 +17,13 @@ export default async function handler(req, res) {
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 🎯 JUEGOS PERMITIDOS
+        // 🎯 SOLO ESTE JUEGO APARECE EN EL CATÁLOGO
         // ==============================================
         const JUEGOS_PERMITIDOS = [
-            'FREE FIRE', 'BLOOD STRIKE', 'ROBLOX', 'MOBILE LEGENDS',
-            'CALL OF DUTY', 'PUBG MOBILE', 'ARENA BREAKOUT', 'DELTA FORCE',
-            'HONOR OF KING'
+            'MOBILE LEGENDS'
         ];
 
-        const EXCLUIR = ['PIN', 'CODE', 'CODIGO', 'GIFTCARD', 'GIFT CARD'];
+        const EXCLUIR = ['PIN', 'CODE', 'CODIGO'];
 
         // ==============================================
         // 📌 GET - CATÁLOGO FILTRADO
@@ -43,26 +41,16 @@ export default async function handler(req, res) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
-                        const region = (item.region || '').toUpperCase();
-
-                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
+                        return JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
-
-                        if (!esJuegoPermitido) return false;
-
-                        // Roblox: solo GLOBAL
-                        if (nombre.includes('ROBLOX') || sku.includes('ROBLOX')) {
-                            return region === 'GLOBAL';
-                        }
-
-                        return true;
                     });
 
                     return res.status(200).json({
                         items: itemsFiltrados,
                         total_filtrado: itemsFiltrados.length,
-                        total_original: data.items.length
+                        total_original: data.items.length,
+                        juegos_permitidos: JUEGOS_PERMITIDOS
                     });
                 }
                 return res.status(response.status).json(data);
@@ -70,8 +58,7 @@ export default async function handler(req, res) {
 
             return res.status(200).json({
                 mensaje: '✅ API de Central One funcionando',
-                status: 'online',
-                juegos: JUEGOS_PERMITIDOS
+                status: 'online'
             });
         }
 
@@ -86,6 +73,22 @@ export default async function handler(req, res) {
                     headers: { 'Authorization': `Bearer ${API_KEY}` }
                 });
                 const data = await response.json();
+
+                if (data.items && Array.isArray(data.items)) {
+                    const itemsFiltrados = data.items.filter(item => {
+                        const nombre = (item.name || '').toUpperCase();
+                        const sku = (item.sku || '').toUpperCase();
+                        return JUEGOS_PERMITIDOS.some(juego =>
+                            nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
+                        );
+                    });
+
+                    return res.status(200).json({
+                        items: itemsFiltrados,
+                        total_filtrado: itemsFiltrados.length,
+                        total_original: data.items.length
+                    });
+                }
                 return res.status(response.status).json(data);
             }
 
@@ -131,7 +134,7 @@ export default async function handler(req, res) {
                     if (!productId) return res.status(400).json({ error: `Paquete BS no encontrado: ${paquete}` });
                 }
                 // ==============================================
-                // 🧱 ROBLOX - GLOBAL (entrega PIN)
+                // 🧱 ROBLOX (entrega PIN)
                 // ==============================================
                 else if (juegoUpper === 'ROBLOX') {
                     const uuidMap = {
@@ -150,18 +153,25 @@ export default async function handler(req, res) {
                     esProductoConPin = true;
                 }
                 // ==============================================
-                // ⚔️ MOBILE LEGENDS
+                // ⚔️ MOBILE LEGENDS (FALTA CONFIGURAR)
                 // ==============================================
                 else if (juegoUpper === 'MOBILE LEGENDS') {
                     const uuidMap = {
-                        // Faltan los UUIDs reales de ML
-                        // Agregar cuando los tengas
+                        // 🔴 REEMPLAZA CON LOS UUIDs REALES CUANDO LOS TENGAS
+                        '51': 'UUID_ML_51',
+                        '102': 'UUID_ML_102',
+                        '234': 'UUID_ML_234',
+                        '625': 'UUID_ML_625',
+                        '1007': 'UUID_ML_1007',
+                        '1860': 'UUID_ML_1860',
+                        '4649': 'UUID_ML_4649',
+                        '7748': 'UUID_ML_7748'
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete ML no encontrado: ${paquete}` });
                 }
                 // ==============================================
-                // 🔫 CALL OF DUTY (Garena SGMY)
+                // 🔫 CALL OF DUTY
                 // ==============================================
                 else if (juegoUpper === 'CALL OF DUTY' || juegoUpper === 'COD') {
                     const uuidMap = {
@@ -182,17 +192,6 @@ export default async function handler(req, res) {
                     if (!productId) return res.status(400).json({ error: `Paquete COD no encontrado: ${paquete}` });
                 }
                 // ==============================================
-                // 🪖 PUBG MOBILE
-                // ==============================================
-                else if (juegoUpper === 'PUBG MOBILE' || juegoUpper === 'PUBG') {
-                    const uuidMap = {
-                        // Faltan los UUIDs reales de PUBG
-                        // Agregar cuando los tengas
-                    };
-                    productId = uuidMap[String(paquete)];
-                    if (!productId) return res.status(400).json({ error: `Paquete PUBG no encontrado: ${paquete}` });
-                }
-                // ==============================================
                 // 🎯 ARENA BREAKOUT
                 // ==============================================
                 else if (juegoUpper === 'ARENA BREAKOUT') {
@@ -209,7 +208,7 @@ export default async function handler(req, res) {
                         'bp_prem3m': 'ae006899-d9a5-424f-b5c8-af965ee61362'
                     };
                     productId = uuidMap[String(paquete)];
-                    if (!productId) return res.status(400).json({ error: `Paquete Arena Breakout no encontrado: ${paquete}` });
+                    if (!productId) return res.status(400).json({ error: `Paquete Arena no encontrado: ${paquete}` });
                 }
                 // ==============================================
                 // 💥 DELTA FORCE
@@ -228,7 +227,7 @@ export default async function handler(req, res) {
                         'sp_dlx': '6d273271-9d52-42c1-b6fc-d4a1eebefc02'
                     };
                     productId = uuidMap[String(paquete)];
-                    if (!productId) return res.status(400).json({ error: `Paquete Delta Force no encontrado: ${paquete}` });
+                    if (!productId) return res.status(400).json({ error: `Paquete Delta no encontrado: ${paquete}` });
                 }
                 else {
                     return res.status(400).json({ error: `Producto no soportado: ${juego}` });
@@ -254,7 +253,6 @@ export default async function handler(req, res) {
                 }
 
                 console.log(`🔄 Enviando recarga ${juego} para ${id_jugador}...`);
-                console.log('📦 Payload:', JSON.stringify(payload, null, 2));
 
                 const response = await fetch(`${BASE_URL}/orders`, {
                     method: 'POST',
@@ -267,11 +265,8 @@ export default async function handler(req, res) {
                 });
 
                 const data = await response.json();
-                console.log('📥 Respuesta:', JSON.stringify(data));
 
                 if (!response.ok) {
-                    console.error('❌ Error Central One:', data);
-
                     if (response.status === 409) {
                         if (data.error?.code === 'insufficient_balance') {
                             return res.status(409).json({ error: 'Saldo insuficiente', sinSaldo: true });
@@ -284,50 +279,33 @@ export default async function handler(req, res) {
                 }
 
                 const orderId = data.order?.id;
-                console.log(`✅ Pedido creado: ${data.order?.reference_code} (ID: ${orderId})`);
-
-                // ==============================================
-                // 🔑 OBTENER PIN (SOLO ROBLOX)
-                // ==============================================
                 let codigos = [];
 
+                // 🔑 OBTENER PIN (SOLO ROBLOX)
                 if (esProductoConPin && orderId) {
-                    console.log('🔍 Iniciando sondeo para PIN...');
                     const maxIntentos = 30;
                     let intento = 0;
-
                     while (intento < maxIntentos && codigos.length === 0) {
                         intento++;
                         const espera = intento <= 15 ? 2000 : 5000;
                         await new Promise(r => setTimeout(r, espera));
-                        console.log(`🔍 Intento ${intento}/${maxIntentos}...`);
 
                         try {
                             const codesResponse = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
                                 headers: { 'Authorization': `Bearer ${API_KEY}` }
                             });
-
-                            if (!codesResponse.ok) {
-                                if (codesResponse.status === 403) {
-                                    console.error('❌ Falta el scope codes:read');
-                                    break;
-                                }
-                                continue;
-                            }
+                            if (!codesResponse.ok) continue;
 
                             const codesData = await codesResponse.json();
                             if (codesData.order?.items?.length > 0) {
                                 for (const item of codesData.order.items) {
-                                    if (item.codes && item.codes.length > 0 && item.status === 'completed') {
+                                    if (item.codes?.length > 0 && item.status === 'completed') {
                                         codigos = item.codes;
-                                        console.log(`✅ PIN encontrado:`, codigos);
                                         break;
                                     }
                                 }
                             }
-                        } catch (err) {
-                            console.log(`⚠️ Error intento ${intento}:`, err.message);
-                        }
+                        } catch (err) {}
                     }
                 }
 
