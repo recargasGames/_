@@ -21,7 +21,8 @@ export default async function handler(req, res) {
         // ==============================================
         const JUEGOS_PERMITIDOS = [
             'FREE FIRE', 'BLOOD STRIKE', 'ROBLOX', 'MOBILE LEGENDS',
-            'CALL OF DUTY', 'PUBG MOBILE', 'ARENA BREAKOUT', 'DELTA FORCE'
+            'CALL OF DUTY', 'PUBG MOBILE', 'ARENA BREAKOUT', 'DELTA FORCE',
+            'HONOR OF KING'
         ];
 
         const EXCLUIR = ['PIN', 'CODE', 'CODIGO', 'GIFTCARD', 'GIFT CARD'];
