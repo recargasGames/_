@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 🎯 SOLO ESTOS JUEGOS APARECEN EN EL CATÁLOGO
+        // 🎯 JUEGOS QUE APARECEN EN EL CATÁLOGO
         // ==============================================
         const JUEGOS_PERMITIDOS = [
             'ROBLOX',
@@ -26,8 +26,8 @@ export default async function handler(req, res) {
             'PUBG MOBILE'
         ];
 
-        // 🚫 Excluir productos con PIN (para que NO se dupliquen en el catálogo)
-        const EXCLUIR = ['PIN', 'CODE', 'CODIGO', 'GIFTCARD', 'GIFT CARD'];
+        // 🚫 Excluir productos con PIN duplicados
+        const EXCLUIR = ['PIN', 'CODE', 'CODIGO'];
 
         // ==============================================
         // 📌 GET - CATÁLOGO FILTRADO
@@ -48,18 +48,14 @@ export default async function handler(req, res) {
                         const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
-                        const tienePin = EXCLUIR.some(palabra =>
-                            nombre.includes(palabra) || sku.includes(palabra)
-                        );
-                        return esJuegoPermitido && !tienePin;
+                        return esJuegoPermitido;
                     });
 
                     return res.status(200).json({
                         items: itemsFiltrados,
                         total_filtrado: itemsFiltrados.length,
                         total_original: data.items.length,
-                        juegos_permitidos: JUEGOS_PERMITIDOS,
-                        excluidos: EXCLUIR
+                        juegos_permitidos: JUEGOS_PERMITIDOS
                     });
                 }
                 return res.status(response.status).json(data);
@@ -88,13 +84,9 @@ export default async function handler(req, res) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
-                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
+                        return JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
-                        const tienePin = EXCLUIR.some(palabra =>
-                            nombre.includes(palabra) || sku.includes(palabra)
-                        );
-                        return esJuegoPermitido && !tienePin;
                     });
 
                     return res.status(200).json({
@@ -118,32 +110,46 @@ export default async function handler(req, res) {
                 let esProductoConPin = false;
 
                 // ==============================================
-                // 🧱 ROBLOX - ÚNICO CON PIN
+                // 🧱 ROBLOX - GIFT CARD (entrega PIN)
                 // ==============================================
                 if (juegoUpper === 'ROBLOX') {
                     const uuidMap = {
-                        '400': 'UUID_ROBLOX_400',      // 👈 REEMPLAZA
-                        '800': 'UUID_ROBLOX_800',      // 👈 REEMPLAZA
-                        '2000': 'UUID_ROBLOX_2000',    // 👈 REEMPLAZA
+                        '400': 'UUID_ROBLOX_400',
+                        '800': 'UUID_ROBLOX_800',
+                        '2000': 'UUID_ROBLOX_2000',
                         '11000': 'a0285ddd-7857-45c6-828e-dc9a79cfb141'
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete Roblox no encontrado: ${paquete}` });
-                    esProductoConPin = true; // ✅ Activa la búsqueda de PIN
+                    esProductoConPin = true;
                 }
                 // ==============================================
                 // ⚔️ MOBILE LEGENDS
                 // ==============================================
                 else if (juegoUpper === 'MOBILE LEGENDS') {
                     const uuidMap = {
-                        '51': 'UUID_ML_51',       // 👈 REEMPLAZA
-                        '102': 'UUID_ML_102',
-                        '234': 'UUID_ML_234',
-                        '625': 'UUID_ML_625',
-                        '1007': 'UUID_ML_1007',
-                        '1860': 'UUID_ML_1860',
-                        '4649': 'UUID_ML_4649',
-                        '7748': 'UUID_ML_7748'
+                        '44': 'UUID_ML_44',
+                        '55': 'UUID_ML_55',
+                        '86': 'UUID_ML_86',
+                        '172': 'UUID_ML_172',
+                        '257': 'UUID_ML_257',
+                        '344': 'UUID_ML_344',
+                        '429': 'UUID_ML_429',
+                        '514': 'UUID_ML_514',
+                        '600': 'UUID_ML_600',
+                        '706': 'UUID_ML_706',
+                        '878': 'UUID_ML_878',
+                        '963': 'UUID_ML_963',
+                        '1050': 'UUID_ML_1050',
+                        '1412': 'UUID_ML_1412',
+                        '2195': 'UUID_ML_2195',
+                        '2901': 'UUID_ML_2901',
+                        '3688': 'UUID_ML_3688',
+                        '4392': 'UUID_ML_4392',
+                        '5532': 'UUID_ML_5532',
+                        '6238': 'UUID_ML_6238',
+                        '7748': 'UUID_ML_7748',
+                        '9288': 'UUID_ML_9288'
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete ML no encontrado: ${paquete}` });
@@ -153,11 +159,11 @@ export default async function handler(req, res) {
                 // ==============================================
                 else if (juegoUpper === 'CALL OF DUTY' || juegoUpper === 'COD') {
                     const uuidMap = {
-                        'COD_80': 'UUID_COD_80',      // 👈 REEMPLAZA
-                        'COD_240': 'UUID_COD_240',
-                        'COD_400': 'UUID_COD_400',
-                        'COD_800': 'UUID_COD_800',
-                        'COD_2000': 'UUID_COD_2000'
+                        '80': 'UUID_COD_80',
+                        '240': 'UUID_COD_240',
+                        '400': 'UUID_COD_400',
+                        '800': 'UUID_COD_800',
+                        '2000': 'UUID_COD_2000'
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete COD no encontrado: ${paquete}` });
@@ -167,11 +173,11 @@ export default async function handler(req, res) {
                 // ==============================================
                 else if (juegoUpper === 'PUBG MOBILE' || juegoUpper === 'PUBG') {
                     const uuidMap = {
-                        'PUBG_60': 'UUID_PUBG_60',    // 👈 REEMPLAZA
-                        'PUBG_325': 'UUID_PUBG_325',
-                        'PUBG_660': 'UUID_PUBG_660',
-                        'PUBG_1800': 'UUID_PUBG_1800',
-                        'PUBG_3850': 'UUID_PUBG_3850'
+                        '60': 'UUID_PUBG_60',
+                        '325': 'UUID_PUBG_325',
+                        '660': 'UUID_PUBG_660',
+                        '1800': 'UUID_PUBG_1800',
+                        '3850': 'UUID_PUBG_3850'
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete PUBG no encontrado: ${paquete}` });
@@ -180,9 +186,6 @@ export default async function handler(req, res) {
                     return res.status(400).json({ error: `Producto no soportado: ${juego}` });
                 }
 
-                // ==============================================
-                // 📤 CREAR PEDIDO EN CENTRAL ONE
-                // ==============================================
                 const idempotencyKey = `recarga-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
                 const payload = {
@@ -193,7 +196,7 @@ export default async function handler(req, res) {
                     note: `${juego} - ID: ${id_jugador} - Paquete: ${paquete}`
                 };
 
-                // Target payload según el juego
+                // Target payload
                 if (juegoUpper === 'ROBLOX') {
                     payload.items[0].target_payload = {
                         player_id: id_jugador,
@@ -211,7 +214,6 @@ export default async function handler(req, res) {
                 }
 
                 console.log(`🔄 Enviando recarga ${juego} para ${id_jugador}...`);
-                console.log('📦 Payload:', JSON.stringify(payload, null, 2));
 
                 const response = await fetch(`${BASE_URL}/orders`, {
                     method: 'POST',
@@ -224,11 +226,8 @@ export default async function handler(req, res) {
                 });
 
                 const data = await response.json();
-                console.log('📥 Respuesta:', JSON.stringify(data));
 
                 if (!response.ok) {
-                    console.error('❌ Error Central One:', data);
-
                     if (response.status === 409) {
                         if (data.error?.code === 'insufficient_balance') {
                             return res.status(409).json({ error: 'Saldo insuficiente', sinSaldo: true });
@@ -241,29 +240,21 @@ export default async function handler(req, res) {
                 }
 
                 const orderId = data.order?.id;
-                console.log(`✅ Pedido creado: ${data.order?.reference_code} (ID: ${orderId})`);
-
-                // ==============================================
-                // 🔑 OBTENER PIN (SOLO ROBLOX)
-                // ==============================================
                 let codigos = [];
 
+                // 🔑 OBTENER PIN (ROBLOX Y GIFT CARDS)
                 if (esProductoConPin && orderId) {
-                    console.log('🔍 Iniciando sondeo para PIN...');
                     const maxIntentos = 30;
                     let intento = 0;
-
                     while (intento < maxIntentos && codigos.length === 0) {
                         intento++;
                         const espera = intento <= 15 ? 2000 : 5000;
                         await new Promise(r => setTimeout(r, espera));
-                        console.log(`🔍 Intento ${intento}/${maxIntentos}...`);
 
                         try {
                             const codesResponse = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
                                 headers: { 'Authorization': `Bearer ${API_KEY}` }
                             });
-
                             if (!codesResponse.ok) {
                                 if (codesResponse.status === 403) {
                                     console.error('❌ Falta el scope codes:read');
@@ -273,20 +264,15 @@ export default async function handler(req, res) {
                             }
 
                             const codesData = await codesResponse.json();
-                            console.log('📥 Códigos:', JSON.stringify(codesData));
-
                             if (codesData.order?.items?.length > 0) {
                                 for (const item of codesData.order.items) {
                                     if (item.codes && item.codes.length > 0 && item.status === 'completed') {
                                         codigos = item.codes;
-                                        console.log(`✅ PIN encontrado:`, codigos);
                                         break;
                                     }
                                 }
                             }
-                        } catch (err) {
-                            console.log(`⚠️ Error intento ${intento}:`, err.message);
-                        }
+                        } catch (err) {}
                     }
                 }
 
