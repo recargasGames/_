@@ -1,3 +1,4 @@
+// api/central-one.js
 export default async function handler(req, res) {
     // Configurar CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,32 +9,71 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    // ==============================================
-    // 📌 GET - PRUEBA
-    // ==============================================
-    if (req.method === 'GET') {
-        return res.status(200).json({
-            mensaje: '✅ API funcionando',
-            status: 'online',
-            hora: new Date().toISOString()
-        });
-    }
+    try {
+        // ⚠️ API Key desde Vercel
+        const API_KEY = process.env.CENTRAL_ONE_API_KEY;
+        if (!API_KEY) {
+            console.error('❌ API Key no configurada');
+            return res.status(500).json({
+                error: 'API Key no configurada'
+            });
+        }
 
-    // ==============================================
-    // 📌 POST
-    // ==============================================
-    if (req.method === 'POST') {
-        try {
-            const { accion, datos } = req.body || {};
+        const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
-            const API_KEY = process.env.CENTRAL_ONE_API_KEY;
-            if (!API_KEY) {
-                return res.status(500).json({
-                    error: 'API Key no configurada'
+        // ==============================================
+        // 📌 GET - PRUEBA Y CATÁLOGO
+        // ==============================================
+        if (req.method === 'GET') {
+            const accion = req.query?.accion;
+
+            // 📦 OBTENER CATÁLOGO (para ver UUIDs)
+            if (accion === 'catalogo') {
+                const response = await fetch(`${BASE_URL}/catalog`, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`
+                    }
                 });
+
+                const data = await response.json();
+                return res.status(response.status).json(data);
             }
 
-            const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
+            // ✅ Respuesta de prueba por defecto
+            return res.status(200).json({
+                mensaje: '✅ API de Central One funcionando',
+                status: 'online',
+                version: '1.0.0',
+                hora: new Date().toISOString(),
+                acciones: {
+                    catalogo: 'GET /api/central-one?accion=catalogo',
+                    recarga: 'POST /api/central-one con {accion: "recarga", datos: {...}}'
+                }
+            });
+        }
+
+        // ==============================================
+        // 📌 POST
+        // ==============================================
+        if (req.method === 'POST') {
+            const { accion, datos } = req.body || {};
+
+            console.log('📥 Acción:', accion);
+            console.log('📥 Datos:', JSON.stringify(datos));
+
+            // ==============================================
+            // 📦 CATÁLOGO (también por POST)
+            // ==============================================
+            if (accion === 'catalogo') {
+                const response = await fetch(`${BASE_URL}/catalog`, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`
+                    }
+                });
+
+                const data = await response.json();
+                return res.status(response.status).json(data);
+            }
 
             // ==============================================
             // 🎮 PROCESAR RECARGA
@@ -70,7 +110,7 @@ export default async function handler(req, res) {
                 // Generar idempotency key
                 const idempotencyKey = `recarga-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-                // 🔧 Construir payload según el juego
+                // Preparar payload
                 const payload = {
                     items: [{
                         catalog_item_id: productId,
@@ -96,7 +136,7 @@ export default async function handler(req, res) {
                     };
                 }
 
-                console.log(`🔄 Creando pedido ${juego} para ${id_jugador}...`);
+                console.log('📤 Enviando a Central One:', JSON.stringify(payload));
 
                 // Crear pedido en Central One
                 const response = await fetch(`${BASE_URL}/orders`, {
@@ -110,6 +150,7 @@ export default async function handler(req, res) {
                 });
 
                 const data = await response.json();
+                console.log('📥 Respuesta:', JSON.stringify(data));
 
                 if (!response.ok) {
                     console.error('❌ Error Central One:', data);
@@ -138,23 +179,18 @@ export default async function handler(req, res) {
                 console.log(`✅ Pedido creado: ${data.order?.reference_code} (ID: ${orderId})`);
 
                 // ==============================================
-                // 🔑 SI ES ROBLOX: OBTENER PIN CON SONDEO
+                // 🔑 OBTENER PIN (SOLO ROBLOX)
                 // ==============================================
                 let codigos = [];
 
                 if (juegoUpper === 'ROBLOX' && orderId) {
-                    console.log('🔍 Iniciando sondeo para obtener PIN...');
+                    console.log('🔍 Iniciando sondeo para PIN...');
 
-                    // ⏱️ Estrategia de sondeo según la documentación:
-                    // - Consultar cada 2s los primeros 30s
-                    // - Luego cada 5s hasta 3 minutos
                     const maxIntentos = 30;
                     let intento = 0;
 
                     while (intento < maxIntentos && codigos.length === 0) {
                         intento++;
-                        
-                        // Esperar según el intento
                         const espera = intento <= 15 ? 2000 : 5000;
                         await new Promise(r => setTimeout(r, espera));
 
@@ -168,42 +204,31 @@ export default async function handler(req, res) {
                             });
 
                             if (!codesResponse.ok) {
-                                console.log(`⚠️ Error ${codesResponse.status} al obtener códigos`);
-                                
-                                // Si es 403, el scope no está configurado
                                 if (codesResponse.status === 403) {
-                                    console.error('❌ Error 403: Falta el scope "codes:read"');
+                                    console.error('❌ Falta el scope codes:read');
                                     break;
                                 }
                                 continue;
                             }
 
                             const codesData = await codesResponse.json();
-                            
-                            // Buscar códigos en los items
+
                             if (codesData.order?.items?.length > 0) {
                                 for (const item of codesData.order.items) {
-                                    // ✅ Según la doc: codes es un array (puede estar vacío)
                                     if (item.codes && item.codes.length > 0 && item.status === 'completed') {
                                         codigos = item.codes;
-                                        console.log(`✅ PIN encontrado en intento ${intento}:`, codigos);
+                                        console.log(`✅ PIN encontrado:`, codigos);
                                         break;
                                     }
                                 }
                             }
                         } catch (err) {
-                            console.log(`⚠️ Error en intento ${intento}:`, err.message);
+                            console.log(`⚠️ Error intento ${intento}:`, err.message);
                         }
-                    }
-
-                    if (codigos.length === 0) {
-                        console.log('⏳ PIN no disponible después de', maxIntentos, 'intentos');
                     }
                 }
 
-                // ==============================================
-                // 📤 RESPUESTA FINAL
-                // ==============================================
+                // Respuesta final
                 const status = data.order?.status || 'confirmed';
                 const esExitosa = status === 'confirmed' || status === 'completed' || status === 'processing';
 
@@ -216,14 +241,13 @@ export default async function handler(req, res) {
                     monto: data.order?.total_sale_amount,
                     moneda: data.order?.currency,
                     estado: status,
-                    // 🔑 Códigos PIN (solo Roblox)
                     codigos: codigos,
                     codigo: codigos.length > 0 ? codigos[0] : null
                 });
             }
 
             // ==============================================
-            // 🔑 CONSULTAR CÓDIGOS DE UN PEDIDO EXISTENTE
+            // 🔑 CONSULTAR CÓDIGOS DE UN PEDIDO
             // ==============================================
             if (accion === 'obtener-codigos') {
                 const { orderId } = datos || {};
@@ -240,7 +264,7 @@ export default async function handler(req, res) {
 
                 if (!codesResponse.ok) {
                     return res.status(codesResponse.status).json({
-                        error: `Error ${codesResponse.status} al obtener códigos`
+                        error: `Error ${codesResponse.status}`
                     });
                 }
 
@@ -248,16 +272,19 @@ export default async function handler(req, res) {
                 return res.status(200).json(codesData);
             }
 
-            return res.status(400).json({ error: 'Acción no válida' });
-
-        } catch (error) {
-            console.error('❌ Error:', error);
-            return res.status(500).json({
-                error: 'Error interno',
-                detalle: error.message
+            return res.status(400).json({
+                error: 'Acción no válida',
+                acciones_soportadas: ['catalogo', 'recarga', 'obtener-codigos']
             });
         }
-    }
 
-    return res.status(405).json({ error: 'Método no permitido' });
+        return res.status(405).json({ error: 'Método no permitido' });
+
+    } catch (error) {
+        console.error('❌ Error interno:', error);
+        return res.status(500).json({
+            error: 'Error interno del servidor',
+            detalle: error.message
+        });
+    }
 }
