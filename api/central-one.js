@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 🎯 JUEGOS QUE APARECEN EN EL CATÁLOGO
+        // 🎯 JUEGOS PERMITIDOS
         // ==============================================
         const JUEGOS_PERMITIDOS = [
             'ROBLOX',
@@ -28,6 +28,11 @@ export default async function handler(req, res) {
 
         // 🚫 Excluir productos con PIN duplicados
         const EXCLUIR = ['PIN', 'CODE', 'CODIGO'];
+
+        // ==============================================
+        // 🌎 REGIONES PERMITIDAS PARA ROBLOX
+        // ==============================================
+        const REGIONES_ROBLOX = ['GLOBAL'];
 
         // ==============================================
         // 📌 GET - CATÁLOGO FILTRADO
@@ -45,17 +50,30 @@ export default async function handler(req, res) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
+                        const region = (item.region || '').toUpperCase();
+
+                        // 1. ¿Es de un juego permitido?
                         const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
-                        return esJuegoPermitido;
+
+                        if (!esJuegoPermitido) return false;
+
+                        // 2. Si es ROBLOX, solo mostrar GLOBAL
+                        if (nombre.includes('ROBLOX') || sku.includes('ROBLOX')) {
+                            return REGIONES_ROBLOX.includes(region);
+                        }
+
+                        // 3. Otros juegos: mostrar todos
+                        return true;
                     });
 
                     return res.status(200).json({
                         items: itemsFiltrados,
                         total_filtrado: itemsFiltrados.length,
                         total_original: data.items.length,
-                        juegos_permitidos: JUEGOS_PERMITIDOS
+                        juegos_permitidos: JUEGOS_PERMITIDOS,
+                        regiones_roblox: REGIONES_ROBLOX
                     });
                 }
                 return res.status(response.status).json(data);
@@ -84,9 +102,19 @@ export default async function handler(req, res) {
                     const itemsFiltrados = data.items.filter(item => {
                         const nombre = (item.name || '').toUpperCase();
                         const sku = (item.sku || '').toUpperCase();
-                        return JUEGOS_PERMITIDOS.some(juego =>
+                        const region = (item.region || '').toUpperCase();
+
+                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
                             nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
                         );
+
+                        if (!esJuegoPermitido) return false;
+
+                        if (nombre.includes('ROBLOX') || sku.includes('ROBLOX')) {
+                            return REGIONES_ROBLOX.includes(region);
+                        }
+
+                        return true;
                     });
 
                     return res.status(200).json({
@@ -110,13 +138,13 @@ export default async function handler(req, res) {
                 let esProductoConPin = false;
 
                 // ==============================================
-                // 🧱 ROBLOX - GIFT CARD (entrega PIN)
+                // 🧱 ROBLOX - GIFT CARD GLOBAL (entrega PIN)
                 // ==============================================
                 if (juegoUpper === 'ROBLOX') {
                     const uuidMap = {
-                        '400': 'UUID_ROBLOX_400',
-                        '800': 'UUID_ROBLOX_800',
-                        '2000': 'UUID_ROBLOX_2000',
+                        '400': 'UUID_ROBLOX_400_GLOBAL',
+                        '800': 'UUID_ROBLOX_800_GLOBAL',
+                        '2000': 'UUID_ROBLOX_2000_GLOBAL',
                         '11000': 'a0285ddd-7857-45c6-828e-dc9a79cfb141'
                     };
                     productId = uuidMap[String(paquete)];
@@ -213,8 +241,6 @@ export default async function handler(req, res) {
                     };
                 }
 
-                console.log(`🔄 Enviando recarga ${juego} para ${id_jugador}...`);
-
                 const response = await fetch(`${BASE_URL}/orders`, {
                     method: 'POST',
                     headers: {
@@ -242,7 +268,7 @@ export default async function handler(req, res) {
                 const orderId = data.order?.id;
                 let codigos = [];
 
-                // 🔑 OBTENER PIN (ROBLOX Y GIFT CARDS)
+                // 🔑 OBTENER PIN (ROBLOX)
                 if (esProductoConPin && orderId) {
                     const maxIntentos = 30;
                     let intento = 0;
@@ -256,10 +282,7 @@ export default async function handler(req, res) {
                                 headers: { 'Authorization': `Bearer ${API_KEY}` }
                             });
                             if (!codesResponse.ok) {
-                                if (codesResponse.status === 403) {
-                                    console.error('❌ Falta el scope codes:read');
-                                    break;
-                                }
+                                if (codesResponse.status === 403) break;
                                 continue;
                             }
 
