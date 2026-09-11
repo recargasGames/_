@@ -6,220 +6,565 @@
 <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
 <title>RECARGASGAMES - Roblox</title>
 <style>
-:root{--color-principal:#3b82f6;--color-hover:#2563eb;--color-azul:#3b82f6;--color-blanco:#ffffff;}
+:root{
+    --color-principal:#3b82f6;
+    --color-hover:#2563eb;
+    --color-azul:#3b82f6;
+    --color-blanco:#ffffff;
+    --color-dorado:#d4af37;
+    --color-dorado-claro:#f5d76e;
+    --color-negro:#0a0e1a;
+    --color-error:#ef4444;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background-image:url('fondo.jpg');background-size:cover;background-position:center;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;overflow-x:hidden;}
+html{scroll-behavior:smooth}
+body{
+    background-image:url('fondo.jpg');
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    padding-top:110px;
+    overflow-x:hidden;
+    min-height:100vh;
+    position:relative;
+}
+body::before{
+    content:'';position:fixed;top:-30%;right:-20%;
+    width:700px;height:700px;
+    background:radial-gradient(circle,rgba(59,130,246,0.15),transparent 70%);
+    border-radius:50%;pointer-events:none;z-index:0;
+}
+body::after{
+    content:'';position:fixed;bottom:-30%;left:-20%;
+    width:700px;height:700px;
+    background:radial-gradient(circle,rgba(212,175,55,0.12),transparent 70%);
+    border-radius:50%;pointer-events:none;z-index:0;
+}
+.barra-superior,.main,.whatsapp-float,.back-to-top{position:relative;z-index:1}
 
-/* ✨ FONDO DE DIAMANTES FLOTANDO (OPTIMIZADO) */
-.diamantes-fondo{
-    position:fixed;
-    top:0;left:0;
+.barra-superior{
+    position:fixed;top:0;left:0;right:0;z-index:999;
+    background:rgba(5,8,16,0.85);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border-bottom:1px solid transparent;
+    border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;
+    box-shadow:0 4px 30px rgba(0,0,0,0.5);
+}
+.header{
+    padding:14px 24px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.brand img{
+    height:55px;width:auto;border-radius:12px;
+    filter:drop-shadow(0 0 12px rgba(212,175,55,0.4));
+    transition:filter 0.4s;
+}
+.brand:hover img{filter:drop-shadow(0 0 20px rgba(212,175,55,0.7))}
+.header-right{display:flex;align-items:center;gap:12px}
+
+.btn-perfil{
+    background:transparent;border:none;color:white;cursor:pointer;
+    padding:0;display:flex;align-items:center;gap:8px;
+    transition:all 0.3s;position:relative;
+    margin-top:8px;
+}
+.btn-perfil:hover .avatar-circle{
+    transform:scale(1.05);
+    box-shadow:0 0 25px rgba(212,175,55,0.6);
+    border-color:var(--color-dorado);
+}
+.btn-perfil .avatar-circle{
+    width:40px;height:40px;border-radius:50%;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;font-size:16px;color:white;
+    transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);
+    position:relative;overflow:hidden;
+}
+.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
+.btn-perfil .avatar-circle .online-dot{
+    position:absolute;bottom:0;right:0;width:12px;height:12px;
+    background:#22c55e;border-radius:50%;border:2px solid #0b1220;
+    box-shadow:0 0 8px rgba(34,197,94,0.8);
+}
+.btn-perfil .perfil-nombre{
+    font-size:14px;font-weight:500;color:white;
+    max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+
+.menu-perfil{
+    position:absolute;top:75px;right:0;
+    background:rgba(10,14,26,0.98);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:16px;min-width:260px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 40px rgba(212,175,55,0.15);
+    opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);
+    transition:all 0.25s ease;z-index:1000;overflow:hidden;
+}
+.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.menu-perfil-header{
+    padding:16px 20px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));
+}
+.menu-perfil-header .avatar-grande{
+    width:48px;height:48px;border-radius:50%;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;border:2px solid rgba(212,175,55,0.4);
+}
+.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
+.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
+.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-opcion{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 20px;color:#e5e7eb;text-decoration:none;
+    font-size:14px;font-weight:500;transition:all 0.2s;
+    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+}
+.menu-perfil-opcion:last-child{border-bottom:none}
+.menu-perfil-opcion:hover{
+    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
+    color:var(--color-dorado-claro);padding-left:26px;
+    border-left:3px solid var(--color-dorado);
+}
+.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
+.menu-perfil-opcion.danger{color:#ef4444}
+.menu-perfil-opcion.danger:hover{
+    background:rgba(239,68,68,0.12);color:#ef4444;border-left-color:#ef4444;
+}
+
+.menu-hamburguesa{
+    background:transparent;border:none;color:white;font-size:28px;
+    cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;
+    margin-top:8px;
+}
+.menu-hamburguesa:hover{
+    transform:scale(1.1);color:var(--color-dorado);
+    text-shadow:0 0 15px rgba(212,175,55,0.6);
+}
+
+.menu-flotante{
+    position:absolute;top:80px;right:0;
+    background:rgba(10,14,26,0.98);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:16px;min-width:240px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.7),0 0 40px rgba(212,175,55,0.15);
+    opacity:0;visibility:hidden;transform:translateY(-10px);
+    transition:all 0.25s ease;z-index:999;overflow:hidden;
+}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
+.menu-opcion{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 20px;color:white;text-decoration:none;
+    font-size:15px;font-weight:500;transition:all 0.2s;
+    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+}
+.menu-opcion:last-child{border-bottom:none}
+.menu-opcion:hover{
+    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
+    color:var(--color-dorado-claro);padding-left:24px;
+}
+.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
+
+.games-menu{
+    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
+    padding:14px 20px;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    border-top:1px solid rgba(255,255,255,0.04);
+}
+.games-menu::-webkit-scrollbar{display:none}
+.games-menu a{
+    text-decoration:none;color:#cbd5e1;padding:7px 14px;
+    border-radius:20px;font-size:14px;font-weight:600;
+    white-space:nowrap;transition:all 0.3s;border:1px solid transparent;
+}
+.games-menu a:hover{
+    color:var(--color-dorado-claro);
+    background:rgba(212,175,55,0.08);
+    border-color:rgba(212,175,55,0.3);
+}
+.games-menu a.active{
+    color:var(--color-dorado-claro);
+    background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));
+    border-color:rgba(212,175,55,0.5);
+    box-shadow:0 0 20px rgba(212,175,55,0.2);
+}
+
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
+.card-panel{
+    background:linear-gradient(135deg,rgba(20,30,55,0.6),rgba(10,14,26,0.8));
+    border:1px solid rgba(212,175,55,0.2);
+    border-radius:20px;padding:18px;margin-bottom:20px;
+    backdrop-filter:blur(10px);position:relative;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.card-panel::before{
+    content:'';position:absolute;top:0;left:-100%;
     width:100%;height:100%;
-    pointer-events:none;
-    z-index:0;
-    overflow:hidden;
-    transform:translateZ(0);
-    backface-visibility:hidden;
+    background:linear-gradient(90deg,transparent,rgba(212,175,55,0.08),transparent);
+    animation:brilloPanel 5s infinite;
 }
-.diamante-flotante{
-    position:absolute;
-    font-size:20px;
-    opacity:0.15;
-    animation:flotarDiamante linear infinite;
-    filter:drop-shadow(0 0 8px rgba(232,46,49,0.6));
-    will-change:transform;
-    transform:translateZ(0);
-    backface-visibility:hidden;
+@keyframes brilloPanel{0%{left:-100%}100%{left:100%}}
+.panel-title{
+    font-size:15px;font-weight:800;margin:0 0 12px;
+    color:var(--color-dorado-claro);position:relative;z-index:1;
+    letter-spacing:0.5px;text-transform:uppercase;
 }
-@keyframes flotarDiamante{
-    0%{transform:translateY(100vh) rotate(0deg) translateZ(0);}
-    100%{transform:translateY(-100px) rotate(360deg) translateZ(0);}
+.form-input{
+    width:100%;height:50px;border-radius:14px;
+    background:rgba(0,0,0,0.3);color:#fff;padding:12px;
+    border:1px solid rgba(255,255,255,0.1);font-size:16px;
+    position:relative;z-index:1;transition:all 0.3s;
 }
-.diamante-flotante:nth-child(1){left:5%;animation-duration:15s;animation-delay:0s;font-size:24px;}
-.diamante-flotante:nth-child(2){left:20%;animation-duration:18s;animation-delay:2s;font-size:18px;}
-.diamante-flotante:nth-child(3){left:35%;animation-duration:12s;animation-delay:4s;font-size:28px;}
-.diamante-flotante:nth-child(4){left:50%;animation-duration:20s;animation-delay:1s;font-size:16px;}
-.diamante-flotante:nth-child(5){left:65%;animation-duration:16s;animation-delay:6s;font-size:22px;}
-.diamante-flotante:nth-child(6){left:80%;animation-duration:14s;animation-delay:3s;font-size:20px;}
-.diamante-flotante:nth-child(7){left:90%;animation-duration:19s;animation-delay:5s;font-size:26px;}
-.diamante-flotante:nth-child(8){left:12%;animation-duration:13s;animation-delay:8s;font-size:18px;}
+.form-input:focus{
+    outline:none;border-color:var(--color-dorado);
+    box-shadow:0 0 0 3px rgba(212,175,55,0.15),0 0 20px rgba(212,175,55,0.2);
+}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1}
+.pay-box{
+    background:rgba(0,0,0,0.3);
+    border:2px solid rgba(255,255,255,0.08);
+    border-radius:16px;padding:12px;text-align:center;
+    cursor:pointer;font-weight:700;transition:all 0.3s;font-size:14px;
+}
+.pay-box.active{
+    border-color:var(--color-dorado);
+    background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));
+    color:var(--color-dorado-claro);
+    box-shadow:0 0 25px rgba(212,175,55,0.3);
+}
+.tasa-info{
+    font-size:12px;color:#94a3b8;margin-top:8px;
+    text-align:right;font-weight:600;position:relative;z-index:1;
+}
 
-.barra-superior, .main, .whatsapp-float, .back-to-top{position:relative;z-index:1;}
+.id-status{
+    margin-top:14px;padding:14px 18px;border-radius:14px;
+    font-size:15px;display:none;font-weight:700;
+    position:relative;overflow:hidden;
+    animation:statusAparecer 0.4s ease;
+}
+@keyframes statusAparecer{
+    from{opacity:0;transform:translateY(-10px) scale(0.95)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+}
+.id-status::before{
+    content:'';position:absolute;top:0;left:-100%;
+    width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+    animation:brilloPasar 2.5s infinite;
+}
+@keyframes brilloPasar{0%{left:-100%}100%{left:100%}}
+.id-status.valido{
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));
+    color:#4ade80;border:1px solid rgba(34,197,94,0.6);
+    box-shadow:0 0 30px rgba(34,197,94,0.4);
+    animation:statusValido 0.5s ease;
+}
+@keyframes statusValido{
+    0%{transform:scale(0.9)}
+    50%{transform:scale(1.03)}
+    100%{transform:scale(1)}
+}
+.id-status.valido .check-icono{
+    width:28px;height:28px;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:15px;color:white;
+    box-shadow:0 0 20px rgba(34,197,94,0.8);flex-shrink:0;
+}
+.id-status.valido .nombre-jugador{
+    color:#fff;font-weight:800;
+    text-shadow:0 0 15px rgba(74,222,128,0.8);
+    background:linear-gradient(90deg,#fff,#4ade80,#fff);
+    background-size:200% 100%;
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+    animation:shineNombre 3s linear infinite;
+}
+@keyframes shineNombre{
+    0%{background-position:0% 0%}
+    100%{background-position:200% 0%}
+}
 
-.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(11,18,32,.95);border-bottom:2px solid var(--color-azul);box-shadow:0 2px 10px rgba(0,0,0,.3);}
-.header{padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a374f;}
-.brand{display:flex;align-items:center}
-.brand img{height:55px;width:auto;border-radius:14px;background:transparent}
-
-.menu-hamburguesa{background:transparent;border:none;color:white;font-size:26px;cursor:pointer;padding:5px 10px;transition:transform 0.2s;}
-.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-azul);}
-.menu-flotante{position:absolute;top:65px;right:20px;background:rgba(17,24,39,0.98);border:1px solid var(--color-azul);border-radius:14px;min-width:220px;box-shadow:0 8px 25px rgba(0,0,0,0.4);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.25s ease;z-index:1000;overflow:hidden;}
-.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0);}
-.menu-opcion{display:flex;align-items:center;gap:10px;padding:14px 18px;color:white;text-decoration:none;font-size:15px;font-weight:500;transition:all 0.2s;border-bottom:1px solid #1f2937;}
-.menu-opcion:last-child{border-bottom:none;}
-.menu-opcion:hover{background:rgba(59,130,246,0.15);color:var(--color-azul);padding-left:22px;}
-
-.games-menu{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:12px 15px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
-.games-menu::-webkit-scrollbar{display:none;width:0;height:0}
-.games-menu a{text-decoration:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:14px;font-weight:700;white-space:nowrap;transition:.2s;}
-.games-menu a:hover,.games-menu a.active{color:var(--color-azul);border-bottom:2px solid var(--color-azul);border-radius:0;}
-
-.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto;}
-.card-panel{background:rgba(11,18,32,.9);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px;position:relative;overflow:hidden;}
-.card-panel::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(59,130,246,0.08),transparent);animation:brilloPanel 4s infinite;will-change:left;}
-@keyframes brilloPanel{0%{left:-100%;}100%{left:100%;}}
-.panel-title{font-size:15px;font-weight:700;margin:0 0 12px;color:var(--color-azul);position:relative;z-index:1;}
-.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.pay-box{background:#111827;border:2px solid #1f2937;border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700;transition:.2s;}
-.pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul);box-shadow:0 0 20px rgba(59,130,246,0.3);}
-
-/* 💎 TARJETAS CON BORDE ARCOÍRIS */
+.section-divider{margin:30px 0 20px;text-align:center}
+.section-divider span{
+    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+    background-size:200% 200%;
+    animation:shineBadge 3s ease infinite;
+    color:#0a0e1a;padding:8px 22px;border-radius:30px;
+    font-size:13px;font-weight:800;letter-spacing:1.5px;
+    display:inline-block;text-transform:uppercase;
+    box-shadow:0 0 30px rgba(212,175,55,0.5);
+}
+@keyframes shineBadge{
+    0%,100%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
-.product-card{background:linear-gradient(135deg,rgba(20,30,55,0.95),rgba(11,18,32,0.95));border:2px solid transparent;border-radius:18px;padding:16px;transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),box-shadow 0.35s;position:relative;overflow:hidden;cursor:pointer;background-clip:padding-box;will-change:transform;transform:translateZ(0);backface-visibility:hidden;}
-.product-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b,#3b82f6);background-size:300% 300%;border-radius:18px;z-index:-1;opacity:0;transition:opacity 0.3s;}
-.product-card:hover::before{opacity:1;}
-.product-card:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 20px 50px rgba(59,130,246,0.3),0 0 40px rgba(139,92,246,0.2);}
-
-.card-header{display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(59,130,246,0.15);padding-bottom:10px;margin-bottom:10px;position:relative;z-index:1;}
-.game-icon{background:linear-gradient(135deg,rgba(232,46,49,0.25),rgba(232,46,49,0.1));padding:10px;border-radius:12px;font-size:20px;box-shadow:0 0 15px rgba(232,46,49,0.3);border:1px solid rgba(232,46,49,0.3);animation:iconoRotar 4s ease-in-out infinite;will-change:transform;}
-@keyframes iconoRotar{0%,100%{transform:rotate(0deg);}25%{transform:rotate(-10deg);}75%{transform:rotate(10deg);}}
-.product-title{font-size:16px;font-weight:800;letter-spacing:0.3px;background:linear-gradient(135deg,#fff,#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.product-desc{color:#9ca3af;font-size:11px;margin-bottom:12px;font-weight:500;letter-spacing:0.2px;position:relative;z-index:1;}
-.product-price{font-size:24px;font-weight:800;color:var(--color-azul);margin-bottom:14px;text-shadow:0 0 20px rgba(59,130,246,0.5);letter-spacing:-0.5px;position:relative;z-index:1;animation:pulsoPrecio 3s ease-in-out infinite;display:inline-block;will-change:transform;}
-@keyframes pulsoPrecio{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
-.btn-buy{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;width:100%;height:42px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(59,130,246,0.3);position:relative;overflow:hidden;z-index:1;}
-.btn-buy::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.3);border-radius:50%;transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s;}
-.btn-buy:hover::before{width:400px;height:400px;}
-.btn-buy:hover{background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 8px 30px rgba(59,130,246,0.6);transform:translateY(-2px);}
-
-.section-divider{margin:30px 0 20px;text-align:center;position:relative;}
-.section-divider span{background:linear-gradient(135deg,#3b82f6,#2563eb,#8b5cf6);background-size:200% 200%;color:#fff;padding:8px 22px;border-radius:30px;font-size:14px;font-weight:800;letter-spacing:1px;box-shadow:0 0 30px rgba(59,130,246,0.5),0 0 60px rgba(139,92,246,0.2),inset 0 1px 0 rgba(255,255,255,0.2);display:inline-block;animation:degradadoDivisor 3s ease infinite;will-change:background-position;}
-@keyframes degradadoDivisor{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
-
-.whatsapp-float{position:fixed;bottom:20px;right:20px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:28px;z-index:1000;box-shadow:0 4px 15px rgba(37,211,102,0.4);}
-.back-to-top{position:fixed;bottom:90px;right:20px;background:var(--color-azul);color:#fff;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;visibility:hidden;z-index:1000;transition:.3s;text-decoration:none;box-shadow:0 4px 15px rgba(59,130,246,0.4);}
-.back-to-top.show{opacity:1;visibility:visible}
-.tasa-info{font-size:12px;color:#94a3b8;margin-top:8px;text-align:right;font-weight:500;position:relative;z-index:1;}
-
-.confetti{position:fixed;width:10px;height:10px;pointer-events:none;z-index:9999;animation:confettiCae 3s ease-out forwards;will-change:transform,opacity;}
-@keyframes confettiCae{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
-
-/* 🔔 MODAL DE AVISO (PREMIUM) */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);}
-.modal-overlay.activo{display:flex;}
-.modal-box{background:rgba(17,24,39,0.98);border:2px solid var(--color-azul);border-radius:20px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px rgba(59,130,246,0.3);animation:modalEntrada 0.3s ease;}
-@keyframes modalEntrada{from{opacity:0;transform:scale(0.9) translateY(-20px);}to{opacity:1;transform:scale(1) translateY(0);}}
-.modal-header{padding:24px 20px;text-align:center;border-bottom:2px solid rgba(255,255,255,0.08);background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(59,130,246,0.05));}
-.modal-header .icono-grande{font-size:50px;margin-bottom:10px;animation:iconoRotar 3s ease-in-out infinite;}
-.modal-header h2{font-size:22px;font-weight:700;color:var(--color-azul);margin:0;text-shadow:0 0 20px rgba(59,130,246,0.5);}
-.modal-body{padding:24px 20px;}
-.modal-aviso{background:rgba(59,130,246,0.1);border-left:4px solid var(--color-azul);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
-.modal-aviso .titulo{font-weight:700;color:var(--color-azul);font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-.modal-aviso .texto{font-size:13px;color:#9ca3af;line-height:1.5;}
-.modal-aviso.amarillo{background:rgba(245,158,11,0.1);border-left-color:#f59e0b;}
-.modal-aviso.amarillo .titulo{color:#f59e0b;}
-.modal-aviso.verde{background:rgba(34,197,94,0.1);border-left-color:#22c55e;}
-.modal-aviso.verde .titulo{color:#22c55e;}
-.modal-aviso.rojo{background:rgba(239,68,68,0.1);border-left-color:#ef4444;}
-.modal-aviso.rojo .titulo{color:#ef4444;}
-.modal-link{display:inline-block;background:rgba(59,130,246,0.15);color:var(--color-azul);padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;margin:6px 0;border:1px solid rgba(59,130,246,0.3);transition:0.3s;}
-.modal-link:hover{background:rgba(59,130,246,0.25);transform:translateY(-2px);}
-.modal-footer{padding:16px 20px 20px;display:flex;gap:10px;}
-.modal-btn{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:0.3s;}
-.modal-btn.cancelar{background:rgba(71,85,105,0.3);color:#94a3b8;border:1px solid rgba(71,85,105,0.5);}
-.modal-btn.cancelar:hover{background:rgba(71,85,105,0.5);color:white;}
-.modal-btn.continuar{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;box-shadow:0 4px 15px rgba(59,130,246,0.4);}
-.modal-btn.continuar:hover{background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 8px 25px rgba(59,130,246,0.6);transform:scale(1.02);}
-
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+.product-card{
+    background:linear-gradient(135deg,rgba(20,30,55,0.7),rgba(10,14,26,0.9));
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:18px;padding:16px;
+    transition:all 0.5s cubic-bezier(0.4,0,0.2,1);
+    position:relative;overflow:hidden;cursor:pointer;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+.product-card::before{
+    content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
+    background:linear-gradient(135deg,#d4af37,#3b82f6,#d4af37);
+    background-size:300% 300%;
+    border-radius:18px;z-index:-1;opacity:0;
+    transition:opacity 0.5s;
+    animation:bordeGirando 4s linear infinite;
+}
+@keyframes bordeGirando{
+    0%{background-position:0% 50%}
+    100%{background-position:300% 50%}
+}
+.product-card:hover::before{opacity:1}
+.product-card:hover{
+    transform:translateY(-8px) scale(1.03);
+    box-shadow:0 25px 60px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.3);
+}
+.card-header{
+    display:flex;align-items:center;gap:12px;
+    border-bottom:1px solid rgba(212,175,55,0.15);
+    padding-bottom:10px;margin-bottom:10px;
+    position:relative;z-index:1;
+}
+.game-icon{
+    background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(59,130,246,0.15));
+    padding:10px;border-radius:12px;font-size:20px;
+    box-shadow:0 0 15px rgba(212,175,55,0.2);
+    border:1px solid rgba(212,175,55,0.3);
+    animation:iconoRotar 4s ease-in-out infinite;
+}
+@keyframes iconoRotar{
+    0%,100%{transform:rotate(0deg)}
+    25%{transform:rotate(-10deg)}
+    75%{transform:rotate(10deg)}
+}
+.product-title{
+    font-size:16px;font-weight:800;
+    background:linear-gradient(135deg,#fff,#f5d76e);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+.product-desc{
+    color:#9ca3af;font-size:11px;margin-bottom:12px;
+    position:relative;z-index:1;
+}
+.product-price{
+    font-size:24px;font-weight:800;color:var(--color-dorado-claro);
+    margin-bottom:14px;
+    text-shadow:0 0 20px rgba(212,175,55,0.5);
+    position:relative;z-index:1;
+    animation:pulsoPrecio 3s ease-in-out infinite;
+    display:inline-block;
+}
+@keyframes pulsoPrecio{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.05)}
+}
+.btn-buy{
+    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+    background-size:200% 200%;
+    animation:shineBadge 3s ease infinite;
+    color:#0a0e1a;border:none;width:100%;height:42px;
+    border-radius:12px;font-size:14px;font-weight:800;
+    cursor:pointer;transition:all 0.3s;letter-spacing:1px;
+    box-shadow:0 4px 15px rgba(212,175,55,0.4);
+    position:relative;z-index:1;text-transform:uppercase;
+}
+.btn-buy:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 30px rgba(212,175,55,0.6);
+}
+
+/* MODAL DE AVISO ROBLOX */
+.modal-overlay{
+    display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
+    z-index:2000;justify-content:center;align-items:center;padding:20px;
+}
+.modal-overlay.activo{display:flex}
+.modal-box{
+    background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:24px;max-width:480px;width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 60px rgba(212,175,55,0.2);
+    animation:modalSlide 0.4s ease;overflow:hidden;
+}
+@keyframes modalSlide{
+    from{transform:translateY(-50px) scale(0.95);opacity:0}
+    to{transform:translateY(0) scale(1);opacity:1}
+}
+.modal-header{
+    padding:24px 20px;text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));
+}
+.modal-header .icono-grande{font-size:50px;margin-bottom:10px}
+.modal-header h2{
+    font-size:20px;font-weight:800;color:var(--color-dorado-claro);
+    letter-spacing:1px;text-transform:uppercase;
+}
+.modal-body{padding:24px 20px}
+.modal-aviso{
+    background:rgba(212,175,55,0.08);
+    border-left:4px solid var(--color-dorado);
+    border-radius:10px;padding:14px 16px;margin-bottom:14px;
+}
+.modal-aviso .titulo{
+    font-weight:700;color:var(--color-dorado-claro);
+    font-size:14px;margin-bottom:6px;
+    display:flex;align-items:center;gap:8px;
+}
+.modal-aviso .texto{
+    font-size:13px;color:#cbd5e1;line-height:1.5;
+}
+.modal-aviso.verde{background:rgba(34,197,94,0.08);border-left-color:#22c55e}
+.modal-aviso.verde .titulo{color:#4ade80}
+.modal-aviso.rojo{background:rgba(239,68,68,0.08);border-left-color:#ef4444}
+.modal-aviso.rojo .titulo{color:#f87171}
+.modal-link{
+    display:inline-block;background:rgba(212,175,55,0.15);
+    color:var(--color-dorado-claro);padding:10px 16px;
+    border-radius:10px;text-decoration:none;font-weight:700;
+    font-size:14px;margin:6px 0;
+    border:1px solid rgba(212,175,55,0.3);transition:0.3s;
+}
+.modal-link:hover{background:rgba(212,175,55,0.25);transform:translateY(-2px)}
+.modal-footer{
+    padding:16px 20px 20px;display:flex;gap:10px;
+}
+.modal-btn{
+    flex:1;padding:14px;border-radius:12px;font-size:15px;
+    font-weight:800;cursor:pointer;border:none;transition:0.3s;
+    text-transform:uppercase;letter-spacing:0.5px;
+}
+.modal-btn.cancelar{
+    background:rgba(71,85,105,0.3);color:#94a3b8;
+    border:1px solid rgba(71,85,105,0.5);
+}
+.modal-btn.cancelar:hover{background:rgba(71,85,105,0.5);color:white}
+.modal-btn.continuar{
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;
+    box-shadow:0 4px 15px rgba(212,175,55,0.4);
+}
+.modal-btn.continuar:hover{
+    transform:scale(1.02);
+    box-shadow:0 8px 25px rgba(212,175,55,0.6);
+}
+
+.whatsapp-float{
+    position:fixed;bottom:20px;right:20px;
+    background:linear-gradient(135deg,#25D366,#128C7E);
+    width:55px;height:55px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;font-size:28px;z-index:1000;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4),0 0 25px rgba(37,211,102,0.4);
+}
+.whatsapp-float:hover{transform:scale(1.1)}
+.back-to-top{
+    position:fixed;bottom:90px;right:20px;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    color:#fff;width:45px;height:45px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;visibility:hidden;
+    z-index:1000;transition:.3s;text-decoration:none;
+    font-size:18px;
+}
+.back-to-top.show{opacity:1;visibility:visible}
+
 @media(max-width:500px){
     body{padding-top:100px}
     .main{padding-top:25px}
     .brand img{height:45px}
     .header{padding:10px 16px}
-    .games-menu{padding:10px 12px}
-    .menu-flotante{right:10px;min-width:200px}
-    .product-price{font-size:20px;}
-    .product-title{font-size:14px;}
-    .diamante-flotante:nth-child(n+6){display:none;}
-    .modal-header h2{font-size:18px;}
-    .modal-header .icono-grande{font-size:40px;}
-    .modal-body{padding:20px 16px;}
-    .modal-footer{padding:12px 16px 16px;}
+    .games-menu{padding:12px 15px}
+    .menu-flotante{right:10px;min-width:220px}
+    .btn-perfil .perfil-nombre{display:none}
+    .btn-perfil .perfil-flecha{display:none}
+    .menu-perfil{right:0;min-width:230px}
+    .product-price{font-size:20px}
+    .product-title{font-size:14px}
 }
 </style>
 </head>
-<body onclick="cerrarMenuSiExterior(event)">
-
-<!-- ✨ FONDO DE DIAMANTES FLOTANDO -->
-<div class="diamantes-fondo">
-    <div class="diamante-flotante">💠</div>
-    <div class="diamante-flotante">💠</div>
-    <div class="diamante-flotante">💠</div>
-    <div class="diamante-flotante">💠</div>
-    <div class="diamante-flotante">💠</div>
-    <div class="diamante-flotante">💠</div>
-    <div class="diamante-flotante">💠</div>
-    <div class="diamante-flotante">💠</div>
-</div>
-
-<!-- 🔔 MODAL DE AVISO -->
-<div class="modal-overlay" id="modalAviso">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="icono-grande">🎮</div>
-            <h2>⚠️ Antes de Comprar</h2>
-        </div>
-        <div class="modal-body">
-            <div class="modal-aviso">
-                <div class="titulo">📋 Es un código para Roblox</div>
-                <div class="texto">
-                    Recibirás un <strong style="color:#fff;">código</strong> para canjear tus Robux tú mismo.
-                </div>
-            </div>
-            <div class="modal-aviso verde">
-                <div class="titulo">✅ ¿Dónde se canjea?</div>
-                <div class="texto">En la página oficial de Roblox:</div>
-                <a href="https://www.roblox.com/es/redeem" target="_blank" class="modal-link">
-                    🌐 roblox.com/es/redeem
-                </a>
-            </div>
-            <div class="modal-aviso amarillo">
-                <div class="titulo">💵 Tu cuenta debe estar en DÓLARES</div>
-                <div class="texto">
-                    Verifica que tu cuenta de Roblox esté en <strong style="color:#22c55e;">USD</strong>. Si está en otra moneda, Roblox te dará <strong style="color:#ef4444;">menos Robux</strong> por el mismo código.
-                </div>
-            </div>
-            <div class="modal-aviso rojo">
-                <div class="titulo">🚫 NO HAY REEMBOLSO</div>
-                <div class="texto">
-                    Si canjeas el código en una cuenta con otra moneda y recibes menos Robux.
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="modal-btn cancelar" onclick="cerrarModal()">Cancelar</button>
-            <button class="modal-btn continuar" onclick="confirmarCompra()">Entendido, continuar</button>
-        </div>
-    </div>
-</div>
+<body onclick="cerrarTodosLosMenus(event)">
 
 <div class="barra-superior">
     <div class="header">
         <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
-        <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        <div class="header-right">
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="logo.png" alt="Logo" id="avatarLogo">
+                        <span class="online-dot"></span>
+                    </div>
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+                </button>
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                    <div class="menu-perfil-header">
+                        <div class="avatar-grande" id="avatarGrande">
+                            <img src="logo.png" alt="Logo">
+                        </div>
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
+                        </div>
+                    </div>
+                    <a href="dashboard.html" class="menu-perfil-opcion">
+                        <span class="icono">📊</span> Mi Panel
+                    </a>
+                    <a href="perfil.html" class="menu-perfil-opcion">
+                        <span class="icono">👤</span> Editar Perfil
+                    </a>
+                    <a href="pedidos.html" class="menu-perfil-opcion">
+                        <span class="icono">📦</span> Mis Pedidos
+                    </a>
+                    <a href="favoritos.html" class="menu-perfil-opcion">
+                        <span class="icono">❤️</span> Favoritos
+                    </a>
+                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion">
+                        <span class="icono">🚪</span> Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+            <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        </div>
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
-            <a href="index.html" class="menu-opcion">🏠 Inicio</a>
-            <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
-            <a href="bloodstrike.html" class="menu-opcion">⚔️ Blood Strike</a>
-            <a href="roblox.html" class="menu-opcion">🧱 Roblox</a>
-            <a href="ml.html" class="menu-opcion">⚔️ Mobile Legends</a>
-            <a href="cod.html" class="menu-opcion">🔫 COD Mobile</a>
-            <a href="pubg.html" class="menu-opcion">🪖 PUBG Mobile</a>
-            <a href="arenabreakout.html" class="menu-opcion">🎯 Arena Breakout</a>
-            <a href="delta.html" class="menu-opcion">💥 Delta Force</a>
-            <a href="netflix.html" class="menu-opcion">🎬 Netflix</a>
-            <a href="disney.html" class="menu-opcion">✨ Disney+</a>
+            <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">
+                🔑 Iniciar Sesión
+            </a>
+            <a href="register.html" class="menu-opcion" id="menuRegister">
+                📝 Crear Cuenta
+            </a>
+            <div id="menuConSesion" style="display:none;">
+                <a href="dashboard.html" class="menu-opcion">📊 Mi Panel</a>
+                <a href="pedidos.html" class="menu-opcion">📦 Mis Pedidos</a>
+                <a href="perfil.html" class="menu-opcion">👤 Editar Perfil</a>
+                <div class="menu-divider"></div>
+                <a href="#" class="menu-opcion" id="menuLogout" style="color:#ef4444;">🚪 Cerrar Sesión</a>
+            </div>
         </div>
     </div>
     <div class="games-menu">
@@ -237,7 +582,80 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
     </div>
 </div>
 
+<!-- MODAL LOGIN -->
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🔑</div>
+            <h2>Iniciar Sesión</h2>
+        </div>
+        <div class="modal-body">
+            <form id="loginForm">
+                <div style="margin-bottom:20px;">
+                    <label style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
+            </form>
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
+                <p style="margin-top:8px;"><a href="#" id="resetPasswordLink" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL AVISO ROBLOX -->
+<div class="modal-overlay" id="modalAviso">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🎮</div>
+            <h2>⚠️ Antes de Comprar</h2>
+        </div>
+        <div class="modal-body">
+            <div class="modal-aviso">
+                <div class="titulo">📋 Es un código para Roblox</div>
+                <div class="texto">Recibirás un <strong style="color:#fff;">código</strong> para canjear tus Robux tú mismo.</div>
+            </div>
+            <div class="modal-aviso verde">
+                <div class="titulo">✅ ¿Dónde se canjea?</div>
+                <div class="texto">En la página oficial de Roblox:</div>
+                <a href="https://www.roblox.com/es/redeem" target="_blank" class="modal-link">🌐 roblox.com/es/redeem</a>
+            </div>
+            <div class="modal-aviso">
+                <div class="titulo">💵 Tu cuenta debe estar en DÓLARES</div>
+                <div class="texto">Verifica que tu cuenta esté en <strong style="color:#4ade80;">USD</strong>. Si está en otra moneda, Roblox te dará <strong style="color:#f87171;">menos Robux</strong> por el mismo código.</div>
+            </div>
+            <div class="modal-aviso rojo">
+                <div class="titulo">🚫 NO HAY REEMBOLSO</div>
+                <div class="texto">Si canjeas el código en una cuenta con otra moneda y recibes menos Robux.</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalAviso()">Cancelar</button>
+            <button class="modal-btn continuar" onclick="confirmarCompra()">Entendido, continuar</button>
+        </div>
+    </div>
+</div>
+
 <div class="main">
+    <div class="card-panel">
+        <div class="panel-title">📧 Tu Correo Electrónico</div>
+        <input type="email" class="form-input" id="robloxEmail" placeholder="ejemplo@correo.com" autocomplete="email">
+        <div class="id-status" id="idStatus"></div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:10px;text-align:center;position:relative;z-index:1;">
+            ⚠️ El PIN de Robux llegará a este correo.
+        </div>
+    </div>
+
     <div class="card-panel">
         <div class="panel-title">💳 Método de Pago</div>
         <div class="payment-methods">
@@ -249,88 +667,163 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
 
     <div class="section-divider"><span>💰 ROBUX - GLOBAL</span></div>
     <div class="products-grid">
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">300 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="4.00">$4.00</div>
             <button class="btn-buy" onclick="prepararCompra('300 Robux', '4.00', '300')">COMPRAR</button>
         </div>
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">360 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="4.20">$4.20</div>
             <button class="btn-buy" onclick="prepararCompra('360 Robux', '4.20', '360')">COMPRAR</button>
         </div>
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">420 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="5.00">$5.00</div>
             <button class="btn-buy" onclick="prepararCompra('420 Robux', '5.00', '420')">COMPRAR</button>
         </div>
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">500 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="6.00">$6.00</div>
             <button class="btn-buy" onclick="prepararCompra('500 Robux', '6.00', '500')">COMPRAR</button>
         </div>
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">555 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="7.05">$7.05</div>
             <button class="btn-buy" onclick="prepararCompra('555 Robux', '7.05', '555')">COMPRAR</button>
         </div>
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">700 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="9.50">$9.50</div>
             <button class="btn-buy" onclick="prepararCompra('700 Robux', '9.50', '700')">COMPRAR</button>
         </div>
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">800 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="10.80">$10.80</div>
             <button class="btn-buy" onclick="prepararCompra('800 Robux', '10.80', '800')">COMPRAR</button>
         </div>
-
-        <div class="product-card" onmousemove="crearParticulas(event,this)">
+        <div class="product-card">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">1000 Robux</div></div>
             <div class="product-desc">📱 Entrega por PIN</div>
             <div class="product-price" data-usd="11.50">$11.50</div>
             <button class="btn-buy" onclick="prepararCompra('1000 Robux', '11.50', '1000')">COMPRAR</button>
         </div>
-
     </div>
 </div>
 
-<div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
-<a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
+<a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank">💬</a>
 
-<script>
-// ==============================================
-// 🛒 COMPRA PENDIENTE
-// ==============================================
+<script type="module">
+import { auth } from './firebase-config.js';
+import {
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+let metodo = "PAGO MOVIL";
+let tasa = 940;
+let emailOk = false;
 let compraPendiente = null;
+const juegoActual = "ROBLOX";
 
-function prepararCompra(producto, precioUsd, paqueteCodigo) {
-    compraPendiente = { producto, precioUsd, paqueteCodigo };
-    document.getElementById('modalAviso').classList.add('activo');
+async function cargarTasa() {
+    const tasaInfo = document.getElementById('tasaInfo');
+    try {
+        const respuesta = await fetch('/api/tasa');
+        const datos = await respuesta.json();
+        if (datos.ok && datos.tasa_usdt) {
+            tasa = Math.round(datos.tasa_usdt);
+            localStorage.setItem('tasa_usd_ves', tasa);
+            tasaInfo.textContent = `${tasa} Bs/USD`;
+            actualizarPrecios();
+        }
+    } catch (error) {
+        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 940;
+        tasaInfo.textContent = `${tasa} Bs/USD`;
+        actualizarPrecios();
+    }
 }
 
-function confirmarCompra() {
+function actualizarPrecios(){
+    document.querySelectorAll('.product-price').forEach(el=>{
+        let u = parseFloat(el.dataset.usd);
+        if(metodo === "PAGO MOVIL"){
+            el.innerText = Math.round(u * tasa).toLocaleString("es-VE") + " Bs";
+        } else {
+            el.innerText = u.toFixed(2) + " USDT";
+        }
+    });
+}
+
+window.seleccionarPago = function(m, e){
+    document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
+    e.classList.add('active');
+    metodo = m;
+    actualizarPrecios();
+};
+
+// VALIDAR EMAIL
+const emailInput = document.getElementById('robloxEmail');
+const statusDiv = document.getElementById('idStatus');
+
+function validarEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+emailInput.addEventListener('input', function() {
+    const email = this.value.trim();
+    if(!email) { statusDiv.style.display = 'none'; emailOk = false; return; }
+    if(!validarEmail(email)) {
+        statusDiv.className = 'id-status error';
+        statusDiv.textContent = '⚠️ Correo inválido';
+        statusDiv.style.display = 'block';
+        emailOk = false;
+        return;
+    }
+    statusDiv.className = 'id-status valido';
+    statusDiv.innerHTML = `
+        <div class="check-icono">✓</div>
+        <div>
+            <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">Correo Verificado</div>
+            <div class="nombre-jugador">${email}</div>
+        </div>
+    `;
+    emailOk = true;
+});
+
+// PREPARAR COMPRA (abre modal)
+window.prepararCompra = function(producto, precioUsd, paqueteCodigo){
+    const email = emailInput.value.trim();
+    if(!email){ alert("❌ Escribe tu correo electrónico primero"); return; }
+    if(!emailOk){ alert("⏳ Verifica tu correo antes de comprar"); return; }
+
+    compraPendiente = { producto, precioUsd, paqueteCodigo, email };
+    document.getElementById('modalAviso').classList.add('activo');
+};
+
+window.cerrarModalAviso = function() {
     document.getElementById('modalAviso').classList.remove('activo');
-    
-    if (!compraPendiente) return;
-    
-    const { producto, precioUsd, paqueteCodigo } = compraPendiente;
+    compraPendiente = null;
+};
+
+window.confirmarCompra = function() {
+    document.getElementById('modalAviso').classList.remove('activo');
+    if(!compraPendiente) return;
+
+    const { producto, precioUsd, paqueteCodigo, email } = compraPendiente;
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
+    localStorage.setItem('correo', email);
+    localStorage.setItem('id_jugador', email);
+    localStorage.setItem('nombre_jugador', email);
     localStorage.setItem('juego_seleccionado', juegoActual);
     localStorage.setItem('producto_seleccionado', producto);
     localStorage.setItem('paquete_codigo', paqueteCodigo);
@@ -339,136 +832,166 @@ function confirmarCompra() {
     localStorage.setItem('metodo_pago', metodo);
 
     window.location.href = "pasarela.html";
-}
-
-function cerrarModal() {
-    document.getElementById('modalAviso').classList.remove('activo');
-    compraPendiente = null;
-}
-
-function alternarMenu() {document.getElementById('menuFlotante').classList.toggle('activo');}
-function cerrarMenuSiExterior(e) {
-    const menu = document.getElementById('menuFlotante');
-    const btn = document.getElementById('btnMenu');
-    if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('activo');
-}
-
-// ==============================================
-// ✨ PARTÍCULAS AL HOVER
-// ==============================================
-function crearParticulas(e, tarjeta){
-    const rect = tarjeta.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const p = document.createElement('div');
-    p.style.position = 'absolute';
-    p.style.left = x + 'px';
-    p.style.top = y + 'px';
-    p.style.width = '6px';
-    p.style.height = '6px';
-    p.style.background = 'radial-gradient(circle,#fff,rgba(232,46,49,0.5))';
-    p.style.borderRadius = '50%';
-    p.style.pointerEvents = 'none';
-    p.style.zIndex = '10';
-    
-    const dx = (Math.random() - 0.5) * 60;
-    const dy = (Math.random() - 0.5) * 60;
-    
-    p.style.setProperty('--dx', dx + 'px');
-    p.style.setProperty('--dy', dy + 'px');
-    p.style.animation = 'particulaBrillo 1.2s ease-out';
-    
-    tarjeta.appendChild(p);
-    
-    setTimeout(() => p.remove(), 1200);
-}
-
-// ==============================================
-// 🎉 CONFETTI
-// ==============================================
-function lanzarConfetti(){
-    const colores = ['#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ec4899', '#ffffff'];
-    const cantidad = 25;
-    
-    for(let i = 0; i < cantidad; i++){
-        setTimeout(() => {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.top = '-10px';
-            confetti.style.background = colores[Math.floor(Math.random() * colores.length)];
-            confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-            confetti.style.width = (Math.random() * 8 + 5) + 'px';
-            confetti.style.height = (Math.random() * 8 + 5) + 'px';
-            document.body.appendChild(confetti);
-            setTimeout(() => confetti.remove(), 3000);
-        }, i * 40);
-    }
-}
-
-// Lanzar confetti al abrir el modal
-const observerModal = new MutationObserver((mutations) => {
-    mutations.forEach((m) => {
-        if (m.target.id === 'modalAviso' && m.target.classList.contains('activo')) {
-            lanzarConfetti();
-        }
-    });
-});
-observerModal.observe(document.getElementById('modalAviso'), { attributes: true });
-
-// ==============================================
-// 💰 TASA
-// ==============================================
-let metodo = "PAGO MOVIL";
-let tasa = 930;
-const juegoActual = "ROBLOX";
-
-async function cargarTasaBinance() {
-    const tasaInfo = document.getElementById('tasaInfo');
-    try {
-        const respuesta = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTVES", {cache: 'no-cache'});
-        const datos = await respuesta.json();
-        const precio = parseFloat(datos.price);
-        if (precio > 0) {
-            tasa = Math.round(precio);
-            localStorage.setItem('tasa_usd_ves', tasa);
-            tasaInfo.textContent = `${tasa} Bs/USD`;
-            actualizarPrecios();
-        }
-    } catch (error) {
-        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 930;
-        tasaInfo.textContent = `${tasa} Bs/USD`;
-        actualizarPrecios();
-    }
-}
-
-function actualizarPrecios(){
-    document.querySelectorAll('.product-price').forEach(el=>{
-        let u=parseFloat(el.dataset.usd);
-        el.innerText = metodo==="PAGO MOVIL" ? Math.round(u*tasa).toLocaleString("es-VE")+" Bs" : u.toFixed(2)+" USDT";
-    });
-}
-
-window.seleccionarPago=function(m,e){
-    document.querySelectorAll('.pay-box').forEach(b=>b.classList.remove('active'));
-    e.classList.add('active');
-    metodo=m;
-    actualizarPrecios();
 };
 
-cargarTasaBinance();
-setInterval(cargarTasaBinance, 60000);
+window.alternarMenu = function() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+    document.getElementById('menuPerfil').classList.remove('activo');
+    document.getElementById('perfilFlecha').classList.remove('abierta');
+};
+
+window.toggleMenuPerfil = function() {
+    document.getElementById('menuPerfil').classList.toggle('activo');
+    document.getElementById('perfilFlecha').classList.toggle('abierta');
+    document.getElementById('menuFlotante').classList.remove('activo');
+};
+
+window.cerrarTodosLosMenus = function(e) {
+    const menuFlotante = document.getElementById('menuFlotante');
+    const menuPerfil = document.getElementById('menuPerfil');
+    const btnMenu = document.getElementById('btnMenu');
+    const btnPerfil = document.getElementById('btnPerfil');
+    if(btnMenu && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
+        menuFlotante.classList.remove('activo');
+    }
+    if(btnPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+        menuPerfil.classList.remove('activo');
+        document.getElementById('perfilFlecha').classList.remove('abierta');
+    }
+};
+
+const perfilContainer = document.getElementById('perfilContainer');
+const menuLogin = document.getElementById('menuLogin');
+const menuRegister = document.getElementById('menuRegister');
+const menuConSesion = document.getElementById('menuConSesion');
+const perfilNombre = document.getElementById('perfilNombre');
+const nombreCompleto = document.getElementById('nombreCompleto');
+const emailUsuario = document.getElementById('emailUsuario');
+const modalLogin = document.getElementById('modalLogin');
+const loginForm = document.getElementById('loginForm');
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        const nombre = user.displayName || 'Usuario';
+        const email = user.email || 'usuario@email.com';
+        perfilContainer.style.display = 'block';
+        perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+        nombreCompleto.textContent = nombre;
+        emailUsuario.textContent = email;
+
+        menuLogin.style.display = 'none';
+        menuRegister.style.display = 'none';
+        menuConSesion.style.display = 'block';
+    } else {
+        perfilContainer.style.display = 'none';
+        menuLogin.style.display = 'flex';
+        menuRegister.style.display = 'flex';
+        menuConSesion.style.display = 'none';
+    }
+});
+
+window.abrirModalLogin = function() {
+    modalLogin.classList.add('activo');
+    document.getElementById('loginMessage').style.display = 'none';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('menuFlotante').classList.remove('activo');
+};
+
+window.cerrarModalLogin = function() {
+    modalLogin.classList.remove('activo');
+};
+
+modalLogin.addEventListener('click', (e) => {
+    if (e.target === modalLogin) cerrarModalLogin();
+});
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('loginMessage');
+
+    btn.disabled = true;
+    btn.textContent = 'Ingresando...';
+    msg.style.display = 'none';
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        msg.style.background = 'rgba(34,197,94,0.15)';
+        msg.style.color = '#86efac';
+        msg.textContent = '✅ ¡Bienvenido!';
+        msg.style.display = 'block';
+        setTimeout(() => {
+            cerrarModalLogin();
+            window.location.reload();
+        }, 1000);
+    } catch (error) {
+        let errorMsg = '❌ ';
+        switch (error.code) {
+            case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
+            case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
+            case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
+            default: errorMsg += error.message;
+        }
+        msg.style.background = 'rgba(239,68,68,0.15)';
+        msg.style.color = '#fca5a5';
+        msg.textContent = errorMsg;
+        msg.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Ingresar';
+    }
+});
+
+document.getElementById('btnCerrarSesion').addEventListener('click', async (e) => {
+    e.preventDefault();
+    if(confirm('¿Seguro que quieres cerrar sesión?')) {
+        await signOut(auth);
+        window.location.reload();
+    }
+});
+
+document.getElementById('menuLogout').addEventListener('click', async (e) => {
+    e.preventDefault();
+    if(confirm('¿Seguro que quieres cerrar sesión?')) {
+        await signOut(auth);
+        window.location.reload();
+    }
+});
+
+document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const msg = document.getElementById('loginMessage');
+    if (!email) {
+        msg.style.background = 'rgba(239,68,68,0.15)';
+        msg.style.color = '#fca5a5';
+        msg.textContent = '❌ Ingresa tu correo primero';
+        msg.style.display = 'block';
+        return;
+    }
+    try {
+        await sendPasswordResetEmail(auth, email);
+        msg.style.background = 'rgba(34,197,94,0.15)';
+        msg.style.color = '#86efac';
+        msg.textContent = '✅ Correo enviado';
+        msg.style.display = 'block';
+    } catch (error) {
+        msg.style.background = 'rgba(239,68,68,0.15)';
+        msg.style.color = '#fca5a5';
+        msg.textContent = '❌ ' + error.message;
+        msg.style.display = 'block';
+    }
+});
+
+cargarTasa();
+setInterval(cargarTasa, 60000);
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
 });
-
-// CSS partículas
-const styleParticula = document.createElement('style');
-styleParticula.textContent = `@keyframes particulaBrillo{0%{opacity:1;transform:scale(0) translate(0,0);}100%{opacity:0;transform:scale(1.5) translate(var(--dx),var(--dy));}}`;
-document.head.appendChild(styleParticula);
 </script>
 </body>
 </html>
