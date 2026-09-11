@@ -96,15 +96,14 @@ export default async function handler(req, res) {
                 // ==============================================
                 else if (juegoUpper === 'ROBLOX') {
                     const uuidMap = {
-                        '50': '81dfdc57-1feb-4e72-8be6-7e119a348c48',
-                        '100': 'ea9298ae-944b-498b-9d82-a8128624cbbd',
+                        '300': '82308d57-2c4d-4271-9040-663e33a993f0',
+                        '360': '5cafd861-3893-49a7-a9be-7815492c04c2',
+                        '420': 'f63a1845-5a51-42b1-b217-616964eaad71',
+                        '500': '56c1daf9-22dc-49ac-9633-6d57548e213e',
+                        '555': '9defafba-f584-4378-ab8c-ce656d2a7c7e',
+                        '700': '7de07ab2-465c-4c26-8a28-626ebfa1cf13',
                         '800': '1418ad82-0ca5-47a3-bd1b-38de2f2b6e0b',
-                        '1000': 'd900d067-7f8a-427e-b128-9b64c91f65d0',
-                        '2000': '898ed399-6901-4582-9755-e5299f7dfb40',
-                        '2500': 'f82d8920-a7e8-4ac2-942e-679ac565284c',
-                        '3000': '2ef44f15-81a6-4a04-8f11-237cd6490789',
-                        '4500': '6378c243-ad55-4c2d-9593-eee0da6ef4e7',
-                        '10000': '79fe3333-e8f3-4a96-b79c-b3acacc6fab5'
+                        '1000': 'd900d067-7f8a-427e-b128-9b64c91f65d0'
                     };
                     productId = uuidMap[String(paquete)];
                     if (!productId) return res.status(400).json({ error: `Paquete Roblox no encontrado: ${paquete}` });
