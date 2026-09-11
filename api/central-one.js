@@ -17,23 +17,7 @@ export default async function handler(req, res) {
         const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
         // ==============================================
-        // 🎯 TODOS LOS JUEGOS APARECEN EN EL CATÁLOGO
-        // ==============================================
-        const JUEGOS_PERMITIDOS = [
-            'FREE FIRE',
-            'BLOOD STRIKE',
-            'ROBLOX',
-            'MOBILE LEGENDS',
-            'CALL OF DUTY',
-            'PUBG MOBILE',
-            'ARENA BREAKOUT',
-            'DELTA FORCE'
-        ];
-
-        const EXCLUIR = ['PIN', 'CODE', 'CODIGO'];
-
-        // ==============================================
-        // 📌 GET - CATÁLOGO FILTRADO
+        // 📌 GET - CATÁLOGO COMPLETO (SIN FILTROS)
         // ==============================================
         if (req.method === 'GET') {
             const accion = req.query?.accion;
@@ -43,34 +27,6 @@ export default async function handler(req, res) {
                     headers: { 'Authorization': `Bearer ${API_KEY}` }
                 });
                 const data = await response.json();
-
-                if (data.items && Array.isArray(data.items)) {
-                    const itemsFiltrados = data.items.filter(item => {
-                        const nombre = (item.name || '').toUpperCase();
-                        const sku = (item.sku || '').toUpperCase();
-                        const region = (item.region || '').toUpperCase();
-
-                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
-                            nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
-                        );
-
-                        if (!esJuegoPermitido) return false;
-
-                        // Roblox: solo GLOBAL
-                        if (nombre.includes('ROBLOX') || sku.includes('ROBLOX')) {
-                            return region === 'GLOBAL';
-                        }
-
-                        return true;
-                    });
-
-                    return res.status(200).json({
-                        items: itemsFiltrados,
-                        total_filtrado: itemsFiltrados.length,
-                        total_original: data.items.length,
-                        juegos_permitidos: JUEGOS_PERMITIDOS
-                    });
-                }
                 return res.status(response.status).json(data);
             }
 
@@ -91,32 +47,6 @@ export default async function handler(req, res) {
                     headers: { 'Authorization': `Bearer ${API_KEY}` }
                 });
                 const data = await response.json();
-
-                if (data.items && Array.isArray(data.items)) {
-                    const itemsFiltrados = data.items.filter(item => {
-                        const nombre = (item.name || '').toUpperCase();
-                        const sku = (item.sku || '').toUpperCase();
-                        const region = (item.region || '').toUpperCase();
-
-                        const esJuegoPermitido = JUEGOS_PERMITIDOS.some(juego =>
-                            nombre.includes(juego) || sku.includes(juego.replace(/\s/g, '-'))
-                        );
-
-                        if (!esJuegoPermitido) return false;
-
-                        if (nombre.includes('ROBLOX') || sku.includes('ROBLOX')) {
-                            return region === 'GLOBAL';
-                        }
-
-                        return true;
-                    });
-
-                    return res.status(200).json({
-                        items: itemsFiltrados,
-                        total_filtrado: itemsFiltrados.length,
-                        total_original: data.items.length
-                    });
-                }
                 return res.status(response.status).json(data);
             }
 
@@ -185,7 +115,7 @@ export default async function handler(req, res) {
                 // ==============================================
                 else if (juegoUpper === 'MOBILE LEGENDS') {
                     const uuidMap = {
-                        // 🔴 REEMPLAZA CON LOS UUIDs REALES CUANDO LOS TENGAS
+                        // 🔴 REEMPLAZA CON LOS UUIDs REALES
                         '51': 'UUID_ML_51',
                         '102': 'UUID_ML_102',
                         '234': 'UUID_ML_234',
