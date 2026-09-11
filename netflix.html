@@ -54,11 +54,16 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
 .input-campo:focus{border-color:#86efac;box-shadow:0 0 20px rgba(37,211,102,0.3);}
 .aviso-whatsapp{margin-top:12px;font-size:13px;color:#86efac;position:relative;z-index:1;}
 
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1;}
+.pay-box{background:#111827;border:2px solid #1f2937;border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700;transition:.2s;}
+.pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul);box-shadow:0 0 20px rgba(59,130,246,0.3);}
+.tasa-info{font-size:12px;color:#94a3b8;margin-top:8px;text-align:right;font-weight:500;position:relative;z-index:1;}
+
 .section-divider{margin:30px 0 20px;text-align:center;position:relative;}
 .section-divider span{background:linear-gradient(135deg,#3b82f6,#2563eb,#8b5cf6);background-size:200% 200%;color:#fff;padding:8px 22px;border-radius:30px;font-size:14px;font-weight:800;letter-spacing:1px;box-shadow:0 0 30px rgba(59,130,246,0.5),0 0 60px rgba(139,92,246,0.2),inset 0 1px 0 rgba(255,255,255,0.2);display:inline-block;animation:degradadoDivisor 3s ease infinite;will-change:background-position;}
 @keyframes degradadoDivisor{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
 
-/* 💎 TARJETAS IDÉNTICAS A LOS JUEGOS */
+/* 💎 TARJETAS IGUALES A LOS JUEGOS */
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
 .product-card{background:linear-gradient(135deg,rgba(20,30,55,0.95),rgba(11,18,32,0.95));border:2px solid transparent;border-radius:18px;padding:16px;transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),box-shadow 0.35s;position:relative;overflow:hidden;cursor:pointer;background-clip:padding-box;will-change:transform;transform:translateZ(0);backface-visibility:hidden;}
 .product-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b,#3b82f6);background-size:300% 300%;border-radius:18px;z-index:-1;opacity:0;transition:opacity 0.3s;}
@@ -71,10 +76,8 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
 @keyframes iconoRotar{0%,100%{transform:rotate(0deg);}25%{transform:rotate(-10deg);}75%{transform:rotate(10deg);}}
 .product-title{font-size:16px;font-weight:800;letter-spacing:0.3px;background:linear-gradient(135deg,#fff,#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .product-desc{color:#9ca3af;font-size:11px;margin-bottom:12px;font-weight:500;letter-spacing:0.2px;position:relative;z-index:1;}
-.product-price{font-size:24px;font-weight:800;color:var(--color-azul);margin-bottom:4px;text-shadow:0 0 20px rgba(59,130,246,0.5);letter-spacing:-0.5px;position:relative;z-index:1;animation:pulsoPrecio 3s ease-in-out infinite;display:inline-block;will-change:transform;}
+.product-price{font-size:24px;font-weight:800;color:var(--color-azul);margin-bottom:14px;text-shadow:0 0 20px rgba(59,130,246,0.5);letter-spacing:-0.5px;position:relative;z-index:1;animation:pulsoPrecio 3s ease-in-out infinite;display:inline-block;will-change:transform;}
 @keyframes pulsoPrecio{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
-.product-price-bs{font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:14px;position:relative;z-index:1;}
-.product-price-bs span{color:#facc15;font-weight:700;}
 .btn-buy{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;width:100%;height:42px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(59,130,246,0.3);position:relative;overflow:hidden;z-index:1;}
 .btn-buy::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.3);border-radius:50%;transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s;}
 .btn-buy:hover::before{width:400px;height:400px;}
@@ -155,13 +158,21 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
         <div class="aviso-whatsapp">💬 Te enviaremos los datos de acceso por WhatsApp después de confirmar el pago.</div>
     </div>
 
+    <div class="card-panel">
+        <div class="panel-title">💳 Método de Pago</div>
+        <div class="payment-methods">
+            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">🏦 PAGO MOVIL</div>
+            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🟡 BINANCE</div>
+        </div>
+        <div class="tasa-info" id="tasaInfo">Cargando...</div>
+    </div>
+
     <div class="section-divider"><span>🎬 ELIGE TU PLAN</span></div>
     <div class="products-grid">
         <div class="product-card" 
              data-codigo="netflix_perfil" 
              data-nombre="Netflix - Perfil" 
              data-precio-usd="3.80"
-             data-precio-bs="3570"
              onmousemove="crearParticulas(event,this)">
             <div class="card-header">
                 <div class="game-icon">👤</div>
@@ -169,7 +180,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
             </div>
             <div class="product-desc">📱 1 perfil • 30 días • Calidad estándar</div>
             <div class="product-price" data-usd="3.80">$3.80</div>
-            <div class="product-price-bs">≈ <span>3.570 Bs</span></div>
             <button class="btn-buy" onclick="seleccionarPlan(this)">COMPRAR</button>
         </div>
 
@@ -177,7 +187,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
              data-codigo="netflix_cuenta" 
              data-nombre="Netflix - Cuenta Completa" 
              data-precio-usd="13.00"
-             data-precio-bs="12220"
              onmousemove="crearParticulas(event,this)">
             <div class="card-header">
                 <div class="game-icon">🎬</div>
@@ -185,7 +194,6 @@ body{background-image:url('fondo.jpg');background-size:cover;background-position
             </div>
             <div class="product-desc">📱 Cuenta completa • 30 días • Ilimitados</div>
             <div class="product-price" data-usd="13.00">$13.00</div>
-            <div class="product-price-bs">≈ <span>12.220 Bs</span></div>
             <button class="btn-buy" onclick="seleccionarPlan(this)">COMPRAR</button>
         </div>
     </div>
@@ -201,6 +209,59 @@ function cerrarMenuSiExterior(e) {
     const btn = document.getElementById('btnMenu');
     if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('activo');
 }
+
+let metodo = "PAGO MOVIL";
+let tasa = 940;
+
+// ==============================================
+// 💱 CARGAR TASA DESDE /api/tasa (USDT de PagoNorte)
+// ==============================================
+async function cargarTasa() {
+    const tasaInfo = document.getElementById('tasaInfo');
+    try {
+        const respuesta = await fetch('/api/tasa');
+        const datos = await respuesta.json();
+        
+        if (datos.ok && datos.tasa_usdt) {
+            tasa = Math.round(datos.tasa_usdt);
+            localStorage.setItem('tasa_usd_ves', tasa);
+            tasaInfo.textContent = `${tasa} Bs/USD`;
+            actualizarPrecios();
+        } else {
+            throw new Error('Tasa no válida');
+        }
+    } catch (error) {
+        console.error('❌ Error tasa:', error);
+        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 940;
+        tasaInfo.textContent = `${tasa} Bs/USD`;
+        actualizarPrecios();
+    }
+}
+
+// ==============================================
+// 💰 ACTUALIZAR PRECIOS SEGÚN MÉTODO DE PAGO
+// ==============================================
+function actualizarPrecios(){
+    document.querySelectorAll('.product-price').forEach(el=>{
+        let u = parseFloat(el.dataset.usd);
+        if(metodo === "PAGO MOVIL"){
+            el.innerText = Math.round(u * tasa).toLocaleString("es-VE") + " Bs";
+            el.style.color = "#3b82f6";
+            el.style.textShadow = "0 0 20px rgba(59,130,246,0.5)";
+        } else {
+            el.innerText = u.toFixed(2) + " USDT";
+            el.style.color = "#f3ba2f";
+            el.style.textShadow = "0 0 20px rgba(243,186,47,0.5)";
+        }
+    });
+}
+
+window.seleccionarPago = function(m, e){
+    document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
+    e.classList.add('active');
+    metodo = m;
+    actualizarPrecios();
+};
 
 // ==============================================
 // ✨ PARTÍCULAS AL HOVER
@@ -274,20 +335,29 @@ function seleccionarPlan(boton) {
 
     lanzarConfetti();
 
+    const precioUsd = tarjeta.dataset.precioUsd;
+    const precioBs = Math.round(parseFloat(precioUsd) * tasa);
+
     localStorage.setItem('juego_seleccionado', 'Netflix');
     localStorage.setItem('id_jugador', whatsapp);
     localStorage.setItem('nombre_jugador', whatsapp);
     localStorage.setItem('producto_seleccionado', tarjeta.dataset.nombre);
-    localStorage.setItem('precio_usd', tarjeta.dataset.precioUsd);
-    localStorage.setItem('precio_en_bs', tarjeta.dataset.precioBs);
+    localStorage.setItem('precio_usd', precioUsd);
+    localStorage.setItem('precio_en_bs', precioBs);
     localStorage.setItem('paquete_codigo', tarjeta.dataset.codigo);
     localStorage.setItem('proveedor', 'pagonorte');
-    localStorage.setItem('metodo_pago', 'MANUAL');
+    localStorage.setItem('metodo_pago', metodo);
 
     setTimeout(() => {
         window.location.href = 'pasarela.html';
     }, 800);
 }
+
+// ==============================================
+// 🚀 INICIALIZAR
+// ==============================================
+cargarTasa();
+setInterval(cargarTasa, 60000);
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
