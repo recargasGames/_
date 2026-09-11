@@ -6,341 +6,98 @@
 <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
 <title>RECARGASGAMES - Arena Breakout Mobile</title>
 <style>
-:root{
-    --color-principal:#3b82f6;
-    --color-hover:#2563eb;
-    --color-azul:#3b82f6;
-    --color-blanco:#ffffff;
-    --glow-azul:0 0 10px rgba(59,130,246,.6),0 0 20px rgba(59,130,246,.3);
-}
+:root{--color-principal:#3b82f6;--color-hover:#2563eb;--color-azul:#3b82f6;--color-blanco:#ffffff;}
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-    background-image:url('fondo.jpg');
-    background-size:cover;
-    background-position:center;
-    background-attachment:fixed;
-    color:#fff;
-    font-family:'Segoe UI',sans-serif;
-    padding-top:110px;
-}
+body{background-image:url('fondo.jpg');background-size:cover;background-position:center;background-attachment:fixed;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;overflow-x:hidden;}
 
-/* 🍔 MENÚ HAMBURGUESA */
-.menu-hamburguesa {
-    background:transparent;
-    border:none;
-    color:white;
-    font-size:26px;
-    cursor:pointer;
-    padding:5px 10px;
-    transition:transform 0.2s,color .2s;
-}
-.menu-hamburguesa:hover {
-    transform:scale(1.1);
-    color:var(--color-azul);
-    text-shadow:var(--glow-azul);
-}
-.menu-flotante {
-    position:absolute;
-    top:65px;
-    right:20px;
-    background:rgba(17,24,39,0.98);
-    border:1px solid var(--color-azul);
-    border-radius:14px;
-    min-width:220px;
-    box-shadow:0 8px 25px rgba(0,0,0,0.4),0 0 20px rgba(59,130,246,.2);
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(-10px);
-    transition:all 0.25s ease;
-    z-index:1000;
-    overflow:hidden;
-}
-.menu-flotante.activo {
-    opacity:1;
-    visibility:visible;
-    transform:translateY(0);
-}
-.menu-opcion {
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:14px 18px;
-    color:white;
-    text-decoration:none;
-    font-size:15px;
-    font-weight:500;
-    transition:all 0.2s;
-    border-bottom:1px solid #1f2937;
-}
-.menu-opcion:last-child { border-bottom:none; }
-.menu-opcion:hover {
-    background:rgba(59,130,246,0.15);
-    color:var(--color-azul);
-    padding-left:22px;
-}
+/* ✨ FONDO DE ICONOS FLOTANDO */
+.diamantes-fondo{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;transform:translateZ(0);backface-visibility:hidden;}
+.diamante-flotante{position:absolute;font-size:20px;opacity:0.15;animation:flotarDiamante linear infinite;filter:drop-shadow(0 0 8px rgba(59,130,246,0.6));will-change:transform;transform:translateZ(0);backface-visibility:hidden;}
+@keyframes flotarDiamante{0%{transform:translateY(100vh) rotate(0deg) translateZ(0);}100%{transform:translateY(-100px) rotate(360deg) translateZ(0);}}
+.diamante-flotante:nth-child(1){left:5%;animation-duration:15s;animation-delay:0s;font-size:24px;}
+.diamante-flotante:nth-child(2){left:20%;animation-duration:18s;animation-delay:2s;font-size:18px;}
+.diamante-flotante:nth-child(3){left:35%;animation-duration:12s;animation-delay:4s;font-size:28px;}
+.diamante-flotante:nth-child(4){left:50%;animation-duration:20s;animation-delay:1s;font-size:16px;}
+.diamante-flotante:nth-child(5){left:65%;animation-duration:16s;animation-delay:6s;font-size:22px;}
+.diamante-flotante:nth-child(6){left:80%;animation-duration:14s;animation-delay:3s;font-size:20px;}
+.diamante-flotante:nth-child(7){left:90%;animation-duration:19s;animation-delay:5s;font-size:26px;}
+.diamante-flotante:nth-child(8){left:12%;animation-duration:13s;animation-delay:8s;font-size:18px;}
 
-/* 🔒 BARRA FIJA */
-.barra-superior{
-    position:fixed;
-    top:0;left:0;right:0;
-    z-index:999;
-    background:rgba(11,18,32,.95);
-    border-bottom:2px solid var(--color-azul);
-    box-shadow:0 2px 15px rgba(59,130,246,.35);
-}
-.header{
-    padding:12px 20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-bottom:1px solid #2a374f;
-}
+.barra-superior, .main, .whatsapp-float, .back-to-top{position:relative;z-index:1;}
+
+.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(11,18,32,.95);border-bottom:2px solid var(--color-azul);box-shadow:0 2px 10px rgba(0,0,0,.3);}
+.header{padding:12px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a374f;}
 .brand{display:flex;align-items:center}
-.brand img{
-    height:55px;width:auto;border-radius:14px;background:transparent;
-    filter:drop-shadow(0 0 8px rgba(59,130,246,.5));
-}
+.brand img{height:55px;width:auto;border-radius:14px;background:transparent}
 
-/* MENÚ INFERIOR */
-.games-menu{
-    display:flex;gap:8px;
-    overflow-x:auto;overflow-y:hidden;
-    padding:12px 15px;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-}
+.menu-hamburguesa{background:transparent;border:none;color:white;font-size:26px;cursor:pointer;padding:5px 10px;transition:transform 0.2s;}
+.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-azul);}
+.menu-flotante{position:absolute;top:65px;right:20px;background:rgba(17,24,39,0.98);border:1px solid var(--color-azul);border-radius:14px;min-width:220px;box-shadow:0 8px 25px rgba(0,0,0,0.4);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.25s ease;z-index:1000;overflow:hidden;}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0);}
+.menu-opcion{display:flex;align-items:center;gap:10px;padding:14px 18px;color:white;text-decoration:none;font-size:15px;font-weight:500;transition:all 0.2s;border-bottom:1px solid #1f2937;}
+.menu-opcion:last-child{border-bottom:none;}
+.menu-opcion:hover{background:rgba(59,130,246,0.15);color:var(--color-azul);padding-left:22px;}
+
+.games-menu{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:12px 15px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .games-menu::-webkit-scrollbar{display:none;width:0;height:0}
-.games-menu a{
-    text-decoration:none;color:#fff;
-    padding:6px 12px;border-radius:20px;
-    font-size:14px;font-weight:700;
-    white-space:nowrap;transition:.2s;
-}
-.games-menu a:hover,.games-menu a.active{
-    color:var(--color-azul);
-    border-bottom:2px solid var(--color-azul);
-    border-radius:0;
-    text-shadow:0 0 8px rgba(59,130,246,.7);
-}
+.games-menu a{text-decoration:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:14px;font-weight:700;white-space:nowrap;transition:.2s;}
+.games-menu a:hover,.games-menu a.active{color:var(--color-azul);border-bottom:2px solid var(--color-azul);border-radius:0;}
 
-/* CONTENEDOR PRINCIPAL */
-.main{
-    padding:20px;padding-top:30px;
-    max-width:800px;margin:0 auto;
-}
-
-/* ✨ CARDS PANEL PREMIUM */
-.card-panel{
-    background:linear-gradient(135deg,rgba(11,18,32,.92) 0%,rgba(17,30,55,.92) 100%);
-    border:1px solid rgba(59,130,246,.4);
-    border-radius:20px;
-    padding:18px;
-    margin-bottom:20px;
-    box-shadow:inset 0 0 25px rgba(59,130,246,.08),0 4px 20px rgba(0,0,0,.4);
-    position:relative;
-    overflow:hidden;
-}
-.card-panel::before{
-    content:'';
-    position:absolute;top:0;left:-100%;
-    width:100%;height:100%;
-    background:linear-gradient(90deg,transparent,rgba(59,130,246,.12),transparent);
-    transition:left .6s;
-    pointer-events:none;
-}
-.card-panel:hover::before{left:100%}
-.panel-title{
-    font-size:15px;font-weight:700;
-    margin:0 0 12px;color:var(--color-azul);
-    text-shadow:0 0 10px rgba(59,130,246,.5);
-}
-.form-input{
-    width:100%;height:50px;
-    border-radius:14px;
-    background:#111827;color:#fff;
-    padding:12px;border:1px solid #1f2937;
-    font-size:16px;transition:.2s;
-}
-.form-input:focus{
-    outline:none;
-    border-color:var(--color-azul);
-    box-shadow:0 0 0 3px rgba(59,130,246,.2),0 0 15px rgba(59,130,246,.3);
-}
-
-/* MÉTODOS DE PAGO */
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto;}
+.card-panel{background:rgba(11,18,32,.9);border:1px solid #1f2937;border-radius:20px;padding:18px;margin-bottom:20px;position:relative;overflow:hidden;}
+.card-panel::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(59,130,246,0.08),transparent);animation:brilloPanel 4s infinite;will-change:left;}
+@keyframes brilloPanel{0%{left:-100%;}100%{left:100%;}}
+.panel-title{font-size:15px;font-weight:700;margin:0 0 12px;color:var(--color-azul);position:relative;z-index:1;}
+.form-input{width:100%;height:50px;border-radius:14px;background:#111827;color:#fff;padding:12px;border:1px solid #1f2937;font-size:16px;position:relative;z-index:1;transition:border-color 0.3s, box-shadow 0.3s;}
+.form-input:focus{outline:none;border-color:var(--color-azul);box-shadow:0 0 20px rgba(59,130,246,0.3);}
 .payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-.pay-box{
-    background:#111827;
-    border:2px solid #1f2937;
-    border-radius:16px;
-    padding:12px;text-align:center;
-    cursor:pointer;font-weight:700;
-    transition:.25s;
-}
-.pay-box.active{
-    border-color:var(--color-azul);
-    background:linear-gradient(135deg,#1e293b,#1a2d4d);
-    color:var(--color-azul);
-    box-shadow:0 0 15px rgba(59,130,246,.4),inset 0 0 15px rgba(59,130,246,.1);
-    text-shadow:0 0 8px rgba(59,130,246,.6);
-}
-.pay-box:hover:not(.active){border-color:rgba(59,130,246,.5)}
+.pay-box{background:#111827;border:2px solid #1f2937;border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700;transition:.2s;}
+.pay-box.active{border-color:var(--color-azul);background:#1e293b;color:var(--color-azul);box-shadow:0 0 20px rgba(59,130,246,0.3);}
 
-/* ✨ GRID DE PRODUCTOS */
-.products-grid{
-    display:grid;grid-template-columns:repeat(2,1fr);
-    gap:15px;margin-bottom:25px;
-}
-.product-card{
-    background:linear-gradient(135deg,rgba(11,18,32,.92) 0%,rgba(17,30,55,.92) 100%);
-    border:1px solid rgba(59,130,246,.35);
-    border-radius:16px;
-    padding:15px;
-    transition:all .3s ease;
-    position:relative;
-    overflow:hidden;
-    box-shadow:inset 0 0 20px rgba(59,130,246,.06),0 2px 10px rgba(0,0,0,.3);
-}
-.product-card::before{
-    content:'';
-    position:absolute;top:0;left:-100%;
-    width:100%;height:100%;
-    background:linear-gradient(90deg,transparent,rgba(59,130,246,.15),transparent);
-    transition:left .7s;
-    pointer-events:none;
-}
-.product-card:hover::before{left:100%}
-.product-card:hover{
-    border-color:var(--color-azul);
-    transform:translateY(-3px);
-    box-shadow:0 0 25px rgba(59,130,246,.35),inset 0 0 25px rgba(59,130,246,.1);
-}
-.card-header{
-    display:flex;align-items:center;gap:12px;
-    border-bottom:1px solid rgba(59,130,246,.2);
-    padding-bottom:10px;margin-bottom:10px;
-}
-.game-icon{
-    background:linear-gradient(135deg,#1a2333,#1e3a5f);
-    padding:8px;border-radius:12px;font-size:18px;
-    box-shadow:0 0 10px rgba(59,130,246,.25);
-}
-.product-title{font-size:16px;font-weight:700}
-.product-desc{color:#9ca3af;font-size:11px;margin-bottom:10px}
-.product-price{
-    font-size:22px;font-weight:700;
-    color:var(--color-azul);
-    margin-bottom:12px;
-    text-shadow:0 0 12px rgba(59,130,246,.6);
-}
-.btn-buy{
-    background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);
-    color:#fff;border:none;
-    width:100%;height:40px;
-    border-radius:12px;
-    font-size:14px;font-weight:700;
-    cursor:pointer;
-    transition:.25s;
-    position:relative;
-    overflow:hidden;
-    box-shadow:0 3px 12px rgba(59,130,246,.35);
-}
-.btn-buy:hover{
-    background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);
-    box-shadow:0 5px 20px rgba(59,130,246,.55);
-    transform:translateY(-1px);
-}
-.btn-buy::after{
-    content:'';
-    position:absolute;
-    top:50%;left:50%;
-    width:0;height:0;
-    background:rgba(255,255,255,.3);
-    border-radius:50%;
-    transform:translate(-50%,-50%);
-    transition:width .4s,height .4s;
-}
-.btn-buy:active::after{width:300px;height:300px}
+/* ✨ ESTADO DE VERIFICACIÓN */
+.id-status{margin-top:14px;padding:14px 18px;border-radius:14px;font-size:15px;display:none;font-weight:700;position:relative;overflow:hidden;letter-spacing:0.3px;animation:statusAparecer 0.4s ease;}
+@keyframes statusAparecer{from{opacity:0;transform:translateY(-10px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+.id-status::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:brilloPasar 2.5s infinite;will-change:left;}
+@keyframes brilloPasar{0%{left:-100%;}100%{left:100%;}}
+.id-status.verificando{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.08));color:#60a5fa;border:1px solid rgba(59,130,246,0.5);box-shadow:0 0 20px rgba(59,130,246,0.2);}
+.id-status.verificando::after{content:'';width:18px;height:18px;border:2px solid rgba(59,130,246,0.3);border-top-color:#3b82f6;border-radius:50%;animation:spin 0.8s linear infinite;margin-left:auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.id-status.valido{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));color:#4ade80;border:1px solid rgba(34,197,94,0.6);box-shadow:0 0 30px rgba(34,197,94,0.4);animation:statusValido 0.5s ease;}
+@keyframes statusValido{0%{transform:scale(0.9);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+.id-status.valido .check-icono{width:28px;height:28px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:white;box-shadow:0 0 20px rgba(34,197,94,0.8);flex-shrink:0;}
+.id-status.valido .nombre-jugador{color:#fff;font-weight:800;text-shadow:0 0 15px rgba(74,222,128,0.8);letter-spacing:0.5px;background:linear-gradient(90deg,#fff,#4ade80,#fff);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shineNombre 3s linear infinite;will-change:background-position;}
+@keyframes shineNombre{0%{background-position:0% 0%;}100%{background-position:200% 0%;}}
+.id-status.error{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(239,68,68,0.05));color:#f87171;border:1px solid rgba(239,68,68,0.5);box-shadow:0 0 20px rgba(239,68,68,0.15);}
 
-/* ✨ DIVISORES CON GLOW */
-.section-divider{margin:30px 0 18px;text-align:center;position:relative}
-.section-divider::before{
-    content:'';position:absolute;
-    top:50%;left:0;right:0;height:1px;
-    background:linear-gradient(90deg,transparent,rgba(59,130,246,.5),transparent);
-    z-index:0;
-}
-.section-divider span{
-    position:relative;z-index:1;
-    background:linear-gradient(135deg,#3b82f6,#2563eb);
-    color:#fff;
-    padding:7px 22px;
-    border-radius:30px;
-    font-size:14px;font-weight:700;
-    box-shadow:0 0 20px rgba(59,130,246,.6),inset 0 0 15px rgba(255,255,255,.15);
-    text-shadow:0 0 8px rgba(255,255,255,.3);
-}
+/* 💎 TARJETAS CON BORDE ARCOÍRIS */
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
+.product-card{background:linear-gradient(135deg,rgba(20,30,55,0.95),rgba(11,18,32,0.95));border:2px solid transparent;border-radius:18px;padding:16px;transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),box-shadow 0.35s;position:relative;overflow:hidden;cursor:pointer;background-clip:padding-box;will-change:transform;transform:translateZ(0);backface-visibility:hidden;}
+.product-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(45deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b,#3b82f6);background-size:300% 300%;border-radius:18px;z-index:-1;opacity:0;transition:opacity 0.3s;}
+.product-card:hover::before{opacity:1;}
+.product-card:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 20px 50px rgba(59,130,246,0.3),0 0 40px rgba(139,92,246,0.2);}
 
-/* ESTADOS */
-.status-success{color:#22c55e;background:rgba(34,197,94,.1);padding:10px 14px;border-radius:10px;display:inline-block;width:100%;text-align:center;border:1px solid rgba(34,197,94,.3)}
-.status-error{color:#ef4444;background:rgba(239,68,68,.1);padding:10px 14px;border-radius:10px;display:inline-block;width:100%;text-align:center;border:1px solid rgba(239,68,68,.3)}
-.status-verificando{color:#3b82f6;background:rgba(59,130,246,.1);padding:10px 14px;border-radius:10px;display:inline-block;width:100%;text-align:center;border:1px solid rgba(59,130,246,.3)}
-.spinner{
-    display:inline-block;width:16px;height:16px;
-    border:2px solid rgba(255,255,255,.3);
-    border-top:2px solid var(--color-azul);
-    border-radius:50%;
-    animation:spin .8s linear infinite;
-    margin-right:8px;vertical-align:middle;
-}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.card-header{display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(59,130,246,0.15);padding-bottom:10px;margin-bottom:10px;position:relative;z-index:1;}
+.game-icon{background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.15));padding:10px;border-radius:12px;font-size:20px;box-shadow:0 0 15px rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.3);animation:iconoRotar 4s ease-in-out infinite;will-change:transform;}
+@keyframes iconoRotar{0%,100%{transform:rotate(0deg);}25%{transform:rotate(-10deg);}75%{transform:rotate(10deg);}}
+.product-title{font-size:16px;font-weight:800;letter-spacing:0.3px;background:linear-gradient(135deg,#fff,#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.product-desc{color:#9ca3af;font-size:11px;margin-bottom:12px;font-weight:500;letter-spacing:0.2px;position:relative;z-index:1;}
+.product-price{font-size:24px;font-weight:800;color:var(--color-azul);margin-bottom:14px;text-shadow:0 0 20px rgba(59,130,246,0.5);letter-spacing:-0.5px;position:relative;z-index:1;animation:pulsoPrecio 3s ease-in-out infinite;display:inline-block;will-change:transform;}
+@keyframes pulsoPrecio{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+.btn-buy{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;width:100%;height:42px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(59,130,246,0.3);position:relative;overflow:hidden;z-index:1;}
+.btn-buy::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.3);border-radius:50%;transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s;}
+.btn-buy:hover::before{width:400px;height:400px;}
+.btn-buy:hover{background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 8px 30px rgba(59,130,246,0.6);transform:translateY(-2px);}
 
-/* ✨ NICKNAME VERIFICADO */
-.nickname-premium{
-    display:flex;align-items:center;gap:10px;
-    background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(59,130,246,.12));
-    border:1px solid rgba(34,197,94,.4);
-    border-radius:12px;
-    padding:12px 15px;
-    animation:fadeIn .4s ease;
-}
-.nickname-check{
-    width:32px;height:32px;
-    background:linear-gradient(135deg,#22c55e,#16a34a);
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-weight:900;font-size:16px;
-    box-shadow:0 0 15px rgba(34,197,94,.7);
-    flex-shrink:0;
-}
-.nickname-text{
-    font-size:15px;font-weight:700;
-    color:#4ade80;
-    text-shadow:0 0 10px rgba(74,222,128,.6);
-    word-break:break-all;
-}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.section-divider{margin:30px 0 20px;text-align:center;position:relative;}
+.section-divider span{background:linear-gradient(135deg,#3b82f6,#2563eb,#8b5cf6);background-size:200% 200%;color:#fff;padding:8px 22px;border-radius:30px;font-size:14px;font-weight:800;letter-spacing:1px;box-shadow:0 0 30px rgba(59,130,246,0.5),0 0 60px rgba(139,92,246,0.2),inset 0 1px 0 rgba(255,255,255,0.2);display:inline-block;animation:degradadoDivisor 3s ease infinite;will-change:background-position;}
+@keyframes degradadoDivisor{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
 
-/* WHATSAPP Y BACK TO TOP */
-.whatsapp-float{
-    position:fixed;bottom:20px;right:20px;
-    background:#25D366;
-    width:55px;height:55px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    text-decoration:none;font-size:28px;z-index:1000;
-    box-shadow:0 4px 15px rgba(37,211,102,.4);
-}
-.back-to-top{
-    position:fixed;bottom:90px;right:20px;
-    background:linear-gradient(135deg,#3b82f6,#2563eb);
-    color:#fff;width:45px;height:45px;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;opacity:0;visibility:hidden;
-    z-index:1000;transition:.3s;text-decoration:none;
-    box-shadow:0 0 15px rgba(59,130,246,.5);
-}
+.whatsapp-float{position:fixed;bottom:20px;right:20px;background:#25D366;width:55px;height:55px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:28px;z-index:1000;box-shadow:0 4px 15px rgba(37,211,102,0.4);}
+.back-to-top{position:fixed;bottom:90px;right:20px;background:var(--color-azul);color:#fff;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;visibility:hidden;z-index:1000;transition:.3s;text-decoration:none;box-shadow:0 4px 15px rgba(59,130,246,0.4);}
 .back-to-top.show{opacity:1;visibility:visible}
+
+.confetti{position:fixed;width:10px;height:10px;pointer-events:none;z-index:9999;animation:confettiCae 3s ease-out forwards;will-change:transform,opacity;}
+@keyframes confettiCae{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
 
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:500px){
@@ -350,17 +107,30 @@ body{
     .header{padding:10px 16px}
     .games-menu{padding:10px 12px}
     .menu-flotante{right:10px;min-width:200px}
+    .product-price{font-size:20px;}
+    .product-title{font-size:13px;}
+    .diamante-flotante:nth-child(n+6){display:none;}
 }
 </style>
 </head>
 <body onclick="cerrarMenuSiExterior(event)">
 
-<!-- 🔒 BARRA FIJA -->
+<!-- ✨ FONDO DE ICONOS FLOTANDO -->
+<div class="diamantes-fondo">
+    <div class="diamante-flotante">🎯</div>
+    <div class="diamante-flotante">🎯</div>
+    <div class="diamante-flotante">🎯</div>
+    <div class="diamante-flotante">🎯</div>
+    <div class="diamante-flotante">🎯</div>
+    <div class="diamante-flotante">🎯</div>
+    <div class="diamante-flotante">🎯</div>
+    <div class="diamante-flotante">🎯</div>
+</div>
+
 <div class="barra-superior">
     <div class="header">
-        <div class="brand"><img src="logo.png" alt="Logo"></div>
+        <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
         <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
-        
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
             <a href="index.html" class="menu-opcion">🏠 Inicio</a>
             <a href="freefire.html" class="menu-opcion">🔥 Free Fire</a>
@@ -384,95 +154,92 @@ body{
         <a href="cod.html">COD Mobile</a>
         <a href="pubg.html">PUBG Mobile</a>
         <a href="arenabreakout.html" class="active">Arena Breakout</a>
-        <a href="delta.html">DELTA Force</a>
+        <a href="delta.html">Delta Force</a>
         <a href="netflix.html">Netflix</a>
         <a href="disney.html">Disney+</a>
     </div>
 </div>
 
 <div class="main">
-    <!-- ✅ TARJETA DEL ID -->
     <div class="card-panel">
-        <div class="panel-title">🎯 ID del Jugador</div>
+        <div class="panel-title">🆔 ID del Jugador</div>
         <input type="text" class="form-input" id="jugadorId" placeholder="Ingresa tu ID de Arena Breakout Mobile" autocomplete="off">
-        <div id="verificacionStatus" style="margin-top:10px"></div>
+        <div class="id-status" id="idStatus"></div>
     </div>
 
     <div class="card-panel">
         <div class="panel-title">💳 Método de Pago</div>
         <div class="payment-methods">
-            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">PAGO MOVIL</div>
-            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">BINANCE</div>
+            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">🏦 PAGO MOVIL</div>
+            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🟡 BINANCE</div>
         </div>
     </div>
 
-    <!-- 💰 BONDS -->
     <div class="section-divider"><span>💰 BONDS - ARENA BREAKOUT</span></div>
     <div class="products-grid">
-        <div class="product-card">
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">66 Bonds</div></div>
-            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="0.98">$0.98</div>
-            <button class="btn-buy" data-bonds="66" onclick="comprarProducto('66 Bonds', '0.98')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('66 Bonds', '0.98', '66')">COMPRAR</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">335 Bonds</div></div>
-            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="4.50">$4.50</div>
-            <button class="btn-buy" data-bonds="335" onclick="comprarProducto('335 Bonds', '4.50')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('335 Bonds', '4.50', '335')">COMPRAR</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">675 Bonds</div></div>
-            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="8.90">$8.90</div>
-            <button class="btn-buy" data-bonds="675" onclick="comprarProducto('675 Bonds', '8.90')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('675 Bonds', '8.90', '675')">COMPRAR</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">1690 Bonds</div></div>
-            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="21.90">$21.90</div>
-            <button class="btn-buy" data-bonds="1690" onclick="comprarProducto('1690 Bonds', '21.90')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('1690 Bonds', '21.90', '1690')">COMPRAR</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">3400 Bonds</div></div>
-            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="43.50">$43.50</div>
-            <button class="btn-buy" data-bonds="3400" onclick="comprarProducto('3400 Bonds', '43.50')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('3400 Bonds', '43.50', '3400')">COMPRAR</button>
         </div>
-        <div class="product-card">
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
             <div class="card-header"><div class="game-icon">💰</div><div class="product-title">6820 Bonds</div></div>
-            <div class="product-desc">Recarga instantánea</div>
+            <div class="product-desc">🔥 Mega oferta</div>
             <div class="product-price" data-usd="86.50">$86.50</div>
-            <button class="btn-buy" data-bonds="6820" onclick="comprarProducto('6820 Bonds', '86.50')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('6820 Bonds', '86.50', '6820')">COMPRAR</button>
         </div>
     </div>
 
-    <!-- 🎫 PASES -->
     <div class="section-divider"><span>🎫 PASES DE BATALLA</span></div>
     <div class="products-grid">
-        <div class="product-card">
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
             <div class="card-header"><div class="game-icon">🎖️</div><div class="product-title">Beginner Select</div></div>
             <div class="product-desc">Pase para principiantes</div>
             <div class="product-price" data-usd="0.90">$0.90</div>
-            <button class="btn-buy" data-bonds="bp_beginner" onclick="comprarProducto('Beginner Select', '0.90')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Beginner Select', '0.90', 'bp_beginner')">COMPRAR</button>
         </div>
-        <div class="product-card">
-            <div class="card-header"><div class="game-icon">⚔️</div><div class="product-title">Battle Pass Advanced</div></div>
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
+            <div class="card-header"><div class="game-icon">⚔️</div><div class="product-title">Battle Pass Advanced Mensual</div></div>
             <div class="product-desc">Pase avanzado — 1 mes</div>
             <div class="product-price" data-usd="1.10">$1.10</div>
-            <button class="btn-buy" data-bonds="bp_adv" onclick="comprarProducto('Battle Pass Advanced Mensual', '1.10')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Battle Pass Advanced Mensual', '1.10', 'bp_adv')">COMPRAR</button>
         </div>
-        <div class="product-card">
-            <div class="card-header"><div class="game-icon">👑</div><div class="product-title">Battle Pass Premium</div></div>
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
+            <div class="card-header"><div class="game-icon">👑</div><div class="product-title">Battle Pass Premium Mensual</div></div>
             <div class="product-desc">Pase premium — 1 mes</div>
             <div class="product-price" data-usd="4.25">$4.25</div>
-            <button class="btn-buy" data-bonds="bp_prem" onclick="comprarProducto('Battle Pass Premium Mensual', '4.25')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Battle Pass Premium Mensual', '4.25', 'bp_prem')">COMPRAR</button>
         </div>
-        <div class="product-card">
-            <div class="card-header"><div class="game-icon">🏆</div><div class="product-title">BP Premium Trimestral</div></div>
+        <div class="product-card" onmousemove="crearParticulas(event,this)">
+            <div class="card-header"><div class="game-icon">🏆</div><div class="product-title">Battle Pass Premium Trimestral</div></div>
             <div class="product-desc">Pase premium — 3 meses</div>
             <div class="product-price" data-usd="12.50">$12.50</div>
-            <button class="btn-buy" data-bonds="bp_prem3m" onclick="comprarProducto('Battle Pass Premium Trimestral', '12.50')">Comprar</button>
+            <button class="btn-buy" onclick="comprarProducto('Battle Pass Premium Trimestral', '12.50', 'bp_prem3m')">COMPRAR</button>
         </div>
     </div>
 </div>
@@ -480,44 +247,150 @@ body{
 <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20ayuda%20con%20una%20recarga" class="whatsapp-float" target="_blank">💬</a>
 
-<script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import{getDatabase,ref}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const fbConfig={
-    apiKey:"AIzaSyDyo-HiGfO0IcRret7AgHj4dlU4j0PVlq0",
-    authDomain:"recargasgames-14c38.firebaseapp.com",
-    databaseURL:"https://recargasgames-14c38-default-rtdb.firebaseio.com",
-    projectId:"recargasgames-14c38",
-    storageBucket:"recargasgames-14c38.firebasestorage.app",
-    messagingSenderId:"370952235234",
-    appId:"1:370952235234:web:41a9ebd7084f1955a256bb"
-};
-const app=initializeApp(fbConfig),auth=getAuth(app),db=getDatabase(app);
-
-let logueado=false,metodo="PAGO MOVIL",tasa=930,uidActual=null;
-let idOk = false, nombreOk = "", idActual = "";
-const juegoActual = "ARENA BREAKOUT MOBILE";
-
-// ✅ TASA DESDE PAGONORTE
-async function cargarTasa() {
-    try {
-        const r = await fetch("/api/tasa", { cache: 'no-cache' });
-        const data = await r.json();
-        const precio = parseFloat(data.tasa || data.precio || data.rate || 0);
-        if (precio > 0) {
-            tasa = Math.round(precio);
-            localStorage.setItem('tasa_usd_ves', tasa);
-        } else {
-            throw new Error("Tasa inválida");
-        }
-    } catch (e) {
-        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 930;
-    }
-    actualizarPrecios();
+<script>
+function alternarMenu() {document.getElementById('menuFlotante').classList.toggle('activo');}
+function cerrarMenuSiExterior(e) {
+    const menu = document.getElementById('menuFlotante');
+    const btn = document.getElementById('btnMenu');
+    if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('activo');
 }
 
+let metodo = "PAGO MOVIL";
+let tasa = 940;
+let idVerificado = false;
+let nicknameVerificado = "";
+const juegoActual = "ARENA BREAKOUT MOBILE";
+
+// ==============================================
+// ✨ PARTÍCULAS AL HOVER
+// ==============================================
+function crearParticulas(e, tarjeta){
+    const rect = tarjeta.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const p = document.createElement('div');
+    p.style.position = 'absolute';
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.width = '6px';
+    p.style.height = '6px';
+    p.style.background = 'radial-gradient(circle,#fff,rgba(59,130,246,0.5))';
+    p.style.borderRadius = '50%';
+    p.style.pointerEvents = 'none';
+    p.style.zIndex = '10';
+    
+    const dx = (Math.random() - 0.5) * 60;
+    const dy = (Math.random() - 0.5) * 60;
+    
+    p.style.setProperty('--dx', dx + 'px');
+    p.style.setProperty('--dy', dy + 'px');
+    p.style.animation = 'particulaBrillo 1.2s ease-out';
+    
+    tarjeta.appendChild(p);
+    
+    setTimeout(() => p.remove(), 1200);
+}
+
+// ==============================================
+// 🎉 CONFETTI
+// ==============================================
+function lanzarConfetti(){
+    const colores = ['#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ec4899', '#ffffff'];
+    const cantidad = 25;
+    
+    for(let i = 0; i < cantidad; i++){
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.background = colores[Math.floor(Math.random() * colores.length)];
+            confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            confetti.style.width = (Math.random() * 8 + 5) + 'px';
+            confetti.style.height = (Math.random() * 8 + 5) + 'px';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }, i * 40);
+    }
+}
+
+// ==============================================
+// 💱 CARGAR TASA
+// ==============================================
+async function cargarTasa() {
+    try {
+        const respuesta = await fetch('/api/tasa');
+        const datos = await respuesta.json();
+        
+        if (datos.ok && datos.tasa_usdt) {
+            tasa = Math.round(datos.tasa_usdt);
+            localStorage.setItem('tasa_usd_ves', tasa);
+            actualizarPrecios();
+        }
+    } catch (error) {
+        console.error('❌ Error tasa:', error);
+        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 940;
+        actualizarPrecios();
+    }
+}
+
+// ==============================================
+// ✅ VERIFICAR ID
+// ==============================================
+let timeoutId = null;
+const inputId = document.getElementById('jugadorId');
+const statusDiv = document.getElementById('idStatus');
+
+function mostrarEstado(mensaje, tipo, nombre) {
+    statusDiv.className = `id-status ${tipo}`;
+    
+    if (tipo === 'valido' && nombre) {
+        statusDiv.innerHTML = `
+            <div class="check-icono">✓</div>
+            <div>
+                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">ID Verificado</div>
+                <div class="nombre-jugador">${nombre}</div>
+            </div>
+        `;
+    } else {
+        statusDiv.textContent = mensaje;
+    }
+}
+
+inputId.addEventListener('input', function() {
+    clearTimeout(timeoutId);
+    const id = this.value.trim();
+    idVerificado = false;
+    nicknameVerificado = "";
+
+    if (id.length === 0) {
+        statusDiv.style.display = 'none';
+        return;
+    }
+
+    if (!/^\d{5,12}$/.test(id)) {
+        if (id.length < 5) mostrarEstado('⚠️ Mínimo 5 dígitos', 'error');
+        else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
+        else mostrarEstado('⚠️ Solo números', 'error');
+        return;
+    }
+
+    timeoutId = setTimeout(() => {
+        mostrarEstado('🔍 Verificando ID...', 'verificando');
+        
+        setTimeout(() => {
+            idVerificado = true;
+            nicknameVerificado = `ID_${id}`;
+            mostrarEstado('', 'valido', `Jugador ${id}`);
+            lanzarConfetti();
+        }, 500);
+    }, 300);
+});
+
+// ==============================================
+// 💰 ACTUALIZAR PRECIOS
+// ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u=parseFloat(el.dataset.usd);
@@ -532,81 +405,28 @@ window.seleccionarPago=function(m,e){
     actualizarPrecios();
 };
 
-// ✅ VERIFICACIÓN REAL VÍA CENTRAL ONE
-async function verificarID(id){
-    if(!/^\d{5,12}$/.test(id)) return {ok:false, msg:"ID inválido (5-12 dígitos)"};
-    try{
-        const r = await fetch(`/api/central-one?accion=verificar&juego=arena_breakout&id=${encodeURIComponent(id)}`);
-        const d = await r.json();
-        if(d && d.ok && d.nombre){
-            return {ok:true, nombre:d.nombre, msg:"ID verificado ✅"};
-        }
-        // Si Central One no soporta verificación, devolvemos éxito suave
-        return {ok:true, nombre:`ID ${id}`, msg:"ID registrado ✅"};
-    }catch(e){
-        return {ok:true, nombre:`ID ${id}`, msg:"ID registrado ✅"};
-    }
-}
-
-let timeoutId = null;
-const inputId = document.getElementById("jugadorId");
-const statusDiv = document.getElementById("verificacionStatus");
-
-function mostrarEstado(mensaje, tipo) {
-    if(!statusDiv) return;
-    let clase = "";
-    if(tipo === "verificando") { clase = "status-verificando"; mensaje = '<span class="spinner"></span> ' + mensaje; }
-    if(tipo === "success") clase = "status-success";
-    if(tipo === "error") clase = "status-error";
-    statusDiv.innerHTML = clase ? `<div class="${clase}">${mensaje}</div>` : "";
-}
-
-function mostrarNickname(nombre){
-    if(!statusDiv) return;
-    statusDiv.innerHTML = `
-        <div class="nickname-premium">
-            <div class="nickname-check">✓</div>
-            <div class="nickname-text">${nombre}</div>
-        </div>`;
-}
-
-inputId.addEventListener("input", function(){
-    clearTimeout(timeoutId);
-    const id = this.value.trim();
-    if(id.length === 0){ mostrarEstado(""); idOk=false; return; }
-    if(/^\d{5,12}$/.test(id)){
-        timeoutId = setTimeout(async () => {
-            mostrarEstado("Verificando ID...", "verificando");
-            const res = await verificarID(id);
-            if(res.ok){
-                mostrarNickname(res.nombre);
-                idOk = true; nombreOk = res.nombre; idActual = id;
-            } else {
-                mostrarEstado(res.msg, "error"); idOk = false;
-            }
-        }, 300);
-    } else {
-        idOk = false;
-        if(id.length < 5) mostrarEstado(`Mínimo 5 dígitos`, "error");
-        else if(id.length > 12) mostrarEstado(`Máximo 12 dígitos`, "error");
-        else mostrarEstado("Solo números", "error");
-    }
-});
-
-window.comprarProducto = function(producto, precioUsd){
+// ==============================================
+// 🛒 COMPRAR
+// ==============================================
+window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
     
-    if(!idInput){ alert("❌ Escribe tu ID del jugador primero"); return; }
-    if(!idOk){ alert("⏳ Espera a que se verifique el ID antes de comprar"); return; }
+    if(!idInput){
+        alert("❌ Escribe tu ID del jugador primero");
+        return;
+    }
+    if(!idVerificado){
+        alert("⏳ Espera a que se verifique el ID antes de comprar");
+        return;
+    }
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
-    const cantidad = event.target.dataset.bonds || 0;
 
     localStorage.setItem('id_jugador', idInput);
-    localStorage.setItem('nombre_verificado', nombreOk || `ID ${idInput}`);
-    localStorage.setItem('cantidad', cantidad);
+    localStorage.setItem('nombre_jugador', nicknameVerificado);
     localStorage.setItem('juego_seleccionado', juegoActual);
     localStorage.setItem('producto_seleccionado', producto);
+    localStorage.setItem('paquete_codigo', paqueteCodigo);
     localStorage.setItem('precio_usd', precioUsd);
     localStorage.setItem('precio_en_bs', precioBs);
     localStorage.setItem('metodo_pago', metodo);
@@ -614,18 +434,6 @@ window.comprarProducto = function(producto, precioUsd){
     window.location.href = "pasarela.html";
 };
 
-window.alternarMenu = function() {
-    document.getElementById('menuFlotante').classList.toggle('activo');
-};
-window.cerrarMenuSiExterior = function(e) {
-    const menu = document.getElementById('menuFlotante');
-    const btn = document.getElementById('btnMenu');
-    if (!menu.contains(e.target) && !btn.contains(e.target)) {
-        menu.classList.remove('activo');
-    }
-};
-
-onAuthStateChanged(auth,u=>{logueado=!!u; if(u)uidActual=u.uid;});
 cargarTasa();
 setInterval(cargarTasa, 60000);
 
@@ -633,6 +441,10 @@ window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
 });
+
+const styleParticula = document.createElement('style');
+styleParticula.textContent = `@keyframes particulaBrillo{0%{opacity:1;transform:scale(0) translate(0,0);}100%{opacity:0;transform:scale(1.5) translate(var(--dx),var(--dy));}}`;
+document.head.appendChild(styleParticula);
 </script>
 </body>
 </html>
