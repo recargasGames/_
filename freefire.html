@@ -18,7 +18,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
-    background-image:url('fondo.png');
+    background-image:url('fondo.jpg');
     background-size:cover;
     background-position:center;
     background-attachment:fixed;
@@ -67,11 +67,14 @@ body::after{
 .brand:hover img{filter:drop-shadow(0 0 20px rgba(212,175,55,0.7))}
 .header-right{display:flex;align-items:center;gap:12px}
 
-/* BOTÓN PERFIL */
+/* ============================================== */
+/* BOTÓN PERFIL (BAJADO) */
+/* ============================================== */
 .btn-perfil{
     background:transparent;border:none;color:white;cursor:pointer;
     padding:0;display:flex;align-items:center;gap:8px;
     transition:all 0.3s;position:relative;
+    margin-top:8px;
 }
 .btn-perfil:hover .avatar-circle{
     transform:scale(1.05);
@@ -99,9 +102,11 @@ body::after{
 .btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
 .btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
 
-/* MENÚ PERFIL */
+/* ============================================== */
+/* MENÚ PERFIL (BAJADO) */
+/* ============================================== */
 .menu-perfil{
-    position:absolute;top:55px;right:0;
+    position:absolute;top:75px;right:0;
     background:rgba(10,14,26,0.98);
     backdrop-filter:blur(20px);
     border:1px solid rgba(212,175,55,0.3);
@@ -148,15 +153,18 @@ body::after{
 .menu-hamburguesa{
     background:transparent;border:none;color:white;font-size:28px;
     cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;
+    margin-top:8px;
 }
 .menu-hamburguesa:hover{
     transform:scale(1.1);color:var(--color-dorado);
     text-shadow:0 0 15px rgba(212,175,55,0.6);
 }
 
-/* MENÚ FLOTANTE */
+/* ============================================== */
+/* MENÚ FLOTANTE (BAJADO) */
+/* ============================================== */
 .menu-flotante{
-    position:absolute;top:60px;right:0;
+    position:absolute;top:80px;right:0;
     background:rgba(10,14,26,0.98);
     backdrop-filter:blur(20px);
     border:1px solid rgba(212,175,55,0.3);
@@ -453,6 +461,8 @@ body::after{
     .btn-perfil .perfil-nombre{display:none}
     .btn-perfil .perfil-flecha{display:none}
     .menu-perfil{right:0;min-width:230px}
+    .product-price{font-size:20px}
+    .product-title{font-size:14px}
 }
 </style>
 </head>
@@ -466,7 +476,7 @@ body::after{
         <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
         <div class="header-right">
 
-            <!-- PERFIL (visible cuando logueado) -->
+            <!-- PERFIL -->
             <div id="perfilContainer" style="position:relative;display:none;">
                 <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
                     <div class="avatar-circle" id="avatarCircle">
@@ -513,7 +523,7 @@ body::after{
         <!-- MENÚ FLOTANTE -->
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
 
-            <!-- SIN SESIÓN (visible por defecto) -->
+            <!-- SIN SESIÓN -->
             <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">
                 🔑 Iniciar Sesión
             </a>
@@ -521,7 +531,7 @@ body::after{
                 📝 Crear Cuenta
             </a>
 
-            <!-- CON SESIÓN (oculto por defecto) -->
+            <!-- CON SESIÓN -->
             <div id="menuConSesion" style="display:none;">
                 <a href="dashboard.html" class="menu-opcion">
                     📊 Mi Panel
@@ -686,9 +696,6 @@ let idVerificado = false;
 let nicknameVerificado = "";
 const juegoActual = "FREE FIRE";
 
-// ==============================================
-// 💱 CARGAR TASA
-// ==============================================
 async function cargarTasa() {
     const tasaInfo = document.getElementById('tasaInfo');
     try {
@@ -707,9 +714,6 @@ async function cargarTasa() {
     }
 }
 
-// ==============================================
-// ✅ VERIFICAR ID
-// ==============================================
 let timeoutId = null;
 const inputId = document.getElementById('jugadorId');
 const statusDiv = document.getElementById('idStatus');
@@ -766,9 +770,6 @@ inputId.addEventListener('input', function() {
     }, 500);
 });
 
-// ==============================================
-// 💰 ACTUALIZAR PRECIOS
-// ==============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u = parseFloat(el.dataset.usd);
@@ -787,9 +788,6 @@ window.seleccionarPago = function(m, e){
     actualizarPrecios();
 };
 
-// ==============================================
-// 🛒 COMPRAR
-// ==============================================
 window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
     if(!idInput){ alert("❌ Escribe tu ID del jugador primero"); return; }
@@ -809,9 +807,6 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     window.location.href = "pasarela.html";
 };
 
-// ==============================================
-// 🍔 MENÚS
-// ==============================================
 window.alternarMenu = function() {
     document.getElementById('menuFlotante').classList.toggle('activo');
     document.getElementById('menuPerfil').classList.remove('activo');
@@ -838,9 +833,6 @@ window.cerrarTodosLosMenus = function(e) {
     }
 };
 
-// ==============================================
-// 🔐 SESIÓN (Firebase)
-// ==============================================
 const perfilContainer = document.getElementById('perfilContainer');
 const menuLogin = document.getElementById('menuLogin');
 const menuRegister = document.getElementById('menuRegister');
@@ -853,7 +845,6 @@ const loginForm = document.getElementById('loginForm');
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // CON SESIÓN
         const nombre = user.displayName || 'Usuario';
         const email = user.email || 'usuario@email.com';
         perfilContainer.style.display = 'block';
@@ -861,12 +852,10 @@ onAuthStateChanged(auth, (user) => {
         nombreCompleto.textContent = nombre;
         emailUsuario.textContent = email;
 
-        // Menú hamburguesa: ocultar login/register, mostrar con sesión
         menuLogin.style.display = 'none';
         menuRegister.style.display = 'none';
         menuConSesion.style.display = 'block';
     } else {
-        // SIN SESIÓN
         perfilContainer.style.display = 'none';
         menuLogin.style.display = 'flex';
         menuRegister.style.display = 'flex';
@@ -874,9 +863,6 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
-// ==============================================
-// 🔑 MODAL LOGIN
-// ==============================================
 window.abrirModalLogin = function() {
     modalLogin.style.display = 'flex';
     document.getElementById('loginMessage').style.display = 'none';
@@ -931,9 +917,6 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// ==============================================
-// 🚪 CERRAR SESIÓN
-// ==============================================
 document.getElementById('btnCerrarSesion').addEventListener('click', async (e) => {
     e.preventDefault();
     if(confirm('¿Seguro que quieres cerrar sesión?')) {
@@ -950,9 +933,6 @@ document.getElementById('menuLogout').addEventListener('click', async (e) => {
     }
 });
 
-// ==============================================
-// 📧 RESET PASSWORD
-// ==============================================
 document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -978,9 +958,6 @@ document.getElementById('resetPasswordLink').addEventListener('click', async (e)
     }
 });
 
-// ==============================================
-// 🚀 INICIALIZAR
-// ==============================================
 cargarTasa();
 setInterval(cargarTasa, 60000);
 
