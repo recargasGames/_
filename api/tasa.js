@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // ⚠️ TOKEN Y SECRET OCULTOS en variables de entorno de Vercel
+        // ⚠️ API KEYS desde variables de entorno de Vercel
         const API_KEY = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
 
@@ -18,23 +18,34 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Error de configuración' });
         }
 
-        // ⚠️ Reemplaza con la URL real de PagoNorte (ver nota al final)
-        const url = `https://pagonorte.net/api/tasas?api_key=${API_KEY}&api_secret=${API_SECRET}`;
+        // ✅ URL y método correctos según la documentación
+        const url = 'https://pagonorte.net/recargas/api.jsp';
 
-        console.log('💱 Consultando tasa USDT...');
+        const params = new URLSearchParams();
+        params.append('action', 'tasas');
+        params.append('api_key', API_KEY);
+        params.append('api_secret', API_SECRET);
 
-        const response = await fetch(url);
+        console.log('💱 Consultando tasas a PagoNorte...');
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString()
+        });
+
         const data = await response.json();
+        console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
 
-        console.log('📥 Respuesta:', JSON.stringify(data));
-
-        if (data.ok !== true) {
-            return res.status(400).json({ 
-                error: data.mensaje || 'Error al obtener la tasa' 
+        if (data.ok !== true || data.alerta !== 'green') {
+            return res.status(400).json({
+                error: data.mensaje || 'Error al obtener las tasas'
             });
         }
 
-        // Devolver solo las tasas que necesitas
+        // ✅ Devolver las tasas necesarias
         return res.status(200).json({
             ok: true,
             tasa_bcv: parseFloat(data.tasa_bcv) || 0,
@@ -45,7 +56,7 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('❌ Error:', error);
-        return res.status(500).json({ 
+        return res.status(500).json({
             error: 'Error al obtener tasa',
             detalle: error.message
         });
