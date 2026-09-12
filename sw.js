@@ -2,7 +2,7 @@
 // 🚀 Service Worker - RecargasGames PWA
 // ============================================
 
-const CACHE_NAME = 'recargasgames-v2';
+const CACHE_NAME = 'recargasgames-v3';
 const URLS_TO_CACHE = [
     '/',
     '/index.html',
@@ -10,7 +10,6 @@ const URLS_TO_CACHE = [
     '/logo.png'
 ];
 
-// INSTALAR
 self.addEventListener('install', (event) => {
     console.log('🔧 SW: Instalando...');
     event.waitUntil(
@@ -23,16 +22,13 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// ACTIVAR
 self.addEventListener('activate', (event) => {
     console.log('✅ SW: Activado');
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
                 keys.map((key) => {
-                    if (key !== CACHE_NAME) {
-                        return caches.delete(key);
-                    }
+                    if (key !== CACHE_NAME) return caches.delete(key);
                 })
             );
         })
@@ -40,12 +36,10 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// FETCH
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     const url = event.request.url;
 
-    // No interceptar APIs externas ni Firebase
     if (
         url.includes('/api/') ||
         url.includes('firebase') ||
