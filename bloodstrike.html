@@ -420,6 +420,136 @@ body::after{
     color:#0a0e1a;
 }
 
+/* ============================================
+   🎨 MODAL PERSONALIZADO DE MENSAJES
+   ============================================ */
+.mensaje-overlay{
+    display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    z-index:9999;justify-content:center;align-items:center;padding:20px;
+}
+.mensaje-overlay.activo{display:flex;animation:fadeInOverlay 0.25s ease}
+@keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+
+.mensaje-box{
+    background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));
+    border:1px solid rgba(212,175,55,0.35);
+    border-radius:24px;padding:32px 26px 24px;
+    max-width:420px;width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 60px rgba(212,175,55,0.2),inset 0 1px 0 rgba(255,255,255,0.06);
+    animation:mensajeSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    text-align:center;position:relative;overflow:hidden;
+}
+@keyframes mensajeSlide{
+    from{transform:translateY(30px) scale(0.9);opacity:0}
+    to{transform:translateY(0) scale(1);opacity:1}
+}
+.mensaje-box::before{
+    content:'';position:absolute;top:0;left:-100%;
+    width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(212,175,55,0.06),transparent);
+    animation:brilloMensaje 3s infinite;pointer-events:none;
+}
+@keyframes brilloMensaje{0%{left:-100%}100%{left:100%}}
+
+.mensaje-cerrar{
+    position:absolute;top:14px;right:18px;
+    background:none;border:none;color:#9ca3af;
+    font-size:24px;cursor:pointer;padding:4px 8px;
+    line-height:1;transition:all 0.3s;z-index:2;
+}
+.mensaje-cerrar:hover{color:var(--color-dorado);transform:rotate(90deg)}
+
+.mensaje-icono{
+    width:80px;height:80px;margin:0 auto 18px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:42px;font-weight:bold;
+    animation:iconoPulse 2s ease-in-out infinite;
+    position:relative;z-index:1;
+}
+@keyframes iconoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.mensaje-icono.exito{
+    background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));
+    border:2px solid rgba(34,197,94,0.7);color:#4ade80;
+    box-shadow:0 0 40px rgba(34,197,94,0.5);
+}
+.mensaje-icono.error{
+    background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));
+    border:2px solid rgba(239,68,68,0.7);color:#f87171;
+    box-shadow:0 0 40px rgba(239,68,68,0.5);
+}
+.mensaje-icono.advertencia{
+    background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(212,175,55,0.08));
+    border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);
+    box-shadow:0 0 40px rgba(212,175,55,0.5);
+}
+.mensaje-icono.info{
+    background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(59,130,246,0.08));
+    border:2px solid rgba(59,130,246,0.7);color:#93c5fd;
+    box-shadow:0 0 40px rgba(59,130,246,0.5);
+}
+.mensaje-icono.confirmacion{
+    background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.15));
+    border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);
+    box-shadow:0 0 40px rgba(212,175,55,0.5);
+}
+
+.mensaje-titulo{
+    font-size:20px;font-weight:800;color:var(--color-dorado-claro);
+    margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase;
+    position:relative;z-index:1;
+}
+.mensaje-texto{
+    font-size:15px;color:#cbd5e1;line-height:1.6;
+    margin-bottom:24px;position:relative;z-index:1;
+    white-space:pre-line;
+}
+.mensaje-botones{
+    display:flex;gap:12px;justify-content:center;
+    position:relative;z-index:1;
+}
+.mensaje-btn{
+    flex:1;padding:14px 20px;border-radius:12px;
+    font-size:14px;font-weight:800;cursor:pointer;
+    transition:all 0.3s;text-transform:uppercase;
+    letter-spacing:1px;border:none;font-family:inherit;min-height:48px;
+}
+.mensaje-btn.principal{
+    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+    background-size:200% 200%;color:#0a0e1a;
+    box-shadow:0 4px 15px rgba(212,175,55,0.4);
+}
+.mensaje-btn.principal:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 25px rgba(212,175,55,0.6);
+    animation:shineBadge 3s ease infinite;
+}
+.mensaje-btn.principal:active{transform:translateY(0) scale(0.98)}
+.mensaje-btn.secundario{
+    background:rgba(71,85,105,0.3);color:#cbd5e1;
+    border:1px solid rgba(71,85,105,0.6);
+}
+.mensaje-btn.secundario:hover{
+    background:rgba(71,85,105,0.5);color:white;
+    transform:translateY(-2px);
+}
+.mensaje-btn.secundario:active{transform:translateY(0) scale(0.98)}
+.mensaje-btn.peligro{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;box-shadow:0 4px 15px rgba(239,68,68,0.4);
+}
+.mensaje-btn.peligro:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 25px rgba(239,68,68,0.6);
+}
+
+@keyframes shineBadge{
+    0%,100%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+}
+
 @media(max-width:500px){
     body{padding-top:100px}
     .main{padding-top:25px}
@@ -432,6 +562,14 @@ body::after{
     .menu-perfil{right:0;min-width:230px}
     .product-price{font-size:19px}
     .product-title{font-size:13px}
+    .mensaje-box{padding:28px 20px 20px}
+    .mensaje-icono{width:70px;height:70px;font-size:36px}
+    .mensaje-titulo{font-size:17px}
+    .mensaje-texto{font-size:14px}
+    .mensaje-btn{font-size:13px;padding:12px 14px}
+}
+@media(max-width:400px){
+    .mensaje-botones{flex-direction:column}
 }
 </style>
 </head>
@@ -591,6 +729,21 @@ body::after{
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
 <a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank">💬</a>
 
+<!-- ============================================
+     🎨 MODAL PERSONALIZADO DE MENSAJES
+     ============================================ -->
+<div class="mensaje-overlay" id="mensajeOverlay">
+    <div class="mensaje-box" id="mensajeBox">
+        <button class="mensaje-cerrar" id="mensajeCerrar" onclick="cerrarMensajePersonalizado()">✕</button>
+        <div class="mensaje-icono" id="mensajeIcono">ℹ</div>
+        <div class="mensaje-titulo" id="mensajeTitulo">Título</div>
+        <div class="mensaje-texto" id="mensajeTexto">Mensaje</div>
+        <div class="mensaje-botones" id="mensajeBotones">
+            <button class="mensaje-btn principal" id="mensajeBtnPrincipal" onclick="cerrarMensajePersonalizado()">Entendido</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
 import { auth } from './firebase-config.js';
 import {
@@ -600,6 +753,108 @@ import {
     sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+// ==============================================
+// 🎨 SISTEMA DE MENSAJES PERSONALIZADOS
+// ==============================================
+let _mensajeCallback = null;
+let _mensajeCerrado = false;
+
+const ICONOS = {
+    exito: '✓',
+    error: '✕',
+    advertencia: '⚠',
+    info: 'ℹ',
+    confirmacion: '❓'
+};
+
+function mostrarMensaje(titulo, mensaje, tipo = 'info', textoBoton = 'Entendido') {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('mensajeOverlay');
+        const icono = document.getElementById('mensajeIcono');
+        const tituloEl = document.getElementById('mensajeTitulo');
+        const textoEl = document.getElementById('mensajeTexto');
+        const botones = document.getElementById('mensajeBotones');
+
+        icono.className = 'mensaje-icono ' + tipo;
+        icono.textContent = ICONOS[tipo] || ICONOS.info;
+        tituloEl.textContent = titulo;
+        textoEl.textContent = mensaje;
+
+        botones.innerHTML = `
+            <button class="mensaje-btn principal" id="mensajeBtnPrincipal">${textoBoton}</button>
+        `;
+
+        document.getElementById('mensajeBtnPrincipal').onclick = () => {
+            if (_mensajeCerrado) return;
+            _mensajeCerrado = true;
+            cerrarMensajePersonalizado();
+            resolve(true);
+        };
+
+        _mensajeCallback = resolve;
+        _mensajeCerrado = false;
+        overlay.classList.add('activo');
+    });
+}
+
+function mostrarConfirmacion(titulo, mensaje, callback, opciones = {}) {
+    const overlay = document.getElementById('mensajeOverlay');
+    const icono = document.getElementById('mensajeIcono');
+    const tituloEl = document.getElementById('mensajeTitulo');
+    const textoEl = document.getElementById('mensajeTexto');
+    const botones = document.getElementById('mensajeBotones');
+
+    const tipo = opciones.tipo || 'confirmacion';
+    const textoAceptar = opciones.textoAceptar || 'Aceptar';
+    const textoCancelar = opciones.textoCancelar || 'Cancelar';
+    const claseAceptar = opciones.peligro ? 'peligro' : 'principal';
+
+    icono.className = 'mensaje-icono ' + tipo;
+    icono.textContent = ICONOS[tipo] || ICONOS.confirmacion;
+    tituloEl.textContent = titulo;
+    textoEl.textContent = mensaje;
+
+    botones.innerHTML = `
+        <button class="mensaje-btn secundario" id="mensajeBtnCancelar">${textoCancelar}</button>
+        <button class="mensaje-btn ${claseAceptar}" id="mensajeBtnAceptar">${textoAceptar}</button>
+    `;
+
+    document.getElementById('mensajeBtnCancelar').onclick = () => {
+        cerrarMensajePersonalizado();
+        if (typeof callback === 'function') callback(false);
+    };
+
+    document.getElementById('mensajeBtnAceptar').onclick = () => {
+        cerrarMensajePersonalizado();
+        if (typeof callback === 'function') callback(true);
+    };
+
+    _mensajeCerrado = false;
+    overlay.classList.add('activo');
+}
+
+function cerrarMensajePersonalizado() {
+    const overlay = document.getElementById('mensajeOverlay');
+    overlay.classList.remove('activo');
+    if (_mensajeCallback) {
+        _mensajeCallback(false);
+        _mensajeCallback = null;
+    }
+}
+
+document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'mensajeOverlay') {
+        cerrarMensajePersonalizado();
+    }
+});
+
+window.mostrarMensaje = mostrarMensaje;
+window.mostrarConfirmacion = mostrarConfirmacion;
+window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
+
+// ==============================================
+// 🎮 VARIABLES DE JUEGO
+// ==============================================
 let metodo = "PAGO MOVIL";
 let tasa = 940;
 let idVerificado = false;
@@ -627,25 +882,15 @@ async function cargarTasa() {
 const inputId = document.getElementById('jugadorId');
 const statusDiv = document.getElementById('idStatus');
 
-// 🚫 SOLO NÚMEROS (bloquea teclas no numéricas)
+// 🚫 SOLO NÚMEROS
 inputId.addEventListener('keypress', function(e) {
     if (!/[0-9]/.test(e.key)) e.preventDefault();
 });
-
-// ✅ PEGAR: limpia, inserta y DISPARA la verificación automáticamente
 inputId.addEventListener('paste', function(e) {
     e.preventDefault();
     const texto = (e.clipboardData || window.clipboardData).getData('text');
     const soloNumeros = texto.replace(/\D/g, '');
-
-    // Insertar manualmente en la posición del cursor
-    const inicio = this.selectionStart;
-    const fin = this.selectionEnd;
-    this.value = this.value.slice(0, inicio) + soloNumeros + this.value.slice(fin);
-    this.selectionStart = this.selectionEnd = inicio + soloNumeros.length;
-
-    // 🔥 TRUCO: disparar el evento 'input' manualmente para que arranque la verificación
-    this.dispatchEvent(new Event('input', { bubbles: true }));
+    document.execCommand('insertText', false, soloNumeros);
 });
 
 let timeoutId = null;
@@ -665,24 +910,19 @@ function mostrarEstado(mensaje, tipo, nombre) {
     }
 }
 
-// ✅ Verificación automática (se dispara con teclado O con pegado)
+// ✅ VERIFICACIÓN REAL CON PAGONORTE
 inputId.addEventListener('input', function() {
     this.value = this.value.replace(/\D/g, '');
     clearTimeout(timeoutId);
     const id = this.value.trim();
     idVerificado = false;
     nicknameVerificado = "";
-
-    if (id.length === 0) {
-        statusDiv.style.display = 'none';
-        return;
-    }
+    if (id.length === 0) { statusDiv.style.display = 'none'; return; }
     if (!/^\d{8,12}$/.test(id)) {
         if (id.length < 8) mostrarEstado('⚠️ Mínimo 8 dígitos', 'error');
         else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
         return;
     }
-
     timeoutId = setTimeout(async () => {
         mostrarEstado('🔍 Verificando ID...', 'verificando');
         try {
@@ -724,8 +964,14 @@ window.seleccionarPago = function(m, e){
 
 window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
-    if(!idInput){ alert("❌ Escribe tu ID del jugador primero"); return; }
-    if(!idVerificado){ alert("⏳ Espera a que se verifique el ID antes de comprar"); return; }
+    if(!idInput){
+        mostrarMensaje('ID requerido', 'Por favor ingresa tu ID del jugador antes de continuar.', 'advertencia');
+        return;
+    }
+    if(!idVerificado){
+        mostrarMensaje('ID no verificado', 'Espera a que se verifique tu ID antes de comprar.', 'advertencia');
+        return;
+    }
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
@@ -851,44 +1097,48 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-document.getElementById('btnCerrarSesion').addEventListener('click', async (e) => {
+document.getElementById('btnCerrarSesion').addEventListener('click', (e) => {
     e.preventDefault();
-    if(confirm('¿Seguro que quieres cerrar sesión?')) {
-        await signOut(auth);
-        window.location.reload();
-    }
+    mostrarConfirmacion(
+        'Cerrar Sesión',
+        '¿Seguro que quieres cerrar sesión?',
+        async (confirmado) => {
+            if (confirmado) {
+                await signOut(auth);
+                window.location.reload();
+            }
+        },
+        { tipo: 'confirmacion', textoAceptar: 'Cerrar sesión', textoCancelar: 'Cancelar', peligro: true }
+    );
 });
 
-document.getElementById('menuLogout').addEventListener('click', async (e) => {
+document.getElementById('menuLogout').addEventListener('click', (e) => {
     e.preventDefault();
-    if(confirm('¿Seguro que quieres cerrar sesión?')) {
-        await signOut(auth);
-        window.location.reload();
-    }
+    mostrarConfirmacion(
+        'Cerrar Sesión',
+        '¿Seguro que quieres cerrar sesión?',
+        async (confirmado) => {
+            if (confirmado) {
+                await signOut(auth);
+                window.location.reload();
+            }
+        },
+        { tipo: 'confirmacion', textoAceptar: 'Cerrar sesión', textoCancelar: 'Cancelar', peligro: true }
+    );
 });
 
 document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
-    const msg = document.getElementById('loginMessage');
     if (!email) {
-        msg.style.background = 'rgba(239,68,68,0.15)';
-        msg.style.color = '#fca5a5';
-        msg.textContent = '❌ Ingresa tu correo primero';
-        msg.style.display = 'block';
+        mostrarMensaje('Correo requerido', 'Ingresa tu correo electrónico para restablecer la contraseña.', 'advertencia');
         return;
     }
     try {
         await sendPasswordResetEmail(auth, email);
-        msg.style.background = 'rgba(34,197,94,0.15)';
-        msg.style.color = '#86efac';
-        msg.textContent = '✅ Correo enviado';
-        msg.style.display = 'block';
+        mostrarMensaje('Correo enviado', 'Revisa tu bandeja de entrada para restablecer tu contraseña.', 'exito');
     } catch (error) {
-        msg.style.background = 'rgba(239,68,68,0.15)';
-        msg.style.color = '#fca5a5';
-        msg.textContent = '❌ ' + error.message;
-        msg.style.display = 'block';
+        mostrarMensaje('Error', 'No se pudo enviar el correo: ' + error.message, 'error');
     }
 });
 
@@ -898,7 +1148,7 @@ setInterval(cargarTasa, 60000);
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
     if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
-});
+},{passive:true});
 </script>
 </body>
 </html>
