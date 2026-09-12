@@ -627,15 +627,25 @@ async function cargarTasa() {
 const inputId = document.getElementById('jugadorId');
 const statusDiv = document.getElementById('idStatus');
 
-// 🚫 SOLO NÚMEROS
+// 🚫 SOLO NÚMEROS (bloquea teclas no numéricas)
 inputId.addEventListener('keypress', function(e) {
     if (!/[0-9]/.test(e.key)) e.preventDefault();
 });
+
+// ✅ PEGAR: limpia, inserta y DISPARA la verificación automáticamente
 inputId.addEventListener('paste', function(e) {
     e.preventDefault();
     const texto = (e.clipboardData || window.clipboardData).getData('text');
     const soloNumeros = texto.replace(/\D/g, '');
-    document.execCommand('insertText', false, soloNumeros);
+
+    // Insertar manualmente en la posición del cursor
+    const inicio = this.selectionStart;
+    const fin = this.selectionEnd;
+    this.value = this.value.slice(0, inicio) + soloNumeros + this.value.slice(fin);
+    this.selectionStart = this.selectionEnd = inicio + soloNumeros.length;
+
+    // 🔥 TRUCO: disparar el evento 'input' manualmente para que arranque la verificación
+    this.dispatchEvent(new Event('input', { bubbles: true }));
 });
 
 let timeoutId = null;
@@ -655,19 +665,24 @@ function mostrarEstado(mensaje, tipo, nombre) {
     }
 }
 
-// ✅ VERIFICACIÓN REAL CON PAGONORTE
+// ✅ Verificación automática (se dispara con teclado O con pegado)
 inputId.addEventListener('input', function() {
     this.value = this.value.replace(/\D/g, '');
     clearTimeout(timeoutId);
     const id = this.value.trim();
     idVerificado = false;
     nicknameVerificado = "";
-    if (id.length === 0) { statusDiv.style.display = 'none'; return; }
+
+    if (id.length === 0) {
+        statusDiv.style.display = 'none';
+        return;
+    }
     if (!/^\d{8,12}$/.test(id)) {
         if (id.length < 8) mostrarEstado('⚠️ Mínimo 8 dígitos', 'error');
         else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
         return;
     }
+
     timeoutId = setTimeout(async () => {
         mostrarEstado('🔍 Verificando ID...', 'verificando');
         try {
