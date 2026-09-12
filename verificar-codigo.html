@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Código - RecargasGames</title>
+    <style>
+        :root{
+            --color-dorado:#d4af37;
+            --color-dorado-claro:#f5d76e;
+            --color-error:#ef4444;
+            --color-success:#22c55e;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Segoe UI',sans-serif;
+            background-image:url('fondo.jpg');
+            background-size:cover;
+            background-position:center;
+            background-attachment:fixed;
+            min-height:100vh;
+            display:flex; justify-content:center; align-items:center;
+            padding:20px; position:relative; overflow-x:hidden;
+        }
+        body::before{
+            content:'';position:fixed;top:-30%;right:-20%;
+            width:500px;height:500px;
+            background:radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%);
+            border-radius:50%;pointer-events:none;z-index:0;
+        }
+        body::after{
+            content:'';position:fixed;bottom:-30%;left:-20%;
+            width:500px;height:500px;
+            background:radial-gradient(circle,rgba(212,175,55,0.1),transparent 70%);
+            border-radius:50%;pointer-events:none;z-index:0;
+        }
+        .container {
+            background:linear-gradient(135deg,rgba(20,30,55,0.92),rgba(10,14,26,0.95));
+            padding:40px 34px;
+            border-radius:24px;
+            border:1px solid rgba(212,175,55,0.3);
+            max-width:420px; width:100%;
+            box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 60px rgba(212,175,55,0.15),inset 0 1px 0 rgba(255,255,255,0.05);
+            position:relative; z-index:1;
+            animation:modalSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes modalSlide {
+            from{transform:translateY(-30px) scale(0.95);opacity:0}
+            to{transform:translateY(0) scale(1);opacity:1}
+        }
+        .logo { text-align:center; margin-bottom:20px; }
+        .logo img {
+            height:60px; width:auto; border-radius:14px;
+            filter:drop-shadow(0 0 15px rgba(212,175,55,0.4));
+        }
+        .logo h1 {
+            color:white; font-size:22px; margin-top:12px; font-weight:800;
+            background:linear-gradient(135deg,#ffffff 0%,#d4af37 50%,#ffffff 100%);
+            background-size:200% auto;
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            background-clip:text; letter-spacing:1px;
+        }
+        .subtitle {
+            text-align:center; color:#9ca3af; font-size:14px;
+            margin-bottom:26px; line-height:1.6;
+        }
+        .subtitle strong { color: var(--color-dorado-claro); }
+        .form-group { margin-bottom:20px; }
+        .form-group label {
+            color:#cbd5e1; display:block; margin-bottom:8px;
+            font-size:13px; font-weight:600;
+            letter-spacing:0.5px; text-transform:uppercase;
+        }
+        .code-input {
+            width:100%; padding:16px;
+            border-radius:12px; border:2px solid rgba(255,255,255,0.1);
+            background:rgba(0,0,0,0.3); color:white;
+            font-size:24px; font-weight:700; text-align:center;
+            letter-spacing:8px; transition:all 0.3s; font-family:inherit;
+        }
+        .code-input:focus {
+            outline:none; border-color:var(--color-dorado);
+            box-shadow:0 0 0 3px rgba(212,175,55,0.15),0 0 20px rgba(212,175,55,0.2);
+        }
+        .btn-primary {
+            width:100%; padding:14px;
+            background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+            background-size:200% 200%;
+            animation:shineBadge 3s ease infinite;
+            color:#0a0e1a; border:none; border-radius:12px;
+            font-size:15px; font-weight:800; cursor:pointer;
+            transition:all 0.3s; margin-top:10px;
+            letter-spacing:1px; text-transform:uppercase;
+            box-shadow:0 10px 30px rgba(212,175,55,0.3);
+            font-family:inherit;
+        }
+        @keyframes shineBadge {
+            0%,100%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+        }
+        .btn-primary:hover {
+            transform:translateY(-2px);
+            box-shadow:0 15px 40px rgba(212,175,55,0.5);
+        }
+        .btn-primary:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+        .links {
+            text-align:center; margin-top:20px;
+            color:#9ca3af; font-size:14px;
+        }
+        .links a {
+            color:var(--color-dorado-claro); text-decoration:none;
+            font-weight:700; transition:0.3s;
+        }
+        .links a:hover { text-decoration:underline; color:#fff; }
+
+        .mensaje-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:9999;justify-content:center;align-items:center;padding:20px;}
+        .mensaje-overlay.activo{display:flex;animation:fadeInOverlay 0.25s ease}
+        @keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+        .mensaje-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.35);border-radius:24px;padding:32px 26px 24px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 60px rgba(212,175,55,0.2);animation:mensajeSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);text-align:center;position:relative;overflow:hidden;}
+        @keyframes mensajeSlide{from{transform:translateY(30px) scale(0.9);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+        .mensaje-cerrar{position:absolute;top:14px;right:18px;background:none;border:none;color:#9ca3af;font-size:24px;cursor:pointer;padding:4px 8px;line-height:1;transition:all 0.3s;z-index:2;}
+        .mensaje-cerrar:hover{color:var(--color-dorado);transform:rotate(90deg)}
+        .mensaje-icono{width:80px;height:80px;margin:0 auto 18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:bold;animation:iconoPulse 2s ease-in-out infinite;position:relative;z-index:1;}
+        @keyframes iconoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+        .mensaje-icono.exito{background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));border:2px solid rgba(34,197,94,0.7);color:#4ade80;box-shadow:0 0 40px rgba(34,197,94,0.5);}
+        .mensaje-icono.error{background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));border:2px solid rgba(239,68,68,0.7);color:#f87171;box-shadow:0 0 40px rgba(239,68,68,0.5);}
+        .mensaje-icono.advertencia{background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(212,175,55,0.08));border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);box-shadow:0 0 40px rgba(212,175,55,0.5);}
+        .mensaje-icono.info{background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(59,130,246,0.08));border:2px solid rgba(59,130,246,0.7);color:#93c5fd;box-shadow:0 0 40px rgba(59,130,246,0.5);}
+        .mensaje-titulo{font-size:20px;font-weight:800;color:var(--color-dorado-claro);margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase;position:relative;z-index:1;}
+        .mensaje-texto{font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:24px;position:relative;z-index:1;white-space:pre-line;}
+        .mensaje-botones{display:flex;gap:12px;justify-content:center;position:relative;z-index:1}
+        .mensaje-btn{flex:1;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px;border:none;font-family:inherit;min-height:48px;}
+        .mensaje-btn.principal{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;box-shadow:0 4px 15px rgba(212,175,55,0.4);}
+        .mensaje-btn.principal:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.6);animation:shineBadge 3s ease infinite;}
+        .mensaje-btn.secundario{background:rgba(71,85,105,0.3);color:#cbd5e1;border:1px solid rgba(71,85,105,0.6);}
+        .mensaje-btn.secundario:hover{background:rgba(71,85,105,0.5);color:white;transform:translateY(-2px);}
+
+        @media(max-width:500px){
+            .container{padding:32px 22px}
+            .logo img{height:55px}
+            .logo h1{font-size:19px}
+            .code-input{font-size:20px;letter-spacing:6px;padding:14px}
+            .mensaje-box{padding:28px 20px 20px}
+            .mensaje-icono{width:70px;height:70px;font-size:36px}
+            .mensaje-titulo{font-size:17px}
+            .mensaje-texto{font-size:14px}
+            .mensaje-btn{font-size:13px;padding:12px 14px}
+        }
+        @media(max-width:400px){
+            .mensaje-botones{flex-direction:column}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="logo.png" alt="Recargas Games">
+            <h1>Verificar Código</h1>
+        </div>
+        <p class="subtitle">Ingresa el <strong>código de 6 dígitos</strong> que enviamos a<br><strong id="emailMostrar">tu correo</strong></p>
+
+        <form id="verifyForm">
+            <div class="form-group">
+                <label>🔢 Código de verificación</label>
+                <input type="text" id="codigo" class="code-input" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*" required>
+            </div>
+            <button type="submit" class="btn-primary" id="verifyBtn">Verificar Código</button>
+        </form>
+
+        <div class="links">
+            ¿No recibiste el código? <a href="#" id="reenviarLink">Reenviar</a>
+        </div>
+        <div class="links" style="margin-top:12px;">
+            <a href="recuperar.html">← Usar otro correo</a>
+        </div>
+    </div>
+
+    <div class="mensaje-overlay" id="mensajeOverlay">
+        <div class="mensaje-box">
+            <button class="mensaje-cerrar" onclick="cerrarMensaje()">✕</button>
+            <div class="mensaje-icono" id="mensajeIcono">ℹ</div>
+            <div class="mensaje-titulo" id="mensajeTitulo">Título</div>
+            <div class="mensaje-texto" id="mensajeTexto">Mensaje</div>
+            <div class="mensaje-botones" id="mensajeBotones">
+                <button class="mensaje-btn principal" onclick="cerrarMensaje()">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from './firebase-config.js';
+        import { sendPasswordResetEmail, confirmPasswordReset } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        const email = sessionStorage.getItem('recover_email') || '';
+        document.getElementById('emailMostrar').textContent = email || 'tu correo';
+
+        if (!email) {
+            window.location.href = 'recuperar.html';
+        }
+
+        const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ' };
+
+        window.mostrarMensaje = function(titulo, mensaje, tipo='info', textoBoton='Entendido') {
+            return new Promise((resolve) => {
+                document.getElementById('mensajeIcono').className = 'mensaje-icono ' + tipo;
+                document.getElementById('mensajeIcono').textContent = ICONOS[tipo] || ICONOS.info;
+                document.getElementById('mensajeTitulo').textContent = titulo;
+                document.getElementById('mensajeTexto').textContent = mensaje;
+                document.getElementById('mensajeBotones').innerHTML =
+                    `<button class="mensaje-btn principal" id="btnOk">${textoBoton}</button>`;
+                document.getElementById('btnOk').onclick = () => { cerrarMensaje(); resolve(true); };
+                document.getElementById('mensajeOverlay').classList.add('activo');
+            });
+        };
+
+        window.cerrarMensaje = function() {
+            document.getElementById('mensajeOverlay').classList.remove('activo');
+        };
+
+        document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'mensajeOverlay') cerrarMensaje();
+        });
+
+        // Solo números en el input del código
+        const codigoInput = document.getElementById('codigo');
+        codigoInput.addEventListener('keypress', function(e) {
+            if (!/[0-9]/.test(e.key)) e.preventDefault();
+        });
+        codigoInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const texto = (e.clipboardData || window.clipboardData).getData('text');
+            const soloNumeros = texto.replace(/\D/g, '').substring(0, 6);
+            document.execCommand('insertText', false, soloNumeros);
+        });
+
+        // ==============================================
+        // 🔢 VERIFICAR CÓDIGO
+        // ==============================================
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const codigo = document.getElementById('codigo').value.trim();
+            const btn = document.getElementById('verifyBtn');
+
+            if (codigo.length !== 6) {
+                mostrarMensaje('Código inválido', 'El código debe tener exactamente 6 dígitos.', 'advertencia');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Verificando...';
+
+            // ⚠️ IMPORTANTE: Firebase NO permite verificar un código OOB desde el cliente.
+            // El flujo real es: el correo trae un ENLACE (oobCode), no un código de 6 dígitos.
+            // Por eso aquí guardamos el código y redirigimos a la pantalla de nueva contraseña,
+            // donde el usuario usará el enlace del correo.
+            sessionStorage.setItem('recover_code', codigo);
+
+            await mostrarMensaje(
+                'Verificación',
+                'Firebase envía un enlace de restablecimiento (no un código de 6 dígitos).\n\nRevisa tu correo y haz clic en el enlace "Restablecer contraseña". Serás redirigido automáticamente.',
+                'info'
+            );
+            // Redirigir a la pantalla de nueva contraseña
+            window.location.href = 'nueva-password.html';
+        });
+
+        // ==============================================
+        // 🔁 REENVIAR CÓDIGO
+        // ==============================================
+        document.getElementById('reenviarLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (!email) {
+                mostrarMensaje('Error', 'No se encontró el correo. Vuelve a empezar.', 'error');
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                mostrarMensaje('Código reenviado', 'Hemos enviado un nuevo enlace a tu correo. Revisa tu bandeja de entrada y SPAM.', 'exito');
+            } catch (error) {
+                mostrarMensaje('Error', 'No se pudo reenviar: ' + error.message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
