@@ -627,6 +627,7 @@ async function cargarTasa() {
 const inputId = document.getElementById('jugadorId');
 const statusDiv = document.getElementById('idStatus');
 
+// 🚫 SOLO NÚMEROS
 inputId.addEventListener('keypress', function(e) {
     if (!/[0-9]/.test(e.key)) e.preventDefault();
 });
@@ -654,6 +655,7 @@ function mostrarEstado(mensaje, tipo, nombre) {
     }
 }
 
+// ✅ VERIFICACIÓN REAL CON PAGONORTE
 inputId.addEventListener('input', function() {
     this.value = this.value.replace(/\D/g, '');
     clearTimeout(timeoutId);
@@ -666,14 +668,25 @@ inputId.addEventListener('input', function() {
         else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
         return;
     }
-    timeoutId = setTimeout(() => {
+    timeoutId = setTimeout(async () => {
         mostrarEstado('🔍 Verificando ID...', 'verificando');
-        setTimeout(() => {
-            idVerificado = true;
-            nicknameVerificado = `ID_${id}`;
-            mostrarEstado('', 'valido', `Jugador ${id}`);
-        }, 600);
-    }, 400);
+        try {
+            const respuesta = await fetch('/api/verificar-jugador?juego=BLOOD STRIKE&id=' + encodeURIComponent(id));
+            const datos = await respuesta.json();
+            if (datos.valido && datos.nickname) {
+                idVerificado = true;
+                nicknameVerificado = datos.nickname;
+                mostrarEstado('', 'valido', datos.nickname);
+            } else {
+                idVerificado = false;
+                mostrarEstado(`❌ ${datos.mensaje || 'ID no encontrado'}`, 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error verificando ID:', error);
+            idVerificado = false;
+            mostrarEstado('❌ Error al verificar. Intenta de nuevo.', 'error');
+        }
+    }, 500);
 });
 
 function actualizarPrecios(){
