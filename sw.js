@@ -1,68 +1,49 @@
-// ============================================
-// 🚀 Service Worker - RecargasGames PWA
-// ============================================
+const CACHE_NAME = 'recargasgames-v1';
 
-const CACHE_NAME = 'recargasgames-v3';
-const URLS_TO_CACHE = [
+const ARCHIVOS = [
     '/',
     '/index.html',
-    '/manifest.json',
-    '/logo.png'
+    '/logo.png',
+    '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
-    console.log('🔧 SW: Instalando...');
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(URLS_TO_CACHE).catch(err => {
-                console.log('⚠️ SW: Error cacheando:', err);
-            });
-        })
+        caches.open(CACHE_NAME)
+            .then((cache) => cache.addAll(ARCHIVOS))
     );
+
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-    console.log('✅ SW: Activado');
     event.waitUntil(
-        caches.keys().then((keys) => {
-            return Promise.all(
-                keys.map((key) => {
-                    if (key !== CACHE_NAME) return caches.delete(key);
-                })
-            );
-        })
+        caches.keys().then((keys) =>
+            Promise.all(
+                keys
+                    .filter((key) => key !== CACHE_NAME)
+                    .map((key) => caches.delete(key))
+            )
+        )
     );
+
     self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
-    const url = event.request.url;
-
-    if (
-        url.includes('/api/') ||
-        url.includes('firebase') ||
-        url.includes('googleapis') ||
-        url.includes('gstatic') ||
-        url.includes('pabilo') ||
-        url.includes('centralone') ||
-        url.includes('pagonorte') ||
-        url.includes('telegram') ||
-        url.includes('wa.me')
-    ) {
-        return;
-    }
 
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                if (response && response.status === 200 && response.type === 'basic') {
-                    const responseClone = response.clone();
+                if (response.ok) {
+                    const copia = response.clone();
+
                     caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
+                        cache.put(event.request, copia);
                     });
                 }
+
                 return response;
             })
             .catch(() => caches.match(event.request))
