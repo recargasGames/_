@@ -49,7 +49,6 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -62,7 +61,7 @@ body {
     position: relative;
 }
 
-/* ✨ PARTÍCULAS DORADAS FLOTANDO */
+/* ✨ PARTÍCULAS LIGERAS */
 .particulas-fondo {
     position: fixed;
     top: 0; left: 0;
@@ -71,7 +70,6 @@ body {
     z-index: 0;
     overflow: hidden;
     transform: translateZ(0);
-    backface-visibility: hidden;
 }
 .particula-dorada {
     position: absolute;
@@ -82,13 +80,12 @@ body {
     opacity: 0;
     animation: flotarParticula linear infinite;
     will-change: transform, opacity;
-    box-shadow: 0 0 10px rgba(245, 215, 110, 0.8);
 }
 @keyframes flotarParticula {
-    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    0% { transform: translate3d(0, 100vh, 0) scale(0); opacity: 0; }
     10% { opacity: 0.8; }
     90% { opacity: 0.8; }
-    100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+    100% { transform: translate3d(0, -100px, 0) scale(1.5); opacity: 0; }
 }
 .particula-dorada:nth-child(1){left:5%;animation-duration:12s;animation-delay:0s;}
 .particula-dorada:nth-child(2){left:15%;animation-duration:16s;animation-delay:2s;}
@@ -106,26 +103,24 @@ body {
 body::before {
     content: '';
     position: fixed;
-    top: -30%;
-    right: -20%;
-    width: 700px;
-    height: 700px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%);
+    top: -30%; right: -20%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.12), transparent 70%);
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
+    transform: translateZ(0);
 }
 body::after {
     content: '';
     position: fixed;
-    bottom: -30%;
-    left: -20%;
-    width: 700px;
-    height: 700px;
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.12), transparent 70%);
+    bottom: -30%; left: -20%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.1), transparent 70%);
     border-radius: 50%;
     pointer-events: none;
     z-index: 0;
+    transform: translateZ(0);
 }
 
 .barra-superior, .main, .whatsapp-float, .back-to-top, .install-app-btn, .footer {
@@ -133,17 +128,17 @@ body::after {
     z-index: 1;
 }
 
-/* BARRA SUPERIOR PREMIUM */
+/* BARRA SUPERIOR */
 .barra-superior {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 999;
-    background: rgba(5, 8, 16, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid transparent;
-    border-image: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), rgba(59, 130, 246, 0.4), transparent) 1;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    background: rgba(5, 8, 16, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transform: translateZ(0);
 }
 
 .header {
@@ -160,16 +155,15 @@ body::after {
     height: 55px;
     width: auto;
     border-radius: 12px;
-    filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.4));
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.4));
     transition: filter 0.4s;
 }
 .brand:hover img {
-    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.7));
+    filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.7));
 }
 
 .header-right { display: flex; align-items: center; gap: 12px; }
 
-/* BOTÓN PERFIL */
 .btn-perfil {
     background: transparent;
     border: none;
@@ -184,7 +178,7 @@ body::after {
 }
 .btn-perfil:hover .avatar-circle {
     transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
     border-color: var(--color-dorado);
 }
 
@@ -214,7 +208,6 @@ body::after {
     background: var(--color-verde);
     border-radius: 50%;
     border: 2px solid #0b1220;
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
 }
 .btn-perfil .perfil-nombre {
     font-size: 14px;
@@ -232,17 +225,15 @@ body::after {
 }
 .btn-perfil .perfil-flecha.abierta { transform: rotate(180deg); }
 
-/* MENÚ PERFIL PREMIUM */
 .menu-perfil {
     position: absolute;
     top: 55px;
     right: 0;
     background: rgba(10, 14, 26, 0.98);
-    backdrop-filter: blur(20px);
     border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: 16px;
     min-width: 260px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 175, 55, 0.15);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.12);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px) scale(0.95);
@@ -325,7 +316,6 @@ body::after {
     border-left-color: #ef4444;
 }
 
-/* HAMBURGUESA */
 .menu-hamburguesa {
     background: transparent;
     border: none;
@@ -339,20 +329,17 @@ body::after {
 .menu-hamburguesa:hover {
     transform: scale(1.1);
     color: var(--color-dorado);
-    text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
 }
 
-/* MENÚ FLOTANTE PREMIUM */
 .menu-flotante {
     position: absolute;
     top: 60px;
     right: 0;
     background: rgba(10, 14, 26, 0.98);
-    backdrop-filter: blur(20px);
     border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: 16px;
     min-width: 240px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 175, 55, 0.15);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.12);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
@@ -389,7 +376,6 @@ body::after {
     margin: 5px 0;
 }
 
-/* MENÚ DE JUEGOS PREMIUM */
 .games-menu {
     display: flex;
     gap: 8px;
@@ -421,10 +407,8 @@ body::after {
     color: var(--color-dorado-claro);
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(59, 130, 246, 0.1));
     border-color: rgba(212, 175, 55, 0.5);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
 }
 
-/* CONTENIDO PRINCIPAL */
 .main {
     padding: 20px;
     max-width: 620px;
@@ -435,28 +419,14 @@ body::after {
     text-align: center;
     margin: 30px 0 40px;
     padding: 30px 20px;
-    background: linear-gradient(135deg, rgba(20, 30, 55, 0.6), rgba(10, 14, 26, 0.8));
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    background: linear-gradient(135deg, rgba(20, 30, 55, 0.75), rgba(10, 14, 26, 0.92));
+    border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: 24px;
-    backdrop-filter: blur(10px);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-.welcome-text::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.08), transparent);
-    animation: brilloPanel 5s infinite;
-}
-@keyframes brilloPanel {
-    0% { left: -100%; }
-    100% { left: 100%; }
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
-/* 🏆 BADGE RECARGAS GAMES */
 .badge-premium {
     display: inline-block;
     background: linear-gradient(135deg, #d4af37, #f5d76e, #d4af37);
@@ -504,7 +474,6 @@ body::after {
     text-transform: uppercase;
 }
 
-/* TARJETAS DE JUEGOS - PREMIUM */
 .games-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -513,16 +482,15 @@ body::after {
 }
 
 .game-link {
-    background: linear-gradient(135deg, rgba(20, 30, 55, 0.7), rgba(10, 14, 26, 0.9));
+    background: linear-gradient(135deg, rgba(20, 30, 55, 0.75), rgba(10, 14, 26, 0.92));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     padding: 0;
     text-decoration: none;
     color: white;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
     overflow: hidden;
     position: relative;
-    backdrop-filter: blur(10px);
     will-change: transform;
     transform: translateZ(0);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -537,7 +505,10 @@ body::after {
     border-radius: 20px;
     z-index: -1;
     opacity: 0;
-    transition: opacity 0.5s;
+    transition: opacity 0.4s;
+}
+.game-link:hover::before {
+    opacity: 1;
     animation: bordeGirando 4s linear infinite;
 }
 @keyframes bordeGirando {
@@ -545,14 +516,9 @@ body::after {
     100% { background-position: 300% 50%; }
 }
 
-.game-link:hover::before { opacity: 1; }
-
 .game-link:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow:
-        0 25px 60px rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(212, 175, 55, 0.3),
-        0 0 80px rgba(59, 130, 246, 0.15);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(212, 175, 55, 0.3);
 }
 
 .game-img {
@@ -561,32 +527,18 @@ body::after {
     object-fit: cover;
     display: block;
     background: rgba(59, 130, 246, 0.15);
-    transition: transform 0.6s ease;
-    filter: brightness(0.9);
+    transition: transform 0.5s ease;
 }
 .game-link:hover .game-img {
-    transform: scale(1.08);
-    filter: brightness(1.1);
+    transform: scale(1.06);
 }
 
-.game-link::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-    transition: left 0.7s;
-    pointer-events: none;
-}
-.game-link:hover::after { left: 100%; }
-
-/* MODAL LOGIN PREMIUM */
 .modal-overlay {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
     z-index: 2000;
     justify-content: center;
     align-items: center;
@@ -600,13 +552,9 @@ body::after {
     border: 1px solid rgba(212, 175, 55, 0.3);
     max-width: 420px;
     width: 90%;
-    box-shadow:
-        0 30px 80px rgba(0, 0, 0, 0.7),
-        0 0 60px rgba(212, 175, 55, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    animation: modalSlide 0.4s ease;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(212, 175, 55, 0.2);
+    animation: modalSlide 0.3s ease;
     position: relative;
-    backdrop-filter: blur(20px);
 }
 @keyframes modalSlide {
     from { transform: translateY(-50px) scale(0.95); opacity: 0; }
@@ -658,14 +606,13 @@ body::after {
 .modal-login .form-group input:focus {
     outline: none;
     border-color: var(--color-dorado);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15), 0 0 20px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
 }
 .modal-login .btn-submit {
     width: 100%;
     padding: 14px;
     background: linear-gradient(135deg, #d4af37, #f5d76e, #d4af37);
     background-size: 200% 200%;
-    animation: shineBadge 3s ease infinite;
     color: #0a0e1a;
     border: none;
     border-radius: 12px;
@@ -722,14 +669,13 @@ body::after {
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-/* INSTALAR APP */
+/* INSTALAR APP - SIEMPRE VISIBLE */
 .install-app-btn {
     position: fixed;
     bottom: 90px; right: 20px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(59, 130, 246, 0.25));
-    backdrop-filter: blur(15px);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(59, 130, 246, 0.3));
     color: white;
-    border: 1px solid rgba(212, 175, 55, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.6);
     padding: 11px 20px;
     border-radius: 50px;
     font-size: 14px;
@@ -737,26 +683,19 @@ body::after {
     cursor: pointer;
     z-index: 1000;
     transition: all 0.3s ease;
-    display: none;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     letter-spacing: 0.5px;
 }
-.install-app-btn.visible {
-    display: block;
-    animation: fadeInUp 0.5s ease;
-}
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 .install-app-btn:hover {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.45), rgba(59, 130, 246, 0.4));
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.5), rgba(59, 130, 246, 0.45));
     border-color: var(--color-dorado);
     transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.4);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(212, 175, 55, 0.4);
+}
+.install-app-btn:active {
+    transform: translateY(-1px) scale(0.98);
 }
 
-/* WHATSAPP */
 .whatsapp-float {
     position: fixed;
     bottom: 20px; right: 20px;
@@ -766,19 +705,17 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 25px rgba(37, 211, 102, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
     z-index: 1000;
     text-decoration: none;
     font-size: 28px;
     color: white;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease;
 }
 .whatsapp-float:hover {
     transform: scale(1.1);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 40px rgba(37, 211, 102, 0.6);
 }
 
-/* VOLVER ARRIBA */
 .back-to-top {
     position: fixed;
     bottom: 155px; right: 20px;
@@ -796,7 +733,7 @@ body::after {
     transition: all 0.3s;
     font-size: 18px;
     text-decoration: none;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 .back-to-top.show {
     opacity: 1;
@@ -806,15 +743,12 @@ body::after {
     transform: translateY(-3px) scale(1.05);
 }
 
-/* FOOTER PREMIUM */
 .footer {
     background: linear-gradient(180deg, transparent, rgba(5, 8, 16, 0.95));
-    border-top: 1px solid transparent;
-    border-image: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), rgba(59, 130, 246, 0.3), transparent) 1;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
     padding: 40px 20px 30px;
     text-align: center;
     margin-top: 60px;
-    backdrop-filter: blur(10px);
 }
 .footer .copyright {
     color: var(--color-dorado-claro);
@@ -822,7 +756,6 @@ body::after {
     font-size: 15px;
     margin-bottom: 15px;
     letter-spacing: 0.5px;
-    text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
 }
 .footer .payment-methods {
     display: flex;
@@ -840,7 +773,6 @@ body::after {
     color: #e5e7eb;
     font-weight: 600;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 .footer .disclaimer {
     margin-top: 20px;
@@ -855,7 +787,6 @@ body::after {
 }
 .footer p { color: #9ca3af; font-size: 13px; margin: 5px 0; }
 
-/* RESPONSIVE */
 @media (max-width: 600px) {
     body { padding-top: 100px; }
     .game-img { height: 130px; }
@@ -904,7 +835,6 @@ body::after {
     <div class="particula-dorada"></div>
 </div>
 
-<!-- BARRA SUPERIOR -->
 <div class="barra-superior">
 
     <div class="header">
@@ -992,7 +922,6 @@ body::after {
     </div>
 </div>
 
-<!-- MODAL LOGIN -->
 <div class="modal-overlay" id="modalLogin">
     <div class="modal-login">
         <button class="close-modal-btn" onclick="cerrarModalLogin()">✕</button>
@@ -1016,7 +945,6 @@ body::after {
     </div>
 </div>
 
-<!-- CONTENIDO PRINCIPAL -->
 <div class="main">
     <div class="welcome-text">
         <span class="badge-premium">★ RECARGAS GAMES ★</span>
@@ -1042,7 +970,6 @@ body::after {
     </div>
 </div>
 
-<!-- FOOTER PREMIUM -->
 <div class="footer">
     <p class="copyright">© 2026 RecargasGames · Todos los derechos reservados</p>
 
@@ -1057,12 +984,10 @@ body::after {
     </p>
 </div>
 
-<!-- BOTONES FLOTANTES -->
 <button class="install-app-btn" id="installAppBtn">📲 Instalar Aplicación</button>
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
 <a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">💬</a>
 
-<!-- SCRIPTS -->
 <script type="module">
 import { auth } from './firebase-config.js';
 import {
@@ -1091,7 +1016,7 @@ const loginBtn = document.getElementById('loginBtn');
 const loginMessage = document.getElementById('loginMessage');
 const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 const installAppBtn = document.getElementById('installAppBtn');
-let deferredPrompt;
+let deferredPrompt = null;
 
 function actualizarUI(user) {
     if (user) {
@@ -1235,31 +1160,88 @@ menuHamburguesaLogout.addEventListener('click', async (e) => {
 
 window.addEventListener('scroll', () => {
     document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
-});
+}, { passive: true });
 
+// ==============================================
+// 📱 REGISTRAR SERVICE WORKER (PWA)
+// ==============================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('✅ SW registrado:', reg.scope))
+            .catch((err) => console.warn('⚠️ SW no registrado:', err.message));
+    });
+}
+
+// ==============================================
+// 📱 BOTÓN INSTALAR (con fallback manual)
+// ==============================================
 window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('📱 Prompt de instalación disponible');
     e.preventDefault();
     deferredPrompt = e;
-    installAppBtn.classList.add('visible');
 });
 
 installAppBtn.addEventListener('click', async () => {
-    if (!deferredPrompt) {
-        alert('⚠️ La aplicación ya está instalada o no se puede instalar en este navegador.');
+    // Caso 1: prompt nativo disponible
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('📱 Instalación:', outcome);
+        if (outcome === 'accepted') {
+            installAppBtn.textContent = '✅ ¡Instalada!';
+            setTimeout(() => { installAppBtn.textContent = '📲 Instalar Aplicación'; }, 3000);
+        }
+        deferredPrompt = null;
         return;
     }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-        installAppBtn.classList.remove('visible');
+
+    // Caso 2: sin prompt → instrucciones manuales
+    const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const esAndroid = /Android/.test(navigator.userAgent);
+    const yaInstalada = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone === true;
+
+    if (yaInstalada) {
+        alert('✅ ¡Ya tienes RecargasGames instalada!\n\nBúscala en tu pantalla de inicio.');
+        return;
     }
-    deferredPrompt = null;
+
+    if (esIOS) {
+        alert(
+            '📱 Para instalar en iPhone/iPad:\n\n' +
+            '1️⃣ Toca el botón Compartir (⬆️) en la barra de Safari\n' +
+            '2️⃣ Desliza y toca "Añadir a pantalla de inicio"\n' +
+            '3️⃣ Confirma con "Añadir"\n\n' +
+            '¡Listo! Tendrás el acceso directo en tu pantalla de inicio.'
+        );
+    } else if (esAndroid) {
+        alert(
+            '📱 Para instalar en Android:\n\n' +
+            '1️⃣ Toca el menú (⋮) arriba a la derecha\n' +
+            '2️⃣ Toca "Instalar aplicación" o "Añadir a pantalla de inicio"\n' +
+            '3️⃣ Confirma\n\n' +
+            '¡Listo! Tendrás el acceso directo en tu pantalla de inicio.'
+        );
+    } else {
+        alert(
+            '📱 Para instalar en tu navegador:\n\n' +
+            '• Chrome / Edge: ícono de "Instalar" en la barra de direcciones\n' +
+            '• Firefox: menú → "Instalar"\n' +
+            '• Safari: Compartir → "Añadir a pantalla de inicio"\n\n' +
+            'Si no aparece la opción, abre la página desde Chrome Android o iOS Safari.'
+        );
+    }
 });
 
 window.addEventListener('appinstalled', () => {
-    installAppBtn.classList.remove('visible');
+    console.log('✅ App instalada correctamente');
+    installAppBtn.textContent = '✅ ¡Instalada!';
+    setTimeout(() => { installAppBtn.textContent = '📲 Instalar Aplicación'; }, 3000);
     deferredPrompt = null;
 });
+
+console.log('🚀 Index cargado');
 </script>
 
 </body>
