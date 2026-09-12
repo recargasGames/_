@@ -17,6 +17,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RecargasGames">
 <meta name="theme-color" content="#0a0e1a">
+<meta name="mobile-web-app-capable" content="yes">
 
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
@@ -61,7 +62,6 @@ body {
     position: relative;
 }
 
-/* ✨ PARTÍCULAS LIGERAS */
 .particulas-fondo {
     position: fixed;
     top: 0; left: 0;
@@ -73,8 +73,7 @@ body {
 }
 .particula-dorada {
     position: absolute;
-    width: 4px;
-    height: 4px;
+    width: 4px; height: 4px;
     background: radial-gradient(circle, #f5d76e, transparent);
     border-radius: 50%;
     opacity: 0;
@@ -128,7 +127,6 @@ body::after {
     z-index: 1;
 }
 
-/* BARRA SUPERIOR */
 .barra-superior {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -158,9 +156,7 @@ body::after {
     filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.4));
     transition: filter 0.4s;
 }
-.brand:hover img {
-    filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.7));
-}
+.brand:hover img { filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.7)); }
 
 .header-right { display: flex; align-items: center; gap: 12px; }
 
@@ -197,10 +193,7 @@ body::after {
     position: relative;
     overflow: hidden;
 }
-.btn-perfil .avatar-circle img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-}
+.btn-perfil .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
 .btn-perfil .avatar-circle .online-dot {
     position: absolute;
     bottom: 0; right: 0;
@@ -265,19 +258,9 @@ body::after {
     overflow: hidden;
     border: 2px solid rgba(212, 175, 55, 0.4);
 }
-.menu-perfil-header .avatar-grande img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-}
-.menu-perfil-header .info h4 {
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-}
-.menu-perfil-header .info p {
-    color: #9ca3af;
-    font-size: 12px;
-}
+.menu-perfil-header .avatar-grande img { width: 100%; height: 100%; object-fit: cover; }
+.menu-perfil-header .info h4 { color: white; font-size: 15px; font-weight: 600; }
+.menu-perfil-header .info p { color: #9ca3af; font-size: 12px; }
 
 .menu-perfil-opcion {
     display: flex;
@@ -529,9 +512,7 @@ body::after {
     background: rgba(59, 130, 246, 0.15);
     transition: transform 0.5s ease;
 }
-.game-link:hover .game-img {
-    transform: scale(1.06);
-}
+.game-link:hover .game-img { transform: scale(1.06); }
 
 .modal-overlay {
     display: none;
@@ -669,7 +650,6 @@ body::after {
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-/* INSTALAR APP - SIEMPRE VISIBLE */
 .install-app-btn {
     position: fixed;
     bottom: 90px; right: 20px;
@@ -692,9 +672,6 @@ body::after {
     transform: translateY(-3px);
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(212, 175, 55, 0.4);
 }
-.install-app-btn:active {
-    transform: translateY(-1px) scale(0.98);
-}
 
 .whatsapp-float {
     position: fixed;
@@ -712,9 +689,7 @@ body::after {
     color: white;
     transition: transform 0.3s ease;
 }
-.whatsapp-float:hover {
-    transform: scale(1.1);
-}
+.whatsapp-float:hover { transform: scale(1.1); }
 
 .back-to-top {
     position: fixed;
@@ -735,13 +710,8 @@ body::after {
     text-decoration: none;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
-.back-to-top.show {
-    opacity: 1;
-    visibility: visible;
-}
-.back-to-top:hover {
-    transform: translateY(-3px) scale(1.05);
-}
+.back-to-top.show { opacity: 1; visibility: visible; }
+.back-to-top:hover { transform: translateY(-3px) scale(1.05); }
 
 .footer {
     background: linear-gradient(180deg, transparent, rgba(5, 8, 16, 0.95));
@@ -819,7 +789,6 @@ body::after {
 
 <body onclick="cerrarTodosLosMenus(event)">
 
-<!-- ✨ PARTÍCULAS DORADAS -->
 <div class="particulas-fondo">
     <div class="particula-dorada"></div>
     <div class="particula-dorada"></div>
@@ -875,7 +844,6 @@ body::after {
                     </a>
                     <a href="pedidos.html" class="menu-perfil-opcion">
                         <span class="icono">📦</span> Mis Pedidos
-                        <span class="badge">3</span>
                     </a>
                     <a href="favoritos.html" class="menu-perfil-opcion">
                         <span class="icono">❤️</span> Favoritos
@@ -1018,6 +986,33 @@ const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 const installAppBtn = document.getElementById('installAppBtn');
 let deferredPrompt = null;
 
+// ==============================================
+// 🔍 DETECTAR SI YA ESTÁ INSTALADA COMO PWA
+// ==============================================
+function estaInstalada() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.matchMedia('(display-mode: fullscreen)').matches ||
+           window.matchMedia('(display-mode: minimal-ui)').matches ||
+           window.navigator.standalone === true;
+}
+
+// Ocultar botón si ya está instalada
+function actualizarBotonInstalar() {
+    if (estaInstalada()) {
+        installAppBtn.style.display = 'none';
+        console.log('✅ PWA instalada - botón oculto');
+    } else {
+        installAppBtn.style.display = 'block';
+    }
+}
+actualizarBotonInstalar();
+
+// Escuchar cambios en el modo display
+window.matchMedia('(display-mode: standalone)').addEventListener('change', actualizarBotonInstalar);
+
+// ==============================================
+// 🔥 FIREBASE AUTH
+// ==============================================
 function actualizarUI(user) {
     if (user) {
         const nombre = user.displayName || 'Usuario';
@@ -1163,7 +1158,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 // ==============================================
-// 📱 REGISTRAR SERVICE WORKER (PWA)
+// 📱 REGISTRAR SERVICE WORKER
 // ==============================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -1174,70 +1169,53 @@ if ('serviceWorker' in navigator) {
 }
 
 // ==============================================
-// 📱 BOTÓN INSTALAR (con fallback manual)
+// 📱 PROMPT NATIVO DE INSTALACIÓN
 // ==============================================
 window.addEventListener('beforeinstallprompt', (e) => {
-    console.log('📱 Prompt de instalación disponible');
+    console.log('📱 beforeinstallprompt: LISTO');
     e.preventDefault();
     deferredPrompt = e;
 });
 
+// ==============================================
+// 📱 CLICK EN BOTÓN INSTALAR
+// ==============================================
 installAppBtn.addEventListener('click', async () => {
-    // Caso 1: prompt nativo disponible
+    if (estaInstalada()) {
+        installAppBtn.style.display = 'none';
+        return;
+    }
+
     if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        console.log('📱 Instalación:', outcome);
+        console.log('📱 Resultado:', outcome);
         if (outcome === 'accepted') {
             installAppBtn.textContent = '✅ ¡Instalada!';
-            setTimeout(() => { installAppBtn.textContent = '📲 Instalar Aplicación'; }, 3000);
+            setTimeout(() => {
+                installAppBtn.textContent = '📲 Instalar Aplicación';
+                actualizarBotonInstalar();
+            }, 3000);
         }
         deferredPrompt = null;
         return;
     }
 
-    // Caso 2: sin prompt → instrucciones manuales
-    const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const esAndroid = /Android/.test(navigator.userAgent);
-    const yaInstalada = window.matchMedia('(display-mode: standalone)').matches ||
-                        window.navigator.standalone === true;
-
-    if (yaInstalada) {
-        alert('✅ ¡Ya tienes RecargasGames instalada!\n\nBúscala en tu pantalla de inicio.');
-        return;
-    }
-
-    if (esIOS) {
-        alert(
-            '📱 Para instalar en iPhone/iPad:\n\n' +
-            '1️⃣ Toca el botón Compartir (⬆️) en la barra de Safari\n' +
-            '2️⃣ Desliza y toca "Añadir a pantalla de inicio"\n' +
-            '3️⃣ Confirma con "Añadir"\n\n' +
-            '¡Listo! Tendrás el acceso directo en tu pantalla de inicio.'
-        );
-    } else if (esAndroid) {
-        alert(
-            '📱 Para instalar en Android:\n\n' +
-            '1️⃣ Toca el menú (⋮) arriba a la derecha\n' +
-            '2️⃣ Toca "Instalar aplicación" o "Añadir a pantalla de inicio"\n' +
-            '3️⃣ Confirma\n\n' +
-            '¡Listo! Tendrás el acceso directo en tu pantalla de inicio.'
-        );
-    } else {
-        alert(
-            '📱 Para instalar en tu navegador:\n\n' +
-            '• Chrome / Edge: ícono de "Instalar" en la barra de direcciones\n' +
-            '• Firefox: menú → "Instalar"\n' +
-            '• Safari: Compartir → "Añadir a pantalla de inicio"\n\n' +
-            'Si no aparece la opción, abre la página desde Chrome Android o iOS Safari.'
-        );
-    }
+    // Fallback: instrucciones manuales
+    alert(
+        '📱 Para instalar:\n\n' +
+        '1️⃣ Toca el menú (⋮) del navegador\n' +
+        '2️⃣ Toca "Instalar aplicación" o "Añadir a pantalla de inicio"\n' +
+        '3️⃣ Confirma'
+    );
 });
 
+// ==============================================
+// 📱 SI SE INSTALA → OCULTAR BOTÓN
+// ==============================================
 window.addEventListener('appinstalled', () => {
-    console.log('✅ App instalada correctamente');
-    installAppBtn.textContent = '✅ ¡Instalada!';
-    setTimeout(() => { installAppBtn.textContent = '📲 Instalar Aplicación'; }, 3000);
+    console.log('✅ App instalada');
+    installAppBtn.style.display = 'none';
     deferredPrompt = null;
 });
 
