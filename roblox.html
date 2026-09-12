@@ -638,6 +638,10 @@ body::after{
                 <div class="titulo">🚫 NO HAY REEMBOLSO</div>
                 <div class="texto">Si canjeas el código en una cuenta con otra moneda y recibes menos Robux.</div>
             </div>
+            <div class="modal-aviso">
+                <div class="titulo">📲 Entrega por WhatsApp</div>
+                <div class="texto">El PIN de Robux se enviará al <strong style="color:#4ade80;">WhatsApp</strong> que indiques.</div>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="modal-btn cancelar" onclick="cerrarModalAviso()">Cancelar</button>
@@ -648,11 +652,11 @@ body::after{
 
 <div class="main">
     <div class="card-panel">
-        <div class="panel-title">📧 Tu Correo Electrónico</div>
-        <input type="email" class="form-input" id="robloxEmail" placeholder="ejemplo@correo.com" autocomplete="email">
+        <div class="panel-title">📲 Tu WhatsApp</div>
+        <input type="tel" inputmode="numeric" pattern="[0-9]*" class="form-input" id="robloxWhatsapp" placeholder="Ej: 04121234567" autocomplete="off">
         <div class="id-status" id="idStatus"></div>
         <div style="font-size:12px;color:#94a3b8;margin-top:10px;text-align:center;position:relative;z-index:1;">
-            ⚠️ El PIN de Robux llegará a este correo.
+            ⚠️ El PIN de Robux llegará a este WhatsApp.
         </div>
     </div>
 
@@ -732,7 +736,7 @@ import {
 
 let metodo = "PAGO MOVIL";
 let tasa = 940;
-let emailOk = false;
+let whatsappOk = false;
 let compraPendiente = null;
 const juegoActual = "ROBLOX";
 
@@ -772,40 +776,50 @@ window.seleccionarPago = function(m, e){
     actualizarPrecios();
 };
 
-// VALIDAR EMAIL
-const emailInput = document.getElementById('robloxEmail');
+// VALIDAR WHATSAPP
+const whatsappInput = document.getElementById('robloxWhatsapp');
 const statusDiv = document.getElementById('idStatus');
 
-function validarEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+// 🚫 SOLO NÚMEROS
+whatsappInput.addEventListener('keypress', function(e) {
+    if (!/[0-9]/.test(e.key)) e.preventDefault();
+});
+whatsappInput.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const texto = (e.clipboardData || window.clipboardData).getData('text');
+    const soloNumeros = texto.replace(/\D/g, '');
+    document.execCommand('insertText', false, soloNumeros);
+});
 
-emailInput.addEventListener('input', function() {
-    const email = this.value.trim();
-    if(!email) { statusDiv.style.display = 'none'; emailOk = false; return; }
-    if(!validarEmail(email)) {
+whatsappInput.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+    const numero = this.value.trim();
+    if(!numero) { statusDiv.style.display = 'none'; whatsappOk = false; return; }
+    if(numero.length < 10 || numero.length > 13) {
         statusDiv.className = 'id-status error';
-        statusDiv.textContent = '⚠️ Correo inválido';
+        statusDiv.textContent = '⚠️ Número inválido (10-13 dígitos)';
         statusDiv.style.display = 'block';
-        emailOk = false;
+        whatsappOk = false;
         return;
     }
     statusDiv.className = 'id-status valido';
     statusDiv.innerHTML = `
         <div class="check-icono">✓</div>
         <div>
-            <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">Correo Verificado</div>
-            <div class="nombre-jugador">${email}</div>
+            <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">WhatsApp Verificado</div>
+            <div class="nombre-jugador">+${numero}</div>
         </div>
     `;
-    emailOk = true;
+    whatsappOk = true;
 });
 
 // PREPARAR COMPRA (abre modal)
 window.prepararCompra = function(producto, precioUsd, paqueteCodigo){
-    const email = emailInput.value.trim();
-    if(!email){ alert("❌ Escribe tu correo electrónico primero"); return; }
-    if(!emailOk){ alert("⏳ Verifica tu correo antes de comprar"); return; }
+    const whatsapp = whatsappInput.value.trim();
+    if(!whatsapp){ alert("❌ Escribe tu número de WhatsApp primero"); return; }
+    if(!whatsappOk){ alert("⏳ Verifica tu WhatsApp antes de comprar"); return; }
 
-    compraPendiente = { producto, precioUsd, paqueteCodigo, email };
+    compraPendiente = { producto, precioUsd, paqueteCodigo, whatsapp };
     document.getElementById('modalAviso').classList.add('activo');
 };
 
@@ -818,12 +832,12 @@ window.confirmarCompra = function() {
     document.getElementById('modalAviso').classList.remove('activo');
     if(!compraPendiente) return;
 
-    const { producto, precioUsd, paqueteCodigo, email } = compraPendiente;
+    const { producto, precioUsd, paqueteCodigo, whatsapp } = compraPendiente;
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
-    localStorage.setItem('correo', email);
-    localStorage.setItem('id_jugador', email);
-    localStorage.setItem('nombre_jugador', email);
+    localStorage.setItem('whatsapp', whatsapp);
+    localStorage.setItem('id_jugador', whatsapp);
+    localStorage.setItem('nombre_jugador', whatsapp);
     localStorage.setItem('juego_seleccionado', juegoActual);
     localStorage.setItem('producto_seleccionado', producto);
     localStorage.setItem('paquete_codigo', paqueteCodigo);
