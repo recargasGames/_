@@ -3,125 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Recargas Games</title>
+    <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+    <title>Iniciar Sesión - RecargasGames</title>
     <style>
+        :root{
+            --color-azul:#3b82f6;
+            --color-hover:#2563eb;
+            --color-dorado:#d4af37;
+            --color-dorado-claro:#f5d76e;
+            --color-negro:#0a0e1a;
+            --color-error:#ef4444;
+            --color-success:#22c55e;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        html { scroll-behavior: smooth; }
+
         body {
             font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0b1220, #1a1a2e);
+            background-image: url('fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
+        body::before{
+            content:'';position:fixed;top:-30%;right:-20%;
+            width:500px;height:500px;
+            background:radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%);
+            border-radius:50%;pointer-events:none;z-index:0;
+        }
+        body::after{
+            content:'';position:fixed;bottom:-30%;left:-20%;
+            width:500px;height:500px;
+            background:radial-gradient(circle,rgba(212,175,55,0.1),transparent 70%);
+            border-radius:50%;pointer-events:none;z-index:0;
+        }
+
         .login-container {
-            background: rgba(17, 24, 39, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid #3b82f6;
-            max-width: 400px;
+            background: linear-gradient(135deg, rgba(20, 30, 55, 0.92), rgba(10, 14, 26, 0.95));
+            padding: 40px 34px;
+            border-radius: 24px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            max-width: 420px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.7),
+                0 0 60px rgba(212, 175, 55, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            z-index: 1;
+            animation: modalSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        @keyframes modalSlide {
+            from { transform: translateY(-30px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
         .logo {
             text-align: center;
             margin-bottom: 30px;
         }
         .logo img {
-            height: 60px;
+            height: 70px;
+            width: auto;
+            border-radius: 14px;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
         }
         .logo h1 {
             color: white;
             font-size: 24px;
-            margin-top: 10px;
+            margin-top: 14px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #d4af37 50%, #ffffff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shineTexto 4s linear infinite;
+            letter-spacing: 1px;
         }
+        @keyframes shineTexto {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
         .form-group label {
-            color: #9ca3af;
+            color: #cbd5e1;
             display: block;
             margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
         .form-group input {
             width: 100%;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 1px solid #374151;
-            background: rgba(255,255,255,0.05);
+            padding: 13px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
             color: white;
             font-size: 15px;
             transition: all 0.3s;
+            font-family: inherit;
         }
         .form-group input:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: var(--color-dorado);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15), 0 0 20px rgba(212, 175, 55, 0.2);
         }
+        .form-group input::placeholder {
+            color: #6b7280;
+        }
+
         .btn-login {
             width: 100%;
             padding: 14px;
-            background: #3b82f6;
-            color: white;
+            background: linear-gradient(135deg, #d4af37, #f5d76e, #d4af37);
+            background-size: 200% 200%;
+            animation: shineBadge 3s ease infinite;
+            color: #0a0e1a;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            font-family: inherit;
+        }
+        @keyframes shineBadge {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
         .btn-login:hover {
-            background: #2563eb;
             transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+        }
+        .btn-login:active {
+            transform: translateY(0) scale(0.98);
         }
         .btn-login:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
+
         .register-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 22px;
             color: #9ca3af;
+            font-size: 14px;
         }
         .register-link a {
-            color: #3b82f6;
+            color: var(--color-dorado-claro);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 700;
+            transition: 0.3s;
         }
         .register-link a:hover {
             text-decoration: underline;
+            color: #fff;
         }
-        .error-message {
-            color: #ef4444;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-        }
-        .success-message {
-            color: #22c55e;
-            font-size: 14px;
-            margin-top: 10px;
-            text-align: center;
-        }
+
         .reset-password {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 14px;
         }
         .reset-password a {
             color: #6b7280;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
+            transition: 0.3s;
         }
         .reset-password a:hover {
-            color: #3b82f6;
+            color: var(--color-dorado-claro);
+        }
+
+        /* ============================================
+           🎨 MODAL PERSONALIZADO DE MENSAJES
+           ============================================ */
+        .mensaje-overlay{
+            display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+            background:rgba(0,0,0,0.85);
+            backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+            z-index:9999;justify-content:center;align-items:center;padding:20px;
+        }
+        .mensaje-overlay.activo{display:flex;animation:fadeInOverlay 0.25s ease}
+        @keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+
+        .mensaje-box{
+            background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));
+            border:1px solid rgba(212,175,55,0.35);
+            border-radius:24px;padding:32px 26px 24px;
+            max-width:420px;width:100%;
+            box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 60px rgba(212,175,55,0.2),inset 0 1px 0 rgba(255,255,255,0.06);
+            animation:mensajeSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            text-align:center;position:relative;overflow:hidden;
+        }
+        @keyframes mensajeSlide{
+            from{transform:translateY(30px) scale(0.9);opacity:0}
+            to{transform:translateY(0) scale(1);opacity:1}
+        }
+        .mensaje-box::before{
+            content:'';position:absolute;top:0;left:-100%;
+            width:100%;height:100%;
+            background:linear-gradient(90deg,transparent,rgba(212,175,55,0.06),transparent);
+            animation:brilloMensaje 3s infinite;pointer-events:none;
+        }
+        @keyframes brilloMensaje{0%{left:-100%}100%{left:100%}}
+
+        .mensaje-cerrar{
+            position:absolute;top:14px;right:18px;
+            background:none;border:none;color:#9ca3af;
+            font-size:24px;cursor:pointer;padding:4px 8px;
+            line-height:1;transition:all 0.3s;z-index:2;
+        }
+        .mensaje-cerrar:hover{color:var(--color-dorado);transform:rotate(90deg)}
+
+        .mensaje-icono{
+            width:80px;height:80px;margin:0 auto 18px;
+            border-radius:50%;display:flex;align-items:center;justify-content:center;
+            font-size:42px;font-weight:bold;
+            animation:iconoPulse 2s ease-in-out infinite;
+            position:relative;z-index:1;
+        }
+        @keyframes iconoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+        .mensaje-icono.exito{
+            background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));
+            border:2px solid rgba(34,197,94,0.7);color:#4ade80;
+            box-shadow:0 0 40px rgba(34,197,94,0.5);
+        }
+        .mensaje-icono.error{
+            background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));
+            border:2px solid rgba(239,68,68,0.7);color:#f87171;
+            box-shadow:0 0 40px rgba(239,68,68,0.5);
+        }
+        .mensaje-icono.advertencia{
+            background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(212,175,55,0.08));
+            border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);
+            box-shadow:0 0 40px rgba(212,175,55,0.5);
+        }
+        .mensaje-icono.info{
+            background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(59,130,246,0.08));
+            border:2px solid rgba(59,130,246,0.7);color:#93c5fd;
+            box-shadow:0 0 40px rgba(59,130,246,0.5);
+        }
+        .mensaje-icono.confirmacion{
+            background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.15));
+            border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);
+            box-shadow:0 0 40px rgba(212,175,55,0.5);
+        }
+
+        .mensaje-titulo{
+            font-size:20px;font-weight:800;color:var(--color-dorado-claro);
+            margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase;
+            position:relative;z-index:1;
+        }
+        .mensaje-texto{
+            font-size:15px;color:#cbd5e1;line-height:1.6;
+            margin-bottom:24px;position:relative;z-index:1;
+            white-space:pre-line;
+        }
+        .mensaje-botones{
+            display:flex;gap:12px;justify-content:center;
+            position:relative;z-index:1;
+        }
+        .mensaje-btn{
+            flex:1;padding:14px 20px;border-radius:12px;
+            font-size:14px;font-weight:800;cursor:pointer;
+            transition:all 0.3s;text-transform:uppercase;
+            letter-spacing:1px;border:none;font-family:inherit;min-height:48px;
+        }
+        .mensaje-btn.principal{
+            background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+            background-size:200% 200%;color:#0a0e1a;
+            box-shadow:0 4px 15px rgba(212,175,55,0.4);
+        }
+        .mensaje-btn.principal:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 25px rgba(212,175,55,0.6);
+            animation:shineBadge 3s ease infinite;
+        }
+        .mensaje-btn.principal:active{transform:translateY(0) scale(0.98)}
+        .mensaje-btn.secundario{
+            background:rgba(71,85,105,0.3);color:#cbd5e1;
+            border:1px solid rgba(71,85,105,0.6);
+        }
+        .mensaje-btn.secundario:hover{
+            background:rgba(71,85,105,0.5);color:white;
+            transform:translateY(-2px);
+        }
+        .mensaje-btn.secundario:active{transform:translateY(0) scale(0.98)}
+        .mensaje-btn.peligro{
+            background:linear-gradient(135deg,#ef4444,#dc2626);
+            color:white;box-shadow:0 4px 15px rgba(239,68,68,0.4);
+        }
+        .mensaje-btn.peligro:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 25px rgba(239,68,68,0.6);
+        }
+
+        @media(max-width:500px){
+            .login-container{padding:32px 22px}
+            .logo img{height:60px}
+            .logo h1{font-size:20px}
+            .mensaje-box{padding:28px 20px 20px}
+            .mensaje-icono{width:70px;height:70px;font-size:36px}
+            .mensaje-titulo{font-size:17px}
+            .mensaje-texto{font-size:14px}
+            .mensaje-btn{font-size:13px;padding:12px 14px}
+        }
+        @media(max-width:400px){
+            .mensaje-botones{flex-direction:column}
         }
     </style>
 </head>
@@ -146,8 +357,6 @@
             <button type="submit" class="btn-login" id="loginBtn">Ingresar</button>
         </form>
 
-        <div id="message"></div>
-
         <div class="register-link">
             ¿No tienes cuenta? <a href="register.html">Regístrate aquí</a>
         </div>
@@ -156,16 +365,132 @@
         </div>
     </div>
 
+    <!-- ============================================
+         🎨 MODAL PERSONALIZADO DE MENSAJES
+         ============================================ -->
+    <div class="mensaje-overlay" id="mensajeOverlay">
+        <div class="mensaje-box" id="mensajeBox">
+            <button class="mensaje-cerrar" id="mensajeCerrar" onclick="cerrarMensajePersonalizado()">✕</button>
+            <div class="mensaje-icono" id="mensajeIcono">ℹ</div>
+            <div class="mensaje-titulo" id="mensajeTitulo">Título</div>
+            <div class="mensaje-texto" id="mensajeTexto">Mensaje</div>
+            <div class="mensaje-botones" id="mensajeBotones">
+                <button class="mensaje-btn principal" id="mensajeBtnPrincipal" onclick="cerrarMensajePersonalizado()">Entendido</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { auth } from './firebase-config.js';
         import { signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+        // ==============================================
+        // 🎨 SISTEMA DE MENSAJES PERSONALIZADOS
+        // ==============================================
+        let _mensajeCallback = null;
+        let _mensajeCerrado = false;
+
+        const ICONOS = {
+            exito: '✓',
+            error: '✕',
+            advertencia: '⚠',
+            info: 'ℹ',
+            confirmacion: '❓'
+        };
+
+        function mostrarMensaje(titulo, mensaje, tipo = 'info', textoBoton = 'Entendido') {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('mensajeOverlay');
+                const icono = document.getElementById('mensajeIcono');
+                const tituloEl = document.getElementById('mensajeTitulo');
+                const textoEl = document.getElementById('mensajeTexto');
+                const botones = document.getElementById('mensajeBotones');
+
+                icono.className = 'mensaje-icono ' + tipo;
+                icono.textContent = ICONOS[tipo] || ICONOS.info;
+                tituloEl.textContent = titulo;
+                textoEl.textContent = mensaje;
+
+                botones.innerHTML = `
+                    <button class="mensaje-btn principal" id="mensajeBtnPrincipal">${textoBoton}</button>
+                `;
+
+                document.getElementById('mensajeBtnPrincipal').onclick = () => {
+                    if (_mensajeCerrado) return;
+                    _mensajeCerrado = true;
+                    cerrarMensajePersonalizado();
+                    resolve(true);
+                };
+
+                _mensajeCallback = resolve;
+                _mensajeCerrado = false;
+                overlay.classList.add('activo');
+            });
+        }
+
+        function mostrarConfirmacion(titulo, mensaje, callback, opciones = {}) {
+            const overlay = document.getElementById('mensajeOverlay');
+            const icono = document.getElementById('mensajeIcono');
+            const tituloEl = document.getElementById('mensajeTitulo');
+            const textoEl = document.getElementById('mensajeTexto');
+            const botones = document.getElementById('mensajeBotones');
+
+            const tipo = opciones.tipo || 'confirmacion';
+            const textoAceptar = opciones.textoAceptar || 'Aceptar';
+            const textoCancelar = opciones.textoCancelar || 'Cancelar';
+            const claseAceptar = opciones.peligro ? 'peligro' : 'principal';
+
+            icono.className = 'mensaje-icono ' + tipo;
+            icono.textContent = ICONOS[tipo] || ICONOS.confirmacion;
+            tituloEl.textContent = titulo;
+            textoEl.textContent = mensaje;
+
+            botones.innerHTML = `
+                <button class="mensaje-btn secundario" id="mensajeBtnCancelar">${textoCancelar}</button>
+                <button class="mensaje-btn ${claseAceptar}" id="mensajeBtnAceptar">${textoAceptar}</button>
+            `;
+
+            document.getElementById('mensajeBtnCancelar').onclick = () => {
+                cerrarMensajePersonalizado();
+                if (typeof callback === 'function') callback(false);
+            };
+
+            document.getElementById('mensajeBtnAceptar').onclick = () => {
+                cerrarMensajePersonalizado();
+                if (typeof callback === 'function') callback(true);
+            };
+
+            _mensajeCerrado = false;
+            overlay.classList.add('activo');
+        }
+
+        function cerrarMensajePersonalizado() {
+            const overlay = document.getElementById('mensajeOverlay');
+            overlay.classList.remove('activo');
+            if (_mensajeCallback) {
+                _mensajeCallback(false);
+                _mensajeCallback = null;
+            }
+        }
+
+        document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'mensajeOverlay') {
+                cerrarMensajePersonalizado();
+            }
+        });
+
+        window.mostrarMensaje = mostrarMensaje;
+        window.mostrarConfirmacion = mostrarConfirmacion;
+        window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
+
+        // ==============================================
+        // 🔐 LOGIN
+        // ==============================================
         const form = document.getElementById('loginForm');
-        const messageDiv = document.getElementById('message');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = document.getElementById('loginBtn');
@@ -175,51 +500,53 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                messageDiv.innerHTML = '<div class="success-message">✅ ¡Bienvenido! Redirigiendo...</div>';
-                
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1500);
+                await mostrarMensaje('¡Bienvenido!', 'Inicio de sesión exitoso. Redirigiendo a tu panel...', 'exito');
+                window.location.href = 'dashboard.html';
 
             } catch (error) {
-                let errorMsg = '❌ Error al iniciar sesión: ';
+                let errorMsg = '';
                 switch (error.code) {
                     case 'auth/user-not-found':
-                        errorMsg += 'Usuario no encontrado';
+                        errorMsg = 'Usuario no encontrado. Verifica tu correo.';
                         break;
                     case 'auth/wrong-password':
-                        errorMsg += 'Contraseña incorrecta';
+                        errorMsg = 'Contraseña incorrecta. Intenta de nuevo.';
                         break;
                     case 'auth/invalid-email':
-                        errorMsg += 'Correo electrónico inválido';
+                        errorMsg = 'El correo electrónico no es válido.';
                         break;
                     case 'auth/too-many-requests':
-                        errorMsg += 'Demasiados intentos. Intenta más tarde';
+                        errorMsg = 'Demasiados intentos fallidos. Intenta más tarde.';
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMsg = 'Correo o contraseña incorrectos.';
                         break;
                     default:
-                        errorMsg += error.message;
+                        errorMsg = error.message;
                 }
-                messageDiv.innerHTML = `<div class="error-message">${errorMsg}</div>`;
+                mostrarMensaje('Error al iniciar sesión', errorMsg, 'error');
                 btn.disabled = false;
                 btn.textContent = 'Ingresar';
             }
         });
 
-        // Restablecer contraseña
+        // ==============================================
+        // 🔑 RESTABLECER CONTRASEÑA
+        // ==============================================
         document.getElementById('resetPassword').addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
-            
+
             if (!email) {
-                messageDiv.innerHTML = '<div class="error-message">❌ Ingresa tu correo para restablecer la contraseña</div>';
+                mostrarMensaje('Correo requerido', 'Ingresa tu correo electrónico para restablecer la contraseña.', 'advertencia');
                 return;
             }
 
             try {
                 await sendPasswordResetEmail(auth, email);
-                messageDiv.innerHTML = '<div class="success-message">✅ Correo de restablecimiento enviado. Revisa tu bandeja de entrada.</div>';
+                mostrarMensaje('Correo enviado', 'Revisa tu bandeja de entrada para restablecer tu contraseña.', 'exito');
             } catch (error) {
-                messageDiv.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+                mostrarMensaje('Error', 'No se pudo enviar el correo: ' + error.message, 'error');
             }
         });
     </script>
