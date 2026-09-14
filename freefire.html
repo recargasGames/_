@@ -18,10 +18,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
-    background-image:url('fondo.jpg');
-    background-size:cover;
-    background-position:center;
-    background-attachment:fixed;
+    background:#0a0e1a;
     color:#fff;
     font-family:'Segoe UI',sans-serif;
     padding-top:110px;
@@ -29,6 +26,30 @@ body{
     min-height:100vh;
     position:relative;
 }
+
+/* 🎬 VIDEO DE FONDO */
+.video-fondo{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:-2;
+    pointer-events:none;
+    opacity:0.55;
+}
+.video-overlay{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(180deg,
+        rgba(10,14,26,0.75) 0%,
+        rgba(10,14,26,0.85) 50%,
+        rgba(10,14,26,0.95) 100%);
+    z-index:-1;
+    pointer-events:none;
+}
+
 body::before{
     content:'';position:fixed;top:-30%;right:-20%;
     width:600px;height:600px;
@@ -567,6 +588,8 @@ body::after{
     .mensaje-titulo{font-size:17px}
     .mensaje-texto{font-size:14px}
     .mensaje-btn{font-size:13px;padding:12px 14px}
+    /* En móvil, video más tenue (ahorra batería) */
+    .video-fondo{opacity:0.35}
 }
 @media(max-width:400px){
     .mensaje-botones{flex-direction:column}
@@ -574,6 +597,12 @@ body::after{
 </style>
 </head>
 <body onclick="cerrarTodosLosMenus(event)">
+
+<!-- 🎬 VIDEO DE FONDO -->
+<video autoplay muted loop playsinline poster="fondo.jpg" class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
 
 <div class="barra-superior">
     <div class="header">
@@ -666,7 +695,6 @@ body::after{
 </div>
 
 <div class="main">
-    <!-- TARJETA DE VERIFICACIÓN MÁS ABAJO -->
     <div class="card-panel" style="margin-top:40px;">
         <div class="panel-title">🆔 ID del Jugador</div>
         <div class="form-group">
