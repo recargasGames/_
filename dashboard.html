@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Panel - RecargasGames</title>
-    
+    <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -23,16 +24,40 @@
 
         body{
             font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-            background-image:url('fondo.jpg');
-            background-size:cover;
-            background-position:center;
-            background-attachment:fixed;
             color:white;
             min-height:100vh;
             padding-top:100px;
             position:relative;
             overflow-x:hidden;
         }
+
+        /* 🎬 VIDEO DE FONDO */
+        .video-fondo{
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            object-fit:cover;
+            z-index:-2;
+            pointer-events:none;
+            opacity:1;
+            filter:brightness(1.15);
+            will-change:transform;
+            transform:translateZ(0);
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+        }
+        .video-overlay{
+            position:fixed;
+            inset:0;
+            background:linear-gradient(180deg,
+                rgba(10,14,26,0.15) 0%,
+                rgba(10,14,26,0.35) 60%,
+                rgba(10,14,26,0.6) 100%);
+            z-index:-1;
+            pointer-events:none;
+            transform:translateZ(0);
+        }
+
         body::before{
             content:'';position:fixed;top:-30%;right:-20%;
             width:600px;height:600px;
@@ -46,17 +71,16 @@
             border-radius:50%;pointer-events:none;z-index:0;
         }
 
-        /* ====== BARRA SUPERIOR PREMIUM ====== */
+        /* ====== BARRA SUPERIOR ====== */
         .topbar{
             position:fixed;top:0;left:0;right:0;z-index:999;
-            background:rgba(5,8,16,0.9);
-            backdrop-filter:blur(15px);
-            -webkit-backdrop-filter:blur(15px);
+            background:rgba(5,8,16,0.85);
             padding:14px 24px;
             display:flex;justify-content:space-between;align-items:center;
             border-bottom:1px solid transparent;
             border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;
             box-shadow:0 4px 20px rgba(0,0,0,0.4);
+            transform:translateZ(0);
         }
         .topbar .logo{
             display:flex;align-items:center;gap:10px;
@@ -109,14 +133,16 @@
 
         /* ====== TARJETA DE BIENVENIDA ====== */
         .welcome-card{
-            background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.92));
+            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
             border:1px solid rgba(212,175,55,0.25);
             border-radius:20px;
             padding:30px;
             margin-bottom:25px;
             position:relative;
             overflow:hidden;
-            box-shadow:0 15px 40px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow:0 15px 40px rgba(0,0,0,0.35);
+            will-change:transform;
+            transform:translateZ(0);
         }
         .welcome-card::before{
             content:'';position:absolute;top:-50%;right:-20%;
@@ -170,17 +196,19 @@
             gap:15px;margin-bottom:30px;
         }
         .stat-card{
-            background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.92));
+            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
             border:1px solid rgba(212,175,55,0.2);
             border-radius:16px;
             padding:22px 18px;
             text-align:center;
             transition:all 0.3s;
             box-shadow:0 10px 30px rgba(0,0,0,0.3);
+            will-change:transform;
+            transform:translateZ(0);
         }
         .stat-card:hover{
             border-color:rgba(212,175,55,0.5);
-            transform:translateY(-4px);
+            transform:translateY(-4px) translateZ(0);
             box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.2);
         }
         .stat-card .number{
@@ -198,11 +226,13 @@
 
         /* ====== SECCIÓN PEDIDOS ====== */
         .pedidos-section{
-            background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.92));
+            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
             border:1px solid rgba(212,175,55,0.25);
             border-radius:18px;
             overflow:hidden;margin-bottom:25px;
-            box-shadow:0 15px 40px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow:0 15px 40px rgba(0,0,0,0.35);
+            will-change:transform;
+            transform:translateZ(0);
         }
         .pedidos-section .header{
             padding:18px 24px;
@@ -227,7 +257,6 @@
             text-shadow:0 0 15px rgba(212,175,55,0.6);
         }
 
-        /* ====== ITEM PEDIDO ====== */
         .pedido-item{
             padding:18px 24px;
             border-bottom:1px solid rgba(212,175,55,0.08);
@@ -294,17 +323,19 @@
             gap:12px;margin-top:20px;
         }
         .juego-rapido{
-            background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.92));
+            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
             border:1px solid rgba(212,175,55,0.2);
             border-radius:14px;
             padding:16px;text-align:center;
             text-decoration:none;color:white;
             transition:all 0.3s;
             box-shadow:0 8px 25px rgba(0,0,0,0.3);
+            will-change:transform;
+            transform:translateZ(0);
         }
         .juego-rapido:hover{
             border-color:rgba(212,175,55,0.5);
-            transform:translateY(-4px);
+            transform:translateY(-4px) translateZ(0);
             box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.2);
         }
         .juego-rapido .icono{font-size:30px;margin-bottom:6px}
@@ -316,12 +347,14 @@
         /* ====== INFO ADICIONAL ====== */
         .info-bar{
             margin-top:25px;padding:18px 22px;
-            background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.92));
+            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
             border:1px solid rgba(212,175,55,0.2);
             border-radius:14px;
             display:flex;flex-wrap:wrap;justify-content:space-between;
             gap:10px;align-items:center;
             box-shadow:0 10px 30px rgba(0,0,0,0.3);
+            will-change:transform;
+            transform:translateZ(0);
         }
         .info-bar .info-item{
             display:flex;align-items:center;gap:8px;
@@ -395,12 +428,20 @@
             .pedido-item{padding:14px 16px}
             .pedido-item .info .pedido-id{font-size:14px}
             .pedido-item .detalle .precio{font-size:15px}
+            .video-fondo {
+                opacity: 0.85;
+                filter: brightness(1.05);
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- ====== BARRA SUPERIOR ====== -->
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
 <header class="topbar">
     <a href="index.html" class="logo">
         <img src="logo.png" alt="RecargasGames">
@@ -415,10 +456,8 @@
     </div>
 </header>
 
-<!-- ====== CONTENIDO ====== -->
 <div class="dashboard-container">
 
-    <!-- TARJETA DE BIENVENIDA -->
     <div class="welcome-card">
         <div class="greeting">👋 Hola,</div>
         <h2 id="bienvenidaNombre">Usuario <span>👋</span></h2>
@@ -429,7 +468,6 @@
         </div>
     </div>
 
-    <!-- ESTADÍSTICAS -->
     <div class="stats-grid">
         <div class="stat-card blue">
             <div class="icon">📦</div>
@@ -448,7 +486,6 @@
         </div>
     </div>
 
-    <!-- SECCIÓN DE PEDIDOS -->
     <div class="pedidos-section">
         <div class="header">
             <h3>📋 Mis Pedidos</h3>
@@ -464,7 +501,6 @@
         </div>
     </div>
 
-    <!-- JUEGOS RÁPIDOS -->
     <div style="margin-top:10px;">
         <h4 style="font-size:15px;font-weight:800;margin-bottom:12px;color:var(--color-dorado-claro);text-transform:uppercase;letter-spacing:1px;">🎮 Recargas Rápidas</h4>
         <div class="juegos-rapidos">
@@ -499,7 +535,6 @@
         </div>
     </div>
 
-    <!-- INFO ADICIONAL -->
     <div class="info-bar">
         <div class="info-item">
             🎮 <strong>ID Jugador:</strong> <span id="infoIdJugador">-</span>
@@ -515,9 +550,6 @@
 </div>
 
 <script>
-    // ==============================================
-    // 🔥 FIREBASE
-    // ==============================================
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
         authDomain: "free-52119.firebaseapp.com",
