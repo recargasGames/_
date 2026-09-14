@@ -239,6 +239,7 @@ table{width:100%;border-collapse:collapse}
 th,td{
     padding:14px 12px;text-align:left;
     border-bottom:1px solid rgba(212,175,55,0.1);font-size:14px;
+    white-space:nowrap;
 }
 th{
     background:rgba(0,0,0,0.3);color:var(--color-dorado-claro);
@@ -464,7 +465,7 @@ tr:hover{background:rgba(212,175,55,0.05)}
                     <thead>
                         <tr>
                             <th>Registro</th><th>Nombre</th><th>Correo</th>
-                            <th>WhatsApp</th><th>Pedidos</th><th>Última actividad</th>
+                            <th>WhatsApp/ID</th><th>Pedidos</th><th>Última actividad</th>
                         </tr>
                     </thead>
                     <tbody id="listaUsuarios">
@@ -590,7 +591,7 @@ tr:hover{background:rgba(212,175,55,0.05)}
 </div>
 
 <script>
-// 🔥 FIREBASE CONFIG (UNIFICADO)
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
     authDomain: "free-52119.firebaseapp.com",
@@ -610,7 +611,7 @@ let deferredPrompt = null;
 let esInstalable = false;
 
 // ============================================
-// 📱 PWA - DETECCIÓN E INSTALACIÓN
+// 📱 PWA
 // ============================================
 function estaInstalada(){
     return window.matchMedia('(display-mode: standalone)').matches ||
@@ -658,7 +659,7 @@ document.getElementById('installAppBtn').addEventListener('click', async () => {
 });
 
 // ============================================
-// 🎨 MODAL MENSAJES
+// 🎨 MODAL
 // ============================================
 function mostrarMensaje(titulo, texto, tipo='info'){
     document.getElementById('mensajeIcono').className = 'mensaje-icono ' + tipo;
@@ -675,7 +676,7 @@ document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
 });
 
 // ============================================
-// 🔑 LOGIN CON FIREBASE AUTH
+// 🔑 LOGIN
 // ============================================
 async function iniciarSesion(){
     const correo = document.getElementById('correo').value.trim();
@@ -694,11 +695,9 @@ async function iniciarSesion(){
     error.style.display = 'none';
 
     try {
-        // 1. Login con Firebase Auth
         const userCredential = await auth.signInWithEmailAndPassword(correo, contrasena);
         const user = userCredential.user;
 
-        // 2. Verificar si es admin
         const adminSnap = await db.ref('admins/' + user.uid).once('value');
         if (!adminSnap.exists() || adminSnap.val() !== true) {
             await auth.signOut();
@@ -709,7 +708,6 @@ async function iniciarSesion(){
             return;
         }
 
-        // 3. Es admin, mostrar panel
         sesionActiva = true;
         document.getElementById('pantallaLogin').style.display = 'none';
         document.getElementById('panelPrincipal').style.display = 'block';
@@ -779,52 +777,80 @@ async function cargarDatosPanel(){
     ]);
 }
 
+// Helper: formatear fecha
+function formatearFecha(iso){
+    if (!iso) return '—';
+    try {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return iso;
+        return d.toLocaleDateString('es-VE') + ' ' + d.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
+    } catch(e) { return iso; }
+}
+
+// 📋 PEDIDOS
 async function cargarPedidos(){
     try {
-        const snap = await db.ref('pedidos').orderByChild('fecha').limitToLast(50).once('value');
+        const snap = await db.ref('pedidos').limitToLast(100).once('value');
         const datos = snap.val();
         const lista = document.getElementById('listaPedidos');
         if (!datos) {
             lista.innerHTML = '<tr><td colspan="7" class="cargando">No hay pedidos</td></tr>';
             return;
         }
-        const pedidos = Object.values(datos).reverse();
+
+        // Convertir a array y ordenar por fecha descendente
+        const pedidos = Object.values(datos).sort((a,b) => {
+            const fa = new Date(a.fecha || 0).getTime();
+            const fb = new Date(b.fecha || 0).getTime();
+            return fb - fa;
+        });
+
         lista.innerHTML = pedidos.map(p => {
-            const clase = p.estado === 'COMPLETADA' ? 'estado-exito' :
-                          p.estado === 'PENDIENTE' ? 'estado-pendiente' : 'estado-error';
+            const estado = (p.estado || 'PENDIENTE').toUpperCase();
+            const clase = estado === 'COMPLETADA' ? 'estado-exito' :
+                          estado === 'PENDIENTE' ? 'estado-pendiente' : 'estado-error';
             return `<tr>
-                <td>${p.fecha || '—'}</td>
+                <td>${formatearFecha(p.fecha)}</td>
                 <td>${p.juego || '—'}</td>
                 <td>${p.producto || '—'}</td>
-                <td>${p.id_jugador || p.nombre_jugador || '—'}</td>
+                <td>${p.nombre_jugador || p.id_jugador || '—'}</td>
                 <td>$${p.monto_usd || p.monto || '—'}</td>
                 <td>${p.referencia_pago || p.referencia || '—'}</td>
-                <td class="${clase}">${p.estado || '?'}</td>
+                <td class="${clase}">${estado}</td>
             </tr>`;
         }).join('');
     } catch (e) {
         console.error(e);
-        document.getElementById('listaPedidos').innerHTML = '<tr><td colspan="7" class="cargando">Error al cargar</td></tr>';
+        document.getElementById('listaPedidos').innerHTML = '<tr><td colspan="7" class="cargando">Error: ' + e.message + '</td></tr>';
     }
 }
 
+// ⚠️ REFERENCIAS FALSAS
 async function cargarReferenciasFalsas(){
     try {
-        const snap = await db.ref('referencias_falsas').orderByChild('fecha').limitToLast(50).once('value');
+        const snap = await db.ref('referencias_falsas').limitToLast(100).once('value');
         const datos = snap.val();
         const lista = document.getElementById('listaReferencias');
         document.getElementById('referenciasFalsas').textContent = datos ? Object.keys(datos).length : 0;
+        
         if (!datos) {
             lista.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#10b981;padding:30px">✅ No hay referencias falsas</td></tr>';
             return;
         }
-        lista.innerHTML = Object.values(datos).reverse().map(r => `
+
+        const refs = Object.values(datos).sort((a,b) => {
+            const fa = new Date(a.fecha || 0).getTime();
+            const fb = new Date(b.fecha || 0).getTime();
+            return fb - fa;
+        });
+
+        lista.innerHTML = refs.map(r => `
             <tr class="ref-falsa">
-                <td>${r.fecha || '—'}</td>
+                <td>${formatearFecha(r.fecha)}</td>
                 <td>${r.juego || '—'}</td>
                 <td><strong style="color:#ef4444">${r.referencia || '—'}</strong></td>
                 <td>$${r.monto_usd || r.monto || '—'}</td>
-                <td>${r.id_jugador || '—'}</td>
+                <td>${r.nombre_jugador || r.id_jugador || '—'}</td>
                 <td>${r.metodo_pago || '—'}</td>
             </tr>
         `).join('');
@@ -833,43 +859,102 @@ async function cargarReferenciasFalsas(){
     }
 }
 
+// 👤 USUARIOS - OPCIÓN A (desde pedidos únicos + usuarios/)
 async function cargarUsuarios(){
     try {
-        const snap = await db.ref('usuarios').once('value');
-        const datos = snap.val();
         const lista = document.getElementById('listaUsuarios');
-        document.getElementById('totalUsuarios').textContent = datos ? Object.keys(datos).length : 0;
-        if (!datos) {
-            lista.innerHTML = '<tr><td colspan="6" class="cargando">No hay usuarios</td></tr>';
+        
+        // 1. Intentar cargar de usuarios/
+        const usuariosSnap = await db.ref('usuarios').once('value');
+        const usuariosData = usuariosSnap.val();
+        
+        let usuariosArray = [];
+
+        if (usuariosData && Object.keys(usuariosData).length > 0) {
+            // Si hay usuarios guardados en BD
+            usuariosArray = Object.values(usuariosData);
+        } else {
+            // 2. Si NO hay usuarios en BD, construir desde pedidos únicos
+            const pedidosSnap = await db.ref('pedidos').once('value');
+            const pedidos = pedidosSnap.val() || {};
+            
+            const usuariosUnicos = {};
+            Object.values(pedidos).forEach(p => {
+                const uid = p.uid || 'anonimo-' + (p.id_jugador || Math.random().toString(36).substring(7));
+                
+                if (!usuariosUnicos[uid]) {
+                    usuariosUnicos[uid] = {
+                        uid: uid,
+                        correo: p.email || p.correo || 'Anónimo',
+                        nombre: p.nombre_jugador || 'Sin nombre',
+                        id_jugador: p.id_jugador || '—',
+                        totalPedidos: 0,
+                        ultimaActividad: p.fecha || null,
+                        fechaRegistro: p.fecha || null
+                    };
+                }
+                usuariosUnicos[uid].totalPedidos++;
+                
+                // Actualizar última actividad si es más reciente
+                if (p.fecha && (!usuariosUnicos[uid].ultimaActividad || p.fecha > usuariosUnicos[uid].ultimaActividad)) {
+                    usuariosUnicos[uid].ultimaActividad = p.fecha;
+                }
+            });
+
+            usuariosArray = Object.values(usuariosUnicos);
+        }
+
+        if (usuariosArray.length === 0) {
+            lista.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:30px">📭 No hay usuarios registrados aún</td></tr>';
+            document.getElementById('totalUsuarios').textContent = '0';
             return;
         }
-        lista.innerHTML = Object.values(datos).reverse().map(u => `
+
+        // Ordenar por fecha registro descendente
+        usuariosArray.sort((a, b) => {
+            const fa = new Date(a.fechaRegistroISO || a.fechaRegistro || 0).getTime();
+            const fb = new Date(b.fechaRegistroISO || b.fechaRegistro || 0).getTime();
+            return fb - fa;
+        });
+
+        document.getElementById('totalUsuarios').textContent = usuariosArray.length;
+        lista.innerHTML = usuariosArray.map(u => `
             <tr>
-                <td>${u.fechaRegistro || '—'}</td>
-                <td>${u.nombre || '—'}</td>
-                <td>${u.correo || '—'}</td>
-                <td>${u.id_jugador || '—'}</td>
+                <td>${formatearFecha(u.fechaRegistroISO || u.fechaRegistro)}</td>
+                <td>${u.nombre || u.displayName || '—'}</td>
+                <td>${u.correo || u.email || '—'}</td>
+                <td>${u.id_jugador || u.whatsapp || '—'}</td>
                 <td>${u.totalPedidos || 0}</td>
-                <td>${u.ultimaActividad || '—'}</td>
+                <td>${formatearFecha(u.ultimaActividad)}</td>
             </tr>
         `).join('');
+        
     } catch (e) {
-        console.error(e);
+        console.error('Error cargando usuarios:', e);
+        document.getElementById('listaUsuarios').innerHTML = '<tr><td colspan="6" class="cargando">Error: ' + e.message + '</td></tr>';
     }
 }
 
+// 📈 ESTADÍSTICAS
 async function cargarEstadisticas(){
     try {
         const snap = await db.ref('pedidos').once('value');
         const datos = snap.val() || {};
         const total = Object.keys(datos).length;
         const hoy = new Date().toLocaleDateString('es-VE');
-        const pedidosHoy = Object.values(datos).filter(p => p.fecha && p.fecha.includes(hoy)).length;
+        const pedidosHoy = Object.values(datos).filter(p => {
+            if (!p.fecha) return false;
+            try {
+                const fechaPedido = new Date(p.fecha).toLocaleDateString('es-VE');
+                return fechaPedido === hoy;
+            } catch(e) { return false; }
+        }).length;
         document.getElementById('totalPedidos').textContent = total;
         document.getElementById('pedidosHoy').textContent = pedidosHoy;
     } catch (e) { console.error(e); }
 }
 
+// 🖼️ CONFIGURACIÓN
 async function cargarConfiguracion(){
     try {
         const snap = await db.ref('configuracion').once('value');
@@ -885,9 +970,7 @@ async function cargarConfiguracion(){
     } catch (e) { console.error(e); }
 }
 
-// ============================================
 // 🚨 MANTENIMIENTO
-// ============================================
 async function cargarEstadoMantenimiento(){
     try {
         const snap = await db.ref('mantenimiento/activo').once('value');
@@ -926,9 +1009,7 @@ async function desactivarMantenimiento(){
     setTimeout(() => msg.style.display = 'none', 3000);
 }
 
-// ============================================
 // 💾 GUARDAR IMÁGENES Y TASA
-// ============================================
 async function guardarImagenes(){
     try {
         await db.ref('configuracion').update({
@@ -973,7 +1054,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !sesionActiva) iniciarSesion();
 });
 
-// 📱 Registrar Service Worker
+// 📱 Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw-admin.js')
