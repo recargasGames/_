@@ -204,33 +204,6 @@
             box-shadow:0 4px 15px rgba(212,175,55,0.4);
         }
         .mensaje-btn.principal:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.6);animation:shineBadge 3s ease infinite;}
-        .mensaje-btn.secundario{
-            background:rgba(71,85,105,0.3);color:#cbd5e1;
-            border:1px solid rgba(71,85,105,0.6);
-        }
-        .mensaje-btn.secundario:hover{background:rgba(71,85,105,0.5);color:white;transform:translateY(-2px);}
-        .mensaje-btn.peligro{
-            background:linear-gradient(135deg,#ef4444,#dc2626);
-            color:white;box-shadow:0 4px 15px rgba(239,68,68,0.4);
-        }
-
-        @media(max-width:500px){
-            .container{padding:32px 22px}
-            .logo img{height:60px}
-            .logo h1{font-size:20px}
-            .mensaje-box{padding:28px 20px 20px}
-            .mensaje-icono{width:70px;height:70px;font-size:36px}
-            .mensaje-titulo{font-size:17px}
-            .mensaje-texto{font-size:14px}
-            .mensaje-btn{font-size:13px;padding:12px 14px}
-            .video-fondo {
-                opacity: 0.85;
-                filter: brightness(1.05);
-            }
-        }
-        @media(max-width:400px){
-            .mensaje-botones{flex-direction:column}
-        }
     </style>
 </head>
 <body>
@@ -249,7 +222,7 @@
         <form id="recoverForm">
             <div class="form-group">
                 <label>📧 Correo electrónico</label>
-                <input type="email" id="email" placeholder="tu@email.com" required>
+                <input type="email" id="email" placeholder="tu@email.com" required autocomplete="email">
             </div>
             <button type="submit" class="btn-primary" id="sendBtn">Enviar Enlace</button>
         </form>
@@ -271,9 +244,10 @@
         </div>
     </div>
 
+    <!-- Carga del archivo firebase-config y envío -->
     <script type="module">
         import { auth } from './firebase-config.js';
-        import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ' };
 
@@ -309,24 +283,28 @@
                 await sendPasswordResetEmail(auth, email);
                 await mostrarMensaje(
                     'Enlace Enviado',
-                    'Hemos enviado un enlace de recuperación a tu correo.\n\nRevisa tu bandeja de entrada y la carpeta de SPAM.\n\nHaz clic en el enlace para crear una nueva contraseña.\n\nRedirigiendo al inicio de sesión...',
+                    'Hemos enviado un enlace de recuperación a tu correo.\n\nRevisa tu bandeja de entrada y la carpeta de SPAM.\n\nHaz clic en el enlace para crear una nueva contraseña.',
                     'exito'
                 );
                 window.location.href = 'login.html';
             } catch (error) {
+                console.error("Error en Firebase:", error);
                 let msg = '';
                 switch (error.code) {
                     case 'auth/user-not-found':
-                        msg = 'No existe ninguna cuenta con ese correo.';
+                        msg = 'No existe ninguna cuenta registrada con ese correo.';
                         break;
                     case 'auth/invalid-email':
-                        msg = 'El correo electrónico no es válido.';
+                        msg = 'El correo electrónico ingresado no es válido.';
                         break;
                     case 'auth/too-many-requests':
-                        msg = 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
+                        msg = 'Demasiados intentos. Espera unos minutos e intenta nuevamente.';
+                        break;
+                    case 'auth/unauthorized-domain':
+                        msg = 'Este dominio no está autorizado en la consola de Firebase Authentication.';
                         break;
                     default:
-                        msg = error.message;
+                        msg = 'Ocurrió un error: ' + error.message;
                 }
                 mostrarMensaje('Error', msg, 'error');
                 btn.disabled = false;
