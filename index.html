@@ -21,7 +21,7 @@
 
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
-<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+<link rel="preload" href="inicio.mp4" as="video" type="video/mp4">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.recargasgames.shop/">
@@ -160,7 +160,6 @@ body::after {
     z-index: 1;
 }
 
-/* ✅ SIN BLUR */
 .barra-superior {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -430,7 +429,6 @@ body::after {
     margin: 0 auto;
 }
 
-/* ✅ SIN BLUR */
 .welcome-text {
     text-align: center;
     margin: 30px 0 40px;
@@ -497,7 +495,6 @@ body::after {
     margin-top: 20px;
 }
 
-/* ✅ SIN BLUR - CON GPU ACELERADA */
 .game-link {
     background: linear-gradient(135deg, rgba(20, 30, 55, 0.6), rgba(10, 14, 26, 0.75));
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -550,7 +547,6 @@ body::after {
 }
 .game-link:hover .game-img { transform: scale(1.06); }
 
-/* ✅ SIN BLUR PESADO */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -686,7 +682,6 @@ body::after {
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-/* 🎨 MODAL MENSAJES */
 .mensaje-overlay {
     display: none;
     position: fixed;
@@ -907,6 +902,7 @@ body::after {
     transition: all 0.3s ease;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     letter-spacing: 0.5px;
+    display: none;
 }
 .install-app-btn:hover {
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.5), rgba(59, 130, 246, 0.45));
@@ -1042,7 +1038,7 @@ body::after {
 <body onclick="cerrarTodosLosMenus(event)">
 
 <video autoplay muted loop playsinline class="video-fondo">
-    <source src="fondo.mp4" type="video/mp4">
+    <source src="inicio.mp4" type="video/mp4">
 </video>
 <div class="video-overlay"></div>
 
@@ -1350,6 +1346,7 @@ const loginMessage = document.getElementById('loginMessage');
 const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 const installAppBtn = document.getElementById('installAppBtn');
 let deferredPrompt = null;
+let esInstalable = false;
 
 function estaInstalada() {
     return window.matchMedia('(display-mode: standalone)').matches ||
@@ -1358,13 +1355,25 @@ function estaInstalada() {
            window.navigator.standalone === true;
 }
 
+function esIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
 function actualizarBotonInstalar() {
+    // Si ya está instalada → ocultar
     if (estaInstalada()) {
         installAppBtn.style.display = 'none';
-    } else {
-        installAppBtn.style.display = 'block';
+        return;
     }
+    // En iOS siempre mostrar (con instrucciones manuales)
+    if (esIOS()) {
+        installAppBtn.style.display = 'block';
+        return;
+    }
+    // En el resto solo mostrar si el navegador permitió instalar
+    installAppBtn.style.display = esInstalable ? 'block' : 'none';
 }
+
 actualizarBotonInstalar();
 
 window.matchMedia('(display-mode: standalone)').addEventListener('change', actualizarBotonInstalar);
@@ -1532,6 +1541,14 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
+    esInstalable = true;
+    actualizarBotonInstalar();
+});
+
+window.addEventListener('appinstalled', () => {
+    esInstalable = false;
+    deferredPrompt = null;
+    installAppBtn.style.display = 'none';
 });
 
 installAppBtn.addEventListener('click', async () => {
@@ -1554,19 +1571,10 @@ installAppBtn.addEventListener('click', async () => {
         return;
     }
 
-    const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const esAndroid = /Android/.test(navigator.userAgent);
-
-    if (esIOS) {
+    if (esIOS()) {
         mostrarMensaje(
             'Instalar en iPhone/iPad',
             '1️⃣ Toca el botón Compartir (⬆️) en Safari\n2️⃣ Desliza y toca "Añadir a pantalla de inicio"\n3️⃣ Confirma con "Añadir"',
-            'info'
-        );
-    } else if (esAndroid) {
-        mostrarMensaje(
-            'Instalar en Android',
-            '1️⃣ Toca el menú (⋮) arriba a la derecha\n2️⃣ Toca "Instalar aplicación"\n3️⃣ Confirma',
             'info'
         );
     } else {
@@ -1576,11 +1584,6 @@ installAppBtn.addEventListener('click', async () => {
             'info'
         );
     }
-});
-
-window.addEventListener('appinstalled', () => {
-    installAppBtn.style.display = 'none';
-    deferredPrompt = null;
 });
 
 console.log('🚀 Index cargado');
