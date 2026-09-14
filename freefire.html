@@ -19,7 +19,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 
-/* 🎨 FONDO NEGRO (el video se ve encima) */
 body{
     background:#000;
     color:#fff;
@@ -30,7 +29,7 @@ body{
     position:relative;
 }
 
-/* 🎬 VIDEO DE FONDO BRILLANTE */
+/* 🎬 VIDEO DE FONDO - OPTIMIZADO PARA GPU */
 .video-fondo{
     position:fixed;
     top:0;
@@ -41,7 +40,11 @@ body{
     z-index:-2;
     pointer-events:none;
     opacity:1;
-    filter:brightness(1.15) contrast(1.05) saturate(1.1);
+    filter:brightness(1.15);
+    will-change:transform;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
 }
 .video-overlay{
     position:fixed;
@@ -52,6 +55,8 @@ body{
         rgba(10,14,26,0.6) 100%);
     z-index:-1;
     pointer-events:none;
+    will-change:transform;
+    transform:translateZ(0);
 }
 
 body::before{
@@ -68,11 +73,10 @@ body::after{
 }
 .barra-superior,.main,.whatsapp-float,.back-to-top{position:relative;z-index:1}
 
+/* ✅ SIN BLUR - fondo plano semitransparente */
 .barra-superior{
     position:fixed;top:0;left:0;right:0;z-index:999;
-    background:rgba(5,8,16,0.75);
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
+    background:rgba(5,8,16,0.85);
     border-bottom:1px solid transparent;
     border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;
     box-shadow:0 4px 20px rgba(0,0,0,0.4);
@@ -218,18 +222,16 @@ body::after{
 
 .main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
 
-/* ✅ TARJETAS TRANSPARENTES CON BLUR */
+/* ✅ SIN BLUR - tarjetas transparentes con color plano */
 .card-panel{
-    background:linear-gradient(135deg,rgba(20,30,55,0.6),rgba(10,14,26,0.75));
+    background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));
     border:1px solid rgba(212,175,55,0.25);
     border-radius:20px;
     padding:22px 18px 20px;
     margin-bottom:20px;
     position:relative;
     overflow:hidden;
-    box-shadow:0 15px 40px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.05);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
+    box-shadow:0 15px 40px rgba(0,0,0,0.35);
 }
 .panel-title{
     font-size:15px;font-weight:800;margin:0 0 16px;
@@ -238,11 +240,9 @@ body::after{
 }
 .form-input{
     width:100%;height:50px;border-radius:14px;
-    background:rgba(0,0,0,0.35);color:#fff;padding:12px 16px;
+    background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;
     border:1px solid rgba(255,255,255,0.18);font-size:16px;
-    position:relative;z-index:1;transition:all 0.3s;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
+    position:relative;z-index:1;transition:border-color 0.3s;
 }
 .form-input:focus{
     outline:none;border-color:var(--color-dorado);
@@ -259,12 +259,10 @@ body::after{
 
 .payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1}
 .pay-box{
-    background:rgba(0,0,0,0.35);
+    background:rgba(0,0,0,0.3);
     border:2px solid rgba(255,255,255,0.15);
     border-radius:16px;padding:12px;text-align:center;
     cursor:pointer;font-weight:700;transition:all 0.3s;font-size:14px;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
 }
 .pay-box.active{
     border-color:var(--color-dorado);
@@ -332,16 +330,18 @@ body::after{
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 
-/* ✅ PRODUCTOS TRANSPARENTES CON BLUR */
+/* ✅ SIN BLUR - producto transparente con GPU acelerada */
 .product-card{
-    background:linear-gradient(135deg,rgba(20,30,55,0.65),rgba(10,14,26,0.75));
+    background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.68));
     border:1px solid rgba(255,255,255,0.12);
     border-radius:18px;padding:16px;
     transition:transform 0.3s ease,box-shadow 0.3s ease;
     position:relative;overflow:hidden;
     box-shadow:0 8px 25px rgba(0,0,0,0.3);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
+    will-change:transform;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
 }
 .product-card::before{
     content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
@@ -352,7 +352,7 @@ body::after{
 }
 .product-card:hover::before{opacity:1}
 .product-card:hover{
-    transform:translateY(-6px);
+    transform:translateY(-6px) translateZ(0);
     box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.3);
 }
 .card-header{
@@ -364,8 +364,6 @@ body::after{
     background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.25));
     padding:10px;border-radius:12px;font-size:20px;
     border:1px solid rgba(212,175,55,0.4);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
 }
 .product-title{
     font-size:15px;font-weight:800;
@@ -462,7 +460,6 @@ body::after{
 .mensaje-overlay{
     display:none;position:fixed;top:0;left:0;right:0;bottom:0;
     background:rgba(0,0,0,0.85);
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
     z-index:9999;justify-content:center;align-items:center;padding:20px;
 }
 .mensaje-overlay.activo{display:flex;animation:fadeInOverlay 0.25s ease}
@@ -605,7 +602,7 @@ body::after{
     .mensaje-btn{font-size:13px;padding:12px 14px}
     .video-fondo{
         opacity:0.85;
-        filter:brightness(1.05) saturate(1);
+        filter:brightness(1.05);
     }
 }
 @media(max-width:400px){
