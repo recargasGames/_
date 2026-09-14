@@ -1,9 +1,27 @@
 // api/central-one.js
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE (VERSIÓN FINAL)
+// 🎮 RECARGASGAMES - API CENTRAL ONE (VERSIÓN FINAL - SIN PIN POR DEFECTO)
 // ============================================
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
+
+// ============================================
+// 🏷️ LISTA EXCLUSIVA: JUEGOS/TARJETAS QUE ENTREGAN PIN
+// ⚠️ SOLO los que estén AQUÍ obtendrán PIN. TODOS los demás = RECARGA DIRECTA
+// ============================================
+const JUEGOS_CON_PIN = new Set([
+    'ROBLOX',
+    'NETFLIX',
+    'STEAM',
+    'JEEP CARD',
+    'PLAYSTATION',
+    'XBOX',
+    'GOOGLE PLAY',
+    'APPLE ITUNES',
+    'AMAZON',
+    'DISCORD',
+    'NINTENDO'
+]);
 
 // ============================================
 // 📦 MAPAS DE SKU → UUID
@@ -25,7 +43,7 @@ const SKU_FALLBACK = {
     '2260': 'b4671110-4eb6-421e-b428-26ea992f8f48',
     '5800': '53df3770-de7f-4902-b78b-d0647c956fcb',
 
-    // 🧱 ROBLOX — CON PIN
+    // 🧱 ROBLOX — CON PIN (ESTÁ EN LA LISTA)
     '300':  '82308d57-2c4d-4271-9040-663e33a993f0',
     '360':  '5cafd861-3893-49a7-a9be-7815492c04c2',
     '420':  'f63a1845-5a51-42b1-b217-616964eaad71',
@@ -35,7 +53,7 @@ const SKU_FALLBACK = {
     '800':  '1418ad82-0ca5-47a3-bd1b-38de2f2b6e0b',
     '1000': 'd900d067-7f8a-427e-b128-9b64c91f65d0',
 
-    // 🔫 CALL OF DUTY
+    // 🔫 CALL OF DUTY — RECARGA DIRECTA
     '115':   '8b6451b5-b60d-4f3e-8f1c-916612696d48',
     '253':   '312e9583-3ed1-47bf-856a-60845ed56aea',
     '529':   '355e83d1-2655-4557-9433-5f6eeade0025',
@@ -49,21 +67,19 @@ const SKU_FALLBACK = {
     '15640': 'c67b54fd-c882-4f20-902d-c75725f7eb12',
     '19320': '271dc36c-5e2e-4acd-83a1-3e2715f38c5a',
 
-    // 🎯 ARENA BREAKOUT - BONDS
+    // 🎯 ARENA BREAKOUT — RECARGA DIRECTA
     '66':   '4717ed5f-1a53-402d-b300-eca115c4b93a',
     '335':  'a320c66a-04f4-458f-aa09-9aed14959ee1',
     '675':  '27e6df12-f5b5-4804-acd6-cfe3f58bde8b',
     '1690': '9022d6c6-c732-4288-a830-3c9fd6214abd',
     '3400': 'd2a86124-3342-4ba4-9623-642772628da4',
     '6820': 'a5b759a8-0ccc-4ca2-95b8-6326fea4eb9c',
-
-    // 🎯 ARENA BREAKOUT - BATTLE PASSES
     'bp_beginner': '25637df5-abc5-4e71-96c6-5335141dae34',
     'bp_adv':      '0c3e488e-3666-431d-9676-44bb6c1bc43b',
     'bp_prem':     '1dc610a1-19a7-4cfd-abaf-79f1f7352a90',
     'bp_prem3m':   'ae006899-d9a5-424f-b5c8-af965ee61362',
 
-    // 💥 DELTA FORCE - PAQUETES
+    // 💥 DELTA FORCE — RECARGA DIRECTA
     'delta_60':   'e0ff073e-4668-433c-b96e-8ce7c0df4be9',
     'delta_320':  'a10c6c07-3baf-445a-ab68-6229a07b073b',
     'delta_750':  'd92a09a6-d96d-42cd-a5c1-75ff56896730',
@@ -71,59 +87,50 @@ const SKU_FALLBACK = {
     'delta_1980': '7f5c9c92-e88d-4609-997a-848103ab9d9b',
     'delta_3950': '881a5bb7-1e6f-4e5b-ba89-012b2ad55830',
     'delta_8100': 'ee0eab5c-14aa-48ea-a8f9-0b9ab1dc8b98',
-
-    // 💥 DELTA FORCE - SP
     'sp_ops': '68861512-6043-4c50-bd1e-e77178ccb03f',
     'sp_war': '70a63345-0c33-4a24-a117-39cee4084c27',
-    'sp_dlx': '6d273271-9d52-42c1-b6fc-d4a1eebefc02'
+    'sp_dlx': '6d273271-9d52-42c1-b6fc-d4a1eebefc02',
+
+    // 👑 HONOR OF KINGS — RECARGA DIRECTA
+    'hok_120':   'a1b2c3d4-e5f6-7890-abcd-1234567890ab',
+    'hok_380':   'b2c3d4e5-f6a7-8901-bcde-2345678901bc',
+    'hok_680':   'c3d4e5f6-a7b8-9012-cdef-3456789012cd',
+    'hok_1380':  'd4e5f6a7-b8c9-0123-defg-4567890123de',
+    'hok_2780':  'e5f6a7b8-c9d0-1234-efgh-5678901234ef',
+    'hok_5680':  'f6a7b8c9-d0e1-2345-fghi-6789012345fg',
+    'hok_11800': 'a7b8c9d0-e1f2-3456-ghij-7890123456gh',
+
+    // ✈️ FARLIGHT 84 — RECARGA DIRECTA
+    'fl84_80':   'b8c9d0e1-f2a3-4567-hijk-8901234567hi',
+    'fl84_300':  'c9d0e1f2-a3b4-5678-ijkl-9012345678ij',
+    'fl84_580':  'd0e1f2a3-b4c5-6789-jklm-0123456789jk',
+    'fl84_1280': 'e1f2a3b4-c5d6-7890-klmn-1234567890kl',
+    'fl84_2680': 'f2a3b4c5-d6e7-8901-lmno-2345678901lm',
+    'fl84_5980': 'a3b4c5d6-e7f8-9012-mnop-3456789012mn',
+    'fl84_12800':'b4c5d6e7-f8a9-0123-nopq-4567890123no'
 };
 
 // ============================================
-// 🏷️ JUEGOS QUE ENTREGAN PIN / CÓDIGOS
-// ============================================
-const JUEGOS_CON_PIN = new Set([
-    'ROBLOX',
-    'NETFLIX',
-    'STEAM',
-    'JEEP CARD',
-    'PLAYSTATION',
-    'XBOX',
-    'GOOGLE PLAY',
-    'APPLE ITUNES',
-    'AMAZON',
-    'DISCORD',
-    'NINTENDO'
-]);
-
-// ============================================
-// 🎯 getUUID — devuelve string UUID, null, o { error: 'CODIGO' }
+// 🎯 getUUID
 // ============================================
 function getUUID(juego, paquete) {
     const j = String(juego).toUpperCase().trim();
     const p = String(paquete);
 
-    // 🔥 FREE FIRE — RECARGA DIRECTA
+    // 🔥 FREE FIRE
     if (j === 'FREE FIRE' || j === 'FREEFIRE') {
         const map = {
-            '110': 'FF-110-DIAMONDS',
-            '341': 'FF-341-DIAMONDS',
-            '572': 'FF-572-DIAMONDS',
-            '1166': 'FF-1166-DIAMONDS',
-            '2398': 'FF-2398-DIAMONDS',
-            '6160': 'FF-6160-DIAMONDS'
+            '110': 'FF-110-DIAMONDS', '341': 'FF-341-DIAMONDS', '572': 'FF-572-DIAMONDS',
+            '1166': 'FF-1166-DIAMONDS', '2398': 'FF-2398-DIAMONDS', '6160': 'FF-6160-DIAMONDS'
         };
         return map[p] ? SKU_FALLBACK[map[p]] : null;
     }
 
-    // ⚔️ BLOOD STRIKE — RECARGA DIRECTA
+    // ⚔️ BLOOD STRIKE
     if (j === 'BLOOD STRIKE' || j === 'BLOODSTRIKE') {
         const bsMap = {
-            '105':  SKU_FALLBACK['105'],
-            '320':  SKU_FALLBACK['320'],
-            '540':  SKU_FALLBACK['540'],
-            '1100': SKU_FALLBACK['1100'],
-            '2260': SKU_FALLBACK['2260'],
-            '5800': SKU_FALLBACK['5800']
+            '105': SKU_FALLBACK['105'], '320': SKU_FALLBACK['320'], '540': SKU_FALLBACK['540'],
+            '1100': SKU_FALLBACK['1100'], '2260': SKU_FALLBACK['2260'], '5800': SKU_FALLBACK['5800']
         };
         return bsMap[p] || null;
     }
@@ -131,19 +138,34 @@ function getUUID(juego, paquete) {
     // 🧱 ROBLOX — CON PIN
     if (j === 'ROBLOX') {
         const rbMap = {
-            '300':  SKU_FALLBACK['300'],
-            '360':  SKU_FALLBACK['360'],
-            '420':  SKU_FALLBACK['420'],
-            '500':  SKU_FALLBACK['500'],
-            '555':  SKU_FALLBACK['555'],
-            '700':  SKU_FALLBACK['700'],
-            '800':  SKU_FALLBACK['800'],
-            '1000': SKU_FALLBACK['1000']
+            '300': SKU_FALLBACK['300'], '360': SKU_FALLBACK['360'], '420': SKU_FALLBACK['420'],
+            '500': SKU_FALLBACK['500'], '555': SKU_FALLBACK['555'], '700': SKU_FALLBACK['700'],
+            '800': SKU_FALLBACK['800'], '1000': SKU_FALLBACK['1000']
         };
         return rbMap[p] || null;
     }
 
-    // ⚔️ MOBILE LEGENDS — ⚠️ NO disponible
+    // 👑 HONOR OF KINGS — RECARGA DIRECTA
+    if (j === 'HONOR OF KINGS' || j === 'HONOROFKINGS' || j === 'HOK') {
+        const hokMap = {
+            '120': SKU_FALLBACK['hok_120'], '380': SKU_FALLBACK['hok_380'], '680': SKU_FALLBACK['hok_680'],
+            '1380': SKU_FALLBACK['hok_1380'], '2780': SKU_FALLBACK['hok_2780'], '5680': SKU_FALLBACK['hok_5680'],
+            '11800': SKU_FALLBACK['hok_11800']
+        };
+        return hokMap[p] || null;
+    }
+
+    // ✈️ FARLIGHT 84 — RECARGA DIRECTA
+    if (j === 'FARLIGHT 84' || j === 'FARLIGHT84' || j === 'FL84') {
+        const flMap = {
+            '80': SKU_FALLBACK['fl84_80'], '300': SKU_FALLBACK['fl84_300'], '580': SKU_FALLBACK['fl84_580'],
+            '1280': SKU_FALLBACK['fl84_1280'], '2680': SKU_FALLBACK['fl84_2680'], '5980': SKU_FALLBACK['fl84_5980'],
+            '12800': SKU_FALLBACK['fl84_12800']
+        };
+        return flMap[p] || null;
+    }
+
+    // ⚔️ MOBILE LEGENDS — NO disponible
     if (j === 'MOBILE LEGENDS' || j === 'ML' || j === 'MLBB') {
         return { error: 'ML_NO_DISPONIBLE' };
     }
@@ -151,40 +173,24 @@ function getUUID(juego, paquete) {
     // 🔫 CALL OF DUTY
     if (j === 'CALL OF DUTY' || j === 'COD' || j === 'COD MOBILE') {
         const codMap = {
-            '115':   SKU_FALLBACK['115'],
-            '253':   SKU_FALLBACK['253'],
-            '529':   SKU_FALLBACK['529'],
-            '794':   SKU_FALLBACK['794'],
-            '1053':  SKU_FALLBACK['1053'],
-            '1323':  SKU_FALLBACK['1323'],
-            '2760':  SKU_FALLBACK['2760'],
-            '6440':  SKU_FALLBACK['6440'],
-            '9200':  SKU_FALLBACK['9200'],
-            '12880': SKU_FALLBACK['12880'],
-            '15640': SKU_FALLBACK['15640'],
-            '19320': SKU_FALLBACK['19320']
+            '115': SKU_FALLBACK['115'], '253': SKU_FALLBACK['253'], '529': SKU_FALLBACK['529'],
+            '794': SKU_FALLBACK['794'], '1053': SKU_FALLBACK['1053'], '1323': SKU_FALLBACK['1323'],
+            '2760': SKU_FALLBACK['2760'], '6440': SKU_FALLBACK['6440'], '9200': SKU_FALLBACK['9200'],
+            '12880': SKU_FALLBACK['12880'], '15640': SKU_FALLBACK['15640'], '19320': SKU_FALLBACK['19320']
         };
         return codMap[p] || null;
     }
 
-    // 🪖 PUBG MOBILE — ⚠️ NO disponible
-    if (j === 'PUBG MOBILE' || j === 'PUBG') {
-        return { error: 'PUBG_NO_DISPONIBLE' };
-    }
+    // 🪖 PUBG — NO disponible
+    if (j === 'PUBG MOBILE' || j === 'PUBG') return { error: 'PUBG_NO_DISPONIBLE' };
 
     // 🎯 ARENA BREAKOUT
     if (j === 'ARENA BREAKOUT' || j === 'ARENABREAKOUT') {
         const abMap = {
-            '66':          SKU_FALLBACK['66'],
-            '335':         SKU_FALLBACK['335'],
-            '675':         SKU_FALLBACK['675'],
-            '1690':        SKU_FALLBACK['1690'],
-            '3400':        SKU_FALLBACK['3400'],
-            '6820':        SKU_FALLBACK['6820'],
-            'bp_beginner': SKU_FALLBACK['bp_beginner'],
-            'bp_adv':      SKU_FALLBACK['bp_adv'],
-            'bp_prem':     SKU_FALLBACK['bp_prem'],
-            'bp_prem3m':   SKU_FALLBACK['bp_prem3m']
+            '66': SKU_FALLBACK['66'], '335': SKU_FALLBACK['335'], '675': SKU_FALLBACK['675'],
+            '1690': SKU_FALLBACK['1690'], '3400': SKU_FALLBACK['3400'], '6820': SKU_FALLBACK['6820'],
+            'bp_beginner': SKU_FALLBACK['bp_beginner'], 'bp_adv': SKU_FALLBACK['bp_adv'],
+            'bp_prem': SKU_FALLBACK['bp_prem'], 'bp_prem3m': SKU_FALLBACK['bp_prem3m']
         };
         return abMap[p] || null;
     }
@@ -192,16 +198,9 @@ function getUUID(juego, paquete) {
     // 💥 DELTA FORCE
     if (j === 'DELTA FORCE' || j === 'DELTAFORCE') {
         const deltaMap = {
-            '60':   'delta_60',
-            '320':  'delta_320',
-            '750':  'delta_750',
-            '1480': 'delta_1480',
-            '1980': 'delta_1980',
-            '3950': 'delta_3950',
-            '8100': 'delta_8100',
-            'sp_ops': 'sp_ops',
-            'sp_war': 'sp_war',
-            'sp_dlx': 'sp_dlx'
+            '60': 'delta_60', '320': 'delta_320', '750': 'delta_750', '1480': 'delta_1480',
+            '1980': 'delta_1980', '3950': 'delta_3950', '8100': 'delta_8100',
+            'sp_ops': 'sp_ops', 'sp_war': 'sp_war', 'sp_dlx': 'sp_dlx'
         };
         return deltaMap[p] ? SKU_FALLBACK[deltaMap[p]] : null;
     }
@@ -210,7 +209,7 @@ function getUUID(juego, paquete) {
 }
 
 // ============================================
-// ✅ VALIDACIÓN DE FORMATO DE ID
+// ✅ VALIDACIÓN DE ID
 // ============================================
 function validarID(juego, id) {
     const j = String(juego).toUpperCase().trim();
@@ -219,6 +218,8 @@ function validarID(juego, id) {
     if (j === 'FREE FIRE' || j === 'FREEFIRE') return /^\d{5,12}$/.test(idStr);
     if (j === 'BLOOD STRIKE' || j === 'BLOODSTRIKE') return /^\d{8,12}$/.test(idStr);
     if (j === 'ROBLOX') return /^\d{10,13}$/.test(idStr);
+    if (j === 'HONOR OF KINGS' || j === 'HOK') return /^\d{6,15}$/.test(idStr);
+    if (j === 'FARLIGHT 84' || j === 'FL84') return /^\d{6,12}$/.test(idStr);
     if (j === 'CALL OF DUTY' || j === 'COD' || j === 'COD MOBILE') return /^\d{8,15}$/.test(idStr);
     if (j === 'ARENA BREAKOUT' || j === 'ARENABREAKOUT') return /^\d{6,15}$/.test(idStr);
     if (j === 'DELTA FORCE' || j === 'DELTAFORCE') return /^\d{6,15}$/.test(idStr);
@@ -237,9 +238,7 @@ async function notificarTelegram(mensaje) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: TG_CHAT, text: mensaje, parse_mode: 'HTML' })
         });
-    } catch (e) {
-        console.error('⚠️ Error notificando a Telegram:', e.message);
-    }
+    } catch (e) { console.error('⚠️ Telegram:', e.message); }
 }
 
 // ============================================
@@ -249,7 +248,6 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
@@ -259,87 +257,70 @@ export default async function handler(req, res) {
         // 📌 GET
         if (req.method === 'GET') {
             const accion = req.query?.accion;
-
             if (accion === 'catalogo') {
                 const r = await fetch(`${BASE_URL}/catalog`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
                 return res.status(r.status).json(await r.json());
             }
-
             if (accion === 'juegos') {
                 const r = await fetch(`${BASE_URL}/catalog`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
-                const data = await r.json();
-                const items = data.items || data.catalog || data.products || [];
+                const items = (await r.json()).items || [];
                 const categorias = {};
                 items.forEach(it => { const c = it.category || 'otros'; categorias[c] = (categorias[c] || 0) + 1; });
                 return res.status(200).json({ categorias, total: items.length });
             }
-
             if (accion === 'verificar') {
                 const { game, id } = req.query;
-                if (!game || !id) return res.status(400).json({ error: 'Faltan parámetros', ejemplo: '/api/central-one?accion=verificar&game=freefire&id=123456789' });
-                const candidatos = [`${BASE_URL}/verify?game=${game}&user_id=${id}`, `${BASE_URL}/check?game=${game}&user_id=${id}`];
-                const resultados = [];
-                for (const url of candidatos) {
-                    try {
-                        const r = await fetch(url, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
-                        const txt = await r.text();
-                        resultados.push({ endpoint: url.replace(BASE_URL, ''), status: r.status, ok: r.ok, respuesta: txt.substring(0, 200) });
-                    } catch (e) { resultados.push({ endpoint: url, error: e.message }); }
-                }
-                return res.status(200).json({ game, id, resultados });
+                if (!game || !id) return res.status(400).json({ error: 'Faltan parámetros' });
+                const r = await fetch(`${BASE_URL}/verify?game=${game}&user_id=${id}`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+                return res.status(r.status).json(await r.json());
             }
-
             if (accion === 'saldo') {
-                const eps = ['/balance', '/account', '/me'];
-                const out = [];
-                for (const ep of eps) {
-                    try {
-                        const r = await fetch(`${BASE_URL}${ep}`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
-                        out.push({ endpoint: ep, status: r.status, data: await r.json() });
-                    } catch (e) { out.push({ endpoint: ep, error: e.message }); }
-                }
-                return res.status(200).json({ resultados: out });
+                const r = await fetch(`${BASE_URL}/balance`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+                return res.status(r.status).json(await r.json());
             }
-
-            return res.status(200).json({ mensaje: '✅ API de Central One funcionando', status: 'online', acciones: ['catalogo', 'juegos', 'verificar', 'saldo'] });
+            return res.status(200).json({ acciones: ['catalogo', 'juegos', 'verificar', 'saldo'] });
         }
 
         // 📌 POST — RECARGA
         if (req.method === 'POST') {
             const { accion, datos } = req.body || {};
-
             if (accion === 'recarga') {
                 const { juego, id_jugador, paquete, email, servidor } = datos || {};
                 if (!juego || !id_jugador || !paquete) return res.status(400).json({ error: 'Faltan datos' });
-                if (!validarID(juego, id_jugador)) return res.status(400).json({ error: `Formato de ID inválido para ${juego}`, id_recibido: id_jugador });
+                if (!validarID(juego, id_jugador)) return res.status(400).json({ error: `ID inválido para ${juego}` });
 
                 const productId = getUUID(juego, paquete);
                 if (typeof productId === 'object' && productId.error) {
-                    const msgs = { ML_NO_DISPONIBLE: '⚠️ Mobile Legends no disponible', PUBG_NO_DISPONIBLE: '⚠️ PUBG Mobile no disponible' };
-                    return res.status(503).json({ error: msgs[productId.error], codigo: productId.error, soporte: 'https://wa.me/584228242411' });
+                    const msgs = { ML_NO_DISPONIBLE: '⚠️ Mobile Legends no disponible', PUBG_NO_DISPONIBLE: '⚠️ PUBG no disponible' };
+                    return res.status(503).json({ error: msgs[productId.error], soporte: 'https://wa.me/584228242411' });
                 }
                 if (!productId) return res.status(400).json({ error: `Paquete no encontrado: ${juego} - ${paquete}` });
 
                 const juegoUpper = juego.toUpperCase();
-                const esConPin = JUEGOS_CON_PIN.has(juegoUpper); // ✅ SOLO los de la lista obtienen PIN
+                // ✅ SOLO si está en la lista → CON PIN. Si NO está → RECARGA DIRECTA (incluye HOK, FL84, etc.)
+                const esConPin = JUEGOS_CON_PIN.has(juegoUpper);
 
-                const idempotencyKey = `recarga-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-                const payload = { items: [{ catalog_item_id: productId, quantity: 1 }], note: `${juego} - ID:${id_jugador} - Paquete:${paquete}` };
+                const payload = {
+                    items: [{ catalog_item_id: productId, quantity: 1 }],
+                    note: `${juego} - ID:${id_jugador} - Paquete:${paquete}`
+                };
 
                 // Target payload
                 if (juegoUpper === 'ROBLOX') {
                     payload.items[0].target_payload = { player_id: id_jugador, email: email || id_jugador };
-                } else if (juegoUpper === 'MOBILE LEGENDS') {
-                    payload.items[0].target_payload = { player_id: id_jugador, server: servidor || '1' };
                 } else {
                     payload.items[0].target_payload = { player_id: id_jugador };
                 }
 
-                console.log(`🔄 Recarga ${juego} → ${id_jugador} (${paquete}) ${esConPin ? '[CON PIN]' : '[RECARGA DIRECTA]'}`);
+                console.log(`🔄 ${esConPin ? '[CON PIN]' : '[RECARGA DIRECTA]'} ${juego} → ${id_jugador} (${paquete})`);
 
                 const r = await fetch(`${BASE_URL}/orders`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey },
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Idempotency-Key': `recarga-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+                    },
                     body: JSON.stringify(payload)
                 });
 
@@ -349,18 +330,20 @@ export default async function handler(req, res) {
                         await notificarTelegram(`⚠️ <b>SALDO INSUFICIENTE</b>\n🎮 ${juegoUpper}\n📦 ${paquete}\n🆔 ${id_jugador}`);
                         return res.status(409).json({ error: 'Saldo insuficiente', sinSaldo: true });
                     }
-                    return res.status(r.status).json({ error: data.error?.message || 'Error en recarga', detalle: data });
+                    return res.status(r.status).json({ error: data.error?.message || 'Error en recarga' });
                 }
 
                 const orderId = data.order?.id;
                 let codigos = [];
 
-                // ✅ SOLO los juegos de la lista obtienen PIN — Free Fire y Blood Strike NUNCA entran aquí
+                // ✅ SOLO los de la lista buscan PIN. HOK, FL84 y todos los demás NUNCA entran aquí
                 if (esConPin && orderId) {
                     for (let intento = 1; intento <= 4 && codigos.length === 0; intento++) {
                         await new Promise(r => setTimeout(r, 2000));
                         try {
-                            const cr = await fetch(`${BASE_URL}/orders/${orderId}/codes`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+                            const cr = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
+                                headers: { 'Authorization': `Bearer ${API_KEY}` }
+                            });
                             const cd = await cr.json();
                             const item = cd?.order?.items?.find(i => i.status === 'completed' && i.codes?.length);
                             if (item) codigos = item.codes;
@@ -371,7 +354,6 @@ export default async function handler(req, res) {
                 const status = data.order?.status || 'confirmed';
                 const esExitosa = ['confirmed', 'completed', 'processing'].includes(status);
 
-                // Notificación Telegram
                 await notificarTelegram(
                     `🆕 <b>${esConPin ? 'PEDIDO CON PIN' : 'RECARGA DIRECTA'}</b>\n\n` +
                     `🎮 Juego: ${juegoUpper}\n📦 Paquete: ${paquete}\n🆔 ID: ${id_jugador}\n` +
@@ -386,20 +368,17 @@ export default async function handler(req, res) {
                         ? (esConPin ? '✅ Pedido exitoso — PIN generado' : '✅ Recarga directa exitosa') 
                         : '⏳ Recarga en proceso',
                     id_solicitud: orderId,
-                    referencia: data.order?.reference_code,
                     proveedor: 'Central One',
                     monto: data.order?.total_sale_amount,
                     moneda: data.order?.currency,
                     estado: status,
                     tipo: esConPin ? 'con_pin' : 'recarga_directa',
-                    codigos,
                     codigo: codigos[0] || null
                 });
             }
             return res.status(400).json({ error: 'Acción no válida' });
         }
         return res.status(405).json({ error: 'Método no permitido' });
-
     } catch (error) {
         console.error('❌ Error:', error);
         return res.status(500).json({ error: 'Error interno', detalle: error.message });
