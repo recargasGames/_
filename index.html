@@ -1161,7 +1161,7 @@ body::after {
         <div id="loginMessage" class="message"></div>
         <div class="auth-links">
             <p>¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></p>
-            <p><a href="#" id="resetPasswordLink">¿Olvidaste tu contraseña?</a></p>
+            <p><a href="recuperar.html">¿Olvidaste tu contraseña?</a></p>
         </div>
     </div>
 </div>
@@ -1226,8 +1226,7 @@ import { auth } from './firebase-config.js';
 import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
-    signOut,
-    sendPasswordResetEmail
+    signOut
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
 let _mensajeCallback = null;
@@ -1360,17 +1359,14 @@ function esIOS() {
 }
 
 function actualizarBotonInstalar() {
-    // Si ya está instalada → ocultar
     if (estaInstalada()) {
         installAppBtn.style.display = 'none';
         return;
     }
-    // En iOS siempre mostrar (con instrucciones manuales)
     if (esIOS()) {
         installAppBtn.style.display = 'block';
         return;
     }
-    // En el resto solo mostrar si el navegador permitió instalar
     installAppBtn.style.display = esInstalable ? 'block' : 'none';
 }
 
@@ -1475,21 +1471,6 @@ loginForm.addEventListener('submit', async (e) => {
         loginMessage.style.display = 'block';
         loginBtn.disabled = false;
         loginBtn.textContent = 'Ingresar';
-    }
-});
-
-document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
-    e.preventDefault();
-    const email = loginEmail.value.trim();
-    if (!email) {
-        mostrarMensaje('Correo requerido', 'Ingresa tu correo electrónico para restablecer la contraseña.', 'advertencia');
-        return;
-    }
-    try {
-        await sendPasswordResetEmail(auth, email);
-        mostrarMensaje('Correo enviado', 'Revisa tu bandeja de entrada para restablecer tu contraseña.', 'exito');
-    } catch (error) {
-        mostrarMensaje('Error', 'No se pudo enviar el correo: ' + error.message, 'error');
     }
 });
 
