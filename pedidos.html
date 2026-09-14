@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Pedidos - Recargas Games</title>
-    
+    <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -13,24 +14,46 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0b1220;
             color: white;
             min-height: 100vh;
             padding-top: 80px;
-            background-image: url('fondo.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+        }
+
+        /* 🎬 VIDEO DE FONDO */
+        .video-fondo{
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            object-fit:cover;
+            z-index:-2;
+            pointer-events:none;
+            opacity:1;
+            filter:brightness(1.15);
+            will-change:transform;
+            transform:translateZ(0);
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+        }
+        .video-overlay{
+            position:fixed;
+            inset:0;
+            background:linear-gradient(180deg,
+                rgba(10,14,26,0.15) 0%,
+                rgba(10,14,26,0.35) 60%,
+                rgba(10,14,26,0.6) 100%);
+            z-index:-1;
+            pointer-events:none;
+            transform:translateZ(0);
         }
 
         /* ====== BARRA SUPERIOR ====== */
         .topbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-            background: rgba(11, 18, 32, 0.95);
+            background: rgba(11, 18, 32, 0.9);
             border-bottom: 2px solid #3b82f6;
             padding: 12px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(10px);
+            transform: translateZ(0);
         }
         .topbar .logo { display: flex; align-items: center; gap: 10px; }
         .topbar .logo img { height: 45px; border-radius: 10px; }
@@ -43,7 +66,7 @@
         }
         .topbar .btn-back:hover { background: rgba(255,255,255,0.05); color: white; }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; position:relative; z-index:1; }
 
         .page-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -61,14 +84,14 @@
         .filtros { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .filtros input {
             flex: 1; min-width: 200px; padding: 10px 16px;
-            border-radius: 10px; background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px; background: rgba(15, 23, 42, 0.7);
             border: 1px solid rgba(51, 65, 85, 0.5);
             color: white; font-size: 14px;
         }
         .filtros input:focus { outline: none; border-color: #3b82f6; }
         .filtros select {
             padding: 10px 16px; border-radius: 10px;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.7);
             border: 1px solid rgba(51, 65, 85, 0.5);
             color: white; font-size: 14px; cursor: pointer;
         }
@@ -79,12 +102,13 @@
         .pedidos-list { display: flex; flex-direction: column; gap: 12px; }
 
         .pedido-card {
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(17, 24, 39, 0.7);
             border-radius: 16px;
             border: 1px solid rgba(255,255,255,0.06);
             padding: 18px 22px;
             transition: all 0.3s;
+            will-change:transform;
+            transform:translateZ(0);
         }
         .pedido-card:hover { border-color: #3b82f6; }
 
@@ -241,10 +265,19 @@
             .pedido-card .top .info .id { font-size: 15px; }
             .pedido-card .top .detalle .precio { font-size: 17px; }
             .pin-box .pin-value { font-size: 20px; }
+            .video-fondo {
+                opacity: 0.85;
+                filter: brightness(1.05);
+            }
         }
     </style>
 </head>
 <body>
+
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
 
 <header class="topbar">
     <div class="logo">
@@ -282,9 +315,6 @@
 </div>
 
 <script>
-    // ==============================================
-    // 🔥 FIREBASE - CONFIGURACIÓN
-    // ==============================================
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
         authDomain: "free-52119.firebaseapp.com",
@@ -312,9 +342,6 @@
         cargarPedidos();
     });
 
-    // ==============================================
-    // 📋 CARGAR PEDIDOS
-    // ==============================================
     function cargarPedidos() {
         const pedidosRef = db.ref('pedidos');
         
@@ -347,9 +374,6 @@
         });
     }
 
-    // ==============================================
-    // 🔍 FILTRAR PEDIDOS
-    // ==============================================
     function filtrarPedidos() {
         const busqueda = document.getElementById('buscarInput').value.toLowerCase().trim();
         const estadoFiltro = document.getElementById('filtroEstado').value;
@@ -377,9 +401,6 @@
         mostrarPedidos(filtrados);
     }
 
-    // ==============================================
-    // 🖥️ MOSTRAR PEDIDOS
-    // ==============================================
     function mostrarPedidos(pedidos) {
         const contenedor = document.getElementById('listaPedidos');
 
@@ -435,9 +456,6 @@
             if (producto) tagsHtml += ` <span class="tag">📦 ${producto}</span>`;
             if (pedido.paquete) tagsHtml += ` <span class="tag">#${pedido.paquete}</span>`;
 
-            // ==============================================
-            // 🔑 PIN DE ROBLOX
-            // ==============================================
             let pinHtml = '';
             if (pedido.pin || (pedido.codigos && pedido.codigos.length > 0)) {
                 const pinValue = pedido.pin || pedido.codigos[0];
@@ -450,9 +468,6 @@
                 `;
             }
 
-            // ==============================================
-            // 📱 MANUAL (Netflix, Disney, Tarjetas)
-            // ==============================================
             let manualHtml = '';
             const esManual = (pedido.metodo_pago === 'MANUAL') || 
                              (juego.toUpperCase().includes('NETFLIX')) ||
@@ -497,9 +512,6 @@
         contenedor.innerHTML = html;
     }
 
-    // ==============================================
-    // 📋 COPIAR PIN
-    // ==============================================
     function copiarPIN(pin) {
         navigator.clipboard.writeText(pin).then(() => {
             alert('✅ PIN copiado al portapapeles');
