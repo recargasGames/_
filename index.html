@@ -21,6 +21,7 @@
 
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
+<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.recargasgames.shop/">
@@ -55,7 +56,6 @@
 html { scroll-behavior: smooth; }
 
 body {
-    background: radial-gradient(ellipse at top, #0f1629 0%, #050810 60%, #000000 100%);
     color: white;
     font-family: 'Segoe UI', sans-serif;
     padding-top: 110px;
@@ -64,6 +64,37 @@ body {
     position: relative;
 }
 
+/* 🎬 VIDEO DE FONDO */
+.video-fondo{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:-2;
+    pointer-events:none;
+    opacity:1;
+    filter:brightness(1.15);
+    will-change:transform;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+}
+.video-overlay{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(180deg,
+        rgba(10,14,26,0.15) 0%,
+        rgba(10,14,26,0.35) 60%,
+        rgba(10,14,26,0.6) 100%);
+    z-index:-1;
+    pointer-events:none;
+    will-change:transform;
+    transform:translateZ(0);
+}
+
+/* ✨ PARTÍCULAS DORADAS */
 .particulas-fondo {
     position: fixed;
     top: 0; left: 0;
@@ -129,13 +160,12 @@ body::after {
     z-index: 1;
 }
 
+/* ✅ SIN BLUR */
 .barra-superior {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 999;
-    background: rgba(5, 8, 16, 0.92);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(5, 8, 16, 0.85);
     border-bottom: 1px solid rgba(212, 175, 55, 0.2);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     transform: translateZ(0);
@@ -400,11 +430,12 @@ body::after {
     margin: 0 auto;
 }
 
+/* ✅ SIN BLUR */
 .welcome-text {
     text-align: center;
     margin: 30px 0 40px;
     padding: 30px 20px;
-    background: linear-gradient(135deg, rgba(20, 30, 55, 0.75), rgba(10, 14, 26, 0.92));
+    background: linear-gradient(135deg, rgba(20, 30, 55, 0.55), rgba(10, 14, 26, 0.7));
     border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: 24px;
     position: relative;
@@ -466,8 +497,9 @@ body::after {
     margin-top: 20px;
 }
 
+/* ✅ SIN BLUR - CON GPU ACELERADA */
 .game-link {
-    background: linear-gradient(135deg, rgba(20, 30, 55, 0.75), rgba(10, 14, 26, 0.92));
+    background: linear-gradient(135deg, rgba(20, 30, 55, 0.6), rgba(10, 14, 26, 0.75));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     padding: 0;
@@ -478,6 +510,8 @@ body::after {
     position: relative;
     will-change: transform;
     transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
@@ -502,7 +536,7 @@ body::after {
 }
 
 .game-link:hover {
-    transform: translateY(-6px) scale(1.02);
+    transform: translateY(-6px) scale(1.02) translateZ(0);
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(212, 175, 55, 0.3);
 }
 
@@ -516,12 +550,12 @@ body::after {
 }
 .game-link:hover .game-img { transform: scale(1.06); }
 
+/* ✅ SIN BLUR PESADO */
 .modal-overlay {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(6px);
     z-index: 2000;
     justify-content: center;
     align-items: center;
@@ -652,16 +686,12 @@ body::after {
     border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-/* ============================================
-   🎨 MODAL PERSONALIZADO DE MENSAJES
-   ============================================ */
+/* 🎨 MODAL MENSAJES */
 .mensaje-overlay {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     z-index: 9999;
     justify-content: center;
     align-items: center;
@@ -993,6 +1023,10 @@ body::after {
     .mensaje-titulo { font-size: 17px; }
     .mensaje-texto { font-size: 14px; }
     .mensaje-btn { font-size: 13px; padding: 12px 14px; }
+    .video-fondo {
+        opacity: 0.85;
+        filter: brightness(1.05);
+    }
 }
 
 @media (max-width: 400px) {
@@ -1006,6 +1040,11 @@ body::after {
 </head>
 
 <body onclick="cerrarTodosLosMenus(event)">
+
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
 
 <div class="particulas-fondo">
     <div class="particula-dorada"></div>
@@ -1174,9 +1213,6 @@ body::after {
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
 <a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">💬</a>
 
-<!-- ============================================
-     🎨 MODAL PERSONALIZADO DE MENSAJES
-     ============================================ -->
 <div class="mensaje-overlay" id="mensajeOverlay">
     <div class="mensaje-box" id="mensajeBox">
         <button class="mensaje-cerrar" id="mensajeCerrar" onclick="cerrarMensajePersonalizado()">✕</button>
@@ -1198,9 +1234,6 @@ import {
     sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-// ==============================================
-// 🎨 SISTEMA DE MENSAJES PERSONALIZADOS
-// ==============================================
 let _mensajeCallback = null;
 let _mensajeCerrado = false;
 
@@ -1287,21 +1320,16 @@ function cerrarMensajePersonalizado() {
     }
 }
 
-// Cerrar al tocar el fondo
 document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
     if (e.target.id === 'mensajeOverlay') {
         cerrarMensajePersonalizado();
     }
 });
 
-// Exponer globalmente
 window.mostrarMensaje = mostrarMensaje;
 window.mostrarConfirmacion = mostrarConfirmacion;
 window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
 
-// ==============================================
-// 🔥 FIREBASE
-// ==============================================
 const perfilContainer = document.getElementById('perfilContainer');
 const menuPerfil = document.getElementById('menuPerfil');
 const perfilNombre = document.getElementById('perfilNombre');
@@ -1493,9 +1521,6 @@ window.addEventListener('scroll', () => {
     document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
 }, { passive: true });
 
-// ==============================================
-// 📱 REGISTRAR SERVICE WORKER
-// ==============================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
@@ -1504,9 +1529,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// ==============================================
-// 📱 INSTALACIÓN PWA
-// ==============================================
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
