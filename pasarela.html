@@ -143,10 +143,9 @@ body::after{
 }
 .texto-secundario{
     font-size:16px;color:#cbd5e1;line-height:1.6;
-    max-width:340px;margin:0 auto;
+    max-width:340px;margin:0 auto;white-space:pre-line;
 }
 
-/* ✅ SIN BLUR - resumen */
 .resumen-box{
     background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
     border:1px solid var(--color-borde);
@@ -168,7 +167,6 @@ body::after{
 .resumen-valor.verde{color:var(--color-dorado-claro)}
 .resumen-valor.tachado{color:#6b7280;text-decoration:line-through;font-weight:500}
 
-/* ✅ SIN BLUR - datos de pago */
 .datos-pago-box{
     background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
     border:1px solid var(--color-borde);
@@ -254,9 +252,7 @@ body::after{
     text-transform:uppercase;letter-spacing:0.5px;
     text-align:left;
 }
-.cupon-input-wrap{
-    display:flex;gap:8px;
-}
+.cupon-input-wrap{display:flex;gap:8px;}
 .cupon-input{
     flex:1;
     padding:12px 14px;
@@ -271,10 +267,7 @@ body::after{
     font-family:inherit;
 }
 .cupon-input::placeholder{
-    color:#6b7280;
-    text-transform:none;
-    letter-spacing:0;
-    font-weight:400;
+    color:#6b7280;text-transform:none;letter-spacing:0;font-weight:400;
 }
 .cupon-input:focus{
     outline:none;
@@ -285,29 +278,16 @@ body::after{
     padding:12px 20px;
     background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
     background-size:200% 200%;
-    color:#0a0e1a;
-    border:none;border-radius:12px;
+    color:#0a0e1a;border:none;border-radius:12px;
     font-size:14px;font-weight:800;
     cursor:pointer;transition:.3s;
     text-transform:uppercase;letter-spacing:0.5px;
     box-shadow:0 4px 15px rgba(212,175,55,0.3);
-    font-family:inherit;
-    white-space:nowrap;
+    font-family:inherit;white-space:nowrap;
 }
-.cupon-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 25px rgba(212,175,55,0.5);
-}
-.cupon-btn:disabled{
-    opacity:0.5;cursor:not-allowed;transform:none;
-}
-.cupon-msg{
-    margin-top:10px;
-    font-size:13px;
-    font-weight:700;
-    min-height:18px;
-    text-align:left;
-}
+.cupon-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.5);}
+.cupon-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.cupon-msg{margin-top:10px;font-size:13px;font-weight:700;min-height:18px;text-align:left;}
 .cupon-msg.ok{color:#4ade80;}
 .cupon-msg.err{color:#f87171;}
 .cupon-aplicado{
@@ -327,10 +307,7 @@ body::after{
     box-shadow:0 4px 15px rgba(212,175,55,0.4);
     font-family:inherit;
 }
-.btn-confirmar:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 30px rgba(212,175,55,0.6);
-}
+.btn-confirmar:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,175,55,0.6);}
 .btn-confirmar:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 
 .volver-btn{
@@ -630,8 +607,8 @@ body::after{
 
     <div id="pasoRecargaExitosa" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
-        <div class="texto-principal">¡Recarga Exitosa!</div>
-        <div class="texto-secundario">Tu recarga se procesó correctamente.</div>
+        <div class="texto-principal" id="tituloExito">¡Recarga Exitosa!</div>
+        <div class="texto-secundario" id="subtituloExito">Tu recarga se procesó correctamente.</div>
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">📋 Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">📦 Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
@@ -715,6 +692,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 const refReferencias = db.ref("referencias_usadas");
+const refReferenciasFalsas = db.ref("referencias_falsas");
 const refPedidos = db.ref("pedidos");
 const refCupones = db.ref("cupones_usados");
 
@@ -873,6 +851,72 @@ function copiarTodosLosDatos(boton){
 }
 
 // ==============================================
+// 📢 TELEGRAM
+// ==============================================
+function enviarTelegram(mensaje) {
+    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: mensaje,
+            parse_mode: 'HTML'
+        })
+    }).catch(err => console.log("Error Telegram:", err));
+}
+
+// 🚨 Helper de notificación al admin
+function notificarAdmin(tipo, datos = {}) {
+    const emojis = {
+        exito: '🎉',
+        falso: '⚠️',
+        duplicado: '🚨',
+        cupon_usado: '🎁',
+        error: '❌',
+        atencion: '🚨'
+    };
+    
+    let mensaje = `${emojis[tipo] || 'ℹ️'} <b>${tipo.toUpperCase()}</b>\n\n`;
+    mensaje += `🎮 Juego: ${juego}\n`;
+    mensaje += `🆔 ID: ${idJugador}\n`;
+    mensaje += `👤 Nombre: ${nombreJugador}\n`;
+    mensaje += `📦 Producto: ${producto}\n`;
+    mensaje += `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n`;
+    if (datos.referencia) mensaje += `🔢 Referencia: ${datos.referencia}\n`;
+    if (datos.metodo) mensaje += `💳 Método: ${datos.metodo}\n`;
+    if (datos.mensaje_extra) mensaje += `\n${datos.mensaje_extra}\n`;
+    mensaje += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
+    
+    enviarTelegram(mensaje);
+}
+
+// ==============================================
+// 🚨 GUARDAR REFERENCIA FALSA
+// ==============================================
+async function guardarReferenciaFalsa(referencia, motivo) {
+    try {
+        const nueva = refReferenciasFalsas.push();
+        await nueva.set({
+            fecha: new Date().toISOString(),
+            fecha_legible: new Date().toLocaleString('es-VE'),
+            juego: juego,
+            id_jugador: idJugador,
+            nombre_jugador: nombreJugador,
+            producto: producto,
+            monto_usd: precioUsdFinal,
+            monto_bs: precioBsFinal,
+            referencia: referencia,
+            metodo_pago: metodoPago,
+            motivo: motivo || 'No encontrada en Pábilo',
+            user_agent: navigator.userAgent
+        });
+        console.log('⚠️ Referencia falsa guardada');
+    } catch (e) {
+        console.error('Error guardando ref falsa:', e);
+    }
+}
+
+// ==============================================
 // 🔒 FIREBASE - REFERENCIAS Y CUPONES
 // ==============================================
 async function verificarReferenciaEnFirebase(ref) {
@@ -955,21 +999,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
 }
 
 // ==============================================
-// 📢 TELEGRAM
-// ==============================================
-function enviarTelegram(mensaje) {
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: mensaje,
-            parse_mode: 'HTML'
-        })
-    }).catch(err => console.log("Error Telegram:", err));
-}
-
-// ==============================================
 // ⚡ VERIFICAR PAGO EN PÁBILO
 // ==============================================
 async function verificarPagoPabilo(referencia) {
@@ -1010,7 +1039,7 @@ async function verificarPagoPabilo(referencia) {
 }
 
 // ==============================================
-// 🎮 ENVIAR RECARGA A CENTRAL ONE
+// 🎮 ENVIAR RECARGA A CENTRAL ONE (CON MENSAJES AMIGABLES)
 // ==============================================
 async function enviarRecargaCentralOne() {
     try {
@@ -1032,13 +1061,29 @@ async function enviarRecargaCentralOne() {
         console.log('📥 Central One:', data);
 
         if (!res.ok) {
+            // ✅ MENSAJES AMIGABLES - el cliente no ve "saldo insuficiente"
             if (data.sinSaldo) {
-                return { exito: false, sinSaldo: true, mensaje: data.error || 'Saldo insuficiente' };
+                return {
+                    exito: false,
+                    silencioso: true,
+                    motivo_admin: 'SALDO INSUFICIENTE EN CENTRAL ONE',
+                    mensaje: 'Tu recarga llegará a tu cuenta muy pronto'
+                };
             }
             if (data.sinStock) {
-                return { exito: false, mensaje: 'Producto agotado' };
+                return {
+                    exito: false,
+                    silencioso: true,
+                    motivo_admin: 'PRODUCTO AGOTADO EN CENTRAL ONE',
+                    mensaje: 'Estamos procesando tu pedido, llegará en breve'
+                };
             }
-            return { exito: false, mensaje: data.error || 'Error en la recarga' };
+            return {
+                exito: false,
+                silencioso: true,
+                motivo_admin: data.error || 'Error interno',
+                mensaje: 'Tu pedido está siendo procesado por nuestro equipo'
+            };
         }
 
         return {
@@ -1054,7 +1099,9 @@ async function enviarRecargaCentralOne() {
         console.error('❌ Error Central One:', error);
         return {
             exito: false,
-            mensaje: "Error de conexión. Intenta en unos minutos."
+            silencioso: true,
+            motivo_admin: 'Error de conexión con Central One',
+            mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto'
         };
     }
 }
@@ -1081,17 +1128,40 @@ async function iniciarVerificacion() {
     mostrarPaso('pasoVerificandoPago');
     
     try {
+        // ============================================
+        // 1. Verificar si la referencia ya fue usada
+        // ============================================
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
+            // 🚨 Notificar intento de reutilización
+            notificarAdmin('duplicado', {
+                referencia: referencia,
+                metodo: metodoPago,
+                mensaje_extra: '⚠️ Intentó usar una referencia <b>YA USADA</b>'
+            });
+            
+            // Guardar en Firebase
+            await guardarReferenciaFalsa(referencia, 'Referencia duplicada - Ya usada');
+            
             mostrarPaso('pasoReferenciaUsada');
             btn.disabled = false;
             btn.innerHTML = '✅ Verificar Pago';
             return;
         }
 
+        // ============================================
+        // 2. Verificar cupón usado
+        // ============================================
         if (cuponAplicado) {
             const cuponYaUsado = await verificarCuponUsado(cuponAplicado);
             if (cuponYaUsado) {
+                // 🚨 Notificar intento de reutilizar cupón
+                notificarAdmin('cupon_usado', {
+                    referencia: referencia,
+                    metodo: metodoPago,
+                    mensaje_extra: `🎁 Intentó usar cupón <b>YA USADO</b>: <code>${cuponAplicado}</code>`
+                });
+                
                 mostrarMensaje('Cupón usado', 'Este cupón ya fue utilizado anteriormente.', 'advertencia');
                 descuentoAplicado = 0;
                 cuponAplicado = "";
@@ -1104,9 +1174,22 @@ async function iniciarVerificacion() {
             }
         }
         
+        // ============================================
+        // 3. Verificar en Pábilo
+        // ============================================
         const pagoConfirmado = await verificarPagoPabilo(referencia);
         
         if (!pagoConfirmado) {
+            // 🚨 Notificar referencia falsa
+            notificarAdmin('falso', {
+                referencia: referencia,
+                metodo: metodoPago,
+                mensaje_extra: '⚠️ Referencia <b>NO encontrada</b> en el banco (posible fraude)'
+            });
+            
+            // Guardar en Firebase
+            await guardarReferenciaFalsa(referencia, 'No encontrada en Pábilo');
+            
             document.getElementById('msgError').textContent = 'Verifica tu referencia e inténtalo de nuevo.';
             setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
             btn.disabled = false;
@@ -1114,6 +1197,9 @@ async function iniciarVerificacion() {
             return;
         }
         
+        // ============================================
+        // 4. Marcar como usados
+        // ============================================
         await marcarReferenciaComoUsada(referencia);
         if (cuponAplicado) {
             await marcarCuponComoUsado(cuponAplicado);
@@ -1122,10 +1208,16 @@ async function iniciarVerificacion() {
         mostrarPaso('pasoPagoConfirmado');
         await new Promise(r => setTimeout(r, 1200));
         
+        // ============================================
+        // 5. Procesar recarga con Central One
+        // ============================================
         mostrarPaso('pasoConectandoServidor');
         let resultadoRecarga = await enviarRecargaCentralOne();
         await new Promise(r => setTimeout(r, 1000));
         
+        // ============================================
+        // 6. Guardar en Firebase
+        // ============================================
         const idPedido = await guardarPedidoEnFirebase(
             referencia,
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
@@ -1134,7 +1226,13 @@ async function iniciarVerificacion() {
             resultadoRecarga.codigos || []
         );
         
+        // ============================================
+        // 7. Mostrar resultado al cliente
+        // ============================================
         if (resultadoRecarga.exito) {
+            // ✅ CASO EXITOSO
+            document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
+            document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
             document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
             document.getElementById('resProducto').textContent = producto;
             document.getElementById('resNombre').textContent = nombreJugador;
@@ -1142,6 +1240,7 @@ async function iniciarVerificacion() {
             document.getElementById('resReferencia').textContent = referencia;
             document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
             
+            // Si hay PIN, mostrarlo
             if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
                 const pin = resultadoRecarga.codigos[0];
                 document.getElementById('pinContainer').innerHTML = `
@@ -1153,30 +1252,81 @@ async function iniciarVerificacion() {
                         </button>
                     </div>
                 `;
+            } else {
+                document.getElementById('pinContainer').innerHTML = '';
             }
             
             mostrarPaso('pasoRecargaExitosa');
             
-            let msg = `🎉 <b>RECARGA EXITOSA</b>\n\n🎮 ${juego}\n👤 ${nombreJugador}\n🆔 ${idJugador}\n📦 ${producto}\n💰 ${precioUsdFinal.toFixed(2)} USD\n💳 ${metodoPago}\n🔢 ${referencia}`;
-            if (cuponAplicado) {
-                msg += `\n🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)`;
-            }
+            // 🎉 Notificar éxito al admin
+            notificarAdmin('exito', {
+                referencia: referencia,
+                metodo: metodoPago,
+                mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : ''
+            });
+            
+            // Si hay PIN, enviar seguido
             if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
-                msg += `\n🎮 PIN: ${resultadoRecarga.codigos[0]}`;
+                enviarTelegram(`🎮 <b>PIN DEL PEDIDO:</b> <code>${resultadoRecarga.codigos[0]}</code>`);
             }
-            enviarTelegram(msg);
+            
+        } else if (resultadoRecarga.silencioso) {
+            // 🚨 CASO SILENCIOSO: Pago verificado pero problema interno
+            // El cliente ve una pantalla positiva, pero el admin recibe alerta
+            
+            document.getElementById('tituloExito').textContent = '¡Pago Verificado!';
+            document.getElementById('subtituloExito').textContent = 'Tu recarga llegará a tu cuenta muy pronto. Te notificaremos por WhatsApp cuando esté lista.';
+            document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
+            document.getElementById('resProducto').textContent = producto;
+            document.getElementById('resNombre').textContent = nombreJugador;
+            document.getElementById('resIdResumen').textContent = idJugador;
+            document.getElementById('resReferencia').textContent = referencia;
+            document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
+            document.getElementById('pinContainer').innerHTML = '';
+            
+            mostrarPaso('pasoRecargaExitosa');
+            
+            // 🚨 Notificar al admin con TODOS los detalles
+            let msgAdmin = `🚨 <b>PAGO VERIFICADO - ATENCIÓN REQUERIDA</b>\n\n`;
+            msgAdmin += `🎮 Juego: ${juego}\n`;
+            msgAdmin += `👤 Nombre: ${nombreJugador}\n`;
+            msgAdmin += `🆔 ID: ${idJugador}\n`;
+            msgAdmin += `📦 Producto: ${producto}\n`;
+            msgAdmin += `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n`;
+            msgAdmin += `🔢 Referencia: ${referencia}\n`;
+            msgAdmin += `💳 Método: ${metodoPago}\n`;
+            if (cuponAplicado) {
+                msgAdmin += `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)\n`;
+            }
+            msgAdmin += `\n⚠️ <b>Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar Central One'}\n`;
+            msgAdmin += `🚨 <b>Acción:</b> Procesa la recarga manualmente\n`;
+            msgAdmin += `📋 Pedido: #${(idPedido || '0000').substring(0, 8).toUpperCase()}\n`;
+            msgAdmin += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
+            
+            enviarTelegram(msgAdmin);
             
         } else {
-            document.getElementById('msgError').textContent = resultadoRecarga.mensaje;
+            // ❌ CASO DE ERROR GENUINO (raro, pero existe)
+            document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo en unos minutos.';
             mostrarPaso('pasoPagoNoEncontrado');
             
-            enviarTelegram(`⚠️ <b>RECARGA FALLIDA</b>\n\n🎮 ${juego}\n👤 ${nombreJugador}\n🆔 ${idJugador}\n📦 ${producto}\n⚠️ ${resultadoRecarga.mensaje}`);
+            notificarAdmin('error', {
+                referencia: referencia,
+                metodo: metodoPago,
+                mensaje_extra: `❌ Error: ${resultadoRecarga.mensaje || 'Desconocido'}`
+            });
         }
         
     } catch (error) {
         console.error('❌ Error:', error);
         mostrarMensaje('Error', 'Ocurrió un error inesperado. Intenta de nuevo.', 'error');
         mostrarPaso('pasoDatos');
+        
+        notificarAdmin('error', {
+            referencia: document.getElementById('referenciaPago').value.trim(),
+            metodo: metodoPago,
+            mensaje_extra: `❌ Error crítico: ${error.message}`
+        });
     } finally {
         btn.disabled = false;
         btn.innerHTML = '✅ Verificar Pago';
