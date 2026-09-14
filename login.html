@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
     <title>Iniciar Sesión - RecargasGames</title>
+    <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
     <style>
         :root{
             --color-azul:#3b82f6;
@@ -20,16 +21,39 @@
 
         body {
             font-family:'Segoe UI',sans-serif;
-            background-image:url('fondo.jpg');
-            background-size:cover;
-            background-position:center;
-            background-attachment:fixed;
             min-height:100vh;
             display:flex; justify-content:center; align-items:center;
             padding:20px;
             position:relative;
             overflow-x:hidden;
         }
+
+        .video-fondo{
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            object-fit:cover;
+            z-index:-2;
+            pointer-events:none;
+            opacity:1;
+            filter:brightness(1.15);
+            will-change:transform;
+            transform:translateZ(0);
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+        }
+        .video-overlay{
+            position:fixed;
+            inset:0;
+            background:linear-gradient(180deg,
+                rgba(10,14,26,0.15) 0%,
+                rgba(10,14,26,0.35) 60%,
+                rgba(10,14,26,0.6) 100%);
+            z-index:-1;
+            pointer-events:none;
+            transform:translateZ(0);
+        }
+
         body::before{
             content:'';position:fixed;top:-30%;right:-20%;
             width:500px;height:500px;
@@ -44,17 +68,16 @@
         }
 
         .login-container {
-            background:linear-gradient(135deg,rgba(20,30,55,0.92),rgba(10,14,26,0.95));
+            background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.85));
             padding:40px 34px;
             border-radius:24px;
             border:1px solid rgba(212,175,55,0.3);
             max-width:420px; width:100%;
-            box-shadow:
-                0 30px 80px rgba(0,0,0,0.7),
-                0 0 60px rgba(212,175,55,0.15),
-                inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 60px rgba(212,175,55,0.15),inset 0 1px 0 rgba(255,255,255,0.05);
             position:relative; z-index:1;
             animation:modalSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            will-change:transform;
+            transform:translateZ(0);
         }
         @keyframes modalSlide {
             from{transform:translateY(-30px) scale(0.95);opacity:0}
@@ -88,8 +111,8 @@
         }
         .form-group input {
             width:100%; padding:13px 16px;
-            border-radius:12px; border:1px solid rgba(255,255,255,0.1);
-            background:rgba(0,0,0,0.3); color:white;
+            border-radius:12px; border:1px solid rgba(255,255,255,0.15);
+            background:rgba(0,0,0,0.35); color:white;
             font-size:15px; transition:all 0.3s; font-family:inherit;
         }
         .form-group input:focus {
@@ -141,13 +164,9 @@
         }
         .reset-password a:hover { color:var(--color-dorado-claro); }
 
-        /* ============================================
-           🎨 MODAL PERSONALIZADO DE MENSAJES
-           ============================================ */
         .mensaje-overlay{
             display:none;position:fixed;top:0;left:0;right:0;bottom:0;
             background:rgba(0,0,0,0.85);
-            backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
             z-index:9999;justify-content:center;align-items:center;padding:20px;
         }
         .mensaje-overlay.activo{display:flex;animation:fadeInOverlay 0.25s ease}
@@ -211,11 +230,6 @@
             border:2px solid rgba(59,130,246,0.7);color:#93c5fd;
             box-shadow:0 0 40px rgba(59,130,246,0.5);
         }
-        .mensaje-icono.confirmacion{
-            background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.15));
-            border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);
-            box-shadow:0 0 40px rgba(212,175,55,0.5);
-        }
 
         .mensaje-titulo{
             font-size:20px;font-weight:800;color:var(--color-dorado-claro);
@@ -247,7 +261,6 @@
             box-shadow:0 8px 25px rgba(212,175,55,0.6);
             animation:shineBadge 3s ease infinite;
         }
-        .mensaje-btn.principal:active{transform:translateY(0) scale(0.98)}
         .mensaje-btn.secundario{
             background:rgba(71,85,105,0.3);color:#cbd5e1;
             border:1px solid rgba(71,85,105,0.6);
@@ -255,15 +268,6 @@
         .mensaje-btn.secundario:hover{
             background:rgba(71,85,105,0.5);color:white;
             transform:translateY(-2px);
-        }
-        .mensaje-btn.secundario:active{transform:translateY(0) scale(0.98)}
-        .mensaje-btn.peligro{
-            background:linear-gradient(135deg,#ef4444,#dc2626);
-            color:white;box-shadow:0 4px 15px rgba(239,68,68,0.4);
-        }
-        .mensaje-btn.peligro:hover{
-            transform:translateY(-2px);
-            box-shadow:0 8px 25px rgba(239,68,68,0.6);
         }
 
         @media(max-width:500px){
@@ -275,6 +279,10 @@
             .mensaje-titulo{font-size:17px}
             .mensaje-texto{font-size:14px}
             .mensaje-btn{font-size:13px;padding:12px 14px}
+            .video-fondo {
+                opacity: 0.85;
+                filter: brightness(1.05);
+            }
         }
         @media(max-width:400px){
             .mensaje-botones{flex-direction:column}
@@ -282,6 +290,11 @@
     </style>
 </head>
 <body>
+    <video autoplay muted loop playsinline class="video-fondo">
+        <source src="fondo.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+
     <div class="login-container">
         <div class="logo">
             <img src="logo.png" alt="Recargas Games">
@@ -310,9 +323,6 @@
         </div>
     </div>
 
-    <!-- ============================================
-         🎨 MODAL PERSONALIZADO DE MENSAJES
-         ============================================ -->
     <div class="mensaje-overlay" id="mensajeOverlay">
         <div class="mensaje-box" id="mensajeBox">
             <button class="mensaje-cerrar" id="mensajeCerrar" onclick="cerrarMensajePersonalizado()">✕</button>
@@ -329,9 +339,6 @@
         import { auth } from './firebase-config.js';
         import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-        // ==============================================
-        // 🎨 SISTEMA DE MENSAJES PERSONALIZADOS
-        // ==============================================
         let _mensajeCallback = null;
         let _mensajeCerrado = false;
 
@@ -373,42 +380,6 @@
             });
         }
 
-        function mostrarConfirmacion(titulo, mensaje, callback, opciones = {}) {
-            const overlay = document.getElementById('mensajeOverlay');
-            const icono = document.getElementById('mensajeIcono');
-            const tituloEl = document.getElementById('mensajeTitulo');
-            const textoEl = document.getElementById('mensajeTexto');
-            const botones = document.getElementById('mensajeBotones');
-
-            const tipo = opciones.tipo || 'confirmacion';
-            const textoAceptar = opciones.textoAceptar || 'Aceptar';
-            const textoCancelar = opciones.textoCancelar || 'Cancelar';
-            const claseAceptar = opciones.peligro ? 'peligro' : 'principal';
-
-            icono.className = 'mensaje-icono ' + tipo;
-            icono.textContent = ICONOS[tipo] || ICONOS.confirmacion;
-            tituloEl.textContent = titulo;
-            textoEl.textContent = mensaje;
-
-            botones.innerHTML = `
-                <button class="mensaje-btn secundario" id="mensajeBtnCancelar">${textoCancelar}</button>
-                <button class="mensaje-btn ${claseAceptar}" id="mensajeBtnAceptar">${textoAceptar}</button>
-            `;
-
-            document.getElementById('mensajeBtnCancelar').onclick = () => {
-                cerrarMensajePersonalizado();
-                if (typeof callback === 'function') callback(false);
-            };
-
-            document.getElementById('mensajeBtnAceptar').onclick = () => {
-                cerrarMensajePersonalizado();
-                if (typeof callback === 'function') callback(true);
-            };
-
-            _mensajeCerrado = false;
-            overlay.classList.add('activo');
-        }
-
         function cerrarMensajePersonalizado() {
             const overlay = document.getElementById('mensajeOverlay');
             overlay.classList.remove('activo');
@@ -425,12 +396,8 @@
         });
 
         window.mostrarMensaje = mostrarMensaje;
-        window.mostrarConfirmacion = mostrarConfirmacion;
         window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
 
-        // ==============================================
-        // 🔐 LOGIN
-        // ==============================================
         const form = document.getElementById('loginForm');
 
         form.addEventListener('submit', async (e) => {
