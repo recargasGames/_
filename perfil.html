@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Perfil - Recargas Games</title>
-    
+    <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -17,14 +18,36 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0b1220;
             color: white;
             min-height: 100vh;
             padding-top: 80px;
-            background-image: url('fondo.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+        }
+
+        /* 🎬 VIDEO DE FONDO */
+        .video-fondo{
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            object-fit:cover;
+            z-index:-2;
+            pointer-events:none;
+            opacity:1;
+            filter:brightness(1.15);
+            will-change:transform;
+            transform:translateZ(0);
+            backface-visibility:hidden;
+            -webkit-backface-visibility:hidden;
+        }
+        .video-overlay{
+            position:fixed;
+            inset:0;
+            background:linear-gradient(180deg,
+                rgba(10,14,26,0.15) 0%,
+                rgba(10,14,26,0.35) 60%,
+                rgba(10,14,26,0.6) 100%);
+            z-index:-1;
+            pointer-events:none;
+            transform:translateZ(0);
         }
 
         .topbar {
@@ -33,13 +56,13 @@
             left: 0;
             right: 0;
             z-index: 999;
-            background: rgba(11, 18, 32, 0.95);
+            background: rgba(11, 18, 32, 0.9);
             border-bottom: 2px solid #3b82f6;
             padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(10px);
+            transform: translateZ(0);
         }
         .topbar .logo {
             display: flex;
@@ -78,14 +101,17 @@
             max-width: 500px;
             margin: 0 auto;
             padding: 20px;
+            position:relative;
+            z-index:1;
         }
 
         .perfil-card {
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(17, 24, 39, 0.7);
             border-radius: 20px;
             padding: 30px;
             border: 1px solid rgba(255,255,255,0.08);
+            will-change:transform;
+            transform:translateZ(0);
         }
 
         .perfil-card h2 {
@@ -126,7 +152,7 @@
             width: 100%;
             padding: 12px 16px;
             border-radius: 10px;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.7);
             border: 1px solid rgba(51, 65, 85, 0.5);
             color: white;
             font-size: 16px;
@@ -136,7 +162,7 @@
         .campo input:focus {
             outline: none;
             border-color: #3b82f6;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
         }
         .campo input:disabled {
             opacity: 0.6;
@@ -210,22 +236,28 @@
             .topbar .logo h1 {
                 font-size: 16px;
             }
+            .video-fondo {
+                opacity: 0.85;
+                filter: brightness(1.05);
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- ====== BARRA SUPERIOR ====== -->
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
 <header class="topbar">
     <div class="logo">
         <img src="logo.png" alt="Recargas Games">
         <h1>Recargas<span>Games</span></h1>
     </div>
-    <!-- ✅ AHORA USA history.back() -->
     <button class="btn-back" onclick="volverAtras()">← Volver</button>
 </header>
 
-<!-- ====== CONTENIDO ====== -->
 <div class="container">
     <div class="perfil-card">
         <h2>✏️ Editar Perfil</h2>
@@ -256,9 +288,6 @@
 </div>
 
 <script>
-    // ==============================================
-    // 🔥 FIREBASE - CONFIGURACIÓN
-    // ==============================================
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
         authDomain: "free-52119.firebaseapp.com",
@@ -276,16 +305,10 @@
 
     let uidActual = null;
 
-    // ==============================================
-    // 🔙 VOLVER A LA PÁGINA ANTERIOR
-    // ==============================================
     function volverAtras() {
         window.history.back();
     }
 
-    // ==============================================
-    // 👤 CARGAR DATOS DEL USUARIO
-    // ==============================================
     auth.onAuthStateChanged((user) => {
         if (!user) {
             window.location.href = 'login.html';
@@ -294,32 +317,25 @@
 
         uidActual = user.uid;
         
-        // Cargar datos de Auth
         document.getElementById('inputEmail').value = user.email || '';
         const nombre = user.displayName || '';
         document.getElementById('inputNombre').value = nombre;
         
-        // Avatar
         const inicial = nombre.charAt(0).toUpperCase() || 'U';
         document.getElementById('avatarGrande').textContent = inicial;
 
-        // Cargar ID del jugador desde Firebase
         const refUsuario = db.ref(`usuarios/${uidActual}`);
         refUsuario.on('value', (snapshot) => {
             const datos = snapshot.val();
             if (datos && datos.id_jugador) {
                 document.getElementById('inputIdJugador').value = datos.id_jugador;
             } else {
-                // Si no tiene, usar el de localStorage
                 const idLocal = localStorage.getItem('id_jugador') || '';
                 document.getElementById('inputIdJugador').value = idLocal;
             }
         });
     });
 
-    // ==============================================
-    // 💾 GUARDAR PERFIL
-    // ==============================================
     function guardarPerfil() {
         const btn = document.getElementById('btnGuardar');
         const mensaje = document.getElementById('mensaje');
@@ -339,12 +355,10 @@
             return;
         }
 
-        // Guardar en Firebase Auth (displayName)
         const user = auth.currentUser;
         user.updateProfile({
             displayName: nombre
         }).then(() => {
-            // Guardar ID jugador en Firebase Database
             const refUsuario = db.ref(`usuarios/${uidActual}`);
             return refUsuario.update({
                 nombre: nombre,
@@ -352,13 +366,11 @@
                 actualizado: new Date().toISOString()
             });
         }).then(() => {
-            // Guardar en localStorage también
             localStorage.setItem('id_jugador', idJugador);
             localStorage.setItem('nombre_jugador', nombre);
             
             mostrarMensaje('exito', '✅ Perfil actualizado correctamente');
             
-            // Actualizar avatar
             const inicial = nombre.charAt(0).toUpperCase();
             document.getElementById('avatarGrande').textContent = inicial;
             
@@ -371,25 +383,18 @@
         });
     }
 
-    // ==============================================
-    // 📢 MOSTRAR MENSAJE
-    // ==============================================
     function mostrarMensaje(tipo, texto) {
         const mensaje = document.getElementById('mensaje');
         mensaje.className = `mensaje ${tipo}`;
         mensaje.textContent = texto;
         mensaje.style.display = 'block';
         
-        // Ocultar después de 5 segundos
         clearTimeout(mensaje._timeout);
         mensaje._timeout = setTimeout(() => {
             mensaje.style.display = 'none';
         }, 5000);
     }
 
-    // ==============================================
-    // 🚪 CERRAR SESIÓN
-    // ==============================================
     function cerrarSesion() {
         if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
             auth.signOut().then(() => {
