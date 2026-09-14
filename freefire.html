@@ -17,8 +17,12 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
+
+/* 🎨 FONDO ANIMADO DE RESPALDO */
 body{
-    background:#0a0e1a;
+    background:linear-gradient(135deg,#0a0e1a 0%,#1a2540 50%,#0a0e1a 100%);
+    background-size:200% 200%;
+    animation:fondoAnimado 10s ease infinite;
     color:#fff;
     font-family:'Segoe UI',sans-serif;
     padding-top:110px;
@@ -26,8 +30,12 @@ body{
     min-height:100vh;
     position:relative;
 }
+@keyframes fondoAnimado{
+    0%,100%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+}
 
-/* 🎬 VIDEO DE FONDO */
+/* 🎬 VIDEO DE FONDO BRILLANTE */
 .video-fondo{
     position:fixed;
     top:0;
@@ -37,15 +45,16 @@ body{
     object-fit:cover;
     z-index:-2;
     pointer-events:none;
-    opacity:0.55;
+    opacity:1;
+    filter:brightness(1.15) contrast(1.05) saturate(1.1);
 }
 .video-overlay{
     position:fixed;
     inset:0;
     background:linear-gradient(180deg,
-        rgba(10,14,26,0.75) 0%,
-        rgba(10,14,26,0.85) 50%,
-        rgba(10,14,26,0.95) 100%);
+        rgba(10,14,26,0.15) 0%,
+        rgba(10,14,26,0.35) 60%,
+        rgba(10,14,26,0.6) 100%);
     z-index:-1;
     pointer-events:none;
 }
@@ -213,15 +222,18 @@ body::after{
 }
 
 .main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
+
 .card-panel{
-    background:linear-gradient(135deg,rgba(20,30,55,0.65),rgba(10,14,26,0.85));
+    background:linear-gradient(135deg,rgba(20,30,55,0.88),rgba(10,14,26,0.96));
     border:1px solid rgba(212,175,55,0.2);
     border-radius:20px;
     padding:22px 18px 20px;
     margin-bottom:20px;
     position:relative;
     overflow:hidden;
-    box-shadow:0 15px 40px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow:0 15px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
 }
 .panel-title{
     font-size:15px;font-weight:800;margin:0 0 16px;
@@ -230,8 +242,8 @@ body::after{
 }
 .form-input{
     width:100%;height:50px;border-radius:14px;
-    background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;
-    border:1px solid rgba(255,255,255,0.1);font-size:16px;
+    background:rgba(0,0,0,0.5);color:#fff;padding:12px 16px;
+    border:1px solid rgba(255,255,255,0.15);font-size:16px;
     position:relative;z-index:1;transition:all 0.3s;
 }
 .form-input:focus{
@@ -249,14 +261,14 @@ body::after{
 
 .payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1}
 .pay-box{
-    background:rgba(0,0,0,0.3);
-    border:2px solid rgba(255,255,255,0.08);
+    background:rgba(0,0,0,0.5);
+    border:2px solid rgba(255,255,255,0.12);
     border-radius:16px;padding:12px;text-align:center;
     cursor:pointer;font-weight:700;transition:all 0.3s;font-size:14px;
 }
 .pay-box.active{
     border-color:var(--color-dorado);
-    background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));
+    background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.15));
     color:var(--color-dorado-claro);
 }
 .tasa-info{
@@ -289,7 +301,7 @@ body::after{
 @keyframes spin{to{transform:rotate(360deg)}}
 .id-status.valido{
     display:flex;align-items:center;gap:12px;
-    background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));
+    background:linear-gradient(135deg,rgba(34,197,94,0.3),rgba(34,197,94,0.1));
     color:#4ade80;border:1px solid rgba(34,197,94,0.6);
 }
 .id-status.valido .check-icono{
@@ -304,7 +316,7 @@ body::after{
 }
 .id-status.error{
     display:flex;align-items:center;gap:10px;
-    background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(239,68,68,0.05));
+    background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));
     color:#f87171;border:1px solid rgba(239,68,68,0.5);
 }
 
@@ -319,13 +331,16 @@ body::after{
 }
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+
 .product-card{
-    background:linear-gradient(135deg,rgba(20,30,55,0.7),rgba(10,14,26,0.9));
-    border:1px solid rgba(255,255,255,0.08);
+    background:linear-gradient(135deg,rgba(20,30,55,0.9),rgba(10,14,26,0.96));
+    border:1px solid rgba(255,255,255,0.1);
     border-radius:18px;padding:16px;
     transition:transform 0.3s ease,box-shadow 0.3s ease;
     position:relative;overflow:hidden;
-    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
 }
 .product-card::before{
     content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
@@ -337,7 +352,7 @@ body::after{
 .product-card:hover::before{opacity:1}
 .product-card:hover{
     transform:translateY(-6px);
-    box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.25);
+    box-shadow:0 20px 45px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.3);
 }
 .card-header{
     display:flex;align-items:center;gap:12px;
@@ -345,9 +360,9 @@ body::after{
     padding-bottom:10px;margin-bottom:10px;
 }
 .game-icon{
-    background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(59,130,246,0.15));
+    background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.2));
     padding:10px;border-radius:12px;font-size:20px;
-    border:1px solid rgba(212,175,55,0.3);
+    border:1px solid rgba(212,175,55,0.35);
 }
 .product-title{
     font-size:15px;font-weight:800;
@@ -441,9 +456,6 @@ body::after{
     color:#0a0e1a;
 }
 
-/* ============================================
-   🎨 MODAL PERSONALIZADO DE MENSAJES
-   ============================================ */
 .mensaje-overlay{
     display:none;position:fixed;top:0;left:0;right:0;bottom:0;
     background:rgba(0,0,0,0.85);
@@ -588,8 +600,10 @@ body::after{
     .mensaje-titulo{font-size:17px}
     .mensaje-texto{font-size:14px}
     .mensaje-btn{font-size:13px;padding:12px 14px}
-    /* En móvil, video más tenue (ahorra batería) */
-    .video-fondo{opacity:0.35}
+    .video-fondo{
+        opacity:0.85;
+        filter:brightness(1.05) saturate(1);
+    }
 }
 @media(max-width:400px){
     .mensaje-botones{flex-direction:column}
@@ -598,8 +612,8 @@ body::after{
 </head>
 <body onclick="cerrarTodosLosMenus(event)">
 
-<!-- 🎬 VIDEO DE FONDO -->
-<video autoplay muted loop playsinline poster="fondo.jpg" class="video-fondo">
+<!-- 🎬 VIDEO DE FONDO (SIN POSTER) -->
+<video autoplay muted loop playsinline class="video-fondo">
     <source src="fondo.mp4" type="video/mp4">
 </video>
 <div class="video-overlay"></div>
@@ -779,9 +793,6 @@ body::after{
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
 <a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank">💬</a>
 
-<!-- ============================================
-     🎨 MODAL PERSONALIZADO DE MENSAJES
-     ============================================ -->
 <div class="mensaje-overlay" id="mensajeOverlay">
     <div class="mensaje-box" id="mensajeBox">
         <button class="mensaje-cerrar" id="mensajeCerrar" onclick="cerrarMensajePersonalizado()">✕</button>
@@ -803,9 +814,6 @@ import {
     sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-// ==============================================
-// 🎨 SISTEMA DE MENSAJES PERSONALIZADOS
-// ==============================================
 let _mensajeCallback = null;
 let _mensajeCerrado = false;
 
@@ -902,9 +910,6 @@ window.mostrarMensaje = mostrarMensaje;
 window.mostrarConfirmacion = mostrarConfirmacion;
 window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
 
-// ==============================================
-// 🎮 VARIABLES DE JUEGO
-// ==============================================
 let metodo = "PAGO MOVIL";
 let tasa = 940;
 let idVerificado = false;
