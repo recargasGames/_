@@ -410,8 +410,9 @@
     </div>
 
     <script type="module">
-        import { auth } from './firebase-config.js';
+        import { auth, db } from './firebase-config.js';
         import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { ref, set } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         let _mensajeCallback = null;
         let _mensajeCerrado = false;
@@ -454,42 +455,6 @@
             });
         }
 
-        function mostrarConfirmacion(titulo, mensaje, callback, opciones = {}) {
-            const overlay = document.getElementById('mensajeOverlay');
-            const icono = document.getElementById('mensajeIcono');
-            const tituloEl = document.getElementById('mensajeTitulo');
-            const textoEl = document.getElementById('mensajeTexto');
-            const botones = document.getElementById('mensajeBotones');
-
-            const tipo = opciones.tipo || 'confirmacion';
-            const textoAceptar = opciones.textoAceptar || 'Aceptar';
-            const textoCancelar = opciones.textoCancelar || 'Cancelar';
-            const claseAceptar = opciones.peligro ? 'peligro' : 'principal';
-
-            icono.className = 'mensaje-icono ' + tipo;
-            icono.textContent = ICONOS[tipo] || ICONOS.confirmacion;
-            tituloEl.textContent = titulo;
-            textoEl.textContent = mensaje;
-
-            botones.innerHTML = `
-                <button class="mensaje-btn secundario" id="mensajeBtnCancelar">${textoCancelar}</button>
-                <button class="mensaje-btn ${claseAceptar}" id="mensajeBtnAceptar">${textoAceptar}</button>
-            `;
-
-            document.getElementById('mensajeBtnCancelar').onclick = () => {
-                cerrarMensajePersonalizado();
-                if (typeof callback === 'function') callback(false);
-            };
-
-            document.getElementById('mensajeBtnAceptar').onclick = () => {
-                cerrarMensajePersonalizado();
-                if (typeof callback === 'function') callback(true);
-            };
-
-            _mensajeCerrado = false;
-            overlay.classList.add('activo');
-        }
-
         function cerrarMensajePersonalizado() {
             const overlay = document.getElementById('mensajeOverlay');
             overlay.classList.remove('activo');
@@ -506,7 +471,6 @@
         });
 
         window.mostrarMensaje = mostrarMensaje;
-        window.mostrarConfirmacion = mostrarConfirmacion;
         window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
 
         const form = document.getElementById('registerForm');
@@ -545,6 +509,24 @@
                 await updateProfile(user, {
                     displayName: fullName
                 });
+
+                // ✅ GUARDAR USUARIO EN LA BASE DE DATOS
+                try {
+                    await set(ref(db, 'usuarios/' + user.uid), {
+                        uid: user.uid,
+                        nombre: fullName,
+                        correo: email,
+                        fechaRegistro: new Date().toISOString(),
+                        fechaRegistroLegible: new Date().toLocaleString('es-VE'),
+                        ultimaActividad: new Date().toISOString(),
+                        ultimaActividadLegible: new Date().toLocaleString('es-VE'),
+                        totalPedidos: 0,
+                        id_jugador: localStorage.getItem('id_jugador') || ''
+                    });
+                    console.log('✅ Usuario guardado en BD');
+                } catch (errGuardar) {
+                    console.error('Error guardando usuario:', errGuardar);
+                }
 
                 await mostrarMensaje('¡Cuenta creada!', 'Tu cuenta se creó exitosamente. Redirigiendo a tu panel...', 'exito');
                 window.location.href = 'dashboard.html';
