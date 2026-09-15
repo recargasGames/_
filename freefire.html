@@ -29,7 +29,7 @@ body{
     position:relative;
 }
 
-/* 🎬 VIDEO DE FONDO - OPTIMIZADO PARA GPU */
+/* 🎬 VIDEO DE FONDO */
 .video-fondo{
     position:fixed;
     top:0;
@@ -73,7 +73,6 @@ body::after{
 }
 .barra-superior,.main,.whatsapp-float,.back-to-top{position:relative;z-index:1}
 
-/* ✅ SIN BLUR - fondo plano semitransparente */
 .barra-superior{
     position:fixed;top:0;left:0;right:0;z-index:999;
     background:rgba(5,8,16,0.85);
@@ -222,7 +221,6 @@ body::after{
 
 .main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
 
-/* ✅ SIN BLUR - tarjetas transparentes con color plano */
 .card-panel{
     background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));
     border:1px solid rgba(212,175,55,0.25);
@@ -330,7 +328,6 @@ body::after{
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 
-/* ✅ SIN BLUR - producto transparente con GPU acelerada */
 .product-card{
     background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.68));
     border:1px solid rgba(255,255,255,0.12);
@@ -612,7 +609,6 @@ body::after{
 </head>
 <body onclick="cerrarTodosLosMenus(event)">
 
-<!-- 🎬 VIDEO DE FONDO (SIN POSTER) -->
 <video autoplay muted loop playsinline class="video-fondo">
     <source src="fondo.mp4" type="video/mp4">
 </video>
@@ -673,7 +669,7 @@ body::after{
         <a href="pubg.html">PUBG Mobile</a>
         <a href="arenabreakout.html">Arena Breakout</a>
         <a href="delta.html">Delta Force</a>
-         <a href="fortnite.html" class="active">Fortnite</a>
+        <a href="fortnite.html">Fortnite</a>
         <a href="lol.html">League of Legends</a>
         <a href="overwatch.html">Overwatch</a>
         <a href="bigo.html">Bigo Live</a>
@@ -705,7 +701,7 @@ body::after{
             <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
             <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
                 <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
-                <p style="margin-top:8px;"><a href="#" id="resetPasswordLink" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
+                <p style="margin-top:8px;"><a href="recuperar.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
             </div>
         </div>
         <div class="modal-footer">
@@ -719,7 +715,7 @@ body::after{
         <div class="panel-title">🆔 ID del Jugador</div>
         <div class="form-group">
             <label>ID del Jugador</label>
-            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="jugadorId" placeholder="Ej: 4664719056" autocomplete="off">
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="10" class="form-input" id="jugadorId" placeholder="Ej: 4664719056" autocomplete="off">
         </div>
         <div class="id-status" id="idStatus"></div>
     </div>
@@ -770,28 +766,6 @@ body::after{
             <div class="product-desc">🔥 Mega oferta</div>
             <div class="product-price" data-usd="39.00">$39.00</div>
             <button class="btn-buy" onclick="comprarProducto('6160 Diamantes', '39.00', '6160')">COMPRAR</button>
-        </div>
-    </div>
-
-    <div class="section-divider"><span>🎫 TARJETAS Y PASES</span></div>
-    <div class="products-grid">
-        <div class="product-card">
-            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Semanal</div></div>
-            <div class="product-desc">7 días de beneficios</div>
-            <div class="product-price" data-usd="2.50">$2.50</div>
-            <button class="btn-buy" onclick="comprarProducto('Tarjeta Semanal', '2.50', 'manual_7')">COMPRAR</button>
-        </div>
-        <div class="product-card">
-            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Mensual</div></div>
-            <div class="product-desc">30 días de beneficios</div>
-            <div class="product-price" data-usd="11.00">$11.00</div>
-            <button class="btn-buy" onclick="comprarProducto('Tarjeta Mensual', '11.00', 'manual_8')">COMPRAR</button>
-        </div>
-        <div class="product-card">
-            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Pase Booyah</div></div>
-            <div class="product-desc">Pase de evento exclusivo</div>
-            <div class="product-price" data-usd="3.00">$3.00</div>
-            <button class="btn-buy" onclick="comprarProducto('Pase Booyah', '3.00', 'manual_9')">COMPRAR</button>
         </div>
     </div>
 </div>
@@ -977,23 +951,26 @@ inputId.addEventListener('input', function() {
     idVerificado = false;
     nicknameVerificado = "";
     if (id.length === 0) { statusDiv.style.display = 'none'; return; }
-    if (!/^\d{5,12}$/.test(id)) {
+    if (!/^\d{5,10}$/.test(id)) {
         if (id.length < 5) mostrarEstado('⚠️ Mínimo 5 dígitos', 'error');
-        else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
+        else if (id.length > 10) mostrarEstado('⚠️ Máximo 10 dígitos', 'error');
         return;
     }
     timeoutId = setTimeout(async () => {
         mostrarEstado('🔍 Verificando ID...', 'verificando');
         try {
-            const respuesta = await fetch('/api/verificar-juugador', {
+            const respuesta = await fetch('/api/verificar-jugador', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id_jugador: id })
+                body: JSON.stringify({
+                    juego: 'FREE FIRE',
+                    id_jugador: id
+                })
             });
             const datos = await respuesta.json();
-            if (datos.valido) {
+            if (datos.valido && datos.nickname) {
                 idVerificado = true;
-                nicknameVerificado = datos.nickname || '';
+                nicknameVerificado = datos.nickname;
                 mostrarEstado('', 'valido', datos.nickname);
             } else {
                 idVerificado = false;
