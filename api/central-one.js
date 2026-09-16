@@ -1,10 +1,12 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.3
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.4
 // ============================================
-// v3.3: AGREGADO FF Weekly (Semanal, Mensual, Booyah) al FREE FIRE
+// v3.4: AGREGADO PlayStation $1, $2, $3, $4 (todas las denominaciones chicas)
+//       CORREGIDO Xbox $25 y $50 (UUIDs reales)
+// v3.3: FF Weekly (Semanal, Mensual, Booyah) al FREE FIRE
 //       ELIMINADO Apex, Fortnite, Overwatch, LOL, FF Weekly aparte
-// v3.2: AGREGADO Mobile Legends (55, 86, 112, 172, 257, 429, 706, 1050)
-// v3.1: AGREGADO PUBG Mobile (WOW Coins + Prime Plus)
+// v3.2: Mobile Legends (55, 86, 112, 172, 257, 429, 706, 1050)
+// v3.1: PUBG Mobile (WOW Coins + Prime Plus)
 // Telegram con process.env (sin hardcodeo)
 // ============================================
 
@@ -137,8 +139,12 @@ const SKU_MAP = {
     'BIGO-10000': '53bea902-d838-4c33-87f7-2dc637cc9820',
 
     // ============================================
-    // 🎁 GIFT CARDS - PLAYSTATION US
+    // 🎁 GIFT CARDS - PLAYSTATION US (TODAS las denominaciones)
     // ============================================
+    'PSN-1':   '39ad5eef-234d-463e-a851-78d21f8ae217',
+    'PSN-2':   '1f3ab10c-4a1c-4632-a883-f8989d251764',
+    'PSN-3':   '1341b21e-72b5-4624-952e-d72511b2ae23',
+    'PSN-4':   '869cdd6a-53e4-4c2c-93ab-6ba13534c318',
     'PSN-5':   '15934f99-e566-4c30-887b-28a99f477b13',
     'PSN-10':  'c30917c6-b1f2-49b1-926a-2a3eaa374e7c',
     'PSN-15':  '5e0aa982-d972-41c5-830e-47d8b6b13a7e',
@@ -153,14 +159,15 @@ const SKU_MAP = {
     'PSN-100': '4150d5b1-014c-4019-98f0-ab1fcb1ea645',
 
     // ============================================
-    // 🎁 GIFT CARDS - XBOX US
+    // 🎁 GIFT CARDS - XBOX US (TODAS las denominaciones)
     // ============================================
     'XBOX-1':   'e8cba797-a7ba-4c6c-8fbd-6a4b5b18b8ed',
+    'XBOX-5':   'dfb2f11c-0a37-4369-ad30-bbd05796ce48',
     'XBOX-10':  '44bfddeb-e545-46ca-91ec-74eb58943cc7',
     'XBOX-15':  '3dfe654b-f678-49bf-b928-c794c6509bb4',
     'XBOX-20':  '29874d8d-a346-41a1-a19d-1a435f58e0cf',
-    'XBOX-25':  '29874d8d-a346-41a1-a19d-1a435f58e0cf',
-    'XBOX-50':  '29874d8d-a346-41a1-a19d-1a435f58e0cf',
+    'XBOX-25':  '555e8d30-e771-4b38-acc0-4eaa9043db68',
+    'XBOX-50':  'b48fbf26-1812-4d5e-9c9b-42d0bfecb5ad',
     'XBOX-100': 'd60be4c3-fb96-4876-9f65-baeaf402b74f',
 
     // ============================================
@@ -222,14 +229,12 @@ const PRODUCTOS_CONFIG = {
         input: ['id_jugador'],
         validar: /^\d{5,12}$/,
         paquetes: {
-            // Diamantes
             '110':  'FF-110-DIAMONDS',
             '341':  'FF-341-DIAMONDS',
             '572':  'FF-572-DIAMONDS',
             '1166': 'FF-1166-DIAMONDS',
             '2398': 'FF-2398-DIAMONDS',
             '6160': 'FF-6160-DIAMONDS',
-            // Tarjetas y Pases
             'weekly_semanal': 'FF-WEEKLY-SEMANAL',
             'weekly_mensual': 'FF-WEEKLY-MENSUAL',
             'weekly_booyah':  'FF-WEEKLY-BOOYAH'
@@ -331,6 +336,7 @@ const PRODUCTOS_CONFIG = {
         tipo: 'giftcard',
         input: ['email'],
         paquetes: {
+            '1': 'PSN-1', '2': 'PSN-2', '3': 'PSN-3', '4': 'PSN-4',
             '5': 'PSN-5', '10': 'PSN-10', '15': 'PSN-15', '20': 'PSN-20',
             '25': 'PSN-25', '30': 'PSN-30', '35': 'PSN-35', '40': 'PSN-40',
             '45': 'PSN-45', '50': 'PSN-50', '75': 'PSN-75', '100': 'PSN-100'
@@ -340,8 +346,8 @@ const PRODUCTOS_CONFIG = {
         tipo: 'giftcard',
         input: ['email'],
         paquetes: {
-            '1': 'XBOX-1', '10': 'XBOX-10', '15': 'XBOX-15',
-            '20': 'XBOX-20', '100': 'XBOX-100'
+            '1': 'XBOX-1', '5': 'XBOX-5', '10': 'XBOX-10', '15': 'XBOX-15',
+            '20': 'XBOX-20', '25': 'XBOX-25', '50': 'XBOX-50', '100': 'XBOX-100'
         }
     },
     'NINTENDO': {
@@ -532,8 +538,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.3 funcionando',
-                version: '3.3',
+                mensaje: '✅ API Central One v3.4 funcionando',
+                version: '3.4',
                 acciones: ['catalogo', 'juegos', 'verificar', 'saldo'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
