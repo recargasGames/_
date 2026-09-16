@@ -29,7 +29,6 @@ body{
     position:relative;
 }
 
-/* 🎬 VIDEO DE FONDO */
 .video-fondo{
     position:fixed;
     top:0;
@@ -669,11 +668,7 @@ body::after{
         <a href="pubg.html">PUBG Mobile</a>
         <a href="arenabreakout.html">Arena Breakout</a>
         <a href="delta.html">Delta Force</a>
-        <a href="fortnite.html">Fortnite</a>
-        <a href="lol.html">League of Legends</a>
-        <a href="overwatch.html">Overwatch</a>
         <a href="bigo.html">Bigo Live</a>
-        <a href="ff-weekly.html">FF Weekly</a>
         <a href="gift-cards.html">Gift Cards</a>
         <a href="netflix.html">Netflix</a>
         <a href="disney.html">Disney+</a>
@@ -715,7 +710,7 @@ body::after{
         <div class="panel-title">🆔 ID del Jugador</div>
         <div class="form-group">
             <label>ID del Jugador</label>
-            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="10" class="form-input" id="jugadorId" placeholder="Ej: 4664719056" autocomplete="off">
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="jugadorId" placeholder="Ej: 4664719056" autocomplete="off">
         </div>
         <div class="id-status" id="idStatus"></div>
     </div>
@@ -766,6 +761,29 @@ body::after{
             <div class="product-desc">🔥 Mega oferta</div>
             <div class="product-price" data-usd="39.00">$39.00</div>
             <button class="btn-buy" onclick="comprarProducto('6160 Diamantes', '39.00', '6160')">COMPRAR</button>
+        </div>
+    </div>
+
+    <!-- 🎫 NUEVA SECCIÓN: TARJETAS Y PASES -->
+    <div class="section-divider"><span>🎫 TARJETAS Y PASES</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Semanal</div></div>
+            <div class="product-desc">⚡ 7 días de beneficios</div>
+            <div class="product-price" data-usd="2.50">$2.50</div>
+            <button class="btn-buy" onclick="comprarProducto('Tarjeta Semanal', '2.50', 'weekly_semanal')">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Mensual</div></div>
+            <div class="product-desc">⚡ 30 días de beneficios</div>
+            <div class="product-price" data-usd="11.00">$11.00</div>
+            <button class="btn-buy" onclick="comprarProducto('Tarjeta Mensual', '11.00', 'weekly_mensual')">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Pase Booyah</div></div>
+            <div class="product-desc">🔥 Pase de evento exclusivo</div>
+            <div class="product-price" data-usd="3.00">$3.00</div>
+            <button class="btn-buy" onclick="comprarProducto('Pase Booyah', '3.00', 'weekly_booyah')">COMPRAR</button>
         </div>
     </div>
 </div>
@@ -951,26 +969,23 @@ inputId.addEventListener('input', function() {
     idVerificado = false;
     nicknameVerificado = "";
     if (id.length === 0) { statusDiv.style.display = 'none'; return; }
-    if (!/^\d{5,10}$/.test(id)) {
+    if (!/^\d{5,12}$/.test(id)) {
         if (id.length < 5) mostrarEstado('⚠️ Mínimo 5 dígitos', 'error');
-        else if (id.length > 10) mostrarEstado('⚠️ Máximo 10 dígitos', 'error');
+        else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
         return;
     }
     timeoutId = setTimeout(async () => {
         mostrarEstado('🔍 Verificando ID...', 'verificando');
         try {
-            const respuesta = await fetch('/api/verificar-jugador', {
+            const respuesta = await fetch('/api/verificar-id', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    juego: 'FREE FIRE',
-                    id_jugador: id
-                })
+                body: JSON.stringify({ id_jugador: id })
             });
             const datos = await respuesta.json();
-            if (datos.valido && datos.nickname) {
+            if (datos.valido) {
                 idVerificado = true;
-                nicknameVerificado = datos.nickname;
+                nicknameVerificado = datos.nickname || '';
                 mostrarEstado('', 'valido', datos.nickname);
             } else {
                 idVerificado = false;
