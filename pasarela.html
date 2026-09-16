@@ -37,7 +37,6 @@ body{
     overflow-x:hidden;
 }
 
-/* 🎬 VIDEO DE FONDO */
 .video-fondo{
     position:fixed;
     top:0;
@@ -390,7 +389,6 @@ body::after{
     box-shadow:0 8px 25px rgba(34,197,94,0.6);
 }
 
-/* 🎨 MODAL */
 .mensaje-overlay{
     display:none;position:fixed;top:0;left:0;right:0;bottom:0;
     background:rgba(0,0,0,0.85);
@@ -525,7 +523,24 @@ body::after{
 
     <div id="pasoDatos" class="paso-box">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
-        
+
+        <!-- 🆕 CAMPO DE WHATSAPP -->
+        <div class="datos-pago-box" style="margin-bottom:20px;">
+            <h3 class="titulo-seccion" style="margin-top:0;">📱 Tu WhatsApp</h3>
+            <p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:12px;">
+                Recibirás aquí la confirmación de tu compra
+            </p>
+            <input type="tel"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   id="whatsappCliente"
+                   class="input-ref"
+                   placeholder="Ej: 584241234567"
+                   maxlength="15"
+                   style="text-align:center;letter-spacing:1px;font-size:16px;margin-bottom:8px;">
+            <div id="whatsappStatus" style="text-align:center;font-size:13px;min-height:18px;"></div>
+        </div>
+
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">🎮 Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">🆔 ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
@@ -538,7 +553,7 @@ body::after{
 
         <div class="datos-pago-box">
             <h3 class="titulo-seccion" style="margin-top:0;">🏦 Datos de Pago Móvil</h3>
-            
+
             <div class="dato-line">
                 <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
                 <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)">
@@ -801,6 +816,50 @@ document.getElementById('cuponInput').addEventListener('keypress', function(e) {
 });
 
 // ==============================================
+// 📱 VALIDACIÓN DE WHATSAPP
+// ==============================================
+const inputWhatsApp = document.getElementById('whatsappCliente');
+const statusWhatsApp = document.getElementById('whatsappStatus');
+
+if (inputWhatsApp) {
+    inputWhatsApp.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
+
+    inputWhatsApp.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const texto = (e.clipboardData || window.clipboardData).getData('text');
+        const soloNumeros = texto.replace(/\D/g, '');
+        document.execCommand('insertText', false, soloNumeros);
+    });
+
+    inputWhatsApp.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        const num = this.value.trim();
+
+        if (num.length === 0) {
+            statusWhatsApp.textContent = '';
+            return;
+        }
+
+        if (num.length < 10) {
+            statusWhatsApp.textContent = '⚠️ Mínimo 10 dígitos';
+            statusWhatsApp.style.color = '#f87171';
+            return;
+        }
+
+        if (num.length > 15) {
+            statusWhatsApp.textContent = '⚠️ Máximo 15 dígitos';
+            statusWhatsApp.style.color = '#f87171';
+            return;
+        }
+
+        statusWhatsApp.textContent = '✅ WhatsApp válido';
+        statusWhatsApp.style.color = '#4ade80';
+    });
+}
+
+// ==============================================
 // 🎯 PASO INICIAL
 // ==============================================
 function mostrarPasoInicial() {
@@ -943,6 +1002,45 @@ async function marcarCuponComoUsado(codigo) {
 }
 
 // ==============================================
+// 🔢 GENERAR NÚMERO DE PEDIDO SECUENCIAL
+// ==============================================
+async function generarNumeroPedido() {
+    try {
+        const contadorRef = db.ref('configuracion/contador_pedidos');
+        const resultado = await contadorRef.transaction((valorActual) => {
+            return (valorActual || 0) + 1;
+        });
+        const numero = resultado.snapshot.val() || 1;
+        const numeroFormateado = String(numero).padStart(4, '0');
+        console.log('🔢 Pedido #' + numeroFormateado);
+        return numeroFormateado;
+    } catch (error) {
+        console.error('Error generando número de pedido:', error);
+        const fallback = Date.now().toString().slice(-4);
+        return fallback;
+    }
+}
+
+// ==============================================
+// 📱 ENVIAR NOTIFICACIÓN WHATSAPP (vía bot)
+// ==============================================
+async function enviarWhatsApp(telefono, mensajeCliente, mensajeAdmin) {
+    try {
+        const res = await fetch('/api/notificar-bot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telefono, mensajeCliente, mensajeAdmin })
+        });
+        const data = await res.json();
+        console.log('📱 WhatsApp:', data);
+        return data.ok;
+    } catch (error) {
+        console.error('❌ Error WhatsApp:', error);
+        return false;
+    }
+}
+
+// ==============================================
 // 💾 GUARDAR PEDIDO + ACTUALIZAR USUARIO
 // ==============================================
 async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos) {
@@ -950,8 +1048,14 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
         const user = auth.currentUser;
         const nuevoPedido = refPedidos.push();
 
+        const numeroPedido = await generarNumeroPedido();
+        const numeroMostrar = `#${numeroPedido}`;
+        const whatsappCliente = document.getElementById('whatsappCliente')?.value.trim() || '';
+
         await nuevoPedido.set({
             uid: user ? user.uid : 'anonimo',
+            numero_pedido: numeroPedido,
+            numero_pedido_mostrar: numeroMostrar,
             referencia: referencia,
             juego: juego,
             id_jugador: idJugador,
@@ -971,17 +1075,16 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             fecha: new Date().toISOString(),
             metodo: metodoPago,
             referencia_pago: referencia,
+            whatsapp_cliente: whatsappCliente || null,
             pin: codigos && codigos.length > 0 ? codigos[0] : null,
             codigos: codigos || []
         });
 
-        // ✅ ACTUALIZAR USUARIO EN LA BD
         if (user && user.uid) {
             try {
                 const userRef = db.ref('usuarios/' + user.uid);
                 const snap = await userRef.once('value');
                 const datosActuales = snap.val() || {};
-
                 await userRef.update({
                     ultimaActividad: new Date().toISOString(),
                     ultimaActividadLegible: new Date().toLocaleString('es-VE'),
@@ -998,10 +1101,10 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             }
         }
 
-        return nuevoPedido.key;
+        return { id: nuevoPedido.key, numero: numeroPedido, numeroMostrar };
     } catch (error) {
         console.error('Error guardando pedido:', error);
-        return null;
+        return { id: null, numero: null, numeroMostrar: '#----' };
     }
 }
 
@@ -1046,7 +1149,7 @@ async function verificarPagoPabilo(referencia) {
 }
 
 // ==============================================
-// 🎮 CENTRAL ONE (CON MENSAJES AMIGABLES)
+// 🎮 CENTRAL ONE
 // ==============================================
 async function enviarRecargaCentralOne() {
     try {
@@ -1069,27 +1172,12 @@ async function enviarRecargaCentralOne() {
 
         if (!res.ok) {
             if (data.sinSaldo) {
-                return {
-                    exito: false,
-                    silencioso: true,
-                    motivo_admin: 'SALDO INSUFICIENTE EN CENTRAL ONE',
-                    mensaje: 'Tu recarga llegará a tu cuenta muy pronto'
-                };
+                return { exito: false, silencioso: true, motivo_admin: 'SALDO INSUFICIENTE EN CENTRAL ONE', mensaje: 'Tu recarga llegará a tu cuenta muy pronto' };
             }
             if (data.sinStock) {
-                return {
-                    exito: false,
-                    silencioso: true,
-                    motivo_admin: 'PRODUCTO AGOTADO EN CENTRAL ONE',
-                    mensaje: 'Estamos procesando tu pedido, llegará en breve'
-                };
+                return { exito: false, silencioso: true, motivo_admin: 'PRODUCTO AGOTADO EN CENTRAL ONE', mensaje: 'Estamos procesando tu pedido, llegará en breve' };
             }
-            return {
-                exito: false,
-                silencioso: true,
-                motivo_admin: data.error || 'Error interno',
-                mensaje: 'Tu pedido está siendo procesado por nuestro equipo'
-            };
+            return { exito: false, silencioso: true, motivo_admin: data.error || 'Error interno', mensaje: 'Tu pedido está siendo procesado por nuestro equipo' };
         }
 
         return {
@@ -1103,12 +1191,7 @@ async function enviarRecargaCentralOne() {
 
     } catch (error) {
         console.error('❌ Error Central One:', error);
-        return {
-            exito: false,
-            silencioso: true,
-            motivo_admin: 'Error de conexión con Central One',
-            mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto'
-        };
+        return { exito: false, silencioso: true, motivo_admin: 'Error de conexión con Central One', mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto' };
     }
 }
 
@@ -1123,6 +1206,13 @@ function mostrarPaso(idPaso) {
 async function iniciarVerificacion() {
     const referencia = document.getElementById('referenciaPago').value.trim();
     const btn = document.getElementById('btnVerificar');
+    const whatsappCliente = document.getElementById('whatsappCliente').value.trim();
+
+    if (!whatsappCliente || whatsappCliente.length < 10) {
+        mostrarMensaje('WhatsApp requerido', 'Ingresa tu número de WhatsApp para enviarte la confirmación.', 'advertencia');
+        document.getElementById('whatsappCliente').focus();
+        return;
+    }
 
     if (!referencia || referencia.length < 6) {
         mostrarMensaje('Referencia inválida', 'Escribe la referencia completa del pago (mínimo 6 dígitos).', 'advertencia');
@@ -1137,11 +1227,7 @@ async function iniciarVerificacion() {
         // 1. Verificar si la referencia ya fue usada
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
-            notificarAdmin('duplicado', {
-                referencia: referencia,
-                metodo: metodoPago,
-                mensaje_extra: '⚠️ Intentó usar una referencia <b>YA USADA</b>'
-            });
+            notificarAdmin('duplicado', { referencia, metodo: metodoPago, mensaje_extra: '⚠️ Intentó usar una referencia <b>YA USADA</b>' });
             await guardarReferenciaFalsa(referencia, 'Referencia duplicada - Ya usada');
             mostrarPaso('pasoReferenciaUsada');
             btn.disabled = false;
@@ -1153,11 +1239,7 @@ async function iniciarVerificacion() {
         if (cuponAplicado) {
             const cuponYaUsado = await verificarCuponUsado(cuponAplicado);
             if (cuponYaUsado) {
-                notificarAdmin('cupon_usado', {
-                    referencia: referencia,
-                    metodo: metodoPago,
-                    mensaje_extra: `🎁 Intentó usar cupón <b>YA USADO</b>: <code>${cuponAplicado}</code>`
-                });
+                notificarAdmin('cupon_usado', { referencia, metodo: metodoPago, mensaje_extra: `🎁 Intentó usar cupón <b>YA USADO</b>: <code>${cuponAplicado}</code>` });
                 mostrarMensaje('Cupón usado', 'Este cupón ya fue utilizado anteriormente.', 'advertencia');
                 descuentoAplicado = 0;
                 cuponAplicado = "";
@@ -1174,11 +1256,7 @@ async function iniciarVerificacion() {
         const pagoConfirmado = await verificarPagoPabilo(referencia);
 
         if (!pagoConfirmado) {
-            notificarAdmin('falso', {
-                referencia: referencia,
-                metodo: metodoPago,
-                mensaje_extra: '⚠️ Referencia <b>NO encontrada</b> en el banco (posible fraude)'
-            });
+            notificarAdmin('falso', { referencia, metodo: metodoPago, mensaje_extra: '⚠️ Referencia <b>NO encontrada</b> en el banco (posible fraude)' });
             await guardarReferenciaFalsa(referencia, 'No encontrada en Pábilo');
             document.getElementById('msgError').textContent = 'Verifica tu referencia e inténtalo de nuevo.';
             setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
@@ -1199,8 +1277,8 @@ async function iniciarVerificacion() {
         let resultadoRecarga = await enviarRecargaCentralOne();
         await new Promise(r => setTimeout(r, 1000));
 
-        // 6. Guardar en Firebase
-        const idPedido = await guardarPedidoEnFirebase(
+        // 6. Guardar en Firebase (con número secuencial)
+        const infoPedido = await guardarPedidoEnFirebase(
             referencia,
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
             resultadoRecarga.id_solicitud || '',
@@ -1208,11 +1286,14 @@ async function iniciarVerificacion() {
             resultadoRecarga.codigos || []
         );
 
+        const idPedido = infoPedido.id;
+        const numeroPedido = infoPedido.numeroMostrar;
+
         // 7. Mostrar resultado
         if (resultadoRecarga.exito) {
             document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
             document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
-            document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
+            document.getElementById('resPedido').textContent = numeroPedido;
             document.getElementById('resProducto').textContent = producto;
             document.getElementById('resNombre').textContent = nombreJugador;
             document.getElementById('resIdResumen').textContent = idJugador;
@@ -1236,21 +1317,48 @@ async function iniciarVerificacion() {
 
             mostrarPaso('pasoRecargaExitosa');
 
-            notificarAdmin('exito', {
-                referencia: referencia,
-                metodo: metodoPago,
-                mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : ''
-            });
+            notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : '' });
 
             if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
                 enviarTelegram(`🎮 <b>PIN DEL PEDIDO:</b> <code>${resultadoRecarga.codigos[0]}</code>`);
             }
 
+            // 📱 ENVIAR WHATSAPP AL CLIENTE Y ADMIN
+            if (whatsappCliente && whatsappCliente.length >= 10) {
+                const mensajeCliente = 
+                    `🎮 *RECARGAS GAMES*\n\n` +
+                    `¡Hola! Recibimos tu comprobante ✅\n\n` +
+                    `🎯 Producto: ${producto}\n` +
+                    `👤 Jugador: ${nombreJugador}\n` +
+                    `🆔 ID: ${idJugador}\n` +
+                    `💰 Total: $${precioUsdFinal.toFixed(2)}\n` +
+                    `📋 Pedido: ${numeroPedido}\n\n` +
+                    `¡Gracias por tu compra! 🙌`;
+
+                const mensajeAdmin = 
+                    `🆕 *NUEVO PEDIDO - JUEGO*\n\n` +
+                    `🎮 Juego: ${juego}\n` +
+                    `📦 Producto: ${producto}\n` +
+                    `👤 Jugador: ${nombreJugador}\n` +
+                    `🆔 ID: ${idJugador}\n` +
+                    `📱 WhatsApp cliente: ${whatsappCliente}\n` +
+                    `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
+                    `📋 Pedido: ${numeroPedido}\n` +
+                    `🔢 Ref: ${referencia}\n` +
+                    `💳 Método: ${metodoPago}\n\n` +
+                    `✅ Estado: COMPLETADA` +
+                    (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0 
+                        ? `\n🎟️ PIN: ${resultadoRecarga.codigos[0]}` 
+                        : '');
+
+                await enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
+                console.log('📱 Notificaciones WhatsApp enviadas');
+            }
+
         } else if (resultadoRecarga.silencioso) {
-            // 🚨 Pago verificado pero problema interno: mensaje positivo al cliente
             document.getElementById('tituloExito').textContent = '¡Pago Verificado!';
             document.getElementById('subtituloExito').textContent = 'Tu recarga llegará a tu cuenta muy pronto. Te notificaremos por WhatsApp cuando esté lista.';
-            document.getElementById('resPedido').textContent = `#${(idPedido || '0000').substring(0, 8).toUpperCase()}`;
+            document.getElementById('resPedido').textContent = numeroPedido;
             document.getElementById('resProducto').textContent = producto;
             document.getElementById('resNombre').textContent = nombreJugador;
             document.getElementById('resIdResumen').textContent = idJugador;
@@ -1271,7 +1379,8 @@ async function iniciarVerificacion() {
             if (cuponAplicado) msgAdmin += `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)\n`;
             msgAdmin += `\n⚠️ <b>Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar Central One'}\n`;
             msgAdmin += `🚨 <b>Acción:</b> Procesa la recarga manualmente\n`;
-            msgAdmin += `📋 Pedido: #${(idPedido || '0000').substring(0, 8).toUpperCase()}\n`;
+            msgAdmin += `📋 Pedido: ${numeroPedido}\n`;
+            msgAdmin += `📱 WhatsApp cliente: ${whatsappCliente}\n`;
             msgAdmin += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
 
             enviarTelegram(msgAdmin);
@@ -1279,24 +1388,14 @@ async function iniciarVerificacion() {
         } else {
             document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo en unos minutos.';
             mostrarPaso('pasoPagoNoEncontrado');
-
-            notificarAdmin('error', {
-                referencia: referencia,
-                metodo: metodoPago,
-                mensaje_extra: `❌ Error: ${resultadoRecarga.mensaje || 'Desconocido'}`
-            });
+            notificarAdmin('error', { referencia, metodo: metodoPago, mensaje_extra: `❌ Error: ${resultadoRecarga.mensaje || 'Desconocido'}` });
         }
 
     } catch (error) {
         console.error('❌ Error:', error);
         mostrarMensaje('Error', 'Ocurrió un error inesperado. Intenta de nuevo.', 'error');
         mostrarPaso('pasoDatos');
-
-        notificarAdmin('error', {
-            referencia: document.getElementById('referenciaPago').value.trim(),
-            metodo: metodoPago,
-            mensaje_extra: `❌ Error crítico: ${error.message}`
-        });
+        notificarAdmin('error', { referencia: document.getElementById('referenciaPago').value.trim(), metodo: metodoPago, mensaje_extra: `❌ Error crítico: ${error.message}` });
     } finally {
         btn.disabled = false;
         btn.innerHTML = '✅ Verificar Pago';
