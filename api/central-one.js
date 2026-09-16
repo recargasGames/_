@@ -1,9 +1,10 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.0
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.3
 // ============================================
-// v3.0: Agregados Apex, Fortnite, LOL, Overwatch,
-// Bigo Live, EA FC, Free Fire Weekly, Roblox Gift Cards,
-// PlayStation, Xbox, Nintendo, Netflix Gift Cards
+// v3.3: AGREGADO FF Weekly (Semanal, Mensual, Booyah) al FREE FIRE
+//       ELIMINADO Apex, Fortnite, Overwatch, LOL, FF Weekly aparte
+// v3.2: AGREGADO Mobile Legends (55, 86, 112, 172, 257, 429, 706, 1050)
+// v3.1: AGREGADO PUBG Mobile (WOW Coins + Prime Plus)
 // Telegram con process.env (sin hardcodeo)
 // ============================================
 
@@ -14,15 +15,17 @@ const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 // ============================================
 const SKU_MAP = {
     // ============================================
-    // 🔥 FREE FIRE
+    // 🔥 FREE FIRE (diamantes + membresías)
     // ============================================
-    'FF-110-DIAMONDS':   'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
-    'FF-341-DIAMONDS':   'bb0a8212-916e-4c9a-ad22-170fa9732734',
-    'FF-572-DIAMONDS':   '0cbc02a5-2e65-41d3-899e-917abd1a2dd1',
-    'FF-1166-DIAMONDS':  'afad588d-54f9-4227-9c0b-9889a9135370',
-    'FF-2398-DIAMONDS':  '72b92180-b858-41fc-8e9d-bc402c16db80',
-    'FF-6160-DIAMONDS':  'e839259e-79e5-474e-b6e8-0c83f876ac6a',
-    'FF-WEEKLY':         '24373afa-9b2a-4cc3-8ef4-ded89a9d6cd9',
+    'FF-110-DIAMONDS':    'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
+    'FF-341-DIAMONDS':    'bb0a8212-916e-4c9a-ad22-170fa9732734',
+    'FF-572-DIAMONDS':    '0cbc02a5-2e65-41d3-899e-917abd1a2dd1',
+    'FF-1166-DIAMONDS':   'afad588d-54f9-4227-9c0b-9889a9135370',
+    'FF-2398-DIAMONDS':   '72b92180-b858-41fc-8e9d-bc402c16db80',
+    'FF-6160-DIAMONDS':   'e839259e-79e5-474e-b6e8-0c83f876ac6a',
+    'FF-WEEKLY-SEMANAL':  '47bba141-8980-47f7-b4bd-2e264c2d9930',
+    'FF-WEEKLY-MENSUAL':  '6f98867c-a84e-418e-ab54-83f1da1fdee2',
+    'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
 
     // ============================================
     // ⚔️ BLOOD STRIKE
@@ -33,6 +36,34 @@ const SKU_MAP = {
     'BS-1100': '0b024948-132f-4834-8bcb-57ffa75f1403',
     'BS-2260': 'b4671110-4eb6-421e-b428-26ea992f8f48',
     'BS-5800': '53df3770-de7f-4902-b78b-d0647c956fcb',
+
+    // ============================================
+    // 🎯 PUBG MOBILE (WOW Coins + Prime Plus)
+    // ============================================
+    'PUBG-60-WOW':      'e3a5f720-8a66-4ce3-8dd6-88141d539f2d',
+    'PUBG-325-WOW':     '1b38e531-b2b7-4319-998b-4b6f4738f418',
+    'PUBG-660-WOW':     'a5197d82-5b5d-4f8b-9850-e6d65b44bc1a',
+    'PUBG-1800-WOW':    '85a09dd0-d45d-4a3c-a40f-e878d0f46cb2',
+    'PUBG-3850-WOW':    '12de1a93-363a-45d3-8582-11d052a93665',
+    'PUBG-8100-WOW':    '865240be-8624-4bfb-8cc9-a00402f859fd',
+    'PUBG-WEEKLY-DEAL': 'f9df0a3a-a46d-4d9b-9c8f-be1a76ff9bc2',
+    'PUBG-PRIME-1M':    '7171efcd-7ece-4f2a-b042-f27f8533a7dd',
+    'PUBG-PRIME-3M':    '25f4a66d-26ed-471d-9ce9-c154007cebef',
+    'PUBG-PRIME-6M':    'f6f6138f-07d0-40de-8ff7-745bb887aba6',
+    'PUBG-PRIME-12M':   '8912c69e-468b-4c9f-993d-43d6b28c413c',
+    'PUBG-ELITE-PASS':  '9f636584-3649-44ce-8d79-51260acccaa0',
+
+    // ============================================
+    // ⚔️ MOBILE LEGENDS (GLOBAL)
+    // ============================================
+    'ML-55':   '85e05010-7caa-4416-a8cf-8180f1cb8cf5',
+    'ML-86':   '46f6116c-7bce-4251-aae7-90405beed7f6',
+    'ML-112':  '0d0eac0a-a97d-4a93-9d42-1542d036dc61',
+    'ML-172':  '98f7e381-8697-4201-8cfb-ef8813225946',
+    'ML-257':  '45f573d5-6223-4bc0-9da6-eb6cf3bd64a8',
+    'ML-429':  'c5001e7e-4b91-4793-bbb4-f1f2038e4081',
+    'ML-706':  '4b4425c0-4525-496a-abdf-75708c9a503d',
+    'ML-1050': '608bf79a-acb1-4ff8-bd67-63906d92c480',
 
     // ============================================
     // 🧱 ROBLOX (GIFT CARDS en Robux)
@@ -98,30 +129,12 @@ const SKU_MAP = {
     'DF-SP-DLX': '6d273271-9d52-42c1-b6fc-d4a1eebefc02',
 
     // ============================================
-    // 🎯 APEX LEGENDS (Syndicate Gold - PH región)
-    // ============================================
-    'APEX-1050-PH':  '89fcae19-85be-470d-9ff5-739b744883b4',
-    'APEX-11500-PH': '7e1f33a9-daad-4584-bc9b-44e3a852910f',
-
-    // ============================================
-    // 🎯 OVERWATCH (1000 Coins)
-    // ============================================
-    'OW-1000': '0f08952b-b1f9-45ef-818d-beee2137e536',
-
-    // ============================================
     // 🎮 BIGO LIVE (Diamantes)
     // ============================================
     'BIGO-100':  '80f84262-372b-4e71-8df9-a3f9f75ad4da',
-    'BIGO-500':  'd5a22f8a-e039-4bc5-84a6-b2d74dcc6e61', // 2000 Diamantes (aproximado)
+    'BIGO-500':  'd5a22f8a-e039-4bc5-84a6-b2d74dcc6e61',
     'BIGO-1000': '0357c579-a20b-4fe2-bbdd-35742c429c0c',
     'BIGO-10000': '53bea902-d838-4c33-87f7-2dc637cc9820',
-
-    // ============================================
-    // ⚔️ LEAGUE OF LEGENDS (RP - US)
-    // ============================================
-    'LOL-650-US':   'ff50b781-29c6-4d91-8986-830871d49c51', // 1240 RP
-    'LOL-1350-US':  'a76c0ae1-98bf-4663-91c3-193841ca56a4', // 1895 RP
-    'LOL-11000-US': 'b34b723c-8e1b-4f79-91a6-acacfab7a92b', // 13500 RP
 
     // ============================================
     // 🎁 GIFT CARDS - PLAYSTATION US
@@ -146,8 +159,8 @@ const SKU_MAP = {
     'XBOX-10':  '44bfddeb-e545-46ca-91ec-74eb58943cc7',
     'XBOX-15':  '3dfe654b-f678-49bf-b928-c794c6509bb4',
     'XBOX-20':  '29874d8d-a346-41a1-a19d-1a435f58e0cf',
-    'XBOX-25':  '29874d8d-a346-41a1-a19d-1a435f58e0cf', // fallback
-    'XBOX-50':  '29874d8d-a346-41a1-a19d-1a435f58e0cf', // fallback
+    'XBOX-25':  '29874d8d-a346-41a1-a19d-1a435f58e0cf',
+    'XBOX-50':  '29874d8d-a346-41a1-a19d-1a435f58e0cf',
     'XBOX-100': 'd60be4c3-fb96-4876-9f65-baeaf402b74f',
 
     // ============================================
@@ -155,7 +168,7 @@ const SKU_MAP = {
     // ============================================
     'NINTENDO-10': 'f28a4f1b-617c-4b6a-814e-1263a91da6f5',
     'NINTENDO-20': '28d38620-68fc-4720-8e2f-586718f68e2b',
-    'NINTENDO-50': '092cce7c-83e5-42a9-b1d6-20978f81f6db', // fallback UK 100
+    'NINTENDO-50': '092cce7c-83e5-42a9-b1d6-20978f81f6db',
     'NINTENDO-100':'092cce7c-83e5-42a9-b1d6-20978f81f6db',
 
     // ============================================
@@ -195,10 +208,9 @@ const SKU_MAP = {
 // ============================================
 // 🎯 PRECIOS DE VENTA (margen sobre costo)
 // ============================================
-// Ajusta estos multiplicadores según tu margen deseado
-const MARGEN_JUEGOS = 1.20;        // +20% para recargas de juegos
-const MARGEN_GIFTCARDS = 1.10;     // +10% para gift cards
-const MARGEN_STREAMING = 1.15;     // +15% para streaming
+const MARGEN_JUEGOS = 1.20;
+const MARGEN_GIFTCARDS = 1.10;
+const MARGEN_STREAMING = 1.15;
 
 // ============================================
 // 📋 CONFIGURACIÓN DE PRODUCTOS
@@ -210,19 +222,18 @@ const PRODUCTOS_CONFIG = {
         input: ['id_jugador'],
         validar: /^\d{5,12}$/,
         paquetes: {
+            // Diamantes
             '110':  'FF-110-DIAMONDS',
             '341':  'FF-341-DIAMONDS',
             '572':  'FF-572-DIAMONDS',
             '1166': 'FF-1166-DIAMONDS',
             '2398': 'FF-2398-DIAMONDS',
-            '6160': 'FF-6160-DIAMONDS'
+            '6160': 'FF-6160-DIAMONDS',
+            // Tarjetas y Pases
+            'weekly_semanal': 'FF-WEEKLY-SEMANAL',
+            'weekly_mensual': 'FF-WEEKLY-MENSUAL',
+            'weekly_booyah':  'FF-WEEKLY-BOOYAH'
         }
-    },
-    'FREE FIRE WEEKLY': {
-        tipo: 'juego',
-        input: ['id_jugador'],
-        validar: /^\d{5,12}$/,
-        paquetes: { 'weekly': 'FF-WEEKLY' }
     },
     'BLOOD STRIKE': {
         tipo: 'juego',
@@ -235,6 +246,39 @@ const PRODUCTOS_CONFIG = {
             '1100': 'BS-1100',
             '2260': 'BS-2260',
             '5800': 'BS-5800'
+        }
+    },
+    'PUBG MOBILE': {
+        tipo: 'juego',
+        input: ['id_jugador'],
+        validar: /^\d{8,12}$/,
+        paquetes: {
+            '60':          'PUBG-60-WOW',
+            '325':         'PUBG-325-WOW',
+            '660':         'PUBG-660-WOW',
+            '1800':        'PUBG-1800-WOW',
+            '3850':        'PUBG-3850-WOW',
+            '8100':        'PUBG-8100-WOW',
+            'prime_1m':    'PUBG-PRIME-1M',
+            'prime_3m':    'PUBG-PRIME-3M',
+            'prime_6m':    'PUBG-PRIME-6M',
+            'prime_12m':   'PUBG-PRIME-12M',
+            'elite_pass':  'PUBG-ELITE-PASS'
+        }
+    },
+    'MOBILE LEGENDS': {
+        tipo: 'juego',
+        input: ['id_jugador', 'zona_id'],
+        validar: /^\d{8,15}$/,
+        paquetes: {
+            '55':   'ML-55',
+            '86':   'ML-86',
+            '112':  'ML-112',
+            '172':  'ML-172',
+            '257':  'ML-257',
+            '429':  'ML-429',
+            '706':  'ML-706',
+            '1050': 'ML-1050'
         }
     },
     'COD': {
@@ -272,21 +316,6 @@ const PRODUCTOS_CONFIG = {
             'sp_ops': 'DF-SP-OPS', 'sp_war': 'DF-SP-WAR', 'sp_dlx': 'DF-SP-DLX'
         }
     },
-    'APEX LEGENDS': {
-        tipo: 'juego',
-        input: ['id_jugador'],
-        validar: /^[a-zA-Z0-9_-]{3,30}$/,
-        paquetes: {
-            '1050': 'APEX-1050-PH',
-            '11500': 'APEX-11500-PH'
-        }
-    },
-    'OVERWATCH': {
-        tipo: 'juego',
-        input: ['id_jugador'],
-        validar: /^[a-zA-Z0-9#-]{3,30}$/,
-        paquetes: { '1000': 'OW-1000' }
-    },
     'BIGO LIVE': {
         tipo: 'juego',
         input: ['id_jugador'],
@@ -294,16 +323,6 @@ const PRODUCTOS_CONFIG = {
         paquetes: {
             '100': 'BIGO-100', '500': 'BIGO-500',
             '1000': 'BIGO-1000', '10000': 'BIGO-10000'
-        }
-    },
-    'LEAGUE OF LEGENDS': {
-        tipo: 'juego',
-        input: ['id_jugador'],
-        validar: /^[a-zA-Z0-9]{3,20}$/,
-        paquetes: {
-            '650': 'LOL-650-US',
-            '1350': 'LOL-1350-US',
-            '11000': 'LOL-11000-US'
         }
     },
 
@@ -364,7 +383,7 @@ const PRODUCTOS_CONFIG = {
 };
 
 // ============================================
-// 🎯 getUUID — devuelve UUID o {error}
+// 🎯 getUUID
 // ============================================
 function getUUID(juego, paquete) {
     const j = String(juego).toUpperCase().trim();
@@ -388,7 +407,6 @@ function validarID(juego, id) {
 
     if (!config || !config.validar) return true;
 
-    // Para gift cards, validamos email
     if (config.tipo === 'giftcard') {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(id).trim());
     }
@@ -462,7 +480,6 @@ export default async function handler(req, res) {
             }
 
             if (accion === 'juegos') {
-                // Devuelve lista de juegos disponibles
                 const juegos = Object.keys(PRODUCTOS_CONFIG).map(j => ({
                     nombre: j,
                     tipo: PRODUCTOS_CONFIG[j].tipo,
@@ -477,7 +494,6 @@ export default async function handler(req, res) {
                     return res.status(400).json({ error: 'Faltan parámetros' });
                 }
 
-                // Verificar formato primero
                 if (!validarID(game, id)) {
                     return res.status(400).json({
                         error: `Formato inválido para ${game}`,
@@ -485,7 +501,6 @@ export default async function handler(req, res) {
                     });
                 }
 
-                // Para Free Fire usar apicentral.pro (ya tienes esa API)
                 if (game.toUpperCase().includes('FREE FIRE')) {
                     const FF_TOKEN = process.env.FF_API_TOKEN;
                     if (FF_TOKEN) {
@@ -517,8 +532,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.0 funcionando',
-                version: '3.0',
+                mensaje: '✅ API Central One v3.3 funcionando',
+                version: '3.3',
                 acciones: ['catalogo', 'juegos', 'verificar', 'saldo'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
@@ -531,7 +546,7 @@ export default async function handler(req, res) {
             const { accion, datos } = req.body || {};
 
             if (accion === 'recarga') {
-                const { juego, id_jugador, paquete, email, servidor } = datos || {};
+                const { juego, id_jugador, paquete, email, servidor, zona_id } = datos || {};
 
                 if (!juego || !paquete) {
                     return res.status(400).json({ error: 'Faltan datos (juego, paquete)' });
@@ -542,7 +557,6 @@ export default async function handler(req, res) {
                     return res.status(400).json({ error: `Juego no soportado: ${juego}` });
                 }
 
-                // Validar input según tipo
                 const inputRequerido = config.tipo === 'giftcard' ? email : id_jugador;
                 if (!inputRequerido) {
                     return res.status(400).json({
@@ -576,18 +590,12 @@ export default async function handler(req, res) {
                     note: `${juegoUpper} - ${config.tipo === 'giftcard' ? `Email: ${email}` : `ID: ${id_jugador}`} - Paquete: ${paquete}`
                 };
 
-                // target_payload según tipo
                 if (config.tipo === 'giftcard') {
                     payload.items[0].target_payload = { email: email };
-                } else if (juegoUpper === 'ROBLOX') {
-                    payload.items[0].target_payload = {
-                        player_id: id_jugador,
-                        email: email || id_jugador
-                    };
                 } else if (juegoUpper === 'MOBILE LEGENDS') {
                     payload.items[0].target_payload = {
                         player_id: id_jugador,
-                        server: servidor || '1'
+                        server: zona_id || servidor || '1'
                     };
                 } else {
                     payload.items[0].target_payload = { player_id: id_jugador };
@@ -628,7 +636,6 @@ export default async function handler(req, res) {
                 const orderId = data.order?.id;
                 let codigos = [];
 
-                // Polling para gift cards (códigos/PIN)
                 if (config.tipo === 'giftcard' && orderId) {
                     const maxIntentos = 6;
                     let intento = 0;
@@ -658,7 +665,6 @@ export default async function handler(req, res) {
                 const costo = parseFloat(data.order?.total_sale_amount || 0);
                 const precioVenta = calcularPrecio(costo, config.tipo);
 
-                // Notificar a Telegram
                 const mensajeTG =
                     `🆕 <b>NUEVO PEDIDO - ${config.tipo === 'giftcard' ? 'GIFT CARD' : 'JUEGO'}</b>\n\n` +
                     `🎮 ${juegoUpper}\n` +
