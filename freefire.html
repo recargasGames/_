@@ -764,7 +764,6 @@ body::after{
         </div>
     </div>
 
-    <!-- 🎫 NUEVA SECCIÓN: TARJETAS Y PASES -->
     <div class="section-divider"><span>🎫 TARJETAS Y PASES</span></div>
     <div class="products-grid">
         <div class="product-card">
@@ -812,6 +811,9 @@ import {
     sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+// ============================================
+// 🎨 MENSAJES PERSONALIZADOS
+// ============================================
 let _mensajeCallback = null;
 let _mensajeCerrado = false;
 
@@ -908,17 +910,36 @@ window.mostrarMensaje = mostrarMensaje;
 window.mostrarConfirmacion = mostrarConfirmacion;
 window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
 
+// ============================================
+// 💰 VARIABLES GLOBALES
+// ============================================
 let metodo = "PAGO MOVIL";
 let tasa = 940;
 let idVerificado = false;
 let nicknameVerificado = "";
 const juegoActual = "FREE FIRE";
 
+// ============================================
+// 💱 CARGAR TASA (CON FALLBACK GARANTIZADO)
+// ============================================
 async function cargarTasa() {
     const tasaInfo = document.getElementById('tasaInfo');
+    if (!tasaInfo) {
+        console.warn('⚠️ No se encontró el elemento tasaInfo');
+        return;
+    }
+
+    // 1) Mostrar valor guardado o default INMEDIATAMENTE
+    const tasaGuardada = localStorage.getItem('tasa_usd_ves');
+    tasa = tasaGuardada ? parseFloat(tasaGuardada) : 940;
+    tasaInfo.textContent = `${tasa} Bs/USD`;
+    actualizarPrecios();
+
+    // 2) Intentar actualizar desde la API
     try {
         const respuesta = await fetch('/api/tasa');
         const datos = await respuesta.json();
+
         if (datos.ok && datos.tasa_usdt) {
             tasa = Math.round(datos.tasa_usdt);
             localStorage.setItem('tasa_usd_ves', tasa);
@@ -926,28 +947,34 @@ async function cargarTasa() {
             actualizarPrecios();
         }
     } catch (error) {
-        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 940;
-        tasaInfo.textContent = `${tasa} Bs/USD`;
-        actualizarPrecios();
+        console.warn('⚠️ Tasa no actualizada, usando valor guardado:', error.message);
+        // Ya tenemos el valor guardado mostrado, no pasa nada
     }
 }
 
+// ============================================
+// 🆔 INPUT DE ID + VERIFICACIÓN
+// ============================================
 const inputId = document.getElementById('jugadorId');
 const statusDiv = document.getElementById('idStatus');
 
-inputId.addEventListener('keypress', function(e) {
-    if (!/[0-9]/.test(e.key)) e.preventDefault();
-});
-inputId.addEventListener('paste', function(e) {
-    e.preventDefault();
-    const texto = (e.clipboardData || window.clipboardData).getData('text');
-    const soloNumeros = texto.replace(/\D/g, '');
-    document.execCommand('insertText', false, soloNumeros);
-});
+if (inputId) {
+    inputId.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
+
+    inputId.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const texto = (e.clipboardData || window.clipboardData).getData('text');
+        const soloNumeros = texto.replace(/\D/g, '');
+        document.execCommand('insertText', false, soloNumeros);
+    });
+}
 
 let timeoutId = null;
 
 function mostrarEstado(mensaje, tipo, nombre) {
+    if (!statusDiv) return;
     statusDiv.className = `id-status ${tipo}`;
     if (tipo === 'valido' && nombre) {
         statusDiv.innerHTML = `
@@ -962,43 +989,48 @@ function mostrarEstado(mensaje, tipo, nombre) {
     }
 }
 
-inputId.addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, '');
-    clearTimeout(timeoutId);
-    const id = this.value.trim();
-    idVerificado = false;
-    nicknameVerificado = "";
-    if (id.length === 0) { statusDiv.style.display = 'none'; return; }
-    if (!/^\d{5,12}$/.test(id)) {
-        if (id.length < 5) mostrarEstado('⚠️ Mínimo 5 dígitos', 'error');
-        else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
-        return;
-    }
-    timeoutId = setTimeout(async () => {
-        mostrarEstado('🔍 Verificando ID...', 'verificando');
-        try {
-            const respuesta = await fetch('/api/verificar-id', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id_jugador: id })
-            });
-            const datos = await respuesta.json();
-            if (datos.valido) {
-                idVerificado = true;
-                nicknameVerificado = datos.nickname || '';
-                mostrarEstado('', 'valido', datos.nickname);
-            } else {
-                idVerificado = false;
-                mostrarEstado(`❌ ${datos.mensaje || 'ID no encontrado'}`, 'error');
-            }
-        } catch (error) {
-            console.error('❌ Error verificando ID:', error);
-            idVerificado = false;
-            mostrarEstado('❌ Error al verificar. Intenta de nuevo.', 'error');
+if (inputId) {
+    inputId.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        clearTimeout(timeoutId);
+        const id = this.value.trim();
+        idVerificado = false;
+        nicknameVerificado = "";
+        if (id.length === 0) { statusDiv.style.display = 'none'; return; }
+        if (!/^\d{5,12}$/.test(id)) {
+            if (id.length < 5) mostrarEstado('⚠️ Mínimo 5 dígitos', 'error');
+            else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
+            return;
         }
-    }, 500);
-});
+        timeoutId = setTimeout(async () => {
+            mostrarEstado('🔍 Verificando ID...', 'verificando');
+            try {
+                const respuesta = await fetch('/api/verificar-id', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_jugador: id })
+                });
+                const datos = await respuesta.json();
+                if (datos.valido) {
+                    idVerificado = true;
+                    nicknameVerificado = datos.nickname || '';
+                    mostrarEstado('', 'valido', datos.nickname);
+                } else {
+                    idVerificado = false;
+                    mostrarEstado(`❌ ${datos.mensaje || 'ID no encontrado'}`, 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error verificando ID:', error);
+                idVerificado = false;
+                mostrarEstado('❌ Error al verificar. Intenta de nuevo.', 'error');
+            }
+        }, 500);
+    });
+}
 
+// ============================================
+// 💵 ACTUALIZAR PRECIOS
+// ============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u = parseFloat(el.dataset.usd);
@@ -1017,6 +1049,9 @@ window.seleccionarPago = function(m, e){
     actualizarPrecios();
 };
 
+// ============================================
+// 🛒 COMPRAR PRODUCTO
+// ============================================
 window.comprarProducto = async function(producto, precioUsd, paqueteCodigo){
     const idInput = document.getElementById("jugadorId").value.trim();
     if(!idInput){
@@ -1042,6 +1077,9 @@ window.comprarProducto = async function(producto, precioUsd, paqueteCodigo){
     window.location.href = "pasarela.html";
 };
 
+// ============================================
+// 🍔 MENÚS
+// ============================================
 window.alternarMenu = function() {
     document.getElementById('menuFlotante').classList.toggle('activo');
     document.getElementById('menuPerfil').classList.remove('activo');
@@ -1068,6 +1106,9 @@ window.cerrarTodosLosMenus = function(e) {
     }
 };
 
+// ============================================
+// 🔐 FIREBASE AUTH
+// ============================================
 const perfilContainer = document.getElementById('perfilContainer');
 const menuLogin = document.getElementById('menuLogin');
 const menuRegister = document.getElementById('menuRegister');
@@ -1197,12 +1238,15 @@ document.getElementById('resetPasswordLink').addEventListener('click', async (e)
     }
 });
 
+// ============================================
+// 🚀 INICIALIZACIÓN
+// ============================================
 cargarTasa();
 setInterval(cargarTasa, 60000);
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
-    if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
+    if(b) b.classList.toggle('show', window.scrollY > 300);
 },{passive:true});
 </script>
 </body>
