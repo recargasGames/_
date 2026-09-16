@@ -608,10 +608,10 @@ body::after{
 
 <div class="main">
     <div class="card-panel" style="margin-top:40px;">
-        <div class="panel-title">📧 Tu Correo</div>
+        <div class="panel-title">📱 Tu WhatsApp</div>
         <div class="form-group">
-            <label>Email donde recibirás el código</label>
-            <input type="email" class="form-input" id="jugadorId" placeholder="tu@email.com" autocomplete="email">
+            <label>Número de WhatsApp (donde recibirás el código)</label>
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" class="form-input" id="jugadorId" placeholder="Ej: 584228242411" autocomplete="off">
         </div>
         <div class="id-status" id="idStatus"></div>
     </div>
@@ -626,7 +626,7 @@ body::after{
     </div>
 
     <div class="info-box">
-        ⚡ <strong>Código instantáneo:</strong> Recibirás tu código en pantalla al confirmar el pago + copia a tu email.
+        ⚡ <strong>Código instantáneo:</strong> Recibirás tu código en pantalla al confirmar el pago + copia a tu WhatsApp.
     </div>
 
     <div class="tabs-marcas" id="tabsMarcas">
@@ -670,7 +670,7 @@ let nicknameVerificado = "";
 let marcaActual = "playstation";
 
 // ============================================
-// 📋 CATÁLOGO DE GIFT CARDS (UUIDs reales)
+// 📋 CATÁLOGO DE GIFT CARDS
 // ============================================
 const GIFT_CARDS_DATA = {
     playstation: {
@@ -678,6 +678,10 @@ const GIFT_CARDS_DATA = {
         icono: "🎮",
         nombre: "PlayStation",
         productos: [
+            { titulo: "$1 USD",  precio: "1.20",  codigo: "1",   desc: "⚡ Gift Card USA" },
+            { titulo: "$2 USD",  precio: "2.30",  codigo: "2",   desc: "⚡ Gift Card USA" },
+            { titulo: "$3 USD",  precio: "3.40",  codigo: "3",   desc: "⚡ Gift Card USA" },
+            { titulo: "$4 USD",  precio: "4.50",  codigo: "4",   desc: "⚡ Gift Card USA" },
             { titulo: "$5 USD",  precio: "5.70",  codigo: "5",   desc: "⚡ Gift Card USA" },
             { titulo: "$10 USD", precio: "10.60", codigo: "10",  desc: "⚡ Gift Card USA" },
             { titulo: "$15 USD", precio: "15.10", codigo: "15",  desc: "⚡ Gift Card USA" },
@@ -693,9 +697,12 @@ const GIFT_CARDS_DATA = {
         nombre: "Xbox",
         productos: [
             { titulo: "$1 USD",  precio: "1.10",  codigo: "1",   desc: "⚡ Xbox USA" },
+            { titulo: "$5 USD",  precio: "5.50",  codigo: "5",   desc: "⚡ Xbox USA" },
             { titulo: "$10 USD", precio: "10.60", codigo: "10",  desc: "⚡ Xbox USA" },
             { titulo: "$15 USD", precio: "14.80", codigo: "15",  desc: "⚡ Xbox USA" },
             { titulo: "$20 USD", precio: "19.70", codigo: "20",  desc: "⚡ Xbox USA" },
+            { titulo: "$25 USD", precio: "24.70", codigo: "25",  desc: "⚡ Xbox USA" },
+            { titulo: "$50 USD", precio: "49.50", codigo: "50",  desc: "⚡ Xbox USA" },
             { titulo: "$100 USD", precio: "99.50", codigo: "100", desc: "🔥 Mega pack USA" }
         ]
     },
@@ -771,30 +778,47 @@ window.cambiarMarca = function(marca, boton) {
 };
 
 // ============================================
-// 📧 VALIDACIÓN EMAIL
+// 📱 VALIDACIÓN DE WHATSAPP
 // ============================================
 const inputId = document.getElementById('jugadorId');
 const statusDiv = document.getElementById('idStatus');
 
 if (inputId) {
+    inputId.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
+
+    inputId.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const texto = (e.clipboardData || window.clipboardData).getData('text');
+        const soloNumeros = texto.replace(/\D/g, '');
+        document.execCommand('insertText', false, soloNumeros);
+    });
+
     inputId.addEventListener('input', function() {
-        const email = this.value.trim();
+        this.value = this.value.replace(/\D/g, '');
+        const whatsapp = this.value.trim();
         idVerificado = false;
         nicknameVerificado = "";
 
-        if (email.length === 0) {
+        if (whatsapp.length === 0) {
             statusDiv.style.display = 'none';
             return;
         }
 
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            mostrarEstado('⚠️ Ingresa un email válido', 'error');
+        if (whatsapp.length < 10) {
+            mostrarEstado('⚠️ Mínimo 10 dígitos', 'error');
+            return;
+        }
+
+        if (whatsapp.length > 15) {
+            mostrarEstado('⚠️ Máximo 15 dígitos', 'error');
             return;
         }
 
         idVerificado = true;
-        nicknameVerificado = email;
-        mostrarEstado('', 'valido', email);
+        nicknameVerificado = whatsapp;
+        mostrarEstado('', 'valido', `+${whatsapp}`);
     });
 }
 
@@ -805,7 +829,7 @@ function mostrarEstado(mensaje, tipo, nombre) {
         statusDiv.innerHTML = `
             <div class="check-icono">✓</div>
             <div>
-                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">Email Confirmado</div>
+                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">WhatsApp Confirmado</div>
                 <div class="nombre-jugador">${nombre}</div>
             </div>
         `;
@@ -859,19 +883,20 @@ window.seleccionarPago = function(m, e){
 };
 
 // ============================================
-// 🛒 COMPRAR
+// 🛒 COMPRAR GIFT CARD
 // ============================================
 window.comprarGiftCard = function(producto, precioUsd, paqueteCodigo){
-    const emailInput = document.getElementById("jugadorId").value.trim();
-    if(!emailInput){ alert("❌ Ingresa tu email"); return; }
-    if(!idVerificado){ alert("⏳ Verifica tu email primero"); return; }
+    const whatsappInput = document.getElementById("jugadorId").value.trim();
+    if(!whatsappInput){ alert("❌ Ingresa tu WhatsApp"); return; }
+    if(!idVerificado){ alert("⏳ Verifica tu WhatsApp primero"); return; }
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
     const data = GIFT_CARDS_DATA[marcaActual];
 
-    localStorage.setItem('id_jugador', emailInput);
+    // 🔑 Guardamos todo lo necesario
+    localStorage.setItem('id_jugador', whatsappInput);
     localStorage.setItem('nombre_jugador', nicknameVerificado);
-    localStorage.setItem('email_comprador', emailInput);
+    localStorage.setItem('whatsapp_comprador', whatsappInput); // ✨ NUEVO
     localStorage.setItem('juego_seleccionado', `${data.nombre.toUpperCase()} GIFT CARD`);
     localStorage.setItem('producto_seleccionado', producto);
     localStorage.setItem('paquete_codigo', paqueteCodigo);
@@ -886,15 +911,21 @@ window.comprarGiftCard = function(producto, precioUsd, paqueteCodigo){
 // 🍔 MENÚS
 // ============================================
 window.alternarMenu = function() {
-    document.getElementById('menuFlotante').classList.toggle('activo');
-    document.getElementById('menuPerfil').classList.remove('activo');
-    document.getElementById('perfilFlecha').classList.remove('abierta');
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mf) mf.classList.toggle('activo');
+    if (mp) mp.classList.remove('activo');
+    if (pf) pf.classList.remove('abierta');
 };
 
 window.toggleMenuPerfil = function() {
-    document.getElementById('menuPerfil').classList.toggle('activo');
-    document.getElementById('perfilFlecha').classList.toggle('abierta');
-    document.getElementById('menuFlotante').classList.remove('activo');
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mp) mp.classList.toggle('activo');
+    if (pf) pf.classList.toggle('abierta');
+    if (mf) mf.classList.remove('activo');
 };
 
 window.cerrarTodosLosMenus = function(e) {
@@ -907,7 +938,8 @@ window.cerrarTodosLosMenus = function(e) {
     }
     if(btnPerfil && menuPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
         menuPerfil.classList.remove('activo');
-        document.getElementById('perfilFlecha').classList.remove('abierta');
+        const pf = document.getElementById('perfilFlecha');
+        if (pf) pf.classList.remove('abierta');
     }
 };
 
@@ -1031,7 +1063,7 @@ if (menuLogoutEl) {
 }
 
 // ============================================
-// 🚀 INICIALIZACIÓN CON LECTURA DE ?marca=
+// 🚀 INICIALIZACIÓN
 // ============================================
 function inicializarMarcaDesdeURL() {
     const params = new URLSearchParams(window.location.search);
