@@ -2,37 +2,67 @@
 // ============================================
 // 🎮 RECARGASGAMES - VERIFICAR JUGADOR (PagoNorte)
 // ============================================
-// Solo PagoNorte directo. Sin fallback.
-// Soporta: Mobile Legends, PUBG Mobile, Arena Breakout, Delta Force
-// ============================================
 
 const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
 // ============================================
-// 🎯 MAPA DE ACCIONES POR JUEGO
+// 🎯 MAPA DE ACCIONES Y TIPOS POR JUEGO
 // ============================================
-// Cada juego tiene:
-//   action: la acción de PagoNorte
-//   tipo:   el tipo de recarga de PagoNorte
-//   zona:   si requiere zona (Mobile Legends)
-// ============================================
-const JUEGOS = {
-    'MOBILE LEGENDS': { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-    'MOBILELEGENDS':  { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-    'ML':             { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-    'MLBB':           { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-
-    'PUBG MOBILE':    { action: 'pubgmobile_nombre',    tipo: 'RecargaPUBGMobile',    requiereZona: false },
-    'PUBGMOBILE':     { action: 'pubgmobile_nombre',    tipo: 'RecargaPUBGMobile',    requiereZona: false },
-    'PUBG':           { action: 'pubgmobile_nombre',    tipo: 'RecargaPUBGMobile',    requiereZona: false },
-
-    'ARENA BREAKOUT': { action: 'arenabreakout_nombre', tipo: 'RecargaArenaBreakout', requiereZona: false },
-    'ARENABREAKOUT':  { action: 'arenabreakout_nombre', tipo: 'RecargaArenaBreakout', requiereZona: false },
-    'ARENA':          { action: 'arenabreakout_nombre', tipo: 'RecargaArenaBreakout', requiereZona: false },
-
-    'DELTA FORCE':    { action: 'deltaforce_nombre',    tipo: 'RecargaDeltaForce',    requiereZona: false },
-    'DELTAFORCE':     { action: 'deltaforce_nombre',    tipo: 'RecargaDeltaForce',    requiereZona: false },
-    'DELTA':          { action: 'deltaforce_nombre',    tipo: 'RecargaDeltaForce',    requiereZona: false }
+const JUEGOS_CONFIG = {
+    'FREE FIRE': {
+        action: 'freefire_nombre',
+        tipo: 'RecargaFreeFire',
+        requiereZona: false,
+        validar: /^\d{5,12}$/
+    },
+    'FREEFIRE': {
+        action: 'freefire_nombre',
+        tipo: 'RecargaFreeFire',
+        requiereZona: false,
+        validar: /^\d{5,12}$/
+    },
+    'FF': {
+        action: 'freefire_nombre',
+        tipo: 'RecargaFreeFire',
+        requiereZona: false,
+        validar: /^\d{5,12}$/
+    },
+    'BLOOD STRIKE': {
+        action: 'bloodstrike_nombre',
+        tipo: 'RecargaBloodStrike',
+        requiereZona: false,
+        validar: /^\d{8,12}$/
+    },
+    'BLOODSTRIKE': {
+        action: 'bloodstrike_nombre',
+        tipo: 'RecargaBloodStrike',
+        requiereZona: false,
+        validar: /^\d{8,12}$/
+    },
+    'BS': {
+        action: 'bloodstrike_nombre',
+        tipo: 'RecargaBloodStrike',
+        requiereZona: false,
+        validar: /^\d{8,12}$/
+    },
+    'MOBILE LEGENDS': {
+        action: 'mobilelegends_nombre',
+        tipo: 'RecargaMobileLegends',
+        requiereZona: true,
+        validar: /^\d{8,15}$/
+    },
+    'ML': {
+        action: 'mobilelegends_nombre',
+        tipo: 'RecargaMobileLegends',
+        requiereZona: true,
+        validar: /^\d{8,15}$/
+    }
+    // ⏳ Agregar más cuando tengas la info:
+    // 'PUBG MOBILE':   { action: 'pubg_nombre',   tipo: 'RecargaPUBG',   requiereZona: false },
+    // 'ARENA BREAKOUT':{ action: 'arena_nombre',  tipo: 'RecargaArena',  requiereZona: false },
+    // 'DELTA FORCE':   { action: 'delta_nombre',  tipo: 'RecargaDelta',  requiereZona: false },
+    // 'COD MOBILE':    { action: 'cod_nombre',    tipo: 'RecargaCOD',    requiereZona: false },
+    // 'ROBLOX':        { action: 'roblox_nombre', tipo: 'RecargaRoblox', requiereZona: false },
 };
 
 // ============================================
@@ -51,52 +81,57 @@ export default async function handler(req, res) {
         if (req.method === 'GET') {
             juego = req.query?.juego || req.query?.game;
             id    = req.query?.id || req.query?.id_jugador;
-            zona  = req.query?.zona || req.query?.zone;
+            zona  = req.query?.zona;
         } else if (req.method === 'POST') {
             juego = req.body?.juego || req.body?.game;
             id    = req.body?.id_jugador || req.body?.id;
-            zona  = req.body?.zona || req.body?.zone;
+            zona  = req.body?.zona;
         } else {
-            return res.status(405).json({ ok: false, valido: false, error: 'Método no permitido' });
+            return res.status(405).json({ error: 'Método no permitido' });
         }
 
         if (!juego || !id) {
             return res.status(400).json({
                 ok: false,
                 valido: false,
-                error: 'Faltan parámetros'
+                error: 'Faltan parámetros',
+                ejemplo: '/api/verificar-jugador?juego=FREE FIRE&id=4664719056'
             });
         }
 
         const juegoUpper = String(juego).toUpperCase().trim();
-        const config = JUEGOS[juegoUpper];
+        const config = JUEGOS_CONFIG[juegoUpper];
 
         if (!config) {
             return res.status(400).json({
                 ok: false,
                 valido: false,
-                error: `Juego no soportado: ${juego}`
+                error: `Juego no soportado: ${juego}`,
+                soportados: [...new Set(Object.values(JUEGOS_CONFIG).map(c => c.tipo))]
             });
         }
 
-        // === Verificar zona si el juego la requiere ===
+        // Validar formato
+        if (!config.validar.test(String(id).trim())) {
+            return res.status(200).json({
+                ok: false,
+                valido: false,
+                mensaje: `Formato de ID inválido para ${juegoUpper}`,
+                id_recibido: id
+            });
+        }
+
+        // Validar zona si el juego la requiere
         if (config.requiereZona && !zona) {
             return res.status(400).json({
                 ok: false,
                 valido: false,
-                error: `El juego ${juego} requiere el parámetro 'zona'`
+                mensaje: `${juegoUpper} requiere el campo "zona"`,
+                ejemplo: `/api/verificar-jugador?juego=MOBILE LEGENDS&id=2248538339&zona=1417`
             });
         }
 
-        // === Validar formato del ID (5-15 dígitos) ===
-        if (!/^\d{5,15}$/.test(String(id).trim())) {
-            return res.status(200).json({
-                ok: false,
-                valido: false,
-                mensaje: `Formato de ID inválido para ${juego}`
-            });
-        }
-
+        // Credenciales
         const API_KEY    = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
 
@@ -119,20 +154,20 @@ export default async function handler(req, res) {
             formData.append('zona', String(zona));
         }
 
-        console.log(`🔍 [PagoNorte] ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
+        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
 
         const respuesta = await fetch(PAGONORTE_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
                 'X-API-Key': API_KEY,
-                'X-API-Secret': API_SECRET
+                'X-API-Secret': API_SECRET,
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: formData.toString()
         });
 
         if (!respuesta.ok) {
-            return res.status(200).json({
+            return res.status(respuesta.status).json({
                 ok: false,
                 valido: false,
                 error: 'Error consultando PagoNorte',
@@ -146,14 +181,13 @@ export default async function handler(req, res) {
         // ============================================
         // 🎯 INTERPRETAR RESPUESTA
         // ============================================
+        const codigo = String(data.code || '').toLowerCase();
         const nickname = data.nickname || data.Nickname || null;
-        const alerta   = data.alerta || data.alert || '';
-        const codigo   = String(data.codigo_respuesta || data.code || '').toLowerCase();
-        const puedeContinuar    = data.puede_continuar === true;
-        const validacionExitosa = data.validacion_exitosa === true;
+        const alerta = data.alerta || data.alert || '';
 
-        // ✅ Jugador verificado correctamente
-        if (validacionExitosa && nickname) {
+        const esValido = (codigo === 'true' || codigo === '00' || alerta === 'green') && nickname;
+
+        if (esValido) {
             return res.status(200).json({
                 ok: true,
                 valido: true,
@@ -162,31 +196,17 @@ export default async function handler(req, res) {
                 zona: zona || null,
                 nickname: nickname,
                 region: data.region || 'GLOBAL',
-                mensaje: data.mensaje || 'Jugador verificado'
+                mensaje: data.mensaje || 'Consulta exitosa'
             });
         }
 
-        // ⚠️ Falla técnica pero puede continuar
-        if (puedeContinuar && !validacionExitosa) {
-            return res.status(200).json({
-                ok: true,
-                valido: true,
-                juego: juegoUpper,
-                id: String(id),
-                zona: zona || null,
-                nickname: null,
-                region: data.region || 'GLOBAL',
-                mensaje: data.mensaje || 'Nombre no disponible. Puede continuar.'
-            });
-        }
-
-        // ❌ Jugador no válido
         return res.status(200).json({
             ok: false,
             valido: false,
             mensaje: data.mensaje || 'Jugador no encontrado',
             alerta: alerta || 'red',
-            code: codigo
+            code: codigo,
+            respuesta_cruda: data
         });
 
     } catch (error) {
