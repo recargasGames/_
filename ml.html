@@ -524,7 +524,7 @@ body::after{
         <div class="panel-title">🆔 Datos del Jugador</div>
         <div class="form-group">
             <label>ID del Jugador</label>
-            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="jugadorId" placeholder="Ej: 123456789" autocomplete="off">
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="15" class="form-input" id="jugadorId" placeholder="Ej: 123456789" autocomplete="off">
         </div>
         <div class="form-group">
             <label>Zona ID</label>
@@ -544,56 +544,48 @@ body::after{
 
     <div class="section-divider"><span>💎 DIAMANTES - MOBILE LEGENDS</span></div>
     <div class="products-grid">
-        <!-- 1. ML · 55 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">55 Diamantes</div></div>
             <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="0.86">$0.86</div>
             <button class="btn-buy" onclick="comprarProducto('55 Diamantes', '0.86', '55')">COMPRAR</button>
         </div>
-        <!-- 2. ML · 86 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">86 Diamantes</div></div>
             <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="1.20">$1.20</div>
             <button class="btn-buy" onclick="comprarProducto('86 Diamantes', '1.20', '86')">COMPRAR</button>
         </div>
-        <!-- 3. ML · 112 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">112 Diamantes</div></div>
             <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="1.76">$1.76</div>
             <button class="btn-buy" onclick="comprarProducto('112 Diamantes', '1.76', '112')">COMPRAR</button>
         </div>
-        <!-- 4. ML · 172 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">172 Diamantes</div></div>
             <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="5.00">$5.00</div>
             <button class="btn-buy" onclick="comprarProducto('172 Diamantes', '5.00', '172')">COMPRAR</button>
         </div>
-        <!-- 5. ML · 257 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">257 Diamantes</div></div>
             <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="7.20">$7.20</div>
             <button class="btn-buy" onclick="comprarProducto('257 Diamantes', '7.20', '257')">COMPRAR</button>
         </div>
-        <!-- 6. ML · 429 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">429 Diamantes</div></div>
             <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="12.20">$12.20</div>
             <button class="btn-buy" onclick="comprarProducto('429 Diamantes', '12.20', '429')">COMPRAR</button>
         </div>
-        <!-- 7. ML · 706 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">706 Diamantes</div></div>
             <div class="product-desc">⚡ Recarga instantánea</div>
             <div class="product-price" data-usd="19.50">$19.50</div>
             <button class="btn-buy" onclick="comprarProducto('706 Diamantes', '19.50', '706')">COMPRAR</button>
         </div>
-        <!-- 8. ML · 1050 -->
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">1050 Diamantes</div></div>
             <div class="product-desc">🔥 Mega oferta</div>
@@ -615,14 +607,27 @@ import {
     sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+// ============================================
+// 🎯 VARIABLES GLOBALES
+// ============================================
 let metodo = "PAGO MOVIL";
 let tasa = 940;
 let idVerificado = false;
 let nicknameVerificado = "";
 const juegoActual = "MOBILE LEGENDS";
 
+// ============================================
+// 💱 CARGAR TASA
+// ============================================
 async function cargarTasa() {
     const tasaInfo = document.getElementById('tasaInfo');
+    if (!tasaInfo) return;
+
+    const tasaGuardada = localStorage.getItem('tasa_usd_ves');
+    tasa = tasaGuardada ? parseFloat(tasaGuardada) : 940;
+    tasaInfo.textContent = `${tasa} Bs/USD`;
+    actualizarPrecios();
+
     try {
         const respuesta = await fetch('/api/tasa');
         const datos = await respuesta.json();
@@ -633,17 +638,20 @@ async function cargarTasa() {
             actualizarPrecios();
         }
     } catch (error) {
-        tasa = localStorage.getItem('tasa_usd_ves') ? parseFloat(localStorage.getItem('tasa_usd_ves')) : 940;
-        tasaInfo.textContent = `${tasa} Bs/USD`;
-        actualizarPrecios();
+        console.warn('⚠️ Tasa no actualizada:', error.message);
     }
 }
 
+// ============================================
+// 🆔 INPUT DE ID + ZONA + VERIFICACIÓN REAL
+// ============================================
 const inputId = document.getElementById('jugadorId');
 const inputZona = document.getElementById('zonaId');
 const statusDiv = document.getElementById('idStatus');
 
+// Solo permitir números en ambos inputs
 [inputId, inputZona].forEach(input => {
+    if (!input) return;
     input.addEventListener('keypress', function(e) {
         if (!/[0-9]/.test(e.key)) e.preventDefault();
     });
@@ -661,6 +669,7 @@ const statusDiv = document.getElementById('idStatus');
 let timeoutId = null;
 
 function mostrarEstado(mensaje, tipo, nombre) {
+    if (!statusDiv) return;
     statusDiv.className = `id-status ${tipo}`;
     if (tipo === 'valido' && nombre) {
         statusDiv.innerHTML = `
@@ -677,37 +686,67 @@ function mostrarEstado(mensaje, tipo, nombre) {
 
 function verificarAmbos() {
     clearTimeout(timeoutId);
-    const id = inputId.value.trim();
-    const zona = inputZona.value.trim();
+    const id = inputId ? inputId.value.trim() : '';
+    const zona = inputZona ? inputZona.value.trim() : '';
 
-    if (id.length < 8 || id.length > 12) {
+    // Validar ID (5-15 dígitos)
+    if (!/^\d{5,15}$/.test(id)) {
         idVerificado = false;
-        if (id.length > 0 && id.length < 8) mostrarEstado('⚠️ El ID debe tener mínimo 8 dígitos', 'error');
-        else if (id.length > 12) mostrarEstado('⚠️ El ID no puede tener más de 12 dígitos', 'error');
+        nicknameVerificado = '';
+        if (id.length > 0 && id.length < 5) mostrarEstado('⚠️ El ID debe tener mínimo 5 dígitos', 'error');
+        else if (id.length > 15) mostrarEstado('⚠️ El ID no puede tener más de 15 dígitos', 'error');
         else statusDiv.style.display = 'none';
         return;
     }
 
+    // Validar Zona (2-6 dígitos)
     if (zona.length < 2 || zona.length > 6) {
         idVerificado = false;
+        nicknameVerificado = '';
         if (zona.length > 0 && zona.length < 2) mostrarEstado('⚠️ La Zona ID debe tener mínimo 2 dígitos', 'error');
         else statusDiv.style.display = 'none';
         return;
     }
 
-    timeoutId = setTimeout(() => {
+    // Verificar con PagoNorte (con debounce)
+    timeoutId = setTimeout(async () => {
         mostrarEstado('🔍 Verificando ID...', 'verificando');
-        setTimeout(() => {
-            idVerificado = true;
-            nicknameVerificado = `Jugador ${id} (Zona ${zona})`;
-            mostrarEstado('', 'valido', `ID: ${id} • Zona: ${zona}`);
-        }, 600);
-    }, 400);
+        try {
+            const respuesta = await fetch('/api/verificar-jugador', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    juego: juegoActual,
+                    id_jugador: id,
+                    zona: zona
+                })
+            });
+            const datos = await respuesta.json();
+
+            if (datos.valido) {
+                idVerificado = true;
+                nicknameVerificado = datos.nickname || `Jugador ${id}`;
+                mostrarEstado('', 'valido', `${nicknameVerificado} • Zona: ${zona}`);
+            } else {
+                idVerificado = false;
+                nicknameVerificado = '';
+                mostrarEstado('❌ ' + (datos.mensaje || 'ID no válido'), 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error verificando ID:', error);
+            idVerificado = false;
+            nicknameVerificado = '';
+            mostrarEstado('❌ Error al verificar. Intenta de nuevo.', 'error');
+        }
+    }, 500);
 }
 
-inputId.addEventListener('input', verificarAmbos);
-inputZona.addEventListener('input', verificarAmbos);
+if (inputId) inputId.addEventListener('input', verificarAmbos);
+if (inputZona) inputZona.addEventListener('input', verificarAmbos);
 
+// ============================================
+// 💵 ACTUALIZAR PRECIOS
+// ============================================
 function actualizarPrecios(){
     document.querySelectorAll('.product-price').forEach(el=>{
         let u = parseFloat(el.dataset.usd);
@@ -726,9 +765,12 @@ window.seleccionarPago = function(m, e){
     actualizarPrecios();
 };
 
+// ============================================
+// 🛒 COMPRAR PRODUCTO
+// ============================================
 window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
-    const id = inputId.value.trim();
-    const zona = inputZona.value.trim();
+    const id = inputId ? inputId.value.trim() : '';
+    const zona = inputZona ? inputZona.value.trim() : '';
 
     if(!id){ alert("❌ Escribe tu ID del jugador"); return; }
     if(!zona){ alert("❌ Escribe tu Zona ID"); return; }
@@ -749,16 +791,25 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     window.location.href = "pasarela.html";
 };
 
+// ============================================
+// 🍔 MENÚS
+// ============================================
 window.alternarMenu = function() {
-    document.getElementById('menuFlotante').classList.toggle('activo');
-    document.getElementById('menuPerfil').classList.remove('activo');
-    document.getElementById('perfilFlecha').classList.remove('abierta');
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mf) mf.classList.toggle('activo');
+    if (mp) mp.classList.remove('activo');
+    if (pf) pf.classList.remove('abierta');
 };
 
 window.toggleMenuPerfil = function() {
-    document.getElementById('menuPerfil').classList.toggle('activo');
-    document.getElementById('perfilFlecha').classList.toggle('abierta');
-    document.getElementById('menuFlotante').classList.remove('activo');
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mp) mp.classList.toggle('activo');
+    if (pf) pf.classList.toggle('abierta');
+    if (mf) mf.classList.remove('activo');
 };
 
 window.cerrarTodosLosMenus = function(e) {
@@ -766,15 +817,19 @@ window.cerrarTodosLosMenus = function(e) {
     const menuPerfil = document.getElementById('menuPerfil');
     const btnMenu = document.getElementById('btnMenu');
     const btnPerfil = document.getElementById('btnPerfil');
-    if(btnMenu && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
+    if(btnMenu && menuFlotante && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
         menuFlotante.classList.remove('activo');
     }
-    if(btnPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+    if(btnPerfil && menuPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
         menuPerfil.classList.remove('activo');
-        document.getElementById('perfilFlecha').classList.remove('abierta');
+        const pf = document.getElementById('perfilFlecha');
+        if (pf) pf.classList.remove('abierta');
     }
 };
 
+// ============================================
+// 🔐 FIREBASE AUTH
+// ============================================
 const perfilContainer = document.getElementById('perfilContainer');
 const menuLogin = document.getElementById('menuLogin');
 const menuRegister = document.getElementById('menuRegister');
@@ -785,124 +840,122 @@ const emailUsuario = document.getElementById('emailUsuario');
 const modalLogin = document.getElementById('modalLogin');
 const loginForm = document.getElementById('loginForm');
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        const nombre = user.displayName || 'Usuario';
-        const email = user.email || 'usuario@email.com';
-        perfilContainer.style.display = 'block';
-        perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
-        nombreCompleto.textContent = nombre;
-        emailUsuario.textContent = email;
-        menuLogin.style.display = 'none';
-        menuRegister.style.display = 'none';
-        menuConSesion.style.display = 'block';
-    } else {
-        perfilContainer.style.display = 'none';
-        menuLogin.style.display = 'flex';
-        menuRegister.style.display = 'flex';
-        menuConSesion.style.display = 'none';
-    }
-});
+if (auth) {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const nombre = user.displayName || 'Usuario';
+            const email = user.email || 'usuario@email.com';
+            if (perfilContainer) perfilContainer.style.display = 'block';
+            if (perfilNombre) perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+            if (nombreCompleto) nombreCompleto.textContent = nombre;
+            if (emailUsuario) emailUsuario.textContent = email;
+
+            if (menuLogin) menuLogin.style.display = 'none';
+            if (menuRegister) menuRegister.style.display = 'none';
+            if (menuConSesion) menuConSesion.style.display = 'block';
+        } else {
+            if (perfilContainer) perfilContainer.style.display = 'none';
+            if (menuLogin) menuLogin.style.display = 'flex';
+            if (menuRegister) menuRegister.style.display = 'flex';
+            if (menuConSesion) menuConSesion.style.display = 'none';
+        }
+    });
+}
 
 window.abrirModalLogin = function() {
-    modalLogin.classList.add('activo');
-    document.getElementById('loginMessage').style.display = 'none';
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('menuFlotante').classList.remove('activo');
+    if (modalLogin) modalLogin.classList.add('activo');
+    const lm = document.getElementById('loginMessage');
+    if (lm) lm.style.display = 'none';
+    const le = document.getElementById('loginEmail');
+    const lp = document.getElementById('loginPassword');
+    if (le) le.value = '';
+    if (lp) lp.value = '';
+    const mf = document.getElementById('menuFlotante');
+    if (mf) mf.classList.remove('activo');
 };
 
 window.cerrarModalLogin = function() {
-    modalLogin.classList.remove('activo');
+    if (modalLogin) modalLogin.classList.remove('activo');
 };
 
-modalLogin.addEventListener('click', (e) => {
-    if (e.target === modalLogin) cerrarModalLogin();
-});
+if (modalLogin) {
+    modalLogin.addEventListener('click', (e) => {
+        if (e.target === modalLogin) cerrarModalLogin();
+    });
+}
 
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const btn = document.getElementById('loginBtn');
-    const msg = document.getElementById('loginMessage');
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+        const msg = document.getElementById('loginMessage');
 
-    btn.disabled = true;
-    btn.textContent = 'Ingresando...';
-    msg.style.display = 'none';
+        btn.disabled = true;
+        btn.textContent = 'Ingresando...';
+        msg.style.display = 'none';
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-        msg.style.background = 'rgba(34,197,94,0.15)';
-        msg.style.color = '#86efac';
-        msg.textContent = '✅ ¡Bienvenido!';
-        msg.style.display = 'block';
-        setTimeout(() => { cerrarModalLogin(); window.location.reload(); }, 1000);
-    } catch (error) {
-        let errorMsg = '❌ ';
-        switch (error.code) {
-            case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
-            case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
-            case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
-            default: errorMsg += error.message;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            msg.style.background = 'rgba(34,197,94,0.15)';
+            msg.style.color = '#86efac';
+            msg.textContent = '✅ ¡Bienvenido!';
+            msg.style.display = 'block';
+            setTimeout(() => {
+                cerrarModalLogin();
+                window.location.reload();
+            }, 1000);
+        } catch (error) {
+            let errorMsg = '❌ ';
+            switch (error.code) {
+                case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
+                case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
+                case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
+                default: errorMsg += error.message;
+            }
+            msg.style.background = 'rgba(239,68,68,0.15)';
+            msg.style.color = '#fca5a5';
+            msg.textContent = errorMsg;
+            msg.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Ingresar';
         }
-        msg.style.background = 'rgba(239,68,68,0.15)';
-        msg.style.color = '#fca5a5';
-        msg.textContent = errorMsg;
-        msg.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Ingresar';
-    }
-});
+    });
+}
 
-document.getElementById('btnCerrarSesion').addEventListener('click', async (e) => {
-    e.preventDefault();
-    if(confirm('¿Seguro que quieres cerrar sesión?')) {
-        await signOut(auth);
-        window.location.reload();
-    }
-});
+const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
+if (btnCerrarSesionEl) {
+    btnCerrarSesionEl.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if(confirm('¿Seguro que quieres cerrar sesión?')) {
+            await signOut(auth);
+            window.location.reload();
+        }
+    });
+}
 
-document.getElementById('menuLogout').addEventListener('click', async (e) => {
-    e.preventDefault();
-    if(confirm('¿Seguro que quieres cerrar sesión?')) {
-        await signOut(auth);
-        window.location.reload();
-    }
-});
+const menuLogoutEl = document.getElementById('menuLogout');
+if (menuLogoutEl) {
+    menuLogoutEl.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if(confirm('¿Seguro que quieres cerrar sesión?')) {
+            await signOut(auth);
+            window.location.reload();
+        }
+    });
+}
 
-document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const msg = document.getElementById('loginMessage');
-    if (!email) {
-        msg.style.background = 'rgba(239,68,68,0.15)';
-        msg.style.color = '#fca5a5';
-        msg.textContent = '❌ Ingresa tu correo primero';
-        msg.style.display = 'block';
-        return;
-    }
-    try {
-        await sendPasswordResetEmail(auth, email);
-        msg.style.background = 'rgba(34,197,94,0.15)';
-        msg.style.color = '#86efac';
-        msg.textContent = '✅ Correo enviado';
-        msg.style.display = 'block';
-    } catch (error) {
-        msg.style.background = 'rgba(239,68,68,0.15)';
-        msg.style.color = '#fca5a5';
-        msg.textContent = '❌ ' + error.message;
-        msg.style.display = 'block';
-    }
-});
-
+// ============================================
+// 🚀 INICIALIZACIÓN
+// ============================================
 cargarTasa();
 setInterval(cargarTasa, 60000);
 
 window.addEventListener('scroll',()=>{
     const b=document.getElementById('backToTop');
-    if(window.scrollY>300)b.classList.add('show');else b.classList.remove('show');
-});
+    if(b) b.classList.toggle('show', window.scrollY > 300);
+},{passive:true});
 </script>
 </body>
 </html>
