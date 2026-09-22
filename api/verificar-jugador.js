@@ -130,7 +130,6 @@ export default async function handler(req, res) {
         formData.append('api_secret', API_SECRET);
         formData.append('id_jugador', String(id));
         
-        // Mobile Legends también necesita "zona"
         if (esML && zona) {
             formData.append('zona', String(zona));
         }
@@ -156,15 +155,29 @@ export default async function handler(req, res) {
         console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
 
         // ============================================
-        // 🎯 INTERPRETAR RESPUESTA
+        // 🎯 INTERPRETAR RESPUESTA (Formato real de PagoNorte)
         // ============================================
-        const codigo = String(data.code || '').toLowerCase();
+        // Formato real: {
+        //   "alerta": "green",
+        //   "codigo_respuesta": "00",
+        //   "nickname": "RG-GOKI",
+        //   "mensaje": "Jugador verificado",
+        //   "ok": true,
+        //   "validacion_exitosa": true
+        // }
+
+        const codigo = String(data.codigo_respuesta || data.code || '').toLowerCase();
         const nickname = data.nickname || data.Nickname || null;
         const alerta = data.alerta || data.alert || '';
+        const okPagoNorte = data.ok === true || data.validacion_exitosa === true;
 
-        const esValido = (codigo === 'true' || codigo === '00' || alerta === 'green') && nickname;
+        const esValido = okPagoNorte || 
+                         (codigo === 'true' || codigo === '00') || 
+                         alerta === 'green';
 
-        if (esValido) {
+        const validoFinal = esValido && !!nickname;
+
+        if (validoFinal) {
             return res.status(200).json({
                 ok: true,
                 valido: true,
@@ -173,7 +186,7 @@ export default async function handler(req, res) {
                 zona: zona || null,
                 nickname: nickname,
                 region: data.region || 'GLOBAL',
-                mensaje: data.mensaje || 'Consulta exitosa'
+                mensaje: data.mensaje || 'Jugador verificado'
             });
         }
 
