@@ -2,6 +2,10 @@
 // ============================================
 // 🎮 RECARGASGAMES - VERIFICAR JUGADOR (PagoNorte)
 // ============================================
+// Solo PagoNorte directo. Sin fallback.
+// Soporta: Mobile Legends, PUBG Mobile, Arena Breakout, Delta Force
+// (Free Fire y Blood Strike usan /api/verificar-id.js aparte)
+// ============================================
 
 const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 
@@ -9,15 +13,6 @@ const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 // 🎯 MAPA DE ACCIONES POR JUEGO
 // ============================================
 const ACCIONES = {
-    // === Ya funcionando (NO TOCAR) ===
-    'FREE FIRE':        'freefire_nombre',
-    'FREEFIRE':         'freefire_nombre',
-    'FF':               'freefire_nombre',
-    'BLOOD STRIKE':     'bloodstrike_nombre',
-    'BLOODSTRIKE':      'bloodstrike_nombre',
-    'BS':               'bloodstrike_nombre',
-
-    // === Nuevos (según doc oficial PagoNorte) ===
     'MOBILE LEGENDS':   'mobilelegends_nombre',
     'MOBILELEGENDS':    'mobilelegends_nombre',
     'ML':               'mobilelegends_nombre',
@@ -39,24 +34,14 @@ const ACCIONES = {
 // ============================================
 // 🎯 JUEGOS QUE REQUIEREN ZONA
 // ============================================
-const REQUIEREN_ZONA = [
-    'MOBILE LEGENDS', 'MOBILELEGENDS', 'ML', 'MLBB'
-];
+const REQUIEREN_ZONA = ['MOBILE LEGENDS', 'MOBILELEGENDS', 'ML', 'MLBB'];
 
 // ============================================
 // ✅ VALIDACIÓN DE FORMATO POR JUEGO
 // ============================================
 function validarFormato(juego, id) {
-    const j = String(juego).toUpperCase().trim();
     const idStr = String(id).trim();
-
-    if (j === 'BLOOD STRIKE' || j === 'BLOODSTRIKE' || j === 'BS') {
-        return /^\d{8,12}$/.test(idStr);
-    }
-    if (j === 'FREE FIRE' || j === 'FREEFIRE' || j === 'FF') {
-        return /^\d{5,12}$/.test(idStr);
-    }
-    // Mobile Legends, PUBG, Arena Breakout, Delta Force
+    // IDs de 5 a 15 dígitos (todos los juegos soportados)
     return /^\d{5,15}$/.test(idStr);
 }
 
@@ -82,7 +67,7 @@ export default async function handler(req, res) {
             id    = req.body?.id_jugador || req.body?.id;
             zona  = req.body?.zona || req.body?.zone;
         } else {
-            return res.status(405).json({ error: 'Método no permitido' });
+            return res.status(405).json({ ok: false, valido: false, error: 'Método no permitido' });
         }
 
         if (!juego || !id) {
@@ -90,19 +75,18 @@ export default async function handler(req, res) {
                 ok: false,
                 valido: false,
                 error: 'Faltan parámetros',
-                ejemplo: '/api/verificar-jugador?juego=FREE FIRE&id=4664719056'
+                ejemplo: '/api/verificar-jugador?juego=MOBILE LEGENDS&id=123456789&zona=1234'
             });
         }
 
         const juegoUpper = String(juego).toUpperCase().trim();
 
-        // === Verificar si el juego requiere zona ===
+        // === Verificar si requiere zona ===
         if (REQUIEREN_ZONA.includes(juegoUpper) && !zona) {
             return res.status(400).json({
                 ok: false,
                 valido: false,
-                error: `El juego ${juego} requiere el parámetro 'zona'`,
-                ejemplo: `/api/verificar-jugador?juego=${juego}&id=123456789&zona=1234`
+                error: `El juego ${juego} requiere el parámetro 'zona'`
             });
         }
 
@@ -116,13 +100,11 @@ export default async function handler(req, res) {
         }
 
         const accion = ACCIONES[juegoUpper];
-
         if (!accion) {
             return res.status(400).json({
                 ok: false,
                 valido: false,
-                error: `Juego no soportado: ${juego}`,
-                soportados: [...new Set(Object.values(ACCIONES))]
+                error: `Juego no soportado: ${juego}`
             });
         }
 
@@ -145,13 +127,11 @@ export default async function handler(req, res) {
         formData.append('api_key', API_KEY);
         formData.append('api_secret', API_SECRET);
         formData.append('id_jugador', String(id));
-
-        // Zona solo para Mobile Legends
         if (REQUIEREN_ZONA.includes(juegoUpper) && zona) {
             formData.append('zona', String(zona));
         }
 
-        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
+        console.log(`🔍 [PagoNorte] ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
 
         const respuesta = await fetch(PAGONORTE_URL, {
             method: 'POST',
@@ -160,7 +140,7 @@ export default async function handler(req, res) {
         });
 
         if (!respuesta.ok) {
-            return res.status(respuesta.status).json({
+            return res.status(200).json({
                 ok: false,
                 valido: false,
                 error: 'Error consultando PagoNorte',
@@ -177,17 +157,11 @@ export default async function handler(req, res) {
         const codigo   = String(data.code || data.codigo_respuesta || '').toLowerCase();
         const nickname = data.nickname || data.Nickname || null;
         const alerta   = data.alerta || data.alert || '';
-        const puedeContinuar = data.puede_continuar === true;
+        const puedeContinuar    = data.puede_continuar === true;
         const validacionExitosa = data.validacion_exitosa === true;
 
-        // Reglas según doc oficial:
-        // - alerta=green + nickname → válido
-        // - codigo=00 → válido
-        // - puede_continuar=true + validacion_exitosa=false → falla técnica (dejar pasar)
-        // - JUGADOR_NO_VALIDO → rechazo funcional (bloquear)
-        const esValido = (codigo === 'true' || codigo === '00' || alerta === 'green') && nickname;
-
-        if (esValido) {
+        // Jugador verificado correctamente
+        if ((codigo === 'true' || codigo === '00' || alerta === 'green') && nickname) {
             return res.status(200).json({
                 ok: true,
                 valido: true,
@@ -214,13 +188,13 @@ export default async function handler(req, res) {
             });
         }
 
+        // Jugador no válido
         return res.status(200).json({
             ok: false,
             valido: false,
             mensaje: data.mensaje || 'Jugador no encontrado',
             alerta: alerta || 'red',
-            code: codigo,
-            respuesta_cruda: data
+            code: codigo
         });
 
     } catch (error) {
