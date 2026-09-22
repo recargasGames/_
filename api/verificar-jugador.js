@@ -2,106 +2,41 @@
 // ============================================
 // 🎮 RECARGASGAMES - VERIFICAR JUGADOR (PagoNorte)
 // ============================================
-// Prueba credenciales en HEADERS primero.
-// Si falla, reintenta con credenciales en BODY.
-// ============================================
 
 const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 
 // ============================================
-// 🎯 MAPA DE JUEGOS
+// 🎯 MAPA DE ACCIONES POR JUEGO
 // ============================================
-const JUEGOS = {
-    'MOBILE LEGENDS': { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-    'MOBILELEGENDS':  { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-    'ML':             { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-    'MLBB':           { action: 'mobilelegends_nombre', tipo: 'RecargaMobileLegends', requiereZona: true },
-
-    'PUBG MOBILE':    { action: 'pubgmobile_nombre',    tipo: 'RecargaPUBGMobile',    requiereZona: false },
-    'PUBGMOBILE':     { action: 'pubgmobile_nombre',    tipo: 'RecargaPUBGMobile',    requiereZona: false },
-    'PUBG':           { action: 'pubgmobile_nombre',    tipo: 'RecargaPUBGMobile',    requiereZona: false },
-
-    'ARENA BREAKOUT': { action: 'arenabreakout_nombre', tipo: 'RecargaArenaBreakout', requiereZona: false },
-    'ARENABREAKOUT':  { action: 'arenabreakout_nombre', tipo: 'RecargaArenaBreakout', requiereZona: false },
-    'ARENA':          { action: 'arenabreakout_nombre', tipo: 'RecargaArenaBreakout', requiereZona: false },
-
-    'DELTA FORCE':    { action: 'deltaforce_nombre',    tipo: 'RecargaDeltaForce',    requiereZona: false },
-    'DELTAFORCE':     { action: 'deltaforce_nombre',    tipo: 'RecargaDeltaForce',    requiereZona: false },
-    'DELTA':          { action: 'deltaforce_nombre',    tipo: 'RecargaDeltaForce',    requiereZona: false }
+const ACCIONES = {
+    'FREE FIRE':      'freefire_nombre',
+    'FREEFIRE':       'freefire_nombre',
+    'FF':             'freefire_nombre',
+    'BLOOD STRIKE':   'bloodstrike_nombre',
+    'BLOODSTRIKE':    'bloodstrike_nombre',
+    'BS':             'bloodstrike_nombre'
+    // Cuando tengas más, descomenta y agrega:
+    // 'MOBILE LEGENDS': 'ml_nombre',
+    // 'CALL OF DUTY':   'cod_nombre',
+    // 'PUBG MOBILE':    'pubg_nombre',
+    // 'ARENA BREAKOUT': 'arena_nombre',
+    // 'DELTA FORCE':    'delta_nombre',
 };
 
 // ============================================
-// 📡 LLAMAR A PAGONORTE (prueba 2 formas)
+// ✅ VALIDACIÓN DE FORMATO POR JUEGO
 // ============================================
-async function llamarPagoNorte(config, id, zona, apiKey, apiSecret) {
-    // Forma 1: credenciales en HEADERS (doc oficial)
-    const formData1 = new URLSearchParams();
-    formData1.append('action', config.action);
-    formData1.append('tipo', config.tipo);
-    formData1.append('id_jugador', String(id));
-    if (config.requiereZona && zona) formData1.append('zona', String(zona));
+function validarFormato(juego, id) {
+    const j = String(juego).toUpperCase().trim();
+    const idStr = String(id).trim();
 
-    console.log('📤 Intento 1 (headers):', formData1.toString());
-
-    let resp1 = await fetch(PAGONORTE_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-API-Key': apiKey,
-            'X-API-Secret': apiSecret
-        },
-        body: formData1.toString()
-    });
-
-    let textoResp1 = await resp1.text();
-    console.log('📥 Intento 1 status:', resp1.status);
-    console.log('📥 Intento 1 body:', textoResp1);
-
-    if (resp1.ok) {
-        try {
-            const data1 = JSON.parse(textoResp1);
-            return { ok: true, status: resp1.status, data: data1, metodo: 'headers' };
-        } catch (e) {
-            console.error('⚠️ Intento 1 no devolvió JSON:', e.message);
-        }
+    if (j === 'BLOOD STRIKE' || j === 'BLOODSTRIKE' || j === 'BS') {
+        return /^\d{8,12}$/.test(idStr);
     }
-
-    // Forma 2: credenciales en BODY
-    const formData2 = new URLSearchParams();
-    formData2.append('action', config.action);
-    formData2.append('tipo', config.tipo);
-    formData2.append('api_key', apiKey);
-    formData2.append('api_secret', apiSecret);
-    formData2.append('id_jugador', String(id));
-    if (config.requiereZona && zona) formData2.append('zona', String(zona));
-
-    console.log('📤 Intento 2 (body):', formData2.toString());
-
-    const resp2 = await fetch(PAGONORTE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData2.toString()
-    });
-
-    const textoResp2 = await resp2.text();
-    console.log('📥 Intento 2 status:', resp2.status);
-    console.log('📥 Intento 2 body:', textoResp2);
-
-    if (resp2.ok) {
-        try {
-            const data2 = JSON.parse(textoResp2);
-            return { ok: true, status: resp2.status, data: data2, metodo: 'body' };
-        } catch (e) {
-            return { ok: false, status: resp2.status, raw: textoResp2, error: 'JSON inválido en intento 2' };
-        }
+    if (j === 'FREE FIRE' || j === 'FREEFIRE' || j === 'FF') {
+        return /^\d{5,12}$/.test(idStr);
     }
-
-    return {
-        ok: false,
-        status: resp2.status,
-        raw: textoResp2,
-        error: 'PagoNorte rechazó ambos intentos'
-    };
+    return /^\d{5,15}$/.test(idStr);
 }
 
 // ============================================
@@ -115,48 +50,45 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        let juego, id, zona;
+        let juego, id;
 
         if (req.method === 'GET') {
             juego = req.query?.juego || req.query?.game;
             id    = req.query?.id || req.query?.id_jugador;
-            zona  = req.query?.zona || req.query?.zone;
         } else if (req.method === 'POST') {
             juego = req.body?.juego || req.body?.game;
             id    = req.body?.id_jugador || req.body?.id;
-            zona  = req.body?.zona || req.body?.zone;
         } else {
-            return res.status(405).json({ ok: false, valido: false, error: 'Método no permitido' });
+            return res.status(405).json({ error: 'Método no permitido' });
         }
 
         if (!juego || !id) {
-            return res.status(400).json({ ok: false, valido: false, error: 'Faltan parámetros' });
-        }
-
-        const juegoUpper = String(juego).toUpperCase().trim();
-        const config = JUEGOS[juegoUpper];
-
-        if (!config) {
             return res.status(400).json({
                 ok: false,
                 valido: false,
-                error: `Juego no soportado: ${juego}`
+                error: 'Faltan parámetros',
+                ejemplo: '/api/verificar-jugador?juego=FREE FIRE&id=4664719056'
             });
         }
 
-        if (config.requiereZona && !zona) {
-            return res.status(400).json({
-                ok: false,
-                valido: false,
-                error: `El juego ${juego} requiere 'zona'`
-            });
-        }
-
-        if (!/^\d{5,15}$/.test(String(id).trim())) {
+        if (!validarFormato(juego, id)) {
             return res.status(200).json({
                 ok: false,
                 valido: false,
-                mensaje: `Formato de ID inválido`
+                mensaje: `Formato de ID inválido para ${juego}`,
+                id_recibido: id
+            });
+        }
+
+        const juegoUpper = String(juego).toUpperCase().trim();
+        const accion = ACCIONES[juegoUpper];
+
+        if (!accion) {
+            return res.status(400).json({
+                ok: false,
+                valido: false,
+                error: `Juego no soportado: ${juego}`,
+                soportados: Object.keys(ACCIONES)
             });
         }
 
@@ -167,52 +99,59 @@ export default async function handler(req, res) {
             return res.status(500).json({
                 ok: false,
                 valido: false,
-                error: 'Credenciales PagoNorte no configuradas'
+                error: 'Credenciales de PagoNorte no configuradas'
             });
         }
 
-        const resultado = await llamarPagoNorte(config, id, zona, API_KEY, API_SECRET);
+        // ============================================
+        // 📡 LLAMAR A PAGONORTE
+        // ============================================
+        const formData = new URLSearchParams();
+        formData.append('action', accion);
+        formData.append('api_key', API_KEY);
+        formData.append('api_secret', API_SECRET);
+        formData.append('id_jugador', String(id));
 
-        if (!resultado.ok) {
-            return res.status(200).json({
+        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}`);
+
+        const respuesta = await fetch(PAGONORTE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!respuesta.ok) {
+            return res.status(respuesta.status).json({
                 ok: false,
                 valido: false,
-                error: resultado.error || 'Error PagoNorte',
-                status: resultado.status,
-                raw: resultado.raw
+                error: 'Error consultando PagoNorte',
+                status: respuesta.status
             });
         }
 
-        const data = resultado.data;
-        console.log('✅ PagoNorte OK vía', resultado.metodo, ':', JSON.stringify(data));
+        const data = await respuesta.json();
+        console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
 
+        // ============================================
+        // 🎯 INTERPRETAR RESPUESTA (Formato real de PagoNorte)
+        // ============================================
+        // Formato: { code: "true", nickname: "XXX", mensaje: "Consulta exitosa", region: "LATAM" }
+        
+        const codigo = String(data.code || '').toLowerCase();
         const nickname = data.nickname || data.Nickname || null;
-        const validacionExitosa = data.validacion_exitosa === true;
-        const puedeContinuar = data.puede_continuar === true;
-        const alerta = data.alerta || '';
+        const alerta = data.alerta || data.alert || '';
 
-        if (validacionExitosa && nickname) {
+        const esValido = (codigo === 'true' || codigo === '00' || alerta === 'green') && nickname;
+
+        if (esValido) {
             return res.status(200).json({
                 ok: true,
                 valido: true,
                 juego: juegoUpper,
                 id: String(id),
-                zona: zona || null,
                 nickname: nickname,
                 region: data.region || 'GLOBAL',
-                mensaje: data.mensaje || 'Jugador verificado'
-            });
-        }
-
-        if (puedeContinuar && !validacionExitosa) {
-            return res.status(200).json({
-                ok: true,
-                valido: true,
-                juego: juegoUpper,
-                id: String(id),
-                zona: zona || null,
-                nickname: null,
-                mensaje: data.mensaje || 'Nombre no disponible. Puede continuar.'
+                mensaje: data.mensaje || 'Consulta exitosa'
             });
         }
 
@@ -221,15 +160,16 @@ export default async function handler(req, res) {
             valido: false,
             mensaje: data.mensaje || 'Jugador no encontrado',
             alerta: alerta || 'red',
-            raw: data
+            code: codigo,
+            respuesta_cruda: data
         });
 
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('❌ Error verificando jugador:', error);
         return res.status(500).json({
             ok: false,
             valido: false,
-            error: 'Error interno',
+            error: 'Error interno verificando jugador',
             detalle: error.message
         });
     }
