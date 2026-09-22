@@ -191,7 +191,7 @@ body::after{
 }
 .dato-line:last-child{margin-bottom:0}
 .dato-texto strong{color:#cbd5e1;display:inline-block;width:90px}
-.dato-texto span{color:#fff;font-weight:600}
+.dato-texto span{color:#fff;font-weight:600;word-break:break-all}
 
 .copiar-btn{
     width:44px;height:44px;border-radius:10px;
@@ -524,7 +524,6 @@ body::after{
     <div id="pasoDatos" class="paso-box">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
 
-        <!-- 🆕 CAMPO DE WHATSAPP -->
         <div class="datos-pago-box" style="margin-bottom:20px;">
             <h3 class="titulo-seccion" style="margin-top:0;">📱 Tu WhatsApp</h3>
             <p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:12px;">
@@ -611,13 +610,13 @@ body::after{
     <div id="pasoPagoConfirmado" class="paso-box">
         <div class="icono-circle icono-exito">✓</div>
         <div class="texto-principal">¡Pago Confirmado!</div>
-        <div class="texto-secundario">Tu pago fue verificado. Procesando recarga...</div>
+        <div class="texto-secundario">Tu pago fue verificado. Procesando...</div>
     </div>
 
     <div id="pasoConectandoServidor" class="paso-box">
         <div class="spinner-circle"></div>
-        <div class="texto-principal">Procesando tu recarga...</div>
-        <div class="texto-secundario">Conectando con Central One. No cierres esta ventana.</div>
+        <div class="texto-principal">Procesando tu compra...</div>
+        <div class="texto-secundario">Conectando con el proveedor. No cierres esta ventana.</div>
     </div>
 
     <div id="pasoRecargaExitosa" class="paso-box">
@@ -1043,7 +1042,7 @@ async function enviarWhatsApp(telefono, mensajeCliente, mensajeAdmin) {
 // ==============================================
 // 💾 GUARDAR PEDIDO + ACTUALIZAR USUARIO
 // ==============================================
-async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos) {
+async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos, extras = {}) {
     try {
         const user = auth.currentUser;
         const nuevoPedido = refPedidos.push();
@@ -1052,7 +1051,7 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
         const numeroMostrar = `#${numeroPedido}`;
         const whatsappCliente = document.getElementById('whatsappCliente')?.value.trim() || '';
 
-        await nuevoPedido.set({
+        const pedidoData = {
             uid: user ? user.uid : 'anonimo',
             numero_pedido: numeroPedido,
             numero_pedido_mostrar: numeroMostrar,
@@ -1078,7 +1077,18 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             whatsapp_cliente: whatsappCliente || null,
             pin: codigos && codigos.length > 0 ? codigos[0] : null,
             codigos: codigos || []
-        });
+        };
+
+        // 🎬 Agregar campos de streaming si aplica
+        if (extras.es_streaming) {
+            pedidoData.es_streaming = true;
+            pedidoData.codigo_aprobacion = extras.codigo_aprobacion || null;
+            pedidoData.datos_streaming = extras.datos_streaming || null;
+            pedidoData.referencia_interna = extras.referencia_interna || null;
+            pedidoData.tipo_streaming = paqueteCod; // netflix_perfil, disney_cuenta, etc.
+        }
+
+        await nuevoPedido.set(pedidoData);
 
         if (user && user.uid) {
             try {
@@ -1149,7 +1159,7 @@ async function verificarPagoPabilo(referencia) {
 }
 
 // ==============================================
-// 🎮 CENTRAL ONE
+// 🎮 CENTRAL ONE (JUEGOS)
 // ==============================================
 async function enviarRecargaCentralOne() {
     try {
@@ -1193,6 +1203,89 @@ async function enviarRecargaCentralOne() {
         console.error('❌ Error Central One:', error);
         return { exito: false, silencioso: true, motivo_admin: 'Error de conexión con Central One', mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto' };
     }
+}
+
+// ============================================
+// 🎬 PAGONORTE - STREAMING (Netflix, Disney+, HBO)
+// ============================================
+async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
+    try {
+        const res = await fetch('/api/pagonorte', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                accion: 'recarga',
+                producto: productoCodigo,
+                referencia: referenciaInterna
+            })
+        });
+
+        const data = await res.json();
+        console.log('📥 PagoNorte:', data);
+
+        if (!res.ok || !data.ok) {
+            return {
+                exito: false,
+                silencioso: true,
+                motivo_admin: data.mensaje || data.error || 'Error PagoNorte',
+                mensaje: 'Tu pedido está siendo procesado por nuestro equipo'
+            };
+        }
+
+        // ✅ Aprobado
+        if (data.estado === 'Aprobado') {
+            return {
+                exito: true,
+                estado: 'Aprobado',
+                codigo_aprobacion: data.codigo_aprobacion || '',
+                datos: data.datos || {},
+                mensaje: data.mensaje || 'Entrega completada'
+            };
+        }
+
+        // ⏳ Pendiente
+        if (data.pendiente === true) {
+            return {
+                exito: false,
+                silencioso: true,
+                pendiente: true,
+                motivo_admin: 'PagoNorte devolvió PENDIENTE — revisar id_solicitud ' + (data.id_solicitud || ''),
+                mensaje: 'Tu pedido está en proceso, te contactaremos pronto'
+            };
+        }
+
+        // ❌ Rechazado
+        return {
+            exito: false,
+            silencioso: true,
+            motivo_admin: data.mensaje || 'Rechazado por PagoNorte',
+            mensaje: 'Tu pedido está siendo procesado por nuestro equipo'
+        };
+
+    } catch (error) {
+        console.error('❌ Error PagoNorte:', error);
+        return {
+            exito: false,
+            silencioso: true,
+            motivo_admin: 'Error de conexión con PagoNorte',
+            mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto'
+        };
+    }
+}
+
+// Genera referencia interna única para PagoNorte
+function generarReferenciaInterna(productoCodigo) {
+    const ts = Date.now();
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const partes = productoCodigo.toUpperCase().split('_');
+    return `RG-${partes.join('-')}-${ts}-${rand}`;
+}
+
+// ¿Es un producto de streaming?
+function esProductoStreaming(paqueteCodigo) {
+    if (!paqueteCodigo) return false;
+    return ['netflix_perfil', 'netflix_cuenta', 'disney_perfil', 'disney_cuenta',
+            'hbo_perfil', 'hbo_cuenta'].includes(paqueteCodigo.toLowerCase());
 }
 
 // ==============================================
@@ -1272,18 +1365,36 @@ async function iniciarVerificacion() {
         mostrarPaso('pasoPagoConfirmado');
         await new Promise(r => setTimeout(r, 1200));
 
-        // 5. Procesar recarga
+        // 5. Procesar compra
         mostrarPaso('pasoConectandoServidor');
-        let resultadoRecarga = await enviarRecargaCentralOne();
+
+        let resultadoRecarga;
+        let esStreaming = esProductoStreaming(paqueteCod);
+        let referenciaInterna = null;
+
+        if (esStreaming) {
+            referenciaInterna = generarReferenciaInterna(paqueteCod);
+            console.log('🎬 Referencia interna:', referenciaInterna);
+            resultadoRecarga = await enviarRecargaPagoNorte(paqueteCod, referenciaInterna);
+        } else {
+            resultadoRecarga = await enviarRecargaCentralOne();
+        }
+
         await new Promise(r => setTimeout(r, 1000));
 
-        // 6. Guardar en Firebase (con número secuencial)
+        // 6. Guardar en Firebase
         const infoPedido = await guardarPedidoEnFirebase(
             referencia,
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
             resultadoRecarga.id_solicitud || '',
-            'Central One',
-            resultadoRecarga.codigos || []
+            esStreaming ? 'PagoNorte' : 'Central One',
+            resultadoRecarga.codigos || [],
+            {
+                es_streaming: esStreaming,
+                codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null,
+                datos_streaming: resultadoRecarga.datos || null,
+                referencia_interna: referenciaInterna
+            }
         );
 
         const idPedido = infoPedido.id;
@@ -1291,8 +1402,6 @@ async function iniciarVerificacion() {
 
         // 7. Mostrar resultado
         if (resultadoRecarga.exito) {
-            document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
-            document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
             document.getElementById('resPedido').textContent = numeroPedido;
             document.getElementById('resProducto').textContent = producto;
             document.getElementById('resNombre').textContent = nombreJugador;
@@ -1300,64 +1409,158 @@ async function iniciarVerificacion() {
             document.getElementById('resReferencia').textContent = referencia;
             document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
 
-            if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
-                const pin = resultadoRecarga.codigos[0];
-                document.getElementById('pinContainer').innerHTML = `
-                    <div class="pin-box">
-                        <div class="pin-label">🎮 TU PIN</div>
-                        <div class="pin-value">${pin}</div>
-                        <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pin}'); mostrarMensaje('PIN copiado', 'El PIN se copió al portapapeles.', 'exito')">
-                            📋 Copiar PIN
-                        </button>
-                    </div>
+            if (esStreaming && resultadoRecarga.datos) {
+                // 🎬 STREAMING - Mostrar entrega
+                document.getElementById('tituloExito').textContent = '¡Compra Exitosa!';
+                document.getElementById('subtituloExito').textContent = 'Aquí están tus datos de acceso. Guárdalos bien.';
+
+                const d = resultadoRecarga.datos;
+
+                let htmlDatos = `
+                    <div class="datos-pago-box" style="margin-top:20px;">
+                        <h3 class="titulo-seccion" style="margin-top:0;">🎬 Datos de tu Cuenta</h3>
                 `;
+
+                const campos = [
+                    { label: '📧 Correo', valor: d.correo },
+                    { label: '🔑 Contraseña', valor: d.clave },
+                    { label: '👤 Perfil', valor: d.perfil },
+                    { label: '🔢 PIN Perfil', valor: d.pin_perfil },
+                    { label: '📅 Vence', valor: d.fecha_vencimiento }
+                ];
+
+                campos.forEach(c => {
+                    if (c.valor && c.valor.toString().trim() !== '') {
+                        const valorSeguro = String(c.valor).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                        htmlDatos += `
+                            <div class="dato-line">
+                                <div class="dato-texto"><strong>${c.label}:</strong> <span>${c.valor}</span></div>
+                                <button class="copiar-btn" onclick="navigator.clipboard.writeText('${valorSeguro}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+
+                if (resultadoRecarga.codigo_aprobacion) {
+                    const codAprob = String(resultadoRecarga.codigo_aprobacion).replace(/'/g, "\\'");
+                    htmlDatos += `
+                        <div class="dato-line" style="background:rgba(212,175,55,0.1);border-color:rgba(212,175,55,0.4);margin-top:12px;">
+                            <div class="dato-texto"><strong>🎟️ Código:</strong> <span style="color:#f5d76e;font-weight:800;">${resultadoRecarga.codigo_aprobacion}</span></div>
+                            <button class="copiar-btn" onclick="navigator.clipboard.writeText('${codAprob}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div style="font-size:11px;color:#f5d76e;text-align:center;margin-top:8px;">
+                            ⚠️ Guarda este código. Lo necesitarás para renovar.
+                        </div>
+                    `;
+                }
+
+                htmlDatos += `</div>`;
+                document.getElementById('pinContainer').innerHTML = htmlDatos;
+
+                mostrarPaso('pasoRecargaExitosa');
+
+                notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: `🎬 Streaming ${producto} entregado. Ref interna: ${referenciaInterna}` });
+
+                if (whatsappCliente && whatsappCliente.length >= 10) {
+                    const mensajeCliente =
+                        `🎬 *RECARGAS GAMES*\n\n` +
+                        `¡Tu compra fue exitosa! ✅\n\n` +
+                        `📦 ${producto}\n` +
+                        `📋 Pedido: ${numeroPedido}\n\n` +
+                        `*DATOS DE ACCESO:*\n` +
+                        (d.correo ? `📧 Correo: ${d.correo}\n` : '') +
+                        (d.clave ? `🔑 Clave: ${d.clave}\n` : '') +
+                        (d.perfil ? `👤 Perfil: ${d.perfil}\n` : '') +
+                        (d.pin_perfil ? `🔢 PIN: ${d.pin_perfil}\n` : '') +
+                        (d.fecha_vencimiento ? `📅 Vence: ${d.fecha_vencimiento}\n` : '') +
+                        (resultadoRecarga.codigo_aprobacion ? `\n🎟️ Código de renovación: ${resultadoRecarga.codigo_aprobacion}\n` : '') +
+                        `\n¡Gracias por tu compra! 🙌`;
+
+                    const mensajeAdmin =
+                        `🎬 *STREAMING ENTREGADO*\n\n` +
+                        `📦 Producto: ${producto}\n` +
+                        `📋 Pedido: ${numeroPedido}\n` +
+                        `📱 Cliente: ${whatsappCliente}\n` +
+                        `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
+                        `🔢 Ref interna: ${referenciaInterna}\n` +
+                        `🎟️ Código aprobación: ${resultadoRecarga.codigo_aprobacion || 'N/A'}\n\n` +
+                        `✅ Estado: APROBADO`;
+
+                    await enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
+                }
+
             } else {
-                document.getElementById('pinContainer').innerHTML = '';
-            }
+                // 🎮 JUEGO - Flujo actual
+                document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
+                document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
 
-            mostrarPaso('pasoRecargaExitosa');
+                if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
+                    const pin = resultadoRecarga.codigos[0];
+                    document.getElementById('pinContainer').innerHTML = `
+                        <div class="pin-box">
+                            <div class="pin-label">🎮 TU PIN</div>
+                            <div class="pin-value">${pin}</div>
+                            <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pin}'); mostrarMensaje('PIN copiado', 'El PIN se copió al portapapeles.', 'exito')">
+                                📋 Copiar PIN
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('pinContainer').innerHTML = '';
+                }
 
-            notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : '' });
+                mostrarPaso('pasoRecargaExitosa');
 
-            if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
-                enviarTelegram(`🎮 <b>PIN DEL PEDIDO:</b> <code>${resultadoRecarga.codigos[0]}</code>`);
-            }
+                notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : '' });
 
-            // 📱 ENVIAR WHATSAPP AL CLIENTE Y ADMIN
-            if (whatsappCliente && whatsappCliente.length >= 10) {
-                const mensajeCliente = 
-                    `🎮 *RECARGAS GAMES*\n\n` +
-                    `¡Hola! Recibimos tu comprobante ✅\n\n` +
-                    `🎯 Producto: ${producto}\n` +
-                    `👤 Jugador: ${nombreJugador}\n` +
-                    `🆔 ID: ${idJugador}\n` +
-                    `💰 Total: $${precioUsdFinal.toFixed(2)}\n` +
-                    `📋 Pedido: ${numeroPedido}\n\n` +
-                    `¡Gracias por tu compra! 🙌`;
+                if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
+                    enviarTelegram(`🎮 <b>PIN DEL PEDIDO:</b> <code>${resultadoRecarga.codigos[0]}</code>`);
+                }
 
-                const mensajeAdmin = 
-                    `🆕 *NUEVO PEDIDO - JUEGO*\n\n` +
-                    `🎮 Juego: ${juego}\n` +
-                    `📦 Producto: ${producto}\n` +
-                    `👤 Jugador: ${nombreJugador}\n` +
-                    `🆔 ID: ${idJugador}\n` +
-                    `📱 WhatsApp cliente: ${whatsappCliente}\n` +
-                    `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
-                    `📋 Pedido: ${numeroPedido}\n` +
-                    `🔢 Ref: ${referencia}\n` +
-                    `💳 Método: ${metodoPago}\n\n` +
-                    `✅ Estado: COMPLETADA` +
-                    (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0 
-                        ? `\n🎟️ PIN: ${resultadoRecarga.codigos[0]}` 
-                        : '');
+                if (whatsappCliente && whatsappCliente.length >= 10) {
+                    const mensajeCliente =
+                        `🎮 *RECARGAS GAMES*\n\n` +
+                        `¡Hola! Recibimos tu comprobante ✅\n\n` +
+                        `🎯 Producto: ${producto}\n` +
+                        `👤 Jugador: ${nombreJugador}\n` +
+                        `🆔 ID: ${idJugador}\n` +
+                        `💰 Total: $${precioUsdFinal.toFixed(2)}\n` +
+                        `📋 Pedido: ${numeroPedido}\n\n` +
+                        `¡Gracias por tu compra! 🙌`;
 
-                await enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
-                console.log('📱 Notificaciones WhatsApp enviadas');
+                    const mensajeAdmin =
+                        `🆕 *NUEVO PEDIDO - JUEGO*\n\n` +
+                        `🎮 Juego: ${juego}\n` +
+                        `📦 Producto: ${producto}\n` +
+                        `👤 Jugador: ${nombreJugador}\n` +
+                        `🆔 ID: ${idJugador}\n` +
+                        `📱 WhatsApp cliente: ${whatsappCliente}\n` +
+                        `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
+                        `📋 Pedido: ${numeroPedido}\n` +
+                        `🔢 Ref: ${referencia}\n` +
+                        `💳 Método: ${metodoPago}\n\n` +
+                        `✅ Estado: COMPLETADA` +
+                        (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0
+                            ? `\n🎟️ PIN: ${resultadoRecarga.codigos[0]}`
+                            : '');
+
+                    await enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
+                }
             }
 
         } else if (resultadoRecarga.silencioso) {
             document.getElementById('tituloExito').textContent = '¡Pago Verificado!';
-            document.getElementById('subtituloExito').textContent = 'Tu recarga llegará a tu cuenta muy pronto. Te notificaremos por WhatsApp cuando esté lista.';
+            document.getElementById('subtituloExito').textContent = 'Tu pedido llegará muy pronto. Te notificaremos por WhatsApp cuando esté listo.';
             document.getElementById('resPedido').textContent = numeroPedido;
             document.getElementById('resProducto').textContent = producto;
             document.getElementById('resNombre').textContent = nombreJugador;
@@ -1377,8 +1580,8 @@ async function iniciarVerificacion() {
             msgAdmin += `🔢 Referencia: ${referencia}\n`;
             msgAdmin += `💳 Método: ${metodoPago}\n`;
             if (cuponAplicado) msgAdmin += `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)\n`;
-            msgAdmin += `\n⚠️ <b>Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar Central One'}\n`;
-            msgAdmin += `🚨 <b>Acción:</b> Procesa la recarga manualmente\n`;
+            msgAdmin += `\n⚠️ <b>Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar'}\n`;
+            msgAdmin += `🚨 <b>Acción:</b> Procesa el pedido manualmente\n`;
             msgAdmin += `📋 Pedido: ${numeroPedido}\n`;
             msgAdmin += `📱 WhatsApp cliente: ${whatsappCliente}\n`;
             msgAdmin += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
@@ -1413,6 +1616,7 @@ console.log('👤 Nombre:', nombreJugador);
 console.log('🆔 ID:', idJugador);
 console.log('📦 Producto:', producto);
 console.log('💳 Método:', metodoPago);
+console.log('🎬 Es streaming:', esProductoStreaming(paqueteCod));
 </script>
 </body>
 </html>
