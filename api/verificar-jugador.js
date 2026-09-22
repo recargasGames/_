@@ -9,19 +9,39 @@ const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 // 🎯 MAPA DE ACCIONES POR JUEGO
 // ============================================
 const ACCIONES = {
-    'FREE FIRE':      'freefire_nombre',
-    'FREEFIRE':       'freefire_nombre',
-    'FF':             'freefire_nombre',
-    'BLOOD STRIKE':   'bloodstrike_nombre',
-    'BLOODSTRIKE':    'bloodstrike_nombre',
-    'BS':             'bloodstrike_nombre'
-    // Cuando tengas más, descomenta y agrega:
-    // 'MOBILE LEGENDS': 'ml_nombre',
-    // 'CALL OF DUTY':   'cod_nombre',
-    // 'PUBG MOBILE':    'pubg_nombre',
-    // 'ARENA BREAKOUT': 'arena_nombre',
-    // 'DELTA FORCE':    'delta_nombre',
+    // === Ya funcionando (NO TOCAR) ===
+    'FREE FIRE':        'freefire_nombre',
+    'FREEFIRE':         'freefire_nombre',
+    'FF':               'freefire_nombre',
+    'BLOOD STRIKE':     'bloodstrike_nombre',
+    'BLOODSTRIKE':      'bloodstrike_nombre',
+    'BS':               'bloodstrike_nombre',
+
+    // === Nuevos (según doc oficial PagoNorte) ===
+    'MOBILE LEGENDS':   'mobilelegends_nombre',
+    'MOBILELEGENDS':    'mobilelegends_nombre',
+    'ML':               'mobilelegends_nombre',
+    'MLBB':             'mobilelegends_nombre',
+
+    'PUBG MOBILE':      'pubgmobile_nombre',
+    'PUBGMOBILE':       'pubgmobile_nombre',
+    'PUBG':             'pubgmobile_nombre',
+
+    'ARENA BREAKOUT':   'arenabreakout_nombre',
+    'ARENABREAKOUT':    'arenabreakout_nombre',
+    'ARENA':            'arenabreakout_nombre',
+
+    'DELTA FORCE':      'deltaforce_nombre',
+    'DELTAFORCE':       'deltaforce_nombre',
+    'DELTA':            'deltaforce_nombre'
 };
+
+// ============================================
+// 🎯 JUEGOS QUE REQUIEREN ZONA
+// ============================================
+const REQUIEREN_ZONA = [
+    'MOBILE LEGENDS', 'MOBILELEGENDS', 'ML', 'MLBB'
+];
 
 // ============================================
 // ✅ VALIDACIÓN DE FORMATO POR JUEGO
@@ -36,6 +56,7 @@ function validarFormato(juego, id) {
     if (j === 'FREE FIRE' || j === 'FREEFIRE' || j === 'FF') {
         return /^\d{5,12}$/.test(idStr);
     }
+    // Mobile Legends, PUBG, Arena Breakout, Delta Force
     return /^\d{5,15}$/.test(idStr);
 }
 
@@ -50,14 +71,16 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        let juego, id;
+        let juego, id, zona;
 
         if (req.method === 'GET') {
             juego = req.query?.juego || req.query?.game;
             id    = req.query?.id || req.query?.id_jugador;
+            zona  = req.query?.zona || req.query?.zone;
         } else if (req.method === 'POST') {
             juego = req.body?.juego || req.body?.game;
             id    = req.body?.id_jugador || req.body?.id;
+            zona  = req.body?.zona || req.body?.zone;
         } else {
             return res.status(405).json({ error: 'Método no permitido' });
         }
@@ -71,6 +94,18 @@ export default async function handler(req, res) {
             });
         }
 
+        const juegoUpper = String(juego).toUpperCase().trim();
+
+        // === Verificar si el juego requiere zona ===
+        if (REQUIEREN_ZONA.includes(juegoUpper) && !zona) {
+            return res.status(400).json({
+                ok: false,
+                valido: false,
+                error: `El juego ${juego} requiere el parámetro 'zona'`,
+                ejemplo: `/api/verificar-jugador?juego=${juego}&id=123456789&zona=1234`
+            });
+        }
+
         if (!validarFormato(juego, id)) {
             return res.status(200).json({
                 ok: false,
@@ -80,7 +115,6 @@ export default async function handler(req, res) {
             });
         }
 
-        const juegoUpper = String(juego).toUpperCase().trim();
         const accion = ACCIONES[juegoUpper];
 
         if (!accion) {
@@ -88,7 +122,7 @@ export default async function handler(req, res) {
                 ok: false,
                 valido: false,
                 error: `Juego no soportado: ${juego}`,
-                soportados: Object.keys(ACCIONES)
+                soportados: [...new Set(Object.values(ACCIONES))]
             });
         }
 
@@ -112,7 +146,12 @@ export default async function handler(req, res) {
         formData.append('api_secret', API_SECRET);
         formData.append('id_jugador', String(id));
 
-        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}`);
+        // Zona solo para Mobile Legends
+        if (REQUIEREN_ZONA.includes(juegoUpper) && zona) {
+            formData.append('zona', String(zona));
+        }
+
+        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
 
         const respuesta = await fetch(PAGONORTE_URL, {
             method: 'POST',
@@ -133,14 +172,19 @@ export default async function handler(req, res) {
         console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
 
         // ============================================
-        // 🎯 INTERPRETAR RESPUESTA (Formato real de PagoNorte)
+        // 🎯 INTERPRETAR RESPUESTA
         // ============================================
-        // Formato: { code: "true", nickname: "XXX", mensaje: "Consulta exitosa", region: "LATAM" }
-        
-        const codigo = String(data.code || '').toLowerCase();
+        const codigo   = String(data.code || data.codigo_respuesta || '').toLowerCase();
         const nickname = data.nickname || data.Nickname || null;
-        const alerta = data.alerta || data.alert || '';
+        const alerta   = data.alerta || data.alert || '';
+        const puedeContinuar = data.puede_continuar === true;
+        const validacionExitosa = data.validacion_exitosa === true;
 
+        // Reglas según doc oficial:
+        // - alerta=green + nickname → válido
+        // - codigo=00 → válido
+        // - puede_continuar=true + validacion_exitosa=false → falla técnica (dejar pasar)
+        // - JUGADOR_NO_VALIDO → rechazo funcional (bloquear)
         const esValido = (codigo === 'true' || codigo === '00' || alerta === 'green') && nickname;
 
         if (esValido) {
@@ -149,9 +193,24 @@ export default async function handler(req, res) {
                 valido: true,
                 juego: juegoUpper,
                 id: String(id),
+                zona: zona || null,
                 nickname: nickname,
                 region: data.region || 'GLOBAL',
                 mensaje: data.mensaje || 'Consulta exitosa'
+            });
+        }
+
+        // Falla técnica pero puede continuar (ej: NOMBRE_NO_DISPONIBLE)
+        if (puedeContinuar && !validacionExitosa) {
+            return res.status(200).json({
+                ok: true,
+                valido: true,
+                juego: juegoUpper,
+                id: String(id),
+                zona: zona || null,
+                nickname: null,
+                region: data.region || 'GLOBAL',
+                mensaje: data.mensaje || 'Nombre no disponible. Puede continuar.'
             });
         }
 
