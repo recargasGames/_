@@ -1,9 +1,17 @@
 const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
+function infoSeguro(valor) {
+    if (!valor) return null;
+
+    return {
+        inicio: valor.slice(0, 7),
+        final: valor.slice(-4),
+        longitud: valor.length
+    };
+}
+
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -16,11 +24,10 @@ export default async function handler(req, res) {
         if (!API_KEY || !API_SECRET) {
             return res.status(500).json({
                 ok: false,
-                error: 'Las variables PAGONORTE_API_KEY o PAGONORTE_API_SECRET no están configuradas en Vercel.'
+                error: 'Faltan las variables de PagoNorte en Vercel.'
             });
         }
 
-        // EXACTAMENTE como la prueba que sí funcionó directamente
         const form = new URLSearchParams();
 
         form.append('action', 'mobilelegends_nombre');
@@ -41,24 +48,34 @@ export default async function handler(req, res) {
 
         const texto = await respuesta.text();
 
-        let datos = null;
+        let datos;
 
         try {
             datos = JSON.parse(texto);
-        } catch (e) {
-            datos = null;
+        } catch {
+            datos = texto;
         }
 
         return res.status(200).json({
-            ok: respuesta.ok,
-            status_pagonorte: respuesta.status,
-            respuesta_json: datos,
-            respuesta_original: texto
+            diagnostico: {
+                api_key: infoSeguro(API_KEY),
+                api_secret: infoSeguro(API_SECRET)
+            },
+
+            peticion: {
+                action: 'mobilelegends_nombre',
+                tipo: 'RecargaMobileLegends',
+                id_jugador: '2248538339',
+                zona: '1417'
+            },
+
+            respuesta_pagonorte: {
+                http_status: respuesta.status,
+                datos: datos
+            }
         });
 
     } catch (error) {
-        console.error('Error test ML:', error);
-
         return res.status(500).json({
             ok: false,
             error: error.message
