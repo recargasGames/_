@@ -6,7 +6,7 @@
 // Si falla, reintenta con credenciales en BODY.
 // ============================================
 
-const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
+const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 
 // ============================================
 // 🎯 MAPA DE JUEGOS
