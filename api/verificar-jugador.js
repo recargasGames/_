@@ -58,11 +58,11 @@ const JUEGOS_CONFIG = {
         validar: /^\d{8,15}$/
     }
     // ⏳ Agregar más cuando tengas la info:
-    // 'PUBG MOBILE':   { action: 'pubg_nombre',   tipo: 'RecargaPUBG',   requiereZona: false },
-    // 'ARENA BREAKOUT':{ action: 'arena_nombre',  tipo: 'RecargaArena',  requiereZona: false },
-    // 'DELTA FORCE':   { action: 'delta_nombre',  tipo: 'RecargaDelta',  requiereZona: false },
-    // 'COD MOBILE':    { action: 'cod_nombre',    tipo: 'RecargaCOD',    requiereZona: false },
-    // 'ROBLOX':        { action: 'roblox_nombre', tipo: 'RecargaRoblox', requiereZona: false },
+    // 'PUBG MOBILE':   { action: 'pubg_nombre',   tipo: 'RecargaPUBG',   requiereZona: false, validar: /^\d{8,12}$/ },
+    // 'ARENA BREAKOUT':{ action: 'arena_nombre',  tipo: 'RecargaArena',  requiereZona: false, validar: /^\d{6,15}$/ },
+    // 'DELTA FORCE':   { action: 'delta_nombre',  tipo: 'RecargaDelta',  requiereZona: false, validar: /^\d{6,15}$/ },
+    // 'COD MOBILE':    { action: 'cod_nombre',    tipo: 'RecargaCOD',    requiereZona: false, validar: /^\d{8,15}$/ },
+    // 'ROBLOX':        { action: 'roblox_nombre', tipo: 'RecargaRoblox', requiereZona: false, validar: /^\d{10,13}$/ },
 };
 
 // ============================================
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
                 ok: false,
                 valido: false,
                 error: `Juego no soportado: ${juego}`,
-                soportados: [...new Set(Object.values(JUEGOS_CONFIG).map(c => c.tipo))]
+                soportados: [...new Set(Object.keys(JUEGOS_CONFIG))]
             });
         }
 
@@ -131,20 +131,33 @@ export default async function handler(req, res) {
             });
         }
 
-        // Credenciales
+        // ============================================
+        // 🔐 LEER CREDENCIALES
+        // ============================================
         const API_KEY    = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
+
+        console.log('=============================================');
+        console.log('🔐 DIAGNÓSTICO DE CREDENCIALES:');
+        console.log('  PAGONORTE_API_KEY:', API_KEY ? '✅ CONFIGURADA (' + API_KEY.substring(0, 12) + '...)' : '❌ NO CONFIGURADA');
+        console.log('  PAGONORTE_API_SECRET:', API_SECRET ? '✅ CONFIGURADA (' + API_SECRET.substring(0, 12) + '...)' : '❌ NO CONFIGURADA');
+        console.log('=============================================');
 
         if (!API_KEY || !API_SECRET) {
             return res.status(500).json({
                 ok: false,
                 valido: false,
-                error: 'Credenciales de PagoNorte no configuradas'
+                error: 'Credenciales de PagoNorte no configuradas',
+                debug: {
+                    api_key_configurada: !!API_KEY,
+                    api_secret_configurada: !!API_SECRET,
+                    instrucciones: 'Configura PAGONORTE_API_KEY y PAGONORTE_API_SECRET en Vercel → Settings → Environment Variables'
+                }
             });
         }
 
         // ============================================
-        // 📡 LLAMAR A PAGONORTE
+        // 📡 PREPARAR PETICIÓN A PAGONORTE
         // ============================================
         const formData = new URLSearchParams();
         formData.append('action', config.action);
@@ -154,29 +167,82 @@ export default async function handler(req, res) {
             formData.append('zona', String(zona));
         }
 
-        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
+        console.log('=============================================');
+        console.log('📤 ENVIANDO A PAGONORTE:');
+        console.log('  URL:', PAGONORTE_URL);
+        console.log('  Action:', config.action);
+        console.log('  Tipo:', config.tipo);
+        console.log('  ID Jugador:', id);
+        if (zona) console.log('  Zona:', zona);
+        console.log('  Body completo:', formData.toString());
+        console.log('=============================================');
 
+        // ============================================
+        // 🚀 LLAMAR A PAGONORTE
+        // ============================================
         const respuesta = await fetch(PAGONORTE_URL, {
             method: 'POST',
             headers: {
                 'X-API-Key': API_KEY,
                 'X-API-Secret': API_SECRET,
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             },
             body: formData.toString()
         });
 
+        // 🔍 LEER RESPUESTA CRUDA (aunque sea error)
+        const textoRespuesta = await respuesta.text();
+
+        console.log('=============================================');
+        console.log('📥 RESPUESTA DE PAGONORTE:');
+        console.log('  Status:', respuesta.status);
+        console.log('  Headers:', JSON.stringify([...respuesta.headers.entries()]));
+        console.log('  Body:', textoRespuesta);
+        console.log('=============================================');
+
+        // Intentar parsear como JSON
+        let data = null;
+        try {
+            data = JSON.parse(textoRespuesta);
+        } catch (e) {
+            console.error('❌ Respuesta NO es JSON');
+        }
+
+        // ============================================
+        // ⚠️ SI PAGONORTE DEVOLVIÓ ERROR (400, 401, 403, etc.)
+        // ============================================
         if (!respuesta.ok) {
             return res.status(respuesta.status).json({
                 ok: false,
                 valido: false,
-                error: 'Error consultando PagoNorte',
-                status: respuesta.status
+                error: 'PagoNorte rechazó la petición',
+                status: respuesta.status,
+                status_texto: respuesta.statusText,
+                respuesta_cruda: textoRespuesta.substring(0, 800),
+                debug: {
+                    url: PAGONORTE_URL,
+                    action: config.action,
+                    tipo: config.tipo,
+                    id_jugador: id,
+                    zona: zona || null,
+                    api_key_prefix: API_KEY.substring(0, 12) + '...',
+                    api_secret_prefix: API_SECRET.substring(0, 12) + '...'
+                }
             });
         }
 
-        const data = await respuesta.json();
-        console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
+        // ============================================
+        // ⚠️ SI NO DEVOLVIÓ JSON VÁLIDO
+        // ============================================
+        if (!data) {
+            return res.status(500).json({
+                ok: false,
+                valido: false,
+                error: 'PagoNorte devolvió algo que no es JSON',
+                respuesta_cruda: textoRespuesta.substring(0, 800)
+            });
+        }
 
         // ============================================
         // 🎯 INTERPRETAR RESPUESTA
@@ -186,6 +252,12 @@ export default async function handler(req, res) {
         const alerta = data.alerta || data.alert || '';
 
         const esValido = (codigo === 'true' || codigo === '00' || alerta === 'green') && nickname;
+
+        console.log('🎯 Resultado:');
+        console.log('  code:', codigo);
+        console.log('  nickname:', nickname);
+        console.log('  alerta:', alerta);
+        console.log('  esValido:', esValido);
 
         if (esValido) {
             return res.status(200).json({
@@ -215,7 +287,8 @@ export default async function handler(req, res) {
             ok: false,
             valido: false,
             error: 'Error interno verificando jugador',
-            detalle: error.message
+            detalle: error.message,
+            stack: error.stack
         });
     }
 }
