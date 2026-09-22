@@ -14,9 +14,11 @@ const ACCIONES = {
     'FF':             'freefire_nombre',
     'BLOOD STRIKE':   'bloodstrike_nombre',
     'BLOODSTRIKE':    'bloodstrike_nombre',
-    'BS':             'bloodstrike_nombre'
+    'BS':             'bloodstrike_nombre',
+    'MOBILE LEGENDS': 'mobilelegends_nombre',
+    'MOBILELEGENDS':  'mobilelegends_nombre',
+    'ML':             'mobilelegends_nombre'
     // Cuando tengas más, descomenta y agrega:
-    // 'MOBILE LEGENDS': 'ml_nombre',
     // 'CALL OF DUTY':   'cod_nombre',
     // 'PUBG MOBILE':    'pubg_nombre',
     // 'ARENA BREAKOUT': 'arena_nombre',
@@ -36,6 +38,9 @@ function validarFormato(juego, id) {
     if (j === 'FREE FIRE' || j === 'FREEFIRE' || j === 'FF') {
         return /^\d{5,12}$/.test(idStr);
     }
+    if (j === 'MOBILE LEGENDS' || j === 'MOBILELEGENDS' || j === 'ML') {
+        return /^\d{8,15}$/.test(idStr);
+    }
     return /^\d{5,15}$/.test(idStr);
 }
 
@@ -50,14 +55,16 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        let juego, id;
+        let juego, id, zona;
 
         if (req.method === 'GET') {
             juego = req.query?.juego || req.query?.game;
             id    = req.query?.id || req.query?.id_jugador;
+            zona  = req.query?.zona;
         } else if (req.method === 'POST') {
             juego = req.body?.juego || req.body?.game;
             id    = req.body?.id_jugador || req.body?.id;
+            zona  = req.body?.zona;
         } else {
             return res.status(405).json({ error: 'Método no permitido' });
         }
@@ -92,6 +99,17 @@ export default async function handler(req, res) {
             });
         }
 
+        // Mobile Legends requiere zona
+        const esML = (juegoUpper === 'MOBILE LEGENDS' || juegoUpper === 'MOBILELEGENDS' || juegoUpper === 'ML');
+        if (esML && !zona) {
+            return res.status(400).json({
+                ok: false,
+                valido: false,
+                error: 'Mobile Legends requiere el campo "zona"',
+                ejemplo: '/api/verificar-jugador?juego=MOBILE LEGENDS&id=2248538339&zona=1417'
+            });
+        }
+
         const API_KEY    = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
 
@@ -111,8 +129,13 @@ export default async function handler(req, res) {
         formData.append('api_key', API_KEY);
         formData.append('api_secret', API_SECRET);
         formData.append('id_jugador', String(id));
+        
+        // Mobile Legends también necesita "zona"
+        if (esML && zona) {
+            formData.append('zona', String(zona));
+        }
 
-        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}`);
+        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
 
         const respuesta = await fetch(PAGONORTE_URL, {
             method: 'POST',
@@ -133,10 +156,8 @@ export default async function handler(req, res) {
         console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
 
         // ============================================
-        // 🎯 INTERPRETAR RESPUESTA (Formato real de PagoNorte)
+        // 🎯 INTERPRETAR RESPUESTA
         // ============================================
-        // Formato: { code: "true", nickname: "XXX", mensaje: "Consulta exitosa", region: "LATAM" }
-        
         const codigo = String(data.code || '').toLowerCase();
         const nickname = data.nickname || data.Nickname || null;
         const alerta = data.alerta || data.alert || '';
@@ -149,6 +170,7 @@ export default async function handler(req, res) {
                 valido: true,
                 juego: juegoUpper,
                 id: String(id),
+                zona: zona || null,
                 nickname: nickname,
                 region: data.region || 'GLOBAL',
                 mensaje: data.mensaje || 'Consulta exitosa'
