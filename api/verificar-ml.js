@@ -1,69 +1,66 @@
 // api/verificar-ml.js
 // ============================================
-// 🎮 RECARGASGAMES
-// 🔎 VERIFICAR JUGADOR MOBILE LEGENDS
-// 📦 MODO DEBUG - RESPUESTA COMPLETA PAGONORTE
+// 🎮 RECARGASGAMES - VERIFICAR MOBILE LEGENDS
+// PagoNorte
 // ============================================
 
-const PAGONORTE_URL = "https://pagonorte.net/recargas_post/api.jsp";
+const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
 export default async function handler(req, res) {
 
     // ============================================
     // CORS
     // ============================================
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader(
-        "Access-Control-Allow-Methods",
-        "GET, POST, OPTIONS"
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS'
     );
     res.setHeader(
-        "Access-Control-Allow-Headers",
-        "Content-Type"
+        'Access-Control-Allow-Headers',
+        'Content-Type'
     );
 
-    if (req.method === "OPTIONS") {
+    if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
     try {
 
         // ============================================
-        // MÉTODO
-        // ============================================
-        if (req.method !== "GET" && req.method !== "POST") {
-            return res.status(405).json({
-                ok: false,
-                valido: false,
-                error: "Método no permitido"
-            });
-        }
-
-        // ============================================
         // OBTENER ID Y ZONA
         // ============================================
-        let id = "";
-        let zona = "";
+        let id;
+        let zona;
 
-        if (req.method === "GET") {
+        if (req.method === 'GET') {
 
-            id = req.query?.id || "";
-            zona = req.query?.zona || "";
+            id = req.query?.id;
+            zona = req.query?.zona;
+
+        } else if (req.method === 'POST') {
+
+            id = req.body?.id;
+            zona = req.body?.zona;
 
         } else {
 
-            id = req.body?.id || "";
-            zona = req.body?.zona || "";
+            return res.status(405).json({
+                ok: false,
+                valido: false,
+                error: 'Método no permitido'
+            });
+
         }
 
-        id = String(id).trim();
-        zona = String(zona).trim();
+        id = id ? String(id).trim() : '';
+        zona = zona ? String(zona).trim() : '';
 
-        console.log("============================================");
-        console.log("🎮 MOBILE LEGENDS");
-        console.log("============================================");
-        console.log("🆔 ID:", id);
-        console.log("🌎 ZONA:", zona);
+        console.log('============================================');
+        console.log('🎮 MOBILE LEGENDS');
+        console.log('============================================');
+        console.log('🆔 ID:', id);
+        console.log('🌎 ZONA:', zona);
 
         // ============================================
         // VALIDAR ID
@@ -72,15 +69,15 @@ export default async function handler(req, res) {
             return res.status(200).json({
                 ok: false,
                 valido: false,
-                mensaje: "Debes ingresar el ID del jugador."
+                mensaje: 'Debes ingresar el ID del jugador.'
             });
         }
 
-        if (!/^[0-9]{5,15}$/.test(id)) {
+        if (!/^\d{8,15}$/.test(id)) {
             return res.status(200).json({
                 ok: false,
                 valido: false,
-                mensaje: "El ID debe tener entre 5 y 15 números."
+                mensaje: 'El ID de Mobile Legends debe tener entre 8 y 15 números.'
             });
         }
 
@@ -91,151 +88,153 @@ export default async function handler(req, res) {
             return res.status(200).json({
                 ok: false,
                 valido: false,
-                mensaje: "Debes ingresar la Zona ID."
+                mensaje: 'Debes ingresar la Zona ID.'
             });
         }
 
-        if (!/^[0-9]{1,6}$/.test(zona)) {
+        if (!/^\d{1,6}$/.test(zona)) {
             return res.status(200).json({
                 ok: false,
                 valido: false,
-                mensaje: "La Zona ID debe contener solamente números."
+                mensaje: 'La Zona ID debe contener solamente números.'
             });
         }
 
         // ============================================
-        // CREDENCIALES
+        // CREDENCIALES PAGONORTE
         // ============================================
         const API_KEY = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
 
         if (!API_KEY || !API_SECRET) {
+
+            console.error(
+                '❌ Credenciales de PagoNorte no configuradas'
+            );
+
             return res.status(500).json({
                 ok: false,
                 valido: false,
-                error: "Credenciales de PagoNorte no configuradas"
+                error: 'Credenciales de PagoNorte no configuradas'
             });
         }
 
         // ============================================
-        // PREPARAR PETICIÓN
+        // 📡 PREPARAR PETICIÓN
         // ============================================
-        const parametros = new URLSearchParams();
+        const formData = new URLSearchParams();
 
-        parametros.append(
-            "action",
-            "mobilelegends_nombre"
+        formData.append(
+            'action',
+            'mobilelegends_nombre'
         );
 
-        parametros.append(
-            "tipo",
-            "RecargaMobileLegends"
+        // 🔑 IMPORTANTE:
+        // Igual que verificar-jugador.js
+        formData.append(
+            'api_key',
+            API_KEY
         );
 
-        parametros.append(
-            "id_jugador",
+        formData.append(
+            'api_secret',
+            API_SECRET
+        );
+
+        formData.append(
+            'id_jugador',
             id
         );
 
-        parametros.append(
-            "zona",
+        formData.append(
+            'zona',
             zona
         );
 
-        const body = parametros.toString();
+        const body = formData.toString();
 
-        console.log("📡 URL:", PAGONORTE_URL);
-        console.log("📦 BODY:", body);
+        console.log('--------------------------------------------');
+        console.log('📡 ENVIANDO A PAGONORTE');
+        console.log('--------------------------------------------');
+        console.log('URL:', PAGONORTE_URL);
+        console.log(
+            'BODY:',
+            body.replace(API_KEY, 'API_KEY_OCULTA')
+                .replace(API_SECRET, 'API_SECRET_OCULTA')
+        );
 
         // ============================================
-        // LLAMAR A PAGONORTE
+        // 🚀 LLAMAR A PAGONORTE
         // ============================================
-        let respuesta;
-
-        try {
-
-            respuesta = await fetch(PAGONORTE_URL, {
-                method: "POST",
+        const respuesta = await fetch(
+            PAGONORTE_URL,
+            {
+                method: 'POST',
 
                 headers: {
-                    "Content-Type":
-                        "application/x-www-form-urlencoded",
-                    "Accept":
-                        "application/json",
-                    "X-API-Key":
-                        API_KEY,
-                    "X-API-Secret":
-                        API_SECRET
+                    'Content-Type':
+                        'application/x-www-form-urlencoded',
+
+                    'Accept':
+                        'application/json'
                 },
 
-                body
-            });
-
-        } catch (errorFetch) {
-
-            console.error(
-                "❌ ERROR CONECTANDO CON PAGONORTE:",
-                errorFetch
-            );
-
-            return res.status(200).json({
-                ok: false,
-                valido: false,
-                error: "No se pudo conectar con PagoNorte.",
-                detalle: errorFetch.message
-            });
-        }
+                body: body
+            }
+        );
 
         // ============================================
         // LEER RESPUESTA ORIGINAL
         // ============================================
-        let respuestaOriginal = "";
+        const respuestaOriginal =
+            await respuesta.text();
 
-        try {
+        console.log('--------------------------------------------');
+        console.log('📥 RESPUESTA PAGONORTE');
+        console.log('--------------------------------------------');
+        console.log(
+            'STATUS:',
+            respuesta.status
+        );
 
-            respuestaOriginal = await respuesta.text();
-
-        } catch (errorText) {
-
-            console.error(
-                "❌ ERROR LEYENDO RESPUESTA:",
-                errorText
-            );
-
-            return res.status(200).json({
-                ok: false,
-                valido: false,
-                error: "No se pudo leer la respuesta de PagoNorte.",
-                status_pagonorte: respuesta.status
-            });
-        }
-
-        console.log("============================================");
-        console.log("📥 RESPUESTA ORIGINAL PAGONORTE");
-        console.log("============================================");
-        console.log(respuestaOriginal);
+        console.log(
+            'BODY:',
+            respuestaOriginal
+        );
 
         // ============================================
         // INTENTAR PARSEAR JSON
         // ============================================
-        let data = null;
-        let jsonValido = false;
+        let data;
 
         try {
 
-            data = JSON.parse(respuestaOriginal);
-            jsonValido = true;
+            data = JSON.parse(
+                respuestaOriginal
+            );
 
         } catch (errorJSON) {
 
-            console.log(
-                "⚠️ PagoNorte no devolvió JSON válido."
-            );
+            return res.status(200).json({
 
+                ok: false,
+
+                valido: false,
+
+                error:
+                    'PagoNorte no devolvió un JSON válido.',
+
+                status_pagonorte:
+                    respuesta.status,
+
+                respuesta_original:
+                    respuestaOriginal
+
+            });
         }
 
         // ============================================
-        // PAGONORTE RESPONDE HTTP ERROR
+        // PAGONORTE RESPONDIÓ ERROR
         // ============================================
         if (!respuesta.ok) {
 
@@ -246,157 +245,7 @@ export default async function handler(req, res) {
                 valido: false,
 
                 error:
-                    "PagoNorte rechazó la solicitud.",
-
-                status_pagonorte:
-                    respuesta.status,
-
-                // RESPUESTA ORIGINAL EXACTA
-                respuesta_original:
-                    respuestaOriginal,
-
-                // JSON ORIGINAL SI EXISTE
-                respuesta_original_json:
-                    jsonValido ? data : null
-
-            });
-        }
-
-        // ============================================
-        // SI NO ES JSON
-        // ============================================
-        if (!jsonValido) {
-
-            return res.status(200).json({
-
-                ok: false,
-
-                valido: false,
-
-                error:
-                    "PagoNorte no devolvió un JSON válido.",
-
-                status_pagonorte:
-                    respuesta.status,
-
-                // TEXTO ORIGINAL COMPLETO
-                respuesta_original:
-                    respuestaOriginal
-
-            });
-        }
-
-        // ============================================
-        // MOSTRAR RESPUESTA COMPLETA EN LOGS
-        // ============================================
-        console.log("============================================");
-        console.log("📦 JSON ORIGINAL PAGONORTE");
-        console.log("============================================");
-
-        console.log(
-            JSON.stringify(data, null, 2)
-        );
-
-        // ============================================
-        // EXTRAER NICKNAME
-        // ============================================
-        const nickname =
-            data.nickname ||
-            data.nombre ||
-            data.nombre_jugador ||
-            data.player_name ||
-            data.playerName ||
-            data.nick ||
-            null;
-
-        // ============================================
-        // EXTRAER CÓDIGO
-        // ============================================
-        const codigo =
-            String(
-                data.codigo_respuesta ||
-                data.codigo ||
-                data.code ||
-                ""
-            ).toLowerCase();
-
-        // ============================================
-        // EXTRAER ALERTA
-        // ============================================
-        const alerta =
-            String(
-                data.alerta ||
-                ""
-            ).toLowerCase();
-
-        // ============================================
-        // EXTRAER MENSAJE
-        // ============================================
-        const mensaje =
-            data.mensaje ||
-            data.message ||
-            data.msg ||
-            "";
-
-        // ============================================
-        // DETERMINAR SI FUE EXITOSO
-        // ============================================
-        const exitoso =
-            data.ok === true ||
-            data.valido === true ||
-            data.success === true ||
-            data.validacion_exitosa === true ||
-            codigo === "00" ||
-            codigo === "0" ||
-            alerta === "green" ||
-            alerta === "success" ||
-            alerta === "ok";
-
-        const jugadorValido =
-            exitoso && nickname;
-
-        // ============================================
-        // RESPUESTA EXITOSA
-        // ============================================
-        if (jugadorValido) {
-
-            console.log("============================================");
-            console.log("✅ JUGADOR VERIFICADO");
-            console.log("============================================");
-            console.log("🆔 ID:", id);
-            console.log("🌎 ZONA:", zona);
-            console.log("👤 NICKNAME:", nickname);
-
-            return res.status(200).json({
-
-                // RESULTADO INTERPRETADO
-                ok: true,
-
-                valido: true,
-
-                juego:
-                    "MOBILE LEGENDS",
-
-                id:
-                    id,
-
-                zona:
-                    zona,
-
-                nickname:
-                    String(nickname),
-
-                region:
-                    data.region ||
-                    "GLOBAL",
-
-                mensaje:
-                    mensaje ||
-                    "Jugador verificado",
-
-                // ====================================
-                // 🔥 RESPUESTA ORIGINAL COMPLETA
-                // ====================================
+                    'PagoNorte rechazó la solicitud.',
 
                 status_pagonorte:
                     respuesta.status,
@@ -411,7 +260,97 @@ export default async function handler(req, res) {
         }
 
         // ============================================
-        // RESPUESTA NO VÁLIDA
+        // INTERPRETAR RESPUESTA
+        // ============================================
+        const codigo =
+            String(
+                data.codigo_respuesta ||
+                data.code ||
+                ''
+            ).toLowerCase();
+
+        const nickname =
+            data.nickname ||
+            data.Nickname ||
+            data.nombre ||
+            data.nombre_jugador ||
+            data.player_name ||
+            null;
+
+        const alerta =
+            String(
+                data.alerta ||
+                data.alert ||
+                ''
+            ).toLowerCase();
+
+        const okPagoNorte =
+            data.ok === true ||
+            data.validacion_exitosa === true;
+
+        const esValido =
+            okPagoNorte ||
+            codigo === 'true' ||
+            codigo === '00' ||
+            alerta === 'green';
+
+        const validoFinal =
+            esValido &&
+            !!nickname;
+
+        // ============================================
+        // ✅ JUGADOR VERIFICADO
+        // ============================================
+        if (validoFinal) {
+
+            console.log('============================================');
+            console.log('✅ JUGADOR MOBILE LEGENDS VERIFICADO');
+            console.log('============================================');
+            console.log('🆔 ID:', id);
+            console.log('🌎 ZONA:', zona);
+            console.log('👤 NICKNAME:', nickname);
+
+            return res.status(200).json({
+
+                ok: true,
+
+                valido: true,
+
+                juego:
+                    'MOBILE LEGENDS',
+
+                id:
+                    id,
+
+                zona:
+                    zona,
+
+                nickname:
+                    nickname,
+
+                region:
+                    data.region ||
+                    'GLOBAL',
+
+                mensaje:
+                    data.mensaje ||
+                    'Jugador verificado',
+
+                // DEBUG
+                status_pagonorte:
+                    respuesta.status,
+
+                respuesta_original:
+                    respuestaOriginal,
+
+                respuesta_original_json:
+                    data
+
+            });
+        }
+
+        // ============================================
+        // ❌ JUGADOR NO VALIDADO
         // ============================================
         return res.status(200).json({
 
@@ -420,19 +359,15 @@ export default async function handler(req, res) {
             valido: false,
 
             mensaje:
-                mensaje ||
-                "No se pudo verificar el jugador.",
+                data.mensaje ||
+                'Jugador no encontrado',
 
             alerta:
                 alerta ||
-                "red",
+                'red',
 
-            codigo_respuesta:
+            code:
                 codigo,
-
-            // ========================================
-            // 🔥 RESPUESTA ORIGINAL COMPLETA
-            // ========================================
 
             status_pagonorte:
                 respuesta.status,
@@ -447,34 +382,24 @@ export default async function handler(req, res) {
 
     } catch (error) {
 
-        // ============================================
-        // ERROR GENERAL
-        // ============================================
         console.error(
-            "============================================"
-        );
-
-        console.error(
-            "💥 ERROR GENERAL"
-        );
-
-        console.error(
+            '❌ ERROR VERIFICANDO MOBILE LEGENDS:',
             error
         );
 
-        return res.status(200).json({
+        return res.status(500).json({
 
             ok: false,
 
             valido: false,
 
             error:
-                "Error interno en verificar-ml",
+                'Error interno verificando jugador',
 
             detalle:
-                error?.message ||
-                String(error)
+                error.message
 
         });
+
     }
 }
