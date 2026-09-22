@@ -3,7 +3,7 @@
 // 🎮 RECARGASGAMES - VERIFICAR JUGADOR (PagoNorte)
 // ============================================
 
-const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
+const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 
 // ============================================
 // 🎯 MAPA DE ACCIONES POR JUEGO
@@ -14,14 +14,45 @@ const ACCIONES = {
     'FF':             'freefire_nombre',
     'BLOOD STRIKE':   'bloodstrike_nombre',
     'BLOODSTRIKE':    'bloodstrike_nombre',
-    'BS':             'bloodstrike_nombre'
-    // Cuando tengas más, descomenta y agrega:
-    // 'MOBILE LEGENDS': 'ml_nombre',
-    // 'CALL OF DUTY':   'cod_nombre',
-    // 'PUBG MOBILE':    'pubg_nombre',
-    // 'ARENA BREAKOUT': 'arena_nombre',
-    // 'DELTA FORCE':    'delta_nombre',
+    'BS':             'bloodstrike_nombre',
+    'MOBILE LEGENDS': 'mobilelegends_nombre',
+    'MOBILELEGENDS':  'mobilelegends_nombre',
+    'ML':             'mobilelegends_nombre',
+    'MLBB':           'mobilelegends_nombre',
+    'PUBG MOBILE':    'pubgmobile_nombre',
+    'PUBGMOBILE':     'pubgmobile_nombre',
+    'PUBG':           'pubgmobile_nombre',
+    'ARENA BREAKOUT': 'arenabreakout_nombre',
+    'ARENABREAKOUT':  'arenabreakout_nombre',
+    'ARENA':          'arenabreakout_nombre',
+    'DELTA FORCE':    'deltaforce_nombre',
+    'DELTAFORCE':     'deltaforce_nombre',
+    'DELTA':          'deltaforce_nombre'
 };
+
+// ============================================
+// 🎯 TIPOS DE RECARGA (para el parámetro 'tipo')
+// ============================================
+const TIPOS = {
+    'MOBILE LEGENDS': 'RecargaMobileLegends',
+    'MOBILELEGENDS':  'RecargaMobileLegends',
+    'ML':             'RecargaMobileLegends',
+    'MLBB':           'RecargaMobileLegends',
+    'PUBG MOBILE':    'RecargaPUBGMobile',
+    'PUBGMOBILE':     'RecargaPUBGMobile',
+    'PUBG':           'RecargaPUBGMobile',
+    'ARENA BREAKOUT': 'RecargaArenaBreakout',
+    'ARENABREAKOUT':  'RecargaArenaBreakout',
+    'ARENA':          'RecargaArenaBreakout',
+    'DELTA FORCE':    'RecargaDeltaForce',
+    'DELTAFORCE':     'RecargaDeltaForce',
+    'DELTA':          'RecargaDeltaForce'
+};
+
+// ============================================
+// 🎯 JUEGOS QUE REQUIEREN ZONA
+// ============================================
+const REQUIEREN_ZONA = ['MOBILE LEGENDS', 'MOBILELEGENDS', 'ML', 'MLBB'];
 
 // ============================================
 // ✅ VALIDACIÓN DE FORMATO POR JUEGO
@@ -50,14 +81,16 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        let juego, id;
+        let juego, id, zona;
 
         if (req.method === 'GET') {
             juego = req.query?.juego || req.query?.game;
             id    = req.query?.id || req.query?.id_jugador;
+            zona  = req.query?.zona || req.query?.zone;
         } else if (req.method === 'POST') {
             juego = req.body?.juego || req.body?.game;
             id    = req.body?.id_jugador || req.body?.id;
+            zona  = req.body?.zona || req.body?.zone;
         } else {
             return res.status(405).json({ error: 'Método no permitido' });
         }
@@ -71,6 +104,17 @@ export default async function handler(req, res) {
             });
         }
 
+        const juegoUpper = String(juego).toUpperCase().trim();
+
+        // Verificar zona si es requerida
+        if (REQUIEREN_ZONA.includes(juegoUpper) && !zona) {
+            return res.status(400).json({
+                ok: false,
+                valido: false,
+                error: `El juego ${juego} requiere el parámetro 'zona'`
+            });
+        }
+
         if (!validarFormato(juego, id)) {
             return res.status(200).json({
                 ok: false,
@@ -80,7 +124,6 @@ export default async function handler(req, res) {
             });
         }
 
-        const juegoUpper = String(juego).toUpperCase().trim();
         const accion = ACCIONES[juegoUpper];
 
         if (!accion) {
@@ -112,7 +155,17 @@ export default async function handler(req, res) {
         formData.append('api_secret', API_SECRET);
         formData.append('id_jugador', String(id));
 
-        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}`);
+        // Agregar tipo si existe
+        if (TIPOS[juegoUpper]) {
+            formData.append('tipo', TIPOS[juegoUpper]);
+        }
+
+        // Agregar zona si es requerida
+        if (REQUIEREN_ZONA.includes(juegoUpper) && zona) {
+            formData.append('zona', String(zona));
+        }
+
+        console.log(`🔍 Verificando ${juegoUpper} - ID: ${id}${zona ? ' - Zona: ' + zona : ''}`);
 
         const respuesta = await fetch(PAGONORTE_URL, {
             method: 'POST',
@@ -133,22 +186,21 @@ export default async function handler(req, res) {
         console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
 
         // ============================================
-        // 🎯 INTERPRETAR RESPUESTA (Formato real de PagoNorte)
+        // 🎯 INTERPRETAR RESPUESTA
         // ============================================
-        // Formato: { code: "true", nickname: "XXX", mensaje: "Consulta exitosa", region: "LATAM" }
-        
-        const codigo = String(data.code || '').toLowerCase();
+        const codigo = String(data.code || data.codigo_respuesta || '').toLowerCase();
         const nickname = data.nickname || data.Nickname || null;
         const alerta = data.alerta || data.alert || '';
+        const validacionExitosa = data.validacion_exitosa === true;
 
-        const esValido = (codigo === 'true' || codigo === '00' || alerta === 'green') && nickname;
-
-        if (esValido) {
+        // Jugador verificado correctamente
+        if ((codigo === 'true' || codigo === '00' || alerta === 'green' || validacionExitosa) && nickname) {
             return res.status(200).json({
                 ok: true,
                 valido: true,
                 juego: juegoUpper,
                 id: String(id),
+                zona: zona || null,
                 nickname: nickname,
                 region: data.region || 'GLOBAL',
                 mensaje: data.mensaje || 'Consulta exitosa'
