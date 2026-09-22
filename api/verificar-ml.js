@@ -1,6 +1,6 @@
 // api/verificar-ml.js
 // ============================================
-// 🎮 RECARGASGAMES - VERIFICAR MOBILE LEGENDS
+// 🎮 VERIFICAR JUGADOR - MOBILE LEGENDS
 // ============================================
 
 const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
@@ -25,7 +25,6 @@ export default async function handler(req, res) {
             return res.status(405).json({ error: 'Método no permitido' });
         }
 
-        // Validar que vengan los datos
         if (!id || !zona) {
             return res.status(400).json({
                 ok: false,
@@ -35,7 +34,6 @@ export default async function handler(req, res) {
             });
         }
 
-        // Validar formato (ID y Zona deben ser números)
         if (!/^\d{5,15}$/.test(String(id)) || !/^\d{1,6}$/.test(String(zona))) {
             return res.status(200).json({
                 ok: false,
@@ -60,23 +58,26 @@ export default async function handler(req, res) {
         // ============================================
         const formData = new URLSearchParams();
         formData.append('action', 'mobilelegends_nombre');
-        formData.append('tipo', 'RecargaMobileLegends'); // <-- Dato clave de tu captura
+        formData.append('tipo', 'RecargaMobileLegends');
         formData.append('id_jugador', String(id));
-        formData.append('zona', String(zona)); // <-- Mobile Legends requiere zona
+        formData.append('zona', String(zona));
 
         console.log(`🔍 Verificando Mobile Legends - ID: ${id} | Zona: ${zona}`);
+        console.log(`📡 URL: ${PAGONORTE_URL}`);
+        console.log(`📦 Body: ${formData.toString()}`);
 
         const respuesta = await fetch(PAGONORTE_URL, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-API-Key': API_KEY,       // <-- Dato clave de tu captura
-                'X-API-Secret': API_SECRET  // <-- Dato clave de tu captura
+                'X-API-Key': API_KEY,
+                'X-API-Secret': API_SECRET
             },
             body: formData.toString()
         });
 
         if (!respuesta.ok) {
+            console.error(`❌ PagoNorte respondió con status: ${respuesta.status}`);
             return res.status(respuesta.status).json({
                 ok: false,
                 valido: false,
@@ -86,18 +87,15 @@ export default async function handler(req, res) {
         }
 
         const data = await respuesta.json();
-        console.log('📥 Respuesta PagoNorte:', JSON.stringify(data));
+        console.log('📥 Respuesta PagoNorte COMPLETA:', JSON.stringify(data, null, 2));
 
         // ============================================
-        // 🎯 INTERPRETAR RESPUESTA (Basado en tus capturas)
+        // 🎯 INTERPRETAR RESPUESTA
         // ============================================
-        // Formato real: { "ok": true, "alerta": "green", "nickname": "RG-GOKI", "codigo_respuesta": "00", ... }
-        
         const codigo = String(data.codigo_respuesta || '').toLowerCase();
         const alerta = String(data.alerta || '').toLowerCase();
         const nickname = data.nickname || null;
 
-        // Validamos si la respuesta indica éxito
         const esValido = (data.ok === true || codigo === '00' || alerta === 'green' || data.validacion_exitosa === true) && nickname;
 
         if (esValido) {
@@ -113,13 +111,14 @@ export default async function handler(req, res) {
             });
         }
 
+        // Si no es válido, devolvemos TODO lo que dijo PagoNorte para debuggear
         return res.status(200).json({
             ok: false,
             valido: false,
             mensaje: data.mensaje || 'Jugador no encontrado',
             alerta: alerta || 'red',
             code: codigo,
-            respuesta_cruda: data
+            respuesta_cruda: data  // <-- Esto es clave para saber qué devuelve PagoNorte
         });
 
     } catch (error) {
