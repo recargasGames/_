@@ -1,5 +1,7 @@
+// firebase-config.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -15,5 +17,6 @@ const firebaseConfig = {
 // Inicializar la App de Firebase
 const app = initializeApp(firebaseConfig);
 
-// Exportar la autenticación para usarla en otras páginas
+// ✅ EXPORTAR Auth Y Database
 export const auth = getAuth(app);
+export const db = getDatabase(app);
