@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>Recargas Games | Recargas de Juegos, Gift Cards y Streaming</title>
 
@@ -50,6 +50,7 @@
     --color-verde: #22c55e;
     --color-warning: #f59e0b;
     --color-info: #3b82f6;
+    --alto-nav: 64px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -59,9 +60,15 @@ body {
     color: white;
     font-family: 'Segoe UI', sans-serif;
     padding-top: 110px;
+    padding-bottom: calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
     overflow-x: hidden;
     min-height: 100vh;
     position: relative;
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--color-dorado-claro);
+    outline-offset: 2px;
 }
 
 .video-fondo{
@@ -151,7 +158,7 @@ body::after {
     transform: translateZ(0);
 }
 
-.barra-superior, .main, .whatsapp-float, .back-to-top, .install-app-btn, .footer {
+.barra-superior, .main, .back-to-top, .install-app-btn, .footer {
     position: relative;
     z-index: 1;
 }
@@ -391,7 +398,7 @@ body::after {
     gap: 8px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 14px 20px;
+    padding: 12px 20px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     border-top: 1px solid rgba(255, 255, 255, 0.04);
@@ -400,7 +407,7 @@ body::after {
 .games-menu a {
     text-decoration: none;
     color: #cbd5e1;
-    padding: 7px 14px;
+    padding: 8px 16px;
     border-radius: 20px;
     font-size: 14px;
     font-weight: 600;
@@ -425,10 +432,44 @@ body::after {
     margin: 0 auto;
 }
 
+.buscador {
+    position: relative;
+    margin: 6px 0 18px;
+}
+.buscador svg {
+    position: absolute;
+    left: 16px; top: 50%;
+    transform: translateY(-50%);
+    width: 18px; height: 18px;
+    stroke: #9ca3af;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+.buscador input {
+    width: 100%;
+    padding: 14px 16px 14px 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    background: rgba(10, 14, 26, 0.75);
+    color: white;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.buscador input::placeholder { color: #9ca3af; }
+.buscador input:focus {
+    outline: none;
+    border-color: var(--color-dorado);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
 .welcome-text {
     text-align: center;
-    margin: 30px 0 40px;
-    padding: 30px 20px;
+    margin: 0 0 12px;
+    padding: 28px 20px 22px;
     background: linear-gradient(135deg, rgba(20, 30, 55, 0.55), rgba(10, 14, 26, 0.7));
     border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: 24px;
@@ -472,10 +513,70 @@ body::after {
     100% { background-position: 200% center; }
 }
 
+.welcome-sub {
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 10px auto 18px;
+    max-width: 420px;
+}
+
+.garantias {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(212, 175, 55, 0.18);
+}
+.garantia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e5e7eb;
+    line-height: 1.3;
+}
+.garantia svg {
+    width: 22px; height: 22px;
+    stroke: var(--color-dorado-claro);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pagos-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: rgba(10, 14, 26, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+}
+.pagos-strip .etiqueta { font-size: 13px; color: #9ca3af; font-weight: 600; }
+.pagos-strip .metodos { display: flex; gap: 8px; flex-wrap: wrap; }
+.pagos-strip .metodos span {
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    font-size: 13px;
+    font-weight: 600;
+    color: #f3f4f6;
+}
+
+.seccion { scroll-margin-top: 140px; }
+
 .seccion-titulo {
     font-size: 16px;
     font-weight: 800;
-    margin: 40px 0 20px;
+    margin: 36px 0 18px;
     color: #e5e7eb;
     padding-left: 15px;
     border-left: 4px solid;
@@ -545,9 +646,21 @@ body::after {
 }
 .game-link:hover .game-img { transform: scale(1.06); }
 
-/* ✨ NUEVO: Nombre debajo de la imagen */
+.game-badge {
+    position: absolute;
+    top: 10px; left: 10px;
+    z-index: 2;
+    background: linear-gradient(135deg, #d4af37, #f5d76e);
+    color: #0a0e1a;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 .game-nombre {
-    padding: 12px 10px;
+    padding: 12px 10px 4px;
     text-align: center;
     font-size: 14px;
     font-weight: 800;
@@ -563,6 +676,42 @@ body::after {
     position: relative;
     z-index: 1;
 }
+
+.game-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #86efac;
+    position: relative;
+    z-index: 1;
+}
+.game-meta::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--color-verde);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+}
+.game-meta.neutro { color: #cbd5e1; }
+.game-meta.neutro::before { background: var(--color-dorado); box-shadow: 0 0 8px rgba(212, 175, 55, 0.8); }
+
+.sin-resultados {
+    display: none;
+    text-align: center;
+    margin-top: 40px;
+    padding: 30px 20px;
+    background: rgba(10, 14, 26, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+}
+.sin-resultados.visible { display: block; }
+.sin-resultados h4 { font-size: 16px; color: var(--color-dorado-claro); margin-bottom: 8px; }
+.sin-resultados p { font-size: 14px; color: #cbd5e1; line-height: 1.5; }
+.sin-resultados a { color: var(--color-dorado-claro); font-weight: 700; }
 
 .modal-overlay {
     display: none;
@@ -904,9 +1053,50 @@ body::after {
     box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6);
 }
 
+.nav-inferior {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 999;
+    background: rgba(5, 8, 16, 0.96);
+    border-top: 1px solid rgba(212, 175, 55, 0.25);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateZ(0);
+}
+.nav-inferior-inner {
+    display: flex;
+    max-width: 620px;
+    margin: 0 auto;
+    height: var(--alto-nav);
+}
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+.nav-item svg {
+    width: 22px; height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.nav-item:hover, .nav-item.active { color: var(--color-dorado-claro); }
+.nav-item.soporte { color: #4ade80; }
+
 .install-app-btn {
     position: fixed;
-    bottom: 90px; right: 20px;
+    bottom: calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+    left: 20px;
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(59, 130, 246, 0.3));
     color: white;
     border: 1px solid rgba(212, 175, 55, 0.6);
@@ -915,7 +1105,7 @@ body::after {
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 998;
     transition: all 0.3s ease;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     letter-spacing: 0.5px;
@@ -928,27 +1118,10 @@ body::after {
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(212, 175, 55, 0.4);
 }
 
-.whatsapp-float {
-    position: fixed;
-    bottom: 20px; right: 20px;
-    background: linear-gradient(135deg, #25D366, #128C7E);
-    width: 55px; height: 55px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    text-decoration: none;
-    font-size: 28px;
-    color: white;
-    transition: transform 0.3s ease;
-}
-.whatsapp-float:hover { transform: scale(1.1); }
-
 .back-to-top {
     position: fixed;
-    bottom: 155px; right: 20px;
+    bottom: calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+    right: 20px;
     background: linear-gradient(135deg, #d4af37, #3b82f6);
     color: white;
     width: 45px; height: 45px;
@@ -957,7 +1130,7 @@ body::after {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 998;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s;
@@ -1015,20 +1188,21 @@ body::after {
 @media (max-width: 600px) {
     body { padding-top: 100px; }
     .game-img { height: 110px; }
-    .game-nombre { font-size: 12px; padding: 10px 6px; }
+    .game-nombre { font-size: 12px; padding: 10px 6px 4px; }
+    .game-meta { font-size: 11px; }
     .brand img { height: 45px; }
     .header { padding: 10px 16px; }
-    .games-menu { padding: 12px 15px; }
+    .games-menu { padding: 10px 15px; }
     .menu-flotante { right: 10px; min-width: 220px; }
     .modal-login { padding: 28px 22px; }
     .btn-perfil .perfil-nombre { display: none; }
     .btn-perfil .perfil-flecha { display: none; }
     .menu-perfil { right: 0; min-width: 230px; }
-    .install-app-btn { right: 15px; bottom: 90px; font-size: 13px; padding: 9px 16px; }
-    .whatsapp-float { right: 15px; bottom: 20px; width: 55px; height: 55px; }
-    .back-to-top { right: 15px; bottom: 155px; width: 45px; height: 45px; }
-    .welcome-text { padding: 25px 18px; }
+    .install-app-btn { left: 15px; font-size: 13px; padding: 9px 16px; }
+    .back-to-top { right: 15px; width: 45px; height: 45px; }
+    .welcome-text { padding: 24px 16px 20px; }
     .welcome-text h2 { font-size: 20px; }
+    .garantia { font-size: 11px; }
     .seccion-titulo { font-size: 14px; margin: 30px 0 15px; }
     .footer .disclaimer { font-size: 11px; }
     .particula-dorada:nth-child(n+7) { display: none; }
@@ -1049,6 +1223,16 @@ body::after {
     .install-app-btn { font-size: 12px; padding: 8px 14px; }
     .games-grid { gap: 12px; }
     .mensaje-botones { flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .particulas-fondo { display: none; }
 }
 </style>
 </head>
@@ -1088,7 +1272,7 @@ body::after {
         <div class="header-right">
 
             <div id="perfilContainer" style="position:relative;display:none;">
-                <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
                     <div class="avatar-circle" id="avatarCircle">
                         <img src="logo.png" alt="Logo" id="avatarLogo">
                         <span class="online-dot"></span>
@@ -1126,7 +1310,7 @@ body::after {
                 </div>
             </div>
 
-            <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         </div>
 
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
@@ -1146,34 +1330,25 @@ body::after {
         </div>
     </div>
 
-    <div class="games-menu">
-        <a href="index.html" class="active">Inicio</a>
-        <a href="freefire.html">Free Fire</a>
-        <a href="bloodstrike.html">Blood Strike</a>
-        <a href="roblox.html">Roblox</a>
-        <a href="ml.html">Mobile Legends</a>
-        <a href="cod.html">COD Mobile</a>
-        <a href="pubg.html">PUBG Mobile</a>
-        <a href="arenabreakout.html">Arena Breakout</a>
-        <a href="delta.html">Delta Force</a>
-        <a href="bigo.html">Bigo Live</a>
-        <a href="gift-cards.html">Gift Cards</a>
-        <a href="netflix.html">Netflix</a>
-        <a href="disney.html">Disney+</a>
-    </div>
+    <nav class="games-menu" id="categorias" aria-label="Categorías">
+        <a href="#inicio" class="active" data-seccion="inicio">Inicio</a>
+        <a href="#juegos" data-seccion="juegos">Juegos</a>
+        <a href="#giftcards" data-seccion="giftcards">Gift Cards</a>
+        <a href="#streaming" data-seccion="streaming">Streaming</a>
+    </nav>
 </div>
 
 <div class="modal-overlay" id="modalLogin">
     <div class="modal-login">
-        <button class="close-modal-btn" onclick="cerrarModalLogin()">✕</button>
+        <button class="close-modal-btn" aria-label="Cerrar" onclick="cerrarModalLogin()">✕</button>
         <h2>🔑 Iniciar Sesión</h2>
         <form id="loginForm">
             <div class="form-group">
-                <label>📧 Correo electrónico</label>
+                <label for="loginEmail">📧 Correo electrónico</label>
                 <input type="email" id="loginEmail" placeholder="tu@email.com" required>
             </div>
             <div class="form-group">
-                <label>🔑 Contraseña</label>
+                <label for="loginPassword">🔑 Contraseña</label>
                 <input type="password" id="loginPassword" placeholder="Tu contraseña" required>
             </div>
             <button type="submit" class="btn-submit" id="loginBtn">Ingresar</button>
@@ -1186,78 +1361,124 @@ body::after {
     </div>
 </div>
 
-<div class="main">
+<div class="main" id="inicio">
+
+    <div class="buscador">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input type="search" id="buscador" placeholder="Buscar juego o servicio" aria-label="Buscar juego o servicio" autocomplete="off">
+    </div>
+
     <div class="welcome-text">
         <span class="badge-premium">★ RECARGAS GAMES ★</span>
         <h2>Los mejores juegos con recargas instantáneas</h2>
+        <p class="welcome-sub">Elige tu juego, paga con Pago Móvil o Binance USDT y recarga.</p>
+        <div class="garantias">
+            <div class="garantia">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+                Entrega inmediata
+            </div>
+            <div class="garantia">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+                Pago seguro
+            </div>
+            <div class="garantia">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>
+                Soporte por WhatsApp
+            </div>
+        </div>
     </div>
 
-    <!-- 🎮 VIDEOJUEGOS -->
-    <h3 class="seccion-titulo">🎮 Videojuegos</h3>
-    <div class="games-grid">
-        <a href="freefire.html" class="game-link">
-            <img src="ff.png" class="game-img" alt="Free Fire" loading="lazy">
-            <div class="game-nombre">Free Fire</div>
-        </a>
-        <a href="bloodstrike.html" class="game-link">
-            <img src="bs.png" class="game-img" alt="Blood Strike" loading="lazy">
-            <div class="game-nombre">Blood Strike</div>
-        </a>
-        <a href="roblox.html" class="game-link">
-            <img src="roblox.png" class="game-img" alt="Roblox" loading="lazy">
-            <div class="game-nombre">Roblox</div>
-        </a>
-        <a href="ml.html" class="game-link">
-            <img src="ml.png" class="game-img" alt="Mobile Legends" loading="lazy">
-            <div class="game-nombre">Mobile Legends</div>
-        </a>
-        <a href="cod.html" class="game-link">
-            <img src="cod.png" class="game-img" alt="COD Mobile" loading="lazy">
-            <div class="game-nombre">COD Mobile</div>
-        </a>
-        <a href="pubg.html" class="game-link">
-            <img src="pubg.png" class="game-img" alt="PUBG Mobile" loading="lazy">
-            <div class="game-nombre">PUBG Mobile</div>
-        </a>
-        <a href="arenabreakout.html" class="game-link">
-            <img src="arena.png" class="game-img" alt="Arena Breakout" loading="lazy">
-            <div class="game-nombre">Arena Breakout</div>
-        </a>
-        <a href="delta.html" class="game-link">
-            <img src="delta.png" class="game-img" alt="Delta Force" loading="lazy">
-            <div class="game-nombre">Delta Force</div>
-        </a>
+    <div class="pagos-strip">
+        <span class="etiqueta">Aceptamos</span>
+        <div class="metodos">
+            <span>Pago Móvil</span>
+            <span>Binance USDT</span>
+        </div>
     </div>
 
-    <!-- 🆕 JUEGOS NUEVOS -->
-    <h3 class="seccion-titulo">🆕 Juegos Nuevos</h3>
-    <div class="games-grid">
-        <a href="bigo.html" class="game-link">
-            <img src="bigo.png" class="game-img" alt="Bigo Live" loading="lazy">
-            <div class="game-nombre">Bigo Live</div>
-        </a>
-    </div>
+    <section class="seccion" id="juegos">
+        <h3 class="seccion-titulo">🎮 Videojuegos</h3>
+        <div class="games-grid">
+            <a href="freefire.html" class="game-link" data-nombre="free fire diamantes">
+                <span class="game-badge">Popular</span>
+                <img src="ff.png" class="game-img" alt="Free Fire" loading="lazy">
+                <div class="game-nombre">Free Fire</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="bloodstrike.html" class="game-link" data-nombre="blood strike">
+                <img src="bs.png" class="game-img" alt="Blood Strike" loading="lazy">
+                <div class="game-nombre">Blood Strike</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="roblox.html" class="game-link" data-nombre="roblox robux">
+                <img src="roblox.png" class="game-img" alt="Roblox" loading="lazy">
+                <div class="game-nombre">Roblox</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="ml.html" class="game-link" data-nombre="mobile legends diamantes ml">
+                <img src="ml.png" class="game-img" alt="Mobile Legends" loading="lazy">
+                <div class="game-nombre">Mobile Legends</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="cod.html" class="game-link" data-nombre="cod mobile call of duty">
+                <img src="cod.png" class="game-img" alt="COD Mobile" loading="lazy">
+                <div class="game-nombre">COD Mobile</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="pubg.html" class="game-link" data-nombre="pubg mobile uc">
+                <img src="pubg.png" class="game-img" alt="PUBG Mobile" loading="lazy">
+                <div class="game-nombre">PUBG Mobile</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="arenabreakout.html" class="game-link" data-nombre="arena breakout">
+                <img src="arena.png" class="game-img" alt="Arena Breakout" loading="lazy">
+                <div class="game-nombre">Arena Breakout</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="delta.html" class="game-link" data-nombre="delta force">
+                <img src="delta.png" class="game-img" alt="Delta Force" loading="lazy">
+                <div class="game-nombre">Delta Force</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+            <a href="bigo.html" class="game-link" data-nombre="bigo live diamantes">
+                <span class="game-badge">Nuevo</span>
+                <img src="bigo.png" class="game-img" alt="Bigo Live" loading="lazy">
+                <div class="game-nombre">Bigo Live</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+        </div>
+    </section>
 
-    <!-- 🎁 GIFT CARDS -->
-    <h3 class="seccion-titulo">🎁 Gift Cards</h3>
-    <div class="games-grid">
-        <a href="gift-cards.html?marca=playstation" class="game-link">
-            <img src="giftcards.png" class="game-img" alt="PlayStation Gift Card" loading="lazy">
-            <div class="game-nombre">PlayStation</div>
-        </a>
-    </div>
+    <section class="seccion" id="giftcards">
+        <h3 class="seccion-titulo">🎁 Gift Cards</h3>
+        <div class="games-grid">
+            <a href="gift-cards.html?marca=playstation" class="game-link" data-nombre="playstation gift card psn">
+                <img src="giftcards.png" class="game-img" alt="PlayStation Gift Card" loading="lazy">
+                <div class="game-nombre">PlayStation</div>
+                <div class="game-meta">Entrega inmediata</div>
+            </a>
+        </div>
+    </section>
 
-    <!-- 🎬 STREAMING -->
-    <h3 class="seccion-titulo">🎬 Streaming</h3>
-    <div class="games-grid">
-        <a href="netflix.html" class="game-link">
-            <img src="netflix.png" class="game-img" alt="Netflix" loading="lazy">
-            <div class="game-nombre">Netflix</div>
-        </a>
-        <a href="disney.html" class="game-link">
-            <img src="disney.png" class="game-img" alt="Disney+" loading="lazy">
-            <div class="game-nombre">Disney+</div>
-        </a>
+    <section class="seccion" id="streaming">
+        <h3 class="seccion-titulo">🎬 Streaming</h3>
+        <div class="games-grid">
+            <a href="netflix.html" class="game-link" data-nombre="netflix streaming series peliculas">
+                <img src="netflix.png" class="game-img" alt="Netflix" loading="lazy">
+                <div class="game-nombre">Netflix</div>
+                <div class="game-meta neutro">Ver planes</div>
+            </a>
+            <a href="disney.html" class="game-link" data-nombre="disney streaming peliculas">
+                <img src="disney.png" class="game-img" alt="Disney+" loading="lazy">
+                <div class="game-nombre">Disney+</div>
+                <div class="game-meta neutro">Ver planes</div>
+            </a>
+        </div>
+    </section>
+
+    <div class="sin-resultados" id="sinResultados" role="status">
+        <h4>No encontramos ese juego</h4>
+        <p>Prueba con otro nombre o <a href="https://wa.me/584228242411" target="_blank" rel="noopener">escríbenos por WhatsApp</a> y lo consultamos.</p>
     </div>
 </div>
 
@@ -1265,7 +1486,8 @@ body::after {
     <p class="copyright">© 2026 RecargasGames · Todos los derechos reservados</p>
 
     <div class="payment-methods">
-        <span>💳 VISA</span>
+        <span>Pago Móvil</span>
+        <span>Binance USDT</span>
     </div>
 
     <p class="disclaimer">
@@ -1275,13 +1497,33 @@ body::after {
     </p>
 </div>
 
+<nav class="nav-inferior" aria-label="Navegación principal">
+    <div class="nav-inferior-inner">
+        <a href="#inicio" class="nav-item active" data-nav="inicio">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="#juegos" class="nav-item" data-nav="juegos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item" id="navPedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
+</nav>
+
 <button class="install-app-btn" id="installAppBtn">📲 Instalar Aplicación</button>
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
-<a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">💬</a>
 
 <div class="mensaje-overlay" id="mensajeOverlay">
     <div class="mensaje-box" id="mensajeBox">
-        <button class="mensaje-cerrar" id="mensajeCerrar" onclick="cerrarMensajePersonalizado()">✕</button>
+        <button class="mensaje-cerrar" id="mensajeCerrar" aria-label="Cerrar" onclick="cerrarMensajePersonalizado()">✕</button>
         <div class="mensaje-icono" id="mensajeIcono">ℹ️</div>
         <div class="mensaje-titulo" id="mensajeTitulo">Título</div>
         <div class="mensaje-texto" id="mensajeTexto">Mensaje</div>
@@ -1301,6 +1543,7 @@ import {
 
 let _mensajeCallback = null;
 let _mensajeCerrado = false;
+let usuarioActual = null;
 
 const ICONOS = {
     exito: '✓',
@@ -1414,6 +1657,7 @@ const loginBtn = document.getElementById('loginBtn');
 const loginMessage = document.getElementById('loginMessage');
 const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 const installAppBtn = document.getElementById('installAppBtn');
+const navPedidos = document.getElementById('navPedidos');
 let deferredPrompt = null;
 let esInstalable = false;
 
@@ -1445,6 +1689,7 @@ actualizarBotonInstalar();
 window.matchMedia('(display-mode: standalone)').addEventListener('change', actualizarBotonInstalar);
 
 function actualizarUI(user) {
+    usuarioActual = user;
     if (user) {
         const nombre = user.displayName || 'Usuario';
         const email = user.email || 'usuario@email.com';
@@ -1466,6 +1711,13 @@ function actualizarUI(user) {
 }
 
 onAuthStateChanged(auth, (user) => { actualizarUI(user); });
+
+navPedidos.addEventListener('click', (e) => {
+    if (!usuarioActual) {
+        e.preventDefault();
+        abrirModalLogin();
+    }
+});
 
 window.toggleMenuPerfil = function() {
     menuPerfil.classList.toggle('activo');
@@ -1577,15 +1829,73 @@ menuHamburguesaLogout.addEventListener('click', (e) => {
     );
 });
 
+const inputBuscador = document.getElementById('buscador');
+const sinResultados = document.getElementById('sinResultados');
+const tarjetas = Array.from(document.querySelectorAll('.game-link'));
+const secciones = Array.from(document.querySelectorAll('.seccion'));
+
+function normalizar(texto) {
+    return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+}
+
+function filtrarCatalogo() {
+    const q = normalizar(inputBuscador.value);
+    let totalVisibles = 0;
+
+    tarjetas.forEach((card) => {
+        const nombre = normalizar(card.dataset.nombre || card.textContent);
+        const visible = q === '' || nombre.includes(q);
+        card.style.display = visible ? '' : 'none';
+        if (visible) totalVisibles++;
+    });
+
+    secciones.forEach((sec) => {
+        const hayVisibles = Array.from(sec.querySelectorAll('.game-link')).some((c) => c.style.display !== 'none');
+        sec.style.display = hayVisibles ? '' : 'none';
+    });
+
+    sinResultados.classList.toggle('visible', q !== '' && totalVisibles === 0);
+}
+
+inputBuscador.addEventListener('input', filtrarCatalogo);
+
+const chips = Array.from(document.querySelectorAll('#categorias a'));
+const itemsNav = Array.from(document.querySelectorAll('.nav-item[data-nav]'));
+
+function marcarActivo(id) {
+    chips.forEach((a) => a.classList.toggle('active', a.dataset.seccion === id));
+    itemsNav.forEach((a) => a.classList.toggle('active', a.dataset.nav === id));
+    const chipActivo = chips.find((a) => a.dataset.seccion === id);
+    if (chipActivo) chipActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
+}
+
+const observador = new IntersectionObserver((entradas) => {
+    entradas.forEach((entrada) => {
+        if (entrada.isIntersecting) marcarActivo(entrada.target.id);
+    });
+}, { rootMargin: '-35% 0px -55% 0px' });
+
+secciones.forEach((sec) => observador.observe(sec));
+
 window.addEventListener('scroll', () => {
     document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
+    if (window.scrollY < 200) marcarActivo('inicio');
 }, { passive: true });
+
+chips[0].addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+itemsNav[0].addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
-            .then((reg) => console.log('✅ SW registrado:', reg.scope))
-            .catch((err) => console.warn('⚠️ SW no registrado:', err.message));
+            .then((reg) => console.log('SW registrado:', reg.scope))
+            .catch((err) => console.warn('SW no registrado:', err.message));
     });
 }
 
@@ -1636,8 +1946,6 @@ installAppBtn.addEventListener('click', async () => {
         );
     }
 });
-
-console.log('🚀 Index v4 cargado con nombres debajo de imágenes');
 </script>
 
 </body>
