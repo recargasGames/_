@@ -6,28 +6,24 @@
 // Acciones: recarga, disponibilidad, renovar, netflix_hogar
 // ============================================
 
-const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
+const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 
 // ============================================
 // 🎯 MAPA DE TIPOS PÚBLICOS
 // ============================================
 const TIPOS = {
-    // Netflix
     'netflix_perfil':   { tipo: 'recargaPerfilNetflix',   servicio: 'Netflix',  modalidad: 'perfil' },
     'netflix_cuenta':   { tipo: 'recargaCuentaNetflix',   servicio: 'Netflix',  modalidad: 'cuenta' },
-
-    // Disney+
     'disney_perfil':    { tipo: 'recargaPerfilDisnep',    servicio: 'Disney+',  modalidad: 'perfil' },
     'disney_cuenta':    { tipo: 'recargaCuentaDisnep',    servicio: 'Disney+',  modalidad: 'cuenta' },
-
-    // HBO (por si después)
     'hbo_perfil':       { tipo: 'recargaPerfilHbo',       servicio: 'HBO',      modalidad: 'perfil' },
     'hbo_cuenta':       { tipo: 'recargaCuentaHbo',       servicio: 'HBO',      modalidad: 'cuenta' }
 };
 
 // ============================================
 // 📡 LLAMAR A PAGONORTE
-// ✅ AHORA CON CABECERAS X-API-Key y X-API-Secret
+// ✅ Con cabeceras X-API-Key y X-API-Secret
+// ✅ Form URL-encoded (NO JSON)
 // ============================================
 async function llamarPagoNorte(params, apiKey, apiSecret) {
     const formData = new URLSearchParams();
@@ -42,7 +38,6 @@ async function llamarPagoNorte(params, apiKey, apiSecret) {
     const respuesta = await fetch(PAGONORTE_URL, {
         method: 'POST',
         headers: {
-            // ✅ AHORA EN CABECERAS (recomendado por la doc)
             'X-API-Key': apiKey,
             'X-API-Secret': apiSecret,
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -58,6 +53,25 @@ async function llamarPagoNorte(params, apiKey, apiSecret) {
     try { data = JSON.parse(texto); } catch (e) { data = { raw: texto }; }
 
     return { ok: respuesta.ok, status: respuesta.status, data };
+}
+
+// ============================================
+// 🎯 EXTRAER DATOS DE STREAMING
+// ✅ PagoNorte devuelve los datos en la RAÍZ
+// ✅ Algunas veces en "datos" (por compatibilidad)
+// ============================================
+function extraerDatosStreaming(data) {
+    // Prioriza la raíz, luego "datos"
+    const fuente = data.datos && typeof data.datos === 'object' ? data.datos : data;
+
+    return {
+        correo:            fuente.correo    || fuente.usuario   || '',
+        clave:             fuente.clave     || fuente.password  || '',
+        perfil:            fuente.perfil                        || '',
+        pin_perfil:        fuente.pin_perfil                    || '',
+        numero_perfil:     fuente.numero_perfil                 || '',
+        fecha_vencimiento: fuente.fecha_vencimiento             || ''
+    };
 }
 
 // ============================================
@@ -77,6 +91,9 @@ export default async function handler(req, res) {
         const API_KEY    = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
 
+        console.log('🔑 API_KEY prefix:', API_KEY ? API_KEY.substring(0, 8) + '...' : 'NO CONFIGURADA');
+        console.log('🔑 API_SECRET prefix:', API_SECRET ? API_SECRET.substring(0, 8) + '...' : 'NO CONFIGURADO');
+
         if (!API_KEY || !API_SECRET) {
             return res.status(500).json({
                 ok: false,
@@ -88,7 +105,6 @@ export default async function handler(req, res) {
         // 1️⃣ COMPRAR STREAMING (recarga)
         // ============================================
         if (accion === 'recarga') {
-            // ✅ Acepta "producto" O "producto_original" (por si la pasarela manda uno u otro)
             const producto = body.producto || body.producto_original;
             const { referencia } = body;
 
@@ -131,8 +147,16 @@ export default async function handler(req, res) {
             const codigo = String(data.codigo_respuesta || '').toLowerCase();
             const estado = data.estado || '';
 
-            // ✅ Aprobado
-            if (estado === 'Aprobado' && data.datos) {
+            console.log('🔍 Estado:', estado, '| Código:', codigo, '| ok:', data.ok);
+
+            // ✅ Aprobado — detecta por estado O por presencia de correo/clave
+            const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
+
+            if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
+                const datos = extraerDatosStreaming(data);
+
+                console.log('✅ Datos extraídos:', datos);
+
                 return res.status(200).json({
                     ok: true,
                     estado: 'Aprobado',
@@ -141,14 +165,7 @@ export default async function handler(req, res) {
                     codigo_aprobacion: data.codigo_aprobacion || '',
                     fecha_registro: data.fecha_registro || '',
                     id_solicitud: data.id_solicitud || '',
-                    datos: {
-                        correo: data.datos.correo || data.datos.usuario || '',
-                        clave: data.datos.clave || data.datos.password || '',
-                        perfil: data.datos.perfil || '',
-                        pin_perfil: data.datos.pin_perfil || '',
-                        numero_perfil: data.datos.numero_perfil || '',
-                        fecha_vencimiento: data.datos.fecha_vencimiento || ''
-                    },
+                    datos: datos,
                     mensaje: data.mensaje || 'Operación aprobada'
                 });
             }
@@ -249,20 +266,17 @@ export default async function handler(req, res) {
 
             const data = resultado.data;
             const estado = data.estado || '';
+            const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
 
-            if (estado === 'Aprobado' && data.datos) {
+            if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
+                const datos = extraerDatosStreaming(data);
+
                 return res.status(200).json({
                     ok: true,
                     estado: 'Aprobado',
                     codigo_aprobacion: data.codigo_aprobacion || '',
                     codigo_aprobacion_original: data.codigo_aprobacion_original || codigo_aprobacion,
-                    datos: {
-                        correo: data.datos.correo || data.datos.usuario || '',
-                        clave: data.datos.clave || data.datos.password || '',
-                        perfil: data.datos.perfil || '',
-                        pin_perfil: data.datos.pin_perfil || '',
-                        fecha_vencimiento: data.datos.fecha_vencimiento || ''
-                    },
+                    datos: datos,
                     mensaje: data.mensaje || 'Renovación procesada'
                 });
             }
