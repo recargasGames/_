@@ -487,7 +487,7 @@ body::after{
             </div>
 
             <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
-            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750, RG-7482 o MANUAL-XXXX" maxlength="30">
+            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750, RG-2025 o MANUAL-XXXX" maxlength="30">
         </div>
 
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
@@ -1270,7 +1270,7 @@ async function iniciarVerificacion() {
 
     const esManual = referencia.startsWith('MANUAL-');
     const esTest = referencia.startsWith('TEST-');
-    // 🎲 Códigos RG: empiezan con RG- pero NO con RG-NETFLIX/RG-DISNEY (esas son referencias internas)
+    // 🎲 Códigos RG: RG-XXXX (4 dígitos) pero NO RG-NETFLIX/RG-DISNEY (esas son referencias internas)
     const esCodigoRG = /^RG-\d{4}$/.test(referencia);
 
     let subtitulo = 'Estamos buscando tu pago en el sistema bancario...';
@@ -1313,6 +1313,34 @@ async function iniciarVerificacion() {
 
             console.log('✅ Código RG válido:', resultadoRG.data);
 
+            // 🚨 VERIFICAR QUE EL PRODUCTO COINCIDA
+            const paqueteDelCodigo = String(resultadoRG.data.paquete || '').trim();
+            const paqueteDelCliente = String(paqueteCod || '').trim();
+
+            if (paqueteDelCodigo && paqueteDelCliente && paqueteDelCodigo !== paqueteDelCliente) {
+                console.log('❌ Producto no coincide:', paqueteDelCodigo, 'vs', paqueteDelCliente);
+
+                notificarAdmin('codigo_rg', {
+                    referencia,
+                    metodo: 'CÓDIGO-RG',
+                    mensaje_extra: `⚠️ Código <b>RECHAZADO por producto no válido</b>\nCódigo es para: <b>${resultadoRG.data.producto || paqueteDelCodigo}</b>\nCliente eligió: <b>${producto}</b>`
+                });
+
+                await mostrarMensaje(
+                    '❌ Código no válido para este producto',
+                    `Tu código es válido solo para <b>${resultadoRG.data.producto || '110 Diamantes'}</b>.\n\n` +
+                    `Pero elegiste: <b>${producto}</b>\n\n` +
+                    `Por favor regresa y selecciona <b>${resultadoRG.data.producto || '110 Diamantes'}</b> para usar tu código.`,
+                    'error'
+                );
+
+                mostrarPaso('pasoDatos');
+                btn.disabled = false;
+                btn.innerHTML = '✅ Verificar Pago';
+                return;
+            }
+
+            // ✅ Todo OK → procesar con Central One
             notificarAdmin('codigo_rg', {
                 referencia,
                 metodo: 'CÓDIGO-RG',
@@ -1323,10 +1351,10 @@ async function iniciarVerificacion() {
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
 
-            // 🎮 Llamar a Central One con el producto del código (110 diamantes)
+            // 🎮 Llamar a Central One con el paquete del código
             const resultadoRecarga = await enviarRecargaCentralOne(
-                'FREE FIRE',
-                resultadoRG.data.paquete || '110',
+                resultadoRG.data.juego || 'FREE FIRE',
+                paqueteDelCodigo || '110',
                 idJugador
             );
 
@@ -1813,6 +1841,7 @@ mostrarPasoInicial();
 console.log('🚀 Pasarela cargada');
 console.log('🎮 Juego:', juego);
 console.log('📦 Producto:', producto);
+console.log('📦 Paquete:', paqueteCod);
 console.log('💳 Método:', metodoPago);
 console.log('📱 WhatsApp:', whatsappCliente || '(no proporcionado)');
 console.log('🎬 Es streaming:', esProductoStreaming(paqueteCod));
