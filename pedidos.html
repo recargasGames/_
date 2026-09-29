@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mis Pedidos - Recargas Games</title>
     <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
 
@@ -11,42 +11,53 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
+        :root {
+            --alto-nav: 64px;
+            --dorado-claro: #f5d76e;
+            --card-bg: linear-gradient(135deg, rgba(14, 26, 58, 0.92), rgba(6, 12, 32, 0.96));
+            --card-borde: rgba(59, 130, 246, 0.25);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
             color: white;
             min-height: 100vh;
             padding-top: 80px;
+            padding-bottom: calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
+        }
+        a:focus-visible, button:focus-visible, input:focus-visible {
+            outline: 2px solid var(--dorado-claro);
+            outline-offset: 2px;
         }
 
-        /* 🎬 VIDEO DE FONDO */
-        .video-fondo{
-            position:fixed;
-            top:0; left:0;
-            width:100%; height:100%;
-            object-fit:cover;
-            z-index:-2;
-            pointer-events:none;
-            opacity:1;
-            filter:brightness(1.15);
-            will-change:transform;
-            transform:translateZ(0);
-            backface-visibility:hidden;
-            -webkit-backface-visibility:hidden;
+        .video-fondo {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            pointer-events: none;
+            opacity: 1;
+            filter: brightness(1.15);
+            will-change: transform;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
-        .video-overlay{
-            position:fixed;
-            inset:0;
-            background:linear-gradient(180deg,
+        .video-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg,
                 rgba(10,14,26,0.15) 0%,
                 rgba(10,14,26,0.35) 60%,
                 rgba(10,14,26,0.6) 100%);
-            z-index:-1;
-            pointer-events:none;
-            transform:translateZ(0);
+            z-index: -1;
+            pointer-events: none;
+            transform: translateZ(0);
         }
 
-        /* ====== BARRA SUPERIOR ====== */
         .topbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 999;
             background: rgba(11, 18, 32, 0.9);
@@ -55,189 +66,182 @@
             display: flex; justify-content: space-between; align-items: center;
             transform: translateZ(0);
         }
-        .topbar .logo { display: flex; align-items: center; gap: 10px; }
+        .topbar .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
         .topbar .logo img { height: 45px; border-radius: 10px; }
         .topbar .logo h1 { font-size: 20px; font-weight: 700; color: white; }
         .topbar .logo h1 span { color: #3b82f6; }
         .topbar .btn-back {
-            background: none; border: none; color: #9ca3af;
+            background: none; border: none; color: #cbd5e1;
             font-size: 14px; cursor: pointer; transition: 0.3s;
-            padding: 6px 12px; border-radius: 8px; font-family: inherit;
+            padding: 8px 12px; border-radius: 8px; font-family: inherit;
         }
-        .topbar .btn-back:hover { background: rgba(255,255,255,0.05); color: white; }
+        .topbar .btn-back:hover { background: rgba(255,255,255,0.08); color: white; }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; position:relative; z-index:1; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
 
         .page-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 25px; flex-wrap: wrap; gap: 12px;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
         }
         .page-header h2 { font-size: 26px; font-weight: 700; }
         .page-header h2 span { color: #3b82f6; }
         .page-header .total {
-            font-size: 14px; color: #9ca3af;
-            background: rgba(17, 24, 39, 0.7);
+            font-size: 14px; color: #cbd5e1;
+            background: rgba(14, 26, 58, 0.85);
+            border: 1px solid var(--card-borde);
             padding: 6px 16px; border-radius: 20px;
         }
 
-        /* ====== FILTROS ====== */
-        .filtros { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .filtros input {
-            flex: 1; min-width: 200px; padding: 10px 16px;
-            border-radius: 10px; background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(51, 65, 85, 0.5);
-            color: white; font-size: 14px;
+        .chips {
+            display: flex; gap: 8px; overflow-x: auto;
+            padding-bottom: 4px; margin-bottom: 14px;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
         }
-        .filtros input:focus { outline: none; border-color: #3b82f6; }
-        .filtros select {
-            padding: 10px 16px; border-radius: 10px;
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(51, 65, 85, 0.5);
-            color: white; font-size: 14px; cursor: pointer;
+        .chips::-webkit-scrollbar { display: none; }
+        .chip {
+            flex-shrink: 0;
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 14px; border-radius: 20px;
+            background: rgba(14, 26, 58, 0.85);
+            border: 1px solid var(--card-borde);
+            color: #cbd5e1; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit; transition: all 0.25s;
         }
-        .filtros select:focus { outline: none; border-color: #3b82f6; }
-        .filtros select option { background: #0b1220; }
+        .chip .n {
+            font-size: 12px; color: #94a3b8;
+            background: rgba(255,255,255,0.08);
+            padding: 1px 8px; border-radius: 10px;
+        }
+        .chip:hover { border-color: rgba(212, 175, 55, 0.5); color: var(--dorado-claro); }
+        .chip.activo {
+            color: var(--dorado-claro);
+            background: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(59,130,246,0.12));
+            border-color: rgba(212,175,55,0.55);
+        }
 
-        /* ====== LISTA DE PEDIDOS ====== */
+        .buscador { margin-bottom: 20px; }
+        .buscador input {
+            width: 100%; padding: 13px 16px;
+            border-radius: 12px; background: rgba(6, 12, 32, 0.85);
+            border: 1px solid var(--card-borde);
+            color: white; font-size: 15px; font-family: inherit;
+        }
+        .buscador input::placeholder { color: #94a3b8; }
+        .buscador input:focus { outline: none; border-color: #3b82f6; }
+
         .pedidos-list { display: flex; flex-direction: column; gap: 12px; }
 
         .pedido-card {
-            background: rgba(17, 24, 39, 0.7);
+            background: var(--card-bg);
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid var(--card-borde);
             padding: 18px 22px;
-            transition: all 0.3s;
-            will-change:transform;
-            transform:translateZ(0);
+            transition: border-color 0.3s;
         }
-        .pedido-card:hover { border-color: #3b82f6; }
+        .pedido-card:hover { border-color: rgba(59, 130, 246, 0.6); }
 
         .pedido-card .top {
             display: flex; justify-content: space-between;
             align-items: flex-start; flex-wrap: wrap; gap: 10px;
         }
-        .pedido-card .top .info { display: flex; flex-direction: column; gap: 4px; }
-        .pedido-card .top .info .id { font-size: 18px; font-weight: 700; }
-        .pedido-card .top .info .id span { color: #3b82f6; }
-        .pedido-card .top .info .fecha { font-size: 13px; color: #6b7280; }
-        .pedido-card .top .info .ref { font-size: 12px; color: #6b7280; }
+        .pedido-card .top .info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+        .pedido-card .top .info .id { font-size: 17px; font-weight: 700; word-break: break-all; }
+        .pedido-card .top .info .id span { color: #60a5fa; }
+        .pedido-card .top .info .fecha { font-size: 13px; color: #94a3b8; }
+        .pedido-card .top .info .ref { font-size: 12px; color: #94a3b8; }
 
         .pedido-card .top .detalle {
             display: flex; flex-direction: column;
-            align-items: flex-end; gap: 4px;
+            align-items: flex-end; gap: 6px;
         }
-        .pedido-card .top .detalle .precio {
-            font-size: 20px; font-weight: 700; color: #22c55e;
-        }
+        .pedido-card .top .detalle .precio { font-size: 20px; font-weight: 700; color: #22c55e; }
         .pedido-card .top .detalle .metodo {
-            font-size: 12px; color: #9ca3af;
-            background: rgba(255,255,255,0.05);
+            font-size: 12px; color: #cbd5e1;
+            background: rgba(255,255,255,0.07);
             padding: 2px 12px; border-radius: 12px;
         }
-        .pedido-card .top .detalle .estado {
-            font-size: 12px; font-weight: 600;
-            padding: 3px 14px; border-radius: 12px;
+        .estado {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 700;
+            padding: 3px 12px; border-radius: 12px;
         }
-        .estado.completado { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-        .estado.pendiente { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .estado.cancelado { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        .estado.procesando { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .estado::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .estado.completado { background: rgba(34, 197, 94, 0.18); color: #4ade80; }
+        .estado.pendiente { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+        .estado.cancelado { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+        .estado.procesando { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
 
         .pedido-card .bottom {
             margin-top: 12px; padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.06);
+            border-top: 1px solid rgba(255,255,255,0.07);
             display: flex; gap: 8px; flex-wrap: wrap;
         }
-        .pedido-card .bottom .tag {
-            background: rgba(59, 130, 246, 0.15); color: #3b82f6;
-            padding: 3px 12px; border-radius: 12px; font-size: 12px;
+        .tag {
+            background: rgba(59, 130, 246, 0.15); color: #93c5fd;
+            padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;
         }
-        .pedido-card .bottom .tag.juego {
-            background: rgba(139, 92, 246, 0.15); color: #a78bfa;
-        }
+        .tag.juego { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; }
 
-        /* ====== PIN DE ROBLOX ====== */
         .pin-box {
-            margin-top: 12px;
-            padding: 16px;
+            margin-top: 12px; padding: 16px;
             background: rgba(34, 197, 94, 0.1);
             border: 2px solid #22c55e;
-            border-radius: 12px;
-            text-align: center;
+            border-radius: 12px; text-align: center;
         }
         .pin-box .pin-label {
-            font-size: 11px; color: #9ca3af;
+            font-size: 12px; color: #cbd5e1;
             text-transform: uppercase; letter-spacing: 2px;
         }
         .pin-box .pin-value {
             font-size: 24px; font-weight: 700;
-            color: #22c55e; letter-spacing: 3px;
+            color: #4ade80; letter-spacing: 3px;
             margin: 8px 0; word-break: break-all;
+            user-select: all;
         }
         .pin-box .btn-copiar {
             background: rgba(34, 197, 94, 0.2);
-            color: #22c55e;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 13px;
+            color: #4ade80; border: none;
+            padding: 10px 22px; border-radius: 8px;
+            font-weight: 700; cursor: pointer;
+            transition: 0.3s; font-size: 14px; font-family: inherit;
         }
-        .pin-box .btn-copiar:hover {
-            background: rgba(34, 197, 94, 0.3);
-        }
+        .pin-box .btn-copiar:hover { background: rgba(34, 197, 94, 0.32); }
 
-        /* ====== WHATSAPP MANUAL ====== */
         .manual-box {
-            margin-top: 12px;
-            padding: 16px;
+            margin-top: 12px; padding: 16px;
             background: rgba(37, 211, 102, 0.1);
             border: 2px solid #25D366;
-            border-radius: 12px;
-            text-align: center;
+            border-radius: 12px; text-align: center;
         }
-        .manual-box .manual-text {
-            font-size: 13px; color: #9ca3af; margin-bottom: 10px;
-        }
+        .manual-box .manual-text { font-size: 14px; color: #cbd5e1; margin-bottom: 10px; }
         .manual-box .btn-whatsapp {
-            background: #25D366;
-            color: white;
-            border: none;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: 0.3s;
+            background: #25D366; color: #06210f; border: none;
+            padding: 11px 24px; border-radius: 8px;
+            font-weight: 800; text-decoration: none;
+            display: inline-block; transition: 0.3s;
         }
-        .manual-box .btn-whatsapp:hover {
-            background: #128C7E;
-        }
+        .manual-box .btn-whatsapp:hover { background: #4ade80; }
 
-        /* ====== SIN PEDIDOS ====== */
         .sin-pedidos {
-            text-align: center; padding: 60px 20px;
-            background: rgba(17, 24, 39, 0.7);
+            text-align: center; padding: 50px 20px;
+            background: var(--card-bg);
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid var(--card-borde);
         }
-        .sin-pedidos .icono { font-size: 64px; margin-bottom: 15px; }
-        .sin-pedidos h3 { font-size: 22px; margin-bottom: 8px; }
-        .sin-pedidos p { color: #9ca3af; font-size: 15px; }
+        .sin-pedidos .icono { font-size: 56px; margin-bottom: 15px; }
+        .sin-pedidos h3 { font-size: 21px; margin-bottom: 8px; }
+        .sin-pedidos p { color: #cbd5e1; font-size: 15px; line-height: 1.5; }
         .sin-pedidos .btn-tienda {
             display: inline-block; margin-top: 18px;
-            padding: 12px 30px; background: #3b82f6;
-            color: white; border: none; border-radius: 12px;
-            font-weight: 600; font-size: 15px;
+            padding: 13px 30px;
+            background: linear-gradient(135deg, #d4af37, #f5d76e);
+            color: #0a0e1a; border: none; border-radius: 12px;
+            font-weight: 800; font-size: 15px;
             cursor: pointer; text-decoration: none; transition: 0.3s;
         }
-        .sin-pedidos .btn-tienda:hover { background: #2563eb; transform: scale(1.02); }
+        .sin-pedidos .btn-tienda:hover { transform: translateY(-2px); }
 
-        /* ====== CARGANDO ====== */
-        .loading { text-align: center; padding: 40px; color: #6b7280; }
+        .loading { text-align: center; padding: 40px; color: #94a3b8; }
         .loading .spinner {
             width: 40px; height: 40px;
             border: 3px solid rgba(59, 130, 246, 0.2);
@@ -248,26 +252,65 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        .toast {
+            position: fixed; left: 50%;
+            bottom: calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+            transform: translate(-50%, 20px);
+            max-width: calc(100% - 32px);
+            padding: 12px 18px; border-radius: 14px;
+            font-size: 14px; font-weight: 600; line-height: 1.4;
+            background: rgba(10, 14, 26, 0.97);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #fff; box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; z-index: 3000; text-align: center;
+        }
+        .toast.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+
+        .nav-inferior {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 999;
+            background: rgba(5, 8, 16, 0.96);
+            border-top: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+            padding-bottom: env(safe-area-inset-bottom);
+            transform: translateZ(0);
+        }
+        .nav-inferior-inner { display: flex; max-width: 900px; margin: 0 auto; height: var(--alto-nav); }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 4px;
+            color: #9ca3af; text-decoration: none;
+            font-size: 12px; font-weight: 600; transition: color 0.2s;
+        }
+        .nav-item svg {
+            width: 22px; height: 22px; stroke: currentColor; fill: none;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .nav-item:hover, .nav-item.active { color: var(--dorado-claro); }
+        .nav-item.soporte { color: #4ade80; }
+
         @media (max-width: 768px) {
             .page-header { flex-direction: column; align-items: flex-start; }
             .pedido-card .top { flex-direction: column; align-items: flex-start; }
             .pedido-card .top .detalle {
-                align-items: flex-start; width: 100%;
+                align-items: center; width: 100%;
                 flex-direction: row; flex-wrap: wrap; gap: 8px;
             }
-            .filtros { flex-direction: column; }
-            .filtros input { min-width: unset; }
-            .filtros select { width: 100%; }
         }
         @media (max-width: 500px) {
             .topbar .logo h1 { font-size: 16px; }
             .pedido-card { padding: 14px 16px; }
             .pedido-card .top .info .id { font-size: 15px; }
-            .pedido-card .top .detalle .precio { font-size: 17px; }
+            .pedido-card .top .detalle .precio { font-size: 18px; }
             .pin-box .pin-value { font-size: 20px; }
-            .video-fondo {
-                opacity: 0.85;
-                filter: brightness(1.05);
+            .video-fondo { opacity: 0.85; filter: brightness(1.05); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
@@ -280,39 +323,63 @@
 <div class="video-overlay"></div>
 
 <header class="topbar">
-    <div class="logo">
+    <a href="index.html" class="logo">
         <img src="logo.png" alt="Recargas Games">
         <h1>Recargas<span>Games</span></h1>
-    </div>
-    <button class="btn-back" onclick="window.history.back()">← Volver</button>
+    </a>
+    <button class="btn-back" id="btnVolver">← Volver</button>
 </header>
 
-<div class="container">
+<main class="container">
 
     <div class="page-header">
-        <h2>📋 Mis <span>Pedidos</span></h2>
+        <h2>Mis <span>pedidos</span></h2>
         <span class="total" id="totalPedidos">0 pedidos</span>
     </div>
 
-    <div class="filtros">
-        <input type="text" id="buscarInput" placeholder="🔍 Buscar por ID, referencia o juego..." oninput="filtrarPedidos()">
-        <select id="filtroEstado" onchange="filtrarPedidos()">
-            <option value="todos">📊 Todos los estados</option>
-            <option value="completado">✅ Completados</option>
-            <option value="pendiente">⏳ Pendientes</option>
-            <option value="procesando">🔄 Procesando</option>
-            <option value="cancelado">❌ Cancelados</option>
-        </select>
+    <div class="chips" id="chips" role="group" aria-label="Filtrar por estado">
+        <button class="chip activo" data-estado="todos">Todos <span class="n" id="n-todos">0</span></button>
+        <button class="chip" data-estado="completado">Completados <span class="n" id="n-completado">0</span></button>
+        <button class="chip" data-estado="pendiente">Pendientes <span class="n" id="n-pendiente">0</span></button>
+        <button class="chip" data-estado="procesando">Procesando <span class="n" id="n-procesando">0</span></button>
+        <button class="chip" data-estado="cancelado">Cancelados <span class="n" id="n-cancelado">0</span></button>
     </div>
 
-    <div class="pedidos-list" id="listaPedidos">
+    <div class="buscador">
+        <input type="search" id="buscarInput" placeholder="Buscar por número de pedido, referencia o juego" aria-label="Buscar pedidos" autocomplete="off">
+    </div>
+
+    <div class="pedidos-list" id="listaPedidos" aria-live="polite">
         <div class="loading">
             <div class="spinner"></div>
             <p>Cargando tus pedidos...</p>
         </div>
     </div>
 
-</div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<nav class="nav-inferior" aria-label="Navegación principal">
+    <div class="nav-inferior-inner">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="index.html#juegos" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item active" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
+</nav>
 
 <script>
     const firebaseConfig = {
@@ -332,6 +399,46 @@
 
     let todosPedidos = [];
     let uidActual = null;
+    let consultaActual = null;
+    let estadoFiltro = 'todos';
+    let toastTimer = null;
+
+    const listaEl = document.getElementById('listaPedidos');
+    const buscarEl = document.getElementById('buscarInput');
+    const toastEl = document.getElementById('toast');
+
+    function esc(valor) {
+        return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    function avisar(mensaje) {
+        toastEl.textContent = mensaje;
+        toastEl.classList.add('visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3000);
+    }
+
+    function normalizarEstado(raw) {
+        const e = String(raw || 'pendiente').toLowerCase().trim();
+        if (['completado', 'completada', 'completed'].includes(e)) return 'completado';
+        if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
+        if (['procesando', 'processing'].includes(e)) return 'procesando';
+        return 'pendiente';
+    }
+
+    const TEXTO_ESTADO = {
+        completado: 'Completado',
+        pendiente: 'Pendiente',
+        procesando: 'Procesando',
+        cancelado: 'Cancelado'
+    };
+
+    document.getElementById('btnVolver').addEventListener('click', () => {
+        if (window.history.length > 1) window.history.back();
+        else window.location.href = 'index.html';
+    });
 
     auth.onAuthStateChanged((user) => {
         if (!user) {
@@ -343,14 +450,16 @@
     });
 
     function cargarPedidos() {
-        const pedidosRef = db.ref('pedidos');
-        
-        pedidosRef.orderByChild('uid').equalTo(uidActual).on('value', (snapshot) => {
+        if (consultaActual) consultaActual.off();
+        consultaActual = db.ref('pedidos').orderByChild('uid').equalTo(uidActual);
+
+        consultaActual.on('value', (snapshot) => {
             todosPedidos = [];
-            
+
             snapshot.forEach((childSnapshot) => {
                 const pedido = childSnapshot.val();
                 pedido.key = childSnapshot.key;
+                pedido._estado = normalizarEstado(pedido.estado);
                 todosPedidos.push(pedido);
             });
 
@@ -359,168 +468,179 @@
                 return 0;
             });
 
-            document.getElementById('totalPedidos').textContent = `${todosPedidos.length} pedidos`;
+            actualizarContadores();
             filtrarPedidos();
-            
+
         }, (error) => {
             console.error('Error cargando pedidos:', error);
-            document.getElementById('listaPedidos').innerHTML = `
+            listaEl.innerHTML = `
                 <div class="sin-pedidos">
-                    <div class="icono">❌</div>
-                    <h3>Error al cargar</h3>
-                    <p>${error.message}</p>
+                    <div class="icono">⚠️</div>
+                    <h3>No pudimos cargar tus pedidos</h3>
+                    <p>Revisa tu conexión e intenta de nuevo. Si sigue igual, escríbenos por WhatsApp.</p>
+                    <a href="https://wa.me/584228242411" target="_blank" rel="noopener" class="btn-tienda">Contactar soporte</a>
                 </div>
             `;
         });
     }
 
-    function filtrarPedidos() {
-        const busqueda = document.getElementById('buscarInput').value.toLowerCase().trim();
-        const estadoFiltro = document.getElementById('filtroEstado').value;
+    function actualizarContadores() {
+        const cuentas = { todos: todosPedidos.length, completado: 0, pendiente: 0, procesando: 0, cancelado: 0 };
+        todosPedidos.forEach((p) => { cuentas[p._estado]++; });
+        Object.keys(cuentas).forEach((k) => {
+            document.getElementById('n-' + k).textContent = cuentas[k];
+        });
+        document.getElementById('totalPedidos').textContent =
+            `${todosPedidos.length} ${todosPedidos.length === 1 ? 'pedido' : 'pedidos'}`;
+    }
 
+    function filtrarPedidos() {
+        const busqueda = buscarEl.value.toLowerCase().trim();
         let filtrados = todosPedidos;
 
         if (estadoFiltro !== 'todos') {
-            filtrados = filtrados.filter(p => {
-                const estado = (p.estado || 'pendiente').toLowerCase();
-                return estado === estadoFiltro;
-            });
+            filtrados = filtrados.filter((p) => p._estado === estadoFiltro);
         }
 
         if (busqueda) {
-            filtrados = filtrados.filter(p => {
-                const id = p.referencia || p.key || '';
-                const juego = p.juego || p.producto || '';
-                const ref = p.referencia_pago || '';
-                return id.toLowerCase().includes(busqueda) ||
-                       juego.toLowerCase().includes(busqueda) ||
-                       ref.toLowerCase().includes(busqueda);
+            filtrados = filtrados.filter((p) => {
+                const id = String(p.referencia || p.key || '').toLowerCase();
+                const juego = String(p.juego || p.producto || '').toLowerCase();
+                const producto = String(p.producto || '').toLowerCase();
+                const ref = String(p.referencia_pago || '').toLowerCase();
+                return id.includes(busqueda) || juego.includes(busqueda) ||
+                       producto.includes(busqueda) || ref.includes(busqueda);
             });
         }
 
         mostrarPedidos(filtrados);
     }
 
-    function mostrarPedidos(pedidos) {
-        const contenedor = document.getElementById('listaPedidos');
+    function formatearFecha(valor) {
+        if (!valor) return 'Fecha no disponible';
+        const fecha = new Date(valor);
+        if (isNaN(fecha.getTime())) return String(valor);
+        return fecha.toLocaleString('es-VE', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
 
+    function formatearMonto(valor) {
+        const n = parseFloat(valor);
+        return isNaN(n) ? '0.00' : n.toFixed(2);
+    }
+
+    function mostrarPedidos(pedidos) {
         if (pedidos.length === 0) {
-            contenedor.innerHTML = `
+            const sinNinguno = todosPedidos.length === 0;
+            listaEl.innerHTML = `
                 <div class="sin-pedidos">
                     <div class="icono">📭</div>
-                    <h3>No hay pedidos</h3>
-                    <p>${todosPedidos.length === 0 ? 'Aún no has hecho ninguna recarga.' : 'No hay pedidos que coincidan con tu búsqueda.'}</p>
-                    <a href="index.html" class="btn-tienda">📲 Ir a la Tienda</a>
+                    <h3>${sinNinguno ? 'Aún no tienes pedidos' : 'No encontramos pedidos'}</h3>
+                    <p>${sinNinguno
+                        ? 'Cuando hagas tu primera recarga, aparecerá aquí.'
+                        : 'Prueba con otro estado o cambia lo que escribiste en el buscador.'}</p>
+                    ${sinNinguno ? '<a href="index.html" class="btn-tienda">Elegir un juego</a>' : ''}
                 </div>
             `;
             return;
         }
 
         let html = '';
-        
+
         pedidos.forEach((pedido) => {
-            const estado = pedido.estado || 'pendiente';
-            const estadoLower = estado.toLowerCase();
-            
-            let estadoClase = 'pendiente';
-            let estadoTexto = '⏳ Pendiente';
-            
-            if (estadoLower === 'completada' || estadoLower === 'completado') {
-                estadoClase = 'completado';
-                estadoTexto = '✅ Completado';
-            } else if (estadoLower === 'cancelado' || estadoLower === 'cancelada') {
-                estadoClase = 'cancelado';
-                estadoTexto = '❌ Cancelado';
-            } else if (estadoLower === 'procesando' || estadoLower === 'processing') {
-                estadoClase = 'procesando';
-                estadoTexto = '🔄 Procesando';
-            }
-
-            let fechaTexto = 'Fecha no disponible';
-            if (pedido.fecha) {
-                try {
-                    const fecha = new Date(pedido.fecha);
-                    fechaTexto = `📅 ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString()}`;
-                } catch (e) {
-                    fechaTexto = `📅 ${pedido.fecha}`;
-                }
-            }
-
+            const estado = pedido._estado;
             const idPedido = pedido.referencia || pedido.key || 'N/A';
             const juego = pedido.juego || 'Producto';
             const producto = pedido.producto || '';
-            const monto = pedido.monto_usd || pedido.monto || '0.00';
+            const monto = formatearMonto(pedido.monto_usd || pedido.monto);
             const metodo = pedido.metodo || 'Pago Móvil';
 
-            let tagsHtml = `<span class="tag juego">🎮 ${juego}</span>`;
-            if (producto) tagsHtml += ` <span class="tag">📦 ${producto}</span>`;
-            if (pedido.paquete) tagsHtml += ` <span class="tag">#${pedido.paquete}</span>`;
+            let tagsHtml = `<span class="tag juego">${esc(juego)}</span>`;
+            if (producto) tagsHtml += `<span class="tag">${esc(producto)}</span>`;
+            if (pedido.paquete) tagsHtml += `<span class="tag">#${esc(pedido.paquete)}</span>`;
 
             let pinHtml = '';
             if (pedido.pin || (pedido.codigos && pedido.codigos.length > 0)) {
                 const pinValue = pedido.pin || pedido.codigos[0];
+                const etiqueta = juego.toUpperCase().includes('ROBLOX') ? 'Tu PIN de Roblox' : 'Tu código';
                 pinHtml = `
                     <div class="pin-box">
-                        <div class="pin-label">🎮 TU PIN DE ROBLOX</div>
-                        <div class="pin-value">${pinValue}</div>
-                        <button class="btn-copiar" onclick="copiarPIN('${pinValue}')">📋 Copiar PIN</button>
+                        <div class="pin-label">${etiqueta}</div>
+                        <div class="pin-value">${esc(pinValue)}</div>
+                        <button class="btn-copiar" data-pin="${esc(pinValue)}">Copiar</button>
                     </div>
                 `;
             }
 
             let manualHtml = '';
-            const esManual = (pedido.metodo_pago === 'MANUAL') || 
-                             (juego.toUpperCase().includes('NETFLIX')) ||
-                             (juego.toUpperCase().includes('DISNEY')) ||
+            const esManual = (pedido.metodo_pago === 'MANUAL') ||
+                             juego.toUpperCase().includes('NETFLIX') ||
+                             juego.toUpperCase().includes('DISNEY') ||
                              (pedido.paquete && String(pedido.paquete).startsWith('manual_'));
-            
+
             if (esManual) {
+                const mensaje = encodeURIComponent(`Hola, necesito mi entrega del pedido ${idPedido}`);
                 manualHtml = `
                     <div class="manual-box">
-                        <div class="manual-text">📱 Este producto se entrega de forma manual</div>
-                        <a href="https://wa.me/584228242411?text=Hola%2C%20necesito%20mi%20entrega%20del%20pedido%20${idPedido}" 
-                           target="_blank" class="btn-whatsapp">
-                           💬 Contactar por WhatsApp
+                        <div class="manual-text">Este producto se entrega de forma manual.</div>
+                        <a href="https://wa.me/584228242411?text=${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp">
+                            Pedir mi entrega por WhatsApp
                         </a>
                     </div>
                 `;
             }
 
             html += `
-                <div class="pedido-card">
+                <article class="pedido-card">
                     <div class="top">
                         <div class="info">
-                            <div class="id">#<span>${idPedido}</span></div>
-                            <div class="fecha">${fechaTexto}</div>
-                            ${pedido.referencia_pago ? `<div class="ref">Ref: ${pedido.referencia_pago}</div>` : ''}
+                            <div class="id">#<span>${esc(idPedido)}</span></div>
+                            <div class="fecha">${esc(formatearFecha(pedido.fecha))}</div>
+                            ${pedido.referencia_pago ? `<div class="ref">Ref: ${esc(pedido.referencia_pago)}</div>` : ''}
                         </div>
                         <div class="detalle">
-                            <div class="precio">$${monto}</div>
-                            <div class="metodo">${metodo}</div>
-                            <div class="estado ${estadoClase}">${estadoTexto}</div>
+                            <div class="precio">$${esc(monto)}</div>
+                            <div class="metodo">${esc(metodo)}</div>
+                            <div class="estado ${estado}">${TEXTO_ESTADO[estado]}</div>
                         </div>
                     </div>
-                    <div class="bottom">
-                        ${tagsHtml}
-                    </div>
+                    <div class="bottom">${tagsHtml}</div>
                     ${pinHtml}
                     ${manualHtml}
-                </div>
+                </article>
             `;
         });
 
-        contenedor.innerHTML = html;
+        listaEl.innerHTML = html;
     }
+
+    listaEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-copiar');
+        if (!btn) return;
+        copiarPIN(btn.dataset.pin);
+    });
 
     function copiarPIN(pin) {
-        navigator.clipboard.writeText(pin).then(() => {
-            alert('✅ PIN copiado al portapapeles');
-        }).catch(() => {
-            alert('PIN: ' + pin);
-        });
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(pin)
+                .then(() => avisar('Copiado al portapapeles'))
+                .catch(() => avisar('No se pudo copiar. Mantén presionado el código para copiarlo.'));
+        } else {
+            avisar('Mantén presionado el código para copiarlo.');
+        }
     }
 
-    console.log('📋 Página de pedidos cargada correctamente');
+    document.getElementById('chips').addEventListener('click', (e) => {
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        estadoFiltro = chip.dataset.estado;
+        document.querySelectorAll('.chip').forEach((c) => c.classList.toggle('activo', c === chip));
+        filtrarPedidos();
+    });
+
+    buscarEl.addEventListener('input', filtrarPedidos);
 </script>
 
 </body>
