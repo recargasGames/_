@@ -693,7 +693,7 @@ const refReferencias = db.ref("referencias_usadas");
 const refReferenciasFalsas = db.ref("referencias_falsas");
 const refPedidos = db.ref("pedidos");
 const refCupones = db.ref("cupones_usados");
-const refManuales = db.ref("referencias_manuales"); // 🆕
+const refManuales = db.ref("referencias_manuales");
 
 // ==============================================
 // 🔑 CONFIGURACIÓN
@@ -952,7 +952,7 @@ async function marcarCuponComoUsado(codigo) {
 }
 
 // ==============================================
-// 🆕 VERIFICAR REFERENCIA MANUAL EN FIREBASE
+// 🆕 REFERENCIAS MANUALES
 // ==============================================
 async function verificarReferenciaManual(codigo) {
     try {
@@ -997,7 +997,6 @@ async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
             whatsapp_cliente: whatsappCliente || null
         };
 
-        // Si es de uso único, marcar como usada
         if (usoUnico) {
             actualizacion.usada = true;
         }
@@ -1011,7 +1010,7 @@ async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
 }
 
 // ==============================================
-// 🔢 GENERAR NÚMERO DE PEDIDO SECUENCIAL
+// 🔢 GENERAR NÚMERO DE PEDIDO
 // ==============================================
 async function generarNumeroPedido() {
     try {
@@ -1031,7 +1030,7 @@ async function generarNumeroPedido() {
 }
 
 // ==============================================
-// 📱 ENVIAR NOTIFICACIÓN WHATSAPP (vía bot)
+// 📱 WHATSAPP
 // ==============================================
 async function enviarWhatsApp(telefono, mensajeCliente, mensajeAdmin) {
     try {
@@ -1217,54 +1216,118 @@ async function enviarRecargaCentralOne() {
 // ============================================
 // 🎬 PAGONORTE - STREAMING (Netflix, Disney+, HBO)
 // ============================================
+// Mapea los paquetes de tu web → tipos de PagoNorte
+const MAPA_PAGONORTE = {
+    'netflix_perfil': 'recargaPerfilNetflix',
+    'netflix_cuenta': 'recargaCuentaNetflix',
+    'disney_perfil':  'recargaPerfilDisnep',    // ⚠️ typo oficial de PagoNorte
+    'disney_cuenta':  'recargaCuentaDisnep',    // ⚠️ typo oficial de PagoNorte
+    'hbo_perfil':     'recargaPerfilHbo',
+    'hbo_cuenta':     'recargaCuentaHbo'
+};
+
+function esProductoStreaming(paqueteCodigo) {
+    if (!paqueteCodigo) return false;
+    return Object.keys(MAPA_PAGONORTE).includes(paqueteCodigo.toLowerCase());
+}
+
+function generarReferenciaInterna(productoCodigo) {
+    const ts = Date.now();
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const partes = productoCodigo.toUpperCase().split('_');
+    return `RG-${partes.join('-')}-${ts}-${rand}`;
+}
+
 async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
     try {
+        // Mapear el tipo público de PagoNorte
+        const tipoPagoNorte = MAPA_PAGONORTE[productoCodigo.toLowerCase()];
+        if (!tipoPagoNorte) {
+            return {
+                exito: false,
+                silencioso: true,
+                motivo_admin: `Producto de streaming no reconocido: ${productoCodigo}`,
+                mensaje: 'Producto no disponible por el momento'
+            };
+        }
+
+        // Detectar si es renovación
+        const modoRenovacion = localStorage.getItem('modo_renovacion') === 'true';
+        const codigoAprobacion = localStorage.getItem('codigo_aprobacion') || '';
+
+        let accion = 'recarga';
+        let bodyParams = {
+            action: accion,
+            tipo: tipoPagoNorte,
+            paquete: '1',
+            referencia: referenciaInterna
+        };
+
+        if (modoRenovacion && codigoAprobacion) {
+            accion = 'renovar_streaming';
+            bodyParams.action = accion;
+            bodyParams.codigo_aprobacion = codigoAprobacion;
+        }
+
         const res = await fetch('/api/pagonorte', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                accion: 'recarga',
-                producto: productoCodigo,
-                referencia: referenciaInterna
+                accion: accion,
+                tipo: tipoPagoNorte,
+                paquete: '1',
+                referencia: referenciaInterna,
+                codigo_aprobacion: codigoAprobacion || null,
+                producto_original: productoCodigo
             })
         });
 
         const data = await res.json();
         console.log('📥 PagoNorte:', data);
 
-        if (!res.ok || !data.ok) {
+        // ❌ Error técnico / red
+        if (!res.ok || !data) {
             return {
                 exito: false,
                 silencioso: true,
-                motivo_admin: data.mensaje || data.error || 'Error PagoNorte',
+                motivo_admin: data?.mensaje || data?.error || 'Error PagoNorte',
                 mensaje: 'Tu pedido está siendo procesado por nuestro equipo'
             };
         }
 
-        if (data.estado === 'Aprobado') {
+        // ⚠️ Normalizar respuesta
+        const estado = String(data.estado || '').toLowerCase();
+        const pendiente = data.pendiente === true;
+
+        // ✅ APROBADO
+        if (estado === 'aprobado' && !pendiente) {
             return {
                 exito: true,
                 estado: 'Aprobado',
                 codigo_aprobacion: data.codigo_aprobacion || '',
+                id_solicitud: data.id_solicitud || '',
                 datos: data.datos || {},
                 mensaje: data.mensaje || 'Entrega completada'
             };
         }
 
-        if (data.pendiente === true) {
+        // ⏳ PENDIENTE / EN PROCESO / EN EJECUCIÓN / DIFERIDO
+        if (pendiente || ['en proceso', 'en ejecución', 'en ejecucion', 'diferido', 'procesando'].includes(estado)) {
             return {
                 exito: false,
                 silencioso: true,
                 pendiente: true,
-                motivo_admin: 'PagoNorte devolvió PENDIENTE — revisar id_solicitud ' + (data.id_solicitud || ''),
+                id_solicitud: data.id_solicitud || '',
+                motivo_admin: `PagoNorte PENDIENTE (${data.estado || 'sin estado'}) — id_solicitud ${data.id_solicitud || 'N/A'}`,
                 mensaje: 'Tu pedido está en proceso, te contactaremos pronto'
             };
         }
 
+        // ❌ RECHAZADO
         return {
             exito: false,
             silencioso: true,
-            motivo_admin: data.mensaje || 'Rechazado por PagoNorte',
+            motivo_admin: data.mensaje || `Rechazado por PagoNorte (${data.estado || 'sin estado'})`,
             mensaje: 'Tu pedido está siendo procesado por nuestro equipo'
         };
 
@@ -1277,19 +1340,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto'
         };
     }
-}
-
-function generarReferenciaInterna(productoCodigo) {
-    const ts = Date.now();
-    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const partes = productoCodigo.toUpperCase().split('_');
-    return `RG-${partes.join('-')}-${ts}-${rand}`;
-}
-
-function esProductoStreaming(paqueteCodigo) {
-    if (!paqueteCodigo) return false;
-    return ['netflix_perfil', 'netflix_cuenta', 'disney_perfil', 'disney_cuenta',
-            'hbo_perfil', 'hbo_cuenta'].includes(paqueteCodigo.toLowerCase());
 }
 
 // ==============================================
@@ -1314,7 +1364,6 @@ async function iniciarVerificacion() {
 
     const esManual = referencia.startsWith('MANUAL-');
 
-    // 🎨 Cambiar el subtítulo según el tipo
     document.getElementById('subtituloVerificando').textContent = esManual
         ? 'Verificando tu código manual...'
         : 'Estamos buscando tu pago en el sistema bancario...';
@@ -1323,7 +1372,7 @@ async function iniciarVerificacion() {
 
     try {
         // ==========================================
-        // 🆕 REFERENCIA MANUAL (empieza con MANUAL-)
+        // 🆕 REFERENCIA MANUAL
         // ==========================================
         if (esManual) {
             console.log('🛠️ Referencia MANUAL detectada:', referencia);
@@ -1353,7 +1402,6 @@ async function iniciarVerificacion() {
 
             console.log('✅ Referencia manual válida:', resultadoManual.data);
 
-            // ⚠️ Validar monto si la referencia tiene monto definido
             if (resultadoManual.data.monto_bs > 0 && Math.abs(resultadoManual.data.monto_bs - precioBsFinal) > 1) {
                 const continuar = await new Promise((resolve) => {
                     document.getElementById('mensajeIcono').className = 'mensaje-icono advertencia';
@@ -1378,7 +1426,6 @@ async function iniciarVerificacion() {
                 }
             }
 
-            // ✅ Pago aceptado (manual)
             notificarAdmin('manual', {
                 referencia,
                 metodo: 'MANUAL-ADMIN',
@@ -1388,7 +1435,6 @@ async function iniciarVerificacion() {
             mostrarPaso('pasoPagoConfirmado');
             await new Promise(r => setTimeout(r, 1000));
 
-            // Procesar compra normalmente
             mostrarPaso('pasoConectandoServidor');
 
             let resultadoRecarga;
@@ -1405,7 +1451,6 @@ async function iniciarVerificacion() {
 
             await new Promise(r => setTimeout(r, 1000));
 
-            // Guardar pedido
             const infoPedido = await guardarPedidoEnFirebase(
                 referencia,
                 resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
@@ -1422,10 +1467,8 @@ async function iniciarVerificacion() {
 
             const numeroPedido = infoPedido.numeroMostrar;
 
-            // Marcar referencia manual como usada
             await marcarReferenciaManualComoUsada(referencia, numeroPedido);
 
-            // Mostrar resultado (misma lógica que la versión normal)
             if (resultadoRecarga.exito) {
                 mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna);
             } else if (resultadoRecarga.silencioso) {
@@ -1445,7 +1488,6 @@ async function iniciarVerificacion() {
         // ==========================================
         console.log('💳 Referencia NORMAL detectada:', referencia);
 
-        // 1. Verificar si la referencia ya fue usada
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
             notificarAdmin('duplicado', { referencia, metodo: metodoPago, mensaje_extra: '⚠️ Intentó usar una referencia <b>YA USADA</b>' });
@@ -1456,7 +1498,6 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // 2. Verificar cupón usado
         if (cuponAplicado) {
             const cuponYaUsado = await verificarCuponUsado(cuponAplicado);
             if (cuponYaUsado) {
@@ -1473,7 +1514,6 @@ async function iniciarVerificacion() {
             }
         }
 
-        // 3. Verificar en Pábilo
         const pagoConfirmado = await verificarPagoPabilo(referencia);
 
         if (!pagoConfirmado) {
@@ -1486,14 +1526,12 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // 4. Marcar como usados
         await marcarReferenciaComoUsada(referencia);
         if (cuponAplicado) await marcarCuponComoUsado(cuponAplicado);
 
         mostrarPaso('pasoPagoConfirmado');
         await new Promise(r => setTimeout(r, 1200));
 
-        // 5. Procesar compra
         mostrarPaso('pasoConectandoServidor');
 
         let resultadoRecarga;
@@ -1510,7 +1548,6 @@ async function iniciarVerificacion() {
 
         await new Promise(r => setTimeout(r, 1000));
 
-        // 6. Guardar en Firebase
         const infoPedido = await guardarPedidoEnFirebase(
             referencia,
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
@@ -1527,7 +1564,6 @@ async function iniciarVerificacion() {
 
         const numeroPedido = infoPedido.numeroMostrar;
 
-        // 7. Mostrar resultado
         if (resultadoRecarga.exito) {
             mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna);
         } else if (resultadoRecarga.silencioso) {
@@ -1550,7 +1586,7 @@ async function iniciarVerificacion() {
 }
 
 // ==============================================
-// 🎨 FUNCIONES AUXILIARES DE RESULTADO
+// 🎨 RESULTADOS
 // ==============================================
 function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
     document.getElementById('resPedido').textContent = numeroPedido;
@@ -1572,8 +1608,8 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
         `;
 
         const campos = [
-            { label: '📧 Correo', valor: d.correo },
-            { label: '🔑 Contraseña', valor: d.clave },
+            { label: '📧 Correo', valor: d.correo || d.usuario },
+            { label: '🔑 Contraseña', valor: d.clave || d.password },
             { label: '👤 Perfil', valor: d.perfil },
             { label: '🔢 PIN Perfil', valor: d.pin_perfil },
             { label: '📅 Vence', valor: d.fecha_vencimiento }
@@ -1752,7 +1788,6 @@ console.log('📦 Producto:', producto);
 console.log('💳 Método:', metodoPago);
 console.log('📱 WhatsApp:', whatsappCliente || '(no proporcionado)');
 console.log('🎬 Es streaming:', esProductoStreaming(paqueteCod));
-console.log('🛠️ Sistema de referencias manuales: ACTIVO');
 </script>
 </body>
 </html>
