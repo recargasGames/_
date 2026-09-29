@@ -2,3082 +2,1128 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
 <title>RECARGASGAMES - Free Fire</title>
 <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
-
 <style>
 :root{
-    --blue:#3b82f6;
-    --blue2:#2563eb;
-    --gold:#d4af37;
-    --gold2:#f5d76e;
-    --bg:#050914;
-    --panel:rgba(5,14,31,.78);
-    --border:rgba(59,130,246,.38);
-    --white:#fff;
+    --color-principal:#3b82f6;
+    --color-hover:#2563eb;
+    --color-azul:#3b82f6;
+    --color-blanco:#ffffff;
+    --color-dorado:#d4af37;
+    --color-dorado-claro:#f5d76e;
+    --color-negro:#0a0e1a;
+    --alto-nav:64px;
 }
-
 *{box-sizing:border-box;margin:0;padding:0}
-
 html{scroll-behavior:smooth}
-
 body{
-    min-height:100vh;
     background:#000;
     color:#fff;
-    font-family:"Segoe UI",Arial,sans-serif;
-    padding-top:126px;
+    font-family:'Segoe UI',sans-serif;
+    padding-top:110px;
+    padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
     overflow-x:hidden;
+    min-height:100vh;
+    position:relative;
 }
-
+a:focus-visible,button:focus-visible,input:focus-visible,.pay-box:focus-visible{
+    outline:2px solid var(--color-dorado-claro);
+    outline-offset:2px;
+}
 .video-fondo{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    z-index:-3;
-    filter:brightness(.72) saturate(1.15);
-}
-
-.video-overlay{
-    position:fixed;
-    inset:0;
-    z-index:-2;
-    background:
-      linear-gradient(180deg,rgba(3,7,18,.35),rgba(3,8,20,.72)),
-      radial-gradient(circle at 50% 25%,rgba(30,100,255,.15),transparent 48%);
-}
-
-body:after{
-    content:"";
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    pointer-events:none;
-    background:linear-gradient(
-        90deg,
-        rgba(0,0,0,.55),
-        transparent 35%,
-        transparent 65%,
-        rgba(0,0,0,.55)
-    );
-}
-
-a{text-decoration:none;color:inherit}
-button,input{font:inherit}
-
-/* =========================
-   HEADER
-========================= */
-
-.barra-superior{
     position:fixed;
     top:0;
     left:0;
-    right:0;
-    z-index:9999;
-    background:rgba(3,8,20,.93);
-    backdrop-filter:blur(18px);
-    border-bottom:1px solid rgba(59,130,246,.35);
-    box-shadow:0 10px 35px rgba(0,0,0,.45);
-}
-
-.header{
-    height:76px;
-    padding:9px 28px;
-    display:flex;
-    align-items:center;
-    gap:28px;
-}
-
-.brand{
-    display:flex;
-    align-items:center;
-    flex-shrink:0;
-}
-
-.brand img{
-    width:255px;
-    max-width:26vw;
-    height:auto;
-    border-radius:12px;
-    filter:drop-shadow(0 0 12px rgba(212,175,55,.35));
-}
-
-.search-box{
-    flex:1;
-    max-width:500px;
-    margin:auto;
-    height:44px;
-    display:flex;
-    align-items:center;
-    border:1px solid rgba(59,130,246,.45);
-    background:rgba(4,13,30,.8);
-    border-radius:13px;
-    padding:0 15px;
-    box-shadow:inset 0 0 20px rgba(0,0,0,.25);
-}
-
-.search-box span{
-    font-size:21px;
-    color:#93c5fd;
-    margin-right:10px;
-}
-
-.search-box input{
-    width:100%;
-    border:0;
-    outline:0;
-    background:transparent;
-    color:#fff;
-    font-size:14px;
-}
-
-.search-box input::placeholder{
-    color:#94a3b8;
-}
-
-.header-right{
-    display:flex;
-    align-items:center;
-    gap:17px;
-}
-
-.install-btn{
-    height:46px;
-    padding:0 18px;
-    border-radius:13px;
-    border:1px solid #60a5fa;
-    background:linear-gradient(
-        135deg,
-        rgba(15,45,90,.9),
-        rgba(4,18,40,.9)
-    );
-    color:#fff;
-    font-weight:800;
-    cursor:pointer;
-    box-shadow:0 0 20px rgba(59,130,246,.15);
-}
-
-.install-btn small{
-    display:block;
-    color:#bfdbfe;
-    font-size:10px;
-    font-weight:500;
-}
-
-.btn-perfil,
-.menu-hamburguesa{
-    background:none;
-    border:0;
-    color:#fff;
-    cursor:pointer;
-}
-
-.btn-perfil{
-    display:flex;
-    align-items:center;
-    gap:9px;
-}
-
-.avatar-circle{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    overflow:hidden;
-    border:2px solid rgba(212,175,55,.55);
-    background:linear-gradient(135deg,#d4af37,#2563eb);
-    position:relative;
-}
-
-.avatar-circle img{
     width:100%;
     height:100%;
     object-fit:cover;
-}
-
-.online-dot{
-    position:absolute;
-    right:0;
-    bottom:0;
-    width:11px;
-    height:11px;
-    background:#22c55e;
-    border:2px solid #07101f;
-    border-radius:50%;
-}
-
-.perfil-nombre{
-    font-weight:700;
-    font-size:14px;
-}
-
-.perfil-flecha{
-    font-size:11px;
-    color:#94a3b8;
-}
-
-.menu-hamburguesa{
-    font-size:30px;
-    line-height:1;
-}
-
-.menu-flotante,
-.menu-perfil{
-    position:absolute;
-    right:24px;
-    top:68px;
-    min-width:245px;
-    background:rgba(5,10,23,.98);
-    border:1px solid rgba(212,175,55,.35);
-    border-radius:16px;
-    box-shadow:0 25px 60px rgba(0,0,0,.7);
-    overflow:hidden;
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(-8px);
-    transition:.25s;
-}
-
-.menu-flotante.activo,
-.menu-perfil.activo{
+    z-index:-2;
+    pointer-events:none;
     opacity:1;
-    visibility:visible;
-    transform:translateY(0);
+    filter:brightness(1.15);
+    will-change:transform;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
 }
-
-.menu-opcion,
-.menu-perfil-opcion{
-    display:flex;
-    gap:11px;
-    padding:14px 18px;
-    color:#e5e7eb;
-    border-bottom:1px solid rgba(255,255,255,.05);
-    font-size:14px;
-    font-weight:600;
-}
-
-.menu-opcion:hover,
-.menu-perfil-opcion:hover{
-    background:rgba(59,130,246,.12);
-    color:var(--gold2);
-}
-
-.menu-perfil-header{
-    padding:17px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    background:linear-gradient(
-        135deg,
-        rgba(212,175,55,.1),
-        rgba(59,130,246,.08)
-    );
-}
-
-.avatar-grande{
-    width:50px;
-    height:50px;
-    border-radius:50%;
-    overflow:hidden;
-    border:2px solid rgba(212,175,55,.5);
-}
-
-.avatar-grande img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.menu-perfil-header h4{
-    font-size:15px;
-}
-
-.menu-perfil-header p{
-    font-size:11px;
-    color:#94a3b8;
-    margin-top:3px;
-}
-
-.danger{
-    color:#f87171!important;
-}
-
-/* =========================
-   MENÚ DE JUEGOS
-========================= */
-
-.games-menu{
-    height:50px;
-    display:flex;
-    gap:4px;
-    align-items:center;
-    overflow-x:auto;
-    padding:0 25px;
-    scrollbar-width:none;
-    border-top:1px solid rgba(255,255,255,.04);
-}
-
-.games-menu::-webkit-scrollbar{
-    display:none;
-}
-
-.games-menu a{
-    white-space:nowrap;
-    padding:10px 13px;
-    border-radius:10px;
-    color:#cbd5e1;
-    font-size:13px;
-    font-weight:700;
-}
-
-.games-menu a:hover{
-    background:rgba(59,130,246,.12);
-    color:#fff;
-}
-
-.games-menu a.active{
-    color:#ffd95b;
-    background:linear-gradient(
-        135deg,
-        rgba(212,175,55,.18),
-        rgba(59,130,246,.12)
-    );
-    border-bottom:2px solid var(--gold);
-}
-
-/* =========================
-   HERO
-========================= */
-
-.hero{
-    max-width:1450px;
-    margin:0 auto;
-    min-height:250px;
-    position:relative;
-    overflow:hidden;
-    border-bottom:1px solid rgba(59,130,246,.25);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-}
-
-.hero:before{
-    content:"";
-    position:absolute;
+.video-overlay{
+    position:fixed;
     inset:0;
-    background:
-      radial-gradient(
-        circle at 20% 50%,
-        rgba(59,130,246,.35),
-        transparent 25%
-      ),
-      radial-gradient(
-        circle at 80% 50%,
-        rgba(37,99,235,.28),
-        transparent 25%
-      ),
-      linear-gradient(
-        90deg,
-        rgba(0,0,0,.8),
-        transparent 30%,
-        transparent 70%,
-        rgba(0,0,0,.8)
-      );
+    background:linear-gradient(180deg,
+        rgba(10,14,26,0.15) 0%,
+        rgba(10,14,26,0.35) 60%,
+        rgba(10,14,26,0.6) 100%);
+    z-index:-1;
+    pointer-events:none;
+    will-change:transform;
+    transform:translateZ(0);
 }
-
-.hero-content{
-    position:relative;
-    z-index:2;
-    padding:34px 20px;
+body::before{
+    content:'';position:fixed;top:-30%;right:-20%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,rgba(59,130,246,0.1),transparent 70%);
+    border-radius:50%;pointer-events:none;z-index:0;
 }
-
-.hero-kicker{
-    color:var(--gold2);
-    font-weight:900;
-    letter-spacing:4px;
-    font-size:13px;
-    text-transform:uppercase;
+body::after{
+    content:'';position:fixed;bottom:-30%;left:-20%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,rgba(212,175,55,0.08),transparent 70%);
+    border-radius:50%;pointer-events:none;z-index:0;
 }
-
-.hero h1{
-    margin:7px 0 8px;
-    font-size:58px;
-    line-height:1;
-    font-weight:1000;
-    letter-spacing:2px;
-    text-shadow:0 4px 25px rgba(0,0,0,.8);
+.main{position:relative;z-index:1}
+.barra-superior{
+    position:fixed;top:0;left:0;right:0;z-index:999;
+    background:rgba(5,8,16,0.85);
+    border-bottom:1px solid transparent;
+    border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
 }
-
-.hero h1 span{
-    color:var(--gold2);
+.header{
+    padding:14px 24px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid rgba(255,255,255,0.05);
 }
-
-.hero p{
-    font-size:18px;
-    font-weight:800;
-    letter-spacing:1px;
+.brand img{
+    height:55px;width:auto;border-radius:12px;
+    filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));
 }
-
-.hero-tags{
-    margin-top:12px;
-    color:#cbd5e1;
-    font-size:13px;
+.header-right{display:flex;align-items:center;gap:12px}
+.btn-perfil{
+    background:transparent;border:none;color:white;cursor:pointer;
+    padding:0;display:flex;align-items:center;gap:8px;
+    transition:all 0.3s;position:relative;
+    margin-top:8px;
 }
-
-.hero-tags span{
-    margin:0 8px;
-    color:#60a5fa;
+.btn-perfil:hover .avatar-circle{
+    transform:scale(1.05);
+    box-shadow:0 0 25px rgba(212,175,55,0.6);
+    border-color:var(--color-dorado);
 }
-
-/* =========================
-   CONTENIDO
-========================= */
-
-.main{
-    width:min(1360px,calc(100% - 36px));
-    margin:0 auto;
-    padding:18px 0 45px;
-    display:grid;
-    grid-template-columns:370px 1fr;
-    gap:18px;
+.btn-perfil .avatar-circle{
+    width:40px;height:40px;border-radius:50%;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;font-size:16px;color:white;
+    transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);
+    position:relative;overflow:hidden;
 }
-
-.left-column{
-    display:flex;
-    flex-direction:column;
-    gap:18px;
+.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
+.btn-perfil .avatar-circle .online-dot{
+    position:absolute;bottom:0;right:0;width:12px;height:12px;
+    background:#22c55e;border-radius:50%;border:2px solid #0b1220;
 }
+.btn-perfil .perfil-nombre{
+    font-size:14px;font-weight:500;color:white;
+    max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+.menu-perfil{
+    position:absolute;top:75px;right:0;
+    background:rgba(10,14,26,0.98);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:16px;min-width:260px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);
+    opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);
+    transition:all 0.25s ease;z-index:1000;overflow:hidden;
+}
+.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.menu-perfil-header{
+    padding:16px 20px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));
+}
+.menu-perfil-header .avatar-grande{
+    width:48px;height:48px;border-radius:50%;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;border:2px solid rgba(212,175,55,0.4);
+}
+.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
+.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
+.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-opcion{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 20px;color:#e5e7eb;text-decoration:none;
+    font-size:14px;font-weight:500;transition:all 0.2s;
+    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+}
+.menu-perfil-opcion:last-child{border-bottom:none}
+.menu-perfil-opcion:hover{
+    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
+    color:var(--color-dorado-claro);padding-left:26px;
+    border-left:3px solid var(--color-dorado);
+}
+.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
+.menu-perfil-opcion.danger{color:#ef4444}
+.menu-perfil-opcion.danger:hover{
+    background:rgba(239,68,68,0.12);color:#ef4444;border-left-color:#ef4444;
+}
+.menu-hamburguesa{
+    background:transparent;border:none;color:white;font-size:28px;
+    cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;
+    margin-top:8px;
+}
+.menu-hamburguesa:hover{
+    transform:scale(1.1);color:var(--color-dorado);
+}
+.menu-flotante{
+    position:absolute;top:80px;right:0;
+    background:rgba(10,14,26,0.98);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:16px;min-width:240px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);
+    opacity:0;visibility:hidden;transform:translateY(-10px);
+    transition:all 0.25s ease;z-index:999;overflow:hidden;
+}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
+.menu-opcion{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 20px;color:white;text-decoration:none;
+    font-size:15px;font-weight:500;transition:all 0.2s;
+    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+}
+.menu-opcion:last-child{border-bottom:none}
+.menu-opcion:hover{
+    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
+    color:var(--color-dorado-claro);padding-left:24px;
+}
+.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
+.games-menu{
+    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
+    padding:12px 20px;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    border-top:1px solid rgba(255,255,255,0.04);
+}
+.games-menu::-webkit-scrollbar{display:none}
+.games-menu a{
+    text-decoration:none;color:#cbd5e1;padding:8px 16px;
+    border-radius:20px;font-size:14px;font-weight:600;
+    white-space:nowrap;transition:all 0.3s;border:1px solid transparent;
+}
+.games-menu a:hover{
+    color:var(--color-dorado-claro);
+    background:rgba(212,175,55,0.08);
+    border-color:rgba(212,175,55,0.3);
+}
+.games-menu a.active{
+    color:var(--color-dorado-claro);
+    background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));
+    border-color:rgba(212,175,55,0.5);
+}
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
 
-.card-panel,
-.products-panel{
-    background:linear-gradient(
-        135deg,
-        rgba(4,18,40,.86),
-        rgba(3,10,24,.82)
-    );
-    border:1px solid rgba(59,130,246,.35);
-    border-radius:18px;
-    box-shadow:0 18px 45px rgba(0,0,0,.38);
-    backdrop-filter:blur(8px);
+.pagina-titulo{
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:10px;
+    margin:24px 0 18px;
+}
+.pagina-titulo h1{
+    font-size:22px;font-weight:900;
+    background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+.chip-entrega{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:14px;
+    background:rgba(34,197,94,0.12);
+    border:1px solid rgba(34,197,94,0.4);
+    color:#86efac;font-size:12px;font-weight:700;
+}
+.chip-entrega::before{
+    content:'';width:7px;height:7px;border-radius:50%;
+    background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.8);
 }
 
 .card-panel{
-    padding:20px;
-}
-
-.panel-title{
-    color:var(--gold2);
-    font-size:16px;
-    font-weight:900;
-    text-transform:uppercase;
-    letter-spacing:.7px;
-    margin-bottom:15px;
-}
-
-.panel-subtitle{
-    font-size:12px;
-    color:#94a3b8;
-    margin-top:-9px;
-    margin-bottom:15px;
-}
-
-.form-group label{
-    display:block;
-    font-size:11px;
-    color:#cbd5e1;
-    font-weight:800;
-    text-transform:uppercase;
-    margin-bottom:7px;
-}
-
-.form-input{
-    width:100%;
-    height:48px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.16);
-    background:rgba(0,0,0,.32);
-    color:#fff;
-    padding:0 15px;
-    outline:none;
-}
-
-.form-input:focus{
-    border-color:#60a5fa;
-    box-shadow:0 0 0 3px rgba(59,130,246,.13);
-}
-
-.id-status{
-    display:none;
-    margin-top:12px;
-    padding:12px;
-    border-radius:12px;
-    font-size:13px;
-    font-weight:700;
-}
-
-.id-status.verificando{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    color:#fde68a;
-    background:rgba(212,175,55,.1);
-    border:1px solid rgba(212,175,55,.35);
-}
-
-.id-status.verificando:after{
-    content:"";
-    width:16px;
-    height:16px;
-    margin-left:auto;
-    border:2px solid rgba(245,215,110,.25);
-    border-top-color:var(--gold2);
-    border-radius:50%;
-    animation:spin .8s linear infinite;
-}
-
-.id-status.valido{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    color:#86efac;
-    background:rgba(34,197,94,.1);
-    border:1px solid rgba(34,197,94,.35);
-}
-
-.id-status.error{
-    display:block;
-    color:#fca5a5;
-    background:rgba(239,68,68,.1);
-    border:1px solid rgba(239,68,68,.35);
-}
-
-.check-icono{
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#16a34a;
-    color:#fff;
-    font-weight:900;
-    flex-shrink:0;
-}
-
-.nombre-jugador{
-    color:#fff;
-    font-weight:900;
-    margin-top:2px;
-}
-
-@keyframes spin{
-    to{transform:rotate(360deg)}
-}
-
-/* =========================
-   PAGOS
-========================= */
-
-.payment-methods{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-
-.pay-box{
-    min-height:74px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:1px solid rgba(59,130,246,.45);
-    border-radius:13px;
-    background:rgba(0,0,0,.25);
-    color:#cbd5e1;
-    cursor:pointer;
-    font-weight:900;
-    font-size:13px;
-    text-align:center;
-    transition:.25s;
-}
-
-.pay-box:hover{
-    border-color:#60a5fa;
-}
-
-.pay-box.active{
-    border:2px solid var(--gold);
-    color:var(--gold2);
-    background:linear-gradient(
-        135deg,
-        rgba(212,175,55,.18),
-        rgba(59,130,246,.12)
-    );
-    box-shadow:0 0 22px rgba(212,175,55,.14);
-}
-
-.tasa-info{
-    text-align:center;
-    color:#f5d76e;
-    font-size:12px;
-    font-weight:800;
-    margin-top:13px;
-}
-
-/* =========================
-   PROMOCIÓN
-========================= */
-
-.promo-box{
-    min-height:175px;
-    border-radius:16px;
-    overflow:hidden;
-    display:flex;
-    align-items:flex-end;
-    padding:18px;
-    background:
-      linear-gradient(
-        0deg,
-        rgba(0,0,0,.82),
-        rgba(0,0,0,.05)
-      ),
-      radial-gradient(
-        circle at 70% 30%,
-        rgba(59,130,246,.6),
-        transparent 35%
-      ),
-      linear-gradient(135deg,#111827,#172554);
-    border:1px solid rgba(212,175,55,.3);
-}
-
-.promo-box h3{
-    font-size:22px;
-    line-height:1.05;
-}
-
-.promo-box strong{
-    color:var(--gold2);
-    font-size:28px;
-}
-
-/* =========================
-   PRODUCTOS
-========================= */
-
-.products-panel{
-    padding:22px;
-}
-
-.section-heading{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px;
-    margin-bottom:16px;
-}
-
-.section-heading-left{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.section-icon{
-    font-size:28px;
-}
-
-.section-heading h2{
-    font-size:20px;
-    color:var(--gold2);
-}
-
-.section-heading p{
-    font-size:11px;
-    color:#94a3b8;
-    margin-top:2px;
-}
-
-.rate-badge{
-    color:#cbd5e1;
-    font-size:10px;
-    padding:7px 10px;
+    background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));
+    border:1px solid rgba(212,175,55,0.25);
     border-radius:20px;
-    border:1px solid rgba(212,175,55,.25);
-    background:rgba(212,175,55,.06);
-    white-space:nowrap;
-}
-
-.products-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:13px;
-}
-
-.product-card{
+    padding:22px 18px 20px;
+    margin-bottom:20px;
     position:relative;
     overflow:hidden;
-    padding:16px;
-    border-radius:15px;
-    background:linear-gradient(
-        135deg,
-        rgba(8,24,50,.9),
-        rgba(3,12,28,.92)
-    );
-    border:1px solid rgba(59,130,246,.42);
-    transition:.25s;
-    min-height:165px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.35);
 }
-
-.product-card:after{
-    content:"";
-    position:absolute;
-    width:100px;
-    height:100px;
-    right:-35px;
-    top:-35px;
-    background:radial-gradient(
-        circle,
-        rgba(59,130,246,.2),
-        transparent 70%
-    );
-    pointer-events:none;
+.panel-title{
+    display:flex;align-items:center;gap:10px;
+    font-size:15px;font-weight:800;margin:0 0 16px;
+    color:var(--color-dorado-claro);position:relative;z-index:1;
+    letter-spacing:0.5px;text-transform:uppercase;
 }
-
+.paso-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;font-size:13px;font-weight:800;
+}
+.paso-titulo{
+    display:flex;align-items:center;gap:10px;
+    font-size:15px;font-weight:800;margin:30px 0 4px;
+    color:var(--color-dorado-claro);
+    letter-spacing:0.5px;text-transform:uppercase;
+}
+.paso-ayuda{color:#cbd5e1;font-size:13px;margin-bottom:6px}
+.form-input{
+    width:100%;height:50px;border-radius:14px;
+    background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;
+    border:1px solid rgba(255,255,255,0.18);font-size:16px;
+    position:relative;z-index:1;transition:border-color 0.3s;
+}
+.form-input:focus{
+    outline:none;border-color:var(--color-dorado);
+    box-shadow:0 0 0 3px rgba(212,175,55,0.15);
+}
+.form-input.resaltar{
+    border-color:#ef4444;
+    box-shadow:0 0 0 3px rgba(239,68,68,0.25);
+}
+.form-group{margin-bottom:16px;position:relative;z-index:1}
+.form-group:last-child{margin-bottom:0}
+.form-group label{
+    display:block;margin-bottom:8px;
+    color:#cbd5e1;font-size:13px;font-weight:600;
+    text-transform:uppercase;letter-spacing:0.5px;
+}
+.ayuda-id{
+    margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.4;
+    position:relative;z-index:1;
+}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1}
+.pay-box{
+    background:rgba(0,0,0,0.3);
+    border:2px solid rgba(255,255,255,0.15);
+    border-radius:16px;padding:12px;text-align:center;
+    cursor:pointer;font-weight:700;transition:all 0.3s;font-size:14px;
+}
+.pay-box.active{
+    border-color:var(--color-dorado);
+    background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.2));
+    color:var(--color-dorado-claro);
+}
+.tasa-info{
+    font-size:12px;color:#94a3b8;margin-top:10px;
+    text-align:right;font-weight:600;position:relative;z-index:1;
+}
+.id-status{
+    margin-top:14px;padding:14px 18px;border-radius:14px;
+    font-size:15px;display:none;font-weight:700;
+    animation:statusAparecer 0.3s ease;
+}
+@keyframes statusAparecer{
+    from{opacity:0;transform:translateY(-8px)}
+    to{opacity:1;transform:translateY(0)}
+}
+.id-status.verificando{
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(212,175,55,0.08));
+    color:var(--color-dorado-claro);
+    border:1px solid rgba(212,175,55,0.5);
+}
+.id-status.verificando::after{
+    content:'';width:18px;height:18px;
+    border:2px solid rgba(212,175,55,0.3);
+    border-top-color:var(--color-dorado);
+    border-radius:50%;animation:spin 0.8s linear infinite;
+    margin-left:auto;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.id-status.valido{
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg,rgba(34,197,94,0.3),rgba(34,197,94,0.1));
+    color:#4ade80;border:1px solid rgba(34,197,94,0.6);
+}
+.id-status.valido .check-icono{
+    width:28px;height:28px;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:15px;color:white;
+    flex-shrink:0;
+}
+.id-status.valido .nombre-jugador{
+    color:#fff;font-weight:800;
+}
+.id-status.error{
+    display:flex;align-items:center;gap:10px;
+    background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));
+    color:#f87171;border:1px solid rgba(239,68,68,0.5);
+}
+.section-divider{margin:24px 0 18px;text-align:center}
+.section-divider span{
+    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+    background-size:200% 200%;
+    color:#0a0e1a;padding:8px 22px;border-radius:30px;
+    font-size:13px;font-weight:800;letter-spacing:1.5px;
+    display:inline-block;text-transform:uppercase;
+    box-shadow:0 0 20px rgba(212,175,55,0.4);
+}
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
+@media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+.product-card{
+    background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.68));
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:18px;padding:16px;
+    transition:transform 0.3s ease,box-shadow 0.3s ease;
+    position:relative;overflow:hidden;
+    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+    will-change:transform;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    display:flex;flex-direction:column;
+}
+.product-card::before{
+    content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
+    background:linear-gradient(135deg,#d4af37,#3b82f6,#d4af37);
+    background-size:300% 300%;
+    border-radius:18px;z-index:-1;opacity:0;
+    transition:opacity 0.3s;
+}
+.product-card:hover::before{opacity:1}
 .product-card:hover{
-    transform:translateY(-4px);
-    border-color:rgba(212,175,55,.7);
-    box-shadow:
-        0 16px 35px rgba(0,0,0,.45),
-        0 0 20px rgba(59,130,246,.12);
+    transform:translateY(-6px) translateZ(0);
+    box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.3);
 }
-
 .card-header{
-    display:flex;
-    align-items:center;
-    gap:10px;
+    display:flex;align-items:center;gap:12px;
+    border-bottom:1px solid rgba(212,175,55,0.15);
+    padding-bottom:10px;margin-bottom:10px;
 }
-
 .game-icon{
-    width:46px;
-    height:46px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:12px;
-    font-size:24px;
-    background:linear-gradient(
-        135deg,
-        rgba(59,130,246,.22),
-        rgba(212,175,55,.12)
-    );
-    border:1px solid rgba(59,130,246,.35);
+    background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.25));
+    padding:10px;border-radius:12px;font-size:20px;
+    border:1px solid rgba(212,175,55,0.4);
 }
-
 .product-title{
-    font-weight:900;
-    font-size:14px;
+    font-size:15px;font-weight:800;
+    background:linear-gradient(135deg,#fff,#f5d76e);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
 }
-
 .product-desc{
-    font-size:10px;
-    color:#94a3b8;
-    margin:9px 0;
+    color:#fcd34d;font-size:12px;font-weight:600;margin-bottom:10px;
 }
-
+.product-price-wrap{margin-top:auto;margin-bottom:14px}
 .product-price{
-    color:var(--gold2);
-    font-size:22px;
-    font-weight:1000;
-    text-shadow:0 0 14px rgba(212,175,55,.22);
-    margin-bottom:10px;
+    font-size:22px;font-weight:800;color:var(--color-dorado-claro);
+    text-shadow:0 0 15px rgba(212,175,55,0.4);
+    display:block;
 }
-
+.product-ref{font-size:12px;color:#94a3b8;margin-top:2px;min-height:16px}
 .btn-buy{
-    width:100%;
-    height:38px;
-    border:0;
-    border-radius:10px;
-    background:linear-gradient(
-        135deg,
-        #d4af37,
-        #f5d76e,
-        #d4af37
-    );
-    color:#07101e;
-    font-size:12px;
-    font-weight:1000;
-    cursor:pointer;
-    transition:.2s;
+    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+    background-size:200% 200%;
+    color:#0a0e1a;border:none;width:100%;height:44px;
+    border-radius:12px;font-size:14px;font-weight:800;
+    cursor:pointer;transition:all 0.3s;letter-spacing:1px;
+    box-shadow:0 4px 15px rgba(212,175,55,0.4);
+    text-transform:uppercase;
 }
-
 .btn-buy:hover{
     transform:translateY(-2px);
-    box-shadow:0 7px 20px rgba(212,175,55,.35);
+    box-shadow:0 8px 25px rgba(212,175,55,0.6);
+}
+.btn-buy.pendiente{
+    background:rgba(212,175,55,0.18);
+    color:var(--color-dorado-claro);
+    border:1px solid rgba(212,175,55,0.5);
+    box-shadow:none;
 }
 
-.products-panel + .products-panel{
-    margin-top:18px;
-}
-
-/* =========================
-   BARRA INFERIOR
-========================= */
-
-.bottom-strip{
-    grid-column:1/-1;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    border:1px solid rgba(59,130,246,.25);
-    border-radius:15px;
-    background:rgba(3,12,28,.72);
-    overflow:hidden;
-}
-
-.bottom-item{
-    padding:14px;
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+    transform:translate(-50%,20px);
+    max-width:calc(100% - 32px);
+    padding:12px 18px;
+    border-radius:14px;
+    font-size:14px;font-weight:600;line-height:1.4;
+    background:rgba(10,14,26,0.97);
+    border:1px solid rgba(212,175,55,0.5);
+    color:#fff;
+    box-shadow:0 12px 35px rgba(0,0,0,0.6);
+    opacity:0;visibility:hidden;
+    transition:all 0.3s ease;
+    z-index:3000;
     text-align:center;
-    border-right:1px solid rgba(255,255,255,.06);
-    color:#cbd5e1;
-    font-size:12px;
-    font-weight:700;
 }
+.toast.visible{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.toast.error{border-color:rgba(239,68,68,0.6);color:#fecaca}
 
-.bottom-item:last-child{
-    border:0;
+.nav-inferior{
+    position:fixed;left:0;right:0;bottom:0;z-index:999;
+    background:rgba(5,8,16,0.96);
+    border-top:1px solid rgba(212,175,55,0.25);
+    box-shadow:0 -4px 20px rgba(0,0,0,0.5);
+    padding-bottom:env(safe-area-inset-bottom);
+    transform:translateZ(0);
 }
-
-.bottom-item b{
-    color:#60a5fa;
-    font-size:17px;
-    margin-right:7px;
+.nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
+.nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;color:#9ca3af;text-decoration:none;
+    font-size:12px;font-weight:600;transition:color 0.2s;
 }
+.nav-item svg{
+    width:22px;height:22px;stroke:currentColor;fill:none;
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
+.nav-item.soporte{color:#4ade80}
 
-/* =========================
-   BOTONES FLOTANTES
-========================= */
-
-.whatsapp-float,
 .back-to-top{
     position:fixed;
-    right:22px;
-    z-index:1000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:50%;
-    text-decoration:none;
+    bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+    right:20px;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    color:#fff;width:45px;height:45px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;visibility:hidden;
+    z-index:998;transition:.3s;text-decoration:none;
+    font-size:18px;box-shadow:0 8px 25px rgba(0,0,0,0.4);
 }
-
-.whatsapp-float{
-    bottom:20px;
-    width:58px;
-    height:58px;
-    font-size:29px;
-    background:#25d366;
-    box-shadow:0 8px 25px rgba(0,0,0,.45);
-}
-
-.back-to-top{
-    bottom:91px;
-    width:46px;
-    height:46px;
-    background:linear-gradient(
-        135deg,
-        #2563eb,
-        #d4af37
-    );
-    color:#fff;
-    font-size:20px;
-    opacity:0;
-    visibility:hidden;
-    transition:.3s;
-}
-
-.back-to-top.show{
-    opacity:1;
-    visibility:visible;
-}
-
-/* =========================
-   LOGIN
-========================= */
-
+.back-to-top.show{opacity:1;visibility:visible}
 .modal-overlay{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:20000;
-    background:rgba(0,0,0,.83);
-    backdrop-filter:blur(7px);
-    align-items:center;
-    justify-content:center;
-    padding:20px;
+    display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.85);z-index:2000;
+    justify-content:center;align-items:center;padding:20px;
 }
-
-.modal-overlay.activo{
-    display:flex;
-}
-
+.modal-overlay.activo{display:flex}
 .modal-box{
-    width:min(420px,100%);
-    border-radius:22px;
-    overflow:hidden;
-    background:linear-gradient(
-        135deg,
-        #101b33,
-        #050b18
-    );
-    border:1px solid rgba(212,175,55,.35);
-    box-shadow:0 30px 80px rgba(0,0,0,.75);
+    background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:24px;max-width:420px;width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,0.7);
+    animation:modalSlide 0.3s ease;overflow:hidden;
 }
-
+@keyframes modalSlide{
+    from{transform:translateY(-40px);opacity:0}
+    to{transform:translateY(0);opacity:1}
+}
 .modal-header{
-    text-align:center;
-    padding:24px;
-    background:linear-gradient(
-        135deg,
-        rgba(212,175,55,.12),
-        rgba(59,130,246,.08)
-    );
-    border-bottom:1px solid rgba(255,255,255,.06);
+    padding:24px 20px;text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));
 }
-
-.modal-header .icono-grande{
-    font-size:42px;
-}
-
+.modal-header .icono-grande{font-size:50px;margin-bottom:10px}
 .modal-header h2{
-    color:var(--gold2);
-    font-size:20px;
-    margin-top:7px;
+    font-size:20px;font-weight:800;color:var(--color-dorado-claro);
+    letter-spacing:1px;text-transform:uppercase;
 }
-
-.modal-body{
-    padding:22px;
-}
-
-.modal-field{
-    margin-bottom:16px;
-}
-
-.modal-field label{
-    display:block;
-    color:#cbd5e1;
-    font-size:11px;
-    font-weight:800;
-    text-transform:uppercase;
-    margin-bottom:7px;
-}
-
-.modal-field input{
-    width:100%;
-    height:45px;
-    border-radius:11px;
-    border:1px solid rgba(255,255,255,.13);
-    background:rgba(0,0,0,.3);
-    color:#fff;
-    padding:0 13px;
-    outline:0;
-}
-
-.modal-field input:focus{
-    border-color:#60a5fa;
-}
-
+.modal-body{padding:24px 20px}
+.modal-footer{padding:0 20px 20px;display:flex;gap:10px}
 .modal-btn{
-    width:100%;
-    height:45px;
-    border-radius:11px;
-    border:0;
-    font-weight:900;
-    cursor:pointer;
+    flex:1;padding:14px;border-radius:12px;font-size:15px;
+    font-weight:800;cursor:pointer;border:none;transition:0.3s;
+    text-transform:uppercase;
 }
-
-.modal-btn.continuar{
-    background:linear-gradient(
-        135deg,
-        #d4af37,
-        #f5d76e
-    );
-    color:#07101e;
-}
-
 .modal-btn.cancelar{
-    background:rgba(71,85,105,.25);
-    color:#cbd5e1;
-    border:1px solid rgba(255,255,255,.1);
+    background:rgba(71,85,105,0.3);color:#94a3b8;
+    border:1px solid rgba(71,85,105,0.5);
 }
-
-.modal-footer{
-    padding:0 22px 22px;
+.modal-btn.cancelar:hover{background:rgba(71,85,105,0.5);color:white}
+.modal-btn.continuar{
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;
 }
-
-.login-links{
-    text-align:center;
-    margin-top:16px;
-    font-size:13px;
-    color:#94a3b8;
-}
-
-.login-links a{
-    color:var(--gold2);
-    font-weight:700;
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media(max-width:1050px){
-
-    .search-box{
-        max-width:340px;
-    }
-
-    .main{
-        grid-template-columns:1fr;
-    }
-
-    .left-column{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-    }
-
-    .products-panel{
-        grid-column:auto;
-    }
-
-    .bottom-strip{
-        grid-column:1;
+@media(max-width:500px){
+    body{padding-top:100px}
+    .main{padding-top:20px}
+    .brand img{height:45px}
+    .header{padding:10px 16px}
+    .games-menu{padding:10px 15px}
+    .menu-flotante{right:10px;min-width:220px}
+    .btn-perfil .perfil-nombre{display:none}
+    .btn-perfil .perfil-flecha{display:none}
+    .menu-perfil{right:0;min-width:230px}
+    .product-price{font-size:19px}
+    .product-title{font-size:13px}
+    .pagina-titulo h1{font-size:20px}
+    .back-to-top{right:15px}
+    .video-fondo{
+        opacity:0.85;
+        filter:brightness(1.05);
     }
 }
-
-@media(max-width:760px){
-
-    body{
-        padding-top:105px;
-    }
-
-    .header{
-        height:62px;
-        padding:7px 13px;
-        gap:10px;
-    }
-
-    .brand img{
-        width:170px;
-        max-width:45vw;
-    }
-
-    .search-box{
-        display:none;
-    }
-
-    .install-btn{
-        display:none;
-    }
-
-    .perfil-nombre,
-    .perfil-flecha{
-        display:none;
-    }
-
-    .menu-flotante,
-    .menu-perfil{
-        top:58px;
-        right:10px;
-    }
-
-    .games-menu{
-        height:43px;
-        padding:0 10px;
-    }
-
-    .games-menu a{
-        font-size:12px;
-        padding:8px 10px;
-    }
-
-    .hero{
-        min-height:210px;
-    }
-
-    .hero h1{
-        font-size:39px;
-    }
-
-    .hero p{
-        font-size:13px;
-    }
-
-    .hero-kicker{
-        font-size:10px;
-        letter-spacing:2px;
-    }
-
-    .main{
-        width:calc(100% - 20px);
-        padding-top:12px;
-    }
-
-    .left-column{
-        display:flex;
-    }
-
-    .products-grid{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .section-heading h2{
-        font-size:16px;
-    }
-
-    .rate-badge{
-        display:none;
-    }
-
-    .bottom-strip{
-        grid-template-columns:1fr;
-    }
-
-    .bottom-item{
-        border-right:0;
-        border-bottom:1px solid rgba(255,255,255,.06);
-    }
-}
-
-@media(max-width:430px){
-
-    .brand img{
-        width:150px;
-    }
-
-    .products-grid{
-        grid-template-columns:1fr;
-    }
-
-    .hero h1{
-        font-size:32px;
-    }
-
-    .product-card{
-        min-height:auto;
-    }
-
-    .payment-methods{
-        gap:7px;
-    }
-
-    .pay-box{
-        font-size:11px;
+@media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{
+        animation-duration:0.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:0.01ms !important;
     }
 }
 </style>
 </head>
-
 <body onclick="cerrarTodosLosMenus(event)">
 
 <video autoplay muted loop playsinline class="video-fondo">
     <source src="fondo.mp4" type="video/mp4">
 </video>
-
 <div class="video-overlay"></div>
 
-<!-- =========================
-     HEADER
-========================= -->
-
-<header class="barra-superior">
-
+<div class="barra-superior">
     <div class="header">
-
-        <a href="index.html" class="brand">
-            <img src="logo.png" alt="RECARGASGAMES">
-        </a>
-
-        <div class="search-box">
-            <span>⌕</span>
-            <input
-                type="search"
-                placeholder="Buscar juegos, productos..."
-                id="buscador">
-        </div>
-
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
         <div class="header-right">
-
-            <button
-                class="install-btn"
-                onclick="alert('Puedes instalar RECARGASGAMES desde el navegador.')">
-
-                ⬇️ Instalar App
-                <small>Accede más rápido</small>
-
-            </button>
-
-            <div
-                id="perfilContainer"
-                style="position:relative;display:none">
-
-                <button
-                    class="btn-perfil"
-                    id="btnPerfil"
-                    onclick="event.stopPropagation();toggleMenuPerfil()">
-
-                    <div class="avatar-circle">
-
-                        <img
-                            src="logo.png"
-                            id="avatarLogo"
-                            alt="Usuario">
-
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="logo.png" alt="Logo" id="avatarLogo">
                         <span class="online-dot"></span>
-
                     </div>
-
-                    <span
-                        class="perfil-nombre"
-                        id="perfilNombre">
-                        Usuario
-                    </span>
-
-                    <span
-                        class="perfil-flecha"
-                        id="perfilFlecha">
-                        ▼
-                    </span>
-
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
                 </button>
-
-                <div
-                    class="menu-perfil"
-                    id="menuPerfil"
-                    onclick="event.stopPropagation()">
-
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
                     <div class="menu-perfil-header">
-
-                        <div class="avatar-grande">
-
-                            <img
-                                src="logo.png"
-                                alt="Usuario">
-
+                        <div class="avatar-grande" id="avatarGrande">
+                            <img src="logo.png" alt="Logo">
                         </div>
-
-                        <div>
-
-                            <h4 id="nombreCompleto">
-                                Usuario
-                            </h4>
-
-                            <p id="emailUsuario">
-                                usuario@email.com
-                            </p>
-
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
                         </div>
-
                     </div>
-
-                    <a
-                        href="dashboard.html"
-                        class="menu-perfil-opcion">
-                        📊 Mi Panel
-                    </a>
-
-                    <a
-                        href="perfil.html"
-                        class="menu-perfil-opcion">
-                        👤 Editar Perfil
-                    </a>
-
-                    <a
-                        href="pedidos.html"
-                        class="menu-perfil-opcion">
-                        📦 Mis Pedidos
-                    </a>
-
-                    <a
-                        href="favoritos.html"
-                        class="menu-perfil-opcion">
-                        ❤️ Favoritos
-                    </a>
-
-                    <a
-                        href="#"
-                        class="menu-perfil-opcion danger"
-                        id="btnCerrarSesion">
-                        🚪 Cerrar Sesión
-                    </a>
-
+                    <a href="dashboard.html" class="menu-perfil-opcion"><span class="icono">📊</span> Mi Panel</a>
+                    <a href="perfil.html" class="menu-perfil-opcion"><span class="icono">👤</span> Editar Perfil</a>
+                    <a href="pedidos.html" class="menu-perfil-opcion"><span class="icono">📦</span> Mis Pedidos</a>
+                    <a href="favoritos.html" class="menu-perfil-opcion"><span class="icono">❤️</span> Favoritos</a>
+                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
                 </div>
-
             </div>
-
-            <button
-                class="menu-hamburguesa"
-                id="btnMenu"
-                onclick="event.stopPropagation();alternarMenu()">
-                ☰
-            </button>
-
+            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         </div>
-
-        <div
-            class="menu-flotante"
-            id="menuFlotante"
-            onclick="event.stopPropagation()">
-
-            <a
-                href="#"
-                class="menu-opcion"
-                id="menuLogin"
-                onclick="abrirModalLogin();return false;">
-                🔑 Iniciar Sesión
-            </a>
-
-            <a
-                href="register.html"
-                class="menu-opcion"
-                id="menuRegister">
-                📝 Crear Cuenta
-            </a>
-
-            <div
-                id="menuConSesion"
-                style="display:none">
-
-                <a
-                    href="dashboard.html"
-                    class="menu-opcion">
-                    📊 Mi Panel
-                </a>
-
-                <a
-                    href="pedidos.html"
-                    class="menu-opcion">
-                    📦 Mis Pedidos
-                </a>
-
-                <a
-                    href="perfil.html"
-                    class="menu-opcion">
-                    👤 Editar Perfil
-                </a>
-
-                <a
-                    href="#"
-                    class="menu-opcion danger"
-                    id="menuLogout">
-                    🚪 Cerrar Sesión
-                </a>
-
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuRegister">📝 Crear Cuenta</a>
+            <div id="menuConSesion" style="display:none;">
+                <a href="dashboard.html" class="menu-opcion">📊 Mi Panel</a>
+                <a href="pedidos.html" class="menu-opcion">📦 Mis Pedidos</a>
+                <a href="perfil.html" class="menu-opcion">👤 Editar Perfil</a>
+                <div class="menu-divider"></div>
+                <a href="#" class="menu-opcion" id="menuLogout" style="color:#ef4444;">🚪 Cerrar Sesión</a>
             </div>
-
         </div>
-
     </div>
-
-    <nav class="games-menu">
-
-        <a href="index.html">⌂ Inicio</a>
-
-        <a
-            href="freefire.html"
-            class="active">
-            🔥 Free Fire
-        </a>
-
-        <a href="bloodstrike.html">
-            🎯 Blood Strike
-        </a>
-
-        <a href="roblox.html">
-            ◈ Roblox
-        </a>
-
-        <a href="ml.html">
-            🎮 Mobile Legends
-        </a>
-
-        <a href="cod.html">
-            ▣ COD Mobile
-        </a>
-
-        <a href="pubg.html">
-            🎯 PUBG Mobile
-        </a>
-
-        <a href="arenabreakout.html">
-            ◉ Arena Breakout
-        </a>
-
-        <a href="delta.html">
-            △ Delta Force
-        </a>
-
-        <a href="bigo.html">
-            ● Bigo Live
-        </a>
-
-        <a href="gift-cards.html">
-            🎁 Gift Cards
-        </a>
-
-        <a href="netflix.html">
-            N Netflix
-        </a>
-
-        <a href="disney.html">
-            Disney+
-        </a>
-
+    <nav class="games-menu" aria-label="Juegos">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html" class="active" aria-current="page">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="delta.html">Delta Force</a>
+        <a href="bigo.html">Bigo Live</a>
+        <a href="gift-cards.html">Gift Cards</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
     </nav>
-
-</header>
-
-<!-- =========================
-     LOGIN
-========================= -->
-
-<div
-    class="modal-overlay"
-    id="modalLogin">
-
-    <div class="modal-box">
-
-        <div class="modal-header">
-
-            <div class="icono-grande">
-                🔑
-            </div>
-
-            <h2>
-                Iniciar Sesión
-            </h2>
-
-        </div>
-
-        <div class="modal-body">
-
-            <form id="loginForm">
-
-                <div class="modal-field">
-
-                    <label>
-                        📧 Correo
-                    </label>
-
-                    <input
-                        type="email"
-                        id="loginEmail"
-                        placeholder="tu@email.com"
-                        required>
-
-                </div>
-
-                <div class="modal-field">
-
-                    <label>
-                        🔑 Contraseña
-                    </label>
-
-                    <input
-                        type="password"
-                        id="loginPassword"
-                        placeholder="Tu contraseña"
-                        required>
-
-                </div>
-
-                <button
-                    type="submit"
-                    id="loginBtn"
-                    class="modal-btn continuar">
-
-                    Ingresar
-
-                </button>
-
-            </form>
-
-            <div
-                id="loginMessage"
-                style="
-                    display:none;
-                    text-align:center;
-                    margin-top:13px;
-                    padding:10px;
-                    border-radius:9px;
-                    font-size:13px">
-
-            </div>
-
-            <div class="login-links">
-
-                <p>
-                    ¿No tienes cuenta?
-                    <a href="register.html">
-                        Regístrate aquí
-                    </a>
-                </p>
-
-                <p style="margin-top:8px">
-
-                    <a href="recuperar.html">
-                        ¿Olvidaste tu contraseña?
-                    </a>
-
-                </p>
-
-            </div>
-
-        </div>
-
-        <div class="modal-footer">
-
-            <button
-                class="modal-btn cancelar"
-                onclick="cerrarModalLogin()">
-
-                Cerrar
-
-            </button>
-
-        </div>
-
-    </div>
-
 </div>
 
-<!-- =========================
-     HERO
-========================= -->
-
-<section class="hero">
-
-    <div class="hero-content">
-
-        <div class="hero-kicker">
-            RECARGASGAMES • RECARGA INSTANTÁNEA
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🔑</div>
+            <h2>Iniciar Sesión</h2>
         </div>
-
-        <h1>
-            FREE F<span>I</span>RE
-        </h1>
-
-        <p>
-            RECARGA TUS DIAMANTES Y DISFRUTA AL MÁXIMO
-        </p>
-
-        <div class="hero-tags">
-            Más diamantes
-            <span>•</span>
-            Más skins
-            <span>•</span>
-            Más diversión
+        <div class="modal-body">
+            <form id="loginForm">
+                <div style="margin-bottom:20px;">
+                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
+            </form>
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
+                <p style="margin-top:8px;"><a href="recuperar.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
+            </div>
         </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
+        </div>
+    </div>
+</div>
 
+<div class="main">
+
+    <div class="pagina-titulo">
+        <h1>Recarga Free Fire</h1>
+        <span class="chip-entrega">Entrega inmediata</span>
     </div>
 
-</section>
-
-<!-- =========================
-     CONTENIDO PRINCIPAL
-========================= -->
-
-<main class="main">
-
-    <div class="left-column">
-
-        <!-- ID DEL JUGADOR -->
-
-        <section class="card-panel">
-
-            <div class="panel-title">
-                🆔 ID del Jugador
-            </div>
-
-            <div class="panel-subtitle">
-                Ingresa tu ID de Free Fire para verificar tu cuenta
-            </div>
-
-            <div class="form-group">
-
-                <label>
-                    ID del Jugador
-                </label>
-
-                <input
-                    type="tel"
-                    inputmode="numeric"
-                    pattern="[0-9]*"
-                    maxlength="12"
-                    class="form-input"
-                    id="jugadorId"
-                    placeholder="Ej: 4664719056"
-                    autocomplete="off">
-
-            </div>
-
-            <div
-                class="id-status"
-                id="idStatus">
-            </div>
-
-        </section>
-
-        <!-- MÉTODO DE PAGO -->
-
-        <section class="card-panel">
-
-            <div class="panel-title">
-                💳 Método de Pago
-            </div>
-
-            <div class="panel-subtitle">
-                Selecciona tu método de pago preferido
-            </div>
-
-            <div class="payment-methods">
-
-                <div
-                    class="pay-box active"
-                    onclick="seleccionarPago('PAGO MOVIL',this)">
-
-                    🏦<br>
-                    PAGO MOVIL
-
-                </div>
-
-                <div
-                    class="pay-box"
-                    onclick="seleccionarPago('BINANCE',this)">
-
-                    🟡<br>
-                    BINANCE
-
-                </div>
-
-            </div>
-
-            <div
-                class="tasa-info"
-                id="tasaInfo">
-
-                Cargando...
-
-            </div>
-
-        </section>
-
-        <!-- PROMOCIÓN -->
-
-        <section class="promo-box">
-
-            <div>
-
-                <div
-                    style="
-                        color:#f5d76e;
-                        font-weight:900;
-                        font-size:11px;
-                        letter-spacing:2px">
-
-                    FREE FIRE
-
-                </div>
-
-                <h3>
-                    RECARGA<br>
-                    <strong>
-                        TUS DIAMANTES
-                    </strong>
-                </h3>
-
-                <div
-                    style="
-                        margin-top:8px;
-                        color:#cbd5e1;
-                        font-size:12px">
-
-                    Rápido • Seguro • Automático
-
-                </div>
-
-            </div>
-
-        </section>
-
+    <div class="card-panel" id="panelId">
+        <div class="panel-title"><span class="paso-num">1</span> ID del jugador</div>
+        <div class="form-group">
+            <label for="jugadorId">ID del jugador</label>
+            <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="jugadorId" placeholder="Ej: 4664719056" autocomplete="off">
+            <p class="ayuda-id">Lo encuentras en tu perfil dentro del juego. Confirmaremos tu nombre antes de comprar.</p>
+        </div>
+        <div class="id-status" id="idStatus" role="status" aria-live="polite"></div>
     </div>
 
-    <!-- =========================
-         DIAMANTES
-    ========================== -->
-
-    <section class="products-panel">
-
-        <div class="section-heading">
-
-            <div class="section-heading-left">
-
-                <div class="section-icon">
-                    💎
-                </div>
-
-                <div>
-
-                    <h2>
-                        DIAMANTES - FREE FIRE
-                    </h2>
-
-                    <p>
-                        Recarga instantánea y segura
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="rate-badge">
-                ◉ Los precios pueden variar según la tasa
-            </div>
-
+    <div class="card-panel">
+        <div class="panel-title"><span class="paso-num">2</span> Método de pago</div>
+        <div class="payment-methods" role="radiogroup" aria-label="Método de pago">
+            <div class="pay-box active" role="radio" aria-checked="true" tabindex="0" data-metodo="PAGO MOVIL">🏦 PAGO MOVIL</div>
+            <div class="pay-box" role="radio" aria-checked="false" tabindex="0" data-metodo="BINANCE">🟡 BINANCE</div>
         </div>
-
-        <div class="products-grid">
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        💎
-                    </div>
-
-                    <div class="product-title">
-                        110 Diamantes
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    ⚡ Recarga instantánea
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="0.81">
-                    $0.81
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('110 Diamantes','0.81','110')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        💎
-                    </div>
-
-                    <div class="product-title">
-                        341 Diamantes
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    ⚡ Recarga instantánea
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="2.60">
-                    $2.60
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('341 Diamantes','2.60','341')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        💎
-                    </div>
-
-                    <div class="product-title">
-                        572 Diamantes
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    ⚡ Recarga instantánea
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="4.20">
-                    $4.20
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('572 Diamantes','4.20','572')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        💎
-                    </div>
-
-                    <div class="product-title">
-                        1166 Diamantes
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    ⚡ Recarga instantánea
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="7.80">
-                    $7.80
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('1166 Diamantes','7.80','1166')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        💎
-                    </div>
-
-                    <div class="product-title">
-                        2398 Diamantes
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    ⚡ Recarga instantánea
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="15.30">
-                    $15.30
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('2398 Diamantes','15.30','2398')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        💎
-                    </div>
-
-                    <div class="product-title">
-                        6160 Diamantes
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    🔥 Mega oferta
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="39.00">
-                    $39.00
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('6160 Diamantes','39.00','6160')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- =========================
-         PASES
-    ========================== -->
-
-    <section class="products-panel">
-
-        <div class="section-heading">
-
-            <div class="section-heading-left">
-
-                <div class="section-icon">
-                    🎫
-                </div>
-
-                <div>
-
-                    <h2>
-                        TARJETAS Y PASES
-                    </h2>
-
-                    <p>
-                        Beneficios exclusivos para tu cuenta
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="rate-badge">
-                ◉ Los precios pueden variar según la tasa
-            </div>
-
-        </div>
-
-        <div class="products-grid">
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        🎫
-                    </div>
-
-                    <div class="product-title">
-                        Tarjeta Semanal
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    ⚡ 7 días de beneficios
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="2.50">
-                    $2.50
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('Tarjeta Semanal','2.50','weekly_semanal')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        🎫
-                    </div>
-
-                    <div class="product-title">
-                        Tarjeta Mensual
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    ⚡ 30 días de beneficios
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="11.00">
-                    $11.00
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('Tarjeta Mensual','11.00','weekly_mensual')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-            <div class="product-card">
-
-                <div class="card-header">
-
-                    <div class="game-icon">
-                        🎫
-                    </div>
-
-                    <div class="product-title">
-                        Pase Booyah
-                    </div>
-
-                </div>
-
-                <div class="product-desc">
-                    🔥 Pase de evento exclusivo
-                </div>
-
-                <div
-                    class="product-price"
-                    data-usd="3.00">
-                    $3.00
-                </div>
-
-                <button
-                    class="btn-buy"
-                    onclick="comprarProducto('Pase Booyah','3.00','weekly_booyah')">
-
-                    COMPRAR
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- =========================
-         BENEFICIOS
-    ========================== -->
-
-    <div class="bottom-strip">
-
-        <div class="bottom-item">
-            <b>🛡️</b>
-            Compra segura
-        </div>
-
-        <div class="bottom-item">
-            <b>⚡</b>
-            Recarga instantánea
-        </div>
-
-        <div class="bottom-item">
-            <b>🎧</b>
-            Soporte 24/7
-        </div>
-
+        <div class="tasa-info" id="tasaInfo">Cargando tasa...</div>
     </div>
 
-</main>
+    <div class="paso-titulo"><span class="paso-num">3</span> Elige tu recarga</div>
+    <p class="paso-ayuda">Todas las recargas se acreditan al instante.</p>
 
-<a
-    href="#"
-    class="back-to-top"
-    id="backToTop"
-    onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">
-    ↑
-</a>
+    <div class="section-divider"><span>💎 DIAMANTES - FREE FIRE</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">110 Diamantes</div></div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="0.81">$0.81</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="110 Diamantes" data-usd="0.81" data-codigo="110">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">341 Diamantes</div></div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="2.60">$2.60</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="341 Diamantes" data-usd="2.60" data-codigo="341">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">572 Diamantes</div></div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="4.20">$4.20</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="572 Diamantes" data-usd="4.20" data-codigo="572">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">1166 Diamantes</div></div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="7.80">$7.80</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="1166 Diamantes" data-usd="7.80" data-codigo="1166">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">2398 Diamantes</div></div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="15.30">$15.30</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="2398 Diamantes" data-usd="15.30" data-codigo="2398">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">💎</div><div class="product-title">6160 Diamantes</div></div>
+            <div class="product-desc">🔥 Mega oferta</div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="39.00">$39.00</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="6160 Diamantes" data-usd="39.00" data-codigo="6160">COMPRAR</button>
+        </div>
+    </div>
 
-<a
-    href="https://wa.me/584228242411"
-    target="_blank"
-    class="whatsapp-float">
-    💬
-</a>
+    <div class="section-divider"><span>🎫 TARJETAS Y PASES</span></div>
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Semanal</div></div>
+            <div class="product-desc">7 días de beneficios</div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="2.50">$2.50</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="Tarjeta Semanal" data-usd="2.50" data-codigo="weekly_semanal">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Mensual</div></div>
+            <div class="product-desc">30 días de beneficios</div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="11.00">$11.00</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="Tarjeta Mensual" data-usd="11.00" data-codigo="weekly_mensual">COMPRAR</button>
+        </div>
+        <div class="product-card">
+            <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Pase Booyah</div></div>
+            <div class="product-desc">🔥 Pase de evento exclusivo</div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="3.00">$3.00</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="Pase Booyah" data-usd="3.00" data-codigo="weekly_booyah">COMPRAR</button>
+        </div>
+    </div>
+</div>
 
-<!-- =========================
-     JAVASCRIPT
-========================= -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<nav class="nav-inferior" aria-label="Navegación principal">
+    <div class="nav-inferior-inner">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="index.html#juegos" class="nav-item active">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item" id="navPedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
+</nav>
+
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
 
 <script type="module">
-
 import { auth } from './firebase-config.js';
-
 import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
     signOut
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-
 let metodo = "PAGO MOVIL";
 let tasa = 940;
 let idVerificado = false;
+let verificandoId = false;
 let nicknameVerificado = "";
-
+let usuarioActual = null;
 const juegoActual = "FREE FIRE";
 
+const inputId = document.getElementById('jugadorId');
+const statusDiv = document.getElementById('idStatus');
+const tasaInfo = document.getElementById('tasaInfo');
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
 
-const inputId = document.getElementById("jugadorId");
-const statusDiv = document.getElementById("idStatus");
+function avisar(mensaje, tipo = 'info') {
+    toastEl.textContent = mensaje;
+    toastEl.className = 'toast visible' + (tipo === 'error' ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3800);
+}
 
+function actualizarBotonesCompra() {
+    document.querySelectorAll('.btn-buy').forEach((b) => {
+        b.classList.toggle('pendiente', !idVerificado);
+        b.textContent = idVerificado ? 'COMPRAR' : 'INGRESA TU ID';
+    });
+}
 
-/* =========================
-   CARGAR TASA
-========================= */
-
-async function cargarTasa(){
-
-    const info = document.getElementById("tasaInfo");
-
-    const guardada =
-        localStorage.getItem("tasa_usd_ves");
-
-    tasa = guardada
-        ? parseFloat(guardada)
-        : 940;
-
-    info.textContent =
-        `Tasa actual: ${tasa.toLocaleString("es-VE")} Bs/USD`;
-
+async function cargarTasa() {
+    const tasaGuardada = localStorage.getItem('tasa_usd_ves');
+    tasa = tasaGuardada ? parseFloat(tasaGuardada) : 940;
     actualizarPrecios();
 
-    try{
-
-        const r = await fetch("/api/tasa");
-
-        const d = await r.json();
-
-        if(d.ok && d.tasa_usdt){
-
-            tasa = Math.round(d.tasa_usdt);
-
-            localStorage.setItem(
-                "tasa_usd_ves",
-                tasa
-            );
-
-            info.textContent =
-                `Tasa actual: ${tasa.toLocaleString("es-VE")} Bs/USD`;
-
+    try {
+        const respuesta = await fetch('/api/tasa');
+        const datos = await respuesta.json();
+        if (datos.ok && datos.tasa_usdt) {
+            tasa = Math.round(datos.tasa_usdt);
+            localStorage.setItem('tasa_usd_ves', tasa);
             actualizarPrecios();
         }
-
-    }catch(e){
-
-        console.warn(
-            "Tasa no actualizada:",
-            e
-        );
-
+    } catch (error) {
+        console.warn('Tasa no actualizada:', error.message);
     }
-
 }
 
-
-/* =========================
-   ESTADO DEL ID
-========================= */
-
-function mostrarEstado(
-    mensaje,
-    tipo,
-    nombre
-){
-
-    statusDiv.className =
-        "id-status " + tipo;
-
-    if(
-        tipo === "valido" &&
-        nombre
-    ){
-
+function mostrarEstado(mensaje, tipo, nombre) {
+    if (!statusDiv) return;
+    statusDiv.className = `id-status ${tipo}`;
+    if (tipo === 'valido' && nombre) {
         statusDiv.innerHTML = `
-
-            <div class="check-icono">
-                ✓
-            </div>
-
+            <div class="check-icono">✓</div>
             <div>
-
-                <div
-                    style="
-                        font-size:10px;
-                        color:#86efac;
-                        text-transform:uppercase;
-                        letter-spacing:1px">
-
-                    ID Verificado
-
-                </div>
-
-                <div class="nombre-jugador">
-                    ${nombre}
-                </div>
-
+                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">ID verificado</div>
+                <div class="nombre-jugador"></div>
             </div>
-
         `;
-
-    }else{
-
-        statusDiv.textContent =
-            mensaje;
-
+        statusDiv.querySelector('.nombre-jugador').textContent = nombre;
+    } else {
+        statusDiv.textContent = mensaje;
     }
-
 }
-
-
-/* =========================
-   VERIFICACIÓN ID
-========================= */
 
 let timeoutId = null;
 
-inputId.addEventListener(
-    "input",
-    function(){
+if (inputId) {
+    inputId.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key)) e.preventDefault();
+    });
 
-        this.value =
-            this.value.replace(/\D/g,"");
-
+    inputId.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        this.classList.remove('resaltar');
         clearTimeout(timeoutId);
-
-        const id =
-            this.value.trim();
-
+        const id = this.value.trim();
         idVerificado = false;
+        verificandoId = false;
         nicknameVerificado = "";
+        actualizarBotonesCompra();
 
-        if(!id){
+        if (id.length === 0) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; return; }
+        statusDiv.style.display = '';
+        if (id.length < 5) { mostrarEstado('Escribe al menos 5 dígitos', 'error'); return; }
 
-            statusDiv.style.display =
-                "none";
-
-            return;
-        }
-
-        if(!/^\d{5,12}$/.test(id)){
-
-            mostrarEstado(
-
-                id.length < 5
-                    ? "⚠️ Mínimo 5 dígitos"
-                    : "⚠️ Máximo 12 dígitos",
-
-                "error"
-
-            );
-
-            return;
-        }
-
-        timeoutId = setTimeout(
-            async()=>{
-
-                mostrarEstado(
-                    "🔍 Verificando ID...",
-                    "verificando"
-                );
-
-                try{
-
-                    const r =
-                        await fetch(
-                            "/api/verificar-jugador?juego=FREE%20FIRE&id=" +
-                            encodeURIComponent(id)
-                        );
-
-                    const d =
-                        await r.json();
-
-                    if(
-                        d.valido &&
-                        d.nickname
-                    ){
-
-                        idVerificado = true;
-
-                        nicknameVerificado =
-                            d.nickname;
-
-                        mostrarEstado(
-                            "",
-                            "valido",
-                            d.nickname
-                        );
-
-                    }else{
-
-                        idVerificado = false;
-
-                        mostrarEstado(
-                            "❌ " +
-                            (
-                                d.mensaje ||
-                                "ID no encontrado"
-                            ),
-                            "error"
-                        );
-
-                    }
-
-                }catch(e){
-
+        timeoutId = setTimeout(async () => {
+            verificandoId = true;
+            mostrarEstado('Verificando ID...', 'verificando');
+            try {
+                const respuesta = await fetch('/api/verificar-jugador?juego=FREE FIRE&id=' + encodeURIComponent(id));
+                const datos = await respuesta.json();
+                if (inputId.value.trim() !== id) return;
+                verificandoId = false;
+                if (datos.valido && datos.nickname) {
+                    idVerificado = true;
+                    nicknameVerificado = datos.nickname;
+                    mostrarEstado('', 'valido', datos.nickname);
+                } else {
                     idVerificado = false;
-
-                    mostrarEstado(
-                        "❌ Error al verificar. Intenta de nuevo.",
-                        "error"
-                    );
-
+                    mostrarEstado(datos.mensaje || 'No encontramos ese ID. Revísalo e intenta de nuevo.', 'error');
                 }
-
-            },
-            500
-        );
-
-    }
-);
-
-
-/* =========================
-   ACTUALIZAR PRECIOS
-========================= */
-
-function actualizarPrecios(){
-
-    document
-        .querySelectorAll(".product-price")
-        .forEach(el=>{
-
-            const usd =
-                parseFloat(
-                    el.dataset.usd
-                );
-
-            if(
-                metodo === "PAGO MOVIL"
-            ){
-
-                el.textContent =
-                    Math.round(
-                        usd * tasa
-                    ).toLocaleString(
-                        "es-VE"
-                    ) + " Bs";
-
-            }else{
-
-                el.textContent =
-                    usd.toFixed(2) +
-                    " USDT";
-
+            } catch (error) {
+                console.error('Error verificando ID:', error);
+                verificandoId = false;
+                idVerificado = false;
+                mostrarEstado('No pudimos verificar el ID. Intenta de nuevo.', 'error');
             }
-
-        });
-
+            actualizarBotonesCompra();
+        }, 500);
+    });
 }
 
+function actualizarPrecios() {
+    document.querySelectorAll('.product-price').forEach((el) => {
+        const u = parseFloat(el.dataset.usd);
+        const ref = el.parentElement.querySelector('.product-ref');
+        const bs = Math.round(u * tasa).toLocaleString('es-VE') + ' Bs';
+        const usdt = u.toFixed(2) + ' USDT';
+        if (metodo === 'PAGO MOVIL') {
+            el.textContent = bs;
+            ref.textContent = '≈ ' + usdt;
+        } else {
+            el.textContent = usdt;
+            ref.textContent = '≈ ' + bs;
+        }
+    });
+    tasaInfo.textContent = metodo === 'PAGO MOVIL'
+        ? `Tasa: ${tasa} Bs por USD`
+        : `Precios en USDT · Referencia: ${tasa} Bs por USD`;
+}
 
-/* =========================
-   MÉTODO DE PAGO
-========================= */
-
-window.seleccionarPago =
-function(m,e){
-
-    document
-        .querySelectorAll(".pay-box")
-        .forEach(x =>
-            x.classList.remove("active")
-        );
-
-    e.classList.add("active");
-
+function seleccionarPago(m, el) {
+    document.querySelectorAll('.pay-box').forEach((b) => {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+    });
+    el.classList.add('active');
+    el.setAttribute('aria-checked', 'true');
     metodo = m;
-
     actualizarPrecios();
-
-};
-
-
-/* =========================
-   COMPRAR PRODUCTO
-========================= */
-
-window.comprarProducto =
-function(
-    producto,
-    precioUsd,
-    paqueteCodigo
-){
-
-    const id =
-        inputId.value.trim();
-
-    if(!id){
-
-        alert(
-            "❌ Escribe tu ID del jugador"
-        );
-
-        return;
-    }
-
-    if(!idVerificado){
-
-        alert(
-            "⏳ Espera a que se verifique el ID"
-        );
-
-        return;
-    }
-
-    const precioBs =
-        Math.round(
-            parseFloat(precioUsd) *
-            tasa
-        );
-
-    localStorage.setItem(
-        "id_jugador",
-        id
-    );
-
-    localStorage.setItem(
-        "nombre_jugador",
-        nicknameVerificado
-    );
-
-    localStorage.setItem(
-        "juego_seleccionado",
-        juegoActual
-    );
-
-    localStorage.setItem(
-        "producto_seleccionado",
-        producto
-    );
-
-    localStorage.setItem(
-        "paquete_codigo",
-        paqueteCodigo
-    );
-
-    localStorage.setItem(
-        "precio_usd",
-        precioUsd
-    );
-
-    localStorage.setItem(
-        "precio_en_bs",
-        precioBs
-    );
-
-    localStorage.setItem(
-        "metodo_pago",
-        metodo
-    );
-
-    window.location.href =
-        "pasarela.html";
-
-};
-
-
-/* =========================
-   MENÚ PRINCIPAL
-========================= */
-
-window.alternarMenu =
-function(){
-
-    const m =
-        document.getElementById(
-            "menuFlotante"
-        );
-
-    const p =
-        document.getElementById(
-            "menuPerfil"
-        );
-
-    p.classList.remove(
-        "activo"
-    );
-
-    m.classList.toggle(
-        "activo"
-    );
-
-};
-
-
-/* =========================
-   MENÚ PERFIL
-========================= */
-
-window.toggleMenuPerfil =
-function(){
-
-    const m =
-        document.getElementById(
-            "menuFlotante"
-        );
-
-    const p =
-        document.getElementById(
-            "menuPerfil"
-        );
-
-    const f =
-        document.getElementById(
-            "perfilFlecha"
-        );
-
-    m.classList.remove(
-        "activo"
-    );
-
-    p.classList.toggle(
-        "activo"
-    );
-
-    f.classList.toggle(
-        "abierta"
-    );
-
-};
-
-
-/* =========================
-   CERRAR MENÚS
-========================= */
-
-window.cerrarTodosLosMenus =
-function(e){
-
-    const m =
-        document.getElementById(
-            "menuFlotante"
-        );
-
-    const p =
-        document.getElementById(
-            "menuPerfil"
-        );
-
-    const bm =
-        document.getElementById(
-            "btnMenu"
-        );
-
-    const bp =
-        document.getElementById(
-            "btnPerfil"
-        );
-
-    if(
-        m &&
-        bm &&
-        !m.contains(e.target) &&
-        !bm.contains(e.target)
-    ){
-
-        m.classList.remove(
-            "activo"
-        );
-
-    }
-
-    if(
-        p &&
-        bp &&
-        !p.contains(e.target) &&
-        !bp.contains(e.target)
-    ){
-
-        p.classList.remove(
-            "activo"
-        );
-
-        document
-            .getElementById(
-                "perfilFlecha"
-            )
-            ?.classList.remove(
-                "abierta"
-            );
-
-    }
-
-};
-
-
-/* =========================
-   FIREBASE
-========================= */
-
-const perfilContainer =
-    document.getElementById(
-        "perfilContainer"
-    );
-
-const menuLogin =
-    document.getElementById(
-        "menuLogin"
-    );
-
-const menuRegister =
-    document.getElementById(
-        "menuRegister"
-    );
-
-const menuConSesion =
-    document.getElementById(
-        "menuConSesion"
-    );
-
-const perfilNombre =
-    document.getElementById(
-        "perfilNombre"
-    );
-
-const nombreCompleto =
-    document.getElementById(
-        "nombreCompleto"
-    );
-
-const emailUsuario =
-    document.getElementById(
-        "emailUsuario"
-    );
-
-const modalLogin =
-    document.getElementById(
-        "modalLogin"
-    );
-
-const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
-
-
-if(auth){
-
-    onAuthStateChanged(
-        auth,
-        user=>{
-
-            if(user){
-
-                const nombre =
-                    user.displayName ||
-                    "Usuario";
-
-                const email =
-                    user.email ||
-                    "usuario@email.com";
-
-                perfilContainer.style.display =
-                    "block";
-
-                perfilNombre.textContent =
-                    nombre.length > 12
-                        ? nombre.substring(0,12) + "..."
-                        : nombre;
-
-                nombreCompleto.textContent =
-                    nombre;
-
-                emailUsuario.textContent =
-                    email;
-
-                menuLogin.style.display =
-                    "none";
-
-                menuRegister.style.display =
-                    "none";
-
-                menuConSesion.style.display =
-                    "block";
-
-            }else{
-
-                perfilContainer.style.display =
-                    "none";
-
-                menuLogin.style.display =
-                    "flex";
-
-                menuRegister.style.display =
-                    "flex";
-
-                menuConSesion.style.display =
-                    "none";
-
-            }
-
-        }
-    );
-
 }
 
-
-/* =========================
-   ABRIR LOGIN
-========================= */
-
-window.abrirModalLogin =
-function(){
-
-    modalLogin.classList.add(
-        "activo"
-    );
-
-    document
-        .getElementById(
-            "menuFlotante"
-        )
-        .classList.remove(
-            "activo"
-        );
-
-    document
-        .getElementById(
-            "loginMessage"
-        )
-        .style.display =
-            "none";
-
-};
-
-
-/* =========================
-   CERRAR LOGIN
-========================= */
-
-window.cerrarModalLogin =
-function(){
-
-    modalLogin.classList.remove(
-        "activo"
-    );
-
-};
-
-
-modalLogin.addEventListener(
-    "click",
-    e=>{
-
-        if(
-            e.target === modalLogin
-        ){
-
-            cerrarModalLogin();
-
+document.querySelectorAll('.pay-box').forEach((box) => {
+    box.addEventListener('click', () => seleccionarPago(box.dataset.metodo, box));
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            seleccionarPago(box.dataset.metodo, box);
         }
+    });
+});
 
+function irAlCampoId(mensaje) {
+    avisar(mensaje, 'error');
+    document.getElementById('panelId').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    inputId.classList.add('resaltar');
+    setTimeout(() => inputId.focus({ preventScroll: true }), 400);
+    setTimeout(() => inputId.classList.remove('resaltar'), 2500);
+}
+
+function comprarProducto(producto, precioUsd, paqueteCodigo) {
+    const id = inputId ? inputId.value.trim() : '';
+    if (!id) { irAlCampoId('Escribe tu ID de jugador para continuar'); return; }
+    if (verificandoId) { avisar('Estamos verificando tu ID. Espera un momento.'); return; }
+    if (!idVerificado) { irAlCampoId('Revisa tu ID: no pudimos verificarlo'); return; }
+
+    const precioBs = Math.round(parseFloat(precioUsd) * tasa);
+
+    localStorage.setItem('id_jugador', id);
+    localStorage.setItem('nombre_jugador', nicknameVerificado);
+    localStorage.setItem('juego_seleccionado', juegoActual);
+    localStorage.setItem('producto_seleccionado', producto);
+    localStorage.setItem('paquete_codigo', paqueteCodigo);
+    localStorage.setItem('precio_usd', precioUsd);
+    localStorage.setItem('precio_en_bs', precioBs);
+    localStorage.setItem('metodo_pago', metodo);
+
+    window.location.href = "pasarela.html";
+}
+
+document.querySelectorAll('.btn-buy').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        comprarProducto(btn.dataset.producto, btn.dataset.usd, btn.dataset.codigo);
+    });
+});
+
+window.alternarMenu = function() {
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mf) mf.classList.toggle('activo');
+    if (mp) mp.classList.remove('activo');
+    if (pf) pf.classList.remove('abierta');
+};
+
+window.toggleMenuPerfil = function() {
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mp) mp.classList.toggle('activo');
+    if (pf) pf.classList.toggle('abierta');
+    if (mf) mf.classList.remove('activo');
+};
+
+window.cerrarTodosLosMenus = function(e) {
+    const menuFlotante = document.getElementById('menuFlotante');
+    const menuPerfil = document.getElementById('menuPerfil');
+    const btnMenu = document.getElementById('btnMenu');
+    const btnPerfil = document.getElementById('btnPerfil');
+    if (btnMenu && menuFlotante && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
+        menuFlotante.classList.remove('activo');
     }
-);
+    if (btnPerfil && menuPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+        menuPerfil.classList.remove('activo');
+        const pf = document.getElementById('perfilFlecha');
+        if (pf) pf.classList.remove('abierta');
+    }
+};
 
+const perfilContainer = document.getElementById('perfilContainer');
+const menuLogin = document.getElementById('menuLogin');
+const menuRegister = document.getElementById('menuRegister');
+const menuConSesion = document.getElementById('menuConSesion');
+const perfilNombre = document.getElementById('perfilNombre');
+const nombreCompleto = document.getElementById('nombreCompleto');
+const emailUsuario = document.getElementById('emailUsuario');
+const modalLogin = document.getElementById('modalLogin');
+const loginForm = document.getElementById('loginForm');
 
-/* =========================
-   INICIAR SESIÓN
-========================= */
+if (auth) {
+    onAuthStateChanged(auth, (user) => {
+        usuarioActual = user;
+        if (user) {
+            const nombre = user.displayName || 'Usuario';
+            const email = user.email || 'usuario@email.com';
+            if (perfilContainer) perfilContainer.style.display = 'block';
+            if (perfilNombre) perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+            if (nombreCompleto) nombreCompleto.textContent = nombre;
+            if (emailUsuario) emailUsuario.textContent = email;
 
-loginForm.addEventListener(
-    "submit",
-    async e=>{
+            if (menuLogin) menuLogin.style.display = 'none';
+            if (menuRegister) menuRegister.style.display = 'none';
+            if (menuConSesion) menuConSesion.style.display = 'block';
+        } else {
+            if (perfilContainer) perfilContainer.style.display = 'none';
+            if (menuLogin) menuLogin.style.display = 'flex';
+            if (menuRegister) menuRegister.style.display = 'flex';
+            if (menuConSesion) menuConSesion.style.display = 'none';
+        }
+    });
+}
 
+document.getElementById('navPedidos').addEventListener('click', (e) => {
+    if (!usuarioActual) {
         e.preventDefault();
+        abrirModalLogin();
+    }
+});
 
-        const email =
-            document
-                .getElementById(
-                    "loginEmail"
-                )
-                .value
-                .trim();
+window.abrirModalLogin = function() {
+    if (modalLogin) modalLogin.classList.add('activo');
+    const lm = document.getElementById('loginMessage');
+    if (lm) lm.style.display = 'none';
+    const le = document.getElementById('loginEmail');
+    const lp = document.getElementById('loginPassword');
+    if (le) le.value = '';
+    if (lp) lp.value = '';
+    const mf = document.getElementById('menuFlotante');
+    if (mf) mf.classList.remove('activo');
+};
 
-        const password =
-            document
-                .getElementById(
-                    "loginPassword"
-                )
-                .value;
+window.cerrarModalLogin = function() {
+    if (modalLogin) modalLogin.classList.remove('activo');
+};
 
-        const btn =
-            document.getElementById(
-                "loginBtn"
-            );
+if (modalLogin) {
+    modalLogin.addEventListener('click', (e) => {
+        if (e.target === modalLogin) cerrarModalLogin();
+    });
+}
 
-        const msg =
-            document.getElementById(
-                "loginMessage"
-            );
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+        const msg = document.getElementById('loginMessage');
 
         btn.disabled = true;
+        btn.textContent = 'Ingresando...';
+        msg.style.display = 'none';
 
-        btn.textContent =
-            "Ingresando...";
-
-        try{
-
-            await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
-
-            msg.style.display =
-                "block";
-
-            msg.style.background =
-                "rgba(34,197,94,.15)";
-
-            msg.style.color =
-                "#86efac";
-
-            msg.textContent =
-                "✅ ¡Bienvenido!";
-
-            setTimeout(
-                ()=>{
-
-                    cerrarModalLogin();
-
-                    location.reload();
-
-                },
-                800
-            );
-
-        }catch(error){
-
-            let texto =
-                "❌ Error al iniciar sesión";
-
-            if(
-                error.code ===
-                "auth/user-not-found"
-            ){
-
-                texto =
-                    "❌ Usuario no encontrado";
-
-            }else if(
-                error.code ===
-                "auth/wrong-password"
-            ){
-
-                texto =
-                    "❌ Contraseña incorrecta";
-
-            }else if(
-                error.code ===
-                "auth/invalid-email"
-            ){
-
-                texto =
-                    "❌ Correo inválido";
-
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            msg.style.background = 'rgba(34,197,94,0.15)';
+            msg.style.color = '#86efac';
+            msg.textContent = '✅ ¡Bienvenido!';
+            msg.style.display = 'block';
+            setTimeout(() => {
+                cerrarModalLogin();
+                window.location.reload();
+            }, 1000);
+        } catch (error) {
+            let errorMsg = '❌ ';
+            switch (error.code) {
+                case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
+                case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
+                case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
+                default: errorMsg += error.message;
             }
-
-            msg.style.display =
-                "block";
-
-            msg.style.background =
-                "rgba(239,68,68,.15)";
-
-            msg.style.color =
-                "#fca5a5";
-
-            msg.textContent =
-                texto;
-
+            msg.style.background = 'rgba(239,68,68,0.15)';
+            msg.style.color = '#fca5a5';
+            msg.textContent = errorMsg;
+            msg.style.display = 'block';
             btn.disabled = false;
-
-            btn.textContent =
-                "Ingresar";
-
+            btn.textContent = 'Ingresar';
         }
-
-    }
-);
-
-
-/* =========================
-   CERRAR SESIÓN
-========================= */
-
-async function cerrarSesion(){
-
-    if(
-        confirm(
-            "¿Seguro que quieres cerrar sesión?"
-        )
-    ){
-
-        await signOut(auth);
-
-        location.reload();
-
-    }
-
+    });
 }
 
+async function confirmarYSalir(e) {
+    e.preventDefault();
+    if (confirm('¿Seguro que quieres cerrar sesión?')) {
+        await signOut(auth);
+        window.location.reload();
+    }
+}
 
-document
-    .getElementById(
-        "btnCerrarSesion"
-    )
-    .addEventListener(
-        "click",
-        e=>{
+const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
+if (btnCerrarSesionEl) btnCerrarSesionEl.addEventListener('click', confirmarYSalir);
 
-            e.preventDefault();
+const menuLogoutEl = document.getElementById('menuLogout');
+if (menuLogoutEl) menuLogoutEl.addEventListener('click', confirmarYSalir);
 
-            cerrarSesion();
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "menuLogout"
-    )
-    .addEventListener(
-        "click",
-        e=>{
-
-            e.preventDefault();
-
-            cerrarSesion();
-
-        }
-    );
-
-
-/* =========================
-   BUSCADOR
-========================= */
-
-document
-    .getElementById(
-        "buscador"
-    )
-    .addEventListener(
-        "input",
-        function(){
-
-            const q =
-                this.value
-                    .toLowerCase()
-                    .trim();
-
-            document
-                .querySelectorAll(
-                    ".product-card"
-                )
-                .forEach(card=>{
-
-                    const texto =
-                        card.textContent
-                            .toLowerCase();
-
-                    card.style.display =
-                        !q ||
-                        texto.includes(q)
-                            ? ""
-                            : "none";
-
-                });
-
-        }
-    );
-
-
-/* =========================
-   INICIO
-========================= */
-
+actualizarBotonesCompra();
 cargarTasa();
+setInterval(cargarTasa, 60000);
 
-setInterval(
-    cargarTasa,
-    60000
-);
+const chipActivo = document.querySelector('.games-menu a.active');
+if (chipActivo) chipActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
 
-
-window.addEventListener(
-    "scroll",
-    ()=>{
-
-        document
-            .getElementById(
-                "backToTop"
-            )
-            .classList.toggle(
-                "show",
-                window.scrollY > 300
-            );
-
-    },
-    {passive:true}
-);
-
+window.addEventListener('scroll', () => {
+    const b = document.getElementById('backToTop');
+    if (b) b.classList.toggle('show', window.scrollY > 300);
+}, { passive: true });
 </script>
-
 </body>
 </html>
