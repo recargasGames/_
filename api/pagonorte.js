@@ -3,7 +3,7 @@
 // 🎬 RECARGASGAMES - PAGONORTE (Streaming)
 // ============================================
 // Maneja: Netflix, Disney+ (perfil y cuenta)
-// Acciones: recarga, disponibilidad_streaming, renovar_streaming, netflix_hogar
+// Acciones: recarga, disponibilidad, renovar, netflix_hogar
 // ============================================
 
 const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
@@ -27,6 +27,7 @@ const TIPOS = {
 
 // ============================================
 // 📡 LLAMAR A PAGONORTE
+// ✅ AHORA CON CABECERAS X-API-Key y X-API-Secret
 // ============================================
 async function llamarPagoNorte(params, apiKey, apiSecret) {
     const formData = new URLSearchParams();
@@ -35,14 +36,17 @@ async function llamarPagoNorte(params, apiKey, apiSecret) {
             formData.append(key, String(value));
         }
     }
-    formData.append('api_key', apiKey);
-    formData.append('api_secret', apiSecret);
 
     console.log('📤 PagoNorte request:', formData.toString());
 
     const respuesta = await fetch(PAGONORTE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+            // ✅ AHORA EN CABECERAS (recomendado por la doc)
+            'X-API-Key': apiKey,
+            'X-API-Secret': apiSecret,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
         body: formData.toString()
     });
 
@@ -84,10 +88,18 @@ export default async function handler(req, res) {
         // 1️⃣ COMPRAR STREAMING (recarga)
         // ============================================
         if (accion === 'recarga') {
-            const { producto, referencia } = body;
+            // ✅ Acepta "producto" O "producto_original" (por si la pasarela manda uno u otro)
+            const producto = body.producto || body.producto_original;
+            const { referencia } = body;
+
+            console.log('🎬 Recarga solicitada:', { producto, referencia });
 
             if (!producto || !referencia) {
-                return res.status(400).json({ ok: false, error: 'Faltan: producto, referencia' });
+                return res.status(400).json({
+                    ok: false,
+                    error: 'Faltan: producto, referencia',
+                    recibido: { producto, referencia }
+                });
             }
 
             const config = TIPOS[producto];
@@ -166,7 +178,7 @@ export default async function handler(req, res) {
         // 2️⃣ DISPONIBILIDAD STREAMING
         // ============================================
         if (accion === 'disponibilidad') {
-            const { producto } = body;
+            const producto = body.producto || body.producto_original;
 
             if (!producto) {
                 return res.status(400).json({ ok: false, error: 'Falta: producto' });
@@ -207,7 +219,8 @@ export default async function handler(req, res) {
         // 3️⃣ RENOVAR STREAMING
         // ============================================
         if (accion === 'renovar') {
-            const { producto, codigo_aprobacion, referencia } = body;
+            const producto = body.producto || body.producto_original;
+            const { codigo_aprobacion, referencia } = body;
 
             if (!producto || !codigo_aprobacion || !referencia) {
                 return res.status(400).json({ ok: false, error: 'Faltan: producto, codigo_aprobacion, referencia' });
