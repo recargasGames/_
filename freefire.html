@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
 <title>RECARGASGAMES - Free Fire</title>
 <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
@@ -15,6 +15,7 @@
     --color-dorado:#d4af37;
     --color-dorado-claro:#f5d76e;
     --color-negro:#0a0e1a;
+    --alto-nav:64px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -23,9 +24,14 @@ body{
     color:#fff;
     font-family:'Segoe UI',sans-serif;
     padding-top:110px;
+    padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
     overflow-x:hidden;
     min-height:100vh;
     position:relative;
+}
+a:focus-visible,button:focus-visible,input:focus-visible,.pay-box:focus-visible{
+    outline:2px solid var(--color-dorado-claro);
+    outline-offset:2px;
 }
 .video-fondo{
     position:fixed;
@@ -67,7 +73,7 @@ body::after{
     background:radial-gradient(circle,rgba(212,175,55,0.08),transparent 70%);
     border-radius:50%;pointer-events:none;z-index:0;
 }
-.barra-superior,.main,.whatsapp-float,.back-to-top{position:relative;z-index:1}
+.main{position:relative;z-index:1}
 .barra-superior{
     position:fixed;top:0;left:0;right:0;z-index:999;
     background:rgba(5,8,16,0.85);
@@ -188,13 +194,13 @@ body::after{
 .menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
 .games-menu{
     display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
-    padding:14px 20px;scrollbar-width:none;
+    padding:12px 20px;scrollbar-width:none;
     -webkit-overflow-scrolling:touch;
     border-top:1px solid rgba(255,255,255,0.04);
 }
 .games-menu::-webkit-scrollbar{display:none}
 .games-menu a{
-    text-decoration:none;color:#cbd5e1;padding:7px 14px;
+    text-decoration:none;color:#cbd5e1;padding:8px 16px;
     border-radius:20px;font-size:14px;font-weight:600;
     white-space:nowrap;transition:all 0.3s;border:1px solid transparent;
 }
@@ -209,6 +215,30 @@ body::after{
     border-color:rgba(212,175,55,0.5);
 }
 .main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
+
+.pagina-titulo{
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:10px;
+    margin:24px 0 18px;
+}
+.pagina-titulo h1{
+    font-size:22px;font-weight:900;
+    background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+.chip-entrega{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:14px;
+    background:rgba(34,197,94,0.12);
+    border:1px solid rgba(34,197,94,0.4);
+    color:#86efac;font-size:12px;font-weight:700;
+}
+.chip-entrega::before{
+    content:'';width:7px;height:7px;border-radius:50%;
+    background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.8);
+}
+
 .card-panel{
     background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));
     border:1px solid rgba(212,175,55,0.25);
@@ -220,10 +250,24 @@ body::after{
     box-shadow:0 15px 40px rgba(0,0,0,0.35);
 }
 .panel-title{
+    display:flex;align-items:center;gap:10px;
     font-size:15px;font-weight:800;margin:0 0 16px;
     color:var(--color-dorado-claro);position:relative;z-index:1;
     letter-spacing:0.5px;text-transform:uppercase;
 }
+.paso-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;font-size:13px;font-weight:800;
+}
+.paso-titulo{
+    display:flex;align-items:center;gap:10px;
+    font-size:15px;font-weight:800;margin:30px 0 4px;
+    color:var(--color-dorado-claro);
+    letter-spacing:0.5px;text-transform:uppercase;
+}
+.paso-ayuda{color:#cbd5e1;font-size:13px;margin-bottom:6px}
 .form-input{
     width:100%;height:50px;border-radius:14px;
     background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;
@@ -234,12 +278,20 @@ body::after{
     outline:none;border-color:var(--color-dorado);
     box-shadow:0 0 0 3px rgba(212,175,55,0.15);
 }
+.form-input.resaltar{
+    border-color:#ef4444;
+    box-shadow:0 0 0 3px rgba(239,68,68,0.25);
+}
 .form-group{margin-bottom:16px;position:relative;z-index:1}
 .form-group:last-child{margin-bottom:0}
 .form-group label{
     display:block;margin-bottom:8px;
     color:#cbd5e1;font-size:13px;font-weight:600;
     text-transform:uppercase;letter-spacing:0.5px;
+}
+.ayuda-id{
+    margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.4;
+    position:relative;z-index:1;
 }
 .payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1}
 .pay-box{
@@ -300,7 +352,7 @@ body::after{
     background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));
     color:#f87171;border:1px solid rgba(239,68,68,0.5);
 }
-.section-divider{margin:30px 0 20px;text-align:center}
+.section-divider{margin:24px 0 18px;text-align:center}
 .section-divider span{
     background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
     background-size:200% 200%;
@@ -322,6 +374,7 @@ body::after{
     transform:translateZ(0);
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
+    display:flex;flex-direction:column;
 }
 .product-card::before{
     content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
@@ -352,18 +405,19 @@ body::after{
     background-clip:text;
 }
 .product-desc{
-    color:#9ca3af;font-size:11px;margin-bottom:12px;
+    color:#fcd34d;font-size:12px;font-weight:600;margin-bottom:10px;
 }
+.product-price-wrap{margin-top:auto;margin-bottom:14px}
 .product-price{
     font-size:22px;font-weight:800;color:var(--color-dorado-claro);
-    margin-bottom:14px;
     text-shadow:0 0 15px rgba(212,175,55,0.4);
-    display:inline-block;
+    display:block;
 }
+.product-ref{font-size:12px;color:#94a3b8;margin-top:2px;min-height:16px}
 .btn-buy{
     background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
     background-size:200% 200%;
-    color:#0a0e1a;border:none;width:100%;height:42px;
+    color:#0a0e1a;border:none;width:100%;height:44px;
     border-radius:12px;font-size:14px;font-weight:800;
     cursor:pointer;transition:all 0.3s;letter-spacing:1px;
     box-shadow:0 4px 15px rgba(212,175,55,0.4);
@@ -373,22 +427,65 @@ body::after{
     transform:translateY(-2px);
     box-shadow:0 8px 25px rgba(212,175,55,0.6);
 }
-.whatsapp-float{
-    position:fixed;bottom:20px;right:20px;
-    background:linear-gradient(135deg,#25D366,#128C7E);
-    width:55px;height:55px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    text-decoration:none;font-size:28px;z-index:1000;
-    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+.btn-buy.pendiente{
+    background:rgba(212,175,55,0.18);
+    color:var(--color-dorado-claro);
+    border:1px solid rgba(212,175,55,0.5);
+    box-shadow:none;
 }
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+    transform:translate(-50%,20px);
+    max-width:calc(100% - 32px);
+    padding:12px 18px;
+    border-radius:14px;
+    font-size:14px;font-weight:600;line-height:1.4;
+    background:rgba(10,14,26,0.97);
+    border:1px solid rgba(212,175,55,0.5);
+    color:#fff;
+    box-shadow:0 12px 35px rgba(0,0,0,0.6);
+    opacity:0;visibility:hidden;
+    transition:all 0.3s ease;
+    z-index:3000;
+    text-align:center;
+}
+.toast.visible{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.toast.error{border-color:rgba(239,68,68,0.6);color:#fecaca}
+
+.nav-inferior{
+    position:fixed;left:0;right:0;bottom:0;z-index:999;
+    background:rgba(5,8,16,0.96);
+    border-top:1px solid rgba(212,175,55,0.25);
+    box-shadow:0 -4px 20px rgba(0,0,0,0.5);
+    padding-bottom:env(safe-area-inset-bottom);
+    transform:translateZ(0);
+}
+.nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
+.nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;color:#9ca3af;text-decoration:none;
+    font-size:12px;font-weight:600;transition:color 0.2s;
+}
+.nav-item svg{
+    width:22px;height:22px;stroke:currentColor;fill:none;
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
+.nav-item.soporte{color:#4ade80}
+
 .back-to-top{
-    position:fixed;bottom:90px;right:20px;
+    position:fixed;
+    bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+    right:20px;
     background:linear-gradient(135deg,#d4af37,#3b82f6);
     color:#fff;width:45px;height:45px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;opacity:0;visibility:hidden;
-    z-index:1000;transition:.3s;text-decoration:none;
-    font-size:18px;
+    z-index:998;transition:.3s;text-decoration:none;
+    font-size:18px;box-shadow:0 8px 25px rgba(0,0,0,0.4);
 }
 .back-to-top.show{opacity:1;visibility:visible}
 .modal-overlay{
@@ -436,19 +533,29 @@ body::after{
 }
 @media(max-width:500px){
     body{padding-top:100px}
-    .main{padding-top:25px}
+    .main{padding-top:20px}
     .brand img{height:45px}
     .header{padding:10px 16px}
-    .games-menu{padding:12px 15px}
+    .games-menu{padding:10px 15px}
     .menu-flotante{right:10px;min-width:220px}
     .btn-perfil .perfil-nombre{display:none}
     .btn-perfil .perfil-flecha{display:none}
     .menu-perfil{right:0;min-width:230px}
     .product-price{font-size:19px}
     .product-title{font-size:13px}
+    .pagina-titulo h1{font-size:20px}
+    .back-to-top{right:15px}
     .video-fondo{
         opacity:0.85;
         filter:brightness(1.05);
+    }
+}
+@media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{
+        animation-duration:0.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:0.01ms !important;
     }
 }
 </style>
@@ -462,10 +569,10 @@ body::after{
 
 <div class="barra-superior">
     <div class="header">
-        <a href="index.html" class="brand"><img src="logo.png" alt="Logo"></a>
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
         <div class="header-right">
             <div id="perfilContainer" style="position:relative;display:none;">
-                <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
                     <div class="avatar-circle" id="avatarCircle">
                         <img src="logo.png" alt="Logo" id="avatarLogo">
                         <span class="online-dot"></span>
@@ -491,7 +598,7 @@ body::after{
                     <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
                 </div>
             </div>
-            <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
         </div>
         <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
             <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">🔑 Iniciar Sesión</a>
@@ -505,9 +612,9 @@ body::after{
             </div>
         </div>
     </div>
-    <div class="games-menu">
+    <nav class="games-menu" aria-label="Juegos">
         <a href="index.html">Inicio</a>
-        <a href="freefire.html" class="active">Free Fire</a>
+        <a href="freefire.html" class="active" aria-current="page">Free Fire</a>
         <a href="bloodstrike.html">Blood Strike</a>
         <a href="roblox.html">Roblox</a>
         <a href="ml.html">Mobile Legends</a>
@@ -519,7 +626,7 @@ body::after{
         <a href="gift-cards.html">Gift Cards</a>
         <a href="netflix.html">Netflix</a>
         <a href="disney.html">Disney+</a>
-    </div>
+    </nav>
 </div>
 
 <div class="modal-overlay" id="modalLogin">
@@ -531,11 +638,11 @@ body::after{
         <div class="modal-body">
             <form id="loginForm">
                 <div style="margin-bottom:20px;">
-                    <label style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
+                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
                     <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
                 </div>
                 <div style="margin-bottom:20px;">
-                    <label style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
+                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
                     <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
                 </div>
                 <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
@@ -553,61 +660,66 @@ body::after{
 </div>
 
 <div class="main">
-    <div class="card-panel" style="margin-top:40px;">
-        <div class="panel-title">🆔 ID del Jugador</div>
+
+    <div class="pagina-titulo">
+        <h1>Recarga Free Fire</h1>
+        <span class="chip-entrega">Entrega inmediata</span>
+    </div>
+
+    <div class="card-panel" id="panelId">
+        <div class="panel-title"><span class="paso-num">1</span> ID del jugador</div>
         <div class="form-group">
-            <label>ID del Jugador</label>
+            <label for="jugadorId">ID del jugador</label>
             <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="jugadorId" placeholder="Ej: 4664719056" autocomplete="off">
+            <p class="ayuda-id">Lo encuentras en tu perfil dentro del juego. Confirmaremos tu nombre antes de comprar.</p>
         </div>
-        <div class="id-status" id="idStatus"></div>
+        <div class="id-status" id="idStatus" role="status" aria-live="polite"></div>
     </div>
 
     <div class="card-panel">
-        <div class="panel-title">💳 Método de Pago</div>
-        <div class="payment-methods">
-            <div class="pay-box active" onclick="seleccionarPago('PAGO MOVIL', this)">🏦 PAGO MOVIL</div>
-            <div class="pay-box" onclick="seleccionarPago('BINANCE', this)">🟡 BINANCE</div>
+        <div class="panel-title"><span class="paso-num">2</span> Método de pago</div>
+        <div class="payment-methods" role="radiogroup" aria-label="Método de pago">
+            <div class="pay-box active" role="radio" aria-checked="true" tabindex="0" data-metodo="PAGO MOVIL">🏦 PAGO MOVIL</div>
+            <div class="pay-box" role="radio" aria-checked="false" tabindex="0" data-metodo="BINANCE">🟡 BINANCE</div>
         </div>
-        <div class="tasa-info" id="tasaInfo">Cargando...</div>
+        <div class="tasa-info" id="tasaInfo">Cargando tasa...</div>
     </div>
+
+    <div class="paso-titulo"><span class="paso-num">3</span> Elige tu recarga</div>
+    <p class="paso-ayuda">Todas las recargas se acreditan al instante.</p>
 
     <div class="section-divider"><span>💎 DIAMANTES - FREE FIRE</span></div>
     <div class="products-grid">
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">110 Diamantes</div></div>
-            <div class="product-desc">⚡ Recarga instantánea</div>
-            <div class="product-price" data-usd="0.81">$0.81</div>
-            <button class="btn-buy" onclick="comprarProducto('110 Diamantes', '0.81', '110')">COMPRAR</button>
+            <div class="product-price-wrap"><span class="product-price" data-usd="0.81">$0.81</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="110 Diamantes" data-usd="0.81" data-codigo="110">COMPRAR</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">341 Diamantes</div></div>
-            <div class="product-desc">⚡ Recarga instantánea</div>
-            <div class="product-price" data-usd="2.60">$2.60</div>
-            <button class="btn-buy" onclick="comprarProducto('341 Diamantes', '2.60', '341')">COMPRAR</button>
+            <div class="product-price-wrap"><span class="product-price" data-usd="2.60">$2.60</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="341 Diamantes" data-usd="2.60" data-codigo="341">COMPRAR</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">572 Diamantes</div></div>
-            <div class="product-desc">⚡ Recarga instantánea</div>
-            <div class="product-price" data-usd="4.20">$4.20</div>
-            <button class="btn-buy" onclick="comprarProducto('572 Diamantes', '4.20', '572')">COMPRAR</button>
+            <div class="product-price-wrap"><span class="product-price" data-usd="4.20">$4.20</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="572 Diamantes" data-usd="4.20" data-codigo="572">COMPRAR</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">1166 Diamantes</div></div>
-            <div class="product-desc">⚡ Recarga instantánea</div>
-            <div class="product-price" data-usd="7.80">$7.80</div>
-            <button class="btn-buy" onclick="comprarProducto('1166 Diamantes', '7.80', '1166')">COMPRAR</button>
+            <div class="product-price-wrap"><span class="product-price" data-usd="7.80">$7.80</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="1166 Diamantes" data-usd="7.80" data-codigo="1166">COMPRAR</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">2398 Diamantes</div></div>
-            <div class="product-desc">⚡ Recarga instantánea</div>
-            <div class="product-price" data-usd="15.30">$15.30</div>
-            <button class="btn-buy" onclick="comprarProducto('2398 Diamantes', '15.30', '2398')">COMPRAR</button>
+            <div class="product-price-wrap"><span class="product-price" data-usd="15.30">$15.30</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="2398 Diamantes" data-usd="15.30" data-codigo="2398">COMPRAR</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">💎</div><div class="product-title">6160 Diamantes</div></div>
             <div class="product-desc">🔥 Mega oferta</div>
-            <div class="product-price" data-usd="39.00">$39.00</div>
-            <button class="btn-buy" onclick="comprarProducto('6160 Diamantes', '39.00', '6160')">COMPRAR</button>
+            <div class="product-price-wrap"><span class="product-price" data-usd="39.00">$39.00</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="6160 Diamantes" data-usd="39.00" data-codigo="6160">COMPRAR</button>
         </div>
     </div>
 
@@ -615,56 +727,89 @@ body::after{
     <div class="products-grid">
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Semanal</div></div>
-            <div class="product-desc">⚡ 7 días de beneficios</div>
-            <div class="product-price" data-usd="2.50">$2.50</div>
-            <button class="btn-buy" onclick="comprarProducto('Tarjeta Semanal', '2.50', 'weekly_semanal')">COMPRAR</button>
+            <div class="product-desc">7 días de beneficios</div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="2.50">$2.50</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="Tarjeta Semanal" data-usd="2.50" data-codigo="weekly_semanal">COMPRAR</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Mensual</div></div>
-            <div class="product-desc">⚡ 30 días de beneficios</div>
-            <div class="product-price" data-usd="11.00">$11.00</div>
-            <button class="btn-buy" onclick="comprarProducto('Tarjeta Mensual', '11.00', 'weekly_mensual')">COMPRAR</button>
+            <div class="product-desc">30 días de beneficios</div>
+            <div class="product-price-wrap"><span class="product-price" data-usd="11.00">$11.00</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="Tarjeta Mensual" data-usd="11.00" data-codigo="weekly_mensual">COMPRAR</button>
         </div>
         <div class="product-card">
             <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Pase Booyah</div></div>
             <div class="product-desc">🔥 Pase de evento exclusivo</div>
-            <div class="product-price" data-usd="3.00">$3.00</div>
-            <button class="btn-buy" onclick="comprarProducto('Pase Booyah', '3.00', 'weekly_booyah')">COMPRAR</button>
+            <div class="product-price-wrap"><span class="product-price" data-usd="3.00">$3.00</span><div class="product-ref"></div></div>
+            <button class="btn-buy" data-producto="Pase Booyah" data-usd="3.00" data-codigo="weekly_booyah">COMPRAR</button>
         </div>
     </div>
 </div>
 
-<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
-<a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank">💬</a>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<nav class="nav-inferior" aria-label="Navegación principal">
+    <div class="nav-inferior-inner">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="index.html#juegos" class="nav-item active">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item" id="navPedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
+</nav>
+
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
 
 <script type="module">
 import { auth } from './firebase-config.js';
 import {
     onAuthStateChanged,
     signInWithEmailAndPassword,
-    signOut,
-    sendPasswordResetEmail
+    signOut
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-// ============================================
-// 🎯 VARIABLES GLOBALES
-// ============================================
 let metodo = "PAGO MOVIL";
 let tasa = 940;
 let idVerificado = false;
+let verificandoId = false;
 let nicknameVerificado = "";
+let usuarioActual = null;
 const juegoActual = "FREE FIRE";
 
-// ============================================
-// 💱 CARGAR TASA
-// ============================================
-async function cargarTasa() {
-    const tasaInfo = document.getElementById('tasaInfo');
-    if (!tasaInfo) return;
+const inputId = document.getElementById('jugadorId');
+const statusDiv = document.getElementById('idStatus');
+const tasaInfo = document.getElementById('tasaInfo');
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
 
+function avisar(mensaje, tipo = 'info') {
+    toastEl.textContent = mensaje;
+    toastEl.className = 'toast visible' + (tipo === 'error' ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3800);
+}
+
+function actualizarBotonesCompra() {
+    document.querySelectorAll('.btn-buy').forEach((b) => {
+        b.classList.toggle('pendiente', !idVerificado);
+        b.textContent = idVerificado ? 'COMPRAR' : 'INGRESA TU ID';
+    });
+}
+
+async function cargarTasa() {
     const tasaGuardada = localStorage.getItem('tasa_usd_ves');
     tasa = tasaGuardada ? parseFloat(tasaGuardada) : 940;
-    tasaInfo.textContent = `${tasa} Bs/USD`;
     actualizarPrecios();
 
     try {
@@ -673,21 +818,12 @@ async function cargarTasa() {
         if (datos.ok && datos.tasa_usdt) {
             tasa = Math.round(datos.tasa_usdt);
             localStorage.setItem('tasa_usd_ves', tasa);
-            tasaInfo.textContent = `${tasa} Bs/USD`;
             actualizarPrecios();
         }
     } catch (error) {
-        console.warn('⚠️ Tasa no actualizada:', error.message);
+        console.warn('Tasa no actualizada:', error.message);
     }
 }
-
-// ============================================
-// 🆔 INPUT DE ID + VERIFICACIÓN
-// ============================================
-const inputId = document.getElementById('jugadorId');
-const statusDiv = document.getElementById('idStatus');
-
-let timeoutId = null;
 
 function mostrarEstado(mensaje, tipo, nombre) {
     if (!statusDiv) return;
@@ -696,88 +832,117 @@ function mostrarEstado(mensaje, tipo, nombre) {
         statusDiv.innerHTML = `
             <div class="check-icono">✓</div>
             <div>
-                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">ID Verificado</div>
-                <div class="nombre-jugador">${nombre}</div>
+                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">ID verificado</div>
+                <div class="nombre-jugador"></div>
             </div>
         `;
+        statusDiv.querySelector('.nombre-jugador').textContent = nombre;
     } else {
         statusDiv.textContent = mensaje;
     }
 }
 
+let timeoutId = null;
+
 if (inputId) {
     inputId.addEventListener('keypress', function(e) {
         if (!/[0-9]/.test(e.key)) e.preventDefault();
     });
-    inputId.addEventListener('paste', function(e) {
-        e.preventDefault();
-        const texto = (e.clipboardData || window.clipboardData).getData('text');
-        const soloNumeros = texto.replace(/\D/g, '');
-        document.execCommand('insertText', false, soloNumeros);
-    });
 
     inputId.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '');
+        this.classList.remove('resaltar');
         clearTimeout(timeoutId);
         const id = this.value.trim();
         idVerificado = false;
+        verificandoId = false;
         nicknameVerificado = "";
-        if (id.length === 0) { statusDiv.style.display = 'none'; return; }
-        if (!/^\d{5,12}$/.test(id)) {
-            if (id.length < 5) mostrarEstado('⚠️ Mínimo 5 dígitos', 'error');
-            else if (id.length > 12) mostrarEstado('⚠️ Máximo 12 dígitos', 'error');
-            return;
-        }
+        actualizarBotonesCompra();
+
+        if (id.length === 0) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; return; }
+        statusDiv.style.display = '';
+        if (id.length < 5) { mostrarEstado('Escribe al menos 5 dígitos', 'error'); return; }
+
         timeoutId = setTimeout(async () => {
-            mostrarEstado('🔍 Verificando ID...', 'verificando');
+            verificandoId = true;
+            mostrarEstado('Verificando ID...', 'verificando');
             try {
                 const respuesta = await fetch('/api/verificar-jugador?juego=FREE FIRE&id=' + encodeURIComponent(id));
                 const datos = await respuesta.json();
+                if (inputId.value.trim() !== id) return;
+                verificandoId = false;
                 if (datos.valido && datos.nickname) {
                     idVerificado = true;
                     nicknameVerificado = datos.nickname;
                     mostrarEstado('', 'valido', datos.nickname);
                 } else {
                     idVerificado = false;
-                    mostrarEstado(`❌ ${datos.mensaje || 'ID no encontrado'}`, 'error');
+                    mostrarEstado(datos.mensaje || 'No encontramos ese ID. Revísalo e intenta de nuevo.', 'error');
                 }
             } catch (error) {
-                console.error('❌ Error verificando ID:', error);
+                console.error('Error verificando ID:', error);
+                verificandoId = false;
                 idVerificado = false;
-                mostrarEstado('❌ Error al verificar. Intenta de nuevo.', 'error');
+                mostrarEstado('No pudimos verificar el ID. Intenta de nuevo.', 'error');
             }
+            actualizarBotonesCompra();
         }, 500);
     });
 }
 
-// ============================================
-// 💵 ACTUALIZAR PRECIOS
-// ============================================
-function actualizarPrecios(){
-    document.querySelectorAll('.product-price').forEach(el=>{
-        let u = parseFloat(el.dataset.usd);
-        if(metodo === "PAGO MOVIL"){
-            el.innerText = Math.round(u * tasa).toLocaleString("es-VE") + " Bs";
+function actualizarPrecios() {
+    document.querySelectorAll('.product-price').forEach((el) => {
+        const u = parseFloat(el.dataset.usd);
+        const ref = el.parentElement.querySelector('.product-ref');
+        const bs = Math.round(u * tasa).toLocaleString('es-VE') + ' Bs';
+        const usdt = u.toFixed(2) + ' USDT';
+        if (metodo === 'PAGO MOVIL') {
+            el.textContent = bs;
+            ref.textContent = '≈ ' + usdt;
         } else {
-            el.innerText = u.toFixed(2) + " USDT";
+            el.textContent = usdt;
+            ref.textContent = '≈ ' + bs;
         }
     });
+    tasaInfo.textContent = metodo === 'PAGO MOVIL'
+        ? `Tasa: ${tasa} Bs por USD`
+        : `Precios en USDT · Referencia: ${tasa} Bs por USD`;
 }
 
-window.seleccionarPago = function(m, e){
-    document.querySelectorAll('.pay-box').forEach(b => b.classList.remove('active'));
-    e.classList.add('active');
+function seleccionarPago(m, el) {
+    document.querySelectorAll('.pay-box').forEach((b) => {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+    });
+    el.classList.add('active');
+    el.setAttribute('aria-checked', 'true');
     metodo = m;
     actualizarPrecios();
-};
+}
 
-// ============================================
-// 🛒 COMPRAR PRODUCTO
-// ============================================
-window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
+document.querySelectorAll('.pay-box').forEach((box) => {
+    box.addEventListener('click', () => seleccionarPago(box.dataset.metodo, box));
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            seleccionarPago(box.dataset.metodo, box);
+        }
+    });
+});
+
+function irAlCampoId(mensaje) {
+    avisar(mensaje, 'error');
+    document.getElementById('panelId').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    inputId.classList.add('resaltar');
+    setTimeout(() => inputId.focus({ preventScroll: true }), 400);
+    setTimeout(() => inputId.classList.remove('resaltar'), 2500);
+}
+
+function comprarProducto(producto, precioUsd, paqueteCodigo) {
     const id = inputId ? inputId.value.trim() : '';
-    if(!id){ alert("❌ Escribe tu ID del jugador"); return; }
-    if(!idVerificado){ alert("⏳ Espera a que se verifique el ID"); return; }
+    if (!id) { irAlCampoId('Escribe tu ID de jugador para continuar'); return; }
+    if (verificandoId) { avisar('Estamos verificando tu ID. Espera un momento.'); return; }
+    if (!idVerificado) { irAlCampoId('Revisa tu ID: no pudimos verificarlo'); return; }
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
@@ -791,11 +956,14 @@ window.comprarProducto = function(producto, precioUsd, paqueteCodigo){
     localStorage.setItem('metodo_pago', metodo);
 
     window.location.href = "pasarela.html";
-};
+}
 
-// ============================================
-// 🍔 MENÚS
-// ============================================
+document.querySelectorAll('.btn-buy').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        comprarProducto(btn.dataset.producto, btn.dataset.usd, btn.dataset.codigo);
+    });
+});
+
 window.alternarMenu = function() {
     const mf = document.getElementById('menuFlotante');
     const mp = document.getElementById('menuPerfil');
@@ -819,19 +987,16 @@ window.cerrarTodosLosMenus = function(e) {
     const menuPerfil = document.getElementById('menuPerfil');
     const btnMenu = document.getElementById('btnMenu');
     const btnPerfil = document.getElementById('btnPerfil');
-    if(btnMenu && menuFlotante && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
+    if (btnMenu && menuFlotante && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
         menuFlotante.classList.remove('activo');
     }
-    if(btnPerfil && menuPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+    if (btnPerfil && menuPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
         menuPerfil.classList.remove('activo');
         const pf = document.getElementById('perfilFlecha');
         if (pf) pf.classList.remove('abierta');
     }
 };
 
-// ============================================
-// 🔐 FIREBASE AUTH
-// ============================================
 const perfilContainer = document.getElementById('perfilContainer');
 const menuLogin = document.getElementById('menuLogin');
 const menuRegister = document.getElementById('menuRegister');
@@ -844,6 +1009,7 @@ const loginForm = document.getElementById('loginForm');
 
 if (auth) {
     onAuthStateChanged(auth, (user) => {
+        usuarioActual = user;
         if (user) {
             const nombre = user.displayName || 'Usuario';
             const email = user.email || 'usuario@email.com';
@@ -863,6 +1029,13 @@ if (auth) {
         }
     });
 }
+
+document.getElementById('navPedidos').addEventListener('click', (e) => {
+    if (!usuarioActual) {
+        e.preventDefault();
+        abrirModalLogin();
+    }
+});
 
 window.abrirModalLogin = function() {
     if (modalLogin) modalLogin.classList.add('activo');
@@ -926,66 +1099,31 @@ if (loginForm) {
     });
 }
 
-const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
-if (btnCerrarSesionEl) {
-    btnCerrarSesionEl.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if(confirm('¿Seguro que quieres cerrar sesión?')) {
-            await signOut(auth);
-            window.location.reload();
-        }
-    });
+async function confirmarYSalir(e) {
+    e.preventDefault();
+    if (confirm('¿Seguro que quieres cerrar sesión?')) {
+        await signOut(auth);
+        window.location.reload();
+    }
 }
+
+const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
+if (btnCerrarSesionEl) btnCerrarSesionEl.addEventListener('click', confirmarYSalir);
 
 const menuLogoutEl = document.getElementById('menuLogout');
-if (menuLogoutEl) {
-    menuLogoutEl.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if(confirm('¿Seguro que quieres cerrar sesión?')) {
-            await signOut(auth);
-            window.location.reload();
-        }
-    });
-}
+if (menuLogoutEl) menuLogoutEl.addEventListener('click', confirmarYSalir);
 
-const resetLinkEl = document.getElementById('resetPasswordLink');
-if (resetLinkEl) {
-    resetLinkEl.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value.trim();
-        const msg = document.getElementById('loginMessage');
-        if (!email) {
-            msg.style.background = 'rgba(239,68,68,0.15)';
-            msg.style.color = '#fca5a5';
-            msg.textContent = '❌ Ingresa tu correo primero';
-            msg.style.display = 'block';
-            return;
-        }
-        try {
-            await sendPasswordResetEmail(auth, email);
-            msg.style.background = 'rgba(34,197,94,0.15)';
-            msg.style.color = '#86efac';
-            msg.textContent = '✅ Correo enviado';
-            msg.style.display = 'block';
-        } catch (error) {
-            msg.style.background = 'rgba(239,68,68,0.15)';
-            msg.style.color = '#fca5a5';
-            msg.textContent = '❌ ' + error.message;
-            msg.style.display = 'block';
-        }
-    });
-}
-
-// ============================================
-// 🚀 INICIALIZACIÓN
-// ============================================
+actualizarBotonesCompra();
 cargarTasa();
 setInterval(cargarTasa, 60000);
 
-window.addEventListener('scroll',()=>{
-    const b=document.getElementById('backToTop');
-    if(b) b.classList.toggle('show', window.scrollY > 300);
-},{passive:true});
+const chipActivo = document.querySelector('.games-menu a.active');
+if (chipActivo) chipActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
+
+window.addEventListener('scroll', () => {
+    const b = document.getElementById('backToTop');
+    if (b) b.classList.toggle('show', window.scrollY > 300);
+}, { passive: true });
 </script>
 </body>
 </html>
