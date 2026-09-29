@@ -906,7 +906,7 @@ async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
 }
 
 // ==============================================
-// 🎲 CÓDIGOS RG (110 Diamantes Free Fire)
+// 🎲 CÓDIGOS RG
 // ==============================================
 async function verificarCodigoRG(codigo) {
     try {
@@ -1270,7 +1270,6 @@ async function iniciarVerificacion() {
 
     const esManual = referencia.startsWith('MANUAL-');
     const esTest = referencia.startsWith('TEST-');
-    // 🎲 Códigos RG: RG-XXXX (4 dígitos) pero NO RG-NETFLIX/RG-DISNEY (esas son referencias internas)
     const esCodigoRG = /^RG-\d{4}$/.test(referencia);
 
     let subtitulo = 'Estamos buscando tu pago en el sistema bancario...';
@@ -1283,7 +1282,7 @@ async function iniciarVerificacion() {
 
     try {
         // ==========================================
-        // 🎲 CÓDIGO RG (110 Diamantes Free Fire)
+        // 🎲 CÓDIGO RG
         // ==========================================
         if (esCodigoRG) {
             console.log('🎲 Código RG detectado:', referencia);
@@ -1328,9 +1327,9 @@ async function iniciarVerificacion() {
 
                 await mostrarMensaje(
                     '❌ Código no válido para este producto',
-                    `Tu código es válido solo para <b>${resultadoRG.data.producto || '110 Diamantes'}</b>.\n\n` +
-                    `Pero elegiste: <b>${producto}</b>\n\n` +
-                    `Por favor regresa y selecciona <b>${resultadoRG.data.producto || '110 Diamantes'}</b> para usar tu código.`,
+                    `Tu código es válido solo para "${resultadoRG.data.producto || '110 Diamantes'}".\n\n` +
+                    `Pero elegiste: "${producto}"\n\n` +
+                    `Por favor regresa y selecciona "${resultadoRG.data.producto || '110 Diamantes'}" para usar tu código.`,
                     'error'
                 );
 
@@ -1340,7 +1339,7 @@ async function iniciarVerificacion() {
                 return;
             }
 
-            // ✅ Todo OK → procesar con Central One
+            // ✅ Todo OK → procesar
             notificarAdmin('codigo_rg', {
                 referencia,
                 metodo: 'CÓDIGO-RG',
@@ -1351,12 +1350,27 @@ async function iniciarVerificacion() {
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
 
-            // 🎮 Llamar a Central One con el paquete del código
-            const resultadoRecarga = await enviarRecargaCentralOne(
-                resultadoRG.data.juego || 'FREE FIRE',
-                paqueteDelCodigo || '110',
-                idJugador
-            );
+            // 🎯 DECIDIR A QUIÉN LLAMAR SEGÚN TIPO
+            const tipoCodigo = resultadoRG.data.tipo || (esProductoStreaming(paqueteDelCodigo) ? 'pagonorte' : 'central_one');
+            let resultadoRecarga;
+            let esStreaming = false;
+            let referenciaInterna = null;
+
+            if (tipoCodigo === 'pagonorte' || esProductoStreaming(paqueteDelCodigo)) {
+                // 🎬 Streaming → PagoNorte
+                esStreaming = true;
+                referenciaInterna = generarReferenciaInterna(paqueteDelCodigo);
+                console.log('🎬 Código es para PagoNorte:', paqueteDelCodigo);
+                resultadoRecarga = await enviarRecargaPagoNorte(paqueteDelCodigo, referenciaInterna);
+            } else {
+                // 🎮 Juego → Central One
+                console.log('🎮 Código es para Central One:', paqueteDelCodigo);
+                resultadoRecarga = await enviarRecargaCentralOne(
+                    resultadoRG.data.juego || 'FREE FIRE',
+                    paqueteDelCodigo,
+                    idJugador
+                );
+            }
 
             await new Promise(r => setTimeout(r, 1000));
 
@@ -1364,10 +1378,13 @@ async function iniciarVerificacion() {
                 referencia,
                 resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
                 resultadoRecarga.id_solicitud || '',
-                'Central One (Código RG)',
+                tipoCodigo === 'pagonorte' ? 'PagoNorte (Código RG)' : 'Central One (Código RG)',
                 resultadoRecarga.codigos || [],
                 {
-                    es_streaming: false,
+                    es_streaming: esStreaming,
+                    codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null,
+                    datos_streaming: resultadoRecarga.datos || null,
+                    referencia_interna: referenciaInterna,
                     codigo_rg: referencia,
                     monto_rg_usd: resultadoRG.data.monto_usd,
                     monto_rg_bs: resultadoRG.data.monto_bs
@@ -1379,7 +1396,7 @@ async function iniciarVerificacion() {
             await marcarCodigoRGComoUsado(referencia, numeroPedido);
 
             if (resultadoRecarga.exito) {
-                mostrarResultadoExitoso(resultadoRecarga, false, referencia, numeroPedido, null);
+                mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna);
             } else if (resultadoRecarga.silencioso) {
                 mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido);
             } else {
@@ -1396,8 +1413,6 @@ async function iniciarVerificacion() {
         // 🧪 MODO TEST
         // ==========================================
         if (esTest) {
-            console.log('🧪 Referencia TEST detectada:', referencia);
-
             mostrarPaso('pasoPagoConfirmado');
             await new Promise(r => setTimeout(r, 800));
             mostrarPaso('pasoConectandoServidor');
