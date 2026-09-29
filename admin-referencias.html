@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Admin - Referencias Manuales</title>
+<title>Admin - Generador de Códigos RG</title>
 <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -85,12 +85,7 @@ body::before{
 }
 .btn-salir:hover{background:rgba(239,68,68,0.25);transform:translateY(-1px);}
 
-.main{
-    padding:20px;
-    max-width:900px;
-    margin:0 auto;
-    position:relative;z-index:1;
-}
+.main{padding:20px;max-width:900px;margin:0 auto;position:relative;z-index:1;}
 
 /* 🔐 LOGIN */
 .login-box{
@@ -103,19 +98,14 @@ body::before{
     margin:60px auto;
     box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
-.login-box .icono{
-    font-size:64px;margin-bottom:16px;
-}
+.login-box .icono{font-size:64px;margin-bottom:16px;}
 .login-box h1{
     font-size:22px;font-weight:800;
     color:var(--color-dorado-claro);
     margin-bottom:8px;
     text-transform:uppercase;letter-spacing:1px;
 }
-.login-box p{
-    font-size:14px;color:#94a3b8;
-    margin-bottom:24px;
-}
+.login-box p{font-size:14px;color:#94a3b8;margin-bottom:24px;}
 .login-input{
     width:100%;padding:16px;
     border-radius:14px;
@@ -146,15 +136,11 @@ body::before{
     transition:.3s;font-family:inherit;
 }
 .btn-login:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(212,175,55,0.6);}
-.login-msg{
-    margin-top:14px;font-size:13px;font-weight:700;
-    min-height:18px;
-}
+.login-msg{margin-top:14px;font-size:13px;font-weight:700;min-height:18px;}
 .login-msg.err{color:#f87171;}
 .login-msg.ok{color:#4ade80;}
 
 /* 🎛️ PANEL */
-.panel{padding:0;}
 .panel-titulo{
     font-size:20px;font-weight:900;
     background:linear-gradient(135deg,#fff,#f5d76e);
@@ -218,6 +204,7 @@ body::before{
     letter-spacing:2px;
     font-weight:800;
     font-family:'Courier New',monospace;
+    font-size:17px;
 }
 
 .checkbox-row{
@@ -256,7 +243,77 @@ body::before{
 .btn-principal:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(212,175,55,0.6);}
 .btn-principal:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 
-/* 📋 LISTA */
+.btn-secundario{
+    width:100%;padding:14px;
+    background:rgba(59,130,246,0.15);
+    border:1px solid rgba(59,130,246,0.4);
+    color:#93c5fd;border-radius:14px;
+    font-size:14px;font-weight:800;cursor:pointer;
+    text-transform:uppercase;letter-spacing:1px;
+    transition:.3s;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    margin-top:10px;
+}
+.btn-secundario:hover{background:rgba(59,130,246,0.25);transform:translateY(-2px);}
+
+/* CÓDIGO GENERADO */
+.codigo-generado{
+    display:none;
+    margin-top:18px;
+    padding:22px 18px;
+    background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));
+    border:2px solid rgba(34,197,94,0.6);
+    border-radius:14px;
+    text-align:center;
+    animation:codigoPulse 2s ease-in-out infinite;
+}
+.codigo-generado.activo{display:block;}
+@keyframes codigoPulse{
+    0%,100%{box-shadow:0 0 30px rgba(34,197,94,0.2)}
+    50%{box-shadow:0 0 50px rgba(34,197,94,0.4)}
+}
+.codigo-generado .etiqueta{
+    font-size:11px;color:#86efac;
+    text-transform:uppercase;letter-spacing:2px;
+    font-weight:800;margin-bottom:8px;
+}
+.codigo-generado .codigo{
+    font-size:36px;font-weight:900;
+    color:#22c55e;letter-spacing:6px;
+    margin:10px 0;word-break:break-all;
+    font-family:'Courier New',monospace;
+    text-shadow:0 0 20px rgba(34,197,94,0.6);
+}
+.codigo-generado .monto-info{
+    font-size:13px;color:#cbd5e1;
+    margin-bottom:14px;
+}
+.codigo-generado .acciones{
+    display:flex;gap:8px;justify-content:center;
+    flex-wrap:wrap;
+}
+.codigo-generado .btn-accion{
+    padding:10px 20px;
+    border-radius:10px;
+    font-weight:800;cursor:pointer;
+    font-size:13px;font-family:inherit;
+    text-transform:uppercase;letter-spacing:0.5px;
+    transition:.3s;border:none;
+}
+.codigo-generado .btn-copiar{
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:#fff;
+    box-shadow:0 4px 15px rgba(34,197,94,0.4);
+}
+.codigo-generado .btn-copiar:hover{transform:scale(1.05);}
+.codigo-generado .btn-whatsapp{
+    background:#25D366;
+    color:#06210f;
+    text-decoration:none;
+    display:inline-flex;align-items:center;
+}
+
+/* LISTA */
 .lista-titulo{
     display:flex;justify-content:space-between;align-items:center;
     margin-bottom:16px;
@@ -276,49 +333,41 @@ body::before{
     color:var(--color-dorado-claro);
 }
 
-.lista-refs{display:flex;flex-direction:column;gap:12px;}
+.lista-codigos{display:flex;flex-direction:column;gap:10px;}
 
-.ref-card{
+.codigo-card{
     background:linear-gradient(135deg,rgba(20,30,55,0.6),rgba(10,14,26,0.75));
     border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px;
-    padding:16px;
+    border-radius:14px;
+    padding:14px 16px;
     display:flex;justify-content:space-between;align-items:center;
-    gap:14px;
+    gap:12px;
     transition:.3s;
     position:relative;
     overflow:hidden;
 }
-.ref-card::before{
+.codigo-card::before{
     content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
-    background:var(--color-azul);
+    background:var(--color-verde);
 }
-.ref-card.activa::before{background:var(--color-verde);}
-.ref-card.usada::before{background:#6b7280;}
-.ref-card.expirada::before{background:var(--color-rojo);}
+.codigo-card.usado::before{background:#6b7280;}
+.codigo-card.usado{opacity:0.5;}
 
-.ref-card.activa:hover{
-    border-color:rgba(34,197,94,0.5);
-    transform:translateY(-2px);
-    box-shadow:0 10px 30px rgba(0,0,0,0.4),0 0 20px rgba(34,197,94,0.15);
-}
-.ref-card.usada{opacity:0.6;}
-
-.ref-info{flex:1;min-width:0;}
-.ref-codigo{
+.codigo-info{flex:1;min-width:0;}
+.codigo-valor{
     font-family:'Courier New',monospace;
-    font-size:16px;font-weight:800;
+    font-size:18px;font-weight:900;
     color:var(--color-dorado-claro);
-    letter-spacing:1.5px;
-    margin-bottom:6px;
+    letter-spacing:2px;
+    margin-bottom:4px;
     word-break:break-all;
 }
-.ref-meta{
+.codigo-meta{
     display:flex;flex-wrap:wrap;gap:10px;
     font-size:12px;color:#94a3b8;
 }
-.ref-meta span{display:flex;align-items:center;gap:4px;}
-.ref-badge{
+.codigo-meta span{display:flex;align-items:center;gap:4px;}
+.codigo-badge{
     display:inline-block;
     padding:3px 10px;
     border-radius:10px;
@@ -328,39 +377,39 @@ body::before{
     letter-spacing:0.5px;
     margin-top:6px;
 }
-.badge-activa{background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(34,197,94,0.5);}
-.badge-usada{background:rgba(107,114,128,0.2);color:#9ca3af;border:1px solid rgba(107,114,128,0.5);}
-.badge-expirada{background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.5);}
+.badge-activo{background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(34,197,94,0.5);}
+.badge-usado{background:rgba(107,114,128,0.2);color:#9ca3af;border:1px solid rgba(107,114,128,0.5);}
 
-.ref-acciones{display:flex;gap:6px;flex-shrink:0;}
-.ref-btn{
-    width:38px;height:38px;
+.codigo-acciones{display:flex;gap:6px;flex-shrink:0;}
+.codigo-btn{
+    width:36px;height:36px;
     border-radius:10px;
     border:1px solid;
     background:transparent;
     cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    font-size:16px;
+    font-size:15px;
     transition:.2s;
     font-family:inherit;
+    padding:0;
 }
-.ref-btn.copiar{
+.codigo-btn.copiar{
     color:var(--color-dorado-claro);
     border-color:rgba(212,175,55,0.4);
     background:rgba(212,175,55,0.1);
 }
-.ref-btn.copiar:hover{background:rgba(212,175,55,0.25);transform:scale(1.08);}
-.ref-btn.borrar{
-    color:#f87171;
-    border-color:rgba(239,68,68,0.4);
-    background:rgba(239,68,68,0.1);
-}
-.ref-btn.borrar:hover{background:rgba(239,68,68,0.25);transform:scale(1.08);}
-.ref-btn.copiado{
+.codigo-btn.copiar:hover{background:rgba(212,175,55,0.25);transform:scale(1.08);}
+.codigo-btn.copiado{
     background:rgba(34,197,94,0.2)!important;
     border-color:rgba(34,197,94,0.5)!important;
     color:#4ade80!important;
 }
+.codigo-btn.borrar{
+    color:#f87171;
+    border-color:rgba(239,68,68,0.4);
+    background:rgba(239,68,68,0.1);
+}
+.codigo-btn.borrar:hover{background:rgba(239,68,68,0.25);transform:scale(1.08);}
 
 .lista-vacia{
     text-align:center;
@@ -373,7 +422,7 @@ body::before{
 }
 .lista-vacia .icono{font-size:48px;margin-bottom:12px;opacity:0.5;}
 
-/* 🔔 TOAST */
+/* TOAST */
 .toast{
     position:fixed;
     top:80px;left:50%;
@@ -398,7 +447,6 @@ body::before{
 .toast.exito{border-color:var(--color-verde);color:#86efac;}
 .toast.error{border-color:var(--color-rojo);color:#fecaca;}
 
-/* ⚙️ INFO PANEL */
 .info-panel{
     background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03));
     border:1px solid rgba(59,130,246,0.35);
@@ -419,7 +467,6 @@ body::before{
     font-size:12px;
 }
 
-/* 📱 RESPONSIVE */
 @media(max-width:500px){
     .header{padding:12px 16px;}
     .header img{height:38px;}
@@ -427,9 +474,10 @@ body::before{
     .btn-salir{padding:6px 10px;font-size:11px;}
     .main{padding:16px;}
     .panel-titulo{font-size:17px;}
-    .ref-card{flex-direction:column;align-items:stretch;}
-    .ref-acciones{justify-content:flex-end;}
+    .codigo-card{flex-direction:column;align-items:stretch;}
+    .codigo-acciones{justify-content:flex-end;}
     .login-box{padding:30px 20px;margin:30px auto;}
+    .codigo-generado .codigo{font-size:28px;letter-spacing:4px;}
 }
 </style>
 </head>
@@ -442,7 +490,7 @@ body::before{
 
 <div class="header">
     <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
-    <div class="header-title">🔐 Admin Referencias</div>
+    <div class="header-title">🎲 Admin Códigos</div>
     <button class="btn-salir" id="btnSalir" style="display:none;" onclick="cerrarSesion()">Cerrar</button>
 </div>
 
@@ -450,9 +498,9 @@ body::before{
 
     <!-- 🔐 LOGIN -->
     <div class="login-box" id="loginBox">
-        <div class="icono">🔐</div>
+        <div class="icono">🎲</div>
         <h1>Acceso Admin</h1>
-        <p>Ingresa tu PIN de administrador</p>
+        <p>Ingresa tu PIN para generar códigos</p>
         <input type="password" class="login-input" id="pinInput" placeholder="RG-XXXX" maxlength="20" autocomplete="off">
         <button class="btn-login" onclick="verificarPin()">🔓 Entrar</button>
         <div class="login-msg" id="loginMsg"></div>
@@ -461,40 +509,40 @@ body::before{
     <!-- 🎛️ PANEL -->
     <div class="panel" id="panel" style="display:none;">
 
-        <h2 class="panel-titulo">🎛️ Panel de Referencias Manuales</h2>
+        <h2 class="panel-titulo">🎲 Generador de Códigos</h2>
 
         <div class="info-panel">
             <strong>💡 ¿Cómo funciona?</strong><br>
-            1. Creas una referencia con formato <code>MANUAL-XXXX</code><br>
-            2. La activas con el monto en Bs que quieres cobrar<br>
-            3. El cliente la usa en la pasarela en vez de una referencia real<br>
-            4. La pasarela detecta <code>MANUAL-</code> y verifica aquí en Firebase<br>
-            5. Si es válida → procesa la recarga real en Central One / PagoNorte
+            1. Generas un código <code>RG-XXXX</code> con un monto en Bs<br>
+            2. Se lo mandas por WhatsApp al cliente que ya te pagó<br>
+            3. El cliente entra a la pasarela y escribe el código<br>
+            4. La pasarela procesa la compra <strong>REAL</strong> en PagoNorte<br>
+            5. Los diamantes / cuenta se entregan al instante
         </div>
 
-        <!-- ➕ CREAR REFERENCIA -->
+        <!-- ➕ GENERAR CÓDIGO -->
         <div class="form-card">
-            <h3>➕ Crear Nueva Referencia</h3>
+            <h3>➕ Generar Nuevo Código</h3>
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label>🔑 Código de referencia</label>
-                    <input type="text" class="form-input codigo" id="nuevaRef" placeholder="MANUAL-TEST01" autocomplete="off">
+                    <label>💰 Monto en Bs</label>
+                    <input type="number" class="form-input" id="nuevoMonto" placeholder="Ej: 3686" min="1">
                 </div>
                 <div class="form-group">
-                    <label>💰 Monto en Bs</label>
-                    <input type="number" class="form-input" id="nuevoMonto" placeholder="2350" min="0">
+                    <label>💵 Monto USD (opcional)</label>
+                    <input type="number" class="form-input" id="nuevoMontoUsd" placeholder="Ej: 3.80" min="0" step="0.01">
                 </div>
             </div>
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label>💵 Monto en USD (opcional)</label>
-                    <input type="number" class="form-input" id="nuevoMontoUsd" placeholder="2.50" min="0" step="0.01">
+                    <label>📝 Nota (opcional)</label>
+                    <input type="text" class="form-input" id="nuevaNota" placeholder="Ej: Cliente Juan" maxlength="80">
                 </div>
                 <div class="form-group">
-                    <label>📝 Nota (opcional)</label>
-                    <input type="text" class="form-input" id="nuevaNota" placeholder="Ej: Prueba Netflix" maxlength="80">
+                    <label>📱 WhatsApp del cliente (opcional)</label>
+                    <input type="tel" class="form-input" id="nuevoWhatsapp" placeholder="Ej: 04241234567" maxlength="15">
                 </div>
             </div>
 
@@ -503,22 +551,33 @@ body::before{
                 <label for="chkUsoUnico">🎯 Uso único (se bloquea al usarse 1 vez)</label>
             </div>
 
-            <button class="btn-principal" id="btnCrear" onclick="crearReferencia()">
-                🚀 Crear y Activar Referencia
+            <button class="btn-principal" id="btnGenerar" onclick="generarCodigo()">
+                🎲 Generar Código RG
             </button>
+
+            <!-- CÓDIGO GENERADO -->
+            <div class="codigo-generado" id="codigoGenerado">
+                <div class="etiqueta">✅ Código generado</div>
+                <div class="codigo" id="codigoValue">RG-0000</div>
+                <div class="monto-info" id="montoInfo">-</div>
+                <div class="acciones">
+                    <button class="btn-accion btn-copiar" onclick="copiarCodigoGenerado()">📋 Copiar</button>
+                    <a href="#" class="btn-accion btn-whatsapp" id="btnWhatsappEnviar" target="_blank">💬 Enviar por WhatsApp</a>
+                </div>
+            </div>
         </div>
 
         <!-- 📋 LISTA -->
         <div class="form-card">
             <div class="lista-titulo">
-                <h3>📋 Referencias Existentes</h3>
-                <div class="contador" id="contadorRefs">0</div>
+                <h3>📋 Códigos Generados</h3>
+                <div class="contador" id="contadorCodigos">0</div>
             </div>
 
-            <div class="lista-refs" id="listaRefs">
+            <div class="lista-codigos" id="listaCodigos">
                 <div class="lista-vacia">
                     <div class="icono">📭</div>
-                    No hay referencias creadas todavía
+                    No hay códigos creados todavía
                 </div>
             </div>
         </div>
@@ -545,12 +604,14 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const refManuales = db.ref("referencias_manuales");
+const refCodigos = db.ref("codigos_rg");
 
 // ==============================================
 // 🔑 CONFIGURACIÓN
 // ==============================================
 const PIN_ADMIN = "RG-2026"; // 👈 CAMBIA ESTE PIN SI QUIERES
+const PREFIJO = "RG-";
+const DIGITOS = 4; // 4 dígitos: RG-0000 a RG-9999
 
 // ==============================================
 // 🔐 SESIÓN
@@ -562,13 +623,13 @@ function verificarPin() {
     if (pin === PIN_ADMIN) {
         msg.className = 'login-msg ok';
         msg.textContent = '✅ Acceso concedido';
-        sessionStorage.setItem('admin_autorizado', '1');
+        sessionStorage.setItem('admin_codigos_autorizado', '1');
 
         setTimeout(() => {
             document.getElementById('loginBox').style.display = 'none';
             document.getElementById('panel').style.display = 'block';
             document.getElementById('btnSalir').style.display = 'block';
-            cargarReferencias();
+            cargarCodigos();
         }, 500);
     } else {
         msg.className = 'login-msg err';
@@ -579,23 +640,20 @@ function verificarPin() {
 }
 
 function cerrarSesion() {
-    sessionStorage.removeItem('admin_autorizado');
+    sessionStorage.removeItem('admin_codigos_autorizado');
     location.reload();
 }
 
-// Enter en el PIN
 document.getElementById('pinInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') verificarPin();
 });
 
-// ==============================================
-// 🚀 AUTO-LOGIN si ya estaba autorizado
-// ==============================================
-if (sessionStorage.getItem('admin_autorizado') === '1') {
+// Auto-login
+if (sessionStorage.getItem('admin_codigos_autorizado') === '1') {
     document.getElementById('loginBox').style.display = 'none';
     document.getElementById('panel').style.display = 'block';
     document.getElementById('btnSalir').style.display = 'block';
-    cargarReferencias();
+    cargarCodigos();
 } else {
     document.getElementById('pinInput').focus();
 }
@@ -615,39 +673,43 @@ function mostrarToast(mensaje, tipo = 'info') {
 }
 
 // ==============================================
-// ➕ CREAR REFERENCIA
+// 🎲 GENERAR CÓDIGO ALEATORIO ÚNICO
 // ==============================================
-async function crearReferencia() {
-    const btn = document.getElementById('btnCrear');
-    const inputRef = document.getElementById('nuevaRef');
+async function generarCodigoUnico() {
+    const maxIntentos = 20;
+    for (let i = 0; i < maxIntentos; i++) {
+        const numero = Math.floor(Math.random() * Math.pow(10, DIGITOS))
+            .toString()
+            .padStart(DIGITOS, '0');
+        const codigo = PREFIJO + numero;
+
+        // Verificar que no exista en Firebase
+        const snap = await refCodigos.child(codigo).once('value');
+        if (!snap.exists()) {
+            return codigo;
+        }
+    }
+    throw new Error('No se pudo generar un código único después de ' + maxIntentos + ' intentos');
+}
+
+// ==============================================
+// 🎲 GENERAR Y GUARDAR
+// ==============================================
+let ultimoCodigoGenerado = null;
+
+async function generarCodigo() {
+    const btn = document.getElementById('btnGenerar');
     const inputMonto = document.getElementById('nuevoMonto');
     const inputMontoUsd = document.getElementById('nuevoMontoUsd');
     const inputNota = document.getElementById('nuevaNota');
+    const inputWhatsapp = document.getElementById('nuevoWhatsapp');
     const chkUsoUnico = document.getElementById('chkUsoUnico');
 
-    let codigo = inputRef.value.trim().toUpperCase();
     const monto = parseFloat(inputMonto.value) || 0;
     const montoUsd = parseFloat(inputMontoUsd.value) || 0;
     const nota = inputNota.value.trim();
+    const whatsapp = inputWhatsapp.value.trim();
     const usoUnico = chkUsoUnico.checked;
-
-    // Validaciones
-    if (!codigo) {
-        mostrarToast('❌ Escribe un código', 'error');
-        inputRef.focus();
-        return;
-    }
-
-    // Auto-prefijo MANUAL- si no lo tiene
-    if (!codigo.startsWith('MANUAL-')) {
-        codigo = 'MANUAL-' + codigo;
-        inputRef.value = codigo;
-    }
-
-    if (codigo.length < 10) {
-        mostrarToast('❌ El código es muy corto (mínimo MANUAL-XX)', 'error');
-        return;
-    }
 
     if (monto <= 0) {
         mostrarToast('❌ El monto en Bs debe ser mayor a 0', 'error');
@@ -655,25 +717,18 @@ async function crearReferencia() {
         return;
     }
 
-    // 🔥 Chequeo de duplicado
     btn.disabled = true;
-    btn.innerHTML = '⏳ Verificando...';
+    btn.innerHTML = '⏳ Generando...';
 
     try {
-        const snap = await refManuales.child(codigo).once('value');
-        if (snap.exists()) {
-            mostrarToast('❌ Ya existe una referencia con ese código', 'error');
-            btn.disabled = false;
-            btn.innerHTML = '🚀 Crear y Activar Referencia';
-            return;
-        }
+        const codigo = await generarCodigoUnico();
 
-        // ✅ Crear
-        await refManuales.child(codigo).set({
+        await refCodigos.child(codigo).set({
             codigo: codigo,
             monto_bs: monto,
             monto_usd: montoUsd,
             nota: nota || '',
+            whatsapp_cliente: whatsapp || '',
             activa: true,
             usada: false,
             uso_unico: usoUnico,
@@ -687,102 +742,134 @@ async function crearReferencia() {
             usado_por_pedido: null
         });
 
-        mostrarToast('✅ Referencia creada y activada', 'exito');
+        ultimoCodigoGenerado = {
+            codigo: codigo,
+            monto_bs: monto,
+            monto_usd: montoUsd,
+            whatsapp: whatsapp
+        };
+
+        // Mostrar código generado
+        document.getElementById('codigoValue').textContent = codigo;
+        document.getElementById('montoInfo').textContent = 
+            `${monto.toLocaleString('es-VE')} Bs` + (montoUsd > 0 ? ` · $${montoUsd.toFixed(2)}` : '');
+        document.getElementById('codigoGenerado').classList.add('activo');
+
+        // Botón WhatsApp
+        const btnWs = document.getElementById('btnWhatsappEnviar');
+        const numDestino = whatsapp ? '58' + whatsapp.replace(/^0/, '') : '';
+        const msj = encodeURIComponent(
+            `🎁 *RECARGASGAMES*\n\n` +
+            `Tu código de canje es:\n\n` +
+            `*${codigo}*\n\n` +
+            `💰 Monto: ${monto.toLocaleString('es-VE')} Bs\n\n` +
+            `👉 Entra a nuestra web, selecciona tu producto y pega este código en la pasarela.\n\n` +
+            `¡Gracias por tu compra! 🙌`
+        );
+        btnWs.href = numDestino ? `https://wa.me/${numDestino}?text=${msj}` : `https://wa.me/?text=${msj}`;
+
+        mostrarToast('✅ Código generado: ' + codigo, 'exito');
 
         // Limpiar formulario
-        inputRef.value = '';
         inputMonto.value = '';
         inputMontoUsd.value = '';
         inputNota.value = '';
-        inputRef.focus();
+        inputWhatsapp.value = '';
 
-        // Refrescar lista
-        cargarReferencias();
+        cargarCodigos();
 
     } catch (error) {
-        console.error('Error creando referencia:', error);
-        mostrarToast('❌ Error al crear la referencia', 'error');
+        console.error('Error generando código:', error);
+        mostrarToast('❌ ' + error.message, 'error');
     } finally {
         btn.disabled = false;
-        btn.innerHTML = '🚀 Crear y Activar Referencia';
+        btn.innerHTML = '🎲 Generar Código RG';
     }
 }
 
 // ==============================================
-// 📋 CARGAR REFERENCIAS
+// 📋 COPIAR CÓDIGO GENERADO
 // ==============================================
-function cargarReferencias() {
-    const listaRefs = document.getElementById('listaRefs');
-    const contador = document.getElementById('contadorRefs');
+function copiarCodigoGenerado() {
+    if (!ultimoCodigoGenerado) return;
+    navigator.clipboard.writeText(ultimoCodigoGenerado.codigo).then(() => {
+        mostrarToast('✅ Copiado: ' + ultimoCodigoGenerado.codigo, 'exito');
+    }).catch(() => {
+        mostrarToast('❌ No se pudo copiar', 'error');
+    });
+}
 
-    refManuales.on('value', (snap) => {
+// ==============================================
+// 📋 CARGAR CÓDIGOS
+// ==============================================
+function cargarCodigos() {
+    const lista = document.getElementById('listaCodigos');
+    const contador = document.getElementById('contadorCodigos');
+
+    refCodigos.on('value', (snap) => {
         const datos = snap.val() || {};
-        const refs = Object.values(datos);
+        const codigos = Object.values(datos);
 
-        // Ordenar por fecha descendente
-        refs.sort((a, b) => {
+        codigos.sort((a, b) => {
             const fa = a.fecha_creacion || '';
             const fb = b.fecha_creacion || '';
             return fb.localeCompare(fa);
         });
 
-        contador.textContent = refs.length;
+        contador.textContent = codigos.length;
 
-        if (refs.length === 0) {
-            listaRefs.innerHTML = `
+        if (codigos.length === 0) {
+            lista.innerHTML = `
                 <div class="lista-vacia">
                     <div class="icono">📭</div>
-                    No hay referencias creadas todavía
+                    No hay códigos creados todavía
                 </div>
             `;
             return;
         }
 
-        listaRefs.innerHTML = refs.map(r => renderizarRef(r)).join('');
+        lista.innerHTML = codigos.map(c => renderizarCodigo(c)).join('');
     });
 }
 
-function renderizarRef(r) {
-    const usada = r.usada === true;
-    const activa = r.activa !== false;
-    const clase = usada ? 'usada' : (activa ? 'activa' : 'expirada');
+function renderizarCodigo(c) {
+    const usada = c.usada === true;
+    const activa = c.activa !== false;
+    const clase = usada ? 'usado' : '';
 
     let badge = '';
-    if (usada) badge = '<span class="ref-badge badge-usada">USADA</span>';
-    else if (activa) badge = '<span class="ref-badge badge-activa">ACTIVA</span>';
-    else badge = '<span class="ref-badge badge-expirada">INACTIVA</span>';
+    if (usada) badge = '<span class="codigo-badge badge-usado">USADO</span>';
+    else if (activa) badge = '<span class="codigo-badge badge-activo">DISPONIBLE</span>';
+    else badge = '<span class="codigo-badge badge-usado">INACTIVO</span>';
 
-    const metaPartes = [];
-    metaPartes.push(`<span>💰 ${r.monto_bs} Bs</span>`);
-    if (r.monto_usd > 0) metaPartes.push(`<span>💵 $${r.monto_usd}</span>`);
-    metaPartes.push(`<span>📅 ${r.fecha_creacion_legible || '-'}</span>`);
-    if (r.uso_unico === false) metaPartes.push(`<span>♻️ Multiuso (${r.veces_usada || 0})</span>`);
-    if (usada && r.fecha_uso) {
-        metaPartes.push(`<span>✅ Usada: ${new Date(r.fecha_uso).toLocaleString('es-VE')}</span>`);
-    }
+    const meta = [];
+    meta.push(`<span>💰 ${c.monto_bs} Bs</span>`);
+    if (c.monto_usd > 0) meta.push(`<span>💵 $${c.monto_usd}</span>`);
+    meta.push(`<span>📅 ${c.fecha_creacion_legible || '-'}</span>`);
+    if (c.whatsapp_cliente) meta.push(`<span>📱 ${c.whatsapp_cliente}</span>`);
 
-    const notaHtml = r.nota ? `<div style="font-size:12px;color:#94a3b8;margin-top:6px;">📝 ${r.nota}</div>` : '';
+    const notaHtml = c.nota ? `<div style="font-size:12px;color:#94a3b8;margin-top:6px;">📝 ${c.nota}</div>` : '';
 
     return `
-        <div class="ref-card ${clase}">
-            <div class="ref-info">
-                <div class="ref-codigo">${r.codigo}</div>
-                <div class="ref-meta">${metaPartes.join('')}</div>
+        <div class="codigo-card ${clase}">
+            <div class="codigo-info">
+                <div class="codigo-valor">${c.codigo}</div>
+                <div class="codigo-meta">${meta.join('')}</div>
                 ${badge}
                 ${notaHtml}
             </div>
-            <div class="ref-acciones">
-                <button class="ref-btn copiar" onclick="copiarRef('${r.codigo}', this)" title="Copiar">📋</button>
-                <button class="ref-btn borrar" onclick="borrarRef('${r.codigo}')" title="Borrar">🗑️</button>
+            <div class="codigo-acciones">
+                <button class="codigo-btn copiar" onclick="copiarCodigo('${c.codigo}', this)" title="Copiar">📋</button>
+                <button class="codigo-btn borrar" onclick="borrarCodigo('${c.codigo}')" title="Borrar">🗑️</button>
             </div>
         </div>
     `;
 }
 
 // ==============================================
-// 📋 COPIAR REFERENCIA
+// 📋 COPIAR CÓDIGO DE LA LISTA
 // ==============================================
-function copiarRef(codigo, boton) {
+function copiarCodigo(codigo, boton) {
     navigator.clipboard.writeText(codigo).then(() => {
         boton.classList.add('copiado');
         boton.textContent = '✓';
@@ -797,14 +884,14 @@ function copiarRef(codigo, boton) {
 }
 
 // ==============================================
-// 🗑️ BORRAR REFERENCIA
+// 🗑️ BORRAR CÓDIGO
 // ==============================================
-async function borrarRef(codigo) {
-    if (!confirm(`¿Borrar la referencia ${codigo}?\n\nEsta acción no se puede deshacer.`)) return;
+async function borrarCodigo(codigo) {
+    if (!confirm(`¿Borrar el código ${codigo}?\n\nEsta acción no se puede deshacer.`)) return;
 
     try {
-        await refManuales.child(codigo).remove();
-        mostrarToast('🗑️ Referencia borrada', 'exito');
+        await refCodigos.child(codigo).remove();
+        mostrarToast('🗑️ Código borrado', 'exito');
     } catch (error) {
         console.error('Error borrando:', error);
         mostrarToast('❌ Error al borrar', 'error');
@@ -812,18 +899,12 @@ async function borrarRef(codigo) {
 }
 
 // ==============================================
-// 🎨 AUTO-FORMATO del código
-// ==============================================
-document.getElementById('nuevaRef').addEventListener('input', function(e) {
-    // Solo letras, números y guiones
-    this.value = this.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-});
-
-// ==============================================
 // 🚀 INIT
 // ==============================================
-console.log('🎛️ Admin Referencias cargado');
+console.log('🎲 Admin Códigos cargado');
 console.log('🔑 PIN:', PIN_ADMIN);
+console.log('🎯 Prefijo:', PREFIJO);
+console.log('🔢 Dígitos:', DIGITOS);
 </script>
 </body>
 </html>
