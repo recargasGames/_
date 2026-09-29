@@ -524,29 +524,13 @@ body::after{
     <div id="pasoDatos" class="paso-box">
         <h2 class="titulo-seccion">Confirmar Pago</h2>
 
-        <div class="datos-pago-box" style="margin-bottom:20px;">
-            <h3 class="titulo-seccion" style="margin-top:0;">📱 Tu WhatsApp</h3>
-            <p style="font-size:13px;color:#94a3b8;text-align:center;margin-bottom:12px;">
-                Recibirás aquí la confirmación de tu compra
-            </p>
-            <input type="tel"
-                   inputmode="numeric"
-                   pattern="[0-9]*"
-                   id="whatsappCliente"
-                   class="input-ref"
-                   placeholder="Ej: 584241234567"
-                   maxlength="15"
-                   style="text-align:center;letter-spacing:1px;font-size:16px;margin-bottom:8px;">
-            <div id="whatsappStatus" style="text-align:center;font-size:13px;min-height:18px;"></div>
-        </div>
-
         <div class="resumen-box">
             <div class="resumen-fila"><span class="resumen-etiqueta">🎮 Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">🆔 ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
             <div class="resumen-fila" id="filaNombre" style="display:none;"><span class="resumen-etiqueta">👤 Jugador</span><span class="resumen-valor verde" id="datoNombreJugador">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">📦 Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
             <div class="resumen-fila" id="filaSubtotal" style="display:none;"><span class="resumen-etiqueta">💵 Subtotal</span><span class="resumen-valor tachado" id="datoSubtotal">-</span></div>
-            <div class="resumen-fila" id="filaDescuento" style="display:none;"><span class="resumen-etiqueta">🎁 Descuento (4%)</span><span class="resumen-valor verde" id="datoDescuento">-</span></div>
+            <div class="resumen-fila" id="filaDescuento" style="display:none;"><span class="resumen-etiqueta">🎁 Descuento</span><span class="resumen-valor verde" id="datoDescuento">-</span></div>
             <div class="resumen-fila"><span class="resumen-etiqueta">💰 Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
@@ -733,6 +717,14 @@ const precioBsOriginal = parseFloat(localStorage.getItem('precio_en_bs') || "0")
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 let metodoPago = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
 
+// 🆕 WHATSAPP desde localStorage (ya no se pide en la pasarela)
+const whatsappCliente = (
+    localStorage.getItem('whatsapp') ||
+    localStorage.getItem('whatsapp_comprador') ||
+    localStorage.getItem('telefono_cliente') ||
+    ''
+).trim();
+
 let descuentoAplicado = 0;
 let cuponAplicado = "";
 let precioUsdFinal = precioUsdOriginal;
@@ -815,50 +807,6 @@ document.getElementById('cuponInput').addEventListener('keypress', function(e) {
 });
 
 // ==============================================
-// 📱 VALIDACIÓN DE WHATSAPP
-// ==============================================
-const inputWhatsApp = document.getElementById('whatsappCliente');
-const statusWhatsApp = document.getElementById('whatsappStatus');
-
-if (inputWhatsApp) {
-    inputWhatsApp.addEventListener('keypress', function(e) {
-        if (!/[0-9]/.test(e.key)) e.preventDefault();
-    });
-
-    inputWhatsApp.addEventListener('paste', function(e) {
-        e.preventDefault();
-        const texto = (e.clipboardData || window.clipboardData).getData('text');
-        const soloNumeros = texto.replace(/\D/g, '');
-        document.execCommand('insertText', false, soloNumeros);
-    });
-
-    inputWhatsApp.addEventListener('input', function() {
-        this.value = this.value.replace(/\D/g, '');
-        const num = this.value.trim();
-
-        if (num.length === 0) {
-            statusWhatsApp.textContent = '';
-            return;
-        }
-
-        if (num.length < 10) {
-            statusWhatsApp.textContent = '⚠️ Mínimo 10 dígitos';
-            statusWhatsApp.style.color = '#f87171';
-            return;
-        }
-
-        if (num.length > 15) {
-            statusWhatsApp.textContent = '⚠️ Máximo 15 dígitos';
-            statusWhatsApp.style.color = '#f87171';
-            return;
-        }
-
-        statusWhatsApp.textContent = '✅ WhatsApp válido';
-        statusWhatsApp.style.color = '#4ade80';
-    });
-}
-
-// ==============================================
 // 🎯 PASO INICIAL
 // ==============================================
 function mostrarPasoInicial() {
@@ -924,6 +872,7 @@ function notificarAdmin(tipo, datos = {}) {
     mensaje += `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n`;
     if (datos.referencia) mensaje += `🔢 Referencia: ${datos.referencia}\n`;
     if (datos.metodo) mensaje += `💳 Método: ${datos.metodo}\n`;
+    if (whatsappCliente) mensaje += `📱 WhatsApp: ${whatsappCliente}\n`;
     if (datos.mensaje_extra) mensaje += `\n${datos.mensaje_extra}\n`;
     mensaje += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
 
@@ -948,6 +897,7 @@ async function guardarReferenciaFalsa(referencia, motivo) {
             referencia: referencia,
             metodo_pago: metodoPago,
             motivo: motivo || 'No encontrada en Pábilo',
+            whatsapp_cliente: whatsappCliente || null,
             user_agent: navigator.userAgent
         });
         console.log('⚠️ Referencia falsa guardada');
@@ -975,7 +925,8 @@ async function marcarReferenciaComoUsada(ref) {
             paquete: paqueteCod,
             metodo_pago: metodoPago,
             cupon: cuponAplicado || null,
-            descuento: descuentoAplicado || 0
+            descuento: descuentoAplicado || 0,
+            whatsapp_cliente: whatsappCliente || null
         });
         return true;
     } catch (e) { return false; }
@@ -1049,7 +1000,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
 
         const numeroPedido = await generarNumeroPedido();
         const numeroMostrar = `#${numeroPedido}`;
-        const whatsappCliente = document.getElementById('whatsappCliente')?.value.trim() || '';
 
         const pedidoData = {
             uid: user ? user.uid : 'anonimo',
@@ -1079,13 +1029,12 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             codigos: codigos || []
         };
 
-        // 🎬 Agregar campos de streaming si aplica
         if (extras.es_streaming) {
             pedidoData.es_streaming = true;
             pedidoData.codigo_aprobacion = extras.codigo_aprobacion || null;
             pedidoData.datos_streaming = extras.datos_streaming || null;
             pedidoData.referencia_interna = extras.referencia_interna || null;
-            pedidoData.tipo_streaming = paqueteCod; // netflix_perfil, disney_cuenta, etc.
+            pedidoData.tipo_streaming = paqueteCod;
         }
 
         await nuevoPedido.set(pedidoData);
@@ -1232,7 +1181,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             };
         }
 
-        // ✅ Aprobado
         if (data.estado === 'Aprobado') {
             return {
                 exito: true,
@@ -1243,7 +1191,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             };
         }
 
-        // ⏳ Pendiente
         if (data.pendiente === true) {
             return {
                 exito: false,
@@ -1254,7 +1201,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             };
         }
 
-        // ❌ Rechazado
         return {
             exito: false,
             silencioso: true,
@@ -1299,13 +1245,6 @@ function mostrarPaso(idPaso) {
 async function iniciarVerificacion() {
     const referencia = document.getElementById('referenciaPago').value.trim();
     const btn = document.getElementById('btnVerificar');
-    const whatsappCliente = document.getElementById('whatsappCliente').value.trim();
-
-    if (!whatsappCliente || whatsappCliente.length < 10) {
-        mostrarMensaje('WhatsApp requerido', 'Ingresa tu número de WhatsApp para enviarte la confirmación.', 'advertencia');
-        document.getElementById('whatsappCliente').focus();
-        return;
-    }
 
     if (!referencia || referencia.length < 6) {
         mostrarMensaje('Referencia inválida', 'Escribe la referencia completa del pago (mínimo 6 dígitos).', 'advertencia');
@@ -1397,7 +1336,6 @@ async function iniciarVerificacion() {
             }
         );
 
-        const idPedido = infoPedido.id;
         const numeroPedido = infoPedido.numeroMostrar;
 
         // 7. Mostrar resultado
@@ -1410,7 +1348,6 @@ async function iniciarVerificacion() {
             document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
 
             if (esStreaming && resultadoRecarga.datos) {
-                // 🎬 STREAMING - Mostrar entrega
                 document.getElementById('tituloExito').textContent = '¡Compra Exitosa!';
                 document.getElementById('subtituloExito').textContent = 'Aquí están tus datos de acceso. Guárdalos bien.';
 
@@ -1500,7 +1437,6 @@ async function iniciarVerificacion() {
                 }
 
             } else {
-                // 🎮 JUEGO - Flujo actual
                 document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
                 document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
 
@@ -1583,7 +1519,7 @@ async function iniciarVerificacion() {
             msgAdmin += `\n⚠️ <b>Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar'}\n`;
             msgAdmin += `🚨 <b>Acción:</b> Procesa el pedido manualmente\n`;
             msgAdmin += `📋 Pedido: ${numeroPedido}\n`;
-            msgAdmin += `📱 WhatsApp cliente: ${whatsappCliente}\n`;
+            if (whatsappCliente) msgAdmin += `📱 WhatsApp cliente: ${whatsappCliente}\n`;
             msgAdmin += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
 
             enviarTelegram(msgAdmin);
@@ -1616,6 +1552,7 @@ console.log('👤 Nombre:', nombreJugador);
 console.log('🆔 ID:', idJugador);
 console.log('📦 Producto:', producto);
 console.log('💳 Método:', metodoPago);
+console.log('📱 WhatsApp:', whatsappCliente || '(no proporcionado)');
 console.log('🎬 Es streaming:', esProductoStreaming(paqueteCod));
 </script>
 </body>
