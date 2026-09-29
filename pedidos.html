@@ -222,6 +222,63 @@
         }
         .manual-box .btn-whatsapp:hover { background: #4ade80; }
 
+        /* 🎬 STREAMING BOX (Netflix, Disney+) */
+        .streaming-box {
+            margin-top: 14px; padding: 18px;
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.12), rgba(17, 60, 207, 0.08));
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            border-radius: 14px;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
+        }
+        .streaming-box .streaming-titulo {
+            font-size: 16px; font-weight: 800;
+            color: var(--dorado-claro);
+            text-align: center; margin-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .streaming-box .streaming-subtitulo {
+            font-size: 12px; color: #cbd5e1;
+            text-align: center; margin-bottom: 14px;
+            line-height: 1.5;
+        }
+        .dato-entrega {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        .dato-entrega:last-of-type { margin-bottom: 0; }
+        .dato-entrega .dato-label {
+            font-size: 11px; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 700; flex-shrink: 0;
+            min-width: 90px;
+        }
+        .dato-entrega .dato-valor {
+            flex: 1;
+            font-size: 15px; font-weight: 700; color: #fff;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+        }
+        .dato-entrega .btn-copiar-dato {
+            width: 36px; height: 36px;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 8px;
+            color: var(--dorado-claro);
+            cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s; flex-shrink: 0;
+            font-family: inherit; padding: 0;
+        }
+        .dato-entrega .btn-copiar-dato:hover {
+            background: rgba(212, 175, 55, 0.3);
+            transform: scale(1.08);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+        }
+
         .sin-pedidos {
             text-align: center; padding: 50px 20px;
             background: var(--card-bg);
@@ -303,6 +360,8 @@
             .pedido-card .top .info .id { font-size: 15px; }
             .pedido-card .top .detalle .precio { font-size: 18px; }
             .pin-box .pin-value { font-size: 20px; }
+            .dato-entrega { flex-wrap: wrap; }
+            .dato-entrega .dato-label { min-width: auto; }
             .video-fondo { opacity: 0.85; filter: brightness(1.05); }
         }
         @media (prefers-reduced-motion: reduce) {
@@ -422,7 +481,7 @@
 
     function normalizarEstado(raw) {
         const e = String(raw || 'pendiente').toLowerCase().trim();
-        if (['completado', 'completada', 'completed'].includes(e)) return 'completado';
+        if (['completado', 'completada', 'completed', 'completada_ok'].includes(e)) return 'completado';
         if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
         if (['procesando', 'processing'].includes(e)) return 'procesando';
         return 'pendiente';
@@ -561,8 +620,12 @@
             if (producto) tagsHtml += `<span class="tag">${esc(producto)}</span>`;
             if (pedido.paquete) tagsHtml += `<span class="tag">#${esc(pedido.paquete)}</span>`;
 
+            // 🎮 PIN para juegos (Roblox, Free Fire, etc)
             let pinHtml = '';
-            if (pedido.pin || (pedido.codigos && pedido.codigos.length > 0)) {
+            const esStreaming = pedido.es_streaming === true ||
+                                (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
+
+            if (!esStreaming && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
                 const pinValue = pedido.pin || pedido.codigos[0];
                 const etiqueta = juego.toUpperCase().includes('ROBLOX') ? 'Tu PIN de Roblox' : 'Tu código';
                 pinHtml = `
@@ -574,22 +637,108 @@
                 `;
             }
 
-            let manualHtml = '';
-            const esManual = (pedido.metodo_pago === 'MANUAL') ||
-                             juego.toUpperCase().includes('NETFLIX') ||
-                             juego.toUpperCase().includes('DISNEY') ||
-                             (pedido.paquete && String(pedido.paquete).startsWith('manual_'));
+            // 🎬 DATOS DE STREAMING (Netflix, Disney+)
+            let streamingHtml = '';
+            if (esStreaming && pedido.datos_streaming) {
+                const d = pedido.datos_streaming;
+                const codAprob = pedido.codigo_aprobacion || '';
 
-            if (esManual) {
-                const mensaje = encodeURIComponent(`Hola, necesito mi entrega del pedido ${idPedido}`);
-                manualHtml = `
+                let camposHtml = '';
+
+                if (d.correo) camposHtml += `
+                    <div class="dato-entrega">
+                        <div class="dato-label">📧 Correo</div>
+                        <div class="dato-valor">${esc(d.correo)}</div>
+                        <button class="btn-copiar-dato" data-copiar="${esc(d.correo)}">📋</button>
+                    </div>
+                `;
+
+                if (d.clave) camposHtml += `
+                    <div class="dato-entrega">
+                        <div class="dato-label">🔑 Contraseña</div>
+                        <div class="dato-valor">${esc(d.clave)}</div>
+                        <button class="btn-copiar-dato" data-copiar="${esc(d.clave)}">📋</button>
+                    </div>
+                `;
+
+                if (d.perfil) camposHtml += `
+                    <div class="dato-entrega">
+                        <div class="dato-label">👤 Perfil</div>
+                        <div class="dato-valor">${esc(d.perfil)}</div>
+                        <button class="btn-copiar-dato" data-copiar="${esc(d.perfil)}">📋</button>
+                    </div>
+                `;
+
+                if (d.pin_perfil) camposHtml += `
+                    <div class="dato-entrega">
+                        <div class="dato-label">🔢 PIN del perfil</div>
+                        <div class="dato-valor">${esc(d.pin_perfil)}</div>
+                        <button class="btn-copiar-dato" data-copiar="${esc(d.pin_perfil)}">📋</button>
+                    </div>
+                `;
+
+                if (d.fecha_vencimiento) camposHtml += `
+                    <div class="dato-entrega">
+                        <div class="dato-label">📅 Vence</div>
+                        <div class="dato-valor">${esc(d.fecha_vencimiento)}</div>
+                        <button class="btn-copiar-dato" data-copiar="${esc(d.fecha_vencimiento)}">📋</button>
+                    </div>
+                `;
+
+                if (codAprob) camposHtml += `
+                    <div class="dato-entrega" style="background:rgba(212,175,55,0.1);border-color:rgba(212,175,55,0.4);">
+                        <div class="dato-label" style="color:#f5d76e;">🎟️ Código renovación</div>
+                        <div class="dato-valor" style="color:#f5d76e;font-weight:800;">${esc(codAprob)}</div>
+                        <button class="btn-copiar-dato" data-copiar="${esc(codAprob)}">📋</button>
+                    </div>
+                    <div style="font-size:11px;color:#f5d76e;text-align:center;margin-top:8px;">
+                        ⚠️ Guarda este código. Lo necesitarás para renovar.
+                    </div>
+                `;
+
+                if (camposHtml) {
+                    const titulo = d.perfil ? '🎬 Datos de tu Perfil' : '🎬 Datos de tu Cuenta';
+                    const subtitulo = d.perfil
+                        ? 'Usa estos datos para iniciar sesión en Netflix'
+                        : 'Usa estos datos para iniciar sesión. NO cambies la contraseña ni el PIN.';
+
+                    streamingHtml = `
+                        <div class="streaming-box">
+                            <div class="streaming-titulo">${titulo}</div>
+                            <div class="streaming-subtitulo">${subtitulo}</div>
+                            ${camposHtml}
+                        </div>
+                    `;
+                }
+            } else if (esStreaming) {
+                // Streaming pero sin datos guardados
+                const mensaje = encodeURIComponent(`Hola, necesito los datos de mi pedido ${idPedido}`);
+                streamingHtml = `
                     <div class="manual-box">
-                        <div class="manual-text">Este producto se entrega de forma manual.</div>
+                        <div class="manual-text">⚠️ Este pedido requiere entrega manual. Contáctanos por WhatsApp.</div>
                         <a href="https://wa.me/584228242411?text=${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp">
                             Pedir mi entrega por WhatsApp
                         </a>
                     </div>
                 `;
+            }
+
+            // 📦 Entrega manual para juegos sin proveedor automático
+            let manualHtml = '';
+            if (!esStreaming) {
+                const esManual = (pedido.metodo_pago === 'MANUAL') ||
+                                 (pedido.paquete && String(pedido.paquete).startsWith('manual_'));
+                if (esManual) {
+                    const mensaje = encodeURIComponent(`Hola, necesito mi entrega del pedido ${idPedido}`);
+                    manualHtml = `
+                        <div class="manual-box">
+                            <div class="manual-text">Este producto se entrega de forma manual.</div>
+                            <a href="https://wa.me/584228242411?text=${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp">
+                                Pedir mi entrega por WhatsApp
+                            </a>
+                        </div>
+                    `;
+                }
             }
 
             html += `
@@ -608,6 +757,7 @@
                     </div>
                     <div class="bottom">${tagsHtml}</div>
                     ${pinHtml}
+                    ${streamingHtml}
                     ${manualHtml}
                 </article>
             `;
@@ -616,6 +766,7 @@
         listaEl.innerHTML = html;
     }
 
+    // Copiar PIN (juegos)
     listaEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-copiar');
         if (!btn) return;
@@ -625,10 +776,27 @@
     function copiarPIN(pin) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(pin)
-                .then(() => avisar('Copiado al portapapeles'))
-                .catch(() => avisar('No se pudo copiar. Mantén presionado el código para copiarlo.'));
+                .then(() => avisar('✓ Copiado al portapapeles'))
+                .catch(() => avisar('No se pudo copiar. Mantén presionado para copiar.'));
         } else {
             avisar('Mantén presionado el código para copiarlo.');
+        }
+    }
+
+    // Copiar datos de streaming
+    listaEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-copiar-dato');
+        if (!btn) return;
+        copiarDato(btn.dataset.copiar);
+    });
+
+    function copiarDato(texto) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(texto)
+                .then(() => avisar('✓ Copiado al portapapeles'))
+                .catch(() => avisar('No se pudo copiar. Mantén presionado el dato.'));
+        } else {
+            avisar('Mantén presionado el dato para copiarlo.');
         }
     }
 
