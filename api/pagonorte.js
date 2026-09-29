@@ -1,16 +1,6 @@
 // api/pagonorte.js
-// ============================================
-// 🎬 RECARGASGAMES - PAGONORTE (Streaming)
-// ============================================
-// Maneja: Netflix, Disney+ (perfil y cuenta)
-// Acciones: recarga, disponibilidad, renovar, netflix_hogar
-// ============================================
+const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
-const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
-
-// ============================================
-// 🎯 MAPA DE TIPOS PÚBLICOS
-// ============================================
 const TIPOS = {
     'netflix_perfil':   { tipo: 'recargaPerfilNetflix',   servicio: 'Netflix',  modalidad: 'perfil' },
     'netflix_cuenta':   { tipo: 'recargaCuentaNetflix',   servicio: 'Netflix',  modalidad: 'cuenta' },
@@ -20,11 +10,6 @@ const TIPOS = {
     'hbo_cuenta':       { tipo: 'recargaCuentaHbo',       servicio: 'HBO',      modalidad: 'cuenta' }
 };
 
-// ============================================
-// 📡 LLAMAR A PAGONORTE
-// ✅ Con cabeceras X-API-Key y X-API-Secret
-// ✅ Form URL-encoded (NO JSON)
-// ============================================
 async function llamarPagoNorte(params, apiKey, apiSecret) {
     const formData = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
@@ -55,15 +40,9 @@ async function llamarPagoNorte(params, apiKey, apiSecret) {
     return { ok: respuesta.ok, status: respuesta.status, data };
 }
 
-// ============================================
-// 🎯 EXTRAER DATOS DE STREAMING
-// ✅ PagoNorte devuelve los datos en la RAÍZ
-// ✅ Algunas veces en "datos" (por compatibilidad)
-// ============================================
+// ✅ Extrae datos desde raíz O desde datos (PagoNorte devuelve en raíz)
 function extraerDatosStreaming(data) {
-    // Prioriza la raíz, luego "datos"
     const fuente = data.datos && typeof data.datos === 'object' ? data.datos : data;
-
     return {
         correo:            fuente.correo    || fuente.usuario   || '',
         clave:             fuente.clave     || fuente.password  || '',
@@ -74,9 +53,6 @@ function extraerDatosStreaming(data) {
     };
 }
 
-// ============================================
-// 🚀 HANDLER
-// ============================================
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -91,18 +67,12 @@ export default async function handler(req, res) {
         const API_KEY    = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
 
-        console.log('🔑 API_KEY prefix:', API_KEY ? API_KEY.substring(0, 8) + '...' : 'NO CONFIGURADA');
-        console.log('🔑 API_SECRET prefix:', API_SECRET ? API_SECRET.substring(0, 8) + '...' : 'NO CONFIGURADO');
-
         if (!API_KEY || !API_SECRET) {
-            return res.status(500).json({
-                ok: false,
-                error: 'Credenciales de PagoNorte no configuradas'
-            });
+            return res.status(500).json({ ok: false, error: 'Credenciales de PagoNorte no configuradas' });
         }
 
         // ============================================
-        // 1️⃣ COMPRAR STREAMING (recarga)
+        // 1️⃣ COMPRAR STREAMING
         // ============================================
         if (accion === 'recarga') {
             const producto = body.producto || body.producto_original;
@@ -111,19 +81,35 @@ export default async function handler(req, res) {
             console.log('🎬 Recarga solicitada:', { producto, referencia });
 
             if (!producto || !referencia) {
-                return res.status(400).json({
-                    ok: false,
-                    error: 'Faltan: producto, referencia',
-                    recibido: { producto, referencia }
-                });
+                return res.status(400).json({ ok: false, error: 'Faltan: producto, referencia' });
             }
 
             const config = TIPOS[producto];
             if (!config) {
-                return res.status(400).json({
-                    ok: false,
-                    error: `Producto no soportado: ${producto}`,
-                    soportados: Object.keys(TIPOS)
+                return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
+            }
+
+            // 🧪 MODO TEST: Si empieza con TEST- → datos ficticios SIN llamar a PagoNorte
+            if (String(referencia).toUpperCase().startsWith('TEST-')) {
+                console.log('🧪 MODO TEST ACTIVADO — NO se llama a PagoNorte');
+                const datosFicticios = {
+                    correo: 'prueba@' + producto + '.test',
+                    clave: 'Test' + Math.floor(Math.random() * 9000 + 1000),
+                    perfil: producto.includes('perfil') ? 'Perfil 1' : '',
+                    pin_perfil: producto.includes('perfil') ? '1234' : '',
+                    numero_perfil: producto.includes('perfil') ? '1' : '',
+                    fecha_vencimiento: new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('es-VE')
+                };
+                return res.status(200).json({
+                    ok: true,
+                    estado: 'Aprobado',
+                    servicio: config.servicio,
+                    modalidad: config.modalidad,
+                    codigo_aprobacion: 'TEST-CODE-' + Date.now().toString().slice(-6),
+                    id_solicitud: 'TEST-' + Date.now(),
+                    datos: datosFicticios,
+                    mensaje: '🧪 MODO PRUEBA — Datos ficticios',
+                    es_prueba: true
                 });
             }
 
@@ -135,12 +121,7 @@ export default async function handler(req, res) {
             }, API_KEY, API_SECRET);
 
             if (!resultado.ok) {
-                return res.status(200).json({
-                    ok: false,
-                    error: 'Error consultando PagoNorte',
-                    status: resultado.status,
-                    raw: resultado.data
-                });
+                return res.status(200).json({ ok: false, error: 'Error consultando PagoNorte', status: resultado.status, raw: resultado.data });
             }
 
             const data = resultado.data;
@@ -149,14 +130,12 @@ export default async function handler(req, res) {
 
             console.log('🔍 Estado:', estado, '| Código:', codigo, '| ok:', data.ok);
 
-            // ✅ Aprobado — detecta por estado O por presencia de correo/clave
             const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
 
+            // ✅ Aprobado
             if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
                 const datos = extraerDatosStreaming(data);
-
                 console.log('✅ Datos extraídos:', datos);
-
                 return res.status(200).json({
                     ok: true,
                     estado: 'Aprobado',
@@ -177,7 +156,7 @@ export default async function handler(req, res) {
                     estado: 'Pendiente',
                     pendiente: true,
                     id_solicitud: data.id_solicitud || '',
-                    mensaje: data.mensaje || 'Operación en proceso. Consulte la misma referencia.'
+                    mensaje: data.mensaje || 'Operación en proceso.'
                 });
             }
 
@@ -192,19 +171,13 @@ export default async function handler(req, res) {
         }
 
         // ============================================
-        // 2️⃣ DISPONIBILIDAD STREAMING
+        // 2️⃣ DISPONIBILIDAD
         // ============================================
         if (accion === 'disponibilidad') {
             const producto = body.producto || body.producto_original;
-
-            if (!producto) {
-                return res.status(400).json({ ok: false, error: 'Falta: producto' });
-            }
-
+            if (!producto) return res.status(400).json({ ok: false, error: 'Falta: producto' });
             const config = TIPOS[producto];
-            if (!config) {
-                return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
-            }
+            if (!config) return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
 
             const resultado = await llamarPagoNorte({
                 action: 'disponibilidad_streaming',
@@ -213,27 +186,20 @@ export default async function handler(req, res) {
             }, API_KEY, API_SECRET);
 
             if (!resultado.ok) {
-                return res.status(200).json({
-                    ok: false,
-                    disponible: false,
-                    error: 'Error consultando disponibilidad',
-                    raw: resultado.data
-                });
+                return res.status(200).json({ ok: false, disponible: false, error: 'Error consultando disponibilidad', raw: resultado.data });
             }
 
             const data = resultado.data;
-            const disponible = data.disponible === true;
-
             return res.status(200).json({
                 ok: true,
-                disponible: disponible,
-                estado: data.estado || (disponible ? 'Disponible' : 'Agotada'),
+                disponible: data.disponible === true,
+                estado: data.estado || (data.disponible ? 'Disponible' : 'Agotada'),
                 mensaje: data.mensaje || ''
             });
         }
 
         // ============================================
-        // 3️⃣ RENOVAR STREAMING
+        // 3️⃣ RENOVAR
         // ============================================
         if (accion === 'renovar') {
             const producto = body.producto || body.producto_original;
@@ -244,9 +210,7 @@ export default async function handler(req, res) {
             }
 
             const config = TIPOS[producto];
-            if (!config) {
-                return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
-            }
+            if (!config) return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
 
             const resultado = await llamarPagoNorte({
                 action: 'renovar_streaming',
@@ -257,11 +221,7 @@ export default async function handler(req, res) {
             }, API_KEY, API_SECRET);
 
             if (!resultado.ok) {
-                return res.status(200).json({
-                    ok: false,
-                    error: 'Error consultando PagoNorte',
-                    raw: resultado.data
-                });
+                return res.status(200).json({ ok: false, error: 'Error consultando PagoNorte', raw: resultado.data });
             }
 
             const data = resultado.data;
@@ -269,61 +229,35 @@ export default async function handler(req, res) {
             const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
 
             if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
-                const datos = extraerDatosStreaming(data);
-
                 return res.status(200).json({
                     ok: true,
                     estado: 'Aprobado',
                     codigo_aprobacion: data.codigo_aprobacion || '',
                     codigo_aprobacion_original: data.codigo_aprobacion_original || codigo_aprobacion,
-                    datos: datos,
+                    datos: extraerDatosStreaming(data),
                     mensaje: data.mensaje || 'Renovación procesada'
                 });
             }
 
             if (data.pendiente === true) {
-                return res.status(200).json({
-                    ok: true,
-                    estado: 'Pendiente',
-                    pendiente: true,
-                    mensaje: data.mensaje || 'Renovación en proceso'
-                });
+                return res.status(200).json({ ok: true, estado: 'Pendiente', pendiente: true, mensaje: data.mensaje || 'Renovación en proceso' });
             }
 
-            return res.status(200).json({
-                ok: false,
-                estado: estado || 'Rechazado',
-                codigo_respuesta: String(data.codigo_respuesta || '').toLowerCase(),
-                mensaje: data.mensaje || 'Renovación no completada',
-                raw: data
-            });
+            return res.status(200).json({ ok: false, estado: estado || 'Rechazado', mensaje: data.mensaje || 'Renovación no completada', raw: data });
         }
 
         // ============================================
-        // 4️⃣ CÓDIGO NETFLIX HOGAR
+        // 4️⃣ NETFLIX HOGAR
         // ============================================
         if (accion === 'netflix_hogar') {
             const { correo } = body;
+            if (!correo) return res.status(400).json({ ok: false, error: 'Falta: correo' });
 
-            if (!correo) {
-                return res.status(400).json({ ok: false, error: 'Falta: correo' });
-            }
+            const resultado = await llamarPagoNorte({ action: 'netflix_hogar', correo: correo }, API_KEY, API_SECRET);
 
-            const resultado = await llamarPagoNorte({
-                action: 'netflix_hogar',
-                correo: correo
-            }, API_KEY, API_SECRET);
-
-            if (!resultado.ok) {
-                return res.status(200).json({
-                    ok: false,
-                    error: 'Error consultando PagoNorte',
-                    raw: resultado.data
-                });
-            }
+            if (!resultado.ok) return res.status(200).json({ ok: false, error: 'Error consultando PagoNorte', raw: resultado.data });
 
             const data = resultado.data;
-
             if (data.estado === 'codigo_disponible' && data.codigo) {
                 return res.status(200).json({
                     ok: true,
@@ -334,28 +268,13 @@ export default async function handler(req, res) {
                 });
             }
 
-            return res.status(200).json({
-                ok: false,
-                estado: data.estado || 'no_disponible',
-                codigo_respuesta: String(data.codigo_respuesta || '').toLowerCase(),
-                mensaje: data.mensaje || 'No hay código disponible',
-                raw: data
-            });
+            return res.status(200).json({ ok: false, estado: data.estado || 'no_disponible', mensaje: data.mensaje || 'No hay código disponible', raw: data });
         }
 
-        // Acción no reconocida
-        return res.status(400).json({
-            ok: false,
-            error: `Acción no soportada: ${accion}`,
-            acciones: ['recarga', 'disponibilidad', 'renovar', 'netflix_hogar']
-        });
+        return res.status(400).json({ ok: false, error: `Acción no soportada: ${accion}` });
 
     } catch (error) {
         console.error('❌ Error PagoNorte:', error);
-        return res.status(500).json({
-            ok: false,
-            error: 'Error interno',
-            detalle: error.message
-        });
+        return res.status(500).json({ ok: false, error: 'Error interno', detalle: error.message });
     }
 }
