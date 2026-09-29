@@ -577,7 +577,7 @@ body::after{
             </div>
 
             <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
-            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30">
+            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750 o MANUAL-XXXX" maxlength="30">
         </div>
 
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
@@ -588,7 +588,7 @@ body::after{
     <div id="pasoVerificandoPago" class="paso-box">
         <div class="spinner-circle"></div>
         <div class="texto-principal">Verificando pago...</div>
-        <div class="texto-secundario">Estamos buscando tu pago en el sistema bancario...</div>
+        <div class="texto-secundario" id="subtituloVerificando">Estamos buscando tu pago en el sistema bancario...</div>
     </div>
 
     <div id="pasoPagoConfirmado" class="paso-box">
@@ -693,6 +693,7 @@ const refReferencias = db.ref("referencias_usadas");
 const refReferenciasFalsas = db.ref("referencias_falsas");
 const refPedidos = db.ref("pedidos");
 const refCupones = db.ref("cupones_usados");
+const refManuales = db.ref("referencias_manuales"); // 🆕
 
 // ==============================================
 // 🔑 CONFIGURACIÓN
@@ -717,7 +718,6 @@ const precioBsOriginal = parseFloat(localStorage.getItem('precio_en_bs') || "0")
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 let metodoPago = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
 
-// 🆕 WHATSAPP desde localStorage (ya no se pide en la pasarela)
 const whatsappCliente = (
     localStorage.getItem('whatsapp') ||
     localStorage.getItem('whatsapp_comprador') ||
@@ -862,7 +862,7 @@ function enviarTelegram(mensaje) {
 }
 
 function notificarAdmin(tipo, datos = {}) {
-    const emojis = { exito: '🎉', falso: '⚠️', duplicado: '🚨', cupon_usado: '🎁', error: '❌', atencion: '🚨' };
+    const emojis = { exito: '🎉', falso: '⚠️', duplicado: '🚨', cupon_usado: '🎁', error: '❌', atencion: '🚨', manual: '🛠️' };
 
     let mensaje = `${emojis[tipo] || 'ℹ️'} <b>${tipo.toUpperCase()}</b>\n\n`;
     mensaje += `🎮 Juego: ${juego}\n`;
@@ -952,6 +952,65 @@ async function marcarCuponComoUsado(codigo) {
 }
 
 // ==============================================
+// 🆕 VERIFICAR REFERENCIA MANUAL EN FIREBASE
+// ==============================================
+async function verificarReferenciaManual(codigo) {
+    try {
+        const snap = await refManuales.child(codigo).once('value');
+        if (!snap.exists()) {
+            return { valida: false, motivo: 'no_existe' };
+        }
+
+        const data = snap.val();
+        const activa = data.activa !== false;
+        const usada = data.usada === true;
+
+        if (!activa) {
+            return { valida: false, motivo: 'inactiva', data };
+        }
+
+        if (usada && data.uso_unico !== false) {
+            return { valida: false, motivo: 'usada', data };
+        }
+
+        return { valida: true, data };
+    } catch (error) {
+        console.error('Error verificando manual:', error);
+        return { valida: false, motivo: 'error' };
+    }
+}
+
+async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
+    try {
+        const snap = await refManuales.child(codigo).once('value');
+        const data = snap.val() || {};
+        const vecesUsada = (data.veces_usada || 0) + 1;
+        const usoUnico = data.uso_unico !== false;
+
+        const actualizacion = {
+            veces_usada: vecesUsada,
+            fecha_uso: new Date().toISOString(),
+            usado_por_juego: juego,
+            usado_por_id: idJugador,
+            usado_por_producto: producto,
+            usado_por_pedido: numeroPedido || null,
+            whatsapp_cliente: whatsappCliente || null
+        };
+
+        // Si es de uso único, marcar como usada
+        if (usoUnico) {
+            actualizacion.usada = true;
+        }
+
+        await refManuales.child(codigo).update(actualizacion);
+        return true;
+    } catch (e) {
+        console.error('Error marcando manual como usada:', e);
+        return false;
+    }
+}
+
+// ==============================================
 // 🔢 GENERAR NÚMERO DE PEDIDO SECUENCIAL
 // ==============================================
 async function generarNumeroPedido() {
@@ -1026,7 +1085,8 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             referencia_pago: referencia,
             whatsapp_cliente: whatsappCliente || null,
             pin: codigos && codigos.length > 0 ? codigos[0] : null,
-            codigos: codigos || []
+            codigos: codigos || [],
+            es_manual: referencia.startsWith('MANUAL-') || false
         };
 
         if (extras.es_streaming) {
@@ -1219,7 +1279,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
     }
 }
 
-// Genera referencia interna única para PagoNorte
 function generarReferenciaInterna(productoCodigo) {
     const ts = Date.now();
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -1227,7 +1286,6 @@ function generarReferenciaInterna(productoCodigo) {
     return `RG-${partes.join('-')}-${ts}-${rand}`;
 }
 
-// ¿Es un producto de streaming?
 function esProductoStreaming(paqueteCodigo) {
     if (!paqueteCodigo) return false;
     return ['netflix_perfil', 'netflix_cuenta', 'disney_perfil', 'disney_cuenta',
@@ -1243,7 +1301,7 @@ function mostrarPaso(idPaso) {
 }
 
 async function iniciarVerificacion() {
-    const referencia = document.getElementById('referenciaPago').value.trim();
+    const referencia = document.getElementById('referenciaPago').value.trim().toUpperCase();
     const btn = document.getElementById('btnVerificar');
 
     if (!referencia || referencia.length < 6) {
@@ -1253,9 +1311,140 @@ async function iniciarVerificacion() {
 
     btn.disabled = true;
     btn.innerHTML = '⏳ Verificando...';
+
+    const esManual = referencia.startsWith('MANUAL-');
+
+    // 🎨 Cambiar el subtítulo según el tipo
+    document.getElementById('subtituloVerificando').textContent = esManual
+        ? 'Verificando tu código manual...'
+        : 'Estamos buscando tu pago en el sistema bancario...';
+
     mostrarPaso('pasoVerificandoPago');
 
     try {
+        // ==========================================
+        // 🆕 REFERENCIA MANUAL (empieza con MANUAL-)
+        // ==========================================
+        if (esManual) {
+            console.log('🛠️ Referencia MANUAL detectada:', referencia);
+
+            const resultadoManual = await verificarReferenciaManual(referencia);
+
+            if (!resultadoManual.valida) {
+                const motivos = {
+                    no_existe: 'La referencia manual no existe en el sistema.',
+                    inactiva: 'Esta referencia manual está desactivada.',
+                    usada: 'Esta referencia manual ya fue utilizada.',
+                    error: 'Error consultando la referencia. Intenta de nuevo.'
+                };
+
+                notificarAdmin('manual', {
+                    referencia,
+                    metodo: metodoPago,
+                    mensaje_extra: `❌ Referencia manual <b>RECHAZADA</b>: ${resultadoManual.motivo}`
+                });
+
+                document.getElementById('msgError').textContent = motivos[resultadoManual.motivo] || 'Referencia inválida.';
+                setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 600);
+                btn.disabled = false;
+                btn.innerHTML = '✅ Verificar Pago';
+                return;
+            }
+
+            console.log('✅ Referencia manual válida:', resultadoManual.data);
+
+            // ⚠️ Validar monto si la referencia tiene monto definido
+            if (resultadoManual.data.monto_bs > 0 && Math.abs(resultadoManual.data.monto_bs - precioBsFinal) > 1) {
+                const continuar = await new Promise((resolve) => {
+                    document.getElementById('mensajeIcono').className = 'mensaje-icono advertencia';
+                    document.getElementById('mensajeIcono').textContent = '⚠';
+                    document.getElementById('mensajeTitulo').textContent = 'Monto diferente';
+                    document.getElementById('mensajeTexto').textContent =
+                        `La referencia está registrada con ${resultadoManual.data.monto_bs} Bs pero tu pedido es de ${precioBsFinal} Bs.\n\n¿Deseas continuar?`;
+                    document.getElementById('mensajeBotones').innerHTML = `
+                        <button class="mensaje-btn secundario" id="btnNo">Cancelar</button>
+                        <button class="mensaje-btn principal" id="btnSi">Continuar</button>
+                    `;
+                    document.getElementById('btnNo').onclick = () => { cerrarMensaje(); resolve(false); };
+                    document.getElementById('btnSi').onclick = () => { cerrarMensaje(); resolve(true); };
+                    document.getElementById('mensajeOverlay').classList.add('activo');
+                });
+
+                if (!continuar) {
+                    mostrarPaso('pasoDatos');
+                    btn.disabled = false;
+                    btn.innerHTML = '✅ Verificar Pago';
+                    return;
+                }
+            }
+
+            // ✅ Pago aceptado (manual)
+            notificarAdmin('manual', {
+                referencia,
+                metodo: 'MANUAL-ADMIN',
+                mensaje_extra: `🛠️ Referencia manual <b>ACEPTADA</b> — ${resultadoManual.data.nota || 'sin nota'}`
+            });
+
+            mostrarPaso('pasoPagoConfirmado');
+            await new Promise(r => setTimeout(r, 1000));
+
+            // Procesar compra normalmente
+            mostrarPaso('pasoConectandoServidor');
+
+            let resultadoRecarga;
+            let esStreaming = esProductoStreaming(paqueteCod);
+            let referenciaInterna = null;
+
+            if (esStreaming) {
+                referenciaInterna = generarReferenciaInterna(paqueteCod);
+                console.log('🎬 Referencia interna:', referenciaInterna);
+                resultadoRecarga = await enviarRecargaPagoNorte(paqueteCod, referenciaInterna);
+            } else {
+                resultadoRecarga = await enviarRecargaCentralOne();
+            }
+
+            await new Promise(r => setTimeout(r, 1000));
+
+            // Guardar pedido
+            const infoPedido = await guardarPedidoEnFirebase(
+                referencia,
+                resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
+                resultadoRecarga.id_solicitud || '',
+                esStreaming ? 'PagoNorte' : 'Central One',
+                resultadoRecarga.codigos || [],
+                {
+                    es_streaming: esStreaming,
+                    codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null,
+                    datos_streaming: resultadoRecarga.datos || null,
+                    referencia_interna: referenciaInterna
+                }
+            );
+
+            const numeroPedido = infoPedido.numeroMostrar;
+
+            // Marcar referencia manual como usada
+            await marcarReferenciaManualComoUsada(referencia, numeroPedido);
+
+            // Mostrar resultado (misma lógica que la versión normal)
+            if (resultadoRecarga.exito) {
+                mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna);
+            } else if (resultadoRecarga.silencioso) {
+                mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido);
+            } else {
+                document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo en unos minutos.';
+                mostrarPaso('pasoPagoNoEncontrado');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '✅ Verificar Pago';
+            return;
+        }
+
+        // ==========================================
+        // 🔵 REFERENCIA NORMAL (Pábilo)
+        // ==========================================
+        console.log('💳 Referencia NORMAL detectada:', referencia);
+
         // 1. Verificar si la referencia ya fue usada
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
@@ -1340,190 +1529,9 @@ async function iniciarVerificacion() {
 
         // 7. Mostrar resultado
         if (resultadoRecarga.exito) {
-            document.getElementById('resPedido').textContent = numeroPedido;
-            document.getElementById('resProducto').textContent = producto;
-            document.getElementById('resNombre').textContent = nombreJugador;
-            document.getElementById('resIdResumen').textContent = idJugador;
-            document.getElementById('resReferencia').textContent = referencia;
-            document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
-
-            if (esStreaming && resultadoRecarga.datos) {
-                document.getElementById('tituloExito').textContent = '¡Compra Exitosa!';
-                document.getElementById('subtituloExito').textContent = 'Aquí están tus datos de acceso. Guárdalos bien.';
-
-                const d = resultadoRecarga.datos;
-
-                let htmlDatos = `
-                    <div class="datos-pago-box" style="margin-top:20px;">
-                        <h3 class="titulo-seccion" style="margin-top:0;">🎬 Datos de tu Cuenta</h3>
-                `;
-
-                const campos = [
-                    { label: '📧 Correo', valor: d.correo },
-                    { label: '🔑 Contraseña', valor: d.clave },
-                    { label: '👤 Perfil', valor: d.perfil },
-                    { label: '🔢 PIN Perfil', valor: d.pin_perfil },
-                    { label: '📅 Vence', valor: d.fecha_vencimiento }
-                ];
-
-                campos.forEach(c => {
-                    if (c.valor && c.valor.toString().trim() !== '') {
-                        const valorSeguro = String(c.valor).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                        htmlDatos += `
-                            <div class="dato-line">
-                                <div class="dato-texto"><strong>${c.label}:</strong> <span>${c.valor}</span></div>
-                                <button class="copiar-btn" onclick="navigator.clipboard.writeText('${valorSeguro}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        `;
-                    }
-                });
-
-                if (resultadoRecarga.codigo_aprobacion) {
-                    const codAprob = String(resultadoRecarga.codigo_aprobacion).replace(/'/g, "\\'");
-                    htmlDatos += `
-                        <div class="dato-line" style="background:rgba(212,175,55,0.1);border-color:rgba(212,175,55,0.4);margin-top:12px;">
-                            <div class="dato-texto"><strong>🎟️ Código:</strong> <span style="color:#f5d76e;font-weight:800;">${resultadoRecarga.codigo_aprobacion}</span></div>
-                            <button class="copiar-btn" onclick="navigator.clipboard.writeText('${codAprob}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div style="font-size:11px;color:#f5d76e;text-align:center;margin-top:8px;">
-                            ⚠️ Guarda este código. Lo necesitarás para renovar.
-                        </div>
-                    `;
-                }
-
-                htmlDatos += `</div>`;
-                document.getElementById('pinContainer').innerHTML = htmlDatos;
-
-                mostrarPaso('pasoRecargaExitosa');
-
-                notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: `🎬 Streaming ${producto} entregado. Ref interna: ${referenciaInterna}` });
-
-                if (whatsappCliente && whatsappCliente.length >= 10) {
-                    const mensajeCliente =
-                        `🎬 *RECARGAS GAMES*\n\n` +
-                        `¡Tu compra fue exitosa! ✅\n\n` +
-                        `📦 ${producto}\n` +
-                        `📋 Pedido: ${numeroPedido}\n\n` +
-                        `*DATOS DE ACCESO:*\n` +
-                        (d.correo ? `📧 Correo: ${d.correo}\n` : '') +
-                        (d.clave ? `🔑 Clave: ${d.clave}\n` : '') +
-                        (d.perfil ? `👤 Perfil: ${d.perfil}\n` : '') +
-                        (d.pin_perfil ? `🔢 PIN: ${d.pin_perfil}\n` : '') +
-                        (d.fecha_vencimiento ? `📅 Vence: ${d.fecha_vencimiento}\n` : '') +
-                        (resultadoRecarga.codigo_aprobacion ? `\n🎟️ Código de renovación: ${resultadoRecarga.codigo_aprobacion}\n` : '') +
-                        `\n¡Gracias por tu compra! 🙌`;
-
-                    const mensajeAdmin =
-                        `🎬 *STREAMING ENTREGADO*\n\n` +
-                        `📦 Producto: ${producto}\n` +
-                        `📋 Pedido: ${numeroPedido}\n` +
-                        `📱 Cliente: ${whatsappCliente}\n` +
-                        `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
-                        `🔢 Ref interna: ${referenciaInterna}\n` +
-                        `🎟️ Código aprobación: ${resultadoRecarga.codigo_aprobacion || 'N/A'}\n\n` +
-                        `✅ Estado: APROBADO`;
-
-                    await enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
-                }
-
-            } else {
-                document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
-                document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
-
-                if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
-                    const pin = resultadoRecarga.codigos[0];
-                    document.getElementById('pinContainer').innerHTML = `
-                        <div class="pin-box">
-                            <div class="pin-label">🎮 TU PIN</div>
-                            <div class="pin-value">${pin}</div>
-                            <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pin}'); mostrarMensaje('PIN copiado', 'El PIN se copió al portapapeles.', 'exito')">
-                                📋 Copiar PIN
-                            </button>
-                        </div>
-                    `;
-                } else {
-                    document.getElementById('pinContainer').innerHTML = '';
-                }
-
-                mostrarPaso('pasoRecargaExitosa');
-
-                notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : '' });
-
-                if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
-                    enviarTelegram(`🎮 <b>PIN DEL PEDIDO:</b> <code>${resultadoRecarga.codigos[0]}</code>`);
-                }
-
-                if (whatsappCliente && whatsappCliente.length >= 10) {
-                    const mensajeCliente =
-                        `🎮 *RECARGAS GAMES*\n\n` +
-                        `¡Hola! Recibimos tu comprobante ✅\n\n` +
-                        `🎯 Producto: ${producto}\n` +
-                        `👤 Jugador: ${nombreJugador}\n` +
-                        `🆔 ID: ${idJugador}\n` +
-                        `💰 Total: $${precioUsdFinal.toFixed(2)}\n` +
-                        `📋 Pedido: ${numeroPedido}\n\n` +
-                        `¡Gracias por tu compra! 🙌`;
-
-                    const mensajeAdmin =
-                        `🆕 *NUEVO PEDIDO - JUEGO*\n\n` +
-                        `🎮 Juego: ${juego}\n` +
-                        `📦 Producto: ${producto}\n` +
-                        `👤 Jugador: ${nombreJugador}\n` +
-                        `🆔 ID: ${idJugador}\n` +
-                        `📱 WhatsApp cliente: ${whatsappCliente}\n` +
-                        `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
-                        `📋 Pedido: ${numeroPedido}\n` +
-                        `🔢 Ref: ${referencia}\n` +
-                        `💳 Método: ${metodoPago}\n\n` +
-                        `✅ Estado: COMPLETADA` +
-                        (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0
-                            ? `\n🎟️ PIN: ${resultadoRecarga.codigos[0]}`
-                            : '');
-
-                    await enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
-                }
-            }
-
+            mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna);
         } else if (resultadoRecarga.silencioso) {
-            document.getElementById('tituloExito').textContent = '¡Pago Verificado!';
-            document.getElementById('subtituloExito').textContent = 'Tu pedido llegará muy pronto. Te notificaremos por WhatsApp cuando esté listo.';
-            document.getElementById('resPedido').textContent = numeroPedido;
-            document.getElementById('resProducto').textContent = producto;
-            document.getElementById('resNombre').textContent = nombreJugador;
-            document.getElementById('resIdResumen').textContent = idJugador;
-            document.getElementById('resReferencia').textContent = referencia;
-            document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
-            document.getElementById('pinContainer').innerHTML = '';
-
-            mostrarPaso('pasoRecargaExitosa');
-
-            let msgAdmin = `🚨 <b>PAGO VERIFICADO - ATENCIÓN REQUERIDA</b>\n\n`;
-            msgAdmin += `🎮 Juego: ${juego}\n`;
-            msgAdmin += `👤 Nombre: ${nombreJugador}\n`;
-            msgAdmin += `🆔 ID: ${idJugador}\n`;
-            msgAdmin += `📦 Producto: ${producto}\n`;
-            msgAdmin += `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n`;
-            msgAdmin += `🔢 Referencia: ${referencia}\n`;
-            msgAdmin += `💳 Método: ${metodoPago}\n`;
-            if (cuponAplicado) msgAdmin += `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)\n`;
-            msgAdmin += `\n⚠️ <b>Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar'}\n`;
-            msgAdmin += `🚨 <b>Acción:</b> Procesa el pedido manualmente\n`;
-            msgAdmin += `📋 Pedido: ${numeroPedido}\n`;
-            if (whatsappCliente) msgAdmin += `📱 WhatsApp cliente: ${whatsappCliente}\n`;
-            msgAdmin += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
-
-            enviarTelegram(msgAdmin);
-
+            mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido);
         } else {
             document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo en unos minutos.';
             mostrarPaso('pasoPagoNoEncontrado');
@@ -1542,6 +1550,196 @@ async function iniciarVerificacion() {
 }
 
 // ==============================================
+// 🎨 FUNCIONES AUXILIARES DE RESULTADO
+// ==============================================
+function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
+    document.getElementById('resPedido').textContent = numeroPedido;
+    document.getElementById('resProducto').textContent = producto;
+    document.getElementById('resNombre').textContent = nombreJugador;
+    document.getElementById('resIdResumen').textContent = idJugador;
+    document.getElementById('resReferencia').textContent = referencia;
+    document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
+
+    if (esStreaming && resultadoRecarga.datos) {
+        document.getElementById('tituloExito').textContent = '¡Compra Exitosa!';
+        document.getElementById('subtituloExito').textContent = 'Aquí están tus datos de acceso. Guárdalos bien.';
+
+        const d = resultadoRecarga.datos;
+
+        let htmlDatos = `
+            <div class="datos-pago-box" style="margin-top:20px;">
+                <h3 class="titulo-seccion" style="margin-top:0;">🎬 Datos de tu Cuenta</h3>
+        `;
+
+        const campos = [
+            { label: '📧 Correo', valor: d.correo },
+            { label: '🔑 Contraseña', valor: d.clave },
+            { label: '👤 Perfil', valor: d.perfil },
+            { label: '🔢 PIN Perfil', valor: d.pin_perfil },
+            { label: '📅 Vence', valor: d.fecha_vencimiento }
+        ];
+
+        campos.forEach(c => {
+            if (c.valor && c.valor.toString().trim() !== '') {
+                const valorSeguro = String(c.valor).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                htmlDatos += `
+                    <div class="dato-line">
+                        <div class="dato-texto"><strong>${c.label}:</strong> <span>${c.valor}</span></div>
+                        <button class="copiar-btn" onclick="navigator.clipboard.writeText('${valorSeguro}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            }
+        });
+
+        if (resultadoRecarga.codigo_aprobacion) {
+            const codAprob = String(resultadoRecarga.codigo_aprobacion).replace(/'/g, "\\'");
+            htmlDatos += `
+                <div class="dato-line" style="background:rgba(212,175,55,0.1);border-color:rgba(212,175,55,0.4);margin-top:12px;">
+                    <div class="dato-texto"><strong>🎟️ Código:</strong> <span style="color:#f5d76e;font-weight:800;">${resultadoRecarga.codigo_aprobacion}</span></div>
+                    <button class="copiar-btn" onclick="navigator.clipboard.writeText('${codAprob}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div style="font-size:11px;color:#f5d76e;text-align:center;margin-top:8px;">
+                    ⚠️ Guarda este código. Lo necesitarás para renovar.
+                </div>
+            `;
+        }
+
+        htmlDatos += `</div>`;
+        document.getElementById('pinContainer').innerHTML = htmlDatos;
+
+        mostrarPaso('pasoRecargaExitosa');
+
+        notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: `🎬 Streaming ${producto} entregado. Ref interna: ${referenciaInterna}` });
+
+        if (whatsappCliente && whatsappCliente.length >= 10) {
+            const mensajeCliente =
+                `🎬 *RECARGAS GAMES*\n\n` +
+                `¡Tu compra fue exitosa! ✅\n\n` +
+                `📦 ${producto}\n` +
+                `📋 Pedido: ${numeroPedido}\n\n` +
+                `*DATOS DE ACCESO:*\n` +
+                (d.correo ? `📧 Correo: ${d.correo}\n` : '') +
+                (d.clave ? `🔑 Clave: ${d.clave}\n` : '') +
+                (d.perfil ? `👤 Perfil: ${d.perfil}\n` : '') +
+                (d.pin_perfil ? `🔢 PIN: ${d.pin_perfil}\n` : '') +
+                (d.fecha_vencimiento ? `📅 Vence: ${d.fecha_vencimiento}\n` : '') +
+                (resultadoRecarga.codigo_aprobacion ? `\n🎟️ Código de renovación: ${resultadoRecarga.codigo_aprobacion}\n` : '') +
+                `\n¡Gracias por tu compra! 🙌`;
+
+            const mensajeAdmin =
+                `🎬 *STREAMING ENTREGADO*\n\n` +
+                `📦 Producto: ${producto}\n` +
+                `📋 Pedido: ${numeroPedido}\n` +
+                `📱 Cliente: ${whatsappCliente}\n` +
+                `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
+                `🔢 Ref interna: ${referenciaInterna}\n` +
+                `🎟️ Código aprobación: ${resultadoRecarga.codigo_aprobacion || 'N/A'}\n\n` +
+                `✅ Estado: APROBADO`;
+
+            enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
+        }
+
+    } else {
+        document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
+        document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
+
+        if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
+            const pin = resultadoRecarga.codigos[0];
+            document.getElementById('pinContainer').innerHTML = `
+                <div class="pin-box">
+                    <div class="pin-label">🎮 TU PIN</div>
+                    <div class="pin-value">${pin}</div>
+                    <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pin}'); mostrarMensaje('PIN copiado', 'El PIN se copió al portapapeles.', 'exito')">
+                        📋 Copiar PIN
+                    </button>
+                </div>
+            `;
+        } else {
+            document.getElementById('pinContainer').innerHTML = '';
+        }
+
+        mostrarPaso('pasoRecargaExitosa');
+
+        notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : '' });
+
+        if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
+            enviarTelegram(`🎮 <b>PIN DEL PEDIDO:</b> <code>${resultadoRecarga.codigos[0]}</code>`);
+        }
+
+        if (whatsappCliente && whatsappCliente.length >= 10) {
+            const mensajeCliente =
+                `🎮 *RECARGAS GAMES*\n\n` +
+                `¡Hola! Recibimos tu comprobante ✅\n\n` +
+                `🎯 Producto: ${producto}\n` +
+                `👤 Jugador: ${nombreJugador}\n` +
+                `🆔 ID: ${idJugador}\n` +
+                `💰 Total: $${precioUsdFinal.toFixed(2)}\n` +
+                `📋 Pedido: ${numeroPedido}\n\n` +
+                `¡Gracias por tu compra! 🙌`;
+
+            const mensajeAdmin =
+                `🆕 *NUEVO PEDIDO - JUEGO*\n\n` +
+                `🎮 Juego: ${juego}\n` +
+                `📦 Producto: ${producto}\n` +
+                `👤 Jugador: ${nombreJugador}\n` +
+                `🆔 ID: ${idJugador}\n` +
+                `📱 WhatsApp cliente: ${whatsappCliente}\n` +
+                `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
+                `📋 Pedido: ${numeroPedido}\n` +
+                `🔢 Ref: ${referencia}\n` +
+                `💳 Método: ${metodoPago}\n\n` +
+                `✅ Estado: COMPLETADA` +
+                (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0
+                    ? `\n🎟️ PIN: ${resultadoRecarga.codigos[0]}`
+                    : '');
+
+            enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
+        }
+    }
+}
+
+function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) {
+    document.getElementById('tituloExito').textContent = '¡Pago Verificado!';
+    document.getElementById('subtituloExito').textContent = 'Tu pedido llegará muy pronto. Te notificaremos por WhatsApp cuando esté listo.';
+    document.getElementById('resPedido').textContent = numeroPedido;
+    document.getElementById('resProducto').textContent = producto;
+    document.getElementById('resNombre').textContent = nombreJugador;
+    document.getElementById('resIdResumen').textContent = idJugador;
+    document.getElementById('resReferencia').textContent = referencia;
+    document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
+    document.getElementById('pinContainer').innerHTML = '';
+
+    mostrarPaso('pasoRecargaExitosa');
+
+    let msgAdmin = `🚨 <b>PAGO VERIFICADO - ATENCIÓN REQUERIDA</b>\n\n`;
+    msgAdmin += `🎮 Juego: ${juego}\n`;
+    msgAdmin += `👤 Nombre: ${nombreJugador}\n`;
+    msgAdmin += `🆔 ID: ${idJugador}\n`;
+    msgAdmin += `📦 Producto: ${producto}\n`;
+    msgAdmin += `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n`;
+    msgAdmin += `🔢 Referencia: ${referencia}\n`;
+    msgAdmin += `💳 Método: ${metodoPago}\n`;
+    if (cuponAplicado) msgAdmin += `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)\n`;
+    msgAdmin += `\n⚠️ <b>Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar'}\n`;
+    msgAdmin += `🚨 <b>Acción:</b> Procesa el pedido manualmente\n`;
+    msgAdmin += `📋 Pedido: ${numeroPedido}\n`;
+    if (whatsappCliente) msgAdmin += `📱 WhatsApp cliente: ${whatsappCliente}\n`;
+    msgAdmin += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
+
+    enviarTelegram(msgAdmin);
+}
+
+// ==============================================
 // 🚀 INICIALIZAR
 // ==============================================
 mostrarPasoInicial();
@@ -1554,6 +1752,7 @@ console.log('📦 Producto:', producto);
 console.log('💳 Método:', metodoPago);
 console.log('📱 WhatsApp:', whatsappCliente || '(no proporcionado)');
 console.log('🎬 Es streaming:', esProductoStreaming(paqueteCod));
+console.log('🛠️ Sistema de referencias manuales: ACTIVO');
 </script>
 </body>
 </html>
