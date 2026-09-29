@@ -487,7 +487,7 @@ body::after{
             </div>
 
             <label style="display:block;margin-top:20px;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
-            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750 o MANUAL-XXXX" maxlength="30">
+            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750, RG-7482 o MANUAL-XXXX" maxlength="30">
         </div>
 
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
@@ -604,6 +604,7 @@ const refReferenciasFalsas = db.ref("referencias_falsas");
 const refPedidos = db.ref("pedidos");
 const refCupones = db.ref("cupones_usados");
 const refManuales = db.ref("referencias_manuales");
+const refCodigosRG = db.ref("codigos_rg");
 
 // ==============================================
 // 🔑 CONFIGURACIÓN
@@ -772,7 +773,7 @@ function enviarTelegram(mensaje) {
 }
 
 function notificarAdmin(tipo, datos = {}) {
-    const emojis = { exito: '🎉', falso: '⚠️', duplicado: '🚨', cupon_usado: '🎁', error: '❌', atencion: '🚨', manual: '🛠️' };
+    const emojis = { exito: '🎉', falso: '⚠️', duplicado: '🚨', cupon_usado: '🎁', error: '❌', atencion: '🚨', manual: '🛠️', codigo_rg: '🎲' };
 
     let mensaje = `${emojis[tipo] || 'ℹ️'} <b>${tipo.toUpperCase()}</b>\n\n`;
     mensaje += `🎮 Juego: ${juego}\n`;
@@ -905,6 +906,54 @@ async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
 }
 
 // ==============================================
+// 🎲 CÓDIGOS RG (110 Diamantes Free Fire)
+// ==============================================
+async function verificarCodigoRG(codigo) {
+    try {
+        const snap = await refCodigosRG.child(codigo).once('value');
+        if (!snap.exists()) return { valido: false, motivo: 'no_existe' };
+
+        const data = snap.val();
+        const activa = data.activa !== false;
+        const usada = data.usada === true;
+
+        if (!activa) return { valido: false, motivo: 'inactivo', data };
+        if (usada && data.uso_unico !== false) return { valido: false, motivo: 'usado', data };
+
+        return { valido: true, data };
+    } catch (error) {
+        console.error('Error verificando código RG:', error);
+        return { valido: false, motivo: 'error' };
+    }
+}
+
+async function marcarCodigoRGComoUsado(codigo, numeroPedido) {
+    try {
+        const snap = await refCodigosRG.child(codigo).once('value');
+        const data = snap.val() || {};
+        const vecesUsada = (data.veces_usada || 0) + 1;
+        const usoUnico = data.uso_unico !== false;
+
+        const actualizacion = {
+            veces_usada: vecesUsada,
+            fecha_uso: new Date().toISOString(),
+            usado_por_juego: juego,
+            usado_por_id: idJugador,
+            usado_por_producto: producto,
+            usado_por_pedido: numeroPedido || null,
+            whatsapp_cliente: whatsappCliente || null
+        };
+
+        if (usoUnico) actualizacion.usada = true;
+        await refCodigosRG.child(codigo).update(actualizacion);
+        return true;
+    } catch (e) {
+        console.error('Error marcando código como usado:', e);
+        return false;
+    }
+}
+
+// ==============================================
 // 🔢 GENERAR NÚMERO DE PEDIDO
 // ==============================================
 async function generarNumeroPedido() {
@@ -985,6 +1034,12 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             pedidoData.tipo_streaming = paqueteCod;
         }
 
+        if (extras.codigo_rg) {
+            pedidoData.codigo_rg = extras.codigo_rg;
+            pedidoData.monto_rg_usd = extras.monto_rg_usd;
+            pedidoData.monto_rg_bs = extras.monto_rg_bs;
+        }
+
         await nuevoPedido.set(pedidoData);
 
         if (user && user.uid) {
@@ -1052,7 +1107,11 @@ async function verificarPagoPabilo(referencia) {
 // ==============================================
 // 🎮 CENTRAL ONE (JUEGOS)
 // ==============================================
-async function enviarRecargaCentralOne() {
+async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugadorOverride) {
+    const juegoEnviar = juegoOverride || juego.toUpperCase();
+    const paqueteEnviar = paqueteOverride || paqueteCod;
+    const idEnviar = idJugadorOverride || idJugador;
+
     try {
         const res = await fetch('/api/central-one', {
             method: 'POST',
@@ -1060,10 +1119,10 @@ async function enviarRecargaCentralOne() {
             body: JSON.stringify({
                 accion: 'recarga',
                 datos: {
-                    juego: juego.toUpperCase(),
-                    id_jugador: idJugador,
-                    paquete: paqueteCod,
-                    email: idJugador
+                    juego: juegoEnviar,
+                    id_jugador: idEnviar,
+                    paquete: paqueteEnviar,
+                    email: idEnviar
                 }
             })
         });
@@ -1143,8 +1202,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
 
         if (accion === 'renovar') payload.codigo_aprobacion = codigoAprobacion;
 
-        console.log('📤 Enviando a /api/pagonorte:', payload);
-
         const res = await fetch('/api/pagonorte', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1152,9 +1209,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
         });
 
         const data = await res.json();
-        console.log('📥 /api/pagonorte respondió:', data);
 
-        // ✅ APROBADO
         if (data.ok === true && data.estado === 'Aprobado' && data.datos) {
             return {
                 exito: true,
@@ -1166,7 +1221,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             };
         }
 
-        // ⏳ PENDIENTE
         if (data.ok === true && (data.pendiente === true || data.estado === 'Pendiente')) {
             return {
                 exito: false,
@@ -1178,7 +1232,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             };
         }
 
-        // ❌ RECHAZADO
         return {
             exito: false,
             silencioso: true,
@@ -1217,16 +1270,102 @@ async function iniciarVerificacion() {
 
     const esManual = referencia.startsWith('MANUAL-');
     const esTest = referencia.startsWith('TEST-');
+    // 🎲 Códigos RG: empiezan con RG- pero NO con RG-NETFLIX/RG-DISNEY (esas son referencias internas)
+    const esCodigoRG = /^RG-\d{4}$/.test(referencia);
 
-    document.getElementById('subtituloVerificando').textContent = esTest
-        ? '🧪 Modo prueba — sin gastar saldo real...'
-        : (esManual ? 'Verificando tu código manual...' : 'Estamos buscando tu pago en el sistema bancario...');
+    let subtitulo = 'Estamos buscando tu pago en el sistema bancario...';
+    if (esTest) subtitulo = '🧪 Modo prueba — sin gastar saldo real...';
+    else if (esCodigoRG) subtitulo = '🎲 Verificando tu código...';
+    else if (esManual) subtitulo = 'Verificando tu código manual...';
+    document.getElementById('subtituloVerificando').textContent = subtitulo;
 
     mostrarPaso('pasoVerificandoPago');
 
     try {
         // ==========================================
-        // 🧪 MODO TEST — Salta verificación de Pábilo
+        // 🎲 CÓDIGO RG (110 Diamantes Free Fire)
+        // ==========================================
+        if (esCodigoRG) {
+            console.log('🎲 Código RG detectado:', referencia);
+
+            const resultadoRG = await verificarCodigoRG(referencia);
+
+            if (!resultadoRG.valido) {
+                const motivos = {
+                    no_existe: 'Este código no existe o fue borrado.',
+                    inactivo: 'Este código está desactivado.',
+                    usado: 'Este código ya fue utilizado.',
+                    error: 'Error consultando el código. Intenta de nuevo.'
+                };
+
+                notificarAdmin('codigo_rg', {
+                    referencia,
+                    metodo: 'CÓDIGO-RG',
+                    mensaje_extra: `❌ Código RG <b>RECHAZADO</b>: ${resultadoRG.motivo}`
+                });
+
+                document.getElementById('msgError').textContent = motivos[resultadoRG.motivo] || 'Código inválido.';
+                setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 600);
+                btn.disabled = false;
+                btn.innerHTML = '✅ Verificar Pago';
+                return;
+            }
+
+            console.log('✅ Código RG válido:', resultadoRG.data);
+
+            notificarAdmin('codigo_rg', {
+                referencia,
+                metodo: 'CÓDIGO-RG',
+                mensaje_extra: `🎲 Código RG <b>ACEPTADO</b> — ${resultadoRG.data.nota || 'sin nota'}`
+            });
+
+            mostrarPaso('pasoPagoConfirmado');
+            await new Promise(r => setTimeout(r, 1000));
+            mostrarPaso('pasoConectandoServidor');
+
+            // 🎮 Llamar a Central One con el producto del código (110 diamantes)
+            const resultadoRecarga = await enviarRecargaCentralOne(
+                'FREE FIRE',
+                resultadoRG.data.paquete || '110',
+                idJugador
+            );
+
+            await new Promise(r => setTimeout(r, 1000));
+
+            const infoPedido = await guardarPedidoEnFirebase(
+                referencia,
+                resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
+                resultadoRecarga.id_solicitud || '',
+                'Central One (Código RG)',
+                resultadoRecarga.codigos || [],
+                {
+                    es_streaming: false,
+                    codigo_rg: referencia,
+                    monto_rg_usd: resultadoRG.data.monto_usd,
+                    monto_rg_bs: resultadoRG.data.monto_bs
+                }
+            );
+
+            const numeroPedido = infoPedido.numeroMostrar;
+
+            await marcarCodigoRGComoUsado(referencia, numeroPedido);
+
+            if (resultadoRecarga.exito) {
+                mostrarResultadoExitoso(resultadoRecarga, false, referencia, numeroPedido, null);
+            } else if (resultadoRecarga.silencioso) {
+                mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido);
+            } else {
+                document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.';
+                mostrarPaso('pasoPagoNoEncontrado');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '✅ Verificar Pago';
+            return;
+        }
+
+        // ==========================================
+        // 🧪 MODO TEST
         // ==========================================
         if (esTest) {
             console.log('🧪 Referencia TEST detectada:', referencia);
