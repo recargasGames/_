@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+<title>RECARGASGAMES - Código TV Netflix</title>
+<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+<style>
+:root{
+    --color-principal:#3b82f6;
+    --color-azul:#3b82f6;
+    --color-blanco:#ffffff;
+    --color-dorado:#d4af37;
+    --color-dorado-claro:#f5d76e;
+    --color-negro:#0a0e1a;
+    --color-netflix:#E50914;
+    --alto-nav:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+    background:#000;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    padding-top:110px;
+    padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+    min-height:100vh;
+    position:relative;
+}
+a:focus-visible,button:focus-visible,input:focus-visible{
+    outline:2px solid var(--color-dorado-claro);
+    outline-offset:2px;
+}
+.video-fondo{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    object-fit:cover;z-index:-2;pointer-events:none;
+    opacity:1;filter:brightness(1.15);
+    will-change:transform;transform:translateZ(0);
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+}
+.video-overlay{
+    position:fixed;inset:0;
+    background:linear-gradient(180deg,
+        rgba(10,14,26,0.15) 0%,
+        rgba(10,14,26,0.35) 60%,
+        rgba(10,14,26,0.6) 100%);
+    z-index:-1;pointer-events:none;transform:translateZ(0);
+}
+body::before{
+    content:'';position:fixed;top:-30%;right:-20%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%);
+    border-radius:50%;pointer-events:none;z-index:0;
+}
+body::after{
+    content:'';position:fixed;bottom:-30%;left:-20%;
+    width:600px;height:600px;
+    background:radial-gradient(circle,rgba(229,9,20,0.1),transparent 70%);
+    border-radius:50%;pointer-events:none;z-index:0;
+}
+.main{position:relative;z-index:1}
+.barra-superior{
+    position:fixed;top:0;left:0;right:0;z-index:999;
+    background:rgba(5,8,16,0.85);
+    border-bottom:1px solid transparent;
+    border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;
+    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+.header{
+    padding:14px 24px;display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.brand img{
+    height:55px;width:auto;border-radius:12px;
+    filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));
+}
+.header-right{display:flex;align-items:center;gap:12px}
+.btn-perfil{
+    background:transparent;border:none;color:white;cursor:pointer;
+    padding:0;display:flex;align-items:center;gap:8px;
+    transition:all 0.3s;position:relative;margin-top:8px;
+}
+.btn-perfil:hover .avatar-circle{
+    transform:scale(1.05);
+    box-shadow:0 0 25px rgba(212,175,55,0.6);
+    border-color:var(--color-dorado);
+}
+.btn-perfil .avatar-circle{
+    width:40px;height:40px;border-radius:50%;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:bold;font-size:16px;color:white;
+    transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);
+    position:relative;overflow:hidden;
+}
+.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
+.btn-perfil .avatar-circle .online-dot{
+    position:absolute;bottom:0;right:0;width:12px;height:12px;
+    background:#22c55e;border-radius:50%;border:2px solid #0b1220;
+}
+.btn-perfil .perfil-nombre{
+    font-size:14px;font-weight:500;color:white;
+    max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+.menu-perfil{
+    position:absolute;top:75px;right:0;
+    background:rgba(10,14,26,0.98);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:16px;min-width:260px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);
+    opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);
+    transition:all 0.25s ease;z-index:1000;overflow:hidden;
+}
+.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.menu-perfil-header{
+    padding:16px 20px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));
+}
+.menu-perfil-header .avatar-grande{
+    width:48px;height:48px;border-radius:50%;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;border:2px solid rgba(212,175,55,0.4);
+}
+.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
+.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
+.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-opcion{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 20px;color:#e5e7eb;text-decoration:none;
+    font-size:14px;font-weight:500;transition:all 0.2s;
+    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+}
+.menu-perfil-opcion:last-child{border-bottom:none}
+.menu-perfil-opcion:hover{
+    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
+    color:var(--color-dorado-claro);padding-left:26px;
+    border-left:3px solid var(--color-dorado);
+}
+.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
+.menu-perfil-opcion.danger{color:#ef4444}
+.menu-perfil-opcion.danger:hover{
+    background:rgba(239,68,68,0.12);color:#ef4444;border-left-color:#ef4444;
+}
+.menu-hamburguesa{
+    background:transparent;border:none;color:white;font-size:28px;
+    cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;margin-top:8px;
+}
+.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-dorado)}
+.menu-flotante{
+    position:absolute;top:80px;right:0;
+    background:rgba(10,14,26,0.98);
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:16px;min-width:240px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);
+    opacity:0;visibility:hidden;transform:translateY(-10px);
+    transition:all 0.25s ease;z-index:999;overflow:hidden;
+}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
+.menu-opcion{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 20px;color:white;text-decoration:none;
+    font-size:15px;font-weight:500;transition:all 0.2s;
+    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+}
+.menu-opcion:last-child{border-bottom:none}
+.menu-opcion:hover{
+    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
+    color:var(--color-dorado-claro);padding-left:24px;
+}
+.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
+.games-menu{
+    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
+    padding:12px 20px;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    border-top:1px solid rgba(255,255,255,0.04);
+}
+.games-menu::-webkit-scrollbar{display:none}
+.games-menu a{
+    text-decoration:none;color:#cbd5e1;padding:8px 16px;
+    border-radius:20px;font-size:14px;font-weight:600;
+    white-space:nowrap;transition:all 0.3s;border:1px solid transparent;
+}
+.games-menu a:hover{
+    color:var(--color-dorado-claro);
+    background:rgba(212,175,55,0.08);
+    border-color:rgba(212,175,55,0.3);
+}
+.games-menu a.active{
+    color:var(--color-dorado-claro);
+    background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));
+    border-color:rgba(212,175,55,0.5);
+}
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
+
+.pagina-titulo{
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:10px;margin:24px 0 18px;
+}
+.pagina-titulo h1{
+    font-size:22px;font-weight:900;
+    background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+.chip-entrega{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:14px;
+    background:rgba(229,9,20,0.12);
+    border:1px solid rgba(229,9,20,0.5);
+    color:#fca5a5;font-size:12px;font-weight:700;
+}
+.chip-entrega::before{
+    content:'';width:7px;height:7px;border-radius:50%;
+    background:#E50914;box-shadow:0 0 8px rgba(229,9,20,0.8);
+}
+
+.card-panel{
+    background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));
+    border:1px solid rgba(212,175,55,0.25);
+    border-radius:20px;padding:22px 18px 20px;margin-bottom:20px;
+    position:relative;overflow:hidden;
+    box-shadow:0 15px 40px rgba(0,0,0,0.35);
+}
+.panel-title{
+    display:flex;align-items:center;gap:10px;
+    font-size:15px;font-weight:800;margin:0 0 16px;
+    color:var(--color-dorado-claro);position:relative;z-index:1;
+    letter-spacing:0.5px;text-transform:uppercase;
+}
+.paso-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;font-size:13px;font-weight:800;
+}
+.form-input{
+    width:100%;height:50px;border-radius:14px;
+    background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;
+    border:1px solid rgba(255,255,255,0.18);font-size:16px;
+    position:relative;z-index:1;transition:border-color 0.3s;
+    font-family:inherit;
+}
+.form-input:focus{
+    outline:none;border-color:var(--color-dorado);
+    box-shadow:0 0 0 3px rgba(212,175,55,0.15);
+}
+.form-input.resaltar{
+    border-color:#ef4444;
+    box-shadow:0 0 0 3px rgba(239,68,68,0.25);
+}
+.form-group{margin-bottom:16px;position:relative;z-index:1}
+.form-group:last-child{margin-bottom:0}
+.form-group label{
+    display:block;margin-bottom:8px;
+    color:#cbd5e1;font-size:13px;font-weight:600;
+    text-transform:uppercase;letter-spacing:0.5px;
+}
+.ayuda-id{
+    margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.4;
+    position:relative;z-index:1;
+}
+
+.btn-action{
+    width:100%;padding:18px;
+    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+    background-size:200% 200%;
+    color:#0a0e1a;border:none;border-radius:14px;
+    font-size:16px;font-weight:800;cursor:pointer;
+    transition:all 0.3s;letter-spacing:1px;
+    text-transform:uppercase;font-family:inherit;
+    box-shadow:0 6px 20px rgba(212,175,55,0.4);
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    position:relative;z-index:1;
+}
+.btn-action:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(212,175,55,0.6)}
+.btn-action:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-action.azul{
+    background:linear-gradient(135deg,#3b82f6,#60a5fa);
+    color:#fff;
+    box-shadow:0 6px 20px rgba(59,130,246,0.4);
+}
+.btn-action.azul:hover{box-shadow:0 10px 30px rgba(59,130,246,0.6)}
+
+.steps-info{
+    background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03));
+    border:1px solid rgba(59,130,246,0.3);
+    border-radius:16px;padding:18px;margin-bottom:20px;
+    position:relative;z-index:1;
+}
+.steps-info h4{
+    color:#93c5fd;font-size:15px;font-weight:800;
+    margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;
+    display:flex;align-items:center;gap:8px;
+}
+.steps-info ol{
+    margin-left:20px;padding:0;
+    color:#cbd5e1;font-size:14px;line-height:1.9;
+}
+.steps-info ol li{padding-left:6px}
+.steps-info strong{color:#fff}
+
+.codigo-resultado{
+    margin-top:20px;padding:28px 20px;
+    background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));
+    border:2px solid rgba(34,197,94,0.6);
+    border-radius:18px;text-align:center;
+    box-shadow:0 0 40px rgba(34,197,94,0.3);
+    animation:codigoPulse 2s ease-in-out infinite;
+    display:none;position:relative;z-index:1;
+}
+.codigo-resultado.activo{display:block}
+@keyframes codigoPulse{
+    0%,100%{box-shadow:0 0 40px rgba(34,197,94,0.3)}
+    50%{box-shadow:0 0 60px rgba(34,197,94,0.5)}
+}
+.codigo-resultado .codigo-label{
+    font-size:12px;color:#9ca3af;
+    text-transform:uppercase;letter-spacing:2px;
+    font-weight:700;margin-bottom:8px;
+}
+.codigo-resultado .codigo-value{
+    font-size:48px;font-weight:900;
+    color:#22c55e;letter-spacing:10px;
+    margin:16px 0;word-break:break-all;
+    text-shadow:0 0 30px rgba(34,197,94,0.7);
+    font-family:'Courier New',monospace;
+    line-height:1.2;
+}
+.codigo-resultado .codigo-tiempo{
+    font-size:13px;color:#94a3b8;
+    margin-bottom:16px;
+}
+.codigo-resultado .btn-copiar-codigo{
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:#fff;border:none;
+    padding:14px 28px;border-radius:12px;
+    font-weight:800;cursor:pointer;font-size:14px;
+    text-transform:uppercase;letter-spacing:1px;
+    box-shadow:0 4px 15px rgba(34,197,94,0.4);
+    transition:.3s;font-family:inherit;
+}
+.codigo-resultado .btn-copiar-codigo:hover{
+    transform:scale(1.05);
+    box-shadow:0 8px 25px rgba(34,197,94,0.6);
+}
+
+.aviso-info{
+    margin-top:16px;padding:14px 16px;
+    background:rgba(212,175,55,0.08);
+    border-left:4px solid var(--color-dorado);
+    border-radius:10px;
+    font-size:13px;color:#cbd5e1;line-height:1.6;
+    position:relative;z-index:1;
+}
+.aviso-info strong{color:var(--color-dorado-claro)}
+
+.soporte-card{
+    background:linear-gradient(135deg,rgba(37,211,102,0.12),rgba(37,211,102,0.03));
+    border:1px solid rgba(37,211,102,0.35);
+    border-radius:16px;
+    padding:20px;
+    margin-top:20px;
+    text-align:center;
+    position:relative;z-index:1;
+}
+.soporte-card h4{
+    color:#86efac;
+    font-size:15px;
+    font-weight:800;
+    margin-bottom:10px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+.soporte-card p{
+    font-size:13px;
+    color:#cbd5e1;
+    margin-bottom:16px;
+    line-height:1.5;
+}
+.btn-whatsapp-soporte{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:linear-gradient(135deg,#25D366,#128C7E);
+    color:#fff;
+    text-decoration:none;
+    padding:14px 28px;
+    border-radius:12px;
+    font-weight:800;
+    font-size:14px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    box-shadow:0 6px 20px rgba(37,211,102,0.4);
+    transition:all 0.3s;
+    font-family:inherit;
+}
+.btn-whatsapp-soporte:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 30px rgba(37,211,102,0.6);
+}
+
+.nav-inferior{
+    position:fixed;left:0;right:0;bottom:0;z-index:999;
+    background:rgba(5,8,16,0.96);
+    border-top:1px solid rgba(212,175,55,0.25);
+    box-shadow:0 -4px 20px rgba(0,0,0,0.5);
+    padding-bottom:env(safe-area-inset-bottom);
+    transform:translateZ(0);
+}
+.nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
+.nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;color:#9ca3af;text-decoration:none;
+    font-size:12px;font-weight:600;transition:color 0.2s;
+}
+.nav-item svg{
+    width:22px;height:22px;stroke:currentColor;fill:none;
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+}
+.nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
+.nav-item.soporte{color:#4ade80}
+
+.back-to-top{
+    position:fixed;
+    bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+    right:20px;
+    background:linear-gradient(135deg,#d4af37,#3b82f6);
+    color:#fff;width:45px;height:45px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0;visibility:hidden;
+    z-index:998;transition:.3s;text-decoration:none;
+    font-size:18px;box-shadow:0 8px 25px rgba(0,0,0,0.4);
+}
+.back-to-top.show{opacity:1;visibility:visible}
+
+.whatsapp-float{
+    position:fixed;
+    bottom:calc(var(--alto-nav) + 80px + env(safe-area-inset-bottom));
+    right:20px;
+    background:linear-gradient(135deg,#25D366,#128C7E);
+    width:55px;height:55px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;font-size:28px;z-index:998;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+}
+
+.modal-overlay{
+    display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.85);z-index:2000;
+    justify-content:center;align-items:center;padding:20px;
+}
+.modal-overlay.activo{display:flex}
+.modal-box{
+    background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));
+    border:1px solid rgba(212,175,55,0.3);
+    border-radius:24px;max-width:420px;width:100%;
+    box-shadow:0 30px 80px rgba(0,0,0,0.7);
+    animation:modalSlide 0.3s ease;overflow:hidden;
+}
+@keyframes modalSlide{
+    from{transform:translateY(-40px);opacity:0}
+    to{transform:translateY(0);opacity:1}
+}
+.modal-header{
+    padding:24px 20px;text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));
+}
+.modal-header .icono-grande{font-size:50px;margin-bottom:10px}
+.modal-header h2{
+    font-size:20px;font-weight:800;color:var(--color-dorado-claro);
+    letter-spacing:1px;text-transform:uppercase;
+}
+.modal-body{padding:24px 20px}
+.modal-footer{padding:0 20px 20px;display:flex;gap:10px}
+.modal-btn{
+    flex:1;padding:14px;border-radius:12px;font-size:15px;
+    font-weight:800;cursor:pointer;border:none;transition:0.3s;
+    text-transform:uppercase;font-family:inherit;
+}
+.modal-btn.cancelar{
+    background:rgba(71,85,105,0.3);color:#94a3b8;
+    border:1px solid rgba(71,85,105,0.5);
+}
+.modal-btn.cancelar:hover{background:rgba(71,85,105,0.5);color:white}
+.modal-btn.continuar{
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;
+}
+
+@media(max-width:500px){
+    body{padding-top:100px}
+    .main{padding-top:20px}
+    .brand img{height:45px}
+    .header{padding:10px 16px}
+    .games-menu{padding:10px 15px}
+    .menu-flotante{right:10px;min-width:220px}
+    .btn-perfil .perfil-nombre{display:none}
+    .btn-perfil .perfil-flecha{display:none}
+    .menu-perfil{right:0;min-width:230px}
+    .codigo-resultado .codigo-value{font-size:34px;letter-spacing:6px}
+    .video-fondo{opacity:0.85;filter:brightness(1.05)}
+}
+@media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{
+        animation-duration:0.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:0.01ms !important;
+    }
+}
+</style>
+</head>
+<body onclick="cerrarTodosLosMenus(event)">
+
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
+        <div class="header-right">
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="logo.png" alt="Logo" id="avatarLogo">
+                        <span class="online-dot"></span>
+                    </div>
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+                </button>
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                    <div class="menu-perfil-header">
+                        <div class="avatar-grande" id="avatarGrande"><img src="logo.png" alt="Logo"></div>
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
+                        </div>
+                    </div>
+                    <a href="dashboard.html" class="menu-perfil-opcion"><span class="icono">📊</span> Mi Panel</a>
+                    <a href="perfil.html" class="menu-perfil-opcion"><span class="icono">👤</span> Editar Perfil</a>
+                    <a href="pedidos.html" class="menu-perfil-opcion"><span class="icono">📦</span> Mis Pedidos</a>
+                    <a href="favoritos.html" class="menu-perfil-opcion"><span class="icono">❤️</span> Favoritos</a>
+                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
+                </div>
+            </div>
+            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        </div>
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuRegister">📝 Crear Cuenta</a>
+            <div id="menuConSesion" style="display:none;">
+                <a href="dashboard.html" class="menu-opcion">📊 Mi Panel</a>
+                <a href="pedidos.html" class="menu-opcion">📦 Mis Pedidos</a>
+                <a href="perfil.html" class="menu-opcion">👤 Editar Perfil</a>
+                <div class="menu-divider"></div>
+                <a href="#" class="menu-opcion" id="menuLogout" style="color:#ef4444;">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+    <nav class="games-menu" aria-label="Juegos">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="delta.html">Delta Force</a>
+        <a href="bigo.html">Bigo Live</a>
+        <a href="gift-cards.html">Gift Cards</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="netflix-codigo-tv.html" class="active" aria-current="page">Código TV</a>
+        <a href="disney.html">Disney+</a>
+    </nav>
+</div>
+
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🔑</div>
+            <h2>Iniciar Sesión</h2>
+        </div>
+        <div class="modal-body">
+            <form id="loginForm">
+                <div style="margin-bottom:20px;">
+                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
+            </form>
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
+                <p style="margin-top:8px;"><a href="#" id="resetPasswordLink" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="pagina-titulo">
+        <h1>📺 Código para TV Netflix</h1>
+        <span class="chip-entrega">Instantáneo</span>
+    </div>
+
+    <div class="steps-info">
+        <h4>📺 ¿Netflix te pide un código en la TV?</h4>
+        <ol>
+            <li>Abre <strong>Netflix en tu TV</strong></li>
+            <li>Selecciona <strong>"Esta es mi cuenta"</strong> → <strong>"Estoy de viaje"</strong></li>
+            <li>Presiona <strong>"Enviar email"</strong></li>
+            <li>Espera unos <strong>5-10 segundos</strong></li>
+            <li>Ingresa abajo el <strong>correo de tu cuenta Netflix</strong></li>
+            <li>Presiona <strong>"Obtener código"</strong> y escribe el código en la TV</li>
+        </ol>
+    </div>
+
+    <div class="card-panel" id="panelId">
+        <div class="panel-title"><span class="paso-num">1</span> Correo de la cuenta</div>
+        <div class="form-group">
+            <label for="correoHogar">📧 Correo de la cuenta Netflix</label>
+            <input type="email" class="form-input" id="correoHogar" placeholder="cuenta@ejemplo.com" autocomplete="off">
+            <p class="ayuda-id">Es el correo de la cuenta Netflix que quieres iniciar en la TV.</p>
+        </div>
+
+        <button class="btn-action azul" id="btnObtenerCodigo" onclick="obtenerCodigoHogar()" style="margin-top:16px;">
+            🔍 Obtener Código
+        </button>
+
+        <div class="codigo-resultado" id="codigoResultado">
+            <div class="codigo-label">🎬 Tu código es</div>
+            <div class="codigo-value" id="codigoValue">------</div>
+            <div class="codigo-tiempo" id="codigoTiempo">⏰ Expira en 15 minutos</div>
+            <button class="btn-copiar-codigo" onclick="copiarCodigo()">
+                📋 Copiar Código
+            </button>
+        </div>
+
+        <div class="aviso-info">
+            <strong>⚠️ Importante:</strong><br>
+            El código expira en pocos minutos. Escríbelo en tu TV inmediatamente. Solo funciona en el dispositivo que lo pidió.
+        </div>
+    </div>
+
+    <div class="soporte-card">
+        <h4>💬 ¿Problemas con el código?</h4>
+        <p>Si no funciona o no aparece, contáctanos y te ayudamos.</p>
+        <a href="https://wa.me/584228242411" class="btn-whatsapp-soporte" target="_blank" rel="noopener">
+            💬 Contactar Soporte
+        </a>
+    </div>
+
+</div>
+
+<nav class="nav-inferior" aria-label="Navegación principal">
+    <div class="nav-inferior-inner">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="index.html#juegos" class="nav-item active">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item" id="navPedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
+</nav>
+
+<a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
+
+<script type="module">
+import { auth } from './firebase-config.js';
+import {
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+let usuarioActual = null;
+let codigoActual = "";
+
+// ============================================
+// 🔑 OBTENER CÓDIGO NETFLIX HOGAR
+// ============================================
+window.obtenerCodigoHogar = async function() {
+    const correoInput = document.getElementById('correoHogar');
+    const correo = correoInput.value.trim();
+    const btn = document.getElementById('btnObtenerCodigo');
+    const resultado = document.getElementById('codigoResultado');
+
+    if (!correo || !correo.includes('@') || !correo.includes('.')) {
+        correoInput.classList.add('resaltar');
+        setTimeout(() => correoInput.classList.remove('resaltar'), 2500);
+        correoInput.focus();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Consultando...';
+    resultado.classList.remove('activo');
+
+    try {
+        const res = await fetch('/api/pagonorte', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                accion: 'netflix_hogar',
+                correo: correo
+            })
+        });
+
+        const data = await res.json();
+        console.log('🔑 Netflix Hogar:', data);
+
+        if (data.ok && data.codigo) {
+            codigoActual = data.codigo;
+            document.getElementById('codigoValue').textContent = data.codigo;
+            document.getElementById('codigoTiempo').textContent = `⏰ Expira en ${data.expira_minutos || 15} minutos`;
+            resultado.classList.add('activo');
+            setTimeout(() => {
+                resultado.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 200);
+        } else if (data.codigo_respuesta === 'codigo_netflix_no_disponible') {
+            alert('⚠️ Aún no hay código disponible.\n\nAsegúrate de:\n1. Abrir Netflix en la TV\n2. Seleccionar "Esta es mi cuenta" → "Estoy de viaje"\n3. Presionar "Enviar email"\n4. Esperar 10 segundos\n\nLuego presiona "Obtener código" otra vez.');
+        } else {
+            alert('❌ ' + (data.mensaje || 'No se pudo obtener el código. Intenta de nuevo en unos segundos.'));
+        }
+
+    } catch (error) {
+        console.error('❌ Error código hogar:', error);
+        alert('❌ No se pudo conectar con el servidor. Intenta de nuevo.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Obtener Código';
+    }
+};
+
+window.copiarCodigo = function() {
+    if (!codigoActual) return;
+    navigator.clipboard.writeText(codigoActual).then(() => {
+        const btn = document.querySelector('.btn-copiar-codigo');
+        const original = btn.innerHTML;
+        btn.innerHTML = '✓ ¡Copiado!';
+        setTimeout(() => btn.innerHTML = original, 2000);
+    });
+};
+
+// ============================================
+// 🍔 MENÚS
+// ============================================
+window.alternarMenu = function() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+    document.getElementById('menuPerfil').classList.remove('activo');
+    document.getElementById('perfilFlecha').classList.remove('abierta');
+};
+
+window.toggleMenuPerfil = function() {
+    document.getElementById('menuPerfil').classList.toggle('activo');
+    document.getElementById('perfilFlecha').classList.toggle('abierta');
+    document.getElementById('menuFlotante').classList.remove('activo');
+};
+
+window.cerrarTodosLosMenus = function(e) {
+    const menuFlotante = document.getElementById('menuFlotante');
+    const menuPerfil = document.getElementById('menuPerfil');
+    const btnMenu = document.getElementById('btnMenu');
+    const btnPerfil = document.getElementById('btnPerfil');
+    if (btnMenu && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
+        menuFlotante.classList.remove('activo');
+    }
+    if (btnPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+        menuPerfil.classList.remove('activo');
+        document.getElementById('perfilFlecha').classList.remove('abierta');
+    }
+};
+
+// ============================================
+// 🔐 FIREBASE AUTH
+// ============================================
+const perfilContainer = document.getElementById('perfilContainer');
+const menuLogin = document.getElementById('menuLogin');
+const menuRegister = document.getElementById('menuRegister');
+const menuConSesion = document.getElementById('menuConSesion');
+const perfilNombre = document.getElementById('perfilNombre');
+const nombreCompleto = document.getElementById('nombreCompleto');
+const emailUsuario = document.getElementById('emailUsuario');
+const modalLogin = document.getElementById('modalLogin');
+const loginForm = document.getElementById('loginForm');
+
+onAuthStateChanged(auth, (user) => {
+    usuarioActual = user;
+    if (user) {
+        const nombre = user.displayName || 'Usuario';
+        const email = user.email || 'usuario@email.com';
+        perfilContainer.style.display = 'block';
+        perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+        nombreCompleto.textContent = nombre;
+        emailUsuario.textContent = email;
+
+        menuLogin.style.display = 'none';
+        menuRegister.style.display = 'none';
+        menuConSesion.style.display = 'block';
+    } else {
+        perfilContainer.style.display = 'none';
+        menuLogin.style.display = 'flex';
+        menuRegister.style.display = 'flex';
+        menuConSesion.style.display = 'none';
+    }
+});
+
+window.abrirModalLogin = function() {
+    modalLogin.classList.add('activo');
+    document.getElementById('loginMessage').style.display = 'none';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('menuFlotante').classList.remove('activo');
+};
+
+window.cerrarModalLogin = function() {
+    modalLogin.classList.remove('activo');
+};
+
+modalLogin.addEventListener('click', (e) => {
+    if (e.target === modalLogin) cerrarModalLogin();
+});
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('loginMessage');
+
+    btn.disabled = true;
+    btn.textContent = 'Ingresando...';
+    msg.style.display = 'none';
+
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        msg.style.background = 'rgba(34,197,94,0.15)';
+        msg.style.color = '#86efac';
+        msg.textContent = '✅ ¡Bienvenido!';
+        msg.style.display = 'block';
+        setTimeout(() => {
+            cerrarModalLogin();
+            window.location.reload();
+        }, 1000);
+    } catch (error) {
+        let errorMsg = '❌ ';
+        switch (error.code) {
+            case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
+            case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
+            case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
+            default: errorMsg += error.message;
+        }
+        msg.style.background = 'rgba(239,68,68,0.15)';
+        msg.style.color = '#fca5a5';
+        msg.textContent = errorMsg;
+        msg.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Ingresar';
+    }
+});
+
+const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
+if (btnCerrarSesionEl) {
+    btnCerrarSesionEl.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm('¿Seguro que quieres cerrar sesión?')) {
+            await signOut(auth);
+            window.location.reload();
+        }
+    });
+}
+
+const menuLogoutEl = document.getElementById('menuLogout');
+if (menuLogoutEl) {
+    menuLogoutEl.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm('¿Seguro que quieres cerrar sesión?')) {
+            await signOut(auth);
+            window.location.reload();
+        }
+    });
+}
+
+const resetLinkEl = document.getElementById('resetPasswordLink');
+if (resetLinkEl) {
+    resetLinkEl.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        if (!email) {
+            alert('❌ Ingresa tu correo primero');
+            return;
+        }
+        try {
+            await sendPasswordResetEmail(auth, email);
+            alert('✅ Correo enviado. Revisa tu bandeja.');
+        } catch (error) {
+            alert('❌ ' + error.message);
+        }
+    });
+}
+
+// ============================================
+// 🚀 INICIALIZACIÓN
+// ============================================
+const chipActivo = document.querySelector('.games-menu a.active');
+if (chipActivo) chipActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
+
+window.addEventListener('scroll', () => {
+    document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
+}, { passive: true });
+</script>
+</body>
+</html>
