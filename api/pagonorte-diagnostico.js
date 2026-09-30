@@ -1,3 +1,4 @@
+// api/pagonorte-diagnostico.js
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     
@@ -9,93 +10,47 @@ export default async function handler(req, res) {
         variables: {
             key_existe: !!API_KEY,
             secret_existe: !!API_SECRET,
-            key_prefijo: API_KEY ? API_KEY.substring(0, 10) + '...' : null,
-            secret_prefijo: API_SECRET ? API_SECRET.substring(0, 10) + '...' : null,
-            key_es_produccion: API_KEY && API_KEY.startsWith('pn_live_'),
-            key_es_sandbox: API_KEY && API_KEY.startsWith('pn_test_')
+            key_prefijo: API_KEY ? API_KEY.substring(0, 12) + '...' : null,
+            secret_prefijo: API_SECRET ? API_SECRET.substring(0, 12) + '...' : null
         },
-        pagoNorte: {}
+        pruebas: {}
     };
     
-    // Prueba 1: PING (más simple, sin auth obligatoria)
+    // Prueba 1: ping
     try {
-        const formPing = new URLSearchParams();
-        formPing.append('action', 'ping');
-        
-        const resPing = await fetch('https://pagonorte.net/recargas_post/api.jsp', {
+        const form = new URLSearchParams();
+        form.append('action', 'ping');
+        const r = await fetch('https://pagonorte.net/recargas_post/api.jsp', {
             method: 'POST',
             headers: {
                 'X-API-Key': API_KEY || '',
                 'X-API-Secret': API_SECRET || '',
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: formPing.toString()
+            body: form.toString()
         });
-        
-        const txtPing = await resPing.text();
-        try {
-            resultado.pagoNorte.ping = JSON.parse(txtPing);
-        } catch (e) {
-            resultado.pagoNorte.ping = { raw: txtPing };
-        }
-        resultado.pagoNorte.ping_http_status = resPing.status;
-    } catch (error) {
-        resultado.pagoNorte.ping_error = error.message;
-    }
+        const t = await r.text();
+        try { resultado.pruebas.ping = JSON.parse(t); } catch (e) { resultado.pruebas.ping = { raw: t }; }
+        resultado.pruebas.ping_http = r.status;
+    } catch (e) { resultado.pruebas.ping_error = e.message; }
     
-    // Prueba 2: SALDO (sí exige auth real)
+    // Prueba 2: saldo
     try {
-        const formSaldo = new URLSearchParams();
-        formSaldo.append('action', 'saldo');
-        
-        const resSaldo = await fetch('https://pagonorte.net/recargas_post/api.jsp', {
+        const form = new URLSearchParams();
+        form.append('action', 'saldo');
+        const r = await fetch('https://pagonorte.net/recargas_post/api.jsp', {
             method: 'POST',
             headers: {
                 'X-API-Key': API_KEY || '',
                 'X-API-Secret': API_SECRET || '',
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: formSaldo.toString()
+            body: form.toString()
         });
-        
-        const txtSaldo = await resSaldo.text();
-        try {
-            resultado.pagoNorte.saldo = JSON.parse(txtSaldo);
-        } catch (e) {
-            resultado.pagoNorte.saldo = { raw: txtSaldo };
-        }
-        resultado.pagoNorte.saldo_http_status = resSaldo.status;
-    } catch (error) {
-        resultado.pagoNorte.saldo_error = error.message;
-    }
-    
-    // Prueba 3: DISPONIBILIDAD de Netflix Perfil (para ver si al menos llega a PagoNorte)
-    try {
-        const formDisp = new URLSearchParams();
-        formDisp.append('action', 'disponibilidad_streaming');
-        formDisp.append('tipo', 'recargaPerfilNetflix');
-        formDisp.append('paquete', '1');
-        
-        const resDisp = await fetch('https://pagonorte.net/recargas_post/api.jsp', {
-            method: 'POST',
-            headers: {
-                'X-API-Key': API_KEY || '',
-                'X-API-Secret': API_SECRET || '',
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formDisp.toString()
-        });
-        
-        const txtDisp = await resDisp.text();
-        try {
-            resultado.pagoNorte.disponibilidad = JSON.parse(txtDisp);
-        } catch (e) {
-            resultado.pagoNorte.disponibilidad = { raw: txtDisp };
-        }
-        resultado.pagoNorte.disponibilidad_http_status = resDisp.status;
-    } catch (error) {
-        resultado.pagoNorte.disponibilidad_error = error.message;
-    }
+        const t = await r.text();
+        try { resultado.pruebas.saldo = JSON.parse(t); } catch (e) { resultado.pruebas.saldo = { raw: t }; }
+        resultado.pruebas.saldo_http = r.status;
+    } catch (e) { resultado.pruebas.saldo_error = e.message; }
     
     return res.status(200).json(resultado);
 }
