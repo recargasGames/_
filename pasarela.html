@@ -1067,7 +1067,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             pedidoData.datos_streaming = extras.datos_streaming || null;
             pedidoData.referencia_interna = extras.referencia_interna || null;
             pedidoData.tipo_streaming = paqueteCod;
-            // ✅ NUEVO: marcar si es renovación
             if (MODO_RENOVACION) {
                 pedidoData.es_renovacion = true;
                 pedidoData.codigo_aprobacion_original = CODIGO_RENOVACION;
@@ -1216,8 +1215,8 @@ function generarReferenciaInterna(productoCodigo) {
     return `RG-${partes.join('-')}-${ts}-${rand}`;
 }
 
-// ✅ NUEVO: Función mejorada para llamar a PagoNorte con detección exacta
-async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
+// ✅ NUEVO: Función mejorada que acepta código RG con codigo_aprobacion_pagonorte
+async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoRGInfo = null) {
     try {
         const tipoPagoNorte = MAPA_PAGONORTE[productoCodigo.toLowerCase()];
         if (!tipoPagoNorte) {
@@ -1229,16 +1228,33 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             };
         }
 
-        const esRenovacion = MODO_RENOVACION && CODIGO_RENOVACION;
+        // 🔄 ¿Es renovación?
+        const esRenovacionNormal = MODO_RENOVACION && CODIGO_RENOVACION;
+        const esRenovacionPorRG = codigoRGInfo && codigoRGInfo.codigo_aprobacion_pagonorte;
+
+        let accion = 'recarga';
+        let codigoAprobacionFinal = '';
+
+        if (esRenovacionPorRG) {
+            accion = 'renovar';
+            codigoAprobacionFinal = codigoRGInfo.codigo_aprobacion_pagonorte;
+            console.log('🔄 RENOVACIÓN POR RG — Código aprobación PagoNorte:', codigoAprobacionFinal);
+        } else if (esRenovacionNormal) {
+            accion = 'renovar';
+            codigoAprobacionFinal = CODIGO_RENOVACION;
+            console.log('🔄 RENOVACIÓN NORMAL — Código aprobación:', codigoAprobacionFinal);
+        } else {
+            console.log('🛒 COMPRA NUEVA — Sin renovación');
+        }
 
         const payload = {
-            accion: esRenovacion ? 'renovar' : 'recarga',
+            accion: accion,
             producto: productoCodigo,
             referencia: referenciaInterna
         };
 
-        if (esRenovacion) {
-            payload.codigo_aprobacion = CODIGO_RENOVACION;
+        if (accion === 'renovar') {
+            payload.codigo_aprobacion = codigoAprobacionFinal;
         }
 
         console.log('📤 Enviando a /api/pagonorte:');
@@ -1253,17 +1269,17 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
         const data = await res.json();
         console.log('📥 Respuesta /api/pagonorte:', data);
 
-        // ✅ APROBADO (según formato exacto de PagoNorte)
+        // ✅ APROBADO
         if (data.ok === true && data.estado === 'Aprobado' && data.datos) {
             return {
                 exito: true,
                 estado: 'Aprobado',
                 codigo_aprobacion: data.codigo_aprobacion || '',
-                codigo_aprobacion_original: data.codigo_aprobacion_original || '',
+                codigo_aprobacion_original: data.codigo_aprobacion_original || codigoAprobacionFinal,
                 id_solicitud: data.id_solicitud || '',
                 datos: data.datos || {},
                 mensaje: data.mensaje || 'Operación aprobada',
-                es_renovacion: esRenovacion
+                es_renovacion: accion === 'renovar'
             };
         }
 
@@ -1299,8 +1315,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
                 `🔢 Referencia: ${referenciaInterna}\n` +
                 `📱 WhatsApp: ${whatsappCliente || 'N/A'}\n\n` +
                 `❌ Código: ${codigoErr}\n` +
-                `❌ Mensaje: ${mensajeErr}\n\n` +
-                `🛠️ <b>ACCIÓN:</b> Revisar credenciales de PagoNorte en Vercel`
+                `❌ Mensaje: ${mensajeErr}`
             );
 
             return {
@@ -1308,7 +1323,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
                 silencioso: true,
                 error_sistema: true,
                 motivo_admin: `🚨 CREDENCIALES PAGONORTE: ${mensajeErr} (${codigoErr})`,
-                mensaje: 'Estamos con un problema técnico temporal. Escríbenos por WhatsApp a +58 422-8242411 para completar tu renovación de inmediato.'
+                mensaje: 'Estamos con un problema técnico temporal. Escríbenos por WhatsApp a +58 422-8242411.'
             };
         }
 
@@ -1317,8 +1332,8 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
             return {
                 exito: false,
                 silencioso: true,
-                motivo_admin: `❌ Código de aprobación no encontrado: ${mensajeErr}`,
-                mensaje: 'El código de renovación no es válido o no pertenece a tu cuenta. Verifícalo o escríbenos por WhatsApp.'
+                motivo_admin: `❌ Código aprobación no encontrado: ${mensajeErr}`,
+                mensaje: 'El código no es válido o no pertenece a tu cuenta. Escríbenos por WhatsApp.'
             };
         }
 
@@ -1328,7 +1343,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
                 exito: false,
                 silencioso: true,
                 motivo_admin: `⏰ Código no renovable (pasó el corte): ${mensajeErr}`,
-                mensaje: 'Tu cuenta ya pasó la fecha de corte y no se puede renovar. Escríbenos por WhatsApp para comprar una nueva.'
+                mensaje: 'Tu cuenta ya pasó la fecha de corte y no se puede renovar. Escríbenos por WhatsApp.'
             };
         }
 
@@ -1338,7 +1353,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
                 exito: false,
                 silencioso: true,
                 motivo_admin: `⚠️ Tipo no coincide: ${mensajeErr}`,
-                mensaje: 'El tipo de cuenta no coincide con la compra original. Verifica si compraste Perfil o Cuenta Completa.'
+                mensaje: 'El tipo de cuenta no coincide con la compra original.'
             };
         }
 
@@ -1348,7 +1363,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
                 exito: false,
                 silencioso: true,
                 motivo_admin: `📭 Sin disponibilidad: ${mensajeErr}`,
-                mensaje: 'No hay stock disponible ahora. Escríbenos por WhatsApp, te avisamos cuando haya.'
+                mensaje: 'No hay stock disponible ahora. Escríbenos por WhatsApp.'
             };
         }
 
@@ -1358,16 +1373,16 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
                 exito: false,
                 silencioso: true,
                 motivo_admin: `🔧 Paquete inválido: ${mensajeErr}`,
-                mensaje: 'Error técnico en el producto. Escríbenos por WhatsApp.'
+                mensaje: 'Error técnico. Escríbenos por WhatsApp.'
             };
         }
 
-        // FALLBACK GENÉRICO
+        // FALLBACK
         return {
             exito: false,
             silencioso: true,
             motivo_admin: `Rechazado. Código: ${codigoErr || 'N/A'}. Mensaje: ${mensajeErr || 'sin mensaje'}`,
-            mensaje: 'Tu pedido está siendo procesado por nuestro equipo. Te contactaremos por WhatsApp.'
+            mensaje: 'Tu pedido está siendo procesado. Te contactaremos por WhatsApp.'
         };
 
     } catch (error) {
@@ -1375,7 +1390,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna) {
         return {
             exito: false,
             silencioso: true,
-            motivo_admin: 'Error de conexión con PagoNorte: ' + error.message,
+            motivo_admin: 'Error de conexión: ' + error.message,
             mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto'
         };
     }
@@ -1489,7 +1504,14 @@ async function iniciarVerificacion() {
             if (tipoCodigo === 'pagonorte' || esProductoStreaming(paqueteDelCodigo)) {
                 esStreaming = true;
                 referenciaInterna = generarReferenciaInterna(paqueteDelCodigo);
-                resultadoRecarga = await enviarRecargaPagoNorte(paqueteDelCodigo, referenciaInterna);
+                console.log('🎬 Código es para PagoNorte:', paqueteDelCodigo);
+                
+                // ✅ NUEVO: Pasar los datos del código RG completo
+                resultadoRecarga = await enviarRecargaPagoNorte(
+                    paqueteDelCodigo,
+                    referenciaInterna,
+                    resultadoRG.data
+                );
             } else {
                 resultadoRecarga = await enviarRecargaCentralOne(
                     resultadoRG.data.juego || 'FREE FIRE',
@@ -1792,7 +1814,6 @@ async function iniciarVerificacion() {
 // ==============================================
 // 🎨 RESULTADOS
 // ==============================================
-// ✅ NUEVO: Diferenciar visualmente entre compra y renovación
 function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
     document.getElementById('resPedido').textContent = numeroPedido;
     document.getElementById('resProducto').textContent = producto;
@@ -1801,7 +1822,6 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
     document.getElementById('resReferencia').textContent = referencia;
     document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
 
-    // ✅ NUEVO: Cambiar textos si es renovación
     const esRenovacion = resultadoRecarga.es_renovacion || MODO_RENOVACION;
 
     if (esStreaming && resultadoRecarga.datos) {
@@ -1843,7 +1863,7 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
 
         htmlDatos += `</div>`;
 
-        // ✅ NUEVO: Bloque destacado de vencimiento
+        // ✅ Bloque destacado de vencimiento
         if (d.fecha_vencimiento) {
             const fechaSegura = String(d.fecha_vencimiento).replace(/'/g, "\\'");
             htmlDatos += `
@@ -1865,7 +1885,7 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
             `;
         }
 
-        // ✅ NUEVO: Código de aprobación (nuevo o el original)
+        // ✅ Código de aprobación
         const codigoAprob = resultadoRecarga.codigo_aprobacion || resultadoRecarga.codigo_aprobacion_original;
         if (codigoAprob) {
             const codAprob = String(codigoAprob).replace(/'/g, "\\'");
@@ -1980,7 +2000,7 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
         }
     }
 
-    // ✅ NUEVO: Limpiar localStorage de renovación después de éxito
+    // ✅ Limpiar localStorage de renovación después de éxito
     if (esRenovacion) {
         setTimeout(() => {
             localStorage.removeItem('modo_renovacion');
