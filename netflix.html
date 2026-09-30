@@ -831,7 +831,7 @@ body::after{
             <div class="panel-title"><span class="paso-num">2</span> Método de pago</div>
             <div class="payment-methods" role="radiogroup" aria-label="Método de pago">
                 <div class="pay-box active" role="radio" aria-checked="true" tabindex="0" data-metodo="PAGO MOVIL">🏦 PAGO MOVIL</div>
-                <div class="pay-box" role="radio" aria-checked="false" tabindex="0" data-metodo="BINANCE">🟡 BINANCE</div>
+                <div class="pay-box" role="radio" aria-checked="false" tabindex="0" data-metodo="BINANCE" aria-disabled="true" style="opacity:.55;cursor:not-allowed;">🟡 BINANCE · Próximamente</div>
             </div>
             <div class="tasa-info" id="tasaInfo">Cargando tasa...</div>
         </div>
@@ -1038,7 +1038,7 @@ window.mostrarConfirmacion = mostrarConfirmacion;
 window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
 
 let metodo = "PAGO MOVIL";
-let tasa = 940;
+let tasa = 930;
 let whatsappOk = false;
 let compraPendiente = null;
 const juegoActual = "NETFLIX";
@@ -1109,7 +1109,7 @@ function mostrarEstado(mensaje, tipo, nombre) {
 // ============================================
 async function cargarTasa() {
     const tasaGuardada = localStorage.getItem('tasa_usd_ves');
-    tasa = tasaGuardada ? parseFloat(tasaGuardada) : 940;
+    tasa = tasaGuardada ? parseFloat(tasaGuardada) : 930;
     actualizarPrecios();
 
     try {
@@ -1142,6 +1142,10 @@ function actualizarPrecios(){
 }
 
 window.seleccionarPago = function(m, el){
+    if (m === 'BINANCE') {
+        avisar('Binance Pay estará disponible próximamente.', 'error');
+        return;
+    }
     document.querySelectorAll('.pay-box').forEach(b => {
         b.classList.remove('active');
         b.setAttribute('aria-checked', 'false');
@@ -1184,7 +1188,33 @@ window.prepararCompra = async function(producto, precioUsd, paqueteCodigo){
     if (!whatsapp) { irAlCampoId('Escribe tu WhatsApp para continuar'); return; }
     if (!whatsappOk) { irAlCampoId('Revisa tu WhatsApp: debe tener 10-12 dígitos'); return; }
 
-    compraPendiente = { producto, precioUsd, paqueteCodigo, whatsapp };
+    const tipoPagoNorte = paqueteCodigo === 'netflix_perfil'
+        ? 'recargaPerfilNetflix'
+        : 'recargaCuentaNetflix';
+
+    try {
+        avisar('Verificando disponibilidad de Netflix...', 'info');
+        const r = await fetch('/api/pagonorte.js?action=disponibilidad&tipo=' + encodeURIComponent(tipoPagoNorte) + '&paquete=1', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+        const d = await r.json();
+
+        if (!r.ok || d.ok === false) {
+            throw new Error(d.mensaje || d.message || 'No se pudo consultar la disponibilidad.');
+        }
+
+        if (d.disponible === false) {
+            await mostrarMensaje('Sin disponibilidad', 'Este producto no tiene existencias disponibles en este momento. Intenta nuevamente más tarde.', 'advertencia');
+            return;
+        }
+    } catch (error) {
+        console.error('Disponibilidad PagoNorte:', error);
+        await mostrarMensaje('No se pudo verificar', 'No fue posible confirmar la disponibilidad de Netflix. No continúes al pago hasta intentarlo nuevamente.', 'error');
+        return;
+    }
+
+    compraPendiente = { producto, precioUsd, paqueteCodigo, whatsapp, tipoPagoNorte };
     document.getElementById('modalAviso').classList.add('activo');
 };
 
@@ -1197,7 +1227,7 @@ window.confirmarCompra = function() {
     document.getElementById('modalAviso').classList.remove('activo');
     if (!compraPendiente) return;
 
-    const { producto, precioUsd, paqueteCodigo, whatsapp } = compraPendiente;
+    const { producto, precioUsd, paqueteCodigo, whatsapp, tipoPagoNorte } = compraPendiente;
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
 
     localStorage.setItem('id_jugador', whatsapp);
@@ -1205,12 +1235,18 @@ window.confirmarCompra = function() {
     localStorage.setItem('whatsapp', whatsapp);
     localStorage.setItem('juego_seleccionado', juegoActual);
     localStorage.setItem('producto_seleccionado', producto);
-    localStorage.setItem('paquete_codigo', paqueteCodigo);
+    localStorage.setItem('paquete_codigo', '1');
+    localStorage.setItem('paquete', '1');
+    localStorage.setItem('tipo_streaming', tipoPagoNorte);
+    localStorage.setItem('tipo_pagonorte', tipoPagoNorte);
     localStorage.setItem('precio_usd', precioUsd);
     localStorage.setItem('precio_en_bs', precioBs);
     localStorage.setItem('metodo_pago', metodo);
     localStorage.setItem('proveedor', 'pagonorte');
     localStorage.removeItem('modo_renovacion');
+    localStorage.removeItem('codigo_aprobacion');
+    localStorage.removeItem('tipo_renovar');
+    localStorage.removeItem('referencia_pagonorte');
 
     window.location.href = "pasarela.html";
 };
@@ -1230,37 +1266,51 @@ window.prepararRenovacion = async function() {
     const whatsapp = document.getElementById('whatsappRenovar').value.trim();
 
     if (!codigo) {
-        await mostrarMensaje('Código Requerido', 'Ingresa el código de renovación de tu compra anterior.', 'advertencia');
+        await mostrarMensaje('Código Requerido', 'Ingresa el código de aprobación que recibiste en tu compra original.', 'advertencia');
         return;
     }
 
-    if (!whatsapp || whatsapp.length < 10) {
-        await mostrarMensaje('WhatsApp Requerido', 'Ingresa tu número de WhatsApp (mínimo 10 dígitos).', 'advertencia');
+    if (!/^[A-Za-z0-9._-]{1,120}$/.test(codigo)) {
+        await mostrarMensaje('Código inválido', 'El código contiene caracteres no permitidos.', 'advertencia');
         return;
     }
 
-    const nombres = {
-        'netflix_perfil': 'Perfil Netflix',
-        'netflix_cuenta': 'Cuenta Netflix'
+    if (!whatsapp || !/^\d{10,12}$/.test(whatsapp)) {
+        await mostrarMensaje('WhatsApp Requerido', 'Ingresa un número de WhatsApp válido de 10 a 12 dígitos.', 'advertencia');
+        return;
+    }
+
+    const mapa = {
+        netflix_perfil: { nombre: 'Perfil Netflix', precio: 3.80, api: 'recargaPerfilNetflix' },
+        netflix_cuenta: { nombre: 'Cuenta Netflix', precio: 13.00, api: 'recargaCuentaNetflix' }
     };
-    const productoNombre = nombres[tipo] || 'Netflix';
-    const precios = { 'netflix_perfil': 3.80, 'netflix_cuenta': 13.00 };
-    const precioUsd = precios[tipo] || 3.80;
+    const producto = mapa[tipo];
+    if (!producto) {
+        await mostrarMensaje('Tipo inválido', 'Selecciona un tipo de Netflix válido.', 'error');
+        return;
+    }
+
+    const precioUsd = producto.precio;
     const precioBs = Math.round(precioUsd * tasa);
 
     localStorage.setItem('id_jugador', whatsapp);
     localStorage.setItem('nombre_jugador', `+58 ${whatsapp}`);
     localStorage.setItem('whatsapp', whatsapp);
     localStorage.setItem('juego_seleccionado', juegoActual);
-    localStorage.setItem('producto_seleccionado', productoNombre + ' (Renovación)');
-    localStorage.setItem('paquete_codigo', tipo);
+    localStorage.setItem('producto_seleccionado', producto.nombre + ' (Renovación)');
+    localStorage.setItem('paquete_codigo', '1');
+    localStorage.setItem('paquete', '1');
+    localStorage.setItem('tipo_streaming', producto.api);
+    localStorage.setItem('tipo_pagonorte', producto.api);
     localStorage.setItem('precio_usd', precioUsd);
     localStorage.setItem('precio_en_bs', precioBs);
-    localStorage.setItem('metodo_pago', 'PAGO MOVIL');
+    localStorage.setItem('metodo_pago', metodo);
     localStorage.setItem('proveedor', 'pagonorte');
     localStorage.setItem('modo_renovacion', 'true');
     localStorage.setItem('codigo_aprobacion', codigo);
     localStorage.setItem('tipo_renovar', tipo);
+    localStorage.setItem('tipo_renovacion_pagonorte', producto.api);
+    localStorage.removeItem('referencia_pagonorte');
 
     window.location.href = "pasarela.html";
 };
