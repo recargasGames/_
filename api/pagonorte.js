@@ -1,1203 +1,361 @@
-// ============================================================
-// RECARGASGAMES
-// API PAGO NORTE - Vercel
-// Compatible con netflix.html + documentación Pago Norte
-// ============================================================
+// api/pagonorte.js
+// ============================================
+// 🎬 RECARGASGAMES - PAGONORTE (Streaming)
+// ============================================
+// Maneja: Netflix, Disney+ (perfil y cuenta)
+// Acciones: recarga, disponibilidad, renovar, netflix_hogar
+// ============================================
 
-const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
+const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
-const ALLOWED_ORIGINS = [
-    'https://recargasgames.shop',
-    'https://www.recargasgames.shop',
-    'https://recargasgames.github.io'
-];
-
-// ============================================================
-// TIPOS STREAMING PÚBLICOS DE PAGO NORTE
-// ============================================================
-
-const STREAMING_TYPES = {
-    netflix_perfil: 'recargaPerfilNetflix',
-    netflix_cuenta: 'recargaCuentaNetflix',
-
-    recargaPerfilNetflix: 'recargaPerfilNetflix',
-    recargaCuentaNetflix: 'recargaCuentaNetflix',
-
-    disney_perfil: 'recargaPerfilDisnep',
-    disney_cuenta: 'recargaCuentaDisnep',
-
-    recargaPerfilDisnep: 'recargaPerfilDisnep',
-    recargaCuentaDisnep: 'recargaCuentaDisnep',
-
-    hbo_perfil: 'recargaPerfilHbo',
-    hbo_cuenta: 'recargaCuentaHbo',
-
-    recargaPerfilHbo: 'recargaPerfilHbo',
-    recargaCuentaHbo: 'recargaCuentaHbo'
+// ============================================
+// 🎯 MAPA DE TIPOS PÚBLICOS
+// ============================================
+const TIPOS = {
+    'netflix_perfil':   { tipo: 'recargaPerfilNetflix',   servicio: 'Netflix',  modalidad: 'perfil' },
+    'netflix_cuenta':   { tipo: 'recargaCuentaNetflix',   servicio: 'Netflix',  modalidad: 'cuenta' },
+    'disney_perfil':    { tipo: 'recargaPerfilDisnep',    servicio: 'Disney+',  modalidad: 'perfil' },
+    'disney_cuenta':    { tipo: 'recargaCuentaDisnep',    servicio: 'Disney+',  modalidad: 'cuenta' },
+    'hbo_perfil':       { tipo: 'recargaPerfilHbo',       servicio: 'HBO',      modalidad: 'perfil' },
+    'hbo_cuenta':       { tipo: 'recargaCuentaHbo',       servicio: 'HBO',      modalidad: 'cuenta' }
 };
 
-const STREAMING_TYPES_VALIDOS = new Set([
-    'recargaPerfilNetflix',
-    'recargaCuentaNetflix',
-    'recargaPerfilDisnep',
-    'recargaCuentaDisnep',
-    'recargaPerfilHbo',
-    'recargaCuentaHbo'
-]);
-
-// ============================================================
-// HELPERS
-// ============================================================
-
-function obtenerOrigen(req) {
-    return req.headers?.origin || '';
-}
-
-function configurarCors(req, res) {
-    const origin = obtenerOrigen(req);
-
-    if (ALLOWED_ORIGINS.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    } else {
-        res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGINS[0]);
-    }
-
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'Content-Type, Accept, X-Requested-With'
-    );
-    res.setHeader('Access-Control-Max-Age', '86400');
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-}
-
-function responder(res, status, data) {
-    return res.status(status).json(data);
-}
-
-function texto(valor) {
-    if (valor === undefined || valor === null) return '';
-    return String(valor).trim();
-}
-
-function esReferenciaValida(referencia) {
-    return /^[A-Za-z0-9._-]{1,120}$/.test(texto(referencia));
-}
-
-function esIdSolicitudValido(id) {
-    return /^\d{1,20}$/.test(texto(id));
-}
-
-function esCodigoAprobacionValido(codigo) {
-    return /^[A-Za-z0-9._-]{1,120}$/.test(texto(codigo));
-}
-
-function obtenerTipoStreaming(tipo) {
-    const valor = texto(tipo);
-    return STREAMING_TYPES[valor] || '';
-}
-
-function esTipoStreamingValido(tipo) {
-    return STREAMING_TYPES_VALIDOS.has(texto(tipo));
-}
-
-// ============================================================
-// BODY
-// ============================================================
-
-function obtenerBody(req) {
-    if (!req.body) {
-        return {};
-    }
-
-    if (typeof req.body === 'object') {
-        return req.body;
-    }
-
-    if (typeof req.body === 'string') {
-        try {
-            return JSON.parse(req.body);
-        } catch {
-            const params = new URLSearchParams(req.body);
-            return Object.fromEntries(params.entries());
+// ============================================
+// 📡 LLAMAR A PAGONORTE
+// ✅ Con cabeceras X-API-Key y X-API-Secret
+// ✅ Form URL-encoded (NO JSON)
+// ============================================
+async function llamarPagoNorte(params, apiKey, apiSecret) {
+    const formData = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+        if (value !== undefined && value !== null && value !== '') {
+            formData.append(key, String(value));
         }
     }
 
-    return {};
+    console.log('📤 PagoNorte request:', formData.toString());
+
+    const respuesta = await fetch(PAGONORTE_URL, {
+        method: 'POST',
+        headers: {
+            'X-API-Key': apiKey,
+            'X-API-Secret': apiSecret,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData.toString()
+    });
+
+    const texto = await respuesta.text();
+    console.log('📥 PagoNorte status:', respuesta.status);
+    console.log('📥 PagoNorte body:', texto);
+
+    let data;
+    try { data = JSON.parse(texto); } catch (e) { data = { raw: texto }; }
+
+    return { ok: respuesta.ok, status: respuesta.status, data };
 }
 
-// ============================================================
-// LLAMADA A PAGO NORTE
-// ============================================================
-
-async function llamarPagoNorte(parametros) {
-    const apiKey = process.env.PAGONORTE_API_KEY;
-    const apiSecret = process.env.PAGONORTE_API_SECRET;
-
-    if (!apiKey || !apiSecret) {
-        throw new Error(
-            'Faltan PAGONORTE_API_KEY o PAGONORTE_API_SECRET en las variables de entorno.'
-        );
-    }
-
-    const formulario = new URLSearchParams();
-
-    for (const [clave, valor] of Object.entries(parametros)) {
-        if (
-            valor !== undefined &&
-            valor !== null &&
-            String(valor) !== ''
-        ) {
-            formulario.append(clave, String(valor));
-        }
-    }
-
-    const controller = new AbortController();
-
-    const timeout = setTimeout(() => {
-        controller.abort();
-    }, 15000);
-
-    try {
-        const respuesta = await fetch(PAGONORTE_URL, {
-            method: 'POST',
-
-            headers: {
-                'X-API-Key': apiKey,
-                'X-API-Secret': apiSecret,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json'
-            },
-
-            body: formulario.toString(),
-
-            signal: controller.signal
-        });
-
-        const textoRespuesta = await respuesta.text();
-
-        let datos;
-
-        try {
-            datos = JSON.parse(textoRespuesta);
-        } catch {
-            throw new Error(
-                'Pago Norte devolvió una respuesta que no es JSON válido.'
-            );
-        }
-
-        return {
-            httpStatus: respuesta.status,
-            httpOk: respuesta.ok,
-            data: datos
-        };
-
-    } finally {
-        clearTimeout(timeout);
-    }
-}
-
-// ============================================================
-// RESPUESTA PÚBLICA
-// ============================================================
-
-function limpiarRespuesta(datos) {
-    if (!datos || typeof datos !== 'object') {
-        return {
-            ok: false,
-            alerta: 'red',
-            estado: 'Error',
-            codigo_respuesta: 'API_RESPUESTA_INVALIDA',
-            mensaje: 'Respuesta inválida de Pago Norte.'
-        };
-    }
-
-    // No devolvemos credenciales ni información interna.
-    return datos;
-}
-
-// ============================================================
-// DISPONIBILIDAD STREAMING
-// ============================================================
-
-async function verificarDisponibilidad(tipo) {
-
-    const tipoPagoNorte = obtenerTipoStreaming(tipo);
-
-    if (!tipoPagoNorte || !esTipoStreamingValido(tipoPagoNorte)) {
-        return {
-            ok: false,
-            disponible: false,
-            alerta: 'red',
-            estado: 'Agotada',
-            codigo_respuesta: 'STREAMING_NO_COMPATIBLE',
-            mensaje: 'Tipo de Streaming no compatible.'
-        };
-    }
-
-    try {
-
-        const resultado = await llamarPagoNorte({
-            action: 'disponibilidad_streaming',
-            tipo: tipoPagoNorte,
-            paquete: '1'
-        });
-
-        const d = resultado.data;
-
-        /*
-         * Pago Norte indica que solamente:
-         *
-         * disponible=true
-         * alerta=green
-         * estado=Disponible
-         *
-         * confirma disponibilidad.
-         */
-
-        const disponible =
-            d &&
-            d.disponible === true &&
-            d.alerta === 'green' &&
-            d.estado === 'Disponible';
-
-        if (disponible) {
-
-            return {
-                ok: true,
-                disponible: true,
-                alerta: 'green',
-                estado: 'Disponible',
-                tipo: tipoPagoNorte,
-                codigo_respuesta: d.codigo_respuesta || '00',
-                meses: d.meses ?? 1,
-                paquete: '1',
-                mensaje: d.mensaje || 'Servicio disponible.'
-            };
-        }
-
-        return {
-            ok: false,
-            disponible: false,
-            alerta: 'red',
-            estado: 'Agotada',
-            tipo: tipoPagoNorte,
-            codigo_respuesta:
-                d?.codigo_respuesta || 'STREAMING_NO_DISPONIBLE',
-            paquete: '1',
-            mensaje:
-                d?.mensaje ||
-                'No se pudo confirmar la disponibilidad del servicio.'
-        };
-
-    } catch (error) {
-
-        console.error(
-            'Error disponibilidad Pago Norte:',
-            error.message
-        );
-
-        return {
-            ok: false,
-            disponible: false,
-            alerta: 'red',
-            estado: 'Agotada',
-            codigo_respuesta: 'STREAMING_NO_DISPONIBLE',
-            mensaje:
-                'No se pudo confirmar la disponibilidad del servicio.'
-        };
-    }
-}
-
-// ============================================================
-// RECARGA / COMPRA STREAMING
-// ============================================================
-
-async function realizarRecarga(body) {
-
-    const tipoOriginal = texto(
-        body.tipo ||
-        body.tipo_pagonorte ||
-        body.tipo_streaming
-    );
-
-    const tipo = obtenerTipoStreaming(tipoOriginal);
-
-    const paquete = texto(
-        body.paquete ||
-        body.paquete_codigo ||
-        '1'
-    );
-
-    const referencia = texto(
-        body.referencia ||
-        body.uuid ||
-        body.nota
-    );
-
-    if (!tipo || !esTipoStreamingValido(tipo)) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                estado: 'Rechazado',
-                codigo_respuesta: 'STREAMING_NO_COMPATIBLE',
-                mensaje: 'Tipo de Streaming inválido.'
-            }
-        };
-    }
-
-    if (paquete !== '1') {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'PAQUETE_INVALIDO',
-                mensaje:
-                    'Streaming utiliza únicamente paquete=1, un mes de servicio.'
-            }
-        };
-    }
-
-    if (!esReferenciaValida(referencia)) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'REFERENCIA_REQUERIDA',
-                mensaje:
-                    'La compra necesita una referencia única válida.'
-            }
-        };
-    }
-
-    try {
-
-        const resultado = await llamarPagoNorte({
-            action: 'recarga',
-            tipo,
-            paquete: '1',
-            referencia
-        });
-
-        const d = limpiarRespuesta(resultado.data);
-
-        /*
-         * IMPORTANTE:
-         *
-         * codigo_respuesta=01 o pendiente=true
-         * NO significa aprobación.
-         *
-         * La misma referencia debe consultarse después.
-         */
-
-        if (
-            d.codigo_respuesta === '01' ||
-            d.pendiente === true
-        ) {
-
-            return {
-                status: 200,
-                data: {
-                    ...d,
-                    ok: true,
-                    pendiente: true,
-                    estado:
-                        d.estado ||
-                        'En proceso',
-                    mensaje:
-                        d.mensaje ||
-                        'Operación en proceso. Consulte la misma referencia.'
-                }
-            };
-        }
-
-        return {
-            status: resultado.httpOk ? 200 : 502,
-            data: d
-        };
-
-    } catch (error) {
-
-        console.error(
-            'Error recarga Pago Norte:',
-            error.message
-        );
-
-        return {
-            status: 502,
-            data: {
-                ok: false,
-                alerta: 'red',
-                estado: 'Error',
-                codigo_respuesta: 'API_ERROR',
-                mensaje:
-                    'No fue posible completar la solicitud a Pago Norte.'
-            }
-        };
-    }
-}
-
-// ============================================================
-// CONSULTAR TRANSACCIÓN
-// ============================================================
-
-async function consultarTransaccion(body) {
-
-    const referencia = texto(
-        body.referencia ||
-        body.uuid
-    );
-
-    const idSolicitud = texto(
-        body.id_solicitud
-    );
-
-    /*
-     * Pago Norte indica que NO se deben enviar
-     * referencia e id_solicitud al mismo tiempo.
-     */
-
-    if (referencia && idSolicitud) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'CONSULTA_AMBIGUA',
-                mensaje:
-                    'Envía referencia o id_solicitud, no ambos.'
-            }
-        };
-    }
-
-    if (!referencia && !idSolicitud) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'REFERENCIA_REQUERIDA',
-                mensaje:
-                    'Debes indicar referencia o id_solicitud.'
-            }
-        };
-    }
-
-    if (
-        referencia &&
-        !esReferenciaValida(referencia)
-    ) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'REFERENCIA_REQUERIDA',
-                mensaje:
-                    'La referencia no tiene un formato válido.'
-            }
-        };
-    }
-
-    if (
-        idSolicitud &&
-        !esIdSolicitudValido(idSolicitud)
-    ) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'ID_SOLICITUD_INVALIDO',
-                mensaje:
-                    'id_solicitud debe contener únicamente dígitos y tener hasta 20 caracteres.'
-            }
-        };
-    }
-
-    try {
-
-        const parametros = {
-            action: 'consulta_transaccion'
-        };
-
-        if (referencia) {
-            parametros.referencia = referencia;
-        } else {
-            parametros.id_solicitud = idSolicitud;
-        }
-
-        const resultado = await llamarPagoNorte(parametros);
-
-        const d = limpiarRespuesta(resultado.data);
-
-        return {
-            status: resultado.httpOk ? 200 : 502,
-            data: d
-        };
-
-    } catch (error) {
-
-        console.error(
-            'Error consulta Pago Norte:',
-            error.message
-        );
-
-        return {
-            status: 502,
-            data: {
-                ok: false,
-                alerta: 'red',
-                estado: 'Error',
-                codigo_respuesta: 'API_CONSULTA_NO_DISPONIBLE',
-                mensaje:
-                    'No fue posible consultar la transacción. Inténtalo nuevamente sin crear otra compra.'
-            }
-        };
-    }
-}
-
-// ============================================================
-// RENOVACIÓN STREAMING
-// ============================================================
-
-async function renovarStreaming(body) {
-
-    const tipoOriginal = texto(
-        body.tipo ||
-        body.tipo_renovar ||
-        body.tipo_renovacion_pagonorte ||
-        body.tipo_pagonorte ||
-        body.tipo_streaming
-    );
-
-    const tipo = obtenerTipoStreaming(tipoOriginal);
-
-    const codigoAprobacion = texto(
-        body.codigo_aprobacion ||
-        body.codigo_aprobacion_original
-    );
-
-    const paquete = texto(
-        body.paquete ||
-        body.paquete_codigo ||
-        '1'
-    );
-
-    const referencia = texto(
-        body.referencia ||
-        body.uuid ||
-        body.nota
-    );
-
-    if (!tipo || !esTipoStreamingValido(tipo)) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                estado: 'Rechazado',
-                codigo_respuesta: 'TIPO_RENOVACION_INVALIDO',
-                mensaje:
-                    'El tipo de Streaming no es válido para renovación.'
-            }
-        };
-    }
-
-    if (!codigoAprobacion) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'CODIGO_NO_ENCONTRADO',
-                mensaje:
-                    'Debes enviar el código de aprobación de la compra original.'
-            }
-        };
-    }
-
-    if (!esCodigoAprobacionValido(codigoAprobacion)) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'CODIGO_NO_ENCONTRADO',
-                mensaje:
-                    'El código de aprobación no tiene un formato válido.'
-            }
-        };
-    }
-
-    if (paquete !== '1') {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'PAQUETE_INVALIDO',
-                mensaje:
-                    'Streaming utiliza únicamente paquete=1, un mes de servicio.'
-            }
-        };
-    }
-
-    if (!esReferenciaValida(referencia)) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'REFERENCIA_REQUERIDA',
-                mensaje:
-                    'La renovación necesita una referencia nueva y única.'
-            }
-        };
-    }
-
-    try {
-
-        const resultado = await llamarPagoNorte({
-            action: 'renovar_streaming',
-            tipo,
-            codigo_aprobacion: codigoAprobacion,
-            paquete: '1',
-            referencia
-        });
-
-        const d = limpiarRespuesta(resultado.data);
-
-        if (
-            d.codigo_respuesta === '01' ||
-            d.pendiente === true
-        ) {
-
-            return {
-                status: 200,
-                data: {
-                    ...d,
-                    ok: true,
-                    pendiente: true,
-                    estado:
-                        d.estado ||
-                        'En proceso',
-                    codigo_aprobacion_original:
-                        d.codigo_aprobacion_original ||
-                        codigoAprobacion,
-                    mensaje:
-                        d.mensaje ||
-                        'Operación en proceso. Consulte la misma referencia.'
-                }
-            };
-        }
-
-        return {
-            status: resultado.httpOk ? 200 : 502,
-            data: d
-        };
-
-    } catch (error) {
-
-        console.error(
-            'Error renovación Pago Norte:',
-            error.message
-        );
-
-        return {
-            status: 502,
-            data: {
-                ok: false,
-                alerta: 'red',
-                estado: 'Error',
-                codigo_respuesta: 'API_ERROR',
-                mensaje:
-                    'No fue posible completar la renovación.'
-            }
-        };
-    }
-}
-
-// ============================================================
-// NETFLIX HOGAR
-// ============================================================
-
-async function netflixHogar(body) {
-
-    const correo = texto(body.correo);
-
-    if (!correo) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'CORREO_REQUERIDO',
-                mensaje:
-                    'Debes indicar el correo de Netflix.'
-            }
-        };
-    }
-
-    /*
-     * Validación básica de formato.
-     * La API de Pago Norte sigue siendo la autoridad final.
-     */
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
-        return {
-            status: 400,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'CORREO_INVALIDO',
-                mensaje:
-                    'El correo de Netflix no tiene un formato válido.'
-            }
-        };
-    }
-
-    try {
-
-        const resultado = await llamarPagoNorte({
-            action: 'netflix_hogar',
-            correo
-        });
-
-        return {
-            status: resultado.httpOk ? 200 : 502,
-            data: limpiarRespuesta(resultado.data)
-        };
-
-    } catch (error) {
-
-        console.error(
-            'Error Netflix hogar:',
-            error.message
-        );
-
-        return {
-            status: 502,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'NETFLIX_HOGAR_NO_DISPONIBLE',
-                mensaje:
-                    'No fue posible completar la consulta de Netflix Hogar.'
-            }
-        };
-    }
-}
-
-// ============================================================
-// CATÁLOGOS / PRECIOS / TASAS
-// ============================================================
-
-async function consultaGeneral(action, body) {
-
-    const parametros = {
-        action
+// ============================================
+// 🎯 EXTRAER DATOS DE STREAMING
+// ✅ PagoNorte devuelve los datos en la RAÍZ
+// ✅ Algunas veces en "datos" (por compatibilidad)
+// ============================================
+function extraerDatosStreaming(data) {
+    // Prioriza la raíz, luego "datos"
+    const fuente = data.datos && typeof data.datos === 'object' ? data.datos : data;
+
+    return {
+        correo:            fuente.correo    || fuente.usuario   || '',
+        clave:             fuente.clave     || fuente.password  || '',
+        perfil:            fuente.perfil                        || '',
+        pin_perfil:        fuente.pin_perfil                    || '',
+        numero_perfil:     fuente.numero_perfil                 || '',
+        fecha_vencimiento: fuente.fecha_vencimiento             || ''
     };
-
-    if (body.grupo) {
-        parametros.grupo = texto(body.grupo);
-    }
-
-    if (body.tipo) {
-        parametros.tipo = texto(body.tipo);
-    }
-
-    try {
-
-        const resultado = await llamarPagoNorte(parametros);
-
-        return {
-            status: resultado.httpOk ? 200 : 502,
-            data: limpiarRespuesta(resultado.data)
-        };
-
-    } catch (error) {
-
-        console.error(
-            `Error Pago Norte (${action}):`,
-            error.message
-        );
-
-        return {
-            status: 502,
-            data: {
-                ok: false,
-                alerta: 'red',
-                codigo_respuesta: 'API_ERROR',
-                mensaje:
-                    'No fue posible consultar Pago Norte.'
-            }
-        };
-    }
 }
 
-// ============================================================
-// HANDLER VERCEL
-// ============================================================
-
+// ============================================
+// 🚀 HANDLER
+// ============================================
 export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    configurarCors(req, res);
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
-    // --------------------------------------------------------
-    // CORS PREFLIGHT
-    // --------------------------------------------------------
+    try {
+        const body = req.method === 'POST' ? req.body : req.query;
+        const { accion } = body;
 
-    if (req.method === 'OPTIONS') {
-        return res.status(204).end();
-    }
+        const API_KEY    = process.env.PAGONORTE_API_KEY;
+        const API_SECRET = process.env.PAGONORTE_API_SECRET;
 
-    // --------------------------------------------------------
-    // BODY
-    // --------------------------------------------------------
+        console.log('🔑 API_KEY prefix:', API_KEY ? API_KEY.substring(0, 8) + '...' : 'NO CONFIGURADA');
+        console.log('🔑 API_SECRET prefix:', API_SECRET ? API_SECRET.substring(0, 8) + '...' : 'NO CONFIGURADO');
 
-    const body = obtenerBody(req);
-
-    // --------------------------------------------------------
-    // ACTION
-    // --------------------------------------------------------
-
-    let action =
-        texto(
-            body.action ||
-            req.query?.action
-        ).toLowerCase();
-
-    // --------------------------------------------------------
-    // GET
-    // --------------------------------------------------------
-
-    if (req.method === 'GET') {
-
-        /*
-         * netflix.html actualmente llama:
-         *
-         * /api/pagonorte.js?action=disponibilidad
-         * &tipo=recargaPerfilNetflix
-         * &paquete=1
-         *
-         * Convertimos "disponibilidad" al contrato real.
-         */
-
-        if (
-            action === 'disponibilidad' ||
-            action === 'disponibilidad_streaming'
-        ) {
-
-            const tipo =
-                texto(
-                    body.tipo ||
-                    req.query?.tipo ||
-                    req.query?.tipo_pagonorte
-                );
-
-            const resultado =
-                await verificarDisponibilidad(tipo);
-
-            return responder(
-                res,
-                resultado.ok ? 200 : 200,
-                resultado
-            );
+        if (!API_KEY || !API_SECRET) {
+            return res.status(500).json({
+                ok: false,
+                error: 'Credenciales de PagoNorte no configuradas'
+            });
         }
 
-        /*
-         * También permitimos consulta de transacción
-         * por GET si alguna parte del frontend lo necesita.
-         */
+        // ============================================
+        // 1️⃣ COMPRAR STREAMING (recarga)
+        // ============================================
+        if (accion === 'recarga') {
+            const producto = body.producto || body.producto_original;
+            const { referencia } = body;
 
-        if (action === 'consulta_transaccion') {
+            console.log('🎬 Recarga solicitada:', { producto, referencia });
 
-            const consultaBody = {
-                referencia:
-                    body.referencia ||
-                    req.query?.referencia,
-
-                id_solicitud:
-                    body.id_solicitud ||
-                    req.query?.id_solicitud
-            };
-
-            const resultado =
-                await consultarTransaccion(consultaBody);
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        /*
-         * Ping de Pago Norte.
-         *
-         * El PDF indica que ping acepta GET sin credenciales.
-         * Lo dejamos directo contra Pago Norte solamente para
-         * diagnóstico.
-         */
-
-        if (action === 'ping') {
-
-            try {
-
-                const respuesta =
-                    await fetch(
-                        `${PAGONORTE_URL}?action=ping`,
-                        {
-                            method: 'GET',
-                            headers: {
-                                Accept: 'application/json'
-                            }
-                        }
-                    );
-
-                const textoRespuesta =
-                    await respuesta.text();
-
-                let datos;
-
-                try {
-                    datos = JSON.parse(textoRespuesta);
-                } catch {
-                    return responder(res, 502, {
-                        ok: false,
-                        alerta: 'red',
-                        codigo_respuesta:
-                            'API_RESPUESTA_INVALIDA',
-                        mensaje:
-                            'Pago Norte no devolvió JSON válido.'
-                    });
-                }
-
-                return responder(
-                    res,
-                    respuesta.ok ? 200 : 502,
-                    datos
-                );
-
-            } catch (error) {
-
-                return responder(res, 502, {
+            if (!producto || !referencia) {
+                return res.status(400).json({
                     ok: false,
-                    alerta: 'red',
-                    codigo_respuesta: 'API_ERROR',
-                    mensaje:
-                        'No fue posible conectar con Pago Norte.'
+                    error: 'Faltan: producto, referencia',
+                    recibido: { producto, referencia }
                 });
             }
+
+            const config = TIPOS[producto];
+            if (!config) {
+                return res.status(400).json({
+                    ok: false,
+                    error: `Producto no soportado: ${producto}`,
+                    soportados: Object.keys(TIPOS)
+                });
+            }
+
+            const resultado = await llamarPagoNorte({
+                action: 'recarga',
+                tipo: config.tipo,
+                paquete: 1,
+                referencia: referencia
+            }, API_KEY, API_SECRET);
+
+            if (!resultado.ok) {
+                return res.status(200).json({
+                    ok: false,
+                    error: 'Error consultando PagoNorte',
+                    status: resultado.status,
+                    raw: resultado.data
+                });
+            }
+
+            const data = resultado.data;
+            const codigo = String(data.codigo_respuesta || '').toLowerCase();
+            const estado = data.estado || '';
+
+            console.log('🔍 Estado:', estado, '| Código:', codigo, '| ok:', data.ok);
+
+            // ✅ Aprobado — detecta por estado O por presencia de correo/clave
+            const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
+
+            if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
+                const datos = extraerDatosStreaming(data);
+
+                console.log('✅ Datos extraídos:', datos);
+
+                return res.status(200).json({
+                    ok: true,
+                    estado: 'Aprobado',
+                    servicio: config.servicio,
+                    modalidad: config.modalidad,
+                    codigo_aprobacion: data.codigo_aprobacion || '',
+                    fecha_registro: data.fecha_registro || '',
+                    id_solicitud: data.id_solicitud || '',
+                    datos: datos,
+                    mensaje: data.mensaje || 'Operación aprobada'
+                });
+            }
+
+            // ⏳ Pendiente
+            if (data.pendiente === true || codigo === '01') {
+                return res.status(200).json({
+                    ok: true,
+                    estado: 'Pendiente',
+                    pendiente: true,
+                    id_solicitud: data.id_solicitud || '',
+                    mensaje: data.mensaje || 'Operación en proceso. Consulte la misma referencia.'
+                });
+            }
+
+            // ❌ Rechazado
+            return res.status(200).json({
+                ok: false,
+                estado: estado || 'Rechazado',
+                codigo_respuesta: codigo,
+                mensaje: data.mensaje || 'Operación no completada',
+                raw: data
+            });
         }
 
-        return responder(res, 400, {
+        // ============================================
+        // 2️⃣ DISPONIBILIDAD STREAMING
+        // ============================================
+        if (accion === 'disponibilidad') {
+            const producto = body.producto || body.producto_original;
+
+            if (!producto) {
+                return res.status(400).json({ ok: false, error: 'Falta: producto' });
+            }
+
+            const config = TIPOS[producto];
+            if (!config) {
+                return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
+            }
+
+            const resultado = await llamarPagoNorte({
+                action: 'disponibilidad_streaming',
+                tipo: config.tipo,
+                paquete: 1
+            }, API_KEY, API_SECRET);
+
+            if (!resultado.ok) {
+                return res.status(200).json({
+                    ok: false,
+                    disponible: false,
+                    error: 'Error consultando disponibilidad',
+                    raw: resultado.data
+                });
+            }
+
+            const data = resultado.data;
+            const disponible = data.disponible === true;
+
+            return res.status(200).json({
+                ok: true,
+                disponible: disponible,
+                estado: data.estado || (disponible ? 'Disponible' : 'Agotada'),
+                mensaje: data.mensaje || ''
+            });
+        }
+
+        // ============================================
+        // 3️⃣ RENOVAR STREAMING
+        // ============================================
+        if (accion === 'renovar') {
+            const producto = body.producto || body.producto_original;
+            const { codigo_aprobacion, referencia } = body;
+
+            if (!producto || !codigo_aprobacion || !referencia) {
+                return res.status(400).json({ ok: false, error: 'Faltan: producto, codigo_aprobacion, referencia' });
+            }
+
+            const config = TIPOS[producto];
+            if (!config) {
+                return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
+            }
+
+            const resultado = await llamarPagoNorte({
+                action: 'renovar_streaming',
+                tipo: config.tipo,
+                codigo_aprobacion: codigo_aprobacion,
+                paquete: 1,
+                referencia: referencia
+            }, API_KEY, API_SECRET);
+
+            if (!resultado.ok) {
+                return res.status(200).json({
+                    ok: false,
+                    error: 'Error consultando PagoNorte',
+                    raw: resultado.data
+                });
+            }
+
+            const data = resultado.data;
+            const estado = data.estado || '';
+            const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
+
+            if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
+                const datos = extraerDatosStreaming(data);
+
+                return res.status(200).json({
+                    ok: true,
+                    estado: 'Aprobado',
+                    codigo_aprobacion: data.codigo_aprobacion || '',
+                    codigo_aprobacion_original: data.codigo_aprobacion_original || codigo_aprobacion,
+                    datos: datos,
+                    mensaje: data.mensaje || 'Renovación procesada'
+                });
+            }
+
+            if (data.pendiente === true) {
+                return res.status(200).json({
+                    ok: true,
+                    estado: 'Pendiente',
+                    pendiente: true,
+                    mensaje: data.mensaje || 'Renovación en proceso'
+                });
+            }
+
+            return res.status(200).json({
+                ok: false,
+                estado: estado || 'Rechazado',
+                codigo_respuesta: String(data.codigo_respuesta || '').toLowerCase(),
+                mensaje: data.mensaje || 'Renovación no completada',
+                raw: data
+            });
+        }
+
+        // ============================================
+        // 4️⃣ CÓDIGO NETFLIX HOGAR
+        // ============================================
+        if (accion === 'netflix_hogar') {
+            const { correo } = body;
+
+            if (!correo) {
+                return res.status(400).json({ ok: false, error: 'Falta: correo' });
+            }
+
+            const resultado = await llamarPagoNorte({
+                action: 'netflix_hogar',
+                correo: correo
+            }, API_KEY, API_SECRET);
+
+            if (!resultado.ok) {
+                return res.status(200).json({
+                    ok: false,
+                    error: 'Error consultando PagoNorte',
+                    raw: resultado.data
+                });
+            }
+
+            const data = resultado.data;
+
+            if (data.estado === 'codigo_disponible' && data.codigo) {
+                return res.status(200).json({
+                    ok: true,
+                    codigo: data.codigo,
+                    expira_minutos: data.expira_minutos || 15,
+                    correo: data.correo || correo,
+                    mensaje: data.mensaje || 'Código temporal disponible'
+                });
+            }
+
+            return res.status(200).json({
+                ok: false,
+                estado: data.estado || 'no_disponible',
+                codigo_respuesta: String(data.codigo_respuesta || '').toLowerCase(),
+                mensaje: data.mensaje || 'No hay código disponible',
+                raw: data
+            });
+        }
+
+        // Acción no reconocida
+        return res.status(400).json({
             ok: false,
-            alerta: 'red',
-            codigo_respuesta: 'ACCION_REQUERIDA',
-            mensaje:
-                'Indica una acción válida.'
+            error: `Acción no soportada: ${accion}`,
+            acciones: ['recarga', 'disponibilidad', 'renovar', 'netflix_hogar']
+        });
+
+    } catch (error) {
+        console.error('❌ Error PagoNorte:', error);
+        return res.status(500).json({
+            ok: false,
+            error: 'Error interno',
+            detalle: error.message
         });
     }
-
-    // --------------------------------------------------------
-    // POST
-    // --------------------------------------------------------
-
-    if (req.method === 'POST') {
-
-        // ----------------------------------------------------
-        // DISPONIBILIDAD
-        // ----------------------------------------------------
-
-        if (
-            action === 'disponibilidad' ||
-            action === 'disponibilidad_streaming'
-        ) {
-
-            const resultado =
-                await verificarDisponibilidad(
-                    body.tipo ||
-                    body.tipo_pagonorte ||
-                    body.tipo_streaming
-                );
-
-            return responder(
-                res,
-                200,
-                resultado
-            );
-        }
-
-        // ----------------------------------------------------
-        // COMPRA / RECARGA
-        // ----------------------------------------------------
-
-        if (action === 'recarga') {
-
-            const resultado =
-                await realizarRecarga(body);
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        // ----------------------------------------------------
-        // CONSULTA TRANSACCIÓN
-        // ----------------------------------------------------
-
-        if (action === 'consulta_transaccion') {
-
-            const resultado =
-                await consultarTransaccion(body);
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        // ----------------------------------------------------
-        // RENOVACIÓN
-        // ----------------------------------------------------
-
-        if (
-            action === 'renovar_streaming' ||
-            action === 'renovacion_streaming'
-        ) {
-
-            const resultado =
-                await renovarStreaming(body);
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        // ----------------------------------------------------
-        // NETFLIX HOGAR
-        // ----------------------------------------------------
-
-        if (action === 'netflix_hogar') {
-
-            const resultado =
-                await netflixHogar(body);
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        // ----------------------------------------------------
-        // CATÁLOGO STREAMING
-        // ----------------------------------------------------
-
-        if (action === 'paquetes') {
-
-            const resultado =
-                await consultaGeneral(
-                    'paquetes',
-                    body
-                );
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        // ----------------------------------------------------
-        // PRECIOS
-        // ----------------------------------------------------
-
-        if (action === 'precios') {
-
-            const resultado =
-                await consultaGeneral(
-                    'precios',
-                    body
-                );
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        // ----------------------------------------------------
-        // TASAS
-        // ----------------------------------------------------
-
-        if (action === 'tasas') {
-
-            const resultado =
-                await consultaGeneral(
-                    'tasas',
-                    body
-                );
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        // ----------------------------------------------------
-        // MONTOS
-        // ----------------------------------------------------
-
-        if (action === 'montos') {
-
-            const resultado =
-                await consultaGeneral(
-                    'montos',
-                    body
-                );
-
-            return responder(
-                res,
-                resultado.status,
-                resultado.data
-            );
-        }
-
-        return responder(res, 400, {
-            ok: false,
-            alerta: 'red',
-            codigo_respuesta: 'ACCION_INVALIDA',
-            mensaje:
-                'Acción no soportada por esta integración.'
-        });
-    }
-
-    // --------------------------------------------------------
-    // MÉTODO NO PERMITIDO
-    // --------------------------------------------------------
-
-    res.setHeader('Allow', 'GET, POST, OPTIONS');
-
-    return responder(res, 405, {
-        ok: false,
-        alerta: 'red',
-        codigo_respuesta: 'METODO_NO_PERMITIDO',
-        mensaje:
-            'Utiliza GET, POST u OPTIONS.'
-    });
 }
