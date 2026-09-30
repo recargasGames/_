@@ -1192,27 +1192,10 @@ window.prepararCompra = async function(producto, precioUsd, paqueteCodigo){
         ? 'recargaPerfilNetflix'
         : 'recargaCuentaNetflix';
 
-    try {
-        avisar('Verificando disponibilidad de Netflix...', 'info');
-        const r = await fetch('/api/pagonorte.js?action=disponibilidad&tipo=' + encodeURIComponent(tipoPagoNorte) + '&paquete=1', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-        const d = await r.json();
-
-        if (!r.ok || d.ok === false) {
-            throw new Error(d.mensaje || d.message || 'No se pudo consultar la disponibilidad.');
-        }
-
-        if (d.disponible === false) {
-            await mostrarMensaje('Sin disponibilidad', 'Este producto no tiene existencias disponibles en este momento. Intenta nuevamente más tarde.', 'advertencia');
-            return;
-        }
-    } catch (error) {
-        console.error('Disponibilidad PagoNorte:', error);
-        await mostrarMensaje('No se pudo verificar', 'No fue posible confirmar la disponibilidad de Netflix. No continúes al pago hasta intentarlo nuevamente.', 'error');
-        return;
-    }
+    // ✅ FIX: Se eliminó la verificación previa de disponibilidad.
+    // El backend la valida automáticamente al procesar el pedido.
+    // Si no hay stock, PagoNorte responde STREAMING_AGOTADO y se muestra
+    // un mensaje claro al cliente en la pasarela.
 
     compraPendiente = { producto, precioUsd, paqueteCodigo, whatsapp, tipoPagoNorte };
     document.getElementById('modalAviso').classList.add('activo');
