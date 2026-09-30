@@ -1,6 +1,9 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.4
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.5
 // ============================================
+// v3.5: ROBLOX actualizado (UUIDs reales 100/1000, +275, +2400,
+//       eliminados los descontinuados: 300/420/700/800/2500/3000/4500/10000
+//       eliminado bloque duplicado ROBLOX-5..100 USD)
 // v3.4: AGREGADO PlayStation $1, $2, $3, $4 (todas las denominaciones chicas)
 //       CORREGIDO Xbox $25 y $50 (UUIDs reales)
 // v3.3: FF Weekly (Semanal, Mensual, Booyah) al FREE FIRE
@@ -68,23 +71,16 @@ const SKU_MAP = {
     'ML-1050': '608bf79a-acb1-4ff8-bd67-63906d92c480',
 
     // ============================================
-    // 🧱 ROBLOX (GIFT CARDS en Robux)
+    // 🧱 ROBLOX (GIFT CARDS en Robux) - v3.5
     // ============================================
     'RBX-50':    '81dfdc57-1feb-4e72-8be6-7e119a348c48',
-    'RBX-100':   '229a97b1-dfec-41a3-a287-c06c882db80e',
-    'RBX-300':   '82308d57-2c4d-4271-9040-663e33a993f0',
+    'RBX-100':   'ea9298ae-944b-498b-9d82-a8128624cbbd',
+    'RBX-275':   '2ed3da74-e7e6-4c1b-a609-b630855303b6',
     'RBX-360':   '5cafd861-3893-49a7-a9be-7815492c04c2',
-    'RBX-420':   'f63a1845-5a51-42b1-b217-616964eaad71',
-    'RBX-500':   '56c1daf9-22dc-49ac-9633-6d57548e213e',
     'RBX-555':   '9defafba-f584-4378-ab8c-ce656d2a7c7e',
-    'RBX-700':   '7de07ab2-465c-4c26-8a28-626ebfa1cf13',
-    'RBX-800':   '1418ad82-0ca5-47a3-bd1b-38de2f2b6e0b',
-    'RBX-1000':  'd900d067-7f8a-427e-b128-9b64c91f65d0',
+    'RBX-1000':  '586763f0-6a06-4f5b-9eaf-cb7f66ae2ce2',
     'RBX-2000':  '898ed399-6901-4582-9755-e5299f7dfb40',
-    'RBX-2500':  'f82d8920-a7e8-4ac2-942e-679ac565284c',
-    'RBX-3000':  '2ef44f15-81a6-4a04-8f11-237cd6490789',
-    'RBX-4500':  '6378c243-ad55-4c2d-9593-eee0da6ef4e7',
-    'RBX-10000': '79fe3333-e8f3-4a96-b79c-b3acacc6fab5',
+    'RBX-2400':  '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc',
 
     // ============================================
     // 🔫 CALL OF DUTY MOBILE
@@ -196,20 +192,7 @@ const SKU_MAP = {
     'GPLAY-10-EUR-DE': '9a71fdad-c577-4363-9322-eb598c42ce21',
     'GPLAY-15-EUR-ES': 'a49ce5ec-6d69-4fc9-a8a1-8d1bae63cdd4',
     'GPLAY-10-GBP-UK': '289508d9-da39-4485-a7cf-a980abfd4d85',
-    'GPLAY-100-GBP-UK':'2f5615b1-3644-4488-b376-b68f04ac7bd7',
-
-    // ============================================
-    // 🎁 GIFT CARDS - ROBLOX (USD)
-    // ============================================
-    'ROBLOX-5':   '3dc289ce-5fff-4119-93e8-c5b6b7fe58c1',
-    'ROBLOX-10':  'cacea4e9-e6f4-4850-834b-7d1cb6c2f99f',
-    'ROBLOX-15':  '97f2b05a-d443-4c1b-a9e6-d254e487519a',
-    'ROBLOX-20':  '9ba01138-7547-467b-91c8-15829a4d3bc7',
-    'ROBLOX-25':  '947a609f-7333-4d6b-a37e-f03f4f795ea6',
-    'ROBLOX-30':  '91ec5b7d-aa96-4c68-8d85-ca0d8fbd7a30',
-    'ROBLOX-50':  '6a210046-93f7-4b41-9cd2-bb9b7907ad78',
-    'ROBLOX-75':  'f3fc40c8-afad-40e2-b6ff-70e3b206e3c2',
-    'ROBLOX-100': '746f9cf2-da4c-47e1-8c63-1b9cccd0ae56'
+    'GPLAY-100-GBP-UK':'2f5615b1-3644-4488-b376-b68f04ac7bd7'
 };
 
 // ============================================
@@ -381,9 +364,14 @@ const PRODUCTOS_CONFIG = {
         tipo: 'giftcard',
         input: ['email'],
         paquetes: {
-            '5': 'ROBLOX-5', '10': 'ROBLOX-10', '15': 'ROBLOX-15',
-            '20': 'ROBLOX-20', '25': 'ROBLOX-25', '30': 'ROBLOX-30',
-            '50': 'ROBLOX-50', '75': 'ROBLOX-75', '100': 'ROBLOX-100'
+            '50':   'RBX-50',
+            '100':  'RBX-100',
+            '275':  'RBX-275',
+            '360':  'RBX-360',
+            '555':  'RBX-555',
+            '1000': 'RBX-1000',
+            '2000': 'RBX-2000',
+            '2400': 'RBX-2400'
         }
     }
 };
@@ -538,8 +526,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.4 funcionando',
-                version: '3.4',
+                mensaje: '✅ API Central One v3.5 funcionando',
+                version: '3.5',
                 acciones: ['catalogo', 'juegos', 'verificar', 'saldo'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
