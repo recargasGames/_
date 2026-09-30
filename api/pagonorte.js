@@ -1,5 +1,5 @@
 // api/pagonorte.js
-const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
+const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
 const TIPOS = {
     'netflix_perfil':   { tipo: 'recargaPerfilNetflix',   servicio: 'Netflix',  modalidad: 'perfil' },
@@ -62,7 +62,8 @@ export default async function handler(req, res) {
 
     try {
         const body = req.method === 'POST' ? req.body : req.query;
-        const { accion } = body;
+        // ✅ Acepta tanto "accion" como "action"
+        const accion = body.accion || body.action;
 
         const API_KEY    = process.env.PAGONORTE_API_KEY;
         const API_SECRET = process.env.PAGONORTE_API_SECRET;
@@ -89,7 +90,7 @@ export default async function handler(req, res) {
                 return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
             }
 
-            // 🧪 MODO TEST: Si empieza con TEST- → datos ficticios SIN llamar a PagoNorte
+            // 🧪 MODO TEST
             if (String(referencia).toUpperCase().startsWith('TEST-')) {
                 console.log('🧪 MODO TEST ACTIVADO — NO se llama a PagoNorte');
                 const datosFicticios = {
@@ -212,6 +213,8 @@ export default async function handler(req, res) {
             const config = TIPOS[producto];
             if (!config) return res.status(400).json({ ok: false, error: `Producto no soportado: ${producto}` });
 
+            console.log('🔄 Renovación solicitada:', { producto, codigo_aprobacion, referencia, tipo: config.tipo });
+
             const resultado = await llamarPagoNorte({
                 action: 'renovar_streaming',
                 tipo: config.tipo,
@@ -226,7 +229,10 @@ export default async function handler(req, res) {
 
             const data = resultado.data;
             const estado = data.estado || '';
+            const codigoErr = data.codigo_respuesta || '';
             const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
+
+            console.log('🔄 Renovación respuesta — estado:', estado, '| tieneDatos:', !!tieneDatos);
 
             if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
                 return res.status(200).json({
@@ -243,7 +249,14 @@ export default async function handler(req, res) {
                 return res.status(200).json({ ok: true, estado: 'Pendiente', pendiente: true, mensaje: data.mensaje || 'Renovación en proceso' });
             }
 
-            return res.status(200).json({ ok: false, estado: estado || 'Rechazado', mensaje: data.mensaje || 'Renovación no completada', raw: data });
+            // ❌ Error específico de renovación — devolver el código y mensaje exactos
+            return res.status(200).json({
+                ok: false,
+                estado: estado || 'Rechazado',
+                codigo_respuesta: codigoErr,
+                mensaje: data.mensaje || 'Renovación no completada',
+                raw: data
+            });
         }
 
         // ============================================
