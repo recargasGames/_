@@ -3,7 +3,7 @@
 // 🎮 RECARGASGAMES - VERIFICAR JUGADOR (PagoNorte)
 // ============================================
 
-const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
+const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
 // ============================================
 // 🎯 MAPA DE ACCIONES POR JUEGO
