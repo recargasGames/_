@@ -646,8 +646,9 @@ const refCodigosRG = db.ref("codigos_rg");
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betasario`;
-const TELEGRAM_TOKEN = "8478493656:AAFKRHpZczw4BN5OaC2_c66C2vkHHveDIPM";
-const TELEGRAM_CHAT_ID = "8452807558";
+
+// ⚠️ TOKEN DE TELEGRAM MOVIDO AL BACKEND POR SEGURIDAD
+// Ahora se usa /api/notificar-telegram en lugar del token directo
 
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
@@ -792,18 +793,20 @@ function copiarTodosLosDatos(boton){
 }
 
 // ==============================================
-// 📢 TELEGRAM
+// 📢 TELEGRAM (A TRAVÉS DEL BACKEND SEGURO)
 // ==============================================
 function enviarTelegram(mensaje) {
-    fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    // ✅ Ahora se envía a través del backend, sin exponer el token
+    fetch('/api/notificar-telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: mensaje,
-            parse_mode: 'HTML'
-        })
-    }).catch(err => console.log("Error Telegram:", err));
+        body: JSON.stringify({ mensaje })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.ok) console.warn('⚠️ Telegram no enviado:', data);
+    })
+    .catch(err => console.log("Error Telegram:", err));
 }
 
 function notificarAdmin(tipo, datos = {}) {
@@ -1214,7 +1217,6 @@ function generarReferenciaInterna(productoCodigo) {
     return `RG-${partes.join('-')}-${ts}-${rand}`;
 }
 
-// ✅ Función mejorada que acepta código RG con codigo_aprobacion_pagonorte
 async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoRGInfo = null) {
     try {
         const tipoPagoNorte = MAPA_PAGONORTE[productoCodigo.toLowerCase()];
@@ -1227,7 +1229,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // 🔄 ¿Es renovación?
         const esRenovacionNormal = MODO_RENOVACION && CODIGO_RENOVACION;
         const esRenovacionPorRG = codigoRGInfo && codigoRGInfo.codigo_aprobacion_pagonorte;
 
@@ -1268,7 +1269,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
         const data = await res.json();
         console.log('📥 Respuesta /api/pagonorte:', data);
 
-        // ✅ APROBADO
         if (data.ok === true && data.estado === 'Aprobado' && data.datos) {
             return {
                 exito: true,
@@ -1282,7 +1282,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // ⏳ PENDIENTE
         if (data.ok === true && (data.pendiente === true || data.estado === 'Pendiente')) {
             return {
                 exito: false,
@@ -1294,11 +1293,9 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // ❌ ERRORES ESPECÍFICOS
         const codigoErr = data.codigo_respuesta || '';
         const mensajeErr = data.mensaje || '';
 
-        // 🚨 CREDENCIALES
         if (codigoErr === 'API_CREDENCIALES' ||
             codigoErr === 'API_INACTIVA' ||
             codigoErr === 'API_PERMISO_DENEGADO' ||
@@ -1326,7 +1323,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // ❌ CÓDIGO NO ENCONTRADO
         if (codigoErr === 'CODIGO_NO_ENCONTRADO') {
             return {
                 exito: false,
@@ -1336,7 +1332,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // ⏰ CÓDIGO NO RENOVABLE
         if (codigoErr === 'CODIGO_NO_RENOVABLE') {
             return {
                 exito: false,
@@ -1346,7 +1341,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // ⚠️ TIPO NO COINCIDE
         if (codigoErr === 'TIPO_RENOVACION_INVALIDO') {
             return {
                 exito: false,
@@ -1356,7 +1350,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // 📭 SIN DISPONIBILIDAD
         if (codigoErr === 'STREAMING_AGOTADO' || codigoErr === 'STREAMING_NO_DISPONIBLE') {
             return {
                 exito: false,
@@ -1366,7 +1359,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // 🔧 PAQUETE INVÁLIDO
         if (codigoErr === 'PAQUETE_INVALIDO') {
             return {
                 exito: false,
@@ -1376,7 +1368,6 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        // FALLBACK
         return {
             exito: false,
             silencioso: true,
@@ -1429,9 +1420,6 @@ async function iniciarVerificacion() {
     mostrarPaso('pasoVerificandoPago');
 
     try {
-        // ==========================================
-        // 🎲 CÓDIGO RG
-        // ==========================================
         if (esCodigoRG) {
             console.log('🎲 Código RG detectado:', referencia);
 
@@ -1506,8 +1494,7 @@ async function iniciarVerificacion() {
                 esStreaming = true;
                 referenciaInterna = generarReferenciaInterna(paqueteDelCodigo);
                 console.log('🎬 Código es para PagoNorte:', paqueteDelCodigo);
-                
-                // ✅ Pasar los datos del código RG completo
+
                 resultadoRecarga = await enviarRecargaPagoNorte(
                     paqueteDelCodigo,
                     referenciaInterna,
@@ -1558,9 +1545,6 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // ==========================================
-        // 🧪 MODO TEST
-        // ==========================================
         if (esTest) {
             mostrarPaso('pasoPagoConfirmado');
             await new Promise(r => setTimeout(r, 800));
@@ -1608,9 +1592,6 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // ==========================================
-        // 🆕 REFERENCIA MANUAL
-        // ==========================================
         if (esManual) {
             const resultadoManual = await verificarReferenciaManual(referencia);
 
@@ -1714,9 +1695,6 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // ==========================================
-        // 🔵 REFERENCIA NORMAL (Pábilo)
-        // ==========================================
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
             notificarAdmin('duplicado', { referencia, metodo: metodoPago, mensaje_extra: '⚠️ Referencia <b>YA USADA</b>' });
@@ -1864,7 +1842,6 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
 
         htmlDatos += `</div>`;
 
-        // ✅ Bloque destacado de vencimiento
         if (d.fecha_vencimiento) {
             const fechaSegura = String(d.fecha_vencimiento).replace(/'/g, "\\'");
             htmlDatos += `
@@ -1886,7 +1863,6 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
             `;
         }
 
-        // ✅ Código de aprobación
         const codigoAprob = resultadoRecarga.codigo_aprobacion || resultadoRecarga.codigo_aprobacion_original;
         if (codigoAprob) {
             const codAprob = String(codigoAprob).replace(/'/g, "\\'");
@@ -2001,7 +1977,6 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
         }
     }
 
-    // ✅ Limpiar localStorage de renovación después de éxito
     if (esRenovacion) {
         setTimeout(() => {
             localStorage.removeItem('modo_renovacion');
