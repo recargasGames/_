@@ -1,5 +1,5 @@
 // api/pagonorte.js
-const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
+const PAGONORTE_URL = 'https://pagonorte.net/recargas/api.jsp';
 
 const TIPOS = {
     'netflix_perfil':   { tipo: 'recargaPerfilNetflix',   servicio: 'Netflix',  modalidad: 'perfil' },
