@@ -1,15 +1,9 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.6
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.5.1
 // ============================================
-// v3.6: NINTENDO corregido (5, 10, 20, 35, 50, 70 - eliminado 100 que no existe)
-//       Mapeo robusto: catalog_item_id + product_id + in_stock + available_stock
-//       Lee 'price' (no reseller_price)
 // v3.5.1: FIX disponibilidad - Central One usa 'product_id' y 'status: active'
+//         (antes buscábamos 'id' y 'available' que NO EXISTEN)
 // v3.5: ROBLOX actualizado + endpoint disponibilidad
-// v3.4: AGREGADO PlayStation $1, $2, $3, $4
-// v3.3: FF Weekly al FREE FIRE
-// v3.2: Mobile Legends
-// v3.1: PUBG Mobile
 // ============================================
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
@@ -143,15 +137,11 @@ const SKU_MAP = {
     'XBOX-50':  'b48fbf26-1812-4d5e-9c9b-42d0bfecb5ad',
     'XBOX-100': 'd60be4c3-fb96-4876-9f65-baeaf402b74f',
 
-    // ============================================
-    // 🎁 GIFT CARDS - NINTENDO US - v3.6 CORREGIDO
-    // ============================================
-    'NINTENDO-5':  '434fffe4-bcf0-4201-b770-c1533bafa5d1',
+    // 🎁 NINTENDO
     'NINTENDO-10': 'f28a4f1b-617c-4b6a-814e-1263a91da6f5',
     'NINTENDO-20': '28d38620-68fc-4720-8e2f-586718f68e2b',
-    'NINTENDO-35': '0ffdd977-d634-4555-945a-c8e3c4e95228',
-    'NINTENDO-50': 'd9dfe5cb-3a64-45bf-a6e6-bf62a01165a3',
-    'NINTENDO-70': 'd8b6fac2-edca-4625-ad77-ba8cbba82276',
+    'NINTENDO-50': '092cce7c-83e5-42a9-b1d6-20978f81f6db',
+    'NINTENDO-100':'092cce7c-83e5-42a9-b1d6-20978f81f6db',
 
     // 🎁 NETFLIX
     'NETFLIX-15':  '676095be-084e-483b-a1c4-9354d5e8c1cf',
@@ -212,25 +202,17 @@ const PRODUCTOS_CONFIG = {
     'BIGO LIVE': { tipo:'juego', input:['id_jugador'], validar:/^\d{6,15}$/, paquetes:{
         '100':'BIGO-100','500':'BIGO-500','1000':'BIGO-1000','10000':'BIGO-10000'
     }},
-    'PLAYSTATION': { tipo:'giftcard', input:['id_jugador'], paquetes:{
+    'PLAYSTATION': { tipo:'giftcard', input:['email'], paquetes:{
         '1':'PSN-1','2':'PSN-2','3':'PSN-3','4':'PSN-4','5':'PSN-5','10':'PSN-10','15':'PSN-15',
         '20':'PSN-20','25':'PSN-25','30':'PSN-30','35':'PSN-35','40':'PSN-40','45':'PSN-45',
         '50':'PSN-50','75':'PSN-75','100':'PSN-100'
     }},
-    'XBOX': { tipo:'giftcard', input:['id_jugador'], paquetes:{
+    'XBOX': { tipo:'giftcard', input:['email'], paquetes:{
         '1':'XBOX-1','5':'XBOX-5','10':'XBOX-10','15':'XBOX-15',
         '20':'XBOX-20','25':'XBOX-25','50':'XBOX-50','100':'XBOX-100'
     }},
-    // ============================================
-    // 🎁 NINTENDO - v3.6 CORREGIDO
-    // ============================================
-    'NINTENDO': { tipo:'giftcard', input:['id_jugador'], paquetes:{
-        '5':  'NINTENDO-5',
-        '10': 'NINTENDO-10',
-        '20': 'NINTENDO-20',
-        '35': 'NINTENDO-35',
-        '50': 'NINTENDO-50',
-        '70': 'NINTENDO-70'
+    'NINTENDO': { tipo:'giftcard', input:['email'], paquetes:{
+        '10':'NINTENDO-10','20':'NINTENDO-20','50':'NINTENDO-50','100':'NINTENDO-100'
     }},
     'NETFLIX': { tipo:'giftcard', input:['email'], paquetes:{
         '15':'NETFLIX-15','20':'NETFLIX-20','25':'NETFLIX-25','30':'NETFLIX-30',
@@ -240,15 +222,12 @@ const PRODUCTOS_CONFIG = {
         '10-eur-de':'GPLAY-10-EUR-DE','15-eur-es':'GPLAY-15-EUR-ES',
         '10-gbp-uk':'GPLAY-10-GBP-UK','100-gbp-uk':'GPLAY-100-GBP-UK'
     }},
-    'ROBLOX': { tipo:'giftcard', input:['id_jugador'], validar:/^\d{10,13}$/, paquetes:{
+    'ROBLOX': { tipo:'giftcard', input:['email'], paquetes:{
         '50':'RBX-50','100':'RBX-100','275':'RBX-275','360':'RBX-360',
         '555':'RBX-555','1000':'RBX-1000','2000':'RBX-2000','2400':'RBX-2400'
     }}
 };
 
-// ============================================
-// 🎯 getUUID
-// ============================================
 function getUUID(juego, paquete) {
     const j = String(juego).toUpperCase().trim();
     const p = String(paquete);
@@ -259,30 +238,21 @@ function getUUID(juego, paquete) {
     return SKU_MAP[sku] || null;
 }
 
-// ============================================
-// ✅ VALIDACIÓN
-// ============================================
 function validarID(juego, id) {
     const j = String(juego).toUpperCase().trim();
     const config = PRODUCTOS_CONFIG[j];
     if (!config || !config.validar) return true;
-    if (config.tipo === 'giftcard' && config.input.includes('email')) {
+    if (config.tipo === 'giftcard') {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(id).trim());
     }
     return config.validar.test(String(id).trim());
 }
 
-// ============================================
-// 📨 TELEGRAM
-// ============================================
 async function notificarTelegram(mensaje) {
     try {
         const TG_TOKEN = process.env.TELEGRAM_TOKEN;
         const TG_CHAT = process.env.TELEGRAM_CHAT_ID;
-        if (!TG_TOKEN || !TG_CHAT) {
-            console.warn('⚠️ Telegram no configurado');
-            return;
-        }
+        if (!TG_TOKEN || !TG_CHAT) return;
         await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -293,9 +263,6 @@ async function notificarTelegram(mensaje) {
     }
 }
 
-// ============================================
-// 💰 PRECIO
-// ============================================
 function calcularPrecio(costoUSD, tipo) {
     const margen = tipo === 'giftcard' ? MARGEN_GIFTCARDS : MARGEN_JUEGOS;
     return (costoUSD * margen).toFixed(2);
@@ -334,7 +301,7 @@ export default async function handler(req, res) {
                     headers: { 'Authorization': `Bearer ${API_KEY}` }
                 });
                 const data = await r.json();
-                const items = data.items || data.catalog || data.data || data.products || data.productos || [];
+                const items = data.items || data.catalog || data.data || data.products || [];
                 return res.status(200).json({
                     ok: true,
                     status_http: r.status,
@@ -372,7 +339,7 @@ export default async function handler(req, res) {
             }
 
             // ============================================
-            // 🔍 DISPONIBILIDAD - v3.6 CON MAPEO ROBUSTO
+            // 🔍 DISPONIBILIDAD - v3.5.1 CON FIX
             // ============================================
             if (accion === 'disponibilidad') {
                 const { juego } = req.query;
@@ -387,26 +354,20 @@ export default async function handler(req, res) {
                 if (!r.ok) return res.status(r.status).json({ error: 'Error consultando catálogo' });
 
                 const data = await r.json();
-                const items = data.items || data.catalog || data.data || data.products || data.productos || [];
+                const items = data.items || data.catalog || data.data || data.products || [];
 
-                // ✅ Mapeo robusto: acepta TODAS las variantes que devuelve Central One
+                // ✅ FIX v3.5.1: Central One usa 'product_id' y 'status: active'
                 const catalogoMap = {};
                 for (const it of items) {
-                    const uuid = it.catalog_item_id
-                              || it.product_id
-                              || it.id
-                              || it.uuid;
+                    const uuid = it.product_id || it.id || it.catalog_item_id || it.uuid;
                     if (!uuid) continue;
-
-                    const disponible =
-                        it.in_stock === true
-                        || (it.status === 'active' && it.available !== false && it.stock !== 0);
-
                     catalogoMap[uuid] = {
-                        disponible,
-                        stock: it.available_stock ?? it.stock ?? it.quantity ?? null,
+                        disponible: it.status === 'active'
+                                 && it.available !== false
+                                 && it.stock !== 0,
+                        stock: it.stock ?? it.quantity ?? null,
                         nombre: it.name || it.title || it.product_name || null,
-                        precio_costo: parseFloat(it.price || it.reseller_price || 0)
+                        precio_costo: parseFloat(it.reseller_price || 0)
                     };
                 }
 
@@ -440,8 +401,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.6 funcionando',
-                version: '3.6',
+                mensaje: '✅ API Central One v3.5.1 funcionando',
+                version: '3.5.1',
                 acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
@@ -460,37 +421,25 @@ export default async function handler(req, res) {
                 const config = PRODUCTOS_CONFIG[juego.toUpperCase()];
                 if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
-                const inputRequerido = config.tipo === 'giftcard' && config.input.includes('email')
-                    ? email
-                    : id_jugador;
-
-                if (!inputRequerido) {
-                    return res.status(400).json({ error: 'Falta input requerido (id_jugador o email)' });
-                }
-                if (!validarID(juego, inputRequerido)) {
-                    return res.status(400).json({ error: `Formato inválido para ${juego}` });
-                }
+                const inputRequerido = config.tipo === 'giftcard' ? email : id_jugador;
+                if (!inputRequerido) return res.status(400).json({ error: 'Falta input requerido' });
+                if (!validarID(juego, inputRequerido)) return res.status(400).json({ error: `Formato inválido para ${juego}` });
 
                 const productId = getUUID(juego, paquete);
-                if (!productId) {
-                    return res.status(400).json({ error: `Paquete no encontrado: ${juego} - ${paquete}` });
-                }
+                if (!productId) return res.status(400).json({ error: `Paquete no encontrado: ${juego} - ${paquete}` });
 
                 const juegoUpper = juego.toUpperCase();
                 const idempotencyKey = `rec-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
                 const payload = {
                     items: [{ catalog_item_id: productId, quantity: 1 }],
-                    note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
+                    note: `${juegoUpper} - ${config.tipo === 'giftcard' ? `Email: ${email}` : `ID: ${id_jugador}`} - Paquete: ${paquete}`
                 };
 
-                if (juegoUpper === 'MOBILE LEGENDS') {
-                    payload.items[0].target_payload = {
-                        player_id: id_jugador,
-                        server: zona_id || servidor || '1'
-                    };
-                } else if (config.tipo === 'giftcard' && config.input.includes('email')) {
+                if (config.tipo === 'giftcard') {
                     payload.items[0].target_payload = { email: email };
+                } else if (juegoUpper === 'MOBILE LEGENDS') {
+                    payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
                 } else {
                     payload.items[0].target_payload = { player_id: id_jugador };
                 }
@@ -545,7 +494,7 @@ export default async function handler(req, res) {
                                     if (it.codes?.length > 0) { codigos = it.codes; break; }
                                 }
                             }
-                        } catch (e) { /* continuar */ }
+                        } catch (e) { }
                     }
                 }
 
@@ -556,13 +505,10 @@ export default async function handler(req, res) {
 
                 const mensajeTG =
                     `🆕 <b>NUEVO PEDIDO - ${config.tipo === 'giftcard' ? 'GIFT CARD' : 'JUEGO'}</b>\n\n` +
-                    `🎮 ${juegoUpper}\n` +
-                    `📦 Paquete: ${paquete}\n` +
-                    `🆔 ${inputRequerido}\n` +
-                    `📋 Orden: ${orderId || 'N/A'}\n` +
-                    `✅ Estado: ${status}\n` +
-                    `💰 Costo: $${costo.toFixed(2)} USD\n` +
-                    `💵 Venta: $${precioVenta} USD` +
+                    `🎮 ${juegoUpper}\n📦 Paquete: ${paquete}\n` +
+                    `🆔 ${config.tipo === 'giftcard' ? `Email: ${email}` : `ID: ${id_jugador}`}\n` +
+                    `📋 Orden: ${orderId || 'N/A'}\n✅ Estado: ${status}\n` +
+                    `💰 Costo: $${costo.toFixed(2)} USD\n💵 Venta: $${precioVenta} USD` +
                     (codigos.length > 0 ? `\n🎟️ <b>PIN:</b> <code>${codigos[0]}</code>` : '');
 
                 await notificarTelegram(mensajeTG);
