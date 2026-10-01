@@ -553,7 +553,6 @@ export default async function handler(req, res) {
                 const data = await r.json();
                 const items = data.items || data.catalog || data.data || [];
 
-                // Mapa UUID → info
                 const catalogoMap = {};
                 for (const it of items) {
                     const uuid = it.id || it.catalog_item_id || it.uuid;
@@ -565,7 +564,6 @@ export default async function handler(req, res) {
                     };
                 }
 
-                // Armar respuesta por paquete
                 const paquetes = {};
                 for (const [codigo, sku] of Object.entries(config.paquetes)) {
                     const uuid = SKU_MAP[sku];
