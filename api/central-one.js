@@ -1,12 +1,9 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.5-DEBUG
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.5.1
 // ============================================
-// v3.5-DEBUG: Agregado endpoint temporal 'debug-catalogo'
-//             para ver la estructura REAL del catálogo de Central One
-// v3.5: ROBLOX actualizado (UUIDs reales 100/1000, +275, +2400,
-//       eliminados los descontinuados: 300/420/700/800/2500/3000/4500/10000
-//       eliminado bloque duplicado ROBLOX-5..100 USD)
-//       + NUEVO endpoint 'disponibilidad' (consulta stock real en Central One)
+// v3.5.1: FIX disponibilidad - Central One usa 'product_id' y 'status: active'
+//         (antes buscábamos 'id' y 'available' que NO EXISTEN)
+// v3.5: ROBLOX actualizado + endpoint disponibilidad
 // ============================================
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
@@ -231,9 +228,6 @@ const PRODUCTOS_CONFIG = {
     }}
 };
 
-// ============================================
-// 🎯 getUUID
-// ============================================
 function getUUID(juego, paquete) {
     const j = String(juego).toUpperCase().trim();
     const p = String(paquete);
@@ -244,9 +238,6 @@ function getUUID(juego, paquete) {
     return SKU_MAP[sku] || null;
 }
 
-// ============================================
-// ✅ VALIDACIÓN
-// ============================================
 function validarID(juego, id) {
     const j = String(juego).toUpperCase().trim();
     const config = PRODUCTOS_CONFIG[j];
@@ -257,9 +248,6 @@ function validarID(juego, id) {
     return config.validar.test(String(id).trim());
 }
 
-// ============================================
-// 📨 TELEGRAM
-// ============================================
 async function notificarTelegram(mensaje) {
     try {
         const TG_TOKEN = process.env.TELEGRAM_TOKEN;
@@ -275,9 +263,6 @@ async function notificarTelegram(mensaje) {
     }
 }
 
-// ============================================
-// 💰 PRECIO
-// ============================================
 function calcularPrecio(costoUSD, tipo) {
     const margen = tipo === 'giftcard' ? MARGEN_GIFTCARDS : MARGEN_JUEGOS;
     return (costoUSD * margen).toFixed(2);
@@ -311,37 +296,19 @@ export default async function handler(req, res) {
                 return res.status(r.status).json(data);
             }
 
-            // ============================================
-            // 🆕 DEBUG TEMPORAL - VER ESTRUCTURA REAL
-            // ============================================
             if (accion === 'debug-catalogo') {
                 const r = await fetch(`${BASE_URL}/catalog`, {
                     headers: { 'Authorization': `Bearer ${API_KEY}` }
                 });
-                const texto = await r.text();
-                let data;
-                try { data = JSON.parse(texto); }
-                catch (e) { return res.status(200).json({ ok:false, status:r.status, raw:texto.substring(0,2000) }); }
-
-                // Detectar array de items
+                const data = await r.json();
                 const items = data.items || data.catalog || data.data || data.products || [];
-
                 return res.status(200).json({
                     ok: true,
                     status_http: r.status,
                     estructura_raiz: Object.keys(data),
                     total_items: items.length,
                     campos_del_primer_item: items[0] ? Object.keys(items[0]) : [],
-                    primeros_3_items: items.slice(0, 3),
-                    // Buscar específicamente los UUIDs de Roblox a ver si aparecen
-                    roblox_encontrados: items.filter(it => {
-                        const uuid = it.id || it.catalog_item_id || it.uuid || it.product_id;
-                        return [
-                            '81dfdc57-1feb-4e72-8be6-7e119a348c48',
-                            'ea9298ae-944b-498b-9d82-a8128624cbbd',
-                            '2ed3da74-e7e6-4c1b-a609-b630855303b6'
-                        ].includes(uuid);
-                    }).slice(0, 3)
+                    primeros_3_items: items.slice(0, 3)
                 });
             }
 
@@ -372,7 +339,7 @@ export default async function handler(req, res) {
             }
 
             // ============================================
-            // 🔍 DISPONIBILIDAD
+            // 🔍 DISPONIBILIDAD - v3.5.1 CON FIX
             // ============================================
             if (accion === 'disponibilidad') {
                 const { juego } = req.query;
@@ -389,20 +356,18 @@ export default async function handler(req, res) {
                 const data = await r.json();
                 const items = data.items || data.catalog || data.data || data.products || [];
 
-                // Mapeo tolerante a cualquier estructura
+                // ✅ FIX v3.5.1: Central One usa 'product_id' y 'status: active'
                 const catalogoMap = {};
                 for (const it of items) {
-                    const uuid = it.id || it.catalog_item_id || it.uuid || it.product_id || it.sku || it.code;
+                    const uuid = it.product_id || it.id || it.catalog_item_id || it.uuid;
                     if (!uuid) continue;
                     catalogoMap[uuid] = {
-                        disponible: it.available !== false
-                                 && it.is_available !== false
-                                 && it.active !== false
-                                 && it.status !== 'out_of_stock'
-                                 && it.status !== 'inactive'
+                        disponible: it.status === 'active'
+                                 && it.available !== false
                                  && it.stock !== 0,
                         stock: it.stock ?? it.quantity ?? null,
-                        nombre: it.name || it.title || it.product_name || null
+                        nombre: it.name || it.title || it.product_name || null,
+                        precio_costo: parseFloat(it.reseller_price || 0)
                     };
                 }
 
@@ -420,7 +385,8 @@ export default async function handler(req, res) {
                         paquetes[codigo] = {
                             disponible: info.disponible,
                             stock: info.stock,
-                            nombre: info.nombre
+                            nombre: info.nombre,
+                            precio_costo: info.precio_costo
                         };
                     }
                 }
@@ -435,8 +401,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.5-DEBUG funcionando',
-                version: '3.5-DEBUG',
+                mensaje: '✅ API Central One v3.5.1 funcionando',
+                version: '3.5.1',
                 acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
