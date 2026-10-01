@@ -391,6 +391,14 @@ tr:hover{background:rgba(212,175,55,0.05)}
                     <option value="ff_1166">💎 1166 Diamantes Free Fire — $7.80</option>
                     <option value="ff_2398">💎 2398 Diamantes Free Fire — $15.30</option>
                     <option value="ff_6160">💎 6160 Diamantes Free Fire — $39.00</option>
+                    <option value="rb_50">🎮 50 Robux Roblox — $1.00</option>
+                    <option value="rb_100">🎮 100 Robux Roblox — $2.00</option>
+                    <option value="rb_275">🎮 275 Robux Roblox — $5.00</option>
+                    <option value="rb_360">🎮 360 Robux Roblox — $6.50</option>
+                    <option value="rb_555">🎮 555 Robux Roblox — $10.00</option>
+                    <option value="rb_1000">🎮 1000 Robux Roblox — $18.00</option>
+                    <option value="rb_2000">🎮 2000 Robux Roblox — $36.00</option>
+                    <option value="rb_2400">🎮 2400 Robux Roblox — $43.00</option>
                     <option value="nf_perfil">🎬 Perfil Netflix — $3.80</option>
                     <option value="nf_cuenta">🎬 Cuenta Netflix — $13.00</option>
                     <option value="ds_perfil">✨ Perfil Disney+ — $3.53</option>
@@ -675,12 +683,23 @@ let ultimosCodigosGenerados = [];
 // 📦 PRODUCTOS PARA CÓDIGOS
 // ══════════════════════════════════════
 const PRODUCTOS_CODIGOS = {
+    // 🎮 FREE FIRE
     'ff_110':     { producto: '110 Diamantes',   juego: 'FREE FIRE', paquete: '110',             usd: 0.81,  tipo: 'central_one' },
     'ff_341':     { producto: '341 Diamantes',   juego: 'FREE FIRE', paquete: '341',             usd: 2.60,  tipo: 'central_one' },
     'ff_572':     { producto: '572 Diamantes',   juego: 'FREE FIRE', paquete: '572',             usd: 4.20,  tipo: 'central_one' },
     'ff_1166':    { producto: '1166 Diamantes',  juego: 'FREE FIRE', paquete: '1166',            usd: 7.80,  tipo: 'central_one' },
     'ff_2398':    { producto: '2398 Diamantes',  juego: 'FREE FIRE', paquete: '2398',            usd: 15.30, tipo: 'central_one' },
     'ff_6160':    { producto: '6160 Diamantes',  juego: 'FREE FIRE', paquete: '6160',            usd: 39.00, tipo: 'central_one' },
+    // 🎮 ROBLOX
+    'rb_50':      { producto: '50 Robux',        juego: 'ROBLOX',    paquete: '81dfdc57-1feb-4e72-8be6-7e119a348c48', usd: 1.00,  tipo: 'central_one' },
+    'rb_100':     { producto: '100 Robux',       juego: 'ROBLOX',    paquete: 'ea9298ae-944b-498b-9d82-a8128624cbbd', usd: 2.00,  tipo: 'central_one' },
+    'rb_275':     { producto: '275 Robux',       juego: 'ROBLOX',    paquete: '2ed3da74-e7e6-4c1b-a609-b630855303b6', usd: 5.00,  tipo: 'central_one' },
+    'rb_360':     { producto: '360 Robux',       juego: 'ROBLOX',    paquete: '5cafd861-3893-49a7-a9be-7815492c04c2', usd: 6.50,  tipo: 'central_one' },
+    'rb_555':     { producto: '555 Robux',       juego: 'ROBLOX',    paquete: '9defafba-f584-4378-ab8c-ce656d2a7c7e', usd: 10.00, tipo: 'central_one' },
+    'rb_1000':    { producto: '1000 Robux',      juego: 'ROBLOX',    paquete: '586763f0-6a06-4f5b-9eaf-cb7f66ae2ce2', usd: 18.00, tipo: 'central_one' },
+    'rb_2000':    { producto: '2000 Robux',      juego: 'ROBLOX',    paquete: '898ed399-6901-4582-9755-e5299f7dfb40', usd: 36.00, tipo: 'central_one' },
+    'rb_2400':    { producto: '2400 Robux',      juego: 'ROBLOX',    paquete: '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc', usd: 43.00, tipo: 'central_one' },
+    // 🎬 STREAMING
     'nf_perfil':  { producto: 'Perfil Netflix',  juego: 'NETFLIX',   paquete: 'netflix_perfil',  usd: 3.80,  tipo: 'pagonorte'   },
     'nf_cuenta':  { producto: 'Cuenta Netflix',  juego: 'NETFLIX',   paquete: 'netflix_cuenta',  usd: 13.00, tipo: 'pagonorte'   },
     'ds_perfil':  { producto: 'Perfil Disney+',  juego: 'DISNEY+',   paquete: 'disney_perfil',   usd: 3.53,  tipo: 'pagonorte'   },
@@ -901,7 +920,6 @@ async function generarCodigos(){
     const cantidad = parseInt(document.getElementById('cantidadCodigos').value) || 1;
     const nota = document.getElementById('notaCodigo').value.trim();
     const whatsapp = document.getElementById('whatsappCodigo').value.trim();
-    // ✅ NUEVO: leer el código de aprobación de PagoNorte
     const codigoAprobacionPagoNorte = (document.getElementById('codigoAprobacionPagoNorte')?.value || '').trim();
 
     if (!config) {
@@ -950,7 +968,6 @@ async function generarCodigos(){
                 creado_por: auth.currentUser ? auth.currentUser.email : 'admin'
             };
 
-            // ✅ NUEVO: Si hay código de aprobación, marcarlo como renovación
             if (codigoAprobacionPagoNorte) {
                 datosCodigo.es_renovacion = true;
                 datosCodigo.codigo_aprobacion_pagonorte = codigoAprobacionPagoNorte;
@@ -1030,7 +1047,6 @@ async function cargarCodigos(){
         } else if (filtro === 'usados') {
             codigos = codigos.filter(c => c.usada === true);
         } else if (filtro === 'renovaciones') {
-            // ✅ NUEVO: filtro de renovaciones
             codigos = codigos.filter(c => c.es_renovacion === true || !!c.codigo_aprobacion_pagonorte);
         }
 
