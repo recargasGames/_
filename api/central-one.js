@@ -24,7 +24,7 @@ const SKU_MAP = {
     'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
 
     // ⚔️ BLOOD STRIKE
-    'BS-105':  'e4efc583-fcc4-4544-9547-8c687d663ba5',
+    'BS-105':  'ebc6b685-9d50-4d42-9aae-48e8c089a793',
     'BS-320':  '6a1d92fb-365c-4a9d-84df-492b954bad95',
     'BS-540':  '2c5dda92-ea2d-426c-b546-439ec433c8a7',
     'BS-1100': '0b024948-132f-4834-8bcb-57ffa75f1403',
