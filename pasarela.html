@@ -648,7 +648,7 @@ const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betasario`;
 
 // ⚠️ TOKEN DE TELEGRAM MOVIDO AL BACKEND POR SEGURIDAD
-// Ahora se usa /api/notificar-telegram en lugar del token directo
+// Se usa /api/notificar-telegram
 
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
@@ -796,7 +796,6 @@ function copiarTodosLosDatos(boton){
 // 📢 TELEGRAM (A TRAVÉS DEL BACKEND SEGURO)
 // ==============================================
 function enviarTelegram(mensaje) {
-    // ✅ Ahora se envía a través del backend, sin exponer el token
     fetch('/api/notificar-telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1447,33 +1446,11 @@ async function iniciarVerificacion() {
             }
 
             console.log('✅ Código RG válido:', resultadoRG.data);
+            console.log('✅ Producto del código:', resultadoRG.data.producto);
+            console.log('✅ Producto del cliente:', producto);
 
-            const paqueteDelCodigo = String(resultadoRG.data.paquete || '').trim();
-            const paqueteDelCliente = String(paqueteCod || '').trim();
-
-            // ✅ FIX: Solo compara si el cliente tiene un paquete válido (no "1" ni vacío)
-            const paqueteDelClienteValido = paqueteDelCliente && paqueteDelCliente !== '1' && paqueteDelCliente !== 'undefined';
-            if (paqueteDelCodigo && paqueteDelClienteValido && paqueteDelCodigo !== paqueteDelCliente) {
-                console.log('❌ Producto no coincide:', paqueteDelCodigo, 'vs', paqueteDelCliente);
-
-                notificarAdmin('codigo_rg', {
-                    referencia,
-                    metodo: 'CÓDIGO-RG',
-                    mensaje_extra: `⚠️ Código <b>RECHAZADO por producto no válido</b>`
-                });
-
-                await mostrarMensaje(
-                    '❌ Código no válido para este producto',
-                    `Tu código es válido solo para "${resultadoRG.data.producto || 'otro producto'}".\n\n` +
-                    `Pero elegiste: "${producto}"`,
-                    'error'
-                );
-
-                mostrarPaso('pasoDatos');
-                btn.disabled = false;
-                btn.innerHTML = '✅ Verificar Pago';
-                return;
-            }
+            // ✅ FIX: NO validamos paquetes porque el código RG ya está vinculado al producto.
+            // Antes fallaba con "50 Robux ≠ 50 Robux" porque comparaba el UUID interno con otro valor.
 
             notificarAdmin('codigo_rg', {
                 referencia,
@@ -1485,25 +1462,26 @@ async function iniciarVerificacion() {
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
 
-            const tipoCodigo = resultadoRG.data.tipo || (esProductoStreaming(paqueteDelCodigo) ? 'pagonorte' : 'central_one');
+            const tipoCodigo = resultadoRG.data.tipo || (esProductoStreaming(resultadoRG.data.paquete) ? 'pagonorte' : 'central_one');
             let resultadoRecarga;
             let esStreaming = false;
             let referenciaInterna = null;
 
-            if (tipoCodigo === 'pagonorte' || esProductoStreaming(paqueteDelCodigo)) {
+            if (tipoCodigo === 'pagonorte' || esProductoStreaming(resultadoRG.data.paquete)) {
                 esStreaming = true;
-                referenciaInterna = generarReferenciaInterna(paqueteDelCodigo);
-                console.log('🎬 Código es para PagoNorte:', paqueteDelCodigo);
+                referenciaInterna = generarReferenciaInterna(resultadoRG.data.paquete);
+                console.log('🎬 Código es para PagoNorte:', resultadoRG.data.paquete);
 
                 resultadoRecarga = await enviarRecargaPagoNorte(
-                    paqueteDelCodigo,
+                    resultadoRG.data.paquete,
                     referenciaInterna,
                     resultadoRG.data
                 );
             } else {
+                console.log('🎮 Código es para Central One:', resultadoRG.data.juego, '| paquete:', resultadoRG.data.paquete);
                 resultadoRecarga = await enviarRecargaCentralOne(
                     resultadoRG.data.juego || 'FREE FIRE',
-                    paqueteDelCodigo,
+                    resultadoRG.data.paquete,
                     idJugador
                 );
             }
