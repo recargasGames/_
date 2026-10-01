@@ -862,9 +862,6 @@ body::after{
         <button class="tab-marca" role="tab" aria-selected="false" data-marca="nintendo" onclick="cambiarMarca('nintendo', this)">
             <span class="tab-icono">🕹️</span> Nintendo
         </button>
-        <button class="tab-marca" role="tab" aria-selected="false" data-marca="roblox" onclick="cambiarMarca('roblox', this)">
-            <span class="tab-icono">🎲</span> Roblox
-        </button>
     </div>
 
     <div class="section-divider"><span id="tituloMarca">🎮 PLAYSTATION GIFT CARDS (US)</span></div>
@@ -923,37 +920,24 @@ let _mensajeCerrado = false;
 let usuarioActual = null;
 
 const ICONOS = {
-    exito: '✓',
-    error: '✕',
-    advertencia: '⚠',
-    info: 'ℹ',
-    confirmacion: '❓'
+    exito: '✓', error: '✕', advertencia: '⚠', info: 'ℹ', confirmacion: '❓'
 };
 
 function mostrarMensaje(titulo, mensaje, tipo = 'info', textoBoton = 'Entendido') {
     return new Promise((resolve) => {
         const overlay = document.getElementById('mensajeOverlay');
-        const icono = document.getElementById('mensajeIcono');
-        const tituloEl = document.getElementById('mensajeTitulo');
-        const textoEl = document.getElementById('mensajeTexto');
-        const botones = document.getElementById('mensajeBotones');
-
-        icono.className = 'mensaje-icono ' + tipo;
-        icono.textContent = ICONOS[tipo] || ICONOS.info;
-        tituloEl.textContent = titulo;
-        textoEl.textContent = mensaje;
-
-        botones.innerHTML = `
-            <button class="mensaje-btn principal" id="mensajeBtnPrincipal">${textoBoton}</button>
-        `;
-
+        document.getElementById('mensajeIcono').className = 'mensaje-icono ' + tipo;
+        document.getElementById('mensajeIcono').textContent = ICONOS[tipo] || ICONOS.info;
+        document.getElementById('mensajeTitulo').textContent = titulo;
+        document.getElementById('mensajeTexto').textContent = mensaje;
+        document.getElementById('mensajeBotones').innerHTML =
+            `<button class="mensaje-btn principal" id="mensajeBtnPrincipal">${textoBoton}</button>`;
         document.getElementById('mensajeBtnPrincipal').onclick = () => {
             if (_mensajeCerrado) return;
             _mensajeCerrado = true;
             cerrarMensajePersonalizado();
             resolve(true);
         };
-
         _mensajeCallback = resolve;
         _mensajeCerrado = false;
         overlay.classList.add('activo');
@@ -962,43 +946,33 @@ function mostrarMensaje(titulo, mensaje, tipo = 'info', textoBoton = 'Entendido'
 
 function mostrarConfirmacion(titulo, mensaje, callback, opciones = {}) {
     const overlay = document.getElementById('mensajeOverlay');
-    const icono = document.getElementById('mensajeIcono');
-    const tituloEl = document.getElementById('mensajeTitulo');
-    const textoEl = document.getElementById('mensajeTexto');
-    const botones = document.getElementById('mensajeBotones');
-
     const tipo = opciones.tipo || 'confirmacion';
     const textoAceptar = opciones.textoAceptar || 'Aceptar';
     const textoCancelar = opciones.textoCancelar || 'Cancelar';
     const claseAceptar = opciones.peligro ? 'peligro' : 'principal';
 
-    icono.className = 'mensaje-icono ' + tipo;
-    icono.textContent = ICONOS[tipo] || ICONOS.confirmacion;
-    tituloEl.textContent = titulo;
-    textoEl.textContent = mensaje;
-
-    botones.innerHTML = `
+    document.getElementById('mensajeIcono').className = 'mensaje-icono ' + tipo;
+    document.getElementById('mensajeIcono').textContent = ICONOS[tipo] || ICONOS.confirmacion;
+    document.getElementById('mensajeTitulo').textContent = titulo;
+    document.getElementById('mensajeTexto').textContent = mensaje;
+    document.getElementById('mensajeBotones').innerHTML = `
         <button class="mensaje-btn secundario" id="mensajeBtnCancelar">${textoCancelar}</button>
         <button class="mensaje-btn ${claseAceptar}" id="mensajeBtnAceptar">${textoAceptar}</button>
     `;
-
     document.getElementById('mensajeBtnCancelar').onclick = () => {
         cerrarMensajePersonalizado();
         if (typeof callback === 'function') callback(false);
     };
-
     document.getElementById('mensajeBtnAceptar').onclick = () => {
         cerrarMensajePersonalizado();
         if (typeof callback === 'function') callback(true);
     };
-
     _mensajeCerrado = false;
     overlay.classList.add('activo');
 }
 
 function cerrarMensajePersonalizado() {
-    const overlay = document.getElementById('mensajeOverlay');
-    overlay.classList.remove('activo');
+    document.getElementById('mensajeOverlay').classList.remove('activo');
     if (_mensajeCallback) {
         _mensajeCallback(false);
         _mensajeCallback = null;
@@ -1006,9 +980,7 @@ function cerrarMensajePersonalizado() {
 }
 
 document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'mensajeOverlay') {
-        cerrarMensajePersonalizado();
-    }
+    if (e.target.id === 'mensajeOverlay') cerrarMensajePersonalizado();
 });
 
 window.mostrarMensaje = mostrarMensaje;
@@ -1026,7 +998,7 @@ let nicknameVerificado = "";
 let marcaActual = "playstation";
 
 // ============================================
-// 📋 CATÁLOGO DE GIFT CARDS
+// 📋 CATÁLOGO DE GIFT CARDS - v3.6 CORREGIDO
 // ============================================
 const GIFT_CARDS_DATA = {
     playstation: {
@@ -1034,17 +1006,22 @@ const GIFT_CARDS_DATA = {
         icono: "🎮",
         nombre: "PlayStation",
         productos: [
-            { titulo: "$1 USD",  precio: "1.20",  codigo: "1",   desc: "⚡ Gift Card USA" },
-            { titulo: "$2 USD",  precio: "2.30",  codigo: "2",   desc: "⚡ Gift Card USA" },
-            { titulo: "$3 USD",  precio: "3.40",  codigo: "3",   desc: "⚡ Gift Card USA" },
-            { titulo: "$4 USD",  precio: "4.50",  codigo: "4",   desc: "⚡ Gift Card USA" },
-            { titulo: "$5 USD",  precio: "5.70",  codigo: "5",   desc: "⚡ Gift Card USA" },
-            { titulo: "$10 USD", precio: "10.60", codigo: "10",  desc: "⚡ Gift Card USA" },
-            { titulo: "$15 USD", precio: "15.10", codigo: "15",  desc: "⚡ Gift Card USA" },
-            { titulo: "$20 USD", precio: "22.30", codigo: "20",  desc: "⚡ Gift Card USA" },
-            { titulo: "$25 USD", precio: "24.80", codigo: "25",  desc: "⚡ Gift Card USA" },
-            { titulo: "$50 USD", precio: "49.80", codigo: "50",  desc: "⚡ Gift Card USA" },
-            { titulo: "$100 USD", precio: "99.50", codigo: "100", desc: "🔥 Mega pack USA" }
+            { titulo: "$1 USD",   precio: "1.20",   codigo: "1",   desc: "⚡ Gift Card USA" },
+            { titulo: "$2 USD",   precio: "2.30",   codigo: "2",   desc: "⚡ Gift Card USA" },
+            { titulo: "$3 USD",   precio: "3.40",   codigo: "3",   desc: "⚡ Gift Card USA" },
+            { titulo: "$4 USD",   precio: "4.50",   codigo: "4",   desc: "⚡ Gift Card USA" },
+            { titulo: "$5 USD",   precio: "5.70",   codigo: "5",   desc: "⚡ Gift Card USA" },
+            { titulo: "$10 USD",  precio: "10.60",  codigo: "10",  desc: "⚡ Gift Card USA" },
+            { titulo: "$15 USD",  precio: "15.10",  codigo: "15",  desc: "⚡ Gift Card USA" },
+            { titulo: "$20 USD",  precio: "22.30",  codigo: "20",  desc: "⚡ Gift Card USA" },
+            { titulo: "$25 USD",  precio: "24.80",  codigo: "25",  desc: "⚡ Gift Card USA" },
+            { titulo: "$30 USD",  precio: "32.00",  codigo: "30",  desc: "⚡ Gift Card USA" },
+            { titulo: "$35 USD",  precio: "37.00",  codigo: "35",  desc: "⚡ Gift Card USA" },
+            { titulo: "$40 USD",  precio: "42.50",  codigo: "40",  desc: "⚡ Gift Card USA" },
+            { titulo: "$45 USD",  precio: "47.50",  codigo: "45",  desc: "⚡ Gift Card USA" },
+            { titulo: "$50 USD",  precio: "49.80",  codigo: "50",  desc: "⚡ Gift Card USA" },
+            { titulo: "$75 USD",  precio: "76.50",  codigo: "75",  desc: "⚡ Gift Card USA" },
+            { titulo: "$100 USD", precio: "99.50",  codigo: "100", desc: "🔥 Mega pack USA" }
         ]
     },
     xbox: {
@@ -1052,14 +1029,14 @@ const GIFT_CARDS_DATA = {
         icono: "🎯",
         nombre: "Xbox",
         productos: [
-            { titulo: "$1 USD",  precio: "1.10",  codigo: "1",   desc: "⚡ Xbox USA" },
-            { titulo: "$5 USD",  precio: "5.50",  codigo: "5",   desc: "⚡ Xbox USA" },
-            { titulo: "$10 USD", precio: "10.60", codigo: "10",  desc: "⚡ Xbox USA" },
-            { titulo: "$15 USD", precio: "14.80", codigo: "15",  desc: "⚡ Xbox USA" },
-            { titulo: "$20 USD", precio: "19.70", codigo: "20",  desc: "⚡ Xbox USA" },
-            { titulo: "$25 USD", precio: "24.70", codigo: "25",  desc: "⚡ Xbox USA" },
-            { titulo: "$50 USD", precio: "49.50", codigo: "50",  desc: "⚡ Xbox USA" },
-            { titulo: "$100 USD", precio: "99.50", codigo: "100", desc: "🔥 Mega pack USA" }
+            { titulo: "$1 USD",   precio: "1.10",   codigo: "1",   desc: "⚡ Xbox USA" },
+            { titulo: "$5 USD",   precio: "5.50",   codigo: "5",   desc: "⚡ Xbox USA" },
+            { titulo: "$10 USD",  precio: "10.60",  codigo: "10",  desc: "⚡ Xbox USA" },
+            { titulo: "$15 USD",  precio: "14.80",  codigo: "15",  desc: "⚡ Xbox USA" },
+            { titulo: "$20 USD",  precio: "19.70",  codigo: "20",  desc: "⚡ Xbox USA" },
+            { titulo: "$25 USD",  precio: "24.70",  codigo: "25",  desc: "⚡ Xbox USA" },
+            { titulo: "$50 USD",  precio: "49.50",  codigo: "50",  desc: "⚡ Xbox USA" },
+            { titulo: "$100 USD", precio: "99.50",  codigo: "100", desc: "🔥 Mega pack USA" }
         ]
     },
     netflix: {
@@ -1067,9 +1044,9 @@ const GIFT_CARDS_DATA = {
         icono: "🎬",
         nombre: "Netflix",
         productos: [
-            { titulo: "$15 USD", precio: "15.80", codigo: "15",  desc: "⚡ Netflix USA" },
-            { titulo: "$25 USD", precio: "26.00", codigo: "25",  desc: "⚡ Netflix USA" },
-            { titulo: "$50 USD", precio: "50.00", codigo: "50",  desc: "⚡ Netflix USA" },
+            { titulo: "$15 USD",  precio: "15.80",  codigo: "15",  desc: "⚡ Netflix USA" },
+            { titulo: "$25 USD",  precio: "26.00",  codigo: "25",  desc: "⚡ Netflix USA" },
+            { titulo: "$50 USD",  precio: "50.00",  codigo: "50",  desc: "⚡ Netflix USA" },
             { titulo: "$100 USD", precio: "106.50", codigo: "100", desc: "🔥 Mega pack USA" }
         ]
     },
@@ -1078,22 +1055,12 @@ const GIFT_CARDS_DATA = {
         icono: "🕹️",
         nombre: "Nintendo",
         productos: [
-            { titulo: "$10 USD", precio: "10.50", codigo: "10",  desc: "⚡ Nintendo USA" },
-            { titulo: "$20 USD", precio: "20.90", codigo: "20",  desc: "⚡ Nintendo USA" },
-            { titulo: "$50 USD", precio: "52.80", codigo: "50",  desc: "⚡ Nintendo USA" },
-            { titulo: "$100 USD", precio: "105.00", codigo: "100", desc: "🔥 Mega pack USA" }
-        ]
-    },
-    roblox: {
-        titulo: "🎲 ROBLOX GIFT CARDS (US)",
-        icono: "🎲",
-        nombre: "Roblox",
-        productos: [
-            { titulo: "$5 USD",  precio: "5.60",  codigo: "5",   desc: "⚡ Roblox USA" },
-            { titulo: "$10 USD", precio: "9.95",  codigo: "10",  desc: "⚡ Roblox USA" },
-            { titulo: "$25 USD", precio: "26.00", codigo: "25",  desc: "⚡ Roblox USA" },
-            { titulo: "$50 USD", precio: "50.30", codigo: "50",  desc: "⚡ Roblox USA" },
-            { titulo: "$100 USD", precio: "99.50", codigo: "100", desc: "🔥 Mega pack USA" }
+            { titulo: "$5 USD",  precio: "5.30",  codigo: "5",  desc: "⚡ Nintendo USA" },
+            { titulo: "$10 USD", precio: "9.95",  codigo: "10", desc: "⚡ Nintendo USA" },
+            { titulo: "$20 USD", precio: "19.90", codigo: "20", desc: "⚡ Nintendo USA" },
+            { titulo: "$35 USD", precio: "35.20", codigo: "35", desc: "⚡ Nintendo USA" },
+            { titulo: "$50 USD", precio: "49.90", codigo: "50", desc: "⚡ Nintendo USA" },
+            { titulo: "$70 USD", precio: "73.90", codigo: "70", desc: "🔥 Mega pack USA" }
         ]
     }
 };
@@ -1469,7 +1436,7 @@ document.getElementById('resetPasswordLink').addEventListener('click', async (e)
 function inicializarMarcaDesdeURL() {
     const params = new URLSearchParams(window.location.search);
     const marcaURL = (params.get('marca') || '').toLowerCase().trim();
-    const marcasValidas = ['playstation', 'xbox', 'netflix', 'nintendo', 'roblox'];
+    const marcasValidas = ['playstation', 'xbox', 'netflix', 'nintendo'];
     const marcaFinal = marcasValidas.includes(marcaURL) ? marcaURL : 'playstation';
 
     document.querySelectorAll('.tab-marca').forEach(t => {
