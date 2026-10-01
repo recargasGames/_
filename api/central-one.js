@@ -4,6 +4,7 @@
 // v3.5: ROBLOX actualizado (UUIDs reales 100/1000, +275, +2400,
 //       eliminados los descontinuados: 300/420/700/800/2500/3000/4500/10000
 //       eliminado bloque duplicado ROBLOX-5..100 USD)
+//       + NUEVO endpoint 'disponibilidad' (consulta stock real en Central One)
 // v3.4: AGREGADO PlayStation $1, $2, $3, $4 (todas las denominaciones chicas)
 //       CORREGIDO Xbox $25 y $50 (UUIDs reales)
 // v3.3: FF Weekly (Semanal, Mensual, Booyah) al FREE FIRE
@@ -525,10 +526,78 @@ export default async function handler(req, res) {
                 return res.status(r.status).json(data);
             }
 
+            // ============================================
+            // 🆕 NUEVO: DISPONIBILIDAD (consulta stock real)
+            // ============================================
+            if (accion === 'disponibilidad') {
+                const { juego } = req.query;
+                if (!juego) {
+                    return res.status(400).json({ error: 'Falta parámetro juego' });
+                }
+
+                const config = PRODUCTOS_CONFIG[juego.toUpperCase()];
+                if (!config) {
+                    return res.status(400).json({ error: `Juego no soportado: ${juego}` });
+                }
+
+                const r = await fetch(`${BASE_URL}/catalog`, {
+                    headers: { 'Authorization': `Bearer ${API_KEY}` }
+                });
+
+                if (!r.ok) {
+                    return res.status(r.status).json({
+                        error: 'Error consultando catálogo Central One'
+                    });
+                }
+
+                const data = await r.json();
+                const items = data.items || data.catalog || data.data || [];
+
+                // Mapa UUID → info
+                const catalogoMap = {};
+                for (const it of items) {
+                    const uuid = it.id || it.catalog_item_id || it.uuid;
+                    if (!uuid) continue;
+                    catalogoMap[uuid] = {
+                        disponible: it.available !== false && it.stock !== 0 && it.status !== 'out_of_stock',
+                        stock: it.stock ?? null,
+                        nombre: it.name || it.title || null
+                    };
+                }
+
+                // Armar respuesta por paquete
+                const paquetes = {};
+                for (const [codigo, sku] of Object.entries(config.paquetes)) {
+                    const uuid = SKU_MAP[sku];
+                    if (!uuid) {
+                        paquetes[codigo] = { disponible: false, motivo: 'SKU no configurado' };
+                        continue;
+                    }
+                    const info = catalogoMap[uuid];
+                    if (!info) {
+                        paquetes[codigo] = { disponible: false, motivo: 'No existe en Central One' };
+                    } else {
+                        paquetes[codigo] = {
+                            disponible: info.disponible,
+                            stock: info.stock,
+                            nombre: info.nombre
+                        };
+                    }
+                }
+
+                return res.status(200).json({
+                    ok: true,
+                    juego: juego.toUpperCase(),
+                    tipo: config.tipo,
+                    paquetes,
+                    consultado_en: new Date().toISOString()
+                });
+            }
+
             return res.status(200).json({
                 mensaje: '✅ API Central One v3.5 funcionando',
                 version: '3.5',
-                acciones: ['catalogo', 'juegos', 'verificar', 'saldo'],
+                acciones: ['catalogo', 'juegos', 'verificar', 'saldo', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
         }
