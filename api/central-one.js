@@ -69,7 +69,7 @@ const SKU_MAP = {
     'RBX-555':   '9defafba-f584-4378-ab8c-ce656d2a7c7e',
     'RBX-1000':  '586763f0-6a06-4f5b-9eaf-cb7f66ae2ce2',
     'RBX-2000':  '898ed399-6901-4582-9755-e5299f7dfb40',
-    'RBX-2400':  '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc',
+    'RBX-2400':  '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc'
 
     // 🔫 CALL OF DUTY MOBILE
     'COD-115':   '8b6451b5-b60d-4f3e-8f1c-916612696d48',
