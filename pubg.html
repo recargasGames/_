@@ -810,9 +810,6 @@ body::after{
     <div class="paso-titulo"><span class="paso-num">3</span> Elige tu recarga</div>
     <p class="paso-ayuda">Todas las recargas se acreditan al instante.</p>
 
-    <!-- ============================================ -->
-    <!-- 💰 WOW COINS -->
-    <!-- ============================================ -->
     <div class="section-divider"><span>💰 WOW COINS - PUBG MOBILE</span></div>
     <div class="products-grid">
         <div class="product-card">
@@ -848,9 +845,6 @@ body::after{
         </div>
     </div>
 
-    <!-- ============================================ -->
-    <!-- 👑 PRIME PLUS Y PASSES -->
-    <!-- ============================================ -->
     <div class="section-divider"><span>👑 PRIME PLUS Y PASSES</span></div>
     <div class="products-grid">
         <div class="product-card">
@@ -1028,6 +1022,7 @@ let tasa = 940;
 let idVerificado = false;
 let verificandoId = false;
 let nicknameVerificado = "";
+let debounceTimer = null;
 const juegoActual = "PUBG MOBILE";
 
 const inputId = document.getElementById('jugadorId');
@@ -1084,6 +1079,24 @@ function mostrarEstado(mensaje, tipo, nombre) {
     }
 }
 
+// ============================================
+// 🔍 VERIFICAR JUGADOR CONTRA /api/verificar-jugador
+// ============================================
+async function verificarJugadorEnBackend(id) {
+    try {
+        const res = await fetch(`/api/verificar-jugador?juego=PUBG%20MOBILE&id=${encodeURIComponent(id)}`);
+        if (!res.ok) {
+            console.warn('⚠️ /api/verificar-jugador respondió', res.status);
+            return { ok: false, motivo: 'http_' + res.status };
+        }
+        const data = await res.json();
+        return data;
+    } catch (e) {
+        console.warn('⚠️ Error llamando /api/verificar-jugador:', e.message);
+        return { ok: false, motivo: 'network' };
+    }
+}
+
 inputId.addEventListener('keypress', function(e) {
     if (!/[0-9]/.test(e.key)) e.preventDefault();
 });
@@ -1092,20 +1105,63 @@ inputId.addEventListener('input', function() {
     this.value = this.value.replace(/\D/g, '');
     this.classList.remove('resaltar');
     const id = this.value.trim();
+
+    // Reset estado
     idVerificado = false;
     verificandoId = false;
     nicknameVerificado = "";
     actualizarBotonesCompra();
+    clearTimeout(debounceTimer);
 
-    if (id.length === 0) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; return; }
+    if (id.length === 0) {
+        statusDiv.className = 'id-status';
+        statusDiv.style.display = 'none';
+        return;
+    }
+
     statusDiv.style.display = '';
-    if (id.length < 8) { mostrarEstado('Escribe al menos 8 dígitos', 'error'); return; }
-    if (id.length > 12) { mostrarEstado('Máximo 12 dígitos', 'error'); return; }
 
-    idVerificado = true;
-    nicknameVerificado = `ID: ${id}`;
-    mostrarEstado('', 'valido', `ID confirmado: ${id}`);
-    actualizarBotonesCompra();
+    if (id.length < 8) {
+        mostrarEstado('Escribe al menos 8 dígitos', 'error');
+        return;
+    }
+    if (id.length > 12) {
+        mostrarEstado('Máximo 12 dígitos', 'error');
+        return;
+    }
+
+    // Mostrar estado "verificando"
+    verificandoId = true;
+    mostrarEstado('Verificando ID...', 'verificando');
+
+    // Debounce: esperar 600ms sin escribir antes de consultar
+    debounceTimer = setTimeout(async () => {
+        if (inputId.value.trim() !== id) return; // el usuario siguió escribiendo
+
+        const resultado = await verificarJugadorEnBackend(id);
+
+        // Verificar que el input no cambió mientras esperábamos
+        if (inputId.value.trim() !== id) return;
+
+        verificandoId = false;
+
+        if (resultado && resultado.ok && resultado.valido === true) {
+            idVerificado = true;
+            nicknameVerificado = resultado.nickname || `ID: ${id}`;
+            mostrarEstado('', 'valido', nicknameVerificado);
+        } else if (resultado && resultado.valido === false) {
+            idVerificado = false;
+            mostrarEstado(resultado.mensaje || '❌ ID no encontrado en PUBG Mobile', 'error');
+        } else {
+            // Backend caído o no responde: modo tolerante (deja pasar)
+            console.warn('⚠️ Backend no respondió, modo tolerante activado');
+            idVerificado = true;
+            nicknameVerificado = `ID: ${id}`;
+            mostrarEstado('', 'valido', `ID: ${id} (sin verificar)`);
+        }
+
+        actualizarBotonesCompra();
+    }, 600);
 });
 
 function actualizarPrecios() {
@@ -1159,6 +1215,7 @@ function irAlCampoId(mensaje) {
 function comprarProducto(producto, precioUsd, paqueteCodigo) {
     const id = inputId.value.trim();
     if (!id) { irAlCampoId('Escribe tu ID de jugador para continuar'); return; }
+    if (verificandoId) { irAlCampoId('Espera un momento, estamos verificando tu ID'); return; }
     if (!idVerificado) { irAlCampoId('Revisa tu ID: debe tener entre 8 y 12 dígitos'); return; }
 
     const precioBs = Math.round(parseFloat(precioUsd) * tasa);
