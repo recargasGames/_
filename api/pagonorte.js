@@ -1,28 +1,38 @@
 // api/pagonorte.js
 // ============================================
-// 🎬 RECARGASGAMES - PAGONORTE (Streaming)
+// 🎬 RECARGASGAMES - PAGONORTE (Streaming) v2
 // ============================================
-// Maneja: Netflix, Disney+ (perfil y cuenta)
+// v2: Agregados tipos públicos EXACTOS al mapa (los que manda la pasarela)
+// Maneja: Netflix, Disney+, HBO (perfil y cuenta)
 // Acciones: recarga, disponibilidad, renovar, netflix_hogar
 // ============================================
 
 const PAGONORTE_URL = 'https://pagonorte.net/recargas_post/api.jsp';
 
 // ============================================
-// 🎯 MAPA DE TIPOS PÚBLICOS
+// 🎯 MAPA DE TIPOS PÚBLICOS (v2 - AMPLIADO)
 // ============================================
 const TIPOS = {
+    // ✅ Por key corta (compatibilidad)
     'netflix_perfil':   { tipo: 'recargaPerfilNetflix',   servicio: 'Netflix',  modalidad: 'perfil' },
     'netflix_cuenta':   { tipo: 'recargaCuentaNetflix',   servicio: 'Netflix',  modalidad: 'cuenta' },
     'disney_perfil':    { tipo: 'recargaPerfilDisnep',    servicio: 'Disney+',  modalidad: 'perfil' },
     'disney_cuenta':    { tipo: 'recargaCuentaDisnep',    servicio: 'Disney+',  modalidad: 'cuenta' },
     'hbo_perfil':       { tipo: 'recargaPerfilHbo',       servicio: 'HBO',      modalidad: 'perfil' },
-    'hbo_cuenta':       { tipo: 'recargaCuentaHbo',       servicio: 'HBO',      modalidad: 'cuenta' }
+    'hbo_cuenta':       { tipo: 'recargaCuentaHbo',       servicio: 'HBO',      modalidad: 'cuenta' },
+
+    // ✅ Por tipo público EXACTO (lo que manda la pasarela)
+    'recargaPerfilNetflix': { tipo: 'recargaPerfilNetflix', servicio: 'Netflix',  modalidad: 'perfil' },
+    'recargaCuentaNetflix': { tipo: 'recargaCuentaNetflix', servicio: 'Netflix',  modalidad: 'cuenta' },
+    'recargaPerfilDisnep':  { tipo: 'recargaPerfilDisnep',  servicio: 'Disney+',  modalidad: 'perfil' },
+    'recargaCuentaDisnep':  { tipo: 'recargaCuentaDisnep',  servicio: 'Disney+',  modalidad: 'cuenta' },
+    'recargaPerfilHbo':     { tipo: 'recargaPerfilHbo',     servicio: 'HBO',      modalidad: 'perfil' },
+    'recargaCuentaHbo':     { tipo: 'recargaCuentaHbo',     servicio: 'HBO',      modalidad: 'cuenta' }
 };
 
 // ============================================
 // 📡 LLAMAR A PAGONORTE
-// ✅ Con cabeceras X-API-Key y X-API-Secret
+// ✅ Cabeceras X-API-Key y X-API-Secret
 // ✅ Form URL-encoded (NO JSON)
 // ============================================
 async function llamarPagoNorte(params, apiKey, apiSecret) {
@@ -57,11 +67,8 @@ async function llamarPagoNorte(params, apiKey, apiSecret) {
 
 // ============================================
 // 🎯 EXTRAER DATOS DE STREAMING
-// ✅ PagoNorte devuelve los datos en la RAÍZ
-// ✅ Algunas veces en "datos" (por compatibilidad)
 // ============================================
 function extraerDatosStreaming(data) {
-    // Prioriza la raíz, luego "datos"
     const fuente = data.datos && typeof data.datos === 'object' ? data.datos : data;
 
     return {
@@ -120,6 +127,8 @@ export default async function handler(req, res) {
 
             const config = TIPOS[producto];
             if (!config) {
+                console.error('❌ Producto no soportado:', producto);
+                console.error('   Soportados:', Object.keys(TIPOS));
                 return res.status(400).json({
                     ok: false,
                     error: `Producto no soportado: ${producto}`,
@@ -149,7 +158,6 @@ export default async function handler(req, res) {
 
             console.log('🔍 Estado:', estado, '| Código:', codigo, '| ok:', data.ok);
 
-            // ✅ Aprobado — detecta por estado O por presencia de correo/clave
             const tieneDatos = data.correo || data.clave || (data.datos && (data.datos.correo || data.datos.clave));
 
             if ((estado === 'Aprobado' || data.ok === true) && tieneDatos) {
@@ -170,7 +178,6 @@ export default async function handler(req, res) {
                 });
             }
 
-            // ⏳ Pendiente
             if (data.pendiente === true || codigo === '01') {
                 return res.status(200).json({
                     ok: true,
@@ -181,7 +188,6 @@ export default async function handler(req, res) {
                 });
             }
 
-            // ❌ Rechazado
             return res.status(200).json({
                 ok: false,
                 estado: estado || 'Rechazado',
@@ -343,7 +349,6 @@ export default async function handler(req, res) {
             });
         }
 
-        // Acción no reconocida
         return res.status(400).json({
             ok: false,
             error: `Acción no soportada: ${accion}`,
