@@ -145,6 +145,24 @@
             background: rgba(13, 22, 39, 0.85);
         }
 
+        /* 🆕 ANIMACIÓN DE PEDIDO NUEVO */
+        .pedido-card.nuevo {
+            animation: brilloNuevo 2s ease-in-out 3;
+            border-color: var(--verde-brillante);
+            box-shadow: 0 0 30px rgba(0, 210, 106, 0.5);
+        }
+        @keyframes brilloNuevo {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 210, 106, 0.5);
+                border-color: var(--verde-brillante);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(0, 210, 106, 0.8);
+                border-color: #4ade80;
+                transform: scale(1.01);
+            }
+        }
+
         .pedido-header {
             display: flex;
             justify-content: space-between;
@@ -451,6 +469,80 @@
         }
         .toast.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
 
+        /* 🆕 NOTIFICACIÓN FLOTANTE DE PEDIDO NUEVO */
+        .notif-pedido {
+            position: fixed;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120%);
+            max-width: calc(100% - 32px);
+            width: 380px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
+            border: 2px solid #4ade80;
+            box-shadow: 0 20px 60px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.3);
+            color: #fff;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+        }
+        .notif-pedido.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+        .notif-pedido .notif-icono {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            animation: latido 1s ease-in-out infinite;
+        }
+        @keyframes latido {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .notif-pedido .notif-texto {
+            flex: 1;
+            min-width: 0;
+        }
+        .notif-pedido .notif-titulo {
+            font-size: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .notif-pedido .notif-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        .notif-pedido .notif-cerrar {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .notif-pedido .notif-cerrar:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: rotate(90deg);
+        }
+
         .nav-inferior {
             position: fixed; left: 0; right: 0; bottom: 0; z-index: 999;
             background: rgba(5, 8, 16, 0.96); border-top: 1px solid rgba(212, 175, 55, 0.25);
@@ -483,55 +575,11 @@
             .dato-entrega .dato-valor { font-size: 14px; }
             .dato-entrega .btn-copiar-dato { width: 36px; height: 36px; }
             .video-fondo { opacity: 0.85; filter: brightness(1.05); }
+            .notif-pedido { width: calc(100% - 24px); padding: 14px 16px; }
         }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-        }
-
-        /* ═══════════════════════════════════════════════
-           PANTALLA DE ACCESO RESTRINGIDO (MODO NEXUS)
-           ═══════════════════════════════════════════════ */
-        .pantalla-bloqueo {
-            position: fixed; inset: 0; z-index: 999999;
-            background: #05080f;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center; overflow: hidden;
-            border: 5px solid #e50914;
-            animation: aparecerBloqueo 0.25s ease;
-        }
-        @keyframes aparecerBloqueo {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .pantalla-bloqueo .icono-bloqueo {
-            font-size: 90px; margin-bottom: 20px;
-            filter: drop-shadow(0 0 20px #e50914);
-            animation: pulso 1.5s ease-in-out infinite;
-        }
-        @keyframes pulso {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        .pantalla-bloqueo h1 {
-            font-size: 30px; font-weight: 900; letter-spacing: 3px;
-            margin: 0 0 12px 0; text-transform: uppercase;
-            color: #f5d76e;
-            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
-        }
-        .pantalla-bloqueo p {
-            font-size: 15px; color: #8899b0; max-width: 85%;
-            line-height: 1.6; margin: 0;
-        }
-        .pantalla-bloqueo .firma-bloqueo {
-            margin-top: 45px; font-size: 13px; color: #3b82f6;
-            font-weight: bold; letter-spacing: 4px;
-        }
-        .pantalla-bloqueo .linea-bloqueo {
-            width: 60px; height: 3px; background: #e50914;
-            margin: 20px auto; border-radius: 2px;
         }
     </style>
 </head>
@@ -601,146 +649,6 @@
     </div>
 </nav>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     SISTEMA DE PROTECCIÓN "MODO NEXUS"
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-(function() {
-    let bloqueado = false;
-
-    function castigar() {
-        if (bloqueado) return;
-        bloqueado = true;
-
-        try { window.stop(); } catch(e) {}
-
-        // Esperar un tick para que se detenga todo
-        setTimeout(function() {
-            // Reemplazamos completamente el HTML
-            document.documentElement.innerHTML = `
-                <head>
-                    <title>Acceso Restringido</title>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <style>
-                        body {
-                            margin: 0; padding: 0; width: 100vw; height: 100vh;
-                            background: #05080f; color: #f5d76e;
-                            display: flex; flex-direction: column;
-                            align-items: center; justify-content: center;
-                            font-family: 'Segoe UI', sans-serif;
-                            text-align: center; overflow: hidden;
-                            border: 5px solid #e50914;
-                            box-sizing: border-box;
-                        }
-                        .icono { 
-                            font-size: 90px; margin-bottom: 20px; 
-                            filter: drop-shadow(0 0 20px #e50914);
-                            animation: pulso 1.5s ease-in-out infinite;
-                        }
-                        @keyframes pulso {
-                            0%, 100% { transform: scale(1); }
-                            50% { transform: scale(1.1); }
-                        }
-                        h1 { 
-                            font-size: 30px; font-weight: 900; letter-spacing: 3px; 
-                            margin: 0 0 12px 0; text-transform: uppercase; 
-                            color: #f5d76e;
-                            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
-                        }
-                        p { 
-                            font-size: 15px; color: #8899b0; 
-                            max-width: 85%; line-height: 1.6; margin: 0;
-                        }
-                        .linea { 
-                            width: 60px; height: 3px; background: #e50914;
-                            margin: 20px auto; border-radius: 2px;
-                        }
-                        .firma { 
-                            margin-top: 45px; font-size: 13px; color: #3b82f6; 
-                            font-weight: bold; letter-spacing: 4px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="icono">⛔</div>
-                    <h1>Acceso Restringido</h1>
-                    <div class="linea"></div>
-                    <p>Hemos detectado actividad de inspección no autorizada.<br>Por seguridad, el acceso a esta página ha sido bloqueado.</p>
-                    <div class="firma">RECARGAS GAMES</div>
-                </body>
-            `;
-        }, 50);
-    }
-
-    // 1. BLOQUEAR ATAJOS DE TECLADO
-    document.addEventListener('keydown', function(e) {
-        // F12
-        if (e.key === 'F12' || e.keyCode === 123) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Ctrl+Shift+I / J / C
-        if (e.ctrlKey && e.shiftKey && ['I','J','C','i','j','c'].includes(e.key)) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Cmd+Option+I / J / C (Mac)
-        if (e.metaKey && e.altKey && ['I','J','C','i','j','c'].includes(e.key)) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Ctrl+U (Ver código fuente)
-        if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Ctrl+S (Guardar página)
-        if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-            e.preventDefault(); e.stopPropagation(); return false;
-        }
-        // Ctrl+Shift+K (Firefox consola)
-        if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-    }, true);
-
-    // 2. BLOQUEAR CLIC DERECHO
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault(); e.stopPropagation(); return false;
-    }, true);
-
-    // 3. DETECCIÓN DE CONSOLA ABIERTA (truco del objeto)
-    const trampa = new Image();
-    Object.defineProperty(trampa, 'id', {
-        get: function() {
-            castigar();
-        }
-    });
-
-    setInterval(function() {
-        if (bloqueado) return;
-        // Ejecutamos el log que dispara la trampa si la consola está abierta
-        console.log(trampa);
-        try { console.clear(); } catch(e) {}
-    }, 1000);
-
-    // 4. DETECCIÓN POR TAMAÑO DE VENTANA
-    setInterval(function() {
-        if (bloqueado) return;
-        const anchoDiff = window.outerWidth - window.innerWidth;
-        const altoDiff = window.outerHeight - window.innerHeight;
-        if (altoDiff > 160 || anchoDiff > 160) {
-            castigar();
-        }
-    }, 1000);
-
-    // 5. BLOQUEAR ARRASTRE DE IMÁGENES Y SELECCIÓN (opcional, refuerza)
-    document.addEventListener('dragstart', function(e) {
-        if (e.target.tagName === 'IMG') e.preventDefault();
-    }, true);
-
-})();
-</script>
-<!-- ═══════════════════════════════════════════════════════════════
-     FIN DEL SISTEMA DE PROTECCIÓN
-     ═══════════════════════════════════════════════════════════════ -->
-
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -762,6 +670,8 @@
     let consultaActual = null;
     let estadoFiltro = 'todos';
     let toastTimer = null;
+    let pedidosVistos = new Set(); // 🆕 Track de pedidos ya vistos
+    let primeraCarga = true; // 🆕 Para no disparar notifs al cargar
 
     const listaEl = document.getElementById('listaPedidos');
     const buscarEl = document.getElementById('buscarInput');
@@ -778,6 +688,145 @@
         toastEl.classList.add('visible');
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3000);
+    }
+
+    // ============================================
+    // 🆕 NOTIFICACIÓN DE PEDIDO NUEVO
+    // ============================================
+    function mostrarNotifPedido(pedido) {
+        const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || 'N/A';
+        const juego = pedido.juego || 'Producto';
+        const producto = pedido.producto || '';
+
+        // Crear el elemento de notificación
+        const notif = document.createElement('div');
+        notif.className = 'notif-pedido';
+        notif.innerHTML = `
+            <div class="notif-icono">🎉</div>
+            <div class="notif-texto">
+                <div class="notif-titulo">¡Pedido #${esc(idPedido)} creado!</div>
+                <div class="notif-sub">${esc(juego)}${producto ? ' - ' + esc(producto) : ''}</div>
+            </div>
+            <button class="notif-cerrar" aria-label="Cerrar">✕</button>
+        `;
+
+        document.body.appendChild(notif);
+
+        // Animación de entrada
+        requestAnimationFrame(() => {
+            notif.classList.add('visible');
+        });
+
+        // Cerrar manualmente
+        const btnCerrar = notif.querySelector('.notif-cerrar');
+        btnCerrar.onclick = () => cerrarNotif(notif);
+
+        // Cerrar automáticamente después de 6s
+        setTimeout(() => cerrarNotif(notif), 6000);
+
+        // 🔔 Reproducir sonido + vibración
+        reproducirSonido();
+        vibrar();
+    }
+
+    function cerrarNotif(notif) {
+        if (!notif || !notif.parentNode) return;
+        notif.classList.remove('visible');
+        setTimeout(() => {
+            if (notif.parentNode) notif.parentNode.removeChild(notif);
+        }, 500);
+    }
+
+    // 🎵 SONIDO - Generado con Web Audio API (sin archivos externos)
+    function reproducirSonido() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+
+            const ctx = new AudioCtx();
+
+            // Nota 1 (C5)
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.frequency.value = 523.25;
+            osc1.type = 'sine';
+            gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            osc1.start(ctx.currentTime);
+            osc1.stop(ctx.currentTime + 0.3);
+
+            // Nota 2 (E5) - un poco después
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.frequency.value = 659.25;
+            osc2.type = 'sine';
+            gain2.gain.setValueAtTime(0, ctx.currentTime + 0.1);
+            gain2.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.15);
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            osc2.start(ctx.currentTime + 0.1);
+            osc2.stop(ctx.currentTime + 0.5);
+
+            // Nota 3 (G5)
+            const osc3 = ctx.createOscillator();
+            const gain3 = ctx.createGain();
+            osc3.connect(gain3);
+            gain3.connect(ctx.destination);
+            osc3.frequency.value = 783.99;
+            osc3.type = 'sine';
+            gain3.gain.setValueAtTime(0, ctx.currentTime + 0.2);
+            gain3.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.25);
+            gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+            osc3.start(ctx.currentTime + 0.2);
+            osc3.stop(ctx.currentTime + 0.7);
+
+            // Cerrar el contexto después
+            setTimeout(() => {
+                try { ctx.close(); } catch(e) {}
+            }, 1000);
+        } catch(e) {
+            console.warn('No se pudo reproducir sonido:', e);
+        }
+    }
+
+    // 📳 VIBRACIÓN (móvil)
+    function vibrar() {
+        if (navigator.vibrate) {
+            try {
+                navigator.vibrate([200, 100, 200]);
+            } catch(e) {}
+        }
+    }
+
+    // 🔔 PEDIR PERMISO DE NOTIFICACIONES NATIVAS (opcional)
+    function pedirPermisoNotif() {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().then((perm) => {
+                if (perm === 'granted') {
+                    console.log('✅ Notificaciones nativas permitidas');
+                }
+            });
+        }
+    }
+
+    // 🔔 ENVIAR NOTIFICACIÓN NATIVA DEL NAVEGADOR
+    function enviarNotifNativa(titulo, cuerpo) {
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+        try {
+            new Notification(titulo, {
+                body: cuerpo,
+                icon: 'logo.png',
+                badge: 'logo.png',
+                tag: 'pedido-nuevo'
+            });
+        } catch(e) {
+            console.warn('Error notificación nativa:', e);
+        }
     }
 
     function normalizarEstado(raw) {
@@ -799,6 +848,7 @@
             return;
         }
         uidActual = user.uid;
+        pedirPermisoNotif();
         cargarPedidos();
     });
 
@@ -807,20 +857,42 @@
         consultaActual = db.ref('pedidos').orderByChild('uid').equalTo(uidActual);
 
         consultaActual.on('value', (snapshot) => {
-            todosPedidos = [];
+            const nuevosPedidos = [];
+            const idsActuales = new Set();
 
             snapshot.forEach((childSnapshot) => {
                 const pedido = childSnapshot.val();
                 pedido.key = childSnapshot.key;
                 pedido._estado = normalizarEstado(pedido.estado);
-                todosPedidos.push(pedido);
+                nuevosPedidos.push(pedido);
+                idsActuales.add(childSnapshot.key);
             });
 
-            todosPedidos.sort((a, b) => {
+            // 🆕 DETECTAR PEDIDOS NUEVOS (después de la primera carga)
+            if (!primeraCarga) {
+                nuevosPedidos.forEach((p) => {
+                    if (!pedidosVistos.has(p.key)) {
+                        console.log('🆕 Pedido nuevo detectado:', p.key);
+                        mostrarNotifPedido(p);
+                        enviarNotifNativa(
+                            '¡Pedido creado!',
+                            `${p.juego || 'Producto'} - #${p.numero_pedido || p.key}`
+                        );
+                    }
+                });
+            }
+
+            // Actualizar el set de vistos
+            pedidosVistos = idsActuales;
+            primeraCarga = false;
+
+            // Ordenar
+            nuevosPedidos.sort((a, b) => {
                 if (a.fecha && b.fecha) return new Date(b.fecha) - new Date(a.fecha);
                 return 0;
             });
 
+            todosPedidos = nuevosPedidos;
             actualizarContadores();
             filtrarPedidos();
 
