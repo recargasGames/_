@@ -175,6 +175,30 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
 .header-right{display:flex;align-items:center;gap:12px}
 
+.btn-notificaciones{
+    width:40px;height:40px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.09);
+    background:rgba(255,255,255,.04);
+    color:#dce3ef;font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:.3s;position:relative;
+}
+
+.btn-notificaciones:hover{
+    color:var(--gold2);
+    border-color:rgba(212,175,55,.4);
+    background:rgba(212,175,55,.08);
+}
+
+.btn-notificaciones .dot-notif{
+    position:absolute;top:6px;right:6px;
+    width:9px;height:9px;border-radius:50%;
+    background:#ef4444;border:2px solid #080c15;
+    display:none;
+}
+
+.btn-notificaciones .dot-notif.activo{display:block}
+
 .btn-perfil{
     border:0;background:transparent;color:white;
     display:flex;align-items:center;gap:8px;cursor:pointer;
@@ -185,9 +209,22 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     border:2px solid rgba(212,175,55,.55);
     background:linear-gradient(135deg,var(--gold),var(--blue));
     position:relative;
+    display:flex;align-items:center;justify-content:center;
 }
 
-.avatar-circle img{width:100%;height:100%;object-fit:cover}
+.avatar-circle img{
+    width:100%;height:100%;object-fit:cover;
+    display:none;
+}
+
+.avatar-circle .avatar-inicial{
+    font-size:16px;font-weight:900;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    width:100%;height:100%;
+}
+
+.avatar-circle.tiene-foto img{display:block}
+.avatar-circle.tiene-foto .avatar-inicial{display:none}
 
 .online-dot{
     position:absolute;right:-1px;bottom:-1px;
@@ -240,9 +277,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 .avatar-grande{
     width:46px;height:46px;border-radius:50%;overflow:hidden;
     border:2px solid rgba(212,175,55,.45);
+    background:linear-gradient(135deg,var(--gold),var(--blue));
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;font-weight:900;color:#fff;
+    flex-shrink:0;
 }
 
-.avatar-grande img{width:100%;height:100%;object-fit:cover}
+.avatar-grande img{width:100%;height:100%;object-fit:cover;display:none}
+.avatar-grande.tiene-foto img{display:block}
+.avatar-grande.tiene-foto span{display:none}
 
 .menu-perfil-header h4{font-size:14px}
 
@@ -498,7 +541,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 .game-link:hover::after{transform:scaleX(1)}
 
 .game-img-wrap{
-    position:relative;height:145px;overflow:hidden;background:#0d1421;
+    position:relative;height:110px;overflow:hidden;background:#0d1421;
 }
 
 .game-img{
@@ -523,10 +566,16 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     box-shadow:0 5px 15px rgba(0,0,0,.4);
 }
 
-.game-info{padding:13px 13px 14px}
+.game-badge.rojo{
+    background:linear-gradient(135deg,#dc2626,#ef4444);
+    color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.5);
+}
+
+.game-info{padding:11px 12px 12px}
 
 .game-nombre{
-    font-size:14px;font-weight:850;color:#f4f7fb;margin-bottom:7px;
+    font-size:13px;font-weight:850;color:#f4f7fb;margin-bottom:6px;
 }
 
 .game-meta{
@@ -550,7 +599,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     display:grid;grid-template-columns:repeat(2,1fr);gap:15px;
 }
 
-.special-card{min-height:180px}
+.special-card{min-height:160px}
 
 .sin-resultados{
     display:none;text-align:center;padding:35px 20px;
@@ -856,23 +905,24 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     .buscador input{height:50px}
     .pagos-strip{align-items:flex-start;flex-direction:column}
     .games-grid{grid-template-columns:repeat(2,1fr);gap:11px}
-    .game-img-wrap{height:115px}
-    .game-info{padding:11px 10px 12px}
+    .game-img-wrap{height:90px}
+    .game-info{padding:9px 10px 10px}
     .game-nombre{font-size:12px}
     .game-meta{font-size:9px}
     .special-grid{grid-template-columns:repeat(2,1fr);gap:11px}
-    .special-card .game-img-wrap{height:120px}
+    .special-card .game-img-wrap{height:100px}
     .seccion-titulo .titulo-principal{font-size:17px}
     .seccion-titulo small{display:none}
     .menu-perfil,.menu-flotante{right:7px;width:245px}
     .perfil-nombre,.perfil-flecha{display:none}
+    .btn-notificaciones{width:36px;height:36px;font-size:16px}
     .footer{margin-top:50px;padding-bottom:35px}
 }
 
 @media(max-width:390px){
     .hero h1{font-size:28px}
     .hero{min-height:370px}
-    .game-img-wrap{height:100px}
+    .game-img-wrap{height:80px}
     .game-nombre{font-size:11px}
     .game-meta{font-size:8px}
     .mensaje-botones{flex-direction:column}
@@ -925,6 +975,19 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
         <div class="header-right">
 
+            <!-- NOTIFICACIONES -->
+            <button
+                class="btn-notificaciones"
+                id="btnNotificaciones"
+                aria-label="Notificaciones"
+                title="Activar notificaciones"
+                onclick="event.stopPropagation(); solicitarNotificaciones()">
+
+                🔔
+                <span class="dot-notif" id="dotNotif"></span>
+
+            </button>
+
             <!-- PERFIL -->
             <div id="perfilContainer" style="position:relative;display:none;">
 
@@ -934,8 +997,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{
                     aria-label="Abrir menú de perfil"
                     onclick="event.stopPropagation(); toggleMenuPerfil()">
 
-                    <div class="avatar-circle">
-                        <img src="logo.png" alt="Usuario" id="avatarLogo">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="" alt="Usuario" id="avatarImg">
+                        <span class="avatar-inicial" id="avatarInicial">U</span>
                         <span class="online-dot"></span>
                     </div>
 
@@ -956,8 +1020,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
                     <div class="menu-perfil-header">
 
-                        <div class="avatar-grande">
-                            <img src="logo.png" alt="Usuario">
+                        <div class="avatar-grande" id="avatarGrande">
+                            <img src="" alt="Usuario" id="avatarGrandeImg">
+                            <span id="avatarGrandeInicial">U</span>
                         </div>
 
                         <div>
@@ -1640,9 +1705,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{
             <a
                 href="netflix.html"
                 class="game-link special-card"
-                data-nombre="netflix streaming series peliculas">
+                data-nombre="netflix streaming series peliculas codigo hogar">
 
                 <div class="game-img-wrap">
+
+                    <span class="game-badge rojo">
+                        CÓDIGO HOGAR
+                    </span>
 
                     <img
                         src="netflix.png"
@@ -1694,8 +1763,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{
                 </div>
 
             </a>
-
-            <!-- ✅ NUEVO: HBO MAX -->
 
             <a
                 href="hbo.html"
@@ -2094,11 +2161,142 @@ const loginMessage = document.getElementById("loginMessage");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const navPedidos = document.getElementById("navPedidos");
 const installAppBtn = document.getElementById("installAppBtn");
+const avatarCircle = document.getElementById("avatarCircle");
+const avatarImg = document.getElementById("avatarImg");
+const avatarInicial = document.getElementById("avatarInicial");
+const avatarGrande = document.getElementById("avatarGrande");
+const avatarGrandeImg = document.getElementById("avatarGrandeImg");
+const avatarGrandeInicial = document.getElementById("avatarGrandeInicial");
+
+
+/* =====================================================
+   NOTIFICACIONES
+===================================================== */
+
+const btnNotificaciones = document.getElementById("btnNotificaciones");
+const dotNotif = document.getElementById("dotNotif");
+
+function solicitarNotificaciones(){
+
+    if(!("Notification" in window)){
+
+        mostrarMensaje(
+            "No disponible",
+            "Tu navegador no soporta notificaciones.",
+            "info"
+        );
+
+        return;
+
+    }
+
+    if(Notification.permission === "granted"){
+
+        nuevaNotificacion("Recargas Games", "Las notificaciones ya están activadas ✅");
+
+        return;
+
+    }
+
+    if(Notification.permission === "denied"){
+
+        mostrarMensaje(
+            "Notificaciones bloqueadas",
+            "Activa las notificaciones desde la configuración de tu navegador.",
+            "advertencia"
+        );
+
+        return;
+
+    }
+
+    Notification.requestPermission().then(permiso=>{
+
+        if(permiso === "granted"){
+
+            dotNotif.classList.add("activo");
+
+            nuevaNotificacion(
+                "¡Notificaciones activadas! 🎉",
+                "Te avisaremos cuando tengas novedades en tus pedidos."
+            );
+
+        }
+
+    });
+
+}
+
+function nuevaNotificacion(titulo, cuerpo, opciones={}){
+
+    if(!("Notification" in window)) return;
+    if(Notification.permission !== "granted") return;
+
+    try{
+
+        const notif = new Notification(titulo, {
+            body: cuerpo,
+            icon: "/logo.png",
+            badge: "/logo.png",
+            vibrate: [200,100,200],
+            ...opciones
+        });
+
+        setTimeout(()=>{ try{ notif.close(); }catch(e){} }, 6000);
+
+    }catch(e){
+        console.warn("Notificación:", e.message);
+    }
+
+}
+
+window.solicitarNotificaciones = solicitarNotificaciones;
+window.nuevaNotificacion = nuevaNotificacion;
+
+// Mostrar punto rojo si hay permiso pendiente
+if("Notification" in window && Notification.permission === "default"){
+    dotNotif.classList.add("activo");
+}
 
 
 /* =====================================================
    FIREBASE / USUARIO
 ===================================================== */
+
+function cargarFotoPerfil(user){
+
+    // 1. Intentar desde localStorage (foto guardada localmente)
+    let foto = localStorage.getItem("foto_perfil_" + user.uid);
+
+    // 2. Si no hay, intentar desde la base de datos (si tienes /usuarios/{uid}/foto)
+    //    Esto se puede ampliar más tarde con Firestore o Realtime DB
+
+    if(foto && foto.startsWith("data:image")){
+
+        avatarImg.src = foto;
+        avatarGrandeImg.src = foto;
+
+        avatarCircle.classList.add("tiene-foto");
+        avatarGrande.classList.add("tiene-foto");
+
+    }else{
+
+        avatarCircle.classList.remove("tiene-foto");
+        avatarGrande.classList.remove("tiene-foto");
+
+    }
+
+}
+
+function ponerInicialAvatar(nombre){
+
+    const inicial = String(nombre || "U").charAt(0).toUpperCase();
+
+    avatarInicial.textContent = inicial;
+    avatarGrandeInicial.textContent = inicial;
+
+}
+
 
 function actualizarUI(user){
 
@@ -2118,11 +2316,34 @@ function actualizarUI(user){
         nombreCompleto.textContent = nombre;
         emailUsuario.textContent = email;
 
+        ponerInicialAvatar(nombre);
+        cargarFotoPerfil(user);
+
         menuHamburguesaLogin.style.display="none";
         menuHamburguesaRegister.style.display="none";
 
         menuHamburguesaDashboard.style.display="flex";
         menuHamburguesaLogout.style.display="flex";
+
+        // Saludo notificación al iniciar sesión (solo una vez por sesión)
+        if(!sessionStorage.getItem("notif_bienvenida")){
+
+            setTimeout(()=>{
+
+                if(Notification.permission === "granted"){
+
+                    nuevaNotificacion(
+                        "👋 ¡Hola, " + nombre.split(" ")[0] + "!",
+                        "Bienvenido de nuevo a Recargas Games"
+                    );
+
+                }
+
+            }, 2000);
+
+            sessionStorage.setItem("notif_bienvenida", "1");
+
+        }
 
     }else{
 
@@ -2303,6 +2524,7 @@ async function ejecutarLogout(){
 
     try{
 
+        sessionStorage.removeItem("notif_bienvenida");
         await signOut(auth);
         window.location.reload();
 
@@ -2627,7 +2849,7 @@ installAppBtn.addEventListener("click",async()=>{
 
             setTimeout(()=>{
                 installAppBtn.textContent="📲 Instalar Aplicación";
-                actualizarBotonInstalar();
+                actualizarBotonaInstalar();
             },3000);
 
         }
