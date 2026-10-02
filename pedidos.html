@@ -14,7 +14,7 @@
         :root {
             --alto-nav: 64px;
             --dorado-claro: #f5d76e;
-            --card-bg: rgba(13, 22, 39, 0.75); /* Fondo semitransparente */
+            --card-bg: rgba(13, 22, 39, 0.75);
             --card-borde: rgba(30, 42, 69, 0.6);
             --azul-brillante: #4a7aff;
             --verde-brillante: #00d26a;
@@ -127,13 +127,9 @@
 
         .pedidos-list { display: flex; flex-direction: column; gap: 12px; }
 
-        /* =========================================
-           DISEÑO DE TARJETA DE PEDIDO (ESTILO IMAGEN)
-           CON TRANSPARENCIA
-           ========================================= */
         .pedido-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px); /* Efecto de desenfoque */
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 16px;
@@ -146,7 +142,7 @@
         }
         .pedido-card:hover { 
             border-color: #3b82f6; 
-            background: rgba(13, 22, 39, 0.85); /* Un poco más opaco al pasar el mouse */
+            background: rgba(13, 22, 39, 0.85);
         }
 
         .pedido-header {
@@ -275,7 +271,6 @@
             fill: currentColor;
         }
 
-        /* Colores de estado */
         .timeline-step.recibido .timeline-icon { background: var(--azul-brillante); color: #fff; } 
         .timeline-step.verificando .timeline-icon { background: var(--naranja); color: #fff; } 
         .timeline-step.completado .timeline-icon { background: var(--verde-brillante); color: #fff; } 
@@ -292,7 +287,6 @@
             color: #fff;
         }
 
-        /* Líneas conectoras */
         .timeline-line {
             flex: 1;
             height: 3px;
@@ -308,10 +302,6 @@
         .timeline-line.completed {
             background: var(--verde-brillante);
         }
-
-        /* =========================================
-           FIN NUEVO DISEÑO DE TARJETA
-           ========================================= */
 
         .pin-box {
             margin-top: 12px; padding: 16px;
@@ -498,6 +488,51 @@
             html { scroll-behavior: auto; }
             *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
         }
+
+        /* ═══════════════════════════════════════════════
+           PANTALLA DE ACCESO RESTRINGIDO (MODO NEXUS)
+           ═══════════════════════════════════════════════ */
+        .pantalla-bloqueo {
+            position: fixed; inset: 0; z-index: 999999;
+            background: #05080f;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center; overflow: hidden;
+            border: 5px solid #e50914;
+            animation: aparecerBloqueo 0.25s ease;
+        }
+        @keyframes aparecerBloqueo {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .pantalla-bloqueo .icono-bloqueo {
+            font-size: 90px; margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px #e50914);
+            animation: pulso 1.5s ease-in-out infinite;
+        }
+        @keyframes pulso {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .pantalla-bloqueo h1 {
+            font-size: 30px; font-weight: 900; letter-spacing: 3px;
+            margin: 0 0 12px 0; text-transform: uppercase;
+            color: #f5d76e;
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+        }
+        .pantalla-bloqueo p {
+            font-size: 15px; color: #8899b0; max-width: 85%;
+            line-height: 1.6; margin: 0;
+        }
+        .pantalla-bloqueo .firma-bloqueo {
+            margin-top: 45px; font-size: 13px; color: #3b82f6;
+            font-weight: bold; letter-spacing: 4px;
+        }
+        .pantalla-bloqueo .linea-bloqueo {
+            width: 60px; height: 3px; background: #e50914;
+            margin: 20px auto; border-radius: 2px;
+        }
     </style>
 </head>
 <body>
@@ -566,6 +601,146 @@
     </div>
 </nav>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     SISTEMA DE PROTECCIÓN "MODO NEXUS"
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    let bloqueado = false;
+
+    function castigar() {
+        if (bloqueado) return;
+        bloqueado = true;
+
+        try { window.stop(); } catch(e) {}
+
+        // Esperar un tick para que se detenga todo
+        setTimeout(function() {
+            // Reemplazamos completamente el HTML
+            document.documentElement.innerHTML = `
+                <head>
+                    <title>Acceso Restringido</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body {
+                            margin: 0; padding: 0; width: 100vw; height: 100vh;
+                            background: #05080f; color: #f5d76e;
+                            display: flex; flex-direction: column;
+                            align-items: center; justify-content: center;
+                            font-family: 'Segoe UI', sans-serif;
+                            text-align: center; overflow: hidden;
+                            border: 5px solid #e50914;
+                            box-sizing: border-box;
+                        }
+                        .icono { 
+                            font-size: 90px; margin-bottom: 20px; 
+                            filter: drop-shadow(0 0 20px #e50914);
+                            animation: pulso 1.5s ease-in-out infinite;
+                        }
+                        @keyframes pulso {
+                            0%, 100% { transform: scale(1); }
+                            50% { transform: scale(1.1); }
+                        }
+                        h1 { 
+                            font-size: 30px; font-weight: 900; letter-spacing: 3px; 
+                            margin: 0 0 12px 0; text-transform: uppercase; 
+                            color: #f5d76e;
+                            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+                        }
+                        p { 
+                            font-size: 15px; color: #8899b0; 
+                            max-width: 85%; line-height: 1.6; margin: 0;
+                        }
+                        .linea { 
+                            width: 60px; height: 3px; background: #e50914;
+                            margin: 20px auto; border-radius: 2px;
+                        }
+                        .firma { 
+                            margin-top: 45px; font-size: 13px; color: #3b82f6; 
+                            font-weight: bold; letter-spacing: 4px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="icono">⛔</div>
+                    <h1>Acceso Restringido</h1>
+                    <div class="linea"></div>
+                    <p>Hemos detectado actividad de inspección no autorizada.<br>Por seguridad, el acceso a esta página ha sido bloqueado.</p>
+                    <div class="firma">RECARGAS GAMES</div>
+                </body>
+            `;
+        }, 50);
+    }
+
+    // 1. BLOQUEAR ATAJOS DE TECLADO
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault(); e.stopPropagation(); castigar(); return false;
+        }
+        // Ctrl+Shift+I / J / C
+        if (e.ctrlKey && e.shiftKey && ['I','J','C','i','j','c'].includes(e.key)) {
+            e.preventDefault(); e.stopPropagation(); castigar(); return false;
+        }
+        // Cmd+Option+I / J / C (Mac)
+        if (e.metaKey && e.altKey && ['I','J','C','i','j','c'].includes(e.key)) {
+            e.preventDefault(); e.stopPropagation(); castigar(); return false;
+        }
+        // Ctrl+U (Ver código fuente)
+        if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+            e.preventDefault(); e.stopPropagation(); castigar(); return false;
+        }
+        // Ctrl+S (Guardar página)
+        if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+            e.preventDefault(); e.stopPropagation(); return false;
+        }
+        // Ctrl+Shift+K (Firefox consola)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
+            e.preventDefault(); e.stopPropagation(); castigar(); return false;
+        }
+    }, true);
+
+    // 2. BLOQUEAR CLIC DERECHO
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault(); e.stopPropagation(); return false;
+    }, true);
+
+    // 3. DETECCIÓN DE CONSOLA ABIERTA (truco del objeto)
+    const trampa = new Image();
+    Object.defineProperty(trampa, 'id', {
+        get: function() {
+            castigar();
+        }
+    });
+
+    setInterval(function() {
+        if (bloqueado) return;
+        // Ejecutamos el log que dispara la trampa si la consola está abierta
+        console.log(trampa);
+        try { console.clear(); } catch(e) {}
+    }, 1000);
+
+    // 4. DETECCIÓN POR TAMAÑO DE VENTANA
+    setInterval(function() {
+        if (bloqueado) return;
+        const anchoDiff = window.outerWidth - window.innerWidth;
+        const altoDiff = window.outerHeight - window.innerHeight;
+        if (altoDiff > 160 || anchoDiff > 160) {
+            castigar();
+        }
+    }, 1000);
+
+    // 5. BLOQUEAR ARRASTRE DE IMÁGENES Y SELECCIÓN (opcional, refuerza)
+    document.addEventListener('dragstart', function(e) {
+        if (e.target.tagName === 'IMG') e.preventDefault();
+    }, true);
+
+})();
+</script>
+<!-- ═══════════════════════════════════════════════════════════════
+     FIN DEL SISTEMA DE PROTECCIÓN
+     ═══════════════════════════════════════════════════════════════ -->
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -612,13 +787,6 @@
         if (['procesando', 'processing'].includes(e)) return 'procesando';
         return 'pendiente';
     }
-
-    const TEXTO_ESTADO = {
-        completado: 'Completado',
-        pendiente: 'Pendiente',
-        procesando: 'Procesando',
-        cancelado: 'Cancelado'
-    };
 
     document.getElementById('btnVolver').addEventListener('click', () => {
         if (window.history.length > 1) window.history.back();
@@ -736,19 +904,14 @@
 
         pedidos.forEach((pedido) => {
             const estado = pedido._estado;
-            
-            // ¡CAMBIO IMPORTANTE! Ahora prioriza el número de pedido real
             const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || pedido.key || 'N/A';
-            
             const juego = pedido.juego || 'Producto';
             const producto = pedido.producto || '';
             const monto = formatearMonto(pedido.monto_usd || pedido.monto);
             const metodo = pedido.metodo || 'Pago Móvil';
-
             const idJugador = pedido.id_jugador || pedido.player_id || 'No especificado';
             const nombreJugador = pedido.nombre_jugador || pedido.player_name || 'No especificado';
 
-            // --- Lógica para la línea de tiempo (Recibido, Verificando, Completado) ---
             let stepRecibido = 'recibido';
             let stepVerificando = '';
             let stepCompletado = '';
@@ -771,18 +934,15 @@
                 line2 = '';
             }
 
-            // Iconos SVG para la tarjeta
             const iconBox = `<svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`;
             const iconRef = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
             const iconRecibido = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
             const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
             const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
 
-            // Detectar si es streaming
             const esStreaming = pedido.es_streaming === true ||
                                 (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
 
-            // HTML de PIN para juegos
             let pinHtml = '';
             if (!esStreaming && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
                 const pinValue = pedido.pin || pedido.codigos[0];
@@ -796,7 +956,6 @@
                 `;
             }
 
-            // HTML de Streaming
             let streamingHtml = '';
             if (esStreaming && pedido.datos_streaming) {
                 const d = pedido.datos_streaming;
@@ -855,7 +1014,6 @@
                 `;
             }
 
-            // HTML de Entrega Manual
             let manualHtml = '';
             if (!esStreaming) {
                 const esManual = (pedido.metodo_pago === 'MANUAL') ||
@@ -873,7 +1031,6 @@
                 }
             }
 
-            // --- CONSTRUCCIÓN DE LA TARJETA ---
             html += `
                 <article class="pedido-card">
                     <div class="pedido-header">
@@ -933,7 +1090,6 @@
         listaEl.innerHTML = html;
     }
 
-    // Copiar PIN (juegos)
     listaEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-copiar');
         if (!btn) return;
@@ -950,7 +1106,6 @@
         }
     }
 
-    // Copiar datos de streaming
     listaEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-copiar-dato');
         if (!btn) return;
