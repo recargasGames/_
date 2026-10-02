@@ -661,6 +661,9 @@ const precioBsOriginal = parseFloat(localStorage.getItem('precio_en_bs') || "0")
 const paqueteCod = localStorage.getItem('paquete_codigo') || "";
 let metodoPago = localStorage.getItem('metodo_pago') || "PAGO MOVIL";
 
+// 🆕 PROVEEDOR GUARDADO POR EL HTML DE ORIGEN
+const proveedorGuardado = (localStorage.getItem('proveedor') || '').toLowerCase().trim();
+
 const whatsappCliente = (
     localStorage.getItem('whatsapp') ||
     localStorage.getItem('whatsapp_comprador') ||
@@ -673,7 +676,6 @@ let cuponAplicado = "";
 let precioUsdFinal = precioUsdOriginal;
 let precioBsFinal = precioBsOriginal;
 
-// 🆕 Variable global para el número de pedido (usado en mensajes WhatsApp)
 let numeroPedidoGlobal = '#0000';
 
 document.getElementById('datoJuego').textContent = juego;
@@ -808,39 +810,23 @@ function enviarTelegram(mensaje) {
     .catch(err => console.log("Error Telegram:", err));
 }
 
-// ==============================================
-// 📢 NOTIFICAR AL ADMIN (v3 - SIN HTML MANUAL)
-// ==============================================
 function notificarAdmin(tipo, datos = {}) {
     const emojis = {
-        exito: '🎉',
-        falso: '⚠️',
-        duplicado: '🚨',
-        cupon_usado: '🎁',
-        error: '❌',
-        atencion: '🚨',
-        manual: '🛠️',
-        codigo_rg: '🎲'
+        exito: '🎉', falso: '⚠️', duplicado: '🚨', cupon_usado: '🎁',
+        error: '❌', atencion: '🚨', manual: '🛠️', codigo_rg: '🎲'
     };
 
     const titulos = {
-        exito: 'EXITOSO',
-        falso: 'NO ENCONTRADO',
-        duplicado: 'REFERENCIA USADA',
-        cupon_usado: 'CUPÓN USADO',
-        error: 'ERROR',
-        atencion: 'ATENCIÓN',
-        manual: 'MANUAL',
-        codigo_rg: 'CÓDIGO RG'
+        exito: 'EXITOSO', falso: 'NO ENCONTRADO', duplicado: 'REFERENCIA USADA',
+        cupon_usado: 'CUPÓN USADO', error: 'ERROR', atencion: 'ATENCIÓN',
+        manual: 'MANUAL', codigo_rg: 'CÓDIGO RG'
     };
 
     const emoji = emojis[tipo] || 'ℹ️';
     const titulo = titulos[tipo] || tipo.toUpperCase();
 
     const esc = (txt) => String(txt || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
     let mensaje = `${emoji} <b>${titulo}</b>\n\n`;
 
@@ -1251,18 +1237,24 @@ const MAPA_PAGONORTE = {
     'hbo_cuenta':     'recargaCuentaHbo'
 };
 
-// 🆕 FUNCIÓN MEJORADA - Detecta por PAQUETE + JUEGO + PRODUCTO
+// 🆕 FUNCIÓN MEJORADA - Prioriza el campo "proveedor" guardado por el HTML
 function esProductoStreaming(paqueteCodigo) {
+    // 🔥 PRIORIDAD 1: Si el HTML guardó explícitamente "pagonorte"
+    if (proveedorGuardado === 'pagonorte') {
+        console.log('✅ Detectado por PROVEEDOR guardado:', proveedorGuardado);
+        return true;
+    }
+
     const paqueteUpper = String(paqueteCodigo || '').toUpperCase();
     const juegoUpper = String(juego || '').toUpperCase();
     const productoUpper = String(producto || '').toUpperCase();
 
-    // 1️⃣ Por paquete (código directo)
+    // 2️⃣ Por paquete (código directo)
     if (paqueteCodigo && Object.keys(MAPA_PAGONORTE).includes(paqueteCodigo.toLowerCase())) {
         return true;
     }
 
-    // 2️⃣ Por nombre del juego
+    // 3️⃣ Por nombre del juego
     if (juegoUpper.includes('NETFLIX') ||
         juegoUpper.includes('DISNEY') ||
         juegoUpper.includes('HBO') ||
@@ -1271,7 +1263,7 @@ function esProductoStreaming(paqueteCodigo) {
         return true;
     }
 
-    // 3️⃣ Por nombre del producto
+    // 4️⃣ Por nombre del producto
     if (productoUpper.includes('NETFLIX') ||
         productoUpper.includes('DISNEY') ||
         productoUpper.includes('HBO') ||
@@ -1281,7 +1273,7 @@ function esProductoStreaming(paqueteCodigo) {
         return true;
     }
 
-    // 4️⃣ Por código de paquete (búsqueda flexible)
+    // 5️⃣ Por código de paquete (búsqueda flexible)
     if (paqueteUpper.includes('NETFLIX') ||
         paqueteUpper.includes('DISNEY') ||
         paqueteUpper.includes('HBO') ||
@@ -1300,27 +1292,54 @@ function obtenerTipoPagoNorte() {
 
     // 1️⃣ Búsqueda exacta por paquete
     if (MAPA_PAGONORTE[paqueteLower]) {
+        console.log('✅ Tipo PagoNorte por MAPA directo:', MAPA_PAGONORTE[paqueteLower]);
         return MAPA_PAGONORTE[paqueteLower];
     }
 
     // 2️⃣ Búsqueda por prefijo (netflix_*, disney_*, hbo_*)
     for (const key of Object.keys(MAPA_PAGONORTE)) {
-        if (paqueteLower.startsWith(key.split('_')[0])) {
+        const prefijo = key.split('_')[0];
+        if (paqueteLower.startsWith(prefijo)) {
+            console.log('✅ Tipo PagoNorte por PREFIJO:', MAPA_PAGONORTE[key]);
             return MAPA_PAGONORTE[key];
         }
     }
 
     // 3️⃣ Detección por nombre del juego
     if (juegoUpper.includes('NETFLIX')) {
-        return productoUpper.includes('PERFIL') ? 'recargaPerfilNetflix' : 'recargaCuentaNetflix';
+        const tipo = productoUpper.includes('PERFIL') ? 'recargaPerfilNetflix' : 'recargaCuentaNetflix';
+        console.log('✅ Tipo PagoNorte por JUEGO (Netflix):', tipo);
+        return tipo;
     }
     if (juegoUpper.includes('DISNEY')) {
-        return productoUpper.includes('PERFIL') ? 'recargaPerfilDisnep' : 'recargaCuentaDisnep';
+        const tipo = productoUpper.includes('PERFIL') ? 'recargaPerfilDisnep' : 'recargaCuentaDisnep';
+        console.log('✅ Tipo PagoNorte por JUEGO (Disney):', tipo);
+        return tipo;
     }
     if (juegoUpper.includes('HBO')) {
-        return productoUpper.includes('PERFIL') ? 'recargaPerfilHbo' : 'recargaCuentaHbo';
+        const tipo = productoUpper.includes('PERFIL') ? 'recargaPerfilHbo' : 'recargaCuentaHbo';
+        console.log('✅ Tipo PagoNorte por JUEGO (HBO):', tipo);
+        return tipo;
     }
 
+    // 4️⃣ Detección por nombre del producto
+    if (productoUpper.includes('NETFLIX')) {
+        const tipo = productoUpper.includes('PERFIL') ? 'recargaPerfilNetflix' : 'recargaCuentaNetflix';
+        console.log('✅ Tipo PagoNorte por PRODUCTO (Netflix):', tipo);
+        return tipo;
+    }
+    if (productoUpper.includes('DISNEY')) {
+        const tipo = productoUpper.includes('PERFIL') ? 'recargaPerfilDisnep' : 'recargaCuentaDisnep';
+        console.log('✅ Tipo PagoNorte por PRODUCTO (Disney):', tipo);
+        return tipo;
+    }
+    if (productoUpper.includes('HBO')) {
+        const tipo = productoUpper.includes('PERFIL') ? 'recargaPerfilHbo' : 'recargaCuentaHbo';
+        console.log('✅ Tipo PagoNorte por PRODUCTO (HBO):', tipo);
+        return tipo;
+    }
+
+    console.error('❌ No se pudo detectar tipo PagoNorte');
     return null;
 }
 
@@ -1333,7 +1352,6 @@ function generarReferenciaInterna(productoCodigo) {
 
 async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoRGInfo = null) {
     try {
-        // 🆕 Usamos el mapeo dinámico
         const tipoPagoNorte = obtenerTipoPagoNorte();
 
         if (!tipoPagoNorte) {
@@ -1346,7 +1364,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
             };
         }
 
-        console.log('✅ Tipo PagoNorte detectado:', tipoPagoNorte);
+        console.log('🎯 Tipo PagoNorte detectado:', tipoPagoNorte);
 
         const esRenovacionNormal = MODO_RENOVACION && CODIGO_RENOVACION;
         const esRenovacionPorRG = codigoRGInfo && codigoRGInfo.codigo_aprobacion_pagonorte;
@@ -1364,7 +1382,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
 
         const payload = {
             accion: accion,
-            producto: tipoPagoNorte,  // 🆕 Usamos el tipo detectado
+            producto: tipoPagoNorte,
             referencia: referenciaInterna
         };
 
@@ -1381,6 +1399,8 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
         });
 
         const data = await res.json();
+
+        console.log('📥 Respuesta PagoNorte:', data);
 
         if (data.ok === true && data.estado === 'Aprobado' && data.datos) {
             return {
@@ -1654,7 +1674,7 @@ async function iniciarVerificacion() {
             let referenciaInterna = generarReferenciaInterna(paqueteCod);
             let resultadoRecarga;
 
-            console.log('🧪 TEST — esStreaming:', esStreaming, '| Juego:', juego, '| Paquete:', paqueteCod);
+            console.log('🧪 TEST — esStreaming:', esStreaming, '| Juego:', juego, '| Paquete:', paqueteCod, '| Proveedor:', proveedorGuardado);
 
             if (esStreaming) {
                 resultadoRecarga = await enviarRecargaPagoNorte(paqueteCod, referencia);
@@ -1845,7 +1865,7 @@ async function iniciarVerificacion() {
         let referenciaInterna = null;
         let resultadoRecarga;
 
-        console.log('🎯 Pedido normal — esStreaming:', esStreaming, '| Juego:', juego);
+        console.log('🎯 Pedido normal — esStreaming:', esStreaming, '| Juego:', juego, '| Proveedor:', proveedorGuardado);
 
         if (esStreaming) {
             referenciaInterna = generarReferenciaInterna(paqueteCod);
@@ -2270,6 +2290,7 @@ console.log('🎮 Juego:', juego);
 console.log('📦 Producto:', producto);
 console.log('📦 Paquete:', paqueteCod);
 console.log('💳 Método:', metodoPago);
+console.log('🏢 Proveedor guardado:', proveedorGuardado || '(no especificado)');
 console.log('📱 WhatsApp:', whatsappCliente || '(no proporcionado)');
 console.log('🎬 Es streaming:', esProductoStreaming(paqueteCod));
 console.log('🔗 Tipo PagoNorte detectado:', obtenerTipoPagoNorte() || 'NINGUNO (irá a Central One)');
