@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Mis Pedidos - Recargas Games</title>
-    <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+    <title>Mis Pedidos - Store Gamers</title>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -12,491 +11,231 @@
 
     <style>
         :root {
-            --alto-nav: 64px;
-            --dorado-claro: #f5d76e;
-            --card-bg: rgba(13, 22, 39, 0.75);
-            --card-borde: rgba(30, 42, 69, 0.6);
-            --azul-brillante: #4a7aff;
-            --verde-brillante: #00d26a;
-            --naranja: #f59e0b;
-            --rojo: #ef4444;
+            --fondo-oscuro: #0a0f1c;
+            --card-bg: #111827;
+            --card-borde: #1e293b;
+            --azul-brillante: #3b82f6;
+            --verde-brillante: #10b981;
+            --texto-gris: #94a3b8;
+            --texto-blanco: #f8fafc;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000;
-            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--fondo-oscuro);
+            color: var(--texto-blanco);
             min-height: 100vh;
-            padding-top: 80px;
-            padding-bottom: calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
-        }
-        a:focus-visible, button:focus-visible, input:focus-visible {
-            outline: 2px solid var(--dorado-claro);
-            outline-offset: 2px;
+            padding-bottom: 80px;
+            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0a0f1c 70%);
         }
 
-        .video-fondo {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: -2; pointer-events: none;
-            opacity: 1; filter: brightness(1.15);
-            will-change: transform; transform: translateZ(0);
-            backface-visibility: hidden; -webkit-backface-visibility: hidden;
-        }
-        .video-overlay {
-            position: fixed; inset: 0;
-            background: linear-gradient(180deg,
-                rgba(10,14,26,0.15) 0%,
-                rgba(10,14,26,0.35) 60%,
-                rgba(10,14,26,0.6) 100%);
-            z-index: -1; pointer-events: none; transform: translateZ(0);
-        }
-
+        /* --- BARRA SUPERIOR --- */
         .topbar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-            background: rgba(11, 18, 32, 0.9);
-            border-bottom: 2px solid #3b82f6;
-            padding: 12px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            transform: translateZ(0);
+            padding: 15px 20px;
+            background: rgba(10, 15, 28, 0.95);
+            border-bottom: 1px solid #1e293b;
+            position: sticky; top: 0; z-index: 100;
         }
-        .topbar .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
-        .topbar .logo img { height: 45px; border-radius: 10px; }
-        .topbar .logo h1 { font-size: 20px; font-weight: 700; color: white; }
-        .topbar .logo h1 span { color: #3b82f6; }
-        .topbar .btn-back {
-            background: none; border: none; color: #cbd5e1;
-            font-size: 14px; cursor: pointer; transition: 0.3s;
-            padding: 8px 12px; border-radius: 8px; font-family: inherit;
-        }
-        .topbar .btn-back:hover { background: rgba(255,255,255,0.08); color: white; }
+        .topbar .logo { height: 40px; border-radius: 8px; }
+        .topbar .iconos { display: flex; gap: 15px; align-items: center; }
+        .topbar .iconos svg { width: 24px; height: 24px; fill: none; stroke: #cbd5e1; stroke-width: 2; }
+        .topbar .perfil { width: 36px; height: 36px; background: #1e293b; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 16px; position: relative; z-index: 1; }
+        /* --- SUB-MENÚ DE JUEGOS --- */
+        .submenu {
+            display: flex; gap: 20px; padding: 15px 20px;
+            background: rgba(10, 15, 28, 0.8);
+            border-bottom: 1px solid #1e293b;
+            overflow-x: auto; white-space: nowrap;
+        }
+        .submenu span {
+            font-size: 14px; font-weight: 600; color: #cbd5e1;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .submenu span.active { color: var(--texto-blanco); border-bottom: 2px solid var(--azul-brillante); padding-bottom: 5px; }
 
-        .page-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
-        }
-        .page-header h2 { font-size: 24px; font-weight: 700; }
-        .page-header h2 span { color: #3b82f6; }
-        .page-header .total {
-            font-size: 13px; color: #cbd5e1;
-            background: rgba(14, 26, 58, 0.85);
-            border: 1px solid var(--card-borde);
-            padding: 5px 14px; border-radius: 20px;
-            backdrop-filter: blur(5px);
-        }
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
 
-        .chips {
-            display: flex; gap: 6px; overflow-x: auto;
-            padding-bottom: 3px; margin-bottom: 10px;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
+        /* --- TARJETAS DE RESUMEN --- */
+        .resumen {
+            display: flex; gap: 10px; margin-bottom: 20px;
         }
-        .chips::-webkit-scrollbar { display: none; }
-        .chip {
-            flex-shrink: 0;
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 7px 12px; border-radius: 20px;
-            background: rgba(14, 26, 58, 0.75);
-            border: 1px solid var(--card-borde);
-            color: #cbd5e1; font-size: 13px; font-weight: 600;
-            cursor: pointer; font-family: inherit; transition: all 0.25s;
-            backdrop-filter: blur(5px);
+        .resumen-card {
+            flex: 1; background: var(--card-bg); border: 1px solid var(--card-borde);
+            border-radius: 12px; padding: 15px 10px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .chip .n {
-            font-size: 11px; color: #94a3b8;
-            background: rgba(255,255,255,0.08);
-            padding: 1px 7px; border-radius: 10px;
+        .resumen-card .icono-box {
+            width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 8px;
         }
-        .chip:hover { border-color: rgba(212, 175, 55, 0.5); color: var(--dorado-claro); }
-        .chip.activo {
-            color: var(--dorado-claro);
-            background: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(59,130,246,0.12));
-            border-color: rgba(212,175,55,0.55);
-        }
+        .resumen-card .icono-box.azul { background: rgba(59, 130, 246, 0.15); color: var(--azul-brillante); }
+        .resumen-card .icono-box.naranja { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .resumen-card .icono-box.verde { background: rgba(16, 185, 129, 0.15); color: var(--verde-brillante); }
+        .resumen-card .icono-box svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
+        .resumen-card .numero { font-size: 22px; font-weight: 700; color: var(--texto-blanco); line-height: 1.2; }
+        .resumen-card .etiqueta { font-size: 11px; color: var(--texto-gris); margin-top: 4px; }
 
-        .buscador { margin-bottom: 14px; }
-        .buscador input {
-            width: 100%; padding: 11px 14px;
-            border-radius: 11px; background: rgba(6, 12, 32, 0.75);
-            border: 1px solid var(--card-borde);
-            color: white; font-size: 14px; font-family: inherit;
-            backdrop-filter: blur(5px);
+        /* --- TÍTULO DE SECCIÓN --- */
+        .section-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 18px; font-weight: 700; margin-bottom: 15px; color: var(--texto-blanco);
         }
-        .buscador input::placeholder { color: #94a3b8; }
-        .buscador input:focus { outline: none; border-color: #3b82f6; }
+        .section-title svg { width: 22px; height: 22px; fill: var(--azul-brillante); }
 
-        .pedidos-list { display: flex; flex-direction: column; gap: 10px; }
-
+        /* --- TARJETAS DE PEDIDOS --- */
+        .pedidos-list { display: flex; flex-direction: column; gap: 15px; }
         .pedido-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 12px;
             border: 1px solid var(--card-borde);
-            color: #fff;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-            transition: border-color 0.3s, background 0.3s;
+            border-radius: 12px;
+            padding: 15px;
+            position: relative;
         }
-        .pedido-card:hover {
-            border-color: #3b82f6;
-            background: rgba(13, 22, 39, 0.85);
-        }
-        .pedido-card.est-cancelado { border-color: rgba(239, 68, 68, 0.45); }
-        .pedido-card.est-cancelado:hover { border-color: rgba(239, 68, 68, 0.7); }
-
         .pedido-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            gap: 10px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 12px; flex-wrap: wrap; gap: 5px;
         }
-        .pedido-header-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-        .pedido-id { font-size: 16px; font-weight: 700; color: var(--azul-brillante); word-break: break-all; }
-        .pedido-fecha { font-size: 11px; color: #8899b0; display: flex; align-items: center; gap: 5px; }
-        .pedido-header-right { text-align: right; flex-shrink: 0; }
-        .pedido-precio { font-size: 16px; font-weight: 700; color: var(--verde-brillante); display: block; }
-        .pedido-card.est-cancelado .pedido-precio { color: #8899b0; text-decoration: line-through; }
-        .pedido-metodo { font-size: 10px; color: #8899b0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pedido-header-left { display: flex; flex-direction: column; gap: 4px; }
+        .pedido-id { font-size: 16px; font-weight: 700; color: var(--azul-brillante); }
+        .pedido-fecha { font-size: 11px; color: var(--texto-gris); display: flex; align-items: center; gap: 4px; }
+        .pedido-header-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .pedido-precio { font-size: 18px; font-weight: 700; color: var(--verde-brillante); }
+        .pedido-metodo { font-size: 10px; color: var(--texto-gris); text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
 
-        /* Etiqueta de estado */
-        .estado-badge {
-            align-self: flex-start;
-            display: inline-flex; align-items: center; gap: 5px;
-            margin-top: 3px; padding: 3px 10px;
-            border-radius: 20px; font-size: 11px; font-weight: 700;
-            border: 1px solid transparent;
-        }
-        .estado-badge::before {
-            content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
-        }
-        .estado-badge.completado { color: var(--verde-brillante); background: rgba(0, 210, 106, 0.15); border-color: rgba(0, 210, 106, 0.5); }
-        .estado-badge.pendiente  { color: var(--naranja); background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.5); }
-        .estado-badge.procesando { color: var(--azul-brillante); background: rgba(74, 122, 255, 0.15); border-color: rgba(74, 122, 255, 0.5); }
-        .estado-badge.cancelado  { color: var(--rojo); background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.5); }
-
-        .pedido-body { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-        .pedido-producto { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
-        .pedido-producto svg { width: 16px; height: 16px; fill: none; stroke: var(--azul-brillante); stroke-width: 2; flex-shrink: 0; }
+        .pedido-body { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+        .pedido-producto { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+        .pedido-producto svg { width: 16px; height: 16px; fill: none; stroke: var(--azul-brillante); stroke-width: 2; }
         .pedido-referencia {
             display: flex; align-items: center; gap: 6px;
-            font-size: 11px; color: #8899b0;
-            background: rgba(17, 28, 50, 0.7);
-            padding: 5px 8px; border-radius: 5px; word-break: break-all;
+            font-size: 12px; color: var(--texto-gris);
+            background: #1e293b; padding: 6px 10px; border-radius: 6px;
         }
-        .pedido-referencia svg { width: 12px; height: 12px; fill: none; stroke: #8899b0; stroke-width: 2; flex-shrink: 0; }
+        .pedido-referencia svg { width: 12px; height: 12px; fill: none; stroke: var(--texto-gris); stroke-width: 2; }
 
         .pedido-jugador-box {
-            background: rgba(22, 34, 59, 0.7);
-            border: 1px solid rgba(37, 50, 77, 0.8);
-            border-radius: 6px; padding: 8px 10px; margin-bottom: 10px;
-            font-size: 12px; line-height: 1.5; color: #cbd5e1;
+            background: #1e293b; border-radius: 8px; padding: 10px 12px; margin-bottom: 15px;
+            font-size: 12px; line-height: 1.6; color: #cbd5e1;
         }
         .pedido-jugador-box strong { color: #fff; }
 
-        /* Línea de tiempo */
+        /* --- LÍNEA DE TIEMPO --- */
         .pedido-timeline {
             display: flex; align-items: center; justify-content: space-between;
             position: relative; padding-top: 10px;
-            border-top: 1px solid rgba(30, 42, 69, 0.6);
+            border-top: 1px solid #1e293b;
         }
-        .timeline-step { display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2; width: 70px; text-align: center; }
+        .timeline-step { display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 2; width: 70px; text-align: center; }
         .timeline-icon {
-            width: 26px; height: 26px; border-radius: 50%;
+            width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            background: #1e2a45; color: #8899b0; transition: all 0.3s;
+            background: #1e293b; color: var(--texto-gris);
         }
-        .timeline-icon svg { width: 13px; height: 13px; fill: currentColor; }
-        .timeline-step.recibido .timeline-icon { background: var(--azul-brillante); color: #fff; }
-        .timeline-step.verificando .timeline-icon { background: var(--naranja); color: #fff; }
+        .timeline-icon svg { width: 16px; height: 16px; fill: currentColor; }
+        .timeline-step.recibido .timeline-icon { background: var(--verde-brillante); color: #fff; }
+        .timeline-step.verificando .timeline-icon { background: #f59e0b; color: #fff; }
         .timeline-step.completado .timeline-icon { background: var(--verde-brillante); color: #fff; }
-        .timeline-label { font-size: 10px; font-weight: 600; color: #8899b0; }
+        .timeline-label { font-size: 11px; font-weight: 600; color: var(--texto-gris); }
         .timeline-step.recibido .timeline-label,
         .timeline-step.verificando .timeline-label,
         .timeline-step.completado .timeline-label { color: #fff; }
-        .timeline-line { flex: 1; height: 2px; background: #1e2a45; margin-top: -18px; z-index: 1; border-radius: 2px; transition: background 0.3s; }
+        
+        .timeline-line { flex: 1; height: 3px; background: #1e293b; margin-top: -22px; z-index: 1; border-radius: 3px; }
         .timeline-line.active { background: var(--azul-brillante); }
         .timeline-line.completed { background: var(--verde-brillante); }
 
-        /* Avisos de estado */
-        .aviso-estado {
-            margin-top: 10px; padding: 9px 12px;
-            border-radius: 9px; font-size: 12px; line-height: 1.4;
-            border: 1px solid transparent;
+        /* --- BOTÓN FLOTANTE --- */
+        .btn-instalar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #2563eb; color: white; border: none; padding: 12px 24px;
+            border-radius: 30px; font-weight: 700; font-size: 15px;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            cursor: pointer; z-index: 1000;
         }
-        .aviso-estado.pendiente  { background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.45); color: #fcd34d; }
-        .aviso-estado.procesando { background: rgba(74, 122, 255, 0.12); border-color: rgba(74, 122, 255, 0.45); color: #bfd0ff; }
-        .aviso-estado.cancelado  { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; margin-top: 0; }
+        .btn-instalar svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-        /* Botones de acción */
-        .acciones { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .btn-accion {
-            flex: 1; min-width: 120px;
-            display: inline-flex; align-items: center; justify-content: center;
-            padding: 9px 12px; border-radius: 9px;
-            font-size: 13px; font-weight: 700; font-family: inherit;
-            text-decoration: none; cursor: pointer; transition: all 0.25s;
-            border: 1px solid transparent;
-        }
-        .btn-accion.dorado {
-            color: var(--dorado-claro);
-            background: rgba(212, 175, 55, 0.12);
-            border-color: rgba(212, 175, 55, 0.55);
-        }
-        .btn-accion.dorado:hover { background: rgba(212, 175, 55, 0.25); }
-        .btn-accion.wa { color: #4ade80; background: transparent; border-color: rgba(37, 211, 102, 0.6); }
-        .btn-accion.wa:hover { background: rgba(37, 211, 102, 0.15); }
-
-        .pin-box {
-            margin-top: 10px; padding: 12px;
-            background: rgba(34, 197, 94, 0.15);
-            border: 2px solid #22c55e;
-            border-radius: 10px; text-align: center;
-            backdrop-filter: blur(5px);
-        }
-        .pin-box .pin-label { font-size: 11px; color: #cbd5e1; letter-spacing: 1px; }
-        .pin-box .pin-value {
-            font-size: 20px; font-weight: 700; color: #4ade80; letter-spacing: 2px;
-            margin: 6px 0; word-break: break-all; user-select: all;
-            font-family: 'Courier New', Consolas, monospace;
-        }
-        .pin-box .btn-copiar {
-            background: rgba(34, 197, 94, 0.25); color: #4ade80; border: none;
-            padding: 8px 22px; border-radius: 7px; font-weight: 700;
-            cursor: pointer; transition: 0.3s; font-size: 13px; font-family: inherit;
-        }
-        .pin-box .btn-copiar:hover { background: rgba(34, 197, 94, 0.4); }
-
-        .manual-box {
-            margin-top: 10px; padding: 12px;
-            background: rgba(37, 211, 102, 0.15);
-            border: 2px solid #25D366; border-radius: 10px; text-align: center;
-            backdrop-filter: blur(5px);
-        }
-        .manual-box .manual-text { font-size: 13px; color: #cbd5e1; margin-bottom: 8px; }
-        .manual-box .btn-whatsapp {
-            background: #25D366; color: #06210f; border: none;
-            padding: 9px 20px; border-radius: 7px; font-weight: 800;
-            text-decoration: none; display: inline-block; transition: 0.3s; font-size: 13px;
-        }
-        .manual-box .btn-whatsapp:hover { background: #4ade80; }
-
-        /* Streaming */
-        .streaming-box {
-            margin-top: 12px; padding: 14px;
-            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1), rgba(17, 60, 207, 0.08));
-            border: 2px solid rgba(212, 175, 55, 0.5);
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-        }
-        .streaming-box .streaming-titulo {
-            font-size: 14px; font-weight: 800; color: var(--dorado-claro);
-            text-align: center; margin-bottom: 4px;
-        }
-        .streaming-box .streaming-subtitulo {
-            font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 4px; line-height: 1.4;
-        }
-        .streaming-box.abierto .btn-revelar-datos[data-accion="revelar"] { display: none; }
-
-        .btn-revelar-datos {
-            width: 100%; padding: 12px 16px; margin-top: 10px;
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.12));
-            border: 2px solid rgba(212, 175, 55, 0.6);
-            border-radius: 10px; color: var(--dorado-claro);
-            font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 12px rgba(212, 175, 55, 0.15);
-        }
-        .btn-revelar-datos:hover {
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.4), rgba(212, 175, 55, 0.2));
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
-        }
-        .btn-revelar-datos:active { transform: translateY(0); }
-        .btn-revelar-datos.secundario { padding: 9px 14px; font-size: 12px; border-width: 1px; box-shadow: none; margin-top: 10px; }
-
-        .dato-entrega {
-            display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
-            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.15);
-            border-radius: 10px; margin-bottom: 8px;
-        }
-        .dato-entrega .dato-label { font-size: 10px; color: #94a3b8; font-weight: 700; }
-        .dato-entrega .dato-contenido { display: flex; align-items: center; gap: 8px; }
-        .dato-entrega .dato-valor {
-            flex: 1; font-size: 14px; font-weight: 700; color: #fff;
-            word-break: break-word; overflow-wrap: anywhere;
-            font-family: 'Courier New', Consolas, monospace; line-height: 1.3; letter-spacing: 0.5px;
-        }
-        .dato-entrega.dato-oculto .dato-valor { color: #94a3b8; letter-spacing: 3px; font-size: 16px; user-select: none; }
-        .dato-entrega.dato-oculto .btn-copiar-dato { display: none; }
-
-        .dato-entrega .btn-copiar-dato {
-            width: 34px; height: 34px;
-            background: rgba(212, 175, 55, 0.15);
-            border: 1px solid rgba(212, 175, 55, 0.5);
-            border-radius: 8px; color: var(--dorado-claro); cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s ease; flex-shrink: 0; padding: 0; font-family: inherit;
-        }
-        .dato-entrega .btn-copiar-dato svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; }
-        .dato-entrega .btn-copiar-dato:hover { background: rgba(212, 175, 55, 0.3); transform: scale(1.06); }
-        .dato-entrega .btn-copiar-dato.copiado { background: rgba(34, 197, 94, 0.25); border-color: rgba(34, 197, 94, 0.6); color: #4ade80; }
-        .dato-entrega .btn-copiar-dato.copiado svg { display: none; }
-        .dato-entrega .btn-copiar-dato.copiado::after { content: '✓'; font-size: 18px; font-weight: bold; }
-
-        .dato-entrega.codigo-renovacion {
-            background: rgba(212, 175, 55, 0.1);
-            border-color: rgba(212, 175, 55, 0.55); border-width: 2px;
-        }
-        .dato-entrega.codigo-renovacion .dato-label { color: var(--dorado-claro); }
-        .dato-entrega.codigo-renovacion .dato-valor { color: var(--dorado-claro); font-weight: 800; font-size: 15px; }
-
-        .aviso-renovacion { margin-top: 8px; font-size: 11px; color: #fcd34d; text-align: center; line-height: 1.4; }
-
-        .contenedor-datos-streaming { display: none; margin-top: 10px; }
-        .contenedor-datos-streaming.visible { display: block; animation: desplegarDatos 0.3s ease; }
-        @keyframes desplegarDatos {
-            from { opacity: 0; transform: translateY(-6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .contador-auto-ocultar { margin-top: 12px; text-align: center; font-size: 11px; color: #94a3b8; }
-        .contador-auto-ocultar .segundos { color: var(--dorado-claro); font-weight: 800; }
-        .barra-tiempo { height: 4px; border-radius: 2px; background: #1e2a45; margin: 6px auto 0; max-width: 240px; overflow: hidden; }
-        .barra-tiempo-fill { height: 100%; width: 100%; background: var(--dorado-claro); border-radius: 2px; transition: width 1s linear; }
-
-        .ayuda-streaming { display: block; margin-top: 12px; text-align: center; font-size: 12px; color: #cbd5e1; text-decoration: underline; }
-        .ayuda-streaming:hover { color: var(--dorado-claro); }
-
-        .pendiente-manual-box {
-            margin-top: 10px; padding: 14px 12px;
-            background: rgba(245, 158, 11, 0.1);
-            border: 2px solid rgba(245, 158, 11, 0.55);
-            border-radius: 12px; text-align: center;
-        }
-        .pendiente-manual-box .titulo-pendiente { font-size: 13px; font-weight: 800; color: #fbbf24; margin-bottom: 6px; }
-        .pendiente-manual-box .desc-pendiente { font-size: 12px; color: #cbd5e1; line-height: 1.4; margin-bottom: 10px; }
-        .pendiente-manual-box .btn-whatsapp-pendiente {
-            background: #25D366; color: #06210f; border: none;
-            padding: 10px 18px; border-radius: 8px; font-weight: 800; text-decoration: none;
-            display: inline-flex; align-items: center; gap: 6px; transition: 0.3s; font-size: 12px;
-        }
-        .pendiente-manual-box .btn-whatsapp-pendiente:hover { background: #4ade80; transform: translateY(-1px); }
-
-        .sin-pedidos {
-            text-align: center; padding: 40px 20px;
-            background: var(--card-bg); border-radius: 14px; border: 1px solid var(--card-borde);
-            backdrop-filter: blur(10px);
-        }
-        .sin-pedidos .icono { font-size: 48px; margin-bottom: 12px; }
-        .sin-pedidos h3 { font-size: 19px; margin-bottom: 6px; }
-        .sin-pedidos p { color: #cbd5e1; font-size: 14px; line-height: 1.4; }
-        .sin-pedidos .btn-tienda {
-            display: inline-block; margin-top: 14px; padding: 11px 26px;
-            background: linear-gradient(135deg, #d4af37, #f5d76e);
-            color: #0a0e1a; border: none; border-radius: 10px;
-            font-weight: 800; font-size: 14px; cursor: pointer; text-decoration: none; transition: 0.3s;
-        }
-        .sin-pedidos .btn-tienda:hover { transform: translateY(-2px); }
-
-        .loading { text-align: center; padding: 30px; color: #94a3b8; }
-        .loading .spinner {
-            width: 36px; height: 36px; border: 3px solid rgba(59, 130, 246, 0.2);
-            border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;
-            margin: 0 auto 12px;
-        }
+        /* --- ESTADOS VACÍOS Y ERRORES --- */
+        .sin-pedidos { text-align: center; padding: 40px 20px; background: var(--card-bg); border-radius: 12px; border: 1px dashed var(--card-borde); }
+        .sin-pedidos h3 { margin-bottom: 8px; }
+        .sin-pedidos p { color: var(--texto-gris); font-size: 14px; }
+        
+        .loading { text-align: center; padding: 40px; color: var(--texto-gris); }
+        .spinner { width: 30px; height: 30px; border: 3px solid rgba(59, 130, 246, 0.2); border-top-color: var(--azul-brillante); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
+        
+        /* --- TOAST --- */
         .toast {
-            position: fixed; left: 50%; bottom: calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
-            transform: translate(-50%, 20px); max-width: calc(100% - 32px);
-            padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; line-height: 1.3;
-            background: rgba(10, 14, 26, 0.97); border: 1px solid rgba(212, 175, 55, 0.5);
-            color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 3000; text-align: center;
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #1e293b; color: #fff; padding: 10px 20px; border-radius: 8px;
+            font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 2000;
         }
-        .toast.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
-
-        .nav-inferior {
-            position: fixed; left: 0; right: 0; bottom: 0; z-index: 999;
-            background: rgba(5, 8, 16, 0.96); border-top: 1px solid rgba(212, 175, 55, 0.25);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.5); padding-bottom: env(safe-area-inset-bottom);
-            transform: translateZ(0);
-        }
-        .nav-inferior-inner { display: flex; max-width: 900px; margin: 0 auto; height: var(--alto-nav); }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-            color: #9ca3af; text-decoration: none; font-size: 12px; font-weight: 600; transition: color 0.2s;
-        }
-        .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .nav-item:hover, .nav-item.active { color: var(--dorado-claro); }
-        .nav-item.soporte { color: #4ade80; }
-
-        @media (max-width: 768px) {
-            .page-header { flex-direction: column; align-items: flex-start; }
-        }
-        @media (max-width: 500px) {
-            .container { padding: 12px; }
-            .topbar .logo h1 { font-size: 16px; }
-            .pedido-card { padding: 10px; }
-            .pedido-id { font-size: 15px; }
-            .pedido-precio { font-size: 15px; }
-            .pedido-jugador-box { font-size: 11px; padding: 7px 9px; }
-            .timeline-step { width: 55px; }
-            .timeline-icon { width: 24px; height: 24px; }
-            .timeline-icon svg { width: 12px; height: 12px; }
-            .timeline-label { font-size: 9px; }
-            .streaming-box { padding: 12px; }
-            .dato-entrega { padding: 9px 11px; }
-            .dato-entrega .dato-valor { font-size: 13px; }
-            .dato-entrega .btn-copiar-dato { width: 32px; height: 32px; }
-            .video-fondo { opacity: 0.85; filter: brightness(1.05); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-        }
+        .toast.visible { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
-<video autoplay muted loop playsinline class="video-fondo">
-    <source src="fondo.mp4" type="video/mp4">
-</video>
-<div class="video-overlay"></div>
-
+<!-- BARRA SUPERIOR (Tal cual la foto) -->
 <header class="topbar">
-    <a href="index.html" class="logo">
-        <img src="logo.png" alt="Recargas Games">
-        <h1>Recargas<span>Games</span></h1>
-    </a>
-    <button class="btn-back" id="btnVolver">← Volver</button>
+    <!-- Cambia 'logo.png' por el logo real de Store Gamers si lo tienes -->
+    <img src="logo.png" alt="Store Gamers" class="logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiI+PHBhdGggZD0iTTEyIDJMMiA3bDEwIDUgMTAtNS0xMC01eiIvPjxwYXRoIGQ9Ik0yIDE3bDEwIDUgMTAtNS0xMC01LTEwIDV6Ii8+PC9zdmc+'">
+    <div class="iconos">
+        <!-- Icono de Campana -->
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <!-- Icono de Perfil -->
+        <div class="perfil">
+            <svg viewBox="0 0 24 24" style="stroke: #3b82f6;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <!-- Icono de Menú Hamburguesa -->
+        <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </div>
 </header>
+
+<!-- SUB-MENÚ (Tal cual la foto) -->
+<div class="submenu">
+    <span class="active">FREE FIRE 💎</span>
+    <span>PASES DE NIVEL</span>
+    <span>BLOOD STRIKE</span>
+</div>
 
 <main class="container">
 
-    <div class="page-header">
-        <h2>Mis <span>pedidos</span></h2>
-        <span class="total" id="totalPedidos">0 pedidos</span>
+    <!-- TARJETAS DE RESUMEN (Total, Pendientes, Completados) -->
+    <div class="resumen">
+        <div class="resumen-card">
+            <div class="icono-box azul">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <span class="numero" id="totalPedidos">0</span>
+            <span class="etiqueta">Total Pedidos</span>
+        </div>
+        <div class="resumen-card">
+            <div class="icono-box naranja">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span class="numero" id="pendientesCount">0</span>
+            <span class="etiqueta">Pendientes</span>
+        </div>
+        <div class="resumen-card">
+            <div class="icono-box verde">
+                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <span class="numero" id="completadosCount">0</span>
+            <span class="etiqueta">Completados</span>
+        </div>
     </div>
 
-    <div class="chips" id="chips" role="group" aria-label="Filtrar por estado">
-        <button class="chip activo" data-estado="todos">Todos <span class="n" id="n-todos">0</span></button>
-        <button class="chip" data-estado="completado">Completados <span class="n" id="n-completado">0</span></button>
-        <button class="chip" data-estado="pendiente">Pendientes <span class="n" id="n-pendiente">0</span></button>
-        <button class="chip" data-estado="procesando">Procesando <span class="n" id="n-procesando">0</span></button>
-        <button class="chip" data-estado="cancelado">Cancelados <span class="n" id="n-cancelado">0</span></button>
+    <!-- TÍTULO "MIS PEDIDOS" -->
+    <div class="section-title">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5" stroke="#fff" stroke-width="2" fill="none"/></svg>
+        Mis Pedidos
     </div>
 
-    <div class="buscador">
-        <input type="search" id="buscarInput" placeholder="Buscar por número de pedido, referencia o juego" aria-label="Buscar pedidos" autocomplete="off">
-    </div>
-
-    <div class="pedidos-list" id="listaPedidos" aria-live="polite">
+    <!-- LISTA DE PEDIDOS (Aquí se cargarán los datos automáticamente) -->
+    <div class="pedidos-list" id="listaPedidos">
         <div class="loading">
             <div class="spinner"></div>
             <p>Cargando tus pedidos...</p>
@@ -505,30 +244,16 @@
 
 </main>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<!-- BOTÓN FLOTANTE "INSTALAR APP" -->
+<button class="btn-instalar">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Instalar App
+</button>
 
-<nav class="nav-inferior" aria-label="Navegación principal">
-    <div class="nav-inferior-inner">
-        <a href="index.html" class="nav-item">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
-            Inicio
-        </a>
-        <a href="index.html#juegos" class="nav-item">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
-            Juegos
-        </a>
-        <a href="pedidos.html" class="nav-item active" aria-current="page">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
-            Pedidos
-        </a>
-        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
-            Soporte
-        </a>
-    </div>
-</nav>
+<div class="toast" id="toast" role="status"></div>
 
 <script>
+    // --- CONFIGURACIÓN DE FIREBASE (Tus datos reales) ---
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
         authDomain: "free-52119.firebaseapp.com",
@@ -544,49 +269,12 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    const WHATSAPP = '584228242411';
-    const SEGUNDOS_VISIBLE = 60;
-    const PUNTOS = '••••••••••';
-
     let todosPedidos = [];
     let uidActual = null;
-    let consultaActual = null;
-    let estadoFiltro = 'todos';
-    let toastTimer = null;
-
-    // Los datos de streaming NO se guardan en el HTML: viven aquí y solo se pintan al tocar "Ver datos".
-    let datosStreaming = {};      // pedidoKey -> [{ label, valor, clase }]
-    const reveladas = {};         // pedidoKey -> timestamp en que se vuelven a ocultar
-    let tickTimer = null;
-
     const listaEl = document.getElementById('listaPedidos');
-    const buscarEl = document.getElementById('buscarInput');
     const toastEl = document.getElementById('toast');
 
-    // Página de cada juego (para "Recargar de nuevo" / "Reintentar" / "Renovar")
-    const PAGINAS = [
-        [/FREE\s*FIRE|\bFF\b/, 'freefire.html'],
-        [/BLOOD\s*STRIKE|BLOCK\s*STRIKE/, 'bloodstrike.html'],
-        [/ROBLOX/, 'roblox.html'],
-        [/MOBILE\s*LEGENDS|\bML\b/, 'ml.html'],
-        [/CALL\s*OF\s*DUTY|\bCOD\b/, 'cod.html'],
-        [/PUBG/, 'pubg.html'],
-        [/ARENA\s*BREAKOUT/, 'arenabreakout.html'],
-        [/DELTA/, 'delta.html'],
-        [/BIGO/, 'bigo.html'],
-        [/GIFT|PLAYSTATION|\bPSN\b/, 'gift-cards.html'],
-        [/NETFLIX/, 'netflix.html'],
-        [/DISNEY/, 'disney.html']
-    ];
-
-    function paginaDelJuego(pedido) {
-        const texto = (String(pedido.juego || '') + ' ' + String(pedido.producto || '')).toUpperCase();
-        for (const [patron, pagina] of PAGINAS) {
-            if (patron.test(texto)) return pagina;
-        }
-        return 'index.html';
-    }
-
+    // --- UTILIDADES ---
     function esc(valor) {
         return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -596,137 +284,7 @@
     function avisar(mensaje) {
         toastEl.textContent = mensaje;
         toastEl.classList.add('visible');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3000);
-    }
-
-    function normalizarEstado(raw) {
-        const e = String(raw || 'pendiente').toLowerCase().trim();
-        if (['completado', 'completada', 'completed', 'completada_ok'].includes(e)) return 'completado';
-        if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
-        if (['procesando', 'processing'].includes(e)) return 'procesando';
-        return 'pendiente';
-    }
-
-    const ETIQUETA_ESTADO = {
-        completado: 'Completado',
-        pendiente: 'Pendiente',
-        procesando: 'Procesando',
-        cancelado: 'Cancelado'
-    };
-
-    // ───── Streaming ─────
-    function detectarServicioStreaming(pedido) {
-        if (pedido.datos_streaming && pedido.datos_streaming.servicio) {
-            return pedido.datos_streaming.servicio;
-        }
-        const combo = (String(pedido.juego || '') + ' ' + String(pedido.producto || '')).toUpperCase();
-
-        if (/NETFLIX|\bNF\b/.test(combo)) return 'Netflix';
-        if (/DISNEY|\bDS\b/.test(combo)) return 'Disney+';
-        if (/\bHBO\b|\bMAX\b/.test(combo)) return 'HBO Max';
-        if (/SPOTIFY/.test(combo)) return 'Spotify';
-        if (/PARAMOUNT/.test(combo)) return 'Paramount+';
-        if (/CRUNCHYROLL/.test(combo)) return 'Crunchyroll';
-        return 'Streaming';
-    }
-
-    function esProductoStreaming(pedido) {
-        if (pedido.es_streaming === true) return true;
-        if (pedido.datos_streaming) return true;
-        const combo = (String(pedido.juego || '') + ' ' + String(pedido.producto || '')).toUpperCase();
-        return /NETFLIX|DISNEY|\bHBO\b|SPOTIFY|PARAMOUNT|CRUNCHYROLL/.test(combo);
-    }
-
-    document.getElementById('btnVolver').addEventListener('click', () => {
-        if (window.history.length > 1) window.history.back();
-        else window.location.href = 'index.html';
-    });
-
-    auth.onAuthStateChanged((user) => {
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-        uidActual = user.uid;
-        cargarPedidos();
-    });
-
-    function cargarPedidos() {
-        if (consultaActual) consultaActual.off();
-        consultaActual = db.ref('pedidos').orderByChild('uid').equalTo(uidActual);
-
-        consultaActual.on('value', (snapshot) => {
-            todosPedidos = [];
-
-            snapshot.forEach((childSnapshot) => {
-                const pedido = childSnapshot.val();
-                pedido.key = childSnapshot.key;
-                pedido._estado = normalizarEstado(pedido.estado);
-                todosPedidos.push(pedido);
-            });
-
-            todosPedidos.sort((a, b) => {
-                if (a.fecha && b.fecha) return new Date(b.fecha) - new Date(a.fecha);
-                return 0;
-            });
-
-            actualizarContadores();
-            filtrarPedidos();
-
-        }, (error) => {
-            console.error('Error cargando pedidos:', error);
-            listaEl.innerHTML = `
-                <div class="sin-pedidos">
-                    <div class="icono">⚠️</div>
-                    <h3>No pudimos cargar tus pedidos</h3>
-                    <p>Revisa tu conexión e intenta de nuevo. Si sigue igual, escríbenos por WhatsApp.</p>
-                    <a href="https://wa.me/${WHATSAPP}" target="_blank" rel="noopener" class="btn-tienda">Contactar soporte</a>
-                </div>
-            `;
-        });
-    }
-
-    function actualizarContadores() {
-        const cuentas = { todos: todosPedidos.length, completado: 0, pendiente: 0, procesando: 0, cancelado: 0 };
-        todosPedidos.forEach((p) => { cuentas[p._estado]++; });
-        Object.keys(cuentas).forEach((k) => {
-            document.getElementById('n-' + k).textContent = cuentas[k];
-        });
-        document.getElementById('totalPedidos').textContent =
-            `${todosPedidos.length} ${todosPedidos.length === 1 ? 'pedido' : 'pedidos'}`;
-    }
-
-    function filtrarPedidos() {
-        const busqueda = buscarEl.value.toLowerCase().trim();
-        let filtrados = todosPedidos;
-
-        if (estadoFiltro !== 'todos') {
-            filtrados = filtrados.filter((p) => p._estado === estadoFiltro);
-        }
-
-        if (busqueda) {
-            filtrados = filtrados.filter((p) => {
-                const id = String(p.numero_pedido || p.referencia || p.key || '').toLowerCase();
-                const juego = String(p.juego || p.producto || '').toLowerCase();
-                const producto = String(p.producto || '').toLowerCase();
-                const ref = String(p.referencia_pago || '').toLowerCase();
-                return id.includes(busqueda) || juego.includes(busqueda) ||
-                       producto.includes(busqueda) || ref.includes(busqueda);
-            });
-        }
-
-        mostrarPedidos(filtrados);
-    }
-
-    function formatearFecha(valor) {
-        if (!valor) return 'Fecha no disponible';
-        const fecha = new Date(valor);
-        if (isNaN(fecha.getTime())) return String(valor);
-        return fecha.toLocaleString('es-VE', {
-            day: '2-digit', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
+        setTimeout(() => toastEl.classList.remove('visible'), 3000);
     }
 
     function formatearMonto(valor) {
@@ -734,412 +292,209 @@
         return isNaN(n) ? '0.00' : n.toFixed(2);
     }
 
-    function enlaceWhatsApp(texto) {
-        return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`;
+    function formatearFecha(fechaStr) {
+        if (!fechaStr) return 'Fecha no disponible';
+        try {
+            const d = new Date(fechaStr);
+            if (isNaN(d.getTime())) return fechaStr; // Si ya viene formateada
+            return d.toLocaleString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch (e) { return fechaStr; }
     }
 
-    const ICONOS = {
-        caja: `<svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`,
-        ref: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
-        check: `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`,
-        lupa: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
-        copiar: `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`
-    };
+    // --- CARGA DE DATOS ---
+    auth.onAuthStateChanged((user) => {
+        if (!user) {
+            // Si no está logueado, redirigir a login (descomentar si es necesario)
+            // window.location.href = 'login.html';
+            // Por ahora, para pruebas, cargaremos datos de ejemplo si no hay usuario
+            cargarPedidosDemo();
+            return;
+        }
+        uidActual = user.uid;
+        cargarPedidosReales();
+    });
 
-    function mostrarPedidos(pedidos) {
-        datosStreaming = {};
+    function cargarPedidosReales() {
+        const consulta = db.ref('pedidos').orderByChild('uid').equalTo(uidActual);
+        consulta.on('value', (snapshot) => {
+            todosPedidos = [];
+            snapshot.forEach((child) => {
+                const pedido = child.val();
+                pedido.key = child.key;
+                // Normalizar estado
+                const est = String(pedido.estado || 'pendiente').toLowerCase();
+                if (['completado', 'completada'].includes(est)) pedido._estado = 'completado';
+                else if (['cancelado', 'cancelada'].includes(est)) pedido._estado = 'cancelado';
+                else if (['procesando'].includes(est)) pedido._estado = 'procesando';
+                else pedido._estado = 'pendiente';
+                
+                todosPedidos.push(pedido);
+            });
+            // Ordenar por fecha descendente
+            todosPedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            renderizar();
+        }, (error) => {
+            console.error(error);
+            listaEl.innerHTML = `<div class="sin-pedidos"><h3>Error de conexión</h3><p>No se pudieron cargar los pedidos.</p></div>`;
+        });
+    }
 
-        if (pedidos.length === 0) {
-            const sinNinguno = todosPedidos.length === 0;
-            listaEl.innerHTML = `
-                <div class="sin-pedidos">
-                    <div class="icono">📭</div>
-                    <h3>${sinNinguno ? 'Aún no tienes pedidos' : 'No encontramos pedidos'}</h3>
-                    <p>${sinNinguno
-                        ? 'Cuando hagas tu primera recarga, aparecerá aquí.'
-                        : 'Prueba con otro estado o cambia lo que escribiste en el buscador.'}</p>
-                    ${sinNinguno ? '<a href="index.html" class="btn-tienda">Elegir un juego</a>' : ''}
-                </div>
-            `;
+    // --- RENDERIZADO ---
+    function renderizar() {
+        // Actualizar contadores superiores
+        const total = todosPedidos.length;
+        const pendientes = todosPedidos.filter(p => p._estado === 'pendiente' || p._estado === 'procesando').length;
+        const completados = todosPedidos.filter(p => p._estado === 'completado').length;
+
+        document.getElementById('totalPedidos').textContent = total;
+        document.getElementById('pendientesCount').textContent = pendientes;
+        document.getElementById('completadosCount').textContent = completados;
+
+        if (total === 0) {
+            listaEl.innerHTML = `<div class="sin-pedidos"><h3>No tienes pedidos</h3><p>Realiza tu primera recarga para verla aquí.</p></div>`;
             return;
         }
 
         let html = '';
+        todosPedidos.forEach(p => {
+            const idPedido = p.numero_pedido || p.referencia || p.key || 'N/A';
+            const juego = p.juego || 'Producto';
+            const producto = p.producto ? ` - ${p.producto}` : '';
+            const monto = formatearMonto(p.monto_usd || p.monto);
+            const metodo = p.metodo || 'Pago Móvil';
+            const fecha = formatearFecha(p.fecha);
+            const refPago = p.referencia_pago || 'N/A';
+            
+            // Datos del jugador (solo si no es streaming y existen)
+            const idJugador = p.id_jugador || p.player_id || '';
+            const nombreJugador = p.nombre_jugador || p.player_name || '';
+            let jugadorHtml = '';
+            if (idJugador || nombreJugador) {
+                jugadorHtml = `
+                    <div class="pedido-jugador-box">
+                        ${idJugador ? `<div><strong>ID de Jugador:</strong> ${esc(idJugador)}</div>` : ''}
+                        ${nombreJugador ? `<div><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</div>` : ''}
+                    </div>`;
+            }
 
-        pedidos.forEach((pedido) => {
-            const estado = pedido._estado;
-            const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || pedido.key || 'N/A';
-            const juego = pedido.juego || 'Producto';
-            const producto = pedido.producto || '';
-            const monto = formatearMonto(pedido.monto_usd || pedido.monto);
-            const metodo = pedido.metodo || 'Pago Móvil';
-            const idJugador = pedido.id_jugador || pedido.player_id || '';
-            const nombreJugador = pedido.nombre_jugador || pedido.player_name || '';
-            const paginaJuego = paginaDelJuego(pedido);
-
-            const esStreaming = esProductoStreaming(pedido);
-            const servicioStreaming = detectarServicioStreaming(pedido);
-            const nombreProducto = producto || servicioStreaming;
-
-            // ───── Línea de tiempo ─────
+            // Línea de tiempo
             let stepRecibido = 'recibido';
             let stepVerificando = '';
             let stepCompletado = '';
             let line1 = 'active';
             let line2 = '';
 
-            if (estado === 'completado') {
+            if (p._estado === 'completado') {
                 stepVerificando = 'verificando';
                 stepCompletado = 'completado';
                 line1 = 'completed';
                 line2 = 'completed';
-            } else if (estado === 'procesando') {
+            } else if (p._estado === 'procesando') {
                 stepVerificando = 'verificando';
                 line1 = 'active';
             }
 
-            const timelineHtml = estado === 'cancelado' ? '' : `
+            const timelineHtml = p._estado === 'cancelado' ? '' : `
                 <div class="pedido-timeline">
                     <div class="timeline-step ${stepRecibido}">
-                        <div class="timeline-icon">${ICONOS.check}</div>
+                        <div class="timeline-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
                         <div class="timeline-label">Recibido</div>
                     </div>
                     <div class="timeline-line ${line1}"></div>
                     <div class="timeline-step ${stepVerificando}">
-                        <div class="timeline-icon">${ICONOS.lupa}</div>
-                        <div class="timeline-label">Verificado</div>
+                        <div class="timeline-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></div>
+                        <div class="timeline-label">Verificando</div>
                     </div>
                     <div class="timeline-line ${line2}"></div>
                     <div class="timeline-step ${stepCompletado}">
-                        <div class="timeline-icon">${ICONOS.check}</div>
-                        <div class="timeline-label">Entregado</div>
+                        <div class="timeline-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                        <div class="timeline-label">Completado</div>
                     </div>
-                </div>
-            `;
-
-            // ───── Caja de jugador (solo si hay datos reales) ─────
-            let jugadorHtml = '';
-            if (!esStreaming && (idJugador || nombreJugador)) {
-                jugadorHtml = `
-                    <div class="pedido-jugador-box">
-                        ${idJugador ? `<div><strong>ID:</strong> ${esc(idJugador)}</div>` : ''}
-                        ${nombreJugador ? `<div><strong>Nombre:</strong> ${esc(nombreJugador)}</div>` : ''}
-                    </div>
-                `;
-            }
-
-            // ───── Aviso según estado ─────
-            let avisoHtml = '';
-            if (estado === 'pendiente' && !esStreaming) {
-                avisoHtml = `<div class="aviso-estado pendiente">Estamos verificando tu pago. Suele tardar de 5 a 10 minutos.</div>`;
-            } else if (estado === 'procesando' && !esStreaming) {
-                avisoHtml = `<div class="aviso-estado procesando">Tu recarga se está procesando. En unos minutos estará lista.</div>`;
-            }
-
-            // ───── PIN / código ─────
-            let pinHtml = '';
-            if (!esStreaming && estado !== 'cancelado' && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
-                const pinValue = pedido.pin || pedido.codigos[0];
-                const etiqueta = juego.toUpperCase().includes('ROBLOX') ? 'Tu PIN de Roblox' : 'Tu código';
-                pinHtml = `
-                    <div class="pin-box">
-                        <div class="pin-label">${etiqueta}</div>
-                        <div class="pin-value">${esc(pinValue)}</div>
-                        <button class="btn-copiar" data-pin="${esc(pinValue)}">Copiar</button>
-                    </div>
-                `;
-            }
-
-            // ───── Streaming ─────
-            let streamingHtml = '';
-            const tieneDatosStreaming = esStreaming && estado !== 'cancelado' && pedido.datos_streaming &&
-                                        (pedido.datos_streaming.correo || pedido.datos_streaming.clave);
-
-            if (tieneDatosStreaming) {
-                const d = pedido.datos_streaming;
-                const codAprob = pedido.codigo_aprobacion || '';
-                const tieneValor = (v) => v !== undefined && v !== null && String(v).trim() !== '';
-
-                const campos = [];
-                if (tieneValor(d.correo)) campos.push({ label: 'Correo', valor: String(d.correo), clase: '' });
-                if (tieneValor(d.clave)) campos.push({ label: 'Contraseña', valor: String(d.clave), clase: '' });
-                if (tieneValor(d.perfil)) campos.push({ label: 'Perfil', valor: String(d.perfil), clase: '' });
-                if (tieneValor(d.pin_perfil)) campos.push({ label: 'PIN del perfil', valor: String(d.pin_perfil), clase: '' });
-                if (tieneValor(d.fecha_vencimiento)) campos.push({ label: 'Vence', valor: String(d.fecha_vencimiento), clase: '' });
-                if (tieneValor(codAprob)) campos.push({ label: 'Código de renovación', valor: String(codAprob), clase: 'codigo-renovacion' });
-
-                datosStreaming[pedido.key] = campos;
-
-                const camposHtml = campos.map((c, i) => `
-                    <div class="dato-entrega dato-oculto ${c.clase}">
-                        <div class="dato-label">${esc(c.label)}</div>
-                        <div class="dato-contenido">
-                            <div class="dato-valor">${PUNTOS}</div>
-                            <button class="btn-copiar-dato" data-pedido="${esc(pedido.key)}" data-idx="${i}" aria-label="Copiar ${esc(c.label)}">
-                                ${ICONOS.copiar}
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-
-                const tienePerfil = tieneValor(d.perfil);
-                const titulo = tienePerfil
-                    ? `Datos de tu perfil de ${esc(servicioStreaming)}`
-                    : `Datos de tu cuenta de ${esc(servicioStreaming)}`;
-                const subtitulo = tienePerfil
-                    ? `Usa estos datos para iniciar sesión en ${esc(servicioStreaming)}.`
-                    : `Usa estos datos para iniciar sesión en ${esc(servicioStreaming)}. No cambies la contraseña ni el PIN.`;
-
-                const mensajeAyuda = `Hola, necesito ayuda para iniciar sesión en ${servicioStreaming}. Pedido ${idPedido}`;
-
-                streamingHtml = `
-                    <div class="streaming-box">
-                        <div class="streaming-titulo">${titulo}</div>
-                        <div class="streaming-subtitulo">${subtitulo}</div>
-
-                        <button class="btn-revelar-datos" data-accion="revelar" data-pedido="${esc(pedido.key)}">
-                            <span>👁️</span>
-                            <span>Ver datos de acceso</span>
-                        </button>
-
-                        <div class="contenedor-datos-streaming" id="datos-${esc(pedido.key)}">
-                            ${camposHtml}
-                            ${tieneValor(codAprob) ? `<div class="aviso-renovacion">Guarda el código: lo necesitas para renovar.</div>` : ''}
-                            <div class="contador-auto-ocultar">
-                                Los datos se ocultan en <span class="segundos">${SEGUNDOS_VISIBLE}</span> s
-                                <div class="barra-tiempo"><div class="barra-tiempo-fill"></div></div>
-                            </div>
-                            <button class="btn-revelar-datos secundario" data-accion="ocultar" data-pedido="${esc(pedido.key)}">
-                                <span>🙈</span>
-                                <span>Ocultar datos</span>
-                            </button>
-                        </div>
-
-                        <a class="ayuda-streaming" href="${enlaceWhatsApp(mensajeAyuda)}" target="_blank" rel="noopener">
-                            ¿Problemas para entrar? Escríbenos
-                        </a>
-                    </div>
-                `;
-            } else if (esStreaming && estado !== 'cancelado') {
-                const mensaje = enlaceWhatsApp(`Hola, necesito los datos de acceso de mi pedido ${idPedido} (${nombreProducto})`);
-                streamingHtml = `
-                    <div class="pendiente-manual-box">
-                        <div class="titulo-pendiente">Preparando tu entrega de ${esc(servicioStreaming)}</div>
-                        <div class="desc-pendiente">
-                            Estamos armando tus datos de acceso.<br>
-                            <strong>Te los enviaremos por WhatsApp.</strong>
-                        </div>
-                        <a href="${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp-pendiente">
-                            💬 Consultar por WhatsApp
-                        </a>
-                    </div>
-                `;
-            }
-
-            // ───── Entrega manual (no streaming) ─────
-            let manualHtml = '';
-            if (!esStreaming && estado !== 'cancelado') {
-                const esManual = (pedido.metodo_pago === 'MANUAL') ||
-                                 (pedido.paquete && String(pedido.paquete).startsWith('manual_'));
-                if (esManual) {
-                    manualHtml = `
-                        <div class="manual-box">
-                            <div class="manual-text">Este producto se entrega de forma manual.</div>
-                            <a href="${enlaceWhatsApp(`Hola, necesito mi entrega del pedido ${idPedido}`)}" target="_blank" rel="noopener" class="btn-whatsapp">
-                                Pedir por WhatsApp
-                            </a>
-                        </div>
-                    `;
-                }
-            }
-
-            // ───── Cancelado ─────
-            let canceladoHtml = '';
-            if (estado === 'cancelado') {
-                const motivo = pedido.motivo_cancelacion || pedido.motivo || 'No pudimos verificar el pago de esta referencia.';
-                canceladoHtml = `
-                    <div class="aviso-estado cancelado">${esc(motivo)}</div>
-                    <div class="acciones">
-                        <a class="btn-accion dorado" href="${esc(paginaJuego)}">Reintentar</a>
-                        <a class="btn-accion wa" href="${enlaceWhatsApp(`Hola, mi pedido ${idPedido} fue cancelado y necesito ayuda`)}" target="_blank" rel="noopener">Hablar con soporte</a>
-                    </div>
-                `;
-            }
-
-            // ───── Acciones de pedidos completados ─────
-            let accionesHtml = '';
-            if (estado === 'completado') {
-                accionesHtml = `
-                    <div class="acciones">
-                        <a class="btn-accion dorado" href="${esc(paginaJuego)}">${esStreaming ? 'Renovar' : 'Recargar de nuevo'}</a>
-                    </div>
-                `;
-            }
+                </div>`;
 
             html += `
-                <article class="pedido-card est-${estado}" data-pedido-key="${esc(pedido.key)}">
+                <div class="pedido-card">
                     <div class="pedido-header">
                         <div class="pedido-header-left">
                             <div class="pedido-id">#${esc(idPedido)}</div>
-                            <div class="pedido-fecha">${esc(formatearFecha(pedido.fecha))}</div>
-                            <span class="estado-badge ${estado}">${ETIQUETA_ESTADO[estado]}</span>
+                            <div class="pedido-fecha">
+                                <svg viewBox="0 0 24 24" style="width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                ${esc(fecha)}
+                            </div>
                         </div>
                         <div class="pedido-header-right">
                             <span class="pedido-precio">$${esc(monto)}</span>
-                            <span class="pedido-metodo">${esc(metodo)}</span>
+                            <span class="pedido-metodo">
+                                <svg viewBox="0 0 24 24" style="width:12px; height:12px; fill:none; stroke:currentColor; stroke-width:2;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                BS|${esc(metodo).toUpperCase()}
+                            </span>
                         </div>
                     </div>
 
                     <div class="pedido-body">
                         <div class="pedido-producto">
-                            ${ICONOS.caja}
-                            <span>${esc(juego)}${producto ? ' · ' + esc(producto) : ''}</span>
+                            <svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            <span>${esc(juego)}${esc(producto)}</span>
                         </div>
                         <div class="pedido-referencia">
-                            ${ICONOS.ref}
-                            Ref: ${esc(pedido.referencia_pago || 'N/A')}
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            Ref: ${esc(refPago)}
                         </div>
                     </div>
 
                     ${jugadorHtml}
                     ${timelineHtml}
-                    ${avisoHtml}
-                    ${canceladoHtml}
-                    ${pinHtml}
-                    ${streamingHtml}
-                    ${manualHtml}
-                    ${accionesHtml}
-                </article>
+                </div>
             `;
         });
 
         listaEl.innerHTML = html;
-
-        // Si el usuario tenía datos abiertos cuando llegó una actualización, se mantienen abiertos
-        Object.keys(reveladas).forEach((key) => {
-            const cont = document.getElementById('datos-' + key);
-            if (cont) revelarDatos(key, cont, true);
-            else delete reveladas[key];
-        });
     }
 
-    // ───── Revelar / ocultar datos de streaming ─────
-    listaEl.addEventListener('click', (e) => {
-        const btn = e.target.closest('.btn-revelar-datos');
-        if (!btn) return;
-        const pedidoKey = btn.dataset.pedido;
-        const contenedor = document.getElementById('datos-' + pedidoKey);
-        if (!contenedor) return;
-
-        if (btn.dataset.accion === 'revelar') revelarDatos(pedidoKey, contenedor, false);
-        else if (btn.dataset.accion === 'ocultar') ocultarDatos(pedidoKey, contenedor);
-    });
-
-    function revelarDatos(pedidoKey, contenedor, mantenerTiempo) {
-        const campos = datosStreaming[pedidoKey] || [];
-        contenedor.querySelectorAll('.dato-entrega').forEach((dato, i) => {
-            const valorEl = dato.querySelector('.dato-valor');
-            if (valorEl && campos[i]) valorEl.textContent = campos[i].valor;
-            dato.classList.remove('dato-oculto');
-        });
-        contenedor.classList.add('visible');
-        const caja = contenedor.closest('.streaming-box');
-        if (caja) caja.classList.add('abierto');
-
-        if (!mantenerTiempo || !reveladas[pedidoKey]) {
-            reveladas[pedidoKey] = Date.now() + SEGUNDOS_VISIBLE * 1000;
-        }
-        iniciarTick();
-        tick();
-        if (!mantenerTiempo) avisar('Datos visibles por ' + SEGUNDOS_VISIBLE + ' segundos');
-    }
-
-    function ocultarDatos(pedidoKey, contenedor) {
-        contenedor.querySelectorAll('.dato-entrega').forEach((dato) => {
-            const valorEl = dato.querySelector('.dato-valor');
-            if (valorEl) valorEl.textContent = PUNTOS;
-            dato.classList.add('dato-oculto');
-        });
-        contenedor.classList.remove('visible');
-        const caja = contenedor.closest('.streaming-box');
-        if (caja) caja.classList.remove('abierto');
-        delete reveladas[pedidoKey];
-    }
-
-    function iniciarTick() {
-        if (!tickTimer) tickTimer = setInterval(tick, 1000);
-    }
-
-    function tick() {
-        const ahora = Date.now();
-        let hayAbiertas = false;
-
-        Object.keys(reveladas).forEach((key) => {
-            const cont = document.getElementById('datos-' + key);
-            const restante = Math.ceil((reveladas[key] - ahora) / 1000);
-
-            if (!cont) {
-                delete reveladas[key];
-                return;
+    // --- DATOS DEMO (Solo para que veas el diseño si no tienes Firebase configurado) ---
+    // Esta función simula la carga de datos de la imagen que enviaste
+    function cargarPedidosDemo() {
+        // Simulamos 6 pedidos
+        todosPedidos = [
+            {
+                key: '1', numero_pedido: '10781', fecha: '2026-09-27T22:20:00', monto_usd: '0.79', metodo: 'PAGO MOVIL',
+                juego: 'FREE FIRE', producto: '110 Diamantes', referencia_pago: '007484271212',
+                id_jugador: '3956851949', nombre_jugador: 'elepechino**', estado: 'completado'
+            },
+            {
+                key: '2', numero_pedido: '9149', fecha: '2026-09-17T20:38:00', monto_usd: '0.78', metodo: 'PAGO MOVIL',
+                juego: 'FREE FIRE', producto: '110 Diamantes', referencia_pago: '007374094517',
+                id_jugador: '3956851949', nombre_jugador: 'elepechino**', estado: 'completado'
+            },
+            {
+                key: '3', numero_pedido: '9148', fecha: '2026-09-17T20:30:00', monto_usd: '0.78', metodo: 'PAGO MOVIL',
+                juego: 'FREE FIRE', producto: '110 Diamantes', referencia_pago: '007374094518',
+                id_jugador: '3956851949', nombre_jugador: 'elepechino**', estado: 'pendiente'
+            },
+            {
+                key: '4', numero_pedido: '9147', fecha: '2026-09-16T15:10:00', monto_usd: '1.50', metodo: 'PAGO MOVIL',
+                juego: 'FREE FIRE', producto: '220 Diamantes', referencia_pago: '007374094519',
+                id_jugador: '3956851949', nombre_jugador: 'elepechino**', estado: 'completado'
+            },
+            {
+                key: '5', numero_pedido: '9146', fecha: '2026-09-15T10:05:00', monto_usd: '0.78', metodo: 'PAGO MOVIL',
+                juego: 'FREE FIRE', producto: '110 Diamantes', referencia_pago: '007374094520',
+                id_jugador: '3956851949', nombre_jugador: 'elepechino**', estado: 'completado'
+            },
+            {
+                key: '6', numero_pedido: '9145', fecha: '2026-09-14T18:00:00', monto_usd: '5.00', metodo: 'PAGO MOVIL',
+                juego: 'FREE FIRE', producto: '550 Diamantes', referencia_pago: '007374094521',
+                id_jugador: '3956851949', nombre_jugador: 'elepechino**', estado: 'completado'
             }
-            if (restante <= 0) {
-                ocultarDatos(key, cont);
-                avisar('Datos ocultados por seguridad');
-                return;
-            }
-
-            hayAbiertas = true;
-            const segEl = cont.querySelector('.segundos');
-            const barraEl = cont.querySelector('.barra-tiempo-fill');
-            if (segEl) segEl.textContent = restante;
-            if (barraEl) barraEl.style.width = (restante / SEGUNDOS_VISIBLE * 100) + '%';
-        });
-
-        if (!hayAbiertas && tickTimer) {
-            clearInterval(tickTimer);
-            tickTimer = null;
-        }
+        ];
+        renderizar();
     }
 
-    // ───── Copiar ─────
-    function copiarTexto(texto, onOk) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(texto)
-                .then(() => { if (onOk) onOk(); avisar('✓ Copiado'); })
-                .catch(() => avisar('No se pudo copiar'));
-        } else {
-            avisar('Mantén presionado para copiar.');
-        }
-    }
+    // Iniciar con demo si no hay sesión de Firebase (para propósitos de visualización)
+    // Si ya tienes login, la función onAuthStateChanged cargará los datos reales.
+    // Descomenta la siguiente línea si quieres forzar la vista previa:
+    // cargarPedidosDemo();
 
-    listaEl.addEventListener('click', (e) => {
-        const btnPin = e.target.closest('.btn-copiar');
-        if (btnPin) {
-            copiarTexto(btnPin.dataset.pin);
-            return;
-        }
-
-        const btnDato = e.target.closest('.btn-copiar-dato');
-        if (btnDato) {
-            const campos = datosStreaming[btnDato.dataset.pedido] || [];
-            const campo = campos[Number(btnDato.dataset.idx)];
-            if (!campo) return;
-            copiarTexto(campo.valor, () => {
-                btnDato.classList.add('copiado');
-                setTimeout(() => btnDato.classList.remove('copiado'), 1500);
-            });
-        }
-    });
-
-    document.getElementById('chips').addEventListener('click', (e) => {
-        const chip = e.target.closest('.chip');
-        if (!chip) return;
-        estadoFiltro = chip.dataset.estado;
-        document.querySelectorAll('.chip').forEach((c) => c.classList.toggle('activo', c === chip));
-        filtrarPedidos();
-    });
-
-    buscarEl.addEventListener('input', filtrarPedidos);
 </script>
 
 </body>
