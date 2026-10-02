@@ -18,8 +18,11 @@
             --color-dorado-claro:#f5d76e;
             --color-negro:#0a0e1a;
             --color-azul:#3b82f6;
-            --card-bg: rgba(20, 30, 55, 0.55); /* Fondo semitransparente */
+            --card-bg: rgba(20, 30, 55, 0.55);
             --card-border: rgba(212, 175, 55, 0.2);
+            --azul-brillante: #4a7aff;
+            --verde-brillante: #00d26a;
+            --naranja: #f59e0b;
         }
         *{margin:0;padding:0;box-sizing:border-box}
         html{scroll-behavior:smooth}
@@ -33,7 +36,6 @@
             overflow-x:hidden;
         }
 
-        /* 🎬 VIDEO DE FONDO */
         .video-fondo{
             position:fixed;
             top:0; left:0;
@@ -265,65 +267,294 @@
             text-shadow:0 0 15px rgba(212,175,55,0.6);
         }
 
-        .pedido-item{
-            padding:18px 24px;
-            border-bottom:1px solid rgba(212,175,55,0.08);
-            display:flex;justify-content:space-between;align-items:center;
-            transition:.3s;cursor:pointer;
+        /* ====== TARJETAS DE PEDIDO (Estilo captura) ====== */
+        .pedido-card {
+            background: rgba(13, 22, 39, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 16px;
+            border: 1px solid rgba(30, 42, 69, 0.6);
+            color: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            cursor: pointer;
         }
-        .pedido-item:last-child{border-bottom:none}
-        .pedido-item:hover{
-            background:linear-gradient(90deg,rgba(212,175,55,0.06),transparent);
+        .pedido-card:hover { 
+            border-color: #3b82f6; 
+            background: rgba(13, 22, 39, 0.85);
         }
-        .pedido-item .info{display:flex;flex-direction:column;gap:4px}
-        .pedido-item .info .pedido-id{font-weight:700;font-size:16px;color:white}
-        .pedido-item .info .pedido-id span{color:var(--color-dorado-claro)}
-        .pedido-item .info .fecha{font-size:13px;color:#94a3b8}
-        .pedido-item .info .productos{
-            font-size:14px;color:#cbd5e1;
-            display:flex;gap:6px;flex-wrap:wrap;
+        .pedido-card.expandido {
+            border-color: var(--color-dorado-claro);
+            background: rgba(13, 22, 39, 0.9);
         }
-        .pedido-item .info .productos .tag{
-            background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));
-            color:var(--color-dorado-claro);
-            padding:2px 12px;border-radius:12px;font-size:12px;
-            border:1px solid rgba(212,175,55,0.3);
-            font-weight:600;
+
+        .pedido-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
-        .pedido-item .detalle{
-            display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+        .pedido-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        .pedido-item .detalle .precio{
-            font-size:18px;font-weight:800;
-            color:var(--color-dorado-claro);
-            text-shadow:0 0 15px rgba(212,175,55,0.4);
+        .pedido-id {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--azul-brillante);
         }
-        .pedido-item .detalle .metodo{
-            font-size:12px;color:#94a3b8;
-            background:rgba(0,0,0,0.3);
-            padding:2px 12px;border-radius:12px;
-            border:1px solid rgba(255,255,255,0.08);
+        .pedido-fecha {
+            font-size: 12px;
+            color: #8899b0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .pedido-item .detalle .estado{
-            font-size:12px;font-weight:700;
-            padding:2px 12px;border-radius:12px;
+        .pedido-header-right {
+            text-align: right;
         }
-        .pedido-item .detalle .estado.completado{
-            background:rgba(34,197,94,0.2);color:#4ade80;
-            border:1px solid rgba(34,197,94,0.4);
+        .pedido-precio {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--verde-brillante);
+            display: block;
         }
-        .pedido-item .detalle .estado.pendiente{
-            background:rgba(212,175,55,0.2);color:var(--color-dorado-claro);
-            border:1px solid rgba(212,175,55,0.4);
+        .pedido-metodo {
+            font-size: 11px;
+            color: #8899b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .pedido-item .detalle .estado.cancelado{
-            background:rgba(239,68,68,0.2);color:#f87171;
-            border:1px solid rgba(239,68,68,0.4);
+
+        .pedido-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
         }
-        .pedido-item .detalle .estado.procesando{
-            background:rgba(59,130,246,0.2);color:#93c5fd;
-            border:1px solid rgba(59,130,246,0.4);
+        .pedido-producto {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
         }
+        .pedido-producto svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--azul-brillante);
+            flex-shrink: 0;
+        }
+        .pedido-referencia {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #8899b0;
+            background: rgba(17, 28, 50, 0.7);
+            padding: 6px 10px;
+            border-radius: 6px;
+            word-break: break-all;
+        }
+        .pedido-referencia svg {
+            width: 14px;
+            height: 14px;
+            fill: #8899b0;
+            flex-shrink: 0;
+        }
+
+        .pedido-jugador-box {
+            background: rgba(22, 34, 59, 0.7);
+            border: 1px solid rgba(37, 50, 77, 0.8);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+        .pedido-jugador-box strong {
+            color: #fff;
+        }
+
+        .pedido-timeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            padding-top: 10px;
+            border-top: 1px solid rgba(30, 42, 69, 0.6);
+        }
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            z-index: 2;
+            width: 80px;
+            text-align: center;
+        }
+        .timeline-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e2a45;
+            color: #8899b0;
+            transition: all 0.3s;
+        }
+        .timeline-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+        .timeline-step.recibido .timeline-icon { background: var(--azul-brillante); color: #fff; } 
+        .timeline-step.verificando .timeline-icon { background: var(--naranja); color: #fff; } 
+        .timeline-step.completado .timeline-icon { background: var(--verde-brillante); color: #fff; } 
+
+        .timeline-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8899b0;
+            text-transform: capitalize;
+        }
+        .timeline-step.recibido .timeline-label,
+        .timeline-step.verificando .timeline-label,
+        .timeline-step.completado .timeline-label {
+            color: #fff;
+        }
+        .timeline-line {
+            flex: 1;
+            height: 3px;
+            background: #1e2a45;
+            margin-top: -22px; 
+            z-index: 1;
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+        .timeline-line.active {
+            background: var(--azul-brillante);
+        }
+        .timeline-line.completed {
+            background: var(--verde-brillante);
+        }
+
+        /* ====== PANEL EXPANDIBLE (Detalles dentro de la tarjeta) ====== */
+        .detalle-expandido {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease;
+            background: rgba(10, 14, 26, 0.7);
+            border-radius: 10px;
+            margin-top: 0;
+            padding: 0 16px;
+            border: 1px solid transparent;
+        }
+        .pedido-card.expandido .detalle-expandido {
+            max-height: 1000px;
+            margin-top: 16px;
+            padding: 16px;
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+        .detalle-expandido h4 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--color-dorado-claro);
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding-bottom: 8px;
+        }
+        .detalle-fila {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+        .detalle-fila:last-child { border-bottom: none; }
+        .detalle-fila .label { color: #8899b0; }
+        .detalle-fila .valor { color: #fff; font-weight: 600; text-align: right; word-break: break-all; }
+
+        /* Estilos para PIN / Streaming dentro del panel expandido */
+        .pin-box {
+            margin-top: 12px; padding: 14px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 10px; text-align: center;
+        }
+        .pin-box .pin-label {
+            font-size: 11px; color: #cbd5e1;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .pin-box .pin-value {
+            font-size: 20px; font-weight: 700;
+            color: #4ade80; letter-spacing: 2px;
+            margin: 6px 0; word-break: break-all;
+            user-select: all;
+        }
+        .pin-box .btn-copiar {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80; border: none;
+            padding: 8px 18px; border-radius: 8px;
+            font-weight: 700; cursor: pointer;
+            transition: 0.3s; font-size: 13px; font-family: inherit;
+        }
+        .pin-box .btn-copiar:hover { background: rgba(34, 197, 94, 0.32); }
+
+        .streaming-box {
+            margin-top: 12px;
+            padding: 14px;
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.08), rgba(17, 60, 207, 0.06));
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 12px;
+        }
+        .streaming-box .streaming-titulo {
+            font-size: 13px; font-weight: 800; color: var(--color-dorado-claro);
+            text-align: center; margin-bottom: 8px; text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .dato-entrega {
+            display: flex; flex-direction: column; gap: 4px; padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 8px; margin-bottom: 8px;
+        }
+        .dato-entrega:last-of-type { margin-bottom: 0; }
+        .dato-entrega .dato-label {
+            font-size: 9px; color: #94a3b8; text-transform: uppercase;
+            letter-spacing: 1px; font-weight: 800;
+        }
+        .dato-entrega .dato-contenido { display: flex; align-items: center; gap: 8px; }
+        .dato-entrega .dato-valor {
+            flex: 1; font-size: 14px; font-weight: 700; color: #fff;
+            word-break: break-word; overflow-wrap: anywhere;
+            font-family: 'Courier New', monospace;
+        }
+        .dato-entrega .btn-copiar-dato {
+            width: 32px; height: 32px;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 8px; color: var(--color-dorado-claro); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0; padding: 0;
+        }
+        .dato-entrega .btn-copiar-dato svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .dato-entrega .btn-copiar-dato:hover { background: rgba(212, 175, 55, 0.3); transform: scale(1.05); }
+        .dato-entrega .btn-copiar-dato.copiado {
+            background: rgba(34, 197, 94, 0.3); border-color: #22c55e; color: #4ade80;
+        }
+        .dato-entrega .btn-copiar-dato.copiado svg { display: none; }
+        .dato-entrega .btn-copiar-dato.copiado::after { content: '✓'; font-size: 16px; font-weight: bold; }
+
+        .sin-pedidos{
+            text-align:center;padding:40px;color:#94a3b8;
+        }
+        .sin-pedidos .icono-grande{font-size:48px;margin-bottom:10px}
 
         /* ====== JUEGOS RÁPIDOS ====== */
         .juegos-rapidos{
@@ -390,7 +621,6 @@
             box-shadow:0 8px 25px rgba(212,175,55,0.6);
         }
 
-        /* ====== CARGANDO ====== */
         .loading{
             text-align:center;padding:40px;color:#94a3b8;
         }
@@ -404,10 +634,6 @@
             box-shadow:0 0 20px rgba(212,175,55,0.3);
         }
         @keyframes spin{to{transform:rotate(360deg)}}
-        .sin-pedidos{
-            text-align:center;padding:40px;color:#94a3b8;
-        }
-        .sin-pedidos .icono-grande{font-size:48px;margin-bottom:10px}
 
         /* ====== RESPONSIVE ====== */
         @media (max-width:768px){
@@ -415,13 +641,6 @@
             .topbar{padding:10px 16px}
             .stats-grid{grid-template-columns:repeat(3,1fr);gap:10px}
             .stat-card .number{font-size:24px}
-            .pedido-item{
-                flex-direction:column;align-items:flex-start;gap:10px;
-            }
-            .pedido-item .detalle{
-                align-items:flex-start;width:100%;
-                flex-direction:row;flex-wrap:wrap;gap:8px;
-            }
             .welcome-card h2{font-size:22px}
             .topbar .logo h1{font-size:16px}
             .topbar-actions .user-badge .name{display:none}
@@ -429,6 +648,7 @@
                 flex-direction:column;align-items:stretch;text-align:center;
             }
             .info-bar .info-item{justify-content:center}
+            .pedido-card { margin: 10px 12px; }
         }
         @media (max-width:500px){
             .stats-grid{grid-template-columns:1fr 1fr 1fr;gap:8px}
@@ -437,13 +657,14 @@
             .stat-card .label{font-size:11px}
             .welcome-card{padding:20px}
             .welcome-card .actions a{padding:9px 16px;font-size:13px}
-            .pedido-item{padding:14px 16px}
-            .pedido-item .info .pedido-id{font-size:14px}
-            .pedido-item .detalle .precio{font-size:15px}
-            .video-fondo {
-                opacity: 0.85;
-                filter: brightness(1.05);
-            }
+            .pedido-card { padding: 12px; margin: 8px 10px; }
+            .pedido-id { font-size: 16px; }
+            .pedido-precio { font-size: 16px; }
+            .timeline-step { width: 60px; }
+            .timeline-icon { width: 28px; height: 28px; }
+            .timeline-icon svg { width: 14px; height: 14px; }
+            .timeline-label { font-size: 10px; }
+            .video-fondo { opacity: 0.85; filter: brightness(1.05); }
         }
     </style>
 </head>
@@ -579,6 +800,36 @@
 
     let uidActual = null;
 
+    function esc(valor) {
+        return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    function formatearFecha(valor) {
+        if (!valor) return 'Fecha no disponible';
+        const fecha = new Date(valor);
+        if (isNaN(fecha.getTime())) return String(valor);
+        return fecha.toLocaleString('es-VE', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    function formatearMonto(valor) {
+        let n = String(valor ?? '0').replace('$', '').trim();
+        const num = parseFloat(n);
+        return isNaN(num) ? '0.00' : num.toFixed(2);
+    }
+
+    function normalizarEstado(raw) {
+        const e = String(raw || 'pendiente').toLowerCase().trim();
+        if (['completado', 'completada', 'completed', 'completada_ok'].includes(e)) return 'completado';
+        if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
+        if (['procesando', 'processing'].includes(e)) return 'procesando';
+        return 'pendiente';
+    }
+
     auth.onAuthStateChanged((user) => {
         if (user) {
             uidActual = user.uid;
@@ -608,6 +859,7 @@
             snapshot.forEach((childSnapshot) => {
                 const pedido = childSnapshot.val();
                 pedido.key = childSnapshot.key;
+                pedido._estado = normalizarEstado(pedido.estado);
                 pedidos.push(pedido);
             });
 
@@ -635,14 +887,8 @@
 
     function actualizarEstadisticas(pedidos) {
         const total = pedidos.length;
-        const completados = pedidos.filter(p => {
-            const e = String(p.estado || '').toLowerCase();
-            return e === 'completada' || e === 'completado' || e === 'completed';
-        }).length;
-        const pendientes = pedidos.filter(p => {
-            const e = String(p.estado || '').toLowerCase();
-            return e === 'pendiente' || e === 'procesando' || e === 'processing';
-        }).length;
+        const completados = pedidos.filter(p => p._estado === 'completado').length;
+        const pendientes = pedidos.filter(p => p._estado === 'pendiente' || p._estado === 'procesando').length;
 
         document.getElementById('totalPedidos').textContent = total;
         document.getElementById('pedidosCompletados').textContent = completados;
@@ -666,65 +912,194 @@
         let html = '';
         const pedidosMostrar = pedidos.slice(0, 5);
 
-        pedidosMostrar.forEach((pedido, index) => {
-            const estado = pedido.estado || 'pendiente';
-            const estadoLower = estado.toLowerCase();
-            
-            let estadoClase = 'pendiente';
-            let estadoTexto = '⏳ Pendiente';
-            
-            if (estadoLower === 'completada' || estadoLower === 'completado' || estadoLower === 'completed') {
-                estadoClase = 'completado';
-                estadoTexto = '✅ Completado';
-            } else if (estadoLower === 'cancelado' || estadoLower === 'cancelada' || estadoLower === 'cancelled') {
-                estadoClase = 'cancelado';
-                estadoTexto = '❌ Cancelado';
-            } else if (estadoLower === 'procesando' || estadoLower === 'processing') {
-                estadoClase = 'procesando';
-                estadoTexto = '🔄 Procesando';
+        pedidosMostrar.forEach((pedido) => {
+            const estado = pedido._estado;
+            const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || pedido.key || 'N/A';
+            const juego = pedido.juego || 'Producto';
+            const producto = pedido.producto || '';
+            const monto = formatearMonto(pedido.monto_usd || pedido.monto);
+            const metodo = pedido.metodo || 'Pago Móvil';
+            const idJugador = pedido.id_jugador || pedido.player_id || 'No especificado';
+            const nombreJugador = pedido.nombre_jugador || pedido.player_name || 'No especificado';
+
+            // Timeline
+            let stepRecibido = 'recibido';
+            let stepVerificando = '';
+            let stepCompletado = '';
+            let line1 = 'active';
+            let line2 = '';
+
+            if (estado === 'completado') {
+                stepVerificando = 'verificando';
+                stepCompletado = 'completado';
+                line1 = 'completed';
+                line2 = 'completed';
+            } else if (estado === 'procesando') {
+                stepVerificando = 'verificando';
+                line1 = 'active';
+            } else if (estado === 'cancelado') {
+                stepRecibido = ''; stepVerificando = ''; stepCompletado = '';
+                line1 = ''; line2 = '';
             }
 
-            let fechaTexto = 'Fecha no disponible';
-            if (pedido.fecha) {
-                try {
-                    const fecha = new Date(pedido.fecha);
-                    fechaTexto = `📅 ${fecha.toLocaleDateString()} ${fecha.toLocaleTimeString()}`;
-                } catch (e) {
-                    fechaTexto = `📅 ${pedido.fecha}`;
+            const iconBox = `<svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`;
+            const iconRef = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+            const iconRecibido = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+            const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
+            const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+
+            // Detectar streaming
+            const esStreaming = pedido.es_streaming === true ||
+                                (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
+
+            // PIN
+            let pinHtml = '';
+            if (!esStreaming && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
+                const pinValue = pedido.pin || pedido.codigos[0];
+                const etiqueta = juego.toUpperCase().includes('ROBLOX') ? 'Tu PIN de Roblox' : 'Tu código';
+                pinHtml = `
+                    <div class="pin-box">
+                        <div class="pin-label">${etiqueta}</div>
+                        <div class="pin-value">${esc(pinValue)}</div>
+                        <button class="btn-copiar" data-pin="${esc(pinValue)}">Copiar</button>
+                    </div>
+                `;
+            }
+
+            // Streaming
+            let streamingHtml = '';
+            if (esStreaming && pedido.datos_streaming) {
+                const d = pedido.datos_streaming;
+                const codAprob = pedido.codigo_aprobacion || '';
+                let camposHtml = '';
+
+                const agregarDato = (label, valor) => {
+                    if (!valor) return '';
+                    const v = esc(valor);
+                    return `
+                        <div class="dato-entrega">
+                            <div class="dato-label">${label}</div>
+                            <div class="dato-contenido">
+                                <div class="dato-valor">${v}</div>
+                                <button class="btn-copiar-dato" data-copiar="${v}" aria-label="Copiar ${label}">
+                                    <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                };
+
+                camposHtml += agregarDato('📧 CORREO', d.correo);
+                camposHtml += agregarDato('🔑 CONTRASEÑA', d.clave);
+                camposHtml += agregarDato('👤 PERFIL', d.perfil);
+                camposHtml += agregarDato('🔢 PIN DEL PERFIL', d.pin_perfil);
+                camposHtml += agregarDato('📅 VENCE', d.fecha_vencimiento);
+                if (codAprob) {
+                    camposHtml += agregarDato('🎟️ CÓDIGO DE RENOVACIÓN', codAprob);
+                }
+
+                if (camposHtml) {
+                    const titulo = d.perfil ? '🎬 DATOS DE TU PERFIL' : '🎬 DATOS DE TU CUENTA';
+                    streamingHtml = `
+                        <div class="streaming-box">
+                            <div class="streaming-titulo">${titulo}</div>
+                            ${camposHtml}
+                        </div>
+                    `;
                 }
             }
 
-            // 🔥 CORRECCIÓN: Ahora usa el número de pedido real
-            const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || pedido.key || `#${String(index + 1).padStart(4, '0')}`;
-            
-            const producto = pedido.producto || pedido.juego || 'Producto';
-            
-            // 🔥 CORRECCIÓN: Limpiar el monto para que no se duplique el $
-            let monto = pedido.monto_usd || pedido.monto || '0.00';
-            monto = String(monto).replace('$', '').trim(); // Elimina el $ si ya lo trae
-            
-            const metodo = pedido.metodo || 'Pago Móvil';
-
-            let tagsHtml = `<span class="tag">🎮 ${producto}</span>`;
-            if (pedido.paquete) {
-                tagsHtml += ` <span class="tag">📦 ${pedido.paquete}</span>`;
-            }
+            // Panel expandible con los detalles
+            let detalleExpandido = `
+                <div class="detalle-expandido">
+                    <h4>📋 Detalles del Pedido</h4>
+                    <div class="detalle-fila">
+                        <span class="label">Número de Pedido:</span>
+                        <span class="valor">#${esc(idPedido)}</span>
+                    </div>
+                    <div class="detalle-fila">
+                        <span class="label">Fecha:</span>
+                        <span class="valor">${esc(formatearFecha(pedido.fecha))}</span>
+                    </div>
+                    <div class="detalle-fila">
+                        <span class="label">Producto:</span>
+                        <span class="valor">${esc(juego)} ${producto ? '- ' + esc(producto) : ''}</span>
+                    </div>
+                    <div class="detalle-fila">
+                        <span class="label">Monto:</span>
+                        <span class="valor">$${esc(monto)}</span>
+                    </div>
+                    <div class="detalle-fila">
+                        <span class="label">Método de Pago:</span>
+                        <span class="valor">${esc(metodo)}</span>
+                    </div>
+                    <div class="detalle-fila">
+                        <span class="label">Referencia de Pago:</span>
+                        <span class="valor">${esc(pedido.referencia_pago || 'N/A')}</span>
+                    </div>
+                    <div class="detalle-fila">
+                        <span class="label">ID de Jugador:</span>
+                        <span class="valor">${esc(idJugador)}</span>
+                    </div>
+                    <div class="detalle-fila">
+                        <span class="label">Nombre de Jugador:</span>
+                        <span class="valor">${esc(nombreJugador)}</span>
+                    </div>
+                    ${pinHtml}
+                    ${streamingHtml}
+                </div>
+            `;
 
             html += `
-                <div class="pedido-item" onclick="verDetalle('${pedido.key || ''}')">
-                    <div class="info">
-                        <div class="pedido-id">#<span>${idPedido}</span></div>
-                        <div class="fecha">${fechaTexto}</div>
-                        <div class="productos">
-                            ${tagsHtml}
+                <div class="pedido-card" onclick="toggleDetalle(this)">
+                    <div class="pedido-header">
+                        <div class="pedido-header-left">
+                            <div class="pedido-id">#${esc(idPedido)}</div>
+                            <div class="pedido-fecha">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="#8899b0"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                ${esc(formatearFecha(pedido.fecha))}
+                            </div>
                         </div>
-                        ${pedido.referencia_pago ? `<div style="font-size:12px;color:#6b7280;margin-top:2px;">Ref: ${pedido.referencia_pago}</div>` : ''}
+                        <div class="pedido-header-right">
+                            <span class="pedido-precio">$${esc(monto)}</span>
+                            <span class="pedido-metodo">${esc(metodo)}</span>
+                        </div>
                     </div>
-                    <div class="detalle">
-                        <div class="precio">$${monto}</div>
-                        <div class="metodo">${metodo}</div>
-                        <div class="estado ${estadoClase}">${estadoTexto}</div>
+
+                    <div class="pedido-body">
+                        <div class="pedido-producto">
+                            ${iconBox}
+                            ${esc(juego)} ${producto ? '- ' + esc(producto) : ''}
+                        </div>
+                        <div class="pedido-referencia">
+                            ${iconRef}
+                            Ref: ${esc(pedido.referencia_pago || 'N/A')}
+                        </div>
                     </div>
+
+                    <div class="pedido-jugador-box">
+                        <div><strong>ID de Jugador:</strong> ${esc(idJugador)}</div>
+                        <div><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</div>
+                    </div>
+
+                    <div class="pedido-timeline">
+                        <div class="timeline-step ${stepRecibido}">
+                            <div class="timeline-icon">${iconRecibido}</div>
+                            <div class="timeline-label">Recibido</div>
+                        </div>
+                        <div class="timeline-line ${line1}"></div>
+                        <div class="timeline-step ${stepVerificando}">
+                            <div class="timeline-icon">${iconVerificando}</div>
+                            <div class="timeline-label">Verificando</div>
+                        </div>
+                        <div class="timeline-line ${line2}"></div>
+                        <div class="timeline-step ${stepCompletado}">
+                            <div class="timeline-icon">${iconCompletado}</div>
+                            <div class="timeline-label">Completado</div>
+                        </div>
+                    </div>
+
+                    ${detalleExpandido}
                 </div>
             `;
         });
@@ -732,13 +1107,36 @@
         contenedor.innerHTML = html;
     }
 
-    function verDetalle(pedidoKey) {
-        if (pedidoKey) {
-            window.location.href = `detalle-pedido.html?id=${pedidoKey}`;
-        } else {
-            alert('Detalle no disponible');
-        }
+    // 🔥 Función para expandir/contraer el detalle de la tarjeta
+    function toggleDetalle(card) {
+        card.classList.toggle('expandido');
     }
+
+    // Copiar PIN
+    document.addEventListener('click', (e) => {
+        const btnPin = e.target.closest('.btn-copiar');
+        if (btnPin) {
+            e.stopPropagation(); // Evita que se expanda la tarjeta
+            const pin = btnPin.dataset.pin;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(pin).then(() => {
+                    alert('✓ PIN copiado al portapapeles');
+                });
+            }
+        }
+
+        const btnDato = e.target.closest('.btn-copiar-dato');
+        if (btnDato) {
+            e.stopPropagation(); // Evita que se expanda la tarjeta
+            const texto = btnDato.dataset.copiar;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(texto).then(() => {
+                    btnDato.classList.add('copiado');
+                    setTimeout(() => btnDato.classList.remove('copiado'), 1500);
+                });
+            }
+        }
+    });
 
     console.log('📋 Dashboard cargado correctamente');
 </script>
