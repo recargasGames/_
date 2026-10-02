@@ -175,30 +175,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
 .header-right{display:flex;align-items:center;gap:12px}
 
-.btn-notificaciones{
-    width:40px;height:40px;border-radius:50%;
-    border:1px solid rgba(255,255,255,.09);
-    background:rgba(255,255,255,.04);
-    color:#dce3ef;font-size:18px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    transition:.3s;position:relative;
-}
-
-.btn-notificaciones:hover{
-    color:var(--gold2);
-    border-color:rgba(212,175,55,.4);
-    background:rgba(212,175,55,.08);
-}
-
-.btn-notificaciones .dot-notif{
-    position:absolute;top:6px;right:6px;
-    width:9px;height:9px;border-radius:50%;
-    background:#ef4444;border:2px solid #080c15;
-    display:none;
-}
-
-.btn-notificaciones .dot-notif.activo{display:block}
-
 .btn-perfil{
     border:0;background:transparent;color:white;
     display:flex;align-items:center;gap:8px;cursor:pointer;
@@ -915,7 +891,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     .seccion-titulo small{display:none}
     .menu-perfil,.menu-flotante{right:7px;width:245px}
     .perfil-nombre,.perfil-flecha{display:none}
-    .btn-notificaciones{width:36px;height:36px;font-size:16px}
     .footer{margin-top:50px;padding-bottom:35px}
 }
 
@@ -974,19 +949,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{
         </div>
 
         <div class="header-right">
-
-            <!-- NOTIFICACIONES -->
-            <button
-                class="btn-notificaciones"
-                id="btnNotificaciones"
-                aria-label="Notificaciones"
-                title="Activar notificaciones"
-                onclick="event.stopPropagation(); solicitarNotificaciones()">
-
-                🔔
-                <span class="dot-notif" id="dotNotif"></span>
-
-            </button>
 
             <!-- PERFIL -->
             <div id="perfilContainer" style="position:relative;display:none;">
@@ -1702,16 +1664,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
         <div class="special-grid">
 
+            <!-- NETFLIX NORMAL -->
             <a
                 href="netflix.html"
                 class="game-link special-card"
-                data-nombre="netflix streaming series peliculas codigo hogar">
+                data-nombre="netflix streaming series peliculas">
 
                 <div class="game-img-wrap">
-
-                    <span class="game-badge rojo">
-                        CÓDIGO HOGAR
-                    </span>
 
                     <img
                         src="netflix.png"
@@ -1725,6 +1684,40 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
                     <div class="game-nombre">
                         Netflix
+                    </div>
+
+                    <div class="game-meta neutro">
+                        Ver planes
+                    </div>
+
+                </div>
+
+            </a>
+
+            <!-- NETFLIX CÓDIGO HOGAR -->
+            <a
+                href="netflix-codigo-tv.html"
+                class="game-link special-card"
+                data-nombre="netflix codigo hogar tv streaming">
+
+                <div class="game-img-wrap">
+
+                    <span class="game-badge rojo">
+                        CÓDIGO HOGAR
+                    </span>
+
+                    <img
+                        src="netflix.png"
+                        class="game-img"
+                        alt="Netflix Código Hogar"
+                        loading="lazy">
+
+                </div>
+
+                <div class="game-info">
+
+                    <div class="game-nombre">
+                        Netflix Código Hogar
                     </div>
 
                     <div class="game-meta neutro">
@@ -2170,67 +2163,39 @@ const avatarGrandeInicial = document.getElementById("avatarGrandeInicial");
 
 
 /* =====================================================
-   NOTIFICACIONES
+   NOTIFICACIONES (se piden automáticamente, sin campanita)
 ===================================================== */
 
-const btnNotificaciones = document.getElementById("btnNotificaciones");
-const dotNotif = document.getElementById("dotNotif");
+function pedirPermisoNotificaciones(){
 
-function solicitarNotificaciones(){
+    if(!("Notification" in window)) return;
 
-    if(!("Notification" in window)){
+    if(Notification.permission === "default"){
 
-        mostrarMensaje(
-            "No disponible",
-            "Tu navegador no soporta notificaciones.",
-            "info"
-        );
+        // Pedir permiso después de 3 segundos para no ser invasivo
+        setTimeout(()=>{
 
-        return;
+            Notification.requestPermission().then(permiso=>{
 
-    }
+                if(permiso === "granted"){
 
-    if(Notification.permission === "granted"){
+                    console.log("✅ Notificaciones activadas");
 
-        nuevaNotificacion("Recargas Games", "Las notificaciones ya están activadas ✅");
+                }
 
-        return;
+            });
+
+        }, 3000);
 
     }
-
-    if(Notification.permission === "denied"){
-
-        mostrarMensaje(
-            "Notificaciones bloqueadas",
-            "Activa las notificaciones desde la configuración de tu navegador.",
-            "advertencia"
-        );
-
-        return;
-
-    }
-
-    Notification.requestPermission().then(permiso=>{
-
-        if(permiso === "granted"){
-
-            dotNotif.classList.add("activo");
-
-            nuevaNotificacion(
-                "¡Notificaciones activadas! 🎉",
-                "Te avisaremos cuando tengas novedades en tus pedidos."
-            );
-
-        }
-
-    });
 
 }
 
-function nuevaNotificacion(titulo, cuerpo, opciones={}){
+// Función global para enviar notificaciones (se puede llamar desde cualquier parte)
+function enviarNotificacion(titulo, cuerpo, opciones={}){
 
-    if(!("Notification" in window)) return;
-    if(Notification.permission !== "granted") return;
+    if(!("Notification" in window)) return false;
+    if(Notification.permission !== "granted") return false;
 
     try{
 
@@ -2242,21 +2207,18 @@ function nuevaNotificacion(titulo, cuerpo, opciones={}){
             ...opciones
         });
 
-        setTimeout(()=>{ try{ notif.close(); }catch(e){} }, 6000);
+        setTimeout(()=>{ try{ notif.close(); }catch(e){} }, 7000);
+
+        return true;
 
     }catch(e){
         console.warn("Notificación:", e.message);
+        return false;
     }
 
 }
 
-window.solicitarNotificaciones = solicitarNotificaciones;
-window.nuevaNotificacion = nuevaNotificacion;
-
-// Mostrar punto rojo si hay permiso pendiente
-if("Notification" in window && Notification.permission === "default"){
-    dotNotif.classList.add("activo");
-}
+window.enviarNotificacion = enviarNotificacion;
 
 
 /* =====================================================
@@ -2265,11 +2227,7 @@ if("Notification" in window && Notification.permission === "default"){
 
 function cargarFotoPerfil(user){
 
-    // 1. Intentar desde localStorage (foto guardada localmente)
     let foto = localStorage.getItem("foto_perfil_" + user.uid);
-
-    // 2. Si no hay, intentar desde la base de datos (si tienes /usuarios/{uid}/foto)
-    //    Esto se puede ampliar más tarde con Firestore o Realtime DB
 
     if(foto && foto.startsWith("data:image")){
 
@@ -2325,25 +2283,8 @@ function actualizarUI(user){
         menuHamburguesaDashboard.style.display="flex";
         menuHamburguesaLogout.style.display="flex";
 
-        // Saludo notificación al iniciar sesión (solo una vez por sesión)
-        if(!sessionStorage.getItem("notif_bienvenida")){
-
-            setTimeout(()=>{
-
-                if(Notification.permission === "granted"){
-
-                    nuevaNotificacion(
-                        "👋 ¡Hola, " + nombre.split(" ")[0] + "!",
-                        "Bienvenido de nuevo a Recargas Games"
-                    );
-
-                }
-
-            }, 2000);
-
-            sessionStorage.setItem("notif_bienvenida", "1");
-
-        }
+        // Pedir permiso de notificaciones automáticamente
+        pedirPermisoNotificaciones();
 
     }else{
 
@@ -2524,7 +2465,6 @@ async function ejecutarLogout(){
 
     try{
 
-        sessionStorage.removeItem("notif_bienvenida");
         await signOut(auth);
         window.location.reload();
 
@@ -2849,7 +2789,7 @@ installAppBtn.addEventListener("click",async()=>{
 
             setTimeout(()=>{
                 installAppBtn.textContent="📲 Instalar Aplicación";
-                actualizarBotonaInstalar();
+                actualizarBotonInstalar();
             },3000);
 
         }
