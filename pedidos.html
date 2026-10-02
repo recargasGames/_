@@ -14,8 +14,8 @@
         :root {
             --alto-nav: 64px;
             --dorado-claro: #f5d76e;
-            --card-bg: #0d1627; /* Fondo oscuro de la tarjeta */
-            --card-borde: #1e2a45;
+            --card-bg: rgba(13, 22, 39, 0.75); /* Fondo semitransparente */
+            --card-borde: rgba(30, 42, 69, 0.6);
             --azul-brillante: #4a7aff;
             --verde-brillante: #00d26a;
             --naranja: #f59e0b;
@@ -36,29 +36,19 @@
         }
 
         .video-fondo {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            z-index: -2;
-            pointer-events: none;
-            opacity: 1;
-            filter: brightness(1.15);
-            will-change: transform;
-            transform: translateZ(0);
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -2; pointer-events: none;
+            opacity: 1; filter: brightness(1.15);
+            will-change: transform; transform: translateZ(0);
+            backface-visibility: hidden; -webkit-backface-visibility: hidden;
         }
         .video-overlay {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: linear-gradient(180deg,
                 rgba(10,14,26,0.15) 0%,
                 rgba(10,14,26,0.35) 60%,
                 rgba(10,14,26,0.6) 100%);
-            z-index: -1;
-            pointer-events: none;
-            transform: translateZ(0);
+            z-index: -1; pointer-events: none; transform: translateZ(0);
         }
 
         .topbar {
@@ -93,6 +83,7 @@
             background: rgba(14, 26, 58, 0.85);
             border: 1px solid var(--card-borde);
             padding: 6px 16px; border-radius: 20px;
+            backdrop-filter: blur(5px);
         }
 
         .chips {
@@ -105,10 +96,11 @@
             flex-shrink: 0;
             display: inline-flex; align-items: center; gap: 8px;
             padding: 8px 14px; border-radius: 20px;
-            background: rgba(14, 26, 58, 0.85);
+            background: rgba(14, 26, 58, 0.75);
             border: 1px solid var(--card-borde);
             color: #cbd5e1; font-size: 14px; font-weight: 600;
             cursor: pointer; font-family: inherit; transition: all 0.25s;
+            backdrop-filter: blur(5px);
         }
         .chip .n {
             font-size: 12px; color: #94a3b8;
@@ -125,9 +117,10 @@
         .buscador { margin-bottom: 20px; }
         .buscador input {
             width: 100%; padding: 13px 16px;
-            border-radius: 12px; background: rgba(6, 12, 32, 0.85);
+            border-radius: 12px; background: rgba(6, 12, 32, 0.75);
             border: 1px solid var(--card-borde);
             color: white; font-size: 15px; font-family: inherit;
+            backdrop-filter: blur(5px);
         }
         .buscador input::placeholder { color: #94a3b8; }
         .buscador input:focus { outline: none; border-color: #3b82f6; }
@@ -135,23 +128,27 @@
         .pedidos-list { display: flex; flex-direction: column; gap: 12px; }
 
         /* =========================================
-           NUEVO DISEÑO DE TARJETA DE PEDIDO 
-           (Basado en la imagen proporcionada)
+           DISEÑO DE TARJETA DE PEDIDO (ESTILO IMAGEN)
+           CON TRANSPARENCIA
            ========================================= */
         .pedido-card {
             background: var(--card-bg);
+            backdrop-filter: blur(10px); /* Efecto de desenfoque */
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
             border: 1px solid var(--card-borde);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #fff;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: border-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s;
         }
-        .pedido-card:hover { border-color: #3b82f6; }
+        .pedido-card:hover { 
+            border-color: #3b82f6; 
+            background: rgba(13, 22, 39, 0.85); /* Un poco más opaco al pasar el mouse */
+        }
 
-        /* Cabecera: ID, Fecha, Precio */
         .pedido-header {
             display: flex;
             justify-content: space-between;
@@ -191,7 +188,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Cuerpo: Producto y Referencia */
         .pedido-body {
             display: flex;
             flex-direction: column;
@@ -217,7 +213,7 @@
             gap: 8px;
             font-size: 12px;
             color: #8899b0;
-            background: #111c32;
+            background: rgba(17, 28, 50, 0.7);
             padding: 6px 10px;
             border-radius: 6px;
             word-break: break-all;
@@ -229,10 +225,9 @@
             flex-shrink: 0;
         }
 
-        /* ID del Jugador (Recuadro gris) */
         .pedido-jugador-box {
-            background: #16223b;
-            border: 1px solid #25324d;
+            background: rgba(22, 34, 59, 0.7);
+            border: 1px solid rgba(37, 50, 77, 0.8);
             border-radius: 8px;
             padding: 10px 12px;
             margin-bottom: 16px;
@@ -244,14 +239,13 @@
             color: #fff;
         }
 
-        /* --- LÍNEA DE TIEMPO (ESTADOS) --- */
         .pedido-timeline {
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: relative;
             padding-top: 10px;
-            border-top: 1px solid var(--card-borde);
+            border-top: 1px solid rgba(30, 42, 69, 0.6);
         }
 
         .timeline-step {
@@ -319,12 +313,12 @@
            FIN NUEVO DISEÑO DE TARJETA
            ========================================= */
 
-        /* Estilos existentes para PIN, Streaming, etc. */
         .pin-box {
             margin-top: 12px; padding: 16px;
-            background: rgba(34, 197, 94, 0.1);
+            background: rgba(34, 197, 94, 0.15);
             border: 2px solid #22c55e;
             border-radius: 12px; text-align: center;
+            backdrop-filter: blur(5px);
         }
         .pin-box .pin-label {
             font-size: 12px; color: #cbd5e1;
@@ -347,9 +341,10 @@
 
         .manual-box {
             margin-top: 12px; padding: 16px;
-            background: rgba(37, 211, 102, 0.1);
+            background: rgba(37, 211, 102, 0.15);
             border: 2px solid #25D366;
             border-radius: 12px; text-align: center;
+            backdrop-filter: blur(5px);
         }
         .manual-box .manual-text { font-size: 14px; color: #cbd5e1; margin-bottom: 10px; }
         .manual-box .btn-whatsapp {
@@ -363,10 +358,11 @@
         .streaming-box {
             margin-top: 16px;
             padding: 20px 18px;
-            background: linear-gradient(135deg, rgba(229, 9, 20, 0.08), rgba(17, 60, 207, 0.06));
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.12), rgba(17, 60, 207, 0.1));
             border: 2px solid rgba(212, 175, 55, 0.5);
             border-radius: 16px;
             box-shadow: 0 0 30px rgba(212, 175, 55, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
         }
         .streaming-box .streaming-titulo {
             font-size: 17px; font-weight: 900; color: var(--dorado-claro);
@@ -380,10 +376,10 @@
 
         .dato-entrega {
             display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
-            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(212, 175, 55, 0.15);
+            background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.15);
             border-radius: 12px; margin-bottom: 10px; position: relative; transition: all 0.25s ease;
         }
-        .dato-entrega:hover { border-color: rgba(212, 175, 55, 0.4); background: rgba(0, 0, 0, 0.5); transform: translateX(2px); }
+        .dato-entrega:hover { border-color: rgba(212, 175, 55, 0.4); background: rgba(0, 0, 0, 0.7); transform: translateX(2px); }
         .dato-entrega:last-of-type { margin-bottom: 0; }
         .dato-entrega .dato-label {
             font-size: 10px; color: #94a3b8; text-transform: uppercase;
@@ -426,7 +422,7 @@
         }
 
         .aviso-renovacion {
-            margin-top: 10px; padding: 10px 14px; background: rgba(245, 158, 11, 0.1);
+            margin-top: 10px; padding: 10px 14px; background: rgba(245, 158, 11, 0.15);
             border-left: 3px solid #fbbf24; border-radius: 8px; font-size: 12px;
             color: #fcd34d; text-align: center; line-height: 1.5; font-weight: 600;
         }
@@ -434,6 +430,7 @@
         .sin-pedidos {
             text-align: center; padding: 50px 20px;
             background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-borde);
+            backdrop-filter: blur(10px);
         }
         .sin-pedidos .icono { font-size: 56px; margin-bottom: 15px; }
         .sin-pedidos h3 { font-size: 21px; margin-bottom: 8px; }
@@ -739,13 +736,15 @@
 
         pedidos.forEach((pedido) => {
             const estado = pedido._estado;
-            const idPedido = pedido.referencia || pedido.key || 'N/A';
+            
+            // ¡CAMBIO IMPORTANTE! Ahora prioriza el número de pedido real
+            const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || pedido.key || 'N/A';
+            
             const juego = pedido.juego || 'Producto';
             const producto = pedido.producto || '';
             const monto = formatearMonto(pedido.monto_usd || pedido.monto);
             const metodo = pedido.metodo || 'Pago Móvil';
 
-            // Datos del jugador (si existen en la BD, si no, se usan valores por defecto)
             const idJugador = pedido.id_jugador || pedido.player_id || 'No especificado';
             const nombreJugador = pedido.nombre_jugador || pedido.player_name || 'No especificado';
 
@@ -765,7 +764,6 @@
                 stepVerificando = 'verificando';
                 line1 = 'active';
             } else if (estado === 'cancelado') {
-                // Si está cancelado, se puede mostrar en rojo (opcional aquí dejamos todo apagado)
                 stepRecibido = '';
                 stepVerificando = '';
                 stepCompletado = '';
@@ -780,7 +778,7 @@
             const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
             const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
 
-            // Detectar si es streaming para mostrar los datos de forma especial
+            // Detectar si es streaming
             const esStreaming = pedido.es_streaming === true ||
                                 (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
 
@@ -798,7 +796,7 @@
                 `;
             }
 
-            // HTML de Streaming (Netflix, Disney+)
+            // HTML de Streaming
             let streamingHtml = '';
             if (esStreaming && pedido.datos_streaming) {
                 const d = pedido.datos_streaming;
@@ -857,7 +855,7 @@
                 `;
             }
 
-            // HTML de Entrega Manual para juegos
+            // HTML de Entrega Manual
             let manualHtml = '';
             if (!esStreaming) {
                 const esManual = (pedido.metodo_pago === 'MANUAL') ||
@@ -875,10 +873,9 @@
                 }
             }
 
-            // --- CONSTRUCCIÓN DE LA NUEVA TARJETA ---
+            // --- CONSTRUCCIÓN DE LA TARJETA ---
             html += `
                 <article class="pedido-card">
-                    <!-- Cabecera -->
                     <div class="pedido-header">
                         <div class="pedido-header-left">
                             <div class="pedido-id">#${esc(idPedido)}</div>
@@ -893,7 +890,6 @@
                         </div>
                     </div>
 
-                    <!-- Cuerpo -->
                     <div class="pedido-body">
                         <div class="pedido-producto">
                             ${iconBox}
@@ -905,13 +901,11 @@
                         </div>
                     </div>
 
-                    <!-- ID del Jugador -->
                     <div class="pedido-jugador-box">
                         <div><strong>ID de Jugador:</strong> ${esc(idJugador)}</div>
                         <div><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</div>
                     </div>
 
-                    <!-- Línea de Tiempo -->
                     <div class="pedido-timeline">
                         <div class="timeline-step ${stepRecibido}">
                             <div class="timeline-icon">${iconRecibido}</div>
@@ -929,7 +923,6 @@
                         </div>
                     </div>
 
-                    <!-- Secciones extra (PIN, Streaming, Manual) -->
                     ${pinHtml}
                     ${streamingHtml}
                     ${manualHtml}
