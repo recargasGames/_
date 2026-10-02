@@ -18,6 +18,8 @@
             --color-dorado-claro:#f5d76e;
             --color-negro:#0a0e1a;
             --color-azul:#3b82f6;
+            --card-bg: rgba(20, 30, 55, 0.55); /* Fondo semitransparente */
+            --card-border: rgba(212, 175, 55, 0.2);
         }
         *{margin:0;padding:0;box-sizing:border-box}
         html{scroll-behavior:smooth}
@@ -133,8 +135,10 @@
 
         /* ====== TARJETA DE BIENVENIDA ====== */
         .welcome-card{
-            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
-            border:1px solid rgba(212,175,55,0.25);
+            background:var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border:1px solid var(--card-border);
             border-radius:20px;
             padding:30px;
             margin-bottom:25px;
@@ -196,8 +200,10 @@
             gap:15px;margin-bottom:30px;
         }
         .stat-card{
-            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
-            border:1px solid rgba(212,175,55,0.2);
+            background:var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border:1px solid var(--card-border);
             border-radius:16px;
             padding:22px 18px;
             text-align:center;
@@ -226,8 +232,10 @@
 
         /* ====== SECCIÓN PEDIDOS ====== */
         .pedidos-section{
-            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
-            border:1px solid rgba(212,175,55,0.25);
+            background:var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border:1px solid var(--card-border);
             border-radius:18px;
             overflow:hidden;margin-bottom:25px;
             box-shadow:0 15px 40px rgba(0,0,0,0.35);
@@ -323,8 +331,10 @@
             gap:12px;margin-top:20px;
         }
         .juego-rapido{
-            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
-            border:1px solid rgba(212,175,55,0.2);
+            background:var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border:1px solid var(--card-border);
             border-radius:14px;
             padding:16px;text-align:center;
             text-decoration:none;color:white;
@@ -347,8 +357,10 @@
         /* ====== INFO ADICIONAL ====== */
         .info-bar{
             margin-top:25px;padding:18px 22px;
-            background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));
-            border:1px solid rgba(212,175,55,0.2);
+            background:var(--card-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border:1px solid var(--card-border);
             border-radius:14px;
             display:flex;flex-wrap:wrap;justify-content:space-between;
             gap:10px;align-items:center;
@@ -623,8 +635,14 @@
 
     function actualizarEstadisticas(pedidos) {
         const total = pedidos.length;
-        const completados = pedidos.filter(p => p.estado === 'COMPLETADA' || p.estado === 'completado').length;
-        const pendientes = pedidos.filter(p => p.estado === 'PENDIENTE' || p.estado === 'pendiente' || p.estado === 'procesando').length;
+        const completados = pedidos.filter(p => {
+            const e = String(p.estado || '').toLowerCase();
+            return e === 'completada' || e === 'completado' || e === 'completed';
+        }).length;
+        const pendientes = pedidos.filter(p => {
+            const e = String(p.estado || '').toLowerCase();
+            return e === 'pendiente' || e === 'procesando' || e === 'processing';
+        }).length;
 
         document.getElementById('totalPedidos').textContent = total;
         document.getElementById('pedidosCompletados').textContent = completados;
@@ -655,10 +673,10 @@
             let estadoClase = 'pendiente';
             let estadoTexto = '⏳ Pendiente';
             
-            if (estadoLower === 'completada' || estadoLower === 'completado') {
+            if (estadoLower === 'completada' || estadoLower === 'completado' || estadoLower === 'completed') {
                 estadoClase = 'completado';
                 estadoTexto = '✅ Completado';
-            } else if (estadoLower === 'cancelado' || estadoLower === 'cancelada') {
+            } else if (estadoLower === 'cancelado' || estadoLower === 'cancelada' || estadoLower === 'cancelled') {
                 estadoClase = 'cancelado';
                 estadoTexto = '❌ Cancelado';
             } else if (estadoLower === 'procesando' || estadoLower === 'processing') {
@@ -676,9 +694,15 @@
                 }
             }
 
-            const idPedido = pedido.referencia || pedido.key || `#${String(index + 1).padStart(4, '0')}`;
+            // 🔥 CORRECCIÓN: Ahora usa el número de pedido real
+            const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || pedido.key || `#${String(index + 1).padStart(4, '0')}`;
+            
             const producto = pedido.producto || pedido.juego || 'Producto';
-            const monto = pedido.monto_usd || pedido.monto || '$0.00';
+            
+            // 🔥 CORRECCIÓN: Limpiar el monto para que no se duplique el $
+            let monto = pedido.monto_usd || pedido.monto || '0.00';
+            monto = String(monto).replace('$', '').trim(); // Elimina el $ si ya lo trae
+            
             const metodo = pedido.metodo || 'Pago Móvil';
 
             let tagsHtml = `<span class="tag">🎮 ${producto}</span>`;
