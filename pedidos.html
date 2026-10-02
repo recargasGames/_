@@ -127,9 +127,6 @@
 
         .pedidos-list { display: flex; flex-direction: column; gap: 10px; }
 
-        /* ═══════════════════════════════════════════════
-           🆕 TARJETA DE PEDIDO — COMPACTADA
-           ═══════════════════════════════════════════════ */
         .pedido-card {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -306,7 +303,6 @@
             background: var(--verde-brillante);
         }
 
-        /* PIN BOX más compacta */
         .pin-box {
             margin-top: 10px; padding: 12px;
             background: rgba(34, 197, 94, 0.15);
@@ -350,9 +346,6 @@
         }
         .manual-box .btn-whatsapp:hover { background: #4ade80; }
 
-        /* ═══════════════════════════════════════════════
-           STREAMING BOX — COMPACTADA
-           ═══════════════════════════════════════════════ */
         .streaming-box {
             margin-top: 12px;
             padding: 14px;
@@ -372,7 +365,6 @@
             line-height: 1.4; font-style: italic;
         }
 
-        /* Botón de revelar datos */
         .btn-revelar-datos {
             width: 100%; padding: 12px 16px;
             margin-top: 10px;
@@ -412,7 +404,6 @@
             font-family: 'Courier New', 'Consolas', monospace; line-height: 1.3; letter-spacing: 0.5px;
         }
 
-        /* Dato oculto */
         .dato-entrega.dato-oculto .dato-valor {
             color: #94a3b8;
             letter-spacing: 3px;
@@ -458,7 +449,6 @@
             color: #fcd34d; text-align: center; line-height: 1.4; font-weight: 600;
         }
 
-        /* Contenedor de datos streaming */
         .contenedor-datos-streaming {
             display: none;
             margin-top: 10px;
@@ -472,7 +462,6 @@
             to { opacity: 1; transform: translateY(0); max-height: 2000px; }
         }
 
-        /* Contador auto-ocultar */
         .contador-auto-ocultar {
             margin-top: 8px;
             text-align: center;
@@ -485,7 +474,6 @@
             font-weight: 800;
         }
 
-        /* Pendiente manual */
         .pendiente-manual-box {
             margin-top: 10px;
             padding: 14px 12px;
@@ -721,6 +709,46 @@
         return 'pendiente';
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    // 🆕 DETECTAR SERVICIO DE STREAMING
+    // ═══════════════════════════════════════════════════════════════
+    function detectarServicioStreaming(pedido) {
+        // Prioridad: datos_streaming.servicio > juego > producto
+        if (pedido.datos_streaming && pedido.datos_streaming.servicio) {
+            return pedido.datos_streaming.servicio;
+        }
+        
+        const j = String(pedido.juego || '').toUpperCase();
+        const p = String(pedido.producto || '').toUpperCase();
+        const combo = j + ' ' + p;
+
+        if (combo.includes('NETFLIX') || combo.includes('NF')) return 'Netflix';
+        if (combo.includes('DISNEY') || combo.includes('DS')) return 'Disney+';
+        if (combo.includes('HBO') || combo.includes('MAX')) return 'HBO Max';
+        if (combo.includes('SPOTIFY')) return 'Spotify';
+        if (combo.includes('PARAMOUNT')) return 'Paramount+';
+        if (combo.includes('CRUNCHYROLL')) return 'Crunchyroll';
+
+        return 'Streaming';
+    }
+
+    function esProductoStreaming(pedido) {
+        // Detección por flag
+        if (pedido.es_streaming === true) return true;
+        if (pedido.datos_streaming) return true;
+
+        const j = String(pedido.juego || '').toUpperCase();
+        const p = String(pedido.producto || '').toUpperCase();
+        const combo = j + ' ' + p;
+
+        return combo.includes('NETFLIX') ||
+               combo.includes('DISNEY') ||
+               combo.includes('HBO') ||
+               combo.includes('SPOTIFY') ||
+               combo.includes('PARAMOUNT') ||
+               combo.includes('CRUNCHYROLL');
+    }
+
     document.getElementById('btnVolver').addEventListener('click', () => {
         if (window.history.length > 1) window.history.back();
         else window.location.href = 'index.html';
@@ -845,6 +873,10 @@
             const idJugador = pedido.id_jugador || pedido.player_id || 'No especificado';
             const nombreJugador = pedido.nombre_jugador || pedido.player_name || 'No especificado';
 
+            // 🆕 Detección mejorada
+            const esStreaming = esProductoStreaming(pedido);
+            const servicioStreaming = detectarServicioStreaming(pedido);
+
             let stepRecibido = 'recibido';
             let stepVerificando = '';
             let stepCompletado = '';
@@ -873,9 +905,6 @@
             const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
             const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
 
-            const esStreaming = pedido.es_streaming === true ||
-                                (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
-
             let pinHtml = '';
             if (!esStreaming && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
                 const pinValue = pedido.pin || pedido.codigos[0];
@@ -899,7 +928,7 @@
                 const pedidoKey = pedido.key;
 
                 const agregarDatoOculto = (label, valor, clase = '') => {
-                    if (!valor) return '';
+                    if (!valor || String(valor).trim() === '') return '';
                     const v = esc(valor);
                     const puntos = '•'.repeat(Math.min(12, String(valor).length));
                     return `
@@ -918,17 +947,29 @@
                 let camposHtml = '';
                 camposHtml += agregarDatoOculto('📧 CORREO', d.correo);
                 camposHtml += agregarDatoOculto('🔑 CONTRASEÑA', d.clave);
-                camposHtml += agregarDatoOculto('👤 PERFIL', d.perfil);
-                camposHtml += agregarDatoOculto('🔢 PIN DEL PERFIL', d.pin_perfil);
-                camposHtml += agregarDatoOculto('📅 VENCE', d.fecha_vencimiento);
-                if (codAprob) {
+                // 🆕 Solo muestra perfil si tiene valor
+                if (d.perfil && String(d.perfil).trim() !== '') {
+                    camposHtml += agregarDatoOculto('👤 PERFIL', d.perfil);
+                }
+                if (d.pin_perfil && String(d.pin_perfil).trim() !== '') {
+                    camposHtml += agregarDatoOculto('🔢 PIN DEL PERFIL', d.pin_perfil);
+                }
+                if (d.fecha_vencimiento && String(d.fecha_vencimiento).trim() !== '') {
+                    camposHtml += agregarDatoOculto('📅 VENCE', d.fecha_vencimiento);
+                }
+                if (codAprob && String(codAprob).trim() !== '') {
                     camposHtml += agregarDatoOculto('🎟️ CÓDIGO DE RENOVACIÓN', codAprob, 'codigo-renovacion');
                 }
 
-                const titulo = d.perfil ? '🎬 DATOS DE TU PERFIL' : '🎬 DATOS DE TU CUENTA';
-                const subtitulo = d.perfil
-                    ? 'Usa estos datos para iniciar sesión en Netflix'
-                    : 'Usa estos datos para iniciar sesión. NO cambies la contraseña ni el PIN.';
+                // 🆕 Título y subtítulo con el servicio REAL
+                const tienePerfil = d.perfil && String(d.perfil).trim() !== '';
+                const titulo = tienePerfil 
+                    ? `🎬 DATOS DE TU PERFIL — ${servicioStreaming}`
+                    : `🎬 DATOS DE TU CUENTA — ${servicioStreaming}`;
+                
+                const subtitulo = tienePerfil
+                    ? `Usa estos datos para iniciar sesión en ${servicioStreaming}`
+                    : `Usa estos datos para iniciar sesión en ${servicioStreaming}. NO cambies la contraseña ni el PIN.`;
 
                 streamingHtml = `
                     <div class="streaming-box">
@@ -942,7 +983,7 @@
 
                         <div class="contenedor-datos-streaming" id="datos-${esc(pedidoKey)}">
                             ${camposHtml}
-                            ${codAprob ? `<div class="aviso-renovacion">⚠️ Guarda este código. Lo necesitarás para renovar.</div>` : ''}
+                            ${codAprob && String(codAprob).trim() !== '' ? `<div class="aviso-renovacion">⚠️ Guarda este código. Lo necesitarás para renovar.</div>` : ''}
                             <div class="contador-auto-ocultar">
                                 🙈 Se ocultará en <span class="segundos" data-contador="${esc(pedidoKey)}">60</span>s
                             </div>
@@ -954,14 +995,15 @@
                     </div>
                 `;
             } else if (esStreaming) {
-                const mensaje = encodeURIComponent(`Hola, necesito los datos de acceso de mi pedido ${idPedido} (${producto})`);
+                // Pendiente de entrega manual
+                const mensaje = encodeURIComponent(`Hola, necesito los datos de acceso de mi pedido ${idPedido} (${producto || servicioStreaming})`);
                 streamingHtml = `
                     <div class="pendiente-manual-box">
                         <div class="icono-pendiente">⏳</div>
-                        <div class="titulo-pendiente">Pendiente de entrega</div>
+                        <div class="titulo-pendiente">Pendiente de entrega — ${servicioStreaming}</div>
                         <div class="desc-pendiente">
                             Tu pedido está siendo procesado.<br>
-                            <strong>Te enviaremos los datos de acceso por WhatsApp.</strong>
+                            <strong>Te enviaremos los datos por WhatsApp.</strong>
                         </div>
                         <a href="https://wa.me/584228242411?text=${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp-pendiente">
                             💬 Consultar por WhatsApp
