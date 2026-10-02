@@ -88,10 +88,11 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .btn-imagen{padding:11px 18px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;transition:.25s;font-family:inherit}
 .btn-imagen:hover{transform:translateY(-2px)}
 
-/* ====== TARJETAS DE PEDIDO (Estilo captura) ====== */
+/* ====== TARJETAS DE PEDIDO ====== */
 .pedido-card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin: 12px 16px; border: 1px solid rgba(30, 42, 69, 0.8); color: #fff; transition: border-color 0.2s; cursor: pointer; }
 .pedido-card:hover { border-color: #3b82f6; }
 .pedido-card.expandido { border-color: var(--color-dorado-claro); }
+.pedido-card.pendiente-manual { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
 .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
 .pedido-header-left { display: flex; flex-direction: column; gap: 4px; }
 .pedido-id { font-size: 18px; font-weight: 700; color: var(--azul-brillante); }
@@ -123,7 +124,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 
 /* ====== PANEL EXPANDIBLE ====== */
 .detalle-expandido { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, margin 0.3s ease, padding 0.3s ease; background: rgba(10, 14, 26, 0.9); border-radius: 10px; margin-top: 0; padding: 0 16px; border: 1px solid transparent; }
-.pedido-card.expandido .detalle-expandido { max-height: 1000px; margin-top: 16px; padding: 16px; border-color: rgba(212, 175, 55, 0.3); }
+.pedido-card.expandido .detalle-expandido { max-height: 3000px; margin-top: 16px; padding: 16px; border-color: rgba(212, 175, 55, 0.3); }
 .detalle-expandido h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--color-dorado-claro); margin-bottom: 12px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); padding-bottom: 8px; }
 .detalle-fila { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
 .detalle-fila:last-child { border-bottom: none; }
@@ -136,7 +137,167 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .badge-estado.cancelado { background: rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); }
 .badge-estado.procesando { background: rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.4); }
 
-/* ====== TARJETAS DE USUARIO (Nuevo estilo) ====== */
+/* ═══════════════════════════════════════════════════════════════
+   🆕 FORMULARIO DE ENTREGA MANUAL (Streaming)
+   ═══════════════════════════════════════════════════════════════ */
+.entrega-manual-box {
+    margin-top: 16px;
+    padding: 18px 16px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+    border: 2px solid rgba(245, 158, 11, 0.6);
+    border-radius: 14px;
+    backdrop-filter: blur(5px);
+    animation: pulsePendiente 2s ease-in-out infinite;
+    cursor: default;
+}
+
+@keyframes pulsePendiente {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
+    50% { box-shadow: 0 0 20px 5px rgba(245, 158, 11, 0.15); }
+}
+
+.entrega-manual-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.entrega-manual-header .icono-alerta {
+    font-size: 24px;
+    animation: pulseIcono 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseIcono {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.entrega-manual-header .titulo-alerta {
+    font-size: 14px;
+    font-weight: 900;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.entrega-manual-header .subtitulo-alerta {
+    font-size: 11px;
+    color: #cbd5e1;
+    margin-top: 2px;
+}
+
+.entrega-form-group {
+    margin-bottom: 12px;
+}
+
+.entrega-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.entrega-form-group input {
+    width: 100%;
+    padding: 11px 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Courier New', 'Consolas', monospace;
+    transition: all 0.3s;
+}
+
+.entrega-form-group input:focus {
+    outline: none;
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.entrega-form-group input::placeholder {
+    color: #6b7280;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+}
+
+.entrega-btn-guardar {
+    width: 100%;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    margin-top: 6px;
+}
+
+.entrega-btn-guardar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
+}
+
+.entrega-btn-guardar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.entrega-btn-cancelar {
+    width: 100%;
+    padding: 11px 18px;
+    background: rgba(71, 85, 105, 0.3);
+    color: #cbd5e1;
+    border: 1px solid rgba(71, 85, 105, 0.6);
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s;
+    margin-top: 8px;
+}
+
+.entrega-btn-cancelar:hover {
+    background: rgba(71, 85, 105, 0.5);
+    color: #fff;
+}
+
+/* Badge de contador en el tab */
+.tab .badge-pendiente-tab {
+    display: inline-block;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: 6px;
+    animation: pulseBadge 1.5s ease-in-out infinite;
+    vertical-align: middle;
+}
+
+@keyframes pulseBadge {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+    50% { transform: scale(1.1); box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.3); }
+}
+
+/* ====== TARJETAS DE USUARIO ====== */
 .usuario-card {
     background: var(--card-bg);
     border-radius: 12px;
@@ -435,7 +596,9 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
     </div>
 
     <div class="tabs">
-        <div class="tab activa" onclick="cambiarTab('pedidos', event)">📋 Pedidos</div>
+        <div class="tab activa" onclick="cambiarTab('pedidos', event)">
+            📋 Pedidos <span class="badge-pendiente-tab" id="badgePendientes" style="display:none;">0</span>
+        </div>
         <div class="tab" onclick="cambiarTab('codigos', event)">🎲 Códigos</div>
         <div class="tab" onclick="cambiarTab('usuarios', event)">👤 Usuarios</div>
         <div class="tab" onclick="cambiarTab('vencimientos', event)">📅 Vencimientos</div>
@@ -451,6 +614,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
                     <option value="">Todos</option>
                     <option value="completado">✅ Completados</option>
                     <option value="pendiente">⏳ Pendientes</option>
+                    <option value="pendiente_manual">🚨 Entrega Manual</option>
                     <option value="procesando">🔄 Procesando</option>
                     <option value="cancelado">❌ Cancelados</option>
                 </select>
@@ -578,7 +742,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         </div>
     </div>
 
-    <!-- 👤 TAB USUARIOS (Ahora con tarjetas) -->
+    <!-- 👤 TAB USUARIOS -->
     <div id="tab-usuarios" class="contenido-tab oculto">
         <div class="tarjeta" style="padding-bottom:0">
             <h3 class="tarjeta-titulo">👤 Usuarios Registrados</h3>
@@ -1154,6 +1318,7 @@ async function cargarPedidosAdmin(){
         const datos = snap.val() || {};
         todosLosPedidos = Object.entries(datos).map(([key, p]) => ({...p, key}));
         renderizarPedidos();
+        actualizarBadgePendientes();
     } catch (e) {
         console.error('Error cargando pedidos:', e);
         document.getElementById('listaPedidosAdmin').innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>';
@@ -1167,7 +1332,17 @@ function renderizarPedidos(){
 
     let lista = [...todosLosPedidos];
 
-    if (filtro) {
+    if (filtro === 'pendiente_manual') {
+        lista = lista.filter(p => {
+            const juego = String(p.juego || '').toUpperCase();
+            const esStreaming = p.es_streaming === true ||
+                                juego.includes('NETFLIX') ||
+                                juego.includes('DISNEY') ||
+                                juego.includes('HBO');
+            const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
+            return esStreaming && !tieneDatos;
+        });
+    } else if (filtro) {
         lista = lista.filter(p => {
             const e = String(p.estado || '').toLowerCase();
             if (filtro === 'completado') return ['completada','completado','completed'].includes(e);
@@ -1208,6 +1383,14 @@ function renderizarTarjetaPedido(p) {
     const idJugador = p.id_jugador || p.player_id || 'No especificado';
     const nombreJugador = p.nombre_jugador || p.player_name || 'No especificado';
 
+    // 🆕 Detección de streaming sin datos
+    const esStreaming = p.es_streaming === true || 
+                        (juego.toUpperCase().includes('NETFLIX') ||
+                         juego.toUpperCase().includes('DISNEY') ||
+                         juego.toUpperCase().includes('HBO'));
+    const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
+    const requiereEntregaManual = esStreaming && !tieneDatos;
+
     let stepRecibido = 'recibido';
     let stepVerificando = '';
     let stepCompletado = '';
@@ -1233,6 +1416,7 @@ function renderizarTarjetaPedido(p) {
     const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
     const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
 
+    // 🆕 Detalle expandido estándar
     const detalleExpandido = `
         <div class="detalle-expandido">
             <h4>📋 Detalles del Pedido</h4>
@@ -1244,15 +1428,66 @@ function renderizarTarjetaPedido(p) {
             <div class="detalle-fila"><span class="label">Referencia de Pago:</span><span class="valor">${esc(p.referencia_pago || p.referencia || 'N/A')}</span></div>
             <div class="detalle-fila"><span class="label">ID de Jugador:</span><span class="valor">${esc(idJugador)}</span></div>
             <div class="detalle-fila"><span class="label">Nombre de Jugador:</span><span class="valor">${esc(nombreJugador)}</span></div>
+            <div class="detalle-fila"><span class="label">WhatsApp Cliente:</span><span class="valor">${esc(p.whatsapp_cliente || '—')}</span></div>
             <div class="detalle-fila"><span class="label">Estado:</span><span class="valor"><span class="badge-estado ${estado}">${TEXTO_ESTADO[estado]}</span></span></div>
         </div>
     `;
 
+    // 🆕 Formulario de entrega manual
+    const formularioEntrega = requiereEntregaManual ? `
+        <div class="entrega-manual-box" onclick="event.stopPropagation()">
+            <div class="entrega-manual-header">
+                <div class="icono-alerta">🚨</div>
+                <div>
+                    <div class="titulo-alerta">Entrega Manual Requerida</div>
+                    <div class="subtitulo-alerta">PagoNorte no devolvió los datos. Ingresalos aquí y envialos por WhatsApp.</div>
+                </div>
+            </div>
+
+            <div class="entrega-form-group">
+                <label>📧 Correo</label>
+                <input type="email" id="entrega-correo-${esc(p.key)}" placeholder="correo@ejemplo.com" autocomplete="off">
+            </div>
+
+            <div class="entrega-form-group">
+                <label>🔑 Contraseña</label>
+                <input type="text" id="entrega-clave-${esc(p.key)}" placeholder="Contraseña de la cuenta" autocomplete="off">
+            </div>
+
+            <div class="entrega-form-group">
+                <label>👤 Perfil (si aplica)</label>
+                <input type="text" id="entrega-perfil-${esc(p.key)}" placeholder="Ej: 1, 2, 3, 4" autocomplete="off">
+            </div>
+
+            <div class="entrega-form-group">
+                <label>🔢 PIN del Perfil (si aplica)</label>
+                <input type="text" id="entrega-pin-${esc(p.key)}" placeholder="Ej: 0644" autocomplete="off">
+            </div>
+
+            <div class="entrega-form-group">
+                <label>📅 Fecha de Vencimiento</label>
+                <input type="text" id="entrega-vence-${esc(p.key)}" placeholder="DD-MM-AAAA" autocomplete="off">
+            </div>
+
+            <div class="entrega-form-group">
+                <label>🎟️ Código de Renovación PagoNorte (opcional)</label>
+                <input type="text" id="entrega-codigo-${esc(p.key)}" placeholder="Código de aprobación" autocomplete="off">
+            </div>
+
+            <button class="entrega-btn-guardar" onclick="entregarStreamingManual('${esc(p.key)}')">
+                💾 Guardar y enviar por WhatsApp
+            </button>
+            <button class="entrega-btn-cancelar" onclick="event.stopPropagation();toggleDetalle(this.closest('.pedido-card'))">
+                Cancelar
+            </button>
+        </div>
+    ` : '';
+
     return `
-        <div class="pedido-card" onclick="toggleDetalle(this)">
+        <div class="pedido-card ${requiereEntregaManual ? 'pendiente-manual' : ''}" onclick="toggleDetalle(this)">
             <div class="pedido-header">
                 <div class="pedido-header-left">
-                    <div class="pedido-id">#${esc(idPedido)}</div>
+                    <div class="pedido-id">#${esc(idPedido)}${requiereEntregaManual ? ' 🚨' : ''}</div>
                     <div class="pedido-fecha">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="#8899b0"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
                         ${esc(formatearFecha(p.fecha))}
@@ -1278,6 +1513,7 @@ function renderizarTarjetaPedido(p) {
             <div class="pedido-jugador-box">
                 <div><strong>ID de Jugador:</strong> ${esc(idJugador)}</div>
                 <div><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</div>
+                <div><strong>📱 WhatsApp:</strong> ${esc(p.whatsapp_cliente || '—')}</div>
             </div>
 
             <div class="pedido-timeline">
@@ -1298,6 +1534,7 @@ function renderizarTarjetaPedido(p) {
             </div>
 
             ${detalleExpandido}
+            ${formularioEntrega}
         </div>
     `;
 }
@@ -1334,7 +1571,131 @@ function esc(valor) {
 }
 
 // ══════════════════════════════════════
-// 👤 USUARIOS (Ahora en tarjetas)
+// 🆕 ENTREGA MANUAL DE STREAMING
+// ══════════════════════════════════════
+async function entregarStreamingManual(pedidoKey) {
+    const correo = document.getElementById(`entrega-correo-${pedidoKey}`)?.value.trim();
+    const clave = document.getElementById(`entrega-clave-${pedidoKey}`)?.value.trim();
+    const perfil = document.getElementById(`entrega-perfil-${pedidoKey}`)?.value.trim();
+    const pin = document.getElementById(`entrega-pin-${pedidoKey}`)?.value.trim();
+    const vence = document.getElementById(`entrega-vence-${pedidoKey}`)?.value.trim();
+    const codigoRenovacion = document.getElementById(`entrega-codigo-${pedidoKey}`)?.value.trim();
+
+    if (!correo || !clave) {
+        mostrarMensaje('Faltan datos', 'El correo y la contraseña son obligatorios', 'advertencia');
+        return;
+    }
+
+    const pedido = todosLosPedidos.find(x => x.key === pedidoKey);
+    if (!pedido) {
+        mostrarMensaje('Error', 'No se encontró el pedido', 'error');
+        return;
+    }
+
+    const btn = document.querySelector(`#entrega-correo-${pedidoKey}`)?.closest('.entrega-manual-box')?.querySelector('.entrega-btn-guardar');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏳ Guardando...';
+    }
+
+    try {
+        const datosStreaming = {
+            correo: correo,
+            usuario: correo,
+            clave: clave,
+            password: clave,
+            perfil: perfil || '',
+            pin_perfil: pin || '',
+            fecha_vencimiento: vence || '',
+            entregado_manual: true,
+            entregado_por: auth.currentUser ? auth.currentUser.email : 'admin',
+            fecha_entrega: new Date().toISOString(),
+            fecha_entrega_legible: new Date().toLocaleString('es-VE')
+        };
+
+        const actualizacion = {
+            datos_streaming: datosStreaming,
+            estado: 'completada',
+            entrega_manual: true,
+            fecha_entrega_manual: new Date().toISOString()
+        };
+
+        if (codigoRenovacion) {
+            actualizacion.codigo_aprobacion = codigoRenovacion;
+            actualizacion.codigo_aprobacion_pagonorte = codigoRenovacion;
+        }
+
+        await db.ref('pedidos/' + pedidoKey).update(actualizacion);
+
+        mostrarMensaje('✅ Guardado', 'Los datos se guardaron y el cliente puede verlos en Mis Pedidos', 'exito');
+
+        // 🆕 Abrir WhatsApp con los datos
+        const whatsapp = pedido.whatsapp_cliente || pedido.whatsapp || pedido.id_jugador;
+        if (whatsapp) {
+            const numeroLimpio = String(whatsapp).replace(/\D/g, '');
+            const numeroConCodigo = numeroLimpio.startsWith('58') ? numeroLimpio : '58' + numeroLimpio.replace(/^0/, '');
+            
+            let mensaje = `🎬 *RECARGAS GAMES*\n\n`;
+            mensaje += `¡Hola! 👋 Aquí están los datos de tu cuenta:\n\n`;
+            mensaje += `📦 *Producto:* ${pedido.producto || pedido.juego || 'Streaming'}\n`;
+            mensaje += `📋 *Pedido:* ${pedido.numero_pedido || pedidoKey}\n\n`;
+            mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
+            mensaje += `🔐 *DATOS DE ACCESO*\n`;
+            mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+            mensaje += `📧 *Correo:* ${correo}\n`;
+            mensaje += `🔑 *Clave:* ${clave}\n`;
+            if (perfil) mensaje += `👤 *Perfil:* ${perfil}\n`;
+            if (pin) mensaje += `🔢 *PIN:* ${pin}\n`;
+            if (vence) mensaje += `📅 *Vence:* ${vence}\n`;
+            if (codigoRenovacion) mensaje += `\n🎟️ *Código de Renovación:* ${codigoRenovacion}\n`;
+            mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+            mensaje += `⚠️ *No compartas estos datos con nadie.*\n\n`;
+            mensaje += `¿Problemas? Escríbenos: +58 422-8242411\n\n`;
+            mensaje += `¡Gracias por tu compra! 🙌`;
+
+            window.open(`https://wa.me/${numeroConCodigo}?text=${encodeURIComponent(mensaje)}`, '_blank');
+        }
+
+        // Recargar la lista
+        await cargarPedidosAdmin();
+
+    } catch (e) {
+        console.error('Error guardando entrega manual:', e);
+        mostrarMensaje('Error', e.message, 'error');
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '💾 Guardar y enviar por WhatsApp';
+        }
+    }
+}
+
+// ══════════════════════════════════════
+// 🆕 CONTAR PEDIDOS PENDIENTES
+// ══════════════════════════════════════
+function actualizarBadgePendientes() {
+    const badge = document.getElementById('badgePendientes');
+    if (!badge) return;
+
+    const pendientes = todosLosPedidos.filter(p => {
+        const juego = String(p.juego || '').toUpperCase();
+        const esStreaming = p.es_streaming === true ||
+                            juego.includes('NETFLIX') ||
+                            juego.includes('DISNEY') ||
+                            juego.includes('HBO');
+        const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
+        return esStreaming && !tieneDatos;
+    }).length;
+
+    if (pendientes > 0) {
+        badge.textContent = pendientes;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+// ══════════════════════════════════════
+// 👤 USUARIOS
 // ══════════════════════════════════════
 async function cargarUsuarios(){
     const contenedor = document.getElementById('listaUsuariosAdmin');
@@ -1348,7 +1709,6 @@ async function cargarUsuarios(){
         if (usuariosData && Object.keys(usuariosData).length > 0) {
             usuariosArray = Object.entries(usuariosData).map(([uid, data]) => ({...data, uid}));
         } else {
-            // Construir desde pedidos si no hay /usuarios
             const pedidosSnap = await db.ref('pedidos').once('value');
             const pedidos = pedidosSnap.val() || {};
             const usuariosUnicos = {};
@@ -1448,7 +1808,6 @@ async function bloquearUsuario(uid){
     try {
         await db.ref('usuarios/' + uid).update({ bloqueado: true, fechaBloqueo: new Date().toISOString() });
         mostrarMensaje('✅ Bloqueado', 'El usuario fue bloqueado', 'exito');
-        // Actualizar la lista local
         const u = todosLosUsuarios.find(x => x.uid === uid);
         if (u) u.bloqueado = true;
         renderizarUsuarios();
