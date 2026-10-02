@@ -364,12 +364,34 @@
             line-height: 1.5; font-style: italic;
         }
 
+        /* 🆕 BOTÓN PARA DESPLEGAR DATOS */
+        .btn-revelar-datos {
+            width: 100%; padding: 14px 18px;
+            margin-top: 14px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.12));
+            border: 2px solid rgba(212, 175, 55, 0.6);
+            border-radius: 12px;
+            color: var(--dorado-claro);
+            font-size: 14px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+        }
+        .btn-revelar-datos:hover {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.4), rgba(212, 175, 55, 0.2));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.35);
+        }
+        .btn-revelar-datos:active { transform: translateY(0); }
+        .btn-revelar-datos .icono-ojo { font-size: 18px; }
+
         .dato-entrega {
             display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
             background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(212, 175, 55, 0.15);
             border-radius: 12px; margin-bottom: 10px; position: relative; transition: all 0.25s ease;
         }
-        .dato-entrega:hover { border-color: rgba(212, 175, 55, 0.4); background: rgba(0, 0, 0, 0.7); transform: translateX(2px); }
         .dato-entrega:last-of-type { margin-bottom: 0; }
         .dato-entrega .dato-label {
             font-size: 10px; color: #94a3b8; text-transform: uppercase;
@@ -381,6 +403,17 @@
             word-break: break-word; overflow-wrap: anywhere;
             font-family: 'Courier New', 'Consolas', monospace; line-height: 1.35; letter-spacing: 0.5px;
         }
+
+        /* 🆕 DATO OCULTO */
+        .dato-entrega.dato-oculto .dato-valor {
+            color: #94a3b8;
+            letter-spacing: 4px;
+            font-size: 18px;
+            user-select: none;
+            filter: blur(0.3px);
+        }
+        .dato-entrega.dato-oculto .btn-copiar-dato { display: none; }
+
         .dato-entrega .btn-copiar-dato {
             width: 40px; height: 40px;
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
@@ -415,6 +448,79 @@
             margin-top: 10px; padding: 10px 14px; background: rgba(245, 158, 11, 0.15);
             border-left: 3px solid #fbbf24; border-radius: 8px; font-size: 12px;
             color: #fcd34d; text-align: center; line-height: 1.5; font-weight: 600;
+        }
+
+        /* 🆕 CONTENEDOR DE DATOS (oculto por defecto) */
+        .contenedor-datos-streaming {
+            display: none;
+            margin-top: 14px;
+            animation: desplegarDatos 0.35s ease;
+        }
+        .contenedor-datos-streaming.visible {
+            display: block;
+        }
+        @keyframes desplegarDatos {
+            from { opacity: 0; transform: translateY(-10px); max-height: 0; }
+            to { opacity: 1; transform: translateY(0); max-height: 2000px; }
+        }
+
+        /* 🆕 CONTADOR DE AUTO-OCULTAR */
+        .contador-auto-ocultar {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        .contador-auto-ocultar .segundos {
+            color: var(--dorado-claro);
+            font-weight: 800;
+        }
+
+        /* 🆕 MENSAJE DE PENDIENTE MANUAL */
+        .pendiente-manual-box {
+            margin-top: 14px;
+            padding: 18px 16px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+            border: 2px solid rgba(245, 158, 11, 0.6);
+            border-radius: 14px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            animation: pulsePendiente 2s ease-in-out infinite;
+        }
+        @keyframes pulsePendiente {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 0 20px 5px rgba(245, 158, 11, 0.15); }
+        }
+        .pendiente-manual-box .icono-pendiente {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .pendiente-manual-box .titulo-pendiente {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .pendiente-manual-box .desc-pendiente {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .pendiente-manual-box .btn-whatsapp-pendiente {
+            background: #25D366; color: #06210f; border: none;
+            padding: 12px 22px; border-radius: 10px;
+            font-weight: 800; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: 0.3s; font-size: 14px;
+        }
+        .pendiente-manual-box .btn-whatsapp-pendiente:hover { 
+            background: #4ade80; 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
         }
 
         .sin-pedidos {
@@ -488,51 +594,6 @@
             html { scroll-behavior: auto; }
             *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
         }
-
-        /* ═══════════════════════════════════════════════
-           PANTALLA DE ACCESO RESTRINGIDO (MODO NEXUS)
-           ═══════════════════════════════════════════════ */
-        .pantalla-bloqueo {
-            position: fixed; inset: 0; z-index: 999999;
-            background: #05080f;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center; overflow: hidden;
-            border: 5px solid #e50914;
-            animation: aparecerBloqueo 0.25s ease;
-        }
-        @keyframes aparecerBloqueo {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .pantalla-bloqueo .icono-bloqueo {
-            font-size: 90px; margin-bottom: 20px;
-            filter: drop-shadow(0 0 20px #e50914);
-            animation: pulso 1.5s ease-in-out infinite;
-        }
-        @keyframes pulso {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        .pantalla-bloqueo h1 {
-            font-size: 30px; font-weight: 900; letter-spacing: 3px;
-            margin: 0 0 12px 0; text-transform: uppercase;
-            color: #f5d76e;
-            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
-        }
-        .pantalla-bloqueo p {
-            font-size: 15px; color: #8899b0; max-width: 85%;
-            line-height: 1.6; margin: 0;
-        }
-        .pantalla-bloqueo .firma-bloqueo {
-            margin-top: 45px; font-size: 13px; color: #3b82f6;
-            font-weight: bold; letter-spacing: 4px;
-        }
-        .pantalla-bloqueo .linea-bloqueo {
-            width: 60px; height: 3px; background: #e50914;
-            margin: 20px auto; border-radius: 2px;
-        }
     </style>
 </head>
 <body>
@@ -601,146 +662,6 @@
     </div>
 </nav>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     SISTEMA DE PROTECCIÓN "MODO NEXUS"
-     ═══════════════════════════════════════════════════════════════ -->
-<script>
-(function() {
-    let bloqueado = false;
-
-    function castigar() {
-        if (bloqueado) return;
-        bloqueado = true;
-
-        try { window.stop(); } catch(e) {}
-
-        // Esperar un tick para que se detenga todo
-        setTimeout(function() {
-            // Reemplazamos completamente el HTML
-            document.documentElement.innerHTML = `
-                <head>
-                    <title>Acceso Restringido</title>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <style>
-                        body {
-                            margin: 0; padding: 0; width: 100vw; height: 100vh;
-                            background: #05080f; color: #f5d76e;
-                            display: flex; flex-direction: column;
-                            align-items: center; justify-content: center;
-                            font-family: 'Segoe UI', sans-serif;
-                            text-align: center; overflow: hidden;
-                            border: 5px solid #e50914;
-                            box-sizing: border-box;
-                        }
-                        .icono { 
-                            font-size: 90px; margin-bottom: 20px; 
-                            filter: drop-shadow(0 0 20px #e50914);
-                            animation: pulso 1.5s ease-in-out infinite;
-                        }
-                        @keyframes pulso {
-                            0%, 100% { transform: scale(1); }
-                            50% { transform: scale(1.1); }
-                        }
-                        h1 { 
-                            font-size: 30px; font-weight: 900; letter-spacing: 3px; 
-                            margin: 0 0 12px 0; text-transform: uppercase; 
-                            color: #f5d76e;
-                            text-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
-                        }
-                        p { 
-                            font-size: 15px; color: #8899b0; 
-                            max-width: 85%; line-height: 1.6; margin: 0;
-                        }
-                        .linea { 
-                            width: 60px; height: 3px; background: #e50914;
-                            margin: 20px auto; border-radius: 2px;
-                        }
-                        .firma { 
-                            margin-top: 45px; font-size: 13px; color: #3b82f6; 
-                            font-weight: bold; letter-spacing: 4px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="icono">⛔</div>
-                    <h1>Acceso Restringido</h1>
-                    <div class="linea"></div>
-                    <p>Hemos detectado actividad de inspección no autorizada.<br>Por seguridad, el acceso a esta página ha sido bloqueado.</p>
-                    <div class="firma">RECARGAS GAMES</div>
-                </body>
-            `;
-        }, 50);
-    }
-
-    // 1. BLOQUEAR ATAJOS DE TECLADO
-    document.addEventListener('keydown', function(e) {
-        // F12
-        if (e.key === 'F12' || e.keyCode === 123) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Ctrl+Shift+I / J / C
-        if (e.ctrlKey && e.shiftKey && ['I','J','C','i','j','c'].includes(e.key)) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Cmd+Option+I / J / C (Mac)
-        if (e.metaKey && e.altKey && ['I','J','C','i','j','c'].includes(e.key)) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Ctrl+U (Ver código fuente)
-        if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-        // Ctrl+S (Guardar página)
-        if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-            e.preventDefault(); e.stopPropagation(); return false;
-        }
-        // Ctrl+Shift+K (Firefox consola)
-        if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
-            e.preventDefault(); e.stopPropagation(); castigar(); return false;
-        }
-    }, true);
-
-    // 2. BLOQUEAR CLIC DERECHO
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault(); e.stopPropagation(); return false;
-    }, true);
-
-    // 3. DETECCIÓN DE CONSOLA ABIERTA (truco del objeto)
-    const trampa = new Image();
-    Object.defineProperty(trampa, 'id', {
-        get: function() {
-            castigar();
-        }
-    });
-
-    setInterval(function() {
-        if (bloqueado) return;
-        // Ejecutamos el log que dispara la trampa si la consola está abierta
-        console.log(trampa);
-        try { console.clear(); } catch(e) {}
-    }, 1000);
-
-    // 4. DETECCIÓN POR TAMAÑO DE VENTANA
-    setInterval(function() {
-        if (bloqueado) return;
-        const anchoDiff = window.outerWidth - window.innerWidth;
-        const altoDiff = window.outerHeight - window.innerHeight;
-        if (altoDiff > 160 || anchoDiff > 160) {
-            castigar();
-        }
-    }, 1000);
-
-    // 5. BLOQUEAR ARRASTRE DE IMÁGENES Y SELECCIÓN (opcional, refuerza)
-    document.addEventListener('dragstart', function(e) {
-        if (e.target.tagName === 'IMG') e.preventDefault();
-    }, true);
-
-})();
-</script>
-<!-- ═══════════════════════════════════════════════════════════════
-     FIN DEL SISTEMA DE PROTECCIÓN
-     ═══════════════════════════════════════════════════════════════ -->
-
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -762,6 +683,9 @@
     let consultaActual = null;
     let estadoFiltro = 'todos';
     let toastTimer = null;
+
+    // 🆕 Guardamos los timers de auto-ocultar por pedido
+    const timersAutoOcultar = {};
 
     const listaEl = document.getElementById('listaPedidos');
     const buscarEl = document.getElementById('buscarInput');
@@ -956,20 +880,26 @@
                 `;
             }
 
+            // 🆕 STREAMING: Datos ocultos + botón desplegable
             let streamingHtml = '';
-            if (esStreaming && pedido.datos_streaming) {
+            const tieneDatosStreaming = esStreaming && pedido.datos_streaming && 
+                                       (pedido.datos_streaming.correo || pedido.datos_streaming.clave);
+
+            if (tieneDatosStreaming) {
                 const d = pedido.datos_streaming;
                 const codAprob = pedido.codigo_aprobacion || '';
-                let camposHtml = '';
+                const pedidoKey = pedido.key;
 
-                const agregarDato = (label, valor, clase = '') => {
+                const agregarDatoOculto = (label, valor, clase = '') => {
                     if (!valor) return '';
                     const v = esc(valor);
+                    // Mostramos '•••' en vez del valor real
+                    const puntos = '•'.repeat(Math.min(12, String(valor).length));
                     return `
-                        <div class="dato-entrega ${clase}">
+                        <div class="dato-entrega dato-oculto ${clase}" data-valor-real="${v}">
                             <div class="dato-label">${label}</div>
                             <div class="dato-contenido">
-                                <div class="dato-valor">${v}</div>
+                                <div class="dato-valor">${puntos}</div>
                                 <button class="btn-copiar-dato" data-copiar="${v}" aria-label="Copiar ${label}">
                                     <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                 </button>
@@ -978,37 +908,57 @@
                     `;
                 };
 
-                camposHtml += agregarDato('📧 CORREO', d.correo);
-                camposHtml += agregarDato('🔑 CONTRASEÑA', d.clave);
-                camposHtml += agregarDato('👤 PERFIL', d.perfil);
-                camposHtml += agregarDato('🔢 PIN DEL PERFIL', d.pin_perfil);
-                camposHtml += agregarDato('📅 VENCE', d.fecha_vencimiento);
+                let camposHtml = '';
+                camposHtml += agregarDatoOculto('📧 CORREO', d.correo);
+                camposHtml += agregarDatoOculto('🔑 CONTRASEÑA', d.clave);
+                camposHtml += agregarDatoOculto('👤 PERFIL', d.perfil);
+                camposHtml += agregarDatoOculto('🔢 PIN DEL PERFIL', d.pin_perfil);
+                camposHtml += agregarDatoOculto('📅 VENCE', d.fecha_vencimiento);
                 if (codAprob) {
-                    camposHtml += agregarDato('🎟️ CÓDIGO DE RENOVACIÓN', codAprob, 'codigo-renovacion');
-                    camposHtml += `<div class="aviso-renovacion">⚠️ Guarda este código. Lo necesitarás para renovar.</div>`;
+                    camposHtml += agregarDatoOculto('🎟️ CÓDIGO DE RENOVACIÓN', codAprob, 'codigo-renovacion');
                 }
 
-                if (camposHtml) {
-                    const titulo = d.perfil ? '🎬 DATOS DE TU PERFIL' : '🎬 DATOS DE TU CUENTA';
-                    const subtitulo = d.perfil
-                        ? 'Usa estos datos para iniciar sesión en Netflix'
-                        : 'Usa estos datos para iniciar sesión. NO cambies la contraseña ni el PIN.';
+                const titulo = d.perfil ? '🎬 DATOS DE TU PERFIL' : '🎬 DATOS DE TU CUENTA';
+                const subtitulo = d.perfil
+                    ? 'Usa estos datos para iniciar sesión en Netflix'
+                    : 'Usa estos datos para iniciar sesión. NO cambies la contraseña ni el PIN.';
 
-                    streamingHtml = `
-                        <div class="streaming-box">
-                            <div class="streaming-titulo">${titulo}</div>
-                            <div class="streaming-subtitulo">${subtitulo}</div>
-                            ${camposHtml}
-                        </div>
-                    `;
-                }
-            } else if (esStreaming) {
-                const mensaje = encodeURIComponent(`Hola, necesito los datos de mi pedido ${idPedido}`);
                 streamingHtml = `
-                    <div class="manual-box">
-                        <div class="manual-text">⚠️ Este pedido requiere entrega manual. Contáctanos por WhatsApp.</div>
-                        <a href="https://wa.me/584228242411?text=${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp">
-                            Pedir mi entrega por WhatsApp
+                    <div class="streaming-box">
+                        <div class="streaming-titulo">${titulo}</div>
+                        <div class="streaming-subtitulo">${subtitulo}</div>
+                        
+                        <button class="btn-revelar-datos" data-accion="revelar" data-pedido="${esc(pedidoKey)}">
+                            <span class="icono-ojo">👁️</span>
+                            <span class="texto-btn">Ver datos de acceso</span>
+                        </button>
+
+                        <div class="contenedor-datos-streaming" id="datos-${esc(pedidoKey)}">
+                            ${camposHtml}
+                            ${codAprob ? `<div class="aviso-renovacion">⚠️ Guarda este código. Lo necesitarás para renovar.</div>` : ''}
+                            <div class="contador-auto-ocultar">
+                                🙈 Se ocultará automáticamente en <span class="segundos" data-contador="${esc(pedidoKey)}">60</span>s
+                            </div>
+                            <button class="btn-revelar-datos" data-accion="ocultar" data-pedido="${esc(pedidoKey)}" style="margin-top:10px;">
+                                <span class="icono-ojo">🙈</span>
+                                <span class="texto-btn">Ocultar datos</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (esStreaming) {
+                // 🆕 PENDIENTE DE ENTREGA MANUAL
+                const mensaje = encodeURIComponent(`Hola, necesito los datos de acceso de mi pedido ${idPedido} (${producto})`);
+                streamingHtml = `
+                    <div class="pendiente-manual-box">
+                        <div class="icono-pendiente">⏳</div>
+                        <div class="titulo-pendiente">Pendiente de entrega</div>
+                        <div class="desc-pendiente">
+                            Tu pedido está siendo procesado.<br>
+                            <strong>Te enviaremos los datos de acceso por WhatsApp</strong> en los próximos minutos.
+                        </div>
+                        <a href="https://wa.me/584228242411?text=${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp-pendiente">
+                            💬 Consultar por WhatsApp
                         </a>
                     </div>
                 `;
@@ -1032,7 +982,7 @@
             }
 
             html += `
-                <article class="pedido-card">
+                <article class="pedido-card" data-pedido-key="${esc(pedido.key)}">
                     <div class="pedido-header">
                         <div class="pedido-header-left">
                             <div class="pedido-id">#${esc(idPedido)}</div>
@@ -1090,6 +1040,91 @@
         listaEl.innerHTML = html;
     }
 
+    // ============================================
+    // 🆕 REVELAR / OCULTAR DATOS DE STREAMING
+    // ============================================
+    listaEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-revelar-datos');
+        if (!btn) return;
+
+        const accion = btn.dataset.accion;
+        const pedidoKey = btn.dataset.pedido;
+        const contenedor = document.getElementById(`datos-${pedidoKey}`);
+
+        if (!contenedor) return;
+
+        if (accion === 'revelar') {
+            revelarDatos(pedidoKey, contenedor);
+        } else if (accion === 'ocultar') {
+            ocultarDatos(pedidoKey, contenedor);
+        }
+    });
+
+    function revelarDatos(pedidoKey, contenedor) {
+        // Mostrar los datos reales
+        contenedor.querySelectorAll('.dato-entrega').forEach((dato) => {
+            const valorReal = dato.dataset.valorReal || '';
+            const valorEl = dato.querySelector('.dato-valor');
+            if (valorEl) {
+                valorEl.textContent = valorReal;
+            }
+            dato.classList.remove('dato-oculto');
+        });
+
+        contenedor.classList.add('visible');
+
+        // Iniciar contador de auto-ocultar
+        iniciarContadorAutoOcultar(pedidoKey, contenedor);
+
+        avisar('👁️ Datos visibles por 60 segundos');
+    }
+
+    function ocultarDatos(pedidoKey, contenedor) {
+        // Ocultar los datos reales
+        contenedor.querySelectorAll('.dato-entrega').forEach((dato) => {
+            const valorReal = dato.dataset.valorReal || '';
+            const valorEl = dato.querySelector('.dato-valor');
+            if (valorEl) {
+                // Regenerar los puntos
+                const puntos = '•'.repeat(Math.min(12, valorReal.length));
+                valorEl.textContent = puntos;
+            }
+            dato.classList.add('dato-oculto');
+        });
+
+        contenedor.classList.remove('visible');
+
+        // Cancelar contador
+        cancelarContadorAutoOcultar(pedidoKey);
+    }
+
+    function iniciarContadorAutoOcultar(pedidoKey, contenedor) {
+        // Cancelar timer anterior si existe
+        cancelarContadorAutoOcultar(pedidoKey);
+
+        let segundos = 60;
+        const segundosEl = contenedor.querySelector(`[data-contador="${pedidoKey}"]`);
+        if (segundosEl) segundosEl.textContent = segundos;
+
+        timersAutoOcultar[pedidoKey] = setInterval(() => {
+            segundos--;
+            if (segundosEl) segundosEl.textContent = segundos;
+
+            if (segundos <= 0) {
+                ocultarDatos(pedidoKey, contenedor);
+                avisar('🔒 Datos ocultados por seguridad');
+            }
+        }, 1000);
+    }
+
+    function cancelarContadorAutoOcultar(pedidoKey) {
+        if (timersAutoOcultar[pedidoKey]) {
+            clearInterval(timersAutoOcultar[pedidoKey]);
+            delete timersAutoOcultar[pedidoKey];
+        }
+    }
+
+    // Copiar PIN de Roblox
     listaEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-copiar');
         if (!btn) return;
@@ -1106,6 +1141,7 @@
         }
     }
 
+    // Copiar dato individual
     listaEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-copiar-dato');
         if (!btn) return;
