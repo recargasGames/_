@@ -673,6 +673,9 @@ let cuponAplicado = "";
 let precioUsdFinal = precioUsdOriginal;
 let precioBsFinal = precioBsOriginal;
 
+// 🆕 Variable global para el número de pedido (usado en mensajes WhatsApp)
+let numeroPedidoGlobal = '#0000';
+
 document.getElementById('datoJuego').textContent = juego;
 document.getElementById('datoId').textContent = idJugador;
 document.getElementById('datoProducto').textContent = producto;
@@ -805,20 +808,69 @@ function enviarTelegram(mensaje) {
     .catch(err => console.log("Error Telegram:", err));
 }
 
+// ==============================================
+// 📢 NOTIFICAR AL ADMIN (v2 - CORTO Y CON NEGRITAS)
+// ==============================================
 function notificarAdmin(tipo, datos = {}) {
-    const emojis = { exito: '🎉', falso: '⚠️', duplicado: '🚨', cupon_usado: '🎁', error: '❌', atencion: '🚨', manual: '🛠️', codigo_rg: '🎲' };
+    const emojis = {
+        exito: '🎉',
+        falso: '⚠️',
+        duplicado: '🚨',
+        cupon_usado: '🎁',
+        error: '❌',
+        atencion: '🚨',
+        manual: '🛠️',
+        codigo_rg: '🎲'
+    };
 
-    let mensaje = `${emojis[tipo] || 'ℹ️'} <b>${tipo.toUpperCase()}</b>\n\n`;
-    mensaje += `🎮 Juego: ${juego}\n`;
-    mensaje += `🆔 ID: ${idJugador}\n`;
-    mensaje += `👤 Nombre: ${nombreJugador}\n`;
-    mensaje += `📦 Producto: ${producto}\n`;
-    mensaje += `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n`;
-    if (datos.referencia) mensaje += `🔢 Referencia: ${datos.referencia}\n`;
-    if (datos.metodo) mensaje += `💳 Método: ${datos.metodo}\n`;
-    if (whatsappCliente) mensaje += `📱 WhatsApp: ${whatsappCliente}\n`;
-    if (datos.mensaje_extra) mensaje += `\n${datos.mensaje_extra}\n`;
-    mensaje += `\n🕐 ${new Date().toLocaleString('es-VE')}`;
+    const titulos = {
+        exito: 'EXITOSO',
+        falso: 'NO ENCONTRADO',
+        duplicado: 'REFERENCIA USADA',
+        cupon_usado: 'CUPÓN USADO',
+        error: 'ERROR',
+        atencion: 'ATENCIÓN',
+        manual: 'MANUAL',
+        codigo_rg: 'CÓDIGO RG'
+    };
+
+    const emoji = emojis[tipo] || 'ℹ️';
+    const titulo = titulos[tipo] || tipo.toUpperCase();
+
+    // Escapar caracteres HTML para evitar errores en Telegram
+    const esc = (txt) => String(txt || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    let mensaje = `${emoji} <b>${titulo}</b>\n\n`;
+
+    // Formato compacto por tipo
+    if (tipo === 'exito' || tipo === 'atencion') {
+        mensaje += `<b>🎮</b> ${esc(juego)}\n`;
+        mensaje += `<b>📦</b> ${esc(producto)}\n`;
+        mensaje += `<b>🆔</b> <code>${esc(idJugador)}</code>\n`;
+        mensaje += `<b>💰</b> $${precioUsdFinal.toFixed(2)} · ${precioBsFinal} Bs\n`;
+    } else if (tipo === 'duplicado' || tipo === 'falso' || tipo === 'cupon_usado') {
+        mensaje += `<b>🎮</b> ${esc(juego)}\n`;
+        mensaje += `<b>🆔</b> <code>${esc(idJugador)}</code>\n`;
+        mensaje += `<b>💰</b> $${precioUsdFinal.toFixed(2)}\n`;
+        mensaje += `<b>⚠️</b> ${esc(datos.mensaje_extra || titulo)}\n`;
+    } else if (tipo === 'manual' || tipo === 'codigo_rg') {
+        mensaje += `<b>🎮</b> ${esc(juego)}\n`;
+        mensaje += `<b>🆔</b> <code>${esc(idJugador)}</code>\n`;
+        mensaje += `<b>💰</b> $${precioUsdFinal.toFixed(2)}\n`;
+        mensaje += `\n${esc(datos.mensaje_extra || '')}\n`;
+    } else {
+        mensaje += `<b>🎮</b> ${esc(juego)}\n`;
+        mensaje += `<b>🆔</b> <code>${esc(idJugador)}</code>\n`;
+        mensaje += `<b>💰</b> $${precioUsdFinal.toFixed(2)}\n`;
+    }
+
+    if (datos.referencia) mensaje += `<b>🔢</b> <code>${esc(datos.referencia)}</code>\n`;
+    if (whatsappCliente) mensaje += `<b>📱</b> ${esc(whatsappCliente)}\n`;
+
+    mensaje += `\n<i>${new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' })}</i>`;
 
     enviarTelegram(mensaje);
 }
@@ -1740,6 +1792,153 @@ async function iniciarVerificacion() {
 }
 
 // ==============================================
+// 🎨 CONSTRUIR MENSAJE INTELIGENTE PARA EL CLIENTE
+// ==============================================
+function detectarTipoProducto() {
+    const juegoUpper = (juego || '').toUpperCase();
+    const productoUpper = (producto || '').toUpperCase();
+
+    if (juegoUpper.includes('NETFLIX') ||
+        juegoUpper.includes('DISNEY') ||
+        juegoUpper.includes('HBO') ||
+        juegoUpper.includes('SPOTIFY') ||
+        productoUpper.includes('NETFLIX') ||
+        productoUpper.includes('DISNEY') ||
+        productoUpper.includes('HBO')) {
+        return 'streaming';
+    }
+
+    if (juegoUpper.includes('ROBLOX') ||
+        juegoUpper.includes('PLAYSTATION') ||
+        juegoUpper.includes('PSN') ||
+        juegoUpper.includes('XBOX') ||
+        juegoUpper.includes('NINTENDO') ||
+        juegoUpper.includes('GOOGLE PLAY') ||
+        juegoUpper.includes('GPLAY') ||
+        juegoUpper.includes('GIFT CARD') ||
+        productoUpper.includes('ROBUX') ||
+        productoUpper.includes('GIFT CARD')) {
+        return 'giftcard';
+    }
+
+    return 'juego';
+}
+
+function obtenerNombreJuegoBonito() {
+    const j = (juego || '').toUpperCase();
+    if (j.includes('ROBLOX')) return 'Roblox';
+    if (j.includes('PLAYSTATION') || j.includes('PSN')) return 'PlayStation';
+    if (j.includes('XBOX')) return 'Xbox';
+    if (j.includes('NINTENDO')) return 'Nintendo';
+    if (j.includes('GOOGLE PLAY') || j.includes('GPLAY')) return 'Google Play';
+    if (j.includes('NETFLIX')) return 'Netflix';
+    if (j.includes('DISNEY')) return 'Disney+';
+    if (j.includes('HBO')) return 'HBO Max';
+    if (j.includes('FREE FIRE')) return 'Free Fire';
+    if (j.includes('BLOOD STRIKE')) return 'Blood Strike';
+    if (j.includes('PUBG')) return 'PUBG Mobile';
+    if (j.includes('MOBILE LEGENDS') || j.includes('ML')) return 'Mobile Legends';
+    if (j.includes('COD') || j.includes('CALL OF DUTY')) return 'Call of Duty Mobile';
+    if (j.includes('ARENA BREAKOUT')) return 'Arena Breakout';
+    if (j.includes('DELTA FORCE')) return 'Delta Force';
+    if (j.includes('BIGO')) return 'Bigo Live';
+    return juego || 'Recarga';
+}
+
+function obtenerLinkCanje() {
+    const j = (juego || '').toUpperCase();
+    if (j.includes('ROBLOX')) return 'https://www.roblox.com/es/redeem';
+    if (j.includes('PLAYSTATION') || j.includes('PSN')) return 'https://store.playstation.com/redeem';
+    if (j.includes('XBOX')) return 'https://redeem.microsoft.com';
+    if (j.includes('NINTENDO')) return 'https://ec.nintendo.com/redeem';
+    if (j.includes('GOOGLE PLAY') || j.includes('GPLAY')) return 'https://play.google.com/redeem';
+    return 'https://www.roblox.com/es/redeem';
+}
+
+function construirMensajeCliente(tipoProducto, pinCliente, datosStreaming) {
+    const nombreBonito = obtenerNombreJuegoBonito();
+
+    // 🎬 STREAMING
+    if (tipoProducto === 'streaming' && datosStreaming) {
+        const d = datosStreaming;
+        let msg = `🎬 *RECARGAS GAMES*\n\n`;
+        msg += `¡Hola! 👋 Tu compra fue exitosa ✅\n\n`;
+        msg += `📦 *Producto:* ${producto}\n`;
+        msg += `📋 *Pedido:* ${numeroPedidoGlobal}\n`;
+        msg += `💰 *Total:* $${precioUsdFinal.toFixed(2)}\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🔐 *DATOS DE ACCESO*\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+        if (d.correo || d.usuario) msg += `📧 *Correo:* ${d.correo || d.usuario}\n`;
+        if (d.clave || d.password) msg += `🔑 *Clave:* ${d.clave || d.password}\n`;
+        if (d.perfil) msg += `👤 *Perfil:* ${d.perfil}\n`;
+        if (d.pin_perfil) msg += `🔢 *PIN:* ${d.pin_perfil}\n`;
+        if (d.fecha_vencimiento) msg += `📅 *Vence:* ${d.fecha_vencimiento}\n`;
+
+        msg += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `⚠️ *No compartas estos datos con nadie.*\n`;
+        msg += `💾 Guárdalos en un lugar seguro.\n\n`;
+        msg += `¿Problemas? Escríbenos: +58 422-8242411\n\n`;
+        msg += `¡Gracias por tu compra! 🙌`;
+        return msg;
+    }
+
+    // 🎁 GIFT CARDS
+    if (tipoProducto === 'giftcard') {
+        const linkCanje = obtenerLinkCanje();
+        let msg = `🎁 *RECARGAS GAMES*\n\n`;
+        msg += `¡Hola! 👋 Tu compra fue exitosa ✅\n\n`;
+        msg += `📦 *Producto:* ${producto}\n`;
+        msg += `📋 *Pedido:* ${numeroPedidoGlobal}\n`;
+        msg += `💰 *Total:* $${precioUsdFinal.toFixed(2)}\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🎟️ *TU CÓDIGO*\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `\`${pinCliente}\`\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `🔗 *Canjéalo aquí:*\n${linkCanje}\n\n`;
+        msg += `📋 *Cómo canjearlo:*\n`;
+        msg += `1️⃣ Abre el link de arriba\n`;
+        msg += `2️⃣ Inicia sesión en tu cuenta ${nombreBonito}\n`;
+        msg += `3️⃣ Pega el código tal como está\n`;
+        msg += `4️⃣ Confirma el canje\n\n`;
+        msg += `⚠️ *Importante:*\n`;
+        msg += `• Tu cuenta debe estar en USD 🇺🇸\n`;
+        msg += `• Verifica la región antes de canjear\n`;
+        msg += `• NO hay reembolso si lo canjeas mal\n\n`;
+        msg += `¿Problemas? Escríbenos: +58 422-8242411\n\n`;
+        msg += `¡Gracias por tu compra! 🙌`;
+        return msg;
+    }
+
+    // 🎮 JUEGOS
+    let msg = `🎮 *RECARGAS GAMES*\n\n`;
+    msg += `¡Hola! 👋 Tu recarga fue exitosa ✅\n\n`;
+    msg += `🎯 *Juego:* ${nombreBonito}\n`;
+    msg += `📦 *Producto:* ${producto}\n`;
+    msg += `👤 *Jugador:* ${nombreJugador}\n`;
+    msg += `🆔 *ID:* ${idJugador}\n`;
+    msg += `💰 *Total:* $${precioUsdFinal.toFixed(2)}\n`;
+    msg += `📋 *Pedido:* ${numeroPedidoGlobal}\n\n`;
+
+    if (pinCliente) {
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🎟️ *TU PIN*\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `\`${pinCliente}\`\n\n`;
+        msg += `🔗 *Canjéalo aquí:*\n${obtenerLinkCanje()}\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+    }
+
+    msg += `✅ Tu recarga ya fue procesada.\n`;
+    msg += `📲 Si no ves el saldo en tu cuenta, espera 5-10 minutos y reinicia el juego.\n\n`;
+    msg += `¿Problemas? Escríbenos: +58 422-8242411\n\n`;
+    msg += `¡Gracias por tu compra! 🙌`;
+    return msg;
+}
+
+// ==============================================
 // 🎨 RESULTADOS
 // ==============================================
 function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
@@ -1845,19 +2044,8 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
         });
 
         if (whatsappCliente && whatsappCliente.length >= 10) {
-            const mensajeCliente =
-                `🎬 *RECARGAS GAMES*\n\n` +
-                `¡Tu ${esRenovacion ? 'renovación' : 'compra'} fue exitosa! ✅\n\n` +
-                `📦 ${producto}\n` +
-                `📋 Pedido: ${numeroPedido}\n\n` +
-                `*DATOS DE ACCESO:*\n` +
-                (d.correo ? `📧 Correo: ${d.correo}\n` : '') +
-                (d.clave ? `🔑 Clave: ${d.clave}\n` : '') +
-                (d.perfil ? `👤 Perfil: ${d.perfil}\n` : '') +
-                (d.pin_perfil ? `🔢 PIN: ${d.pin_perfil}\n` : '') +
-                (d.fecha_vencimiento ? `📅 Vence: ${d.fecha_vencimiento}\n` : '') +
-                (codigoAprob ? `\n🎟️ Código de renovación: ${codigoAprob}\n` : '') +
-                `\n¡Gracias! 🙌`;
+            numeroPedidoGlobal = numeroPedido;
+            const mensajeCliente = construirMensajeCliente('streaming', null, resultadoRecarga.datos);
 
             const mensajeAdmin =
                 `🎬 *STREAMING ${esRenovacion ? 'RENOVADO' : 'ENTREGADO'}*\n\n` +
@@ -1866,28 +2054,35 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
                 `📱 Cliente: ${whatsappCliente}\n` +
                 `💰 Monto: $${precioUsdFinal.toFixed(2)} / ${precioBsFinal} Bs\n` +
                 `🔢 Ref interna: ${referenciaInterna}\n` +
-                `📅 Nuevo vencimiento: ${d.fecha_vencimiento || 'N/A'}\n` +
+                `📅 Nuevo vencimiento: ${resultadoRecarga.datos.fecha_vencimiento || 'N/A'}\n` +
                 `🎟️ Código aprobación: ${codigoAprob || 'N/A'}\n\n` +
                 `✅ Estado: APROBADO`;
 
             enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
         }
     } else {
-        // 🎮 JUEGOS (incluye Roblox)
-        document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
-        document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
+        // 🎮 JUEGOS Y GIFT CARDS
+        const tipoProducto = detectarTipoProducto();
 
-        // ✅ FIX v3.5.1: Guardamos el PIN para usarlo en WhatsApp
+        document.getElementById('tituloExito').textContent =
+            tipoProducto === 'giftcard' ? '¡Gift Card Generada!' : '¡Recarga Exitosa!';
+        document.getElementById('subtituloExito').textContent =
+            tipoProducto === 'giftcard'
+                ? 'Guarda bien tu código. También lo enviamos a tu WhatsApp.'
+                : 'Tu recarga se procesó correctamente.';
+
         let pinCliente = null;
-
         if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) {
             pinCliente = resultadoRecarga.codigos[0];
+        }
+
+        if (pinCliente) {
             document.getElementById('pinContainer').innerHTML = `
                 <div class="pin-box">
-                    <div class="pin-label">🎮 TU PIN</div>
+                    <div class="pin-label">${tipoProducto === 'giftcard' ? '🎟️ TU CÓDIGO' : '🎮 TU PIN'}</div>
                     <div class="pin-value">${pinCliente}</div>
-                    <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pinCliente}'); mostrarMensaje('PIN copiado', 'El PIN se copió al portapapeles.', 'exito')">
-                        📋 Copiar PIN
+                    <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pinCliente}'); mostrarMensaje('Copiado', 'El código se copió al portapapeles.', 'exito')">
+                        📋 Copiar código
                     </button>
                 </div>
             `;
@@ -1897,26 +2092,20 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
 
         mostrarPaso('pasoRecargaExitosa');
 
-        notificarAdmin('exito', { referencia, metodo: metodoPago, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)` : '' });
+        notificarAdmin('exito', {
+            referencia,
+            metodo: metodoPago,
+            mensaje_extra: cuponAplicado
+                ? `🎁 Cupón: ${cuponAplicado} (-${descuentoAplicado}%)`
+                : ''
+        });
 
         if (whatsappCliente && whatsappCliente.length >= 10) {
-            // ✅ FIX v3.5.1: PIN incluido en el mensaje al cliente
-            const mensajeCliente =
-                `🎮 *RECARGAS GAMES*\n\n` +
-                `¡Hola! Recibimos tu comprobante ✅\n\n` +
-                `🎯 Producto: ${producto}\n` +
-                `👤 Jugador: ${nombreJugador}\n` +
-                `🆔 ID: ${idJugador}\n` +
-                `💰 Total: $${precioUsdFinal.toFixed(2)}\n` +
-                `📋 Pedido: ${numeroPedido}\n\n` +
-                (pinCliente 
-                    ? `🎟️ *TU PIN:*\n\`${pinCliente}\`\n\n` +
-                      `🔗 Canjéalo aquí: https://www.roblox.com/es/redeem\n\n`
-                    : '') +
-                `¡Gracias por tu compra! 🙌`;
+            numeroPedidoGlobal = numeroPedido;
+            const mensajeCliente = construirMensajeCliente(tipoProducto, pinCliente, null);
 
             const mensajeAdmin =
-                `🆕 *NUEVO PEDIDO - JUEGO*\n\n` +
+                `🆕 *NUEVO PEDIDO - ${tipoProducto.toUpperCase()}*\n\n` +
                 `🎮 Juego: ${juego}\n` +
                 `📦 Producto: ${producto}\n` +
                 `👤 Jugador: ${nombreJugador}\n` +
@@ -1927,7 +2116,7 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
                 `🔢 Ref: ${referencia}\n` +
                 `💳 Método: ${metodoPago}\n\n` +
                 `✅ Estado: COMPLETADA` +
-                (pinCliente ? `\n🎟️ PIN: ${pinCliente}` : '');
+                (pinCliente ? `\n🎟️ PIN/Código: ${pinCliente}` : '');
 
             enviarWhatsApp(whatsappCliente, mensajeCliente, mensajeAdmin);
         }
@@ -1987,6 +2176,7 @@ console.log('💳 Método:', metodoPago);
 console.log('📱 WhatsApp:', whatsappCliente || '(no proporcionado)');
 console.log('🎬 Es streaming:', esProductoStreaming(paqueteCod));
 console.log('🔄 Modo renovación:', MODO_RENOVACION ? 'SÍ' : 'NO');
+console.log('🎨 Tipo detectado:', detectarTipoProducto());
 </script>
 </body>
 </html>
