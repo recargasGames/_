@@ -139,10 +139,16 @@
             color: #fff;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             transition: all 0.3s;
+            cursor: pointer;
+            user-select: none;
         }
         .pedido-card:hover { 
             border-color: #3b82f6; 
             background: rgba(13, 22, 39, 0.85);
+        }
+        .pedido-card.revelado {
+            border-color: var(--dorado-claro);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.25);
         }
 
         /* 🆕 ANIMACIÓN DE PEDIDO NUEVO */
@@ -338,6 +344,11 @@
             margin: 8px 0; word-break: break-all;
             user-select: all;
         }
+        .pin-box .pin-value.oculto {
+            color: #64748b;
+            letter-spacing: 4px;
+            user-select: none;
+        }
         .pin-box .btn-copiar {
             background: rgba(34, 197, 94, 0.2);
             color: #4ade80; border: none;
@@ -346,6 +357,7 @@
             transition: 0.3s; font-size: 14px; font-family: inherit;
         }
         .pin-box .btn-copiar:hover { background: rgba(34, 197, 94, 0.32); }
+        .pin-box .btn-copiar.oculto { display: none; }
 
         .manual-box {
             margin-top: 12px; padding: 16px;
@@ -399,6 +411,11 @@
             word-break: break-word; overflow-wrap: anywhere;
             font-family: 'Courier New', 'Consolas', monospace; line-height: 1.35; letter-spacing: 0.5px;
         }
+        .dato-entrega .dato-valor.oculto {
+            color: #64748b;
+            letter-spacing: 4px;
+            user-select: none;
+        }
         .dato-entrega .btn-copiar-dato {
             width: 40px; height: 40px;
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
@@ -418,6 +435,7 @@
         }
         .dato-entrega .btn-copiar-dato.copiado svg { display: none; }
         .dato-entrega .btn-copiar-dato.copiado::after { content: '✓'; font-size: 20px; font-weight: bold; }
+        .dato-entrega .btn-copiar-dato.oculto { display: none; }
 
         .dato-entrega.codigo-renovacion {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
@@ -665,13 +683,15 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
+    const PUNTOS = '••••••••••';
+
     let todosPedidos = [];
     let uidActual = null;
     let consultaActual = null;
     let estadoFiltro = 'todos';
     let toastTimer = null;
-    let pedidosVistos = new Set(); // 🆕 Track de pedidos ya vistos
-    let primeraCarga = true; // 🆕 Para no disparar notifs al cargar
+    let pedidosVistos = new Set();
+    let primeraCarga = true;
 
     const listaEl = document.getElementById('listaPedidos');
     const buscarEl = document.getElementById('buscarInput');
@@ -698,7 +718,6 @@
         const juego = pedido.juego || 'Producto';
         const producto = pedido.producto || '';
 
-        // Crear el elemento de notificación
         const notif = document.createElement('div');
         notif.className = 'notif-pedido';
         notif.innerHTML = `
@@ -712,19 +731,15 @@
 
         document.body.appendChild(notif);
 
-        // Animación de entrada
         requestAnimationFrame(() => {
             notif.classList.add('visible');
         });
 
-        // Cerrar manualmente
         const btnCerrar = notif.querySelector('.notif-cerrar');
         btnCerrar.onclick = () => cerrarNotif(notif);
 
-        // Cerrar automáticamente después de 6s
         setTimeout(() => cerrarNotif(notif), 6000);
 
-        // 🔔 Reproducir sonido + vibración
         reproducirSonido();
         vibrar();
     }
@@ -737,83 +752,48 @@
         }, 500);
     }
 
-    // 🎵 SONIDO - Generado con Web Audio API (sin archivos externos)
     function reproducirSonido() {
         try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) return;
 
             const ctx = new AudioCtx();
+            const notas = [523.25, 659.25, 783.99];
 
-            // Nota 1 (C5)
-            const osc1 = ctx.createOscillator();
-            const gain1 = ctx.createGain();
-            osc1.connect(gain1);
-            gain1.connect(ctx.destination);
-            osc1.frequency.value = 523.25;
-            osc1.type = 'sine';
-            gain1.gain.setValueAtTime(0.15, ctx.currentTime);
-            gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-            osc1.start(ctx.currentTime);
-            osc1.stop(ctx.currentTime + 0.3);
+            notas.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                const t = ctx.currentTime + (i * 0.1);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.15, t + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc.start(t);
+                osc.stop(t + 0.4);
+            });
 
-            // Nota 2 (E5) - un poco después
-            const osc2 = ctx.createOscillator();
-            const gain2 = ctx.createGain();
-            osc2.connect(gain2);
-            gain2.connect(ctx.destination);
-            osc2.frequency.value = 659.25;
-            osc2.type = 'sine';
-            gain2.gain.setValueAtTime(0, ctx.currentTime + 0.1);
-            gain2.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.15);
-            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-            osc2.start(ctx.currentTime + 0.1);
-            osc2.stop(ctx.currentTime + 0.5);
-
-            // Nota 3 (G5)
-            const osc3 = ctx.createOscillator();
-            const gain3 = ctx.createGain();
-            osc3.connect(gain3);
-            gain3.connect(ctx.destination);
-            osc3.frequency.value = 783.99;
-            osc3.type = 'sine';
-            gain3.gain.setValueAtTime(0, ctx.currentTime + 0.2);
-            gain3.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.25);
-            gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
-            osc3.start(ctx.currentTime + 0.2);
-            osc3.stop(ctx.currentTime + 0.7);
-
-            // Cerrar el contexto después
-            setTimeout(() => {
-                try { ctx.close(); } catch(e) {}
-            }, 1000);
+            setTimeout(() => { try { ctx.close(); } catch(e) {} }, 1000);
         } catch(e) {
             console.warn('No se pudo reproducir sonido:', e);
         }
     }
 
-    // 📳 VIBRACIÓN (móvil)
     function vibrar() {
         if (navigator.vibrate) {
-            try {
-                navigator.vibrate([200, 100, 200]);
-            } catch(e) {}
+            try { navigator.vibrate([200, 100, 200]); } catch(e) {}
         }
     }
 
-    // 🔔 PEDIR PERMISO DE NOTIFICACIONES NATIVAS (opcional)
     function pedirPermisoNotif() {
         if (!('Notification' in window)) return;
         if (Notification.permission === 'default') {
-            Notification.requestPermission().then((perm) => {
-                if (perm === 'granted') {
-                    console.log('✅ Notificaciones nativas permitidas');
-                }
-            });
+            Notification.requestPermission().catch(() => {});
         }
     }
 
-    // 🔔 ENVIAR NOTIFICACIÓN NATIVA DEL NAVEGADOR
     function enviarNotifNativa(titulo, cuerpo) {
         if (!('Notification' in window)) return;
         if (Notification.permission !== 'granted') return;
@@ -824,9 +804,7 @@
                 badge: 'logo.png',
                 tag: 'pedido-nuevo'
             });
-        } catch(e) {
-            console.warn('Error notificación nativa:', e);
-        }
+        } catch(e) {}
     }
 
     function normalizarEstado(raw) {
@@ -868,11 +846,9 @@
                 idsActuales.add(childSnapshot.key);
             });
 
-            // 🆕 DETECTAR PEDIDOS NUEVOS (después de la primera carga)
             if (!primeraCarga) {
                 nuevosPedidos.forEach((p) => {
                     if (!pedidosVistos.has(p.key)) {
-                        console.log('🆕 Pedido nuevo detectado:', p.key);
                         mostrarNotifPedido(p);
                         enviarNotifNativa(
                             '¡Pedido creado!',
@@ -882,11 +858,9 @@
                 });
             }
 
-            // Actualizar el set de vistos
             pedidosVistos = idsActuales;
             primeraCarga = false;
 
-            // Ordenar
             nuevosPedidos.sort((a, b) => {
                 if (a.fecha && b.fecha) return new Date(b.fecha) - new Date(a.fecha);
                 return 0;
@@ -1011,10 +985,12 @@
             const iconRecibido = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
             const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
             const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+            const iconCopiar = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
             const esStreaming = pedido.es_streaming === true ||
                                 (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
 
+            // 🆕 PIN: siempre con clase "oculto" al renderizar
             let pinHtml = '';
             if (!esStreaming && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
                 const pinValue = pedido.pin || pedido.codigos[0];
@@ -1022,8 +998,8 @@
                 pinHtml = `
                     <div class="pin-box">
                         <div class="pin-label">${etiqueta}</div>
-                        <div class="pin-value">${esc(pinValue)}</div>
-                        <button class="btn-copiar" data-pin="${esc(pinValue)}">Copiar</button>
+                        <div class="pin-value oculto" data-valor="${esc(pinValue)}">${PUNTOS}</div>
+                        <button class="btn-copiar oculto" data-pin="${esc(pinValue)}">Copiar</button>
                     </div>
                 `;
             }
@@ -1041,9 +1017,9 @@
                         <div class="dato-entrega ${clase}">
                             <div class="dato-label">${label}</div>
                             <div class="dato-contenido">
-                                <div class="dato-valor">${v}</div>
-                                <button class="btn-copiar-dato" data-copiar="${v}" aria-label="Copiar ${label}">
-                                    <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                <div class="dato-valor oculto" data-valor="${v}">${PUNTOS}</div>
+                                <button class="btn-copiar-dato oculto" data-copiar="${v}" aria-label="Copiar ${label}">
+                                    ${iconCopiar}
                                 </button>
                             </div>
                         </div>
@@ -1104,7 +1080,7 @@
             }
 
             html += `
-                <article class="pedido-card">
+                <article class="pedido-card" data-pedido-key="${esc(pedido.key)}">
                     <div class="pedido-header">
                         <div class="pedido-header-left">
                             <div class="pedido-id">#${esc(idPedido)}</div>
@@ -1162,13 +1138,54 @@
         listaEl.innerHTML = html;
     }
 
+    // ═══════════════════════════════════════════════
+    // 🆕 CLICK EN LA TARJETA: REVELA U OCULTA DATOS
+    // ═══════════════════════════════════════════════
+    listaEl.addEventListener('click', (e) => {
+        // Si el usuario tocó un botón de copiar, no hacemos toggle
+        if (e.target.closest('.btn-copiar') || e.target.closest('.btn-copiar-dato')) {
+            return;
+        }
+
+        const card = e.target.closest('.pedido-card');
+        if (!card) return;
+
+        const estaRevelado = card.classList.contains('revelado');
+        const valores = card.querySelectorAll('.dato-valor, .pin-value');
+        const botones = card.querySelectorAll('.btn-copiar-dato, .btn-copiar');
+
+        if (estaRevelado) {
+            // Ocultar
+            valores.forEach((el) => {
+                el.textContent = PUNTOS;
+                el.classList.add('oculto');
+            });
+            botones.forEach((el) => el.classList.add('oculto'));
+            card.classList.remove('revelado');
+        } else {
+            // Revelar
+            valores.forEach((el) => {
+                const valor = el.dataset.valor || '';
+                if (valor) el.textContent = valor;
+                el.classList.remove('oculto');
+            });
+            botones.forEach((el) => el.classList.remove('oculto'));
+            card.classList.add('revelado');
+            avisar('👁️ Datos visibles. Toca de nuevo para ocultar.');
+        }
+    });
+
+    // ═══════════════════════════════════════════════
+    // COPIAR PIN
+    // ═══════════════════════════════════════════════
     listaEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-copiar');
         if (!btn) return;
-        copiarPIN(btn.dataset.pin);
-    });
+        e.stopPropagation();
 
-    function copiarPIN(pin) {
+        const pin = btn.dataset.pin;
+        if (!pin) return;
+
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(pin)
                 .then(() => avisar('✓ Copiado al portapapeles'))
@@ -1176,13 +1193,18 @@
         } else {
             avisar('Mantén presionado el código para copiarlo.');
         }
-    }
+    });
 
+    // ═══════════════════════════════════════════════
+    // COPIAR DATOS DE STREAMING
+    // ═══════════════════════════════════════════════
     listaEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.btn-copiar-dato');
         if (!btn) return;
+        e.stopPropagation();
 
         const texto = btn.dataset.copiar;
+        if (!texto) return;
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(texto)
