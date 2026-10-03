@@ -495,9 +495,7 @@
         .btn-accion.wa { color: #4ade80; background: transparent; border-color: rgba(37, 211, 102, 0.6); }
         .btn-accion.wa:hover { background: rgba(37, 211, 102, 0.15); }
 
-        /* ═══════════════════════════════════════════════
-           PAGINACIÓN
-           ═══════════════════════════════════════════════ */
+        /* PAGINACIÓN */
         .paginacion {
             display: flex;
             justify-content: center;
@@ -745,6 +743,58 @@
     </div>
 </nav>
 
+<!-- ═══════════════════════════════════════════════
+     🤖 BOTÓN FLOTANTE DEL ASISTENTE
+     ═══════════════════════════════════════════════ -->
+<button id="btnChatbot" style="
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10a37f, #0d8a6b);
+    border: none;
+    color: white;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(16, 163, 127, 0.5);
+    z-index: 9998;
+    transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center;
+" aria-label="Abrir asistente">💬</button>
+
+<div id="chatbotWrap" style="
+    position: fixed;
+    bottom: 160px;
+    right: 20px;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    height: 520px;
+    max-height: calc(100vh - 200px);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: none;
+    border: 2px solid rgba(16, 163, 127, 0.6);
+    background: #0a0e1a;
+">
+    <iframe src="chatbot.html" style="width: 100%; height: 100%; border: none;" title="Asistente"></iframe>
+</div>
+
+<script>
+    (function() {
+        const btn = document.getElementById('btnChatbot');
+        const wrap = document.getElementById('chatbotWrap');
+        let abierto = false;
+        btn.addEventListener('click', () => {
+            abierto = !abierto;
+            wrap.style.display = abierto ? 'block' : 'none';
+            btn.textContent = abierto ? '✕' : '💬';
+        });
+    })();
+</script>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -762,11 +812,11 @@
     const db = firebase.database();
 
     const WHATSAPP = '584228242411';
-    const POR_PAGINA = 5; // 🆕 5 pedidos por página
+    const POR_PAGINA = 5;
 
     let todosPedidos = [];
-    let pedidosFiltrados = []; // 🆕 lista filtrada actual
-    let paginaActual = 1;      // 🆕 página actual
+    let pedidosFiltrados = [];
+    let paginaActual = 1;
     let uidActual = null;
     let consultaActual = null;
     let estadoFiltro = 'todos';
@@ -955,13 +1005,10 @@
         }
 
         pedidosFiltrados = filtrados;
-        paginaActual = 1; // Al filtrar, volvemos a la página 1
+        paginaActual = 1;
         renderizarPagina();
     }
 
-    // ═══════════════════════════════════════════════
-    // RENDERIZAR PÁGINA ACTUAL
-    // ═══════════════════════════════════════════════
     function renderizarPagina() {
         const total = pedidosFiltrados.length;
         const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
@@ -977,9 +1024,6 @@
         renderizarPaginacion(totalPaginas, total);
     }
 
-    // ═══════════════════════════════════════════════
-    // RENDERIZAR BOTONES DE PAGINACIÓN
-    // ═══════════════════════════════════════════════
     function renderizarPaginacion(totalPaginas, totalPedidos) {
         if (totalPedidos === 0) {
             paginacionEl.innerHTML = '';
@@ -988,11 +1032,8 @@
         }
 
         let html = '';
-
-        // Botón "Anterior"
         html += `<button class="pag-btn" data-pag="ant" ${paginaActual === 1 ? 'disabled' : ''}>‹</button>`;
 
-        // Generar números de página con "…" si hay muchas
         const paginas = generarPaginas(paginaActual, totalPaginas);
         paginas.forEach((p) => {
             if (p === '...') {
@@ -1002,7 +1043,6 @@
             }
         });
 
-        // Botón "Siguiente"
         html += `<button class="pag-btn" data-pag="sig" ${paginaActual === totalPaginas ? 'disabled' : ''}>›</button>`;
 
         paginacionEl.innerHTML = html;
@@ -1012,7 +1052,6 @@
         pagInfoEl.textContent = `Mostrando ${desde}-${hasta} de ${totalPedidos} pedidos · Página ${paginaActual} de ${totalPaginas}`;
     }
 
-    // Genera una lista de páginas con "…" si son muchas
     function generarPaginas(actual, total) {
         const paginas = [];
         if (total <= 7) {
@@ -1033,7 +1072,6 @@
         return paginas;
     }
 
-    // Click en los botones de paginación
     paginacionEl.addEventListener('click', (e) => {
         const btn = e.target.closest('.pag-btn');
         if (!btn || btn.disabled) return;
@@ -1044,8 +1082,6 @@
         else paginaActual = parseInt(val);
 
         renderizarPagina();
-
-        // Scroll suave hacia arriba del panel
         document.querySelector('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
