@@ -14,15 +14,10 @@
         .mensaje{margin-bottom:12px;padding:10px 14px;border-radius:12px;max-width:85%;line-height:1.5}
         .cliente{background:var(--azul);margin-left:auto;border-bottom-right-radius:4px}
         .ia{background:#475569;margin-right:auto;border-bottom-left-radius:4px;white-space:pre-wrap}
-        .cargando{opacity:0.7}
-        .entrada{display:flex;gap:10px}
+        .entrada{display:flex;gap:10px;margin-top:15px}
         input{flex:1;padding:14px;border-radius:10px;border:1px solid var(--borde);background:var(--tarjeta);color:var(--texto);font-size:1rem}
         button{padding:14px 24px;background:var(--azul);border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer}
         button:hover{background:#2563eb}
-        button:disabled{opacity:0.5;cursor:not-allowed}
-        .estado{font-size:0.85rem;margin-top:10px;text-align:center}
-        .ok{color:#10b981}
-        .error{color:#ef4444}
     </style>
 </head>
 <body>
@@ -35,100 +30,47 @@
 
         <div class="entrada">
             <input type="text" id="pregunta" placeholder="Ej: ¿cuánto cuesta Netflix?">
-            <button id="btnEnviar" onclick="enviar()">Enviar</button>
+            <button onclick="enviar()">Enviar</button>
         </div>
-        
-        <p id="estado" class="estado ok">✅ Conectado — ¡Pregunta!</p>
     </div>
 
     <script>
         const chat = document.getElementById('chat');
         const pregunta = document.getElementById('pregunta');
-        const btnEnviar = document.getElementById('btnEnviar');
-        const estado = document.getElementById('estado');
-        let historial = [];
 
-        // 📋 INFORMACIÓN COMPLETA DE TU TIENDA — Aquí se edita todo
-        const SISTEMA = `
-Eres el asistente oficial de RECARGAS GAMES. Responde SIEMPRE en español, amable, claro y breve.
+        function responder(texto) {
+            const t = texto.toLowerCase();
+            
+            if(/hola|buenas/.test(t)) return "¡Hola! 👋 Bienvenido 😊\nPregúntame por:\n• Netflix / Disney+\n• Free Fire / Roblox\n• Precios / Pagos";
+            
+            if(/netflix/.test(t)) return "🎬 NETFLIX:\n✅ 1 Pantalla → 3.8$ / 3.500 Bs\n✅ Completa → 13$ / 12.500 Bs\n\n🌐 recargasgames.shop";
+            
+            if(/disney/.test(t)) return "🎬 DISNEY+:\n✅ 1 Pantalla → 3.5$ / 3.500 Bs\n✅ Completa → 9$ / 12.500 Bs\n\n🌐 recargasgames.shop";
+            
+            if(/free fire|diamantes/.test(t)) return "🔥 FREE FIRE:\n✅ Desde 770 Bs\n✅ Paquetes de 110 hasta 6160+ diamantes\n\n🌐 recargasgames.shop";
+            
+            if(/pago|datos/.test(t)) return "💳 PAGO MÓVIL:\nBco Venezuela 0102\nC.I.: 32824869\nTel: 04228242411\n✅ También Binance / USDT\n\n📲 Envía comprobante por WhatsApp";
+            
+            if(/precio|lista/.test(t)) return "📦 TODOS LOS PRECIOS:\nNetflix 1P → 3.8$ / 3.500 Bs\nNetflix Completa → 13$ / 12.500 Bs\nDisney+ 1P → 3.5$ / 3.500 Bs\nDisney+ Completa → 9$ / 12.500 Bs\nFree Fire → desde 770 Bs\nRoblox → desde 3.5$\n\n🌐 recargasgames.shop";
+            
+            return "No entendí 😅 Pregúntame por Netflix, Disney+, Free Fire, Roblox o precios";
+        }
 
-📦 LISTA DE PRECIOS:
-• 🎬 Netflix 1 Pantalla → 3.8$ / 3.500 Bs
-• 🎬 Netflix Cuenta Completa → 13$ / 12.500 Bs
-• 🎬 Disney+ 1 Pantalla → 3.5$ / 3.500 Bs
-• 🎬 Disney+ Cuenta Completa → 9$ / 12.500 Bs
-• 🔥 Free Fire Diamantes → desde 770 Bs
-• 🎮 Roblox → desde 3.5$
-• 🎮 Blood Strike, COD Mobile, PUBG, Mobile Legends disponibles
-
-💳 FORMAS DE PAGO:
-• Pago Móvil: Banco Venezuela (0102) — Cédula: 32824869 — Tel: 04228242411
-• Binance / USDT
-• Transferencia Bancaria
-
-🌐 PÁGINA WEB: recargasgames.shop
-⏰ HORARIO: 7:00 AM — 11:00 PM
-📲 WHATSAPP: +58 422 824 2411
-
-CÓMO COMPRAR:
-1️⃣ Elige tu producto
-2️⃣ Realiza el pago
-3️⃣ Envía el comprobante por WhatsApp o en la web
-4️⃣ Recibes tu cuenta/recarga al instante ✅
-        `.trim();
-
-        async function enviar() {
+        function enviar() {
             const texto = pregunta.value.trim();
             if(!texto) return;
             
             agregarMensaje(texto, 'cliente');
             pregunta.value = '';
-            btnEnviar.disabled = true;
-            estado.textContent = "⏳ Consultando...";
-
-            const idCargando = 'cargando-'+Date.now();
-            agregarMensaje('Escribiendo...', 'ia', idCargando);
-
-            try {
-                // 🔒 Llamada segura a Vercel
-                const respuesta = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        messages: [
-                            { role: 'system', content: SISTEMA },
-                            ...historial,
-                            { role: 'user', content: texto }
-                        ]
-                    })
-                });
-
-                if(!respuesta.ok) throw new Error('Error del servidor');
-                
-                const datos = await respuesta.json();
-                const textoRespuesta = datos?.choices?.[0]?.message?.content || "No entendí. Pregúntame por Netflix, Disney+, Free Fire, Roblox o precios 😊";
-
-                document.getElementById(idCargando)?.remove();
-                agregarMensaje(textoRespuesta, 'ia');
-                historial.push({ role: 'assistant', content: textoRespuesta });
-                estado.textContent = "✅ Listo";
-                estado.className = "estado ok";
-
-            } catch (error) {
-                document.getElementById(idCargando)?.remove();
-                estado.textContent = "❌ " + error.message;
-                estado.className = "estado error";
-                agregarMensaje("Error: " + error.message + "\n\nIntenta de nuevo.", 'ia');
-            }
-
-            btnEnviar.disabled = false;
-            pregunta.focus();
+            
+            setTimeout(() => {
+                agregarMensaje(responder(texto), 'ia');
+            }, 300);
         }
 
-        function agregarMensaje(texto, tipo, id=null) {
+        function agregarMensaje(texto, tipo) {
             const div = document.createElement('div');
             div.className = `mensaje ${tipo}`;
-            if(id) div.id = id;
             div.textContent = texto;
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
