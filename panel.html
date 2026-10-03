@@ -137,277 +137,105 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .badge-estado.cancelado { background: rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); }
 .badge-estado.procesando { background: rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.4); }
 
-/* ═══════════════════════════════════════════════════════════════
-   🆕 FORMULARIO DE ENTREGA MANUAL (Streaming)
-   ═══════════════════════════════════════════════════════════════ */
-.entrega-manual-box {
-    margin-top: 16px;
-    padding: 18px 16px;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
-    border: 2px solid rgba(245, 158, 11, 0.6);
-    border-radius: 14px;
-    backdrop-filter: blur(5px);
-    animation: pulsePendiente 2s ease-in-out infinite;
-    cursor: default;
-}
+/* ENTREGA MANUAL */
+.entrega-manual-box { margin-top: 16px; padding: 18px 16px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border: 2px solid rgba(245, 158, 11, 0.6); border-radius: 14px; backdrop-filter: blur(5px); animation: pulsePendiente 2s ease-in-out infinite; cursor: default; }
+@keyframes pulsePendiente { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); } 50% { box-shadow: 0 0 20px 5px rgba(245, 158, 11, 0.15); } }
+.entrega-manual-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(245, 158, 11, 0.3); }
+.entrega-manual-header .icono-alerta { font-size: 24px; animation: pulseIcono 1.5s ease-in-out infinite; }
+@keyframes pulseIcono { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+.entrega-manual-header .titulo-alerta { font-size: 14px; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; }
+.entrega-manual-header .subtitulo-alerta { font-size: 11px; color: #cbd5e1; margin-top: 2px; }
+.entrega-form-group { margin-bottom: 12px; }
+.entrega-form-group label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; }
+.entrega-form-group input { width: 100%; padding: 11px 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; color: #fff; font-size: 14px; font-family: 'Courier New', 'Consolas', monospace; transition: all 0.3s; }
+.entrega-form-group input:focus { outline: none; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15); }
+.entrega-form-group input::placeholder { color: #6b7280; font-family: 'Segoe UI', sans-serif; font-size: 13px; }
+.entrega-btn-guardar { width: 100%; padding: 14px 18px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; font-family: inherit; transition: all 0.3s; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); margin-top: 6px; }
+.entrega-btn-guardar:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5); }
+.entrega-btn-guardar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.entrega-btn-cancelar { width: 100%; padding: 11px 18px; background: rgba(71, 85, 105, 0.3); color: #cbd5e1; border: 1px solid rgba(71, 85, 105, 0.6); border-radius: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; font-family: inherit; transition: all 0.3s; margin-top: 8px; }
+.entrega-btn-cancelar:hover { background: rgba(71, 85, 105, 0.5); color: #fff; }
 
-@keyframes pulsePendiente {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
-    50% { box-shadow: 0 0 20px 5px rgba(245, 158, 11, 0.15); }
-}
+.tab .badge-pendiente-tab { display: inline-block; background: #ef4444; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 10px; margin-left: 6px; animation: pulseBadge 1.5s ease-in-out infinite; vertical-align: middle; }
+@keyframes pulseBadge { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 50% { transform: scale(1.1); box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.3); } }
 
-.entrega-manual-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.entrega-manual-header .icono-alerta {
-    font-size: 24px;
-    animation: pulseIcono 1.5s ease-in-out infinite;
-}
-
-@keyframes pulseIcono {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-}
-
-.entrega-manual-header .titulo-alerta {
-    font-size: 14px;
-    font-weight: 900;
-    color: #fbbf24;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.entrega-manual-header .subtitulo-alerta {
-    font-size: 11px;
-    color: #cbd5e1;
-    margin-top: 2px;
-}
-
-.entrega-form-group {
-    margin-bottom: 12px;
-}
-
-.entrega-form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #fbbf24;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.entrega-form-group input {
-    width: 100%;
-    padding: 11px 14px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-    font-family: 'Courier New', 'Consolas', monospace;
-    transition: all 0.3s;
-}
-
-.entrega-form-group input:focus {
-    outline: none;
-    border-color: #fbbf24;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
-}
-
-.entrega-form-group input::placeholder {
-    color: #6b7280;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 13px;
-}
-
-.entrega-btn-guardar {
-    width: 100%;
-    padding: 14px 18px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s;
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
-    margin-top: 6px;
-}
-
-.entrega-btn-guardar:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5);
-}
-
-.entrega-btn-guardar:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.entrega-btn-cancelar {
-    width: 100%;
-    padding: 11px 18px;
-    background: rgba(71, 85, 105, 0.3);
-    color: #cbd5e1;
-    border: 1px solid rgba(71, 85, 105, 0.6);
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s;
-    margin-top: 8px;
-}
-
-.entrega-btn-cancelar:hover {
-    background: rgba(71, 85, 105, 0.5);
-    color: #fff;
-}
-
-/* Badge de contador en el tab */
-.tab .badge-pendiente-tab {
-    display: inline-block;
-    background: #ef4444;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 2px 7px;
-    border-radius: 10px;
-    margin-left: 6px;
-    animation: pulseBadge 1.5s ease-in-out infinite;
-    vertical-align: middle;
-}
-
-@keyframes pulseBadge {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
-    50% { transform: scale(1.1); box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.3); }
-}
-
-/* ====== TARJETAS DE USUARIO ====== */
-.usuario-card {
+/* ═══════════════════════════════════════════════
+   💬 TARJETAS DE MENSAJES DE SOPORTE
+   ═══════════════════════════════════════════════ */
+.mensaje-card {
     background: var(--card-bg);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
     margin: 12px 16px;
     border: 1px solid rgba(30, 42, 69, 0.8);
-    color: #fff;
-    transition: border-color 0.2s;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
 }
+.mensaje-card:hover { border-color: #3b82f6; }
+.mensaje-card.nuevo {
+    border-color: rgba(59, 130, 246, 0.7);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(13, 22, 39, 0.9));
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+.mensaje-card.nuevo::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+    animation: pulsoAzul 2s ease-in-out infinite;
+}
+@keyframes pulsoAzul {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+    50% { box-shadow: 0 0 12px 3px rgba(59, 130, 246, 0.3); }
+}
+.mensaje-card.leido { opacity: 0.7; border-color: rgba(107, 114, 128, 0.4); }
+.mensaje-card.leido::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: #6b7280;
+}
+.mensaje-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.mensaje-cliente { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.mensaje-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: #fff; flex-shrink: 0; }
+.mensaje-cliente-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mensaje-nombre { font-size: 14px; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mensaje-email { font-size: 11px; color: #8899b0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mensaje-estado-badge { padding: 3px 10px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.badge-nuevo { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.5); animation: pulseBadge 1.5s ease-in-out infinite; }
+.badge-leido { background: rgba(107, 114, 128, 0.2); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.5); }
+.mensaje-cuerpo { background: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.5; color: #e2e8f0; margin-bottom: 10px; word-wrap: break-word; white-space: pre-wrap; }
+.mensaje-fecha { font-size: 11px; color: #94a3b8; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+.mensaje-acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+.mensaje-btn-accion { flex: 1; min-width: 100px; padding: 9px 12px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; transition: all 0.25s; border: 1px solid transparent; font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.mensaje-btn-accion.whatsapp { background: linear-gradient(135deg, #25d366, #128c7e); color: #fff; }
+.mensaje-btn-accion.whatsapp:hover { transform: translateY(-2px); }
+.mensaje-btn-accion.marcar { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.4); }
+.mensaje-btn-accion.marcar:hover { background: rgba(16, 185, 129, 0.3); }
+.mensaje-btn-accion.borrar { background: rgba(239, 68, 68, 0.12); color: #f87171; border-color: rgba(239, 68, 68, 0.4); flex: 0 0 auto; min-width: 50px; }
+.mensaje-btn-accion.borrar:hover { background: rgba(239, 68, 68, 0.25); }
+
+/* USUARIOS */
+.usuario-card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin: 12px 16px; border: 1px solid rgba(30, 42, 69, 0.8); color: #fff; transition: border-color 0.2s; }
 .usuario-card:hover { border-color: #3b82f6; }
-.usuario-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.usuario-info-principal {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-    flex: 1;
-}
-.usuario-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #d4af37, #3b82f6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 16px;
-    color: #fff;
-    flex-shrink: 0;
-}
-.usuario-datos {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-    flex: 1;
-}
-.usuario-nombre {
-    font-size: 15px;
-    font-weight: 700;
-    color: #fff;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.usuario-correo {
-    font-size: 12px;
-    color: #8899b0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.usuario-badge {
-    font-size: 10px;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-}
+.usuario-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
+.usuario-info-principal { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+.usuario-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #3b82f6); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; color: #fff; flex-shrink: 0; }
+.usuario-datos { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.usuario-nombre { font-size: 15px; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.usuario-correo { font-size: 12px; color: #8899b0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.usuario-badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
 .usuario-badge.activo { background: rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.5); }
 .usuario-badge.bloqueado { background: rgba(239,68,68,0.2); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); }
-.usuario-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(30, 42, 69, 0.8);
-}
-.usuario-meta span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(0,0,0,0.25);
-    padding: 5px 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
-    font-size: 12px;
-    color: #cbd5e1;
-}
+.usuario-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(30, 42, 69, 0.8); }
+.usuario-meta span { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.25); padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: #cbd5e1; }
 .usuario-meta strong { color: var(--color-dorado-claro); }
 .usuario-meta .pedidos-count { color: var(--azul-brillante); font-weight: 800; }
-.usuario-acciones {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-}
-.usuario-btn {
-    flex: 1;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-weight: 800;
-    font-size: 12px;
-    cursor: pointer;
-    transition: .25s;
-    border: none;
-    font-family: inherit;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
+.usuario-acciones { display: flex; gap: 8px; margin-top: 12px; }
+.usuario-btn { flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: .25s; border: none; font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px; }
 .usuario-btn.bloquear { background: rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); }
 .usuario-btn.bloquear:hover { background: rgba(245,158,11,0.35); }
 .usuario-btn.activar { background: rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); }
@@ -537,13 +365,13 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
     .video-fondo{opacity:0.85;filter:brightness(1.05)}
     .codigo-card{flex-direction:column;align-items:stretch}
     .codigo-acciones{justify-content:flex-end}
-    .pedido-card, .usuario-card { margin: 10px 12px; }
+    .pedido-card, .usuario-card, .mensaje-card { margin: 10px 12px; }
 }
 @media (max-width:500px){
     .panel-titulo{font-size:16px}
     .tarjeta-titulo{font-size:15px}
     .mensaje-botones{flex-direction:column}
-    .pedido-card, .usuario-card { padding: 12px; margin: 8px 10px; }
+    .pedido-card, .usuario-card, .mensaje-card { padding: 12px; margin: 8px 10px; }
     .pedido-id { font-size: 16px; }
     .pedido-precio { font-size: 16px; }
     .timeline-step { width: 60px; }
@@ -560,7 +388,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 </video>
 <div class="video-overlay"></div>
 
-<!-- 🔑 LOGIN -->
+<!-- LOGIN -->
 <div class="login-container" id="pantallaLogin">
     <div class="login-box">
         <div class="logo-login"><img src="logo.png" alt="Logo"></div>
@@ -582,7 +410,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
     </div>
 </div>
 
-<!-- 📱 PANEL -->
+<!-- PANEL -->
 <div class="panel-container" id="panelPrincipal">
     <div class="panel-header">
         <div>
@@ -602,9 +430,12 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         <div class="tab" onclick="cambiarTab('codigos', event)">🎲 Códigos</div>
         <div class="tab" onclick="cambiarTab('usuarios', event)">👤 Usuarios</div>
         <div class="tab" onclick="cambiarTab('vencimientos', event)">📅 Vencimientos</div>
+        <div class="tab" onclick="cambiarTab('mensajes', event)">
+            💬 Mensajes <span class="badge-pendiente-tab" id="badgeMensajes" style="display:none;">0</span>
+        </div>
     </div>
 
-    <!-- 📋 TAB PEDIDOS -->
+    <!-- TAB PEDIDOS -->
     <div id="tab-pedidos" class="contenido-tab">
         <div class="tarjeta" style="padding-bottom:0">
             <h3 class="tarjeta-titulo">📋 Todos los Pedidos</h3>
@@ -628,7 +459,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         </div>
     </div>
 
-    <!-- 🎲 TAB CÓDIGOS -->
+    <!-- TAB CÓDIGOS -->
     <div id="tab-codigos" class="contenido-tab oculto">
         <div class="tarjeta">
             <h3 class="tarjeta-titulo">🎲 Generador de Códigos RG</h3>
@@ -708,7 +539,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
                 <label>🎟️ Código de Aprobación PagoNorte (solo para RENOVACIONES)</label>
                 <input type="text" id="codigoAprobacionPagoNorte" placeholder="Ej: 123456789" maxlength="30" style="font-family:'Courier New',monospace;letter-spacing:1px;">
                 <p style="font-size:12px;color:#94a3b8;margin-top:6px;line-height:1.5;">
-                    💡 <strong>Renovación:</strong> Pega aquí el código de aprobación que PagoNorte te dio al comprar la cuenta originalmente.<br>
+                    💡 <strong>Renovación:</strong> Pega aquí el código de aprobación que PagoNorte te dio.<br>
                     🛒 <strong>Compra nueva:</strong> Deja este campo <strong>vacío</strong>.
                 </p>
             </div>
@@ -742,7 +573,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         </div>
     </div>
 
-    <!-- 👤 TAB USUARIOS -->
+    <!-- TAB USUARIOS -->
     <div id="tab-usuarios" class="contenido-tab oculto">
         <div class="tarjeta" style="padding-bottom:0">
             <h3 class="tarjeta-titulo">👤 Usuarios Registrados</h3>
@@ -763,7 +594,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         </div>
     </div>
 
-    <!-- 📅 TAB VENCIMIENTOS -->
+    <!-- TAB VENCIMIENTOS -->
     <div id="tab-vencimientos" class="contenido-tab oculto">
         <div class="tarjeta">
             <h3 class="tarjeta-titulo">📅 Vencimientos de Streaming</h3>
@@ -813,6 +644,31 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         </div>
     </div>
 
+    <!-- TAB MENSAJES -->
+    <div id="tab-mensajes" class="contenido-tab oculto">
+        <div class="tarjeta" style="padding-bottom:0">
+            <h3 class="tarjeta-titulo">💬 Mensajes de Soporte</h3>
+
+            <div class="busqueda-container">
+                <input type="text" id="buscarMensajes" placeholder="🔍 Buscar por nombre, correo o mensaje..." oninput="renderizarMensajes()">
+                <select class="filtro-select" id="filtroMensajes" onchange="renderizarMensajes()">
+                    <option value="nuevos">🆕 Nuevos</option>
+                    <option value="leidos">✅ Leídos</option>
+                    <option value="todos">📋 Todos</option>
+                </select>
+                <button class="btn-imagen" onclick="marcarTodosLeidos()" title="Marcar todos como leídos">✅</button>
+                <button class="btn-imagen" onclick="cargarMensajes()" title="Recargar">🔄</button>
+            </div>
+
+            <div id="listaMensajes" style="padding-bottom:20px">
+                <div class="lista-vacia">
+                    <div class="icono">💬</div>
+                    Cargando mensajes...
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <button class="install-app-btn" id="installAppBtn">📲 Instalar App</button>
@@ -829,7 +685,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 </div>
 
 <script>
-// 🔥 FIREBASE
+// FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
     authDomain: "free-52119.firebaseapp.com",
@@ -852,10 +708,8 @@ let ultimosCodigosGenerados = [];
 let todosLosPedidos = [];
 let todosLosUsuarios = [];
 let vencimientosCache = [];
+let todosLosMensajes = [];
 
-// ══════════════════════════════════════
-// 📦 PRODUCTOS PARA CÓDIGOS
-// ══════════════════════════════════════
 const PRODUCTOS_CODIGOS = {
     'ff_110':     { producto: '110 Diamantes',   juego: 'FREE FIRE', paquete: '110',             usd: 0.81,  tipo: 'central_one' },
     'ff_341':     { producto: '341 Diamantes',   juego: 'FREE FIRE', paquete: '341',             usd: 2.60,  tipo: 'central_one' },
@@ -879,9 +733,7 @@ const PRODUCTOS_CODIGOS = {
 
 let tasaCodigosActual = 940;
 
-// ══════════════════════════════════════
-// 📱 PWA
-// ══════════════════════════════════════
+// PWA
 function estaInstalada(){
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
@@ -924,9 +776,7 @@ document.getElementById('installAppBtn').addEventListener('click', async () => {
     }
 });
 
-// ══════════════════════════════════════
-// 🎨 MODAL
-// ══════════════════════════════════════
+// MODAL
 function mostrarMensaje(titulo, texto, tipo='info', botones=null){
     document.getElementById('mensajeIcono').className = 'mensaje-icono ' + tipo;
     document.getElementById('mensajeIcono').textContent =
@@ -953,9 +803,7 @@ document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
     if (e.target.id === 'mensajeOverlay') cerrarMensaje();
 });
 
-// ══════════════════════════════════════
-// 🔑 LOGIN
-// ══════════════════════════════════════
+// LOGIN
 async function iniciarSesion(){
     const correo = document.getElementById('correo').value.trim();
     const contrasena = document.getElementById('contrasena').value;
@@ -1017,9 +865,7 @@ async function cerrarSesion(){
     document.getElementById('btnLogin').textContent = '🔐 Ingresar al Panel';
 }
 
-// ══════════════════════════════════════
-// 📑 TABS
-// ══════════════════════════════════════
+// TABS
 function cambiarTab(nombre, event){
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('activa'));
     document.querySelectorAll('.contenido-tab').forEach(c => c.classList.add('oculto'));
@@ -1036,6 +882,228 @@ function cambiarTab(nombre, event){
         if (todosLosUsuarios.length === 0) cargarUsuarios();
         else renderizarUsuarios();
     }
+    if (nombre === 'mensajes') {
+        if (todosLosMensajes.length === 0) cargarMensajes();
+        else renderizarMensajes();
+    }
+}
+
+// ══════════════════════════════════════
+// 💬 MENSAJES DE SOPORTE
+// ══════════════════════════════════════
+async function cargarMensajes() {
+    const contenedor = document.getElementById('listaMensajes');
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⏳</div>Cargando mensajes...</div>';
+
+    try {
+        const snap = await db.ref('mensajes_soporte').limitToLast(200).once('value');
+        const datos = snap.val() || {};
+
+        todosLosMensajes = Object.entries(datos)
+            .map(([key, m]) => ({ ...m, key }))
+            .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+
+        actualizarBadgeMensajes();
+        renderizarMensajes();
+
+        // Escuchar nuevos mensajes en tiempo real
+        db.ref('mensajes_soporte').on('child_added', (child) => {
+            const m = child.val();
+            if (m && m.estado === 'nuevo' && !todosLosMensajes.find(x => x.key === child.key)) {
+                m.key = child.key;
+                todosLosMensajes.unshift(m);
+                actualizarBadgeMensajes();
+                if (!document.getElementById('tab-mensajes').classList.contains('oculto')) {
+                    renderizarMensajes();
+                }
+                reproducirSonidoMensaje();
+            }
+        });
+    } catch (e) {
+        console.error('Error cargando mensajes:', e);
+        contenedor.innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>';
+    }
+}
+
+function reproducirSonidoMensaje() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notas = [659.25, 783.99];
+        notas.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.value = freq;
+            osc.type = 'sine';
+            const t = ctx.currentTime + (i * 0.15);
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.12, t + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+            osc.start(t);
+            osc.stop(t + 0.3);
+        });
+        setTimeout(() => { try { ctx.close(); } catch(e) {} }, 800);
+    } catch(e) {}
+}
+
+function actualizarBadgeMensajes() {
+    const badge = document.getElementById('badgeMensajes');
+    if (!badge) return;
+    const nuevos = todosLosMensajes.filter(m => m.estado === 'nuevo').length;
+    if (nuevos > 0) {
+        badge.textContent = nuevos;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function renderizarMensajes() {
+    const contenedor = document.getElementById('listaMensajes');
+    if (!contenedor) return;
+
+    const filtro = document.getElementById('filtroMensajes').value;
+    const buscar = document.getElementById('buscarMensajes').value.trim().toLowerCase();
+
+    let lista = [...todosLosMensajes];
+    if (filtro === 'nuevos') lista = lista.filter(m => m.estado === 'nuevo');
+    else if (filtro === 'leidos') lista = lista.filter(m => m.estado === 'leido');
+
+    if (buscar) {
+        lista = lista.filter(m =>
+            (m.nombre || '').toLowerCase().includes(buscar) ||
+            (m.email || '').toLowerCase().includes(buscar) ||
+            (m.mensaje || '').toLowerCase().includes(buscar) ||
+            (m.uid || '').toLowerCase().includes(buscar)
+        );
+    }
+
+    if (lista.length === 0) {
+        contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">💬</div>No hay mensajes con ese filtro</div>';
+        return;
+    }
+
+    contenedor.innerHTML = lista.map(m => renderizarTarjetaMensaje(m)).join('');
+}
+
+function renderizarTarjetaMensaje(m) {
+    const nuevo = m.estado === 'nuevo';
+    const nombre = m.nombre || 'Cliente';
+    const email = m.email || (m.uid === 'anonimo' ? 'No registrado' : m.uid);
+    const inicial = String(nombre).charAt(0).toUpperCase() || '?';
+    const fecha = m.fecha_legible || formatearFecha(m.fecha);
+    const textoMensaje = m.mensaje || '';
+
+    const badge = nuevo
+        ? '<span class="mensaje-estado-badge badge-nuevo">🆕 Nuevo</span>'
+        : '<span class="mensaje-estado-badge badge-leido">✅ Leído</span>';
+
+    const botonMarcar = nuevo ? `
+        <button class="mensaje-btn-accion marcar" onclick="marcarLeido('${m.key}')">
+            ✅ Marcar leído
+        </button>
+    ` : '';
+
+    return `
+        <div class="mensaje-card ${nuevo ? 'nuevo' : 'leido'}">
+            <div class="mensaje-header">
+                <div class="mensaje-cliente">
+                    <div class="mensaje-avatar">${esc(inicial)}</div>
+                    <div class="mensaje-cliente-info">
+                        <div class="mensaje-nombre">${esc(nombre)}</div>
+                        <div class="mensaje-email">📧 ${esc(email)}</div>
+                    </div>
+                </div>
+                ${badge}
+            </div>
+            <div class="mensaje-cuerpo">${esc(textoMensaje)}</div>
+            <div class="mensaje-fecha">🕐 ${esc(fecha)}</div>
+            <div class="mensaje-acciones">
+                <button class="mensaje-btn-accion whatsapp" onclick="responderPorWhatsApp('${esc(textoMensaje).replace(/'/g, "\\'")}', '${esc(nombre).replace(/'/g, "\\'")}')">
+                    📲 Responder
+                </button>
+                ${botonMarcar}
+                <button class="mensaje-btn-accion borrar" onclick="borrarMensaje('${m.key}')">🗑️</button>
+            </div>
+        </div>
+    `;
+}
+
+async function marcarLeido(key) {
+    try {
+        await db.ref('mensajes_soporte/' + key).update({
+            estado: 'leido',
+            fecha_leido: new Date().toISOString()
+        });
+        const m = todosLosMensajes.find(x => x.key === key);
+        if (m) m.estado = 'leido';
+        actualizarBadgeMensajes();
+        renderizarMensajes();
+    } catch(e) {
+        mostrarMensaje('Error', e.message, 'error');
+    }
+}
+
+async function marcarTodosLeidos() {
+    const nuevos = todosLosMensajes.filter(m => m.estado === 'nuevo');
+    if (nuevos.length === 0) {
+        mostrarMensaje('Info', 'No hay mensajes nuevos', 'info');
+        return;
+    }
+    mostrarMensaje('¿Marcar todos como leídos?', `Se marcarán ${nuevos.length} mensajes`, 'advertencia', [
+        { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
+        { clase: '', texto: '✅ Sí, marcar', onclick: 'confirmarMarcarTodos()' }
+    ]);
+}
+
+async function confirmarMarcarTodos() {
+    cerrarMensaje();
+    try {
+        const updates = {};
+        todosLosMensajes.filter(m => m.estado === 'nuevo').forEach(m => {
+            updates[`mensajes_soporte/${m.key}/estado`] = 'leido';
+            updates[`mensajes_soporte/${m.key}/fecha_leido`] = new Date().toISOString();
+        });
+        await db.ref().update(updates);
+        todosLosMensajes.forEach(m => m.estado = 'leido');
+        actualizarBadgeMensajes();
+        renderizarMensajes();
+        mostrarMensaje('✅ Listo', 'Todos los mensajes marcados como leídos', 'exito');
+    } catch(e) {
+        mostrarMensaje('Error', e.message, 'error');
+    }
+}
+
+function borrarMensaje(key) {
+    mostrarMensaje('¿Borrar mensaje?', 'Esta acción no se puede deshacer', 'advertencia', [
+        { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
+        { clase: 'peligro', texto: '🗑️ Borrar', onclick: `confirmarBorrarMensaje('${key}')` }
+    ]);
+}
+
+async function confirmarBorrarMensaje(key) {
+    cerrarMensaje();
+    try {
+        await db.ref('mensajes_soporte/' + key).remove();
+        todosLosMensajes = todosLosMensajes.filter(m => m.key !== key);
+        actualizarBadgeMensajes();
+        renderizarMensajes();
+        mostrarMensaje('✅ Borrado', 'Mensaje eliminado', 'exito');
+    } catch(e) {
+        mostrarMensaje('Error', e.message, 'error');
+    }
+}
+
+function responderPorWhatsApp(textoMensaje, nombre) {
+    const primerNombre = nombre.split(' ')[0].split('@')[0];
+    const texto = encodeURIComponent(
+        `Hola ${primerNombre} 👋 Soy del equipo de *RecargasGames*.\n\n` +
+        `Vi tu mensaje:\n_"${textoMensaje}"_\n\n` +
+        `¿En qué te puedo ayudar?`
+    );
+    window.open(`https://wa.me/?text=${texto}`, '_blank');
 }
 
 // ══════════════════════════════════════
@@ -1050,9 +1118,7 @@ async function cargarTasaCodigos(){
             actualizarPreviewCodigo();
             return;
         }
-    } catch(e){
-        console.warn('⚠️ No se pudo cargar api/tasa.js:', e.message);
-    }
+    } catch(e){}
 
     try {
         const snap = await db.ref('configuracion/tasaDolar').once('value');
@@ -1133,10 +1199,6 @@ async function generarCodigos(){
                 fecha_creacion: new Date().toISOString(),
                 fecha_creacion_legible: new Date().toLocaleString('es-VE'),
                 fecha_uso: null,
-                usado_por_juego: null,
-                usado_por_id: null,
-                usado_por_producto: null,
-                usado_por_pedido: null,
                 creado_por: auth.currentUser ? auth.currentUser.email : 'admin'
             };
 
@@ -1290,14 +1352,13 @@ async function confirmarBorrar(codigo){
     }
 }
 
-// ══════════════════════════════════════
-// 📊 CARGAR DATOS PANEL
-// ══════════════════════════════════════
+// CARGAR DATOS PANEL
 async function cargarDatosPanel(){
     try { await cargarTasaCodigos(); } catch(e){ console.error(e); }
     try { await cargarPedidosAdmin(); } catch(e){ console.error(e); }
     try { await cargarUsuarios(); } catch(e){ console.error(e); }
     try { await cargarCodigos(); } catch(e){ console.error(e); }
+    try { await cargarMensajes(); } catch(e){ console.error(e); }
 }
 
 function formatearFecha(iso){
@@ -1309,9 +1370,7 @@ function formatearFecha(iso){
     } catch(e) { return iso; }
 }
 
-// ══════════════════════════════════════
-// 📋 PEDIDOS
-// ══════════════════════════════════════
+// PEDIDOS
 async function cargarPedidosAdmin(){
     try {
         const snap = await db.ref('pedidos').limitToLast(500).once('value');
@@ -1335,10 +1394,7 @@ function renderizarPedidos(){
     if (filtro === 'pendiente_manual') {
         lista = lista.filter(p => {
             const juego = String(p.juego || '').toUpperCase();
-            const esStreaming = p.es_streaming === true ||
-                                juego.includes('NETFLIX') ||
-                                juego.includes('DISNEY') ||
-                                juego.includes('HBO');
+            const esStreaming = p.es_streaming === true || juego.includes('NETFLIX') || juego.includes('DISNEY') || juego.includes('HBO');
             const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
             return esStreaming && !tieneDatos;
         });
@@ -1383,7 +1439,6 @@ function renderizarTarjetaPedido(p) {
     const idJugador = p.id_jugador || p.player_id || 'No especificado';
     const nombreJugador = p.nombre_jugador || p.player_name || 'No especificado';
 
-    // 🆕 Detección de streaming sin datos
     const esStreaming = p.es_streaming === true || 
                         (juego.toUpperCase().includes('NETFLIX') ||
                          juego.toUpperCase().includes('DISNEY') ||
@@ -1416,7 +1471,6 @@ function renderizarTarjetaPedido(p) {
     const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
     const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
 
-    // 🆕 Detalle expandido estándar
     const detalleExpandido = `
         <div class="detalle-expandido">
             <h4>📋 Detalles del Pedido</h4>
@@ -1433,47 +1487,39 @@ function renderizarTarjetaPedido(p) {
         </div>
     `;
 
-    // 🆕 Formulario de entrega manual
     const formularioEntrega = requiereEntregaManual ? `
         <div class="entrega-manual-box" onclick="event.stopPropagation()">
             <div class="entrega-manual-header">
                 <div class="icono-alerta">🚨</div>
                 <div>
                     <div class="titulo-alerta">Entrega Manual Requerida</div>
-                    <div class="subtitulo-alerta">PagoNorte no devolvió los datos. Ingresalos aquí y envialos por WhatsApp.</div>
+                    <div class="subtitulo-alerta">PagoNorte no devolvió los datos. Ingresalos aquí.</div>
                 </div>
             </div>
-
             <div class="entrega-form-group">
                 <label>📧 Correo</label>
                 <input type="email" id="entrega-correo-${esc(p.key)}" placeholder="correo@ejemplo.com" autocomplete="off">
             </div>
-
             <div class="entrega-form-group">
                 <label>🔑 Contraseña</label>
                 <input type="text" id="entrega-clave-${esc(p.key)}" placeholder="Contraseña de la cuenta" autocomplete="off">
             </div>
-
             <div class="entrega-form-group">
                 <label>👤 Perfil (si aplica)</label>
                 <input type="text" id="entrega-perfil-${esc(p.key)}" placeholder="Ej: 1, 2, 3, 4" autocomplete="off">
             </div>
-
             <div class="entrega-form-group">
                 <label>🔢 PIN del Perfil (si aplica)</label>
                 <input type="text" id="entrega-pin-${esc(p.key)}" placeholder="Ej: 0644" autocomplete="off">
             </div>
-
             <div class="entrega-form-group">
                 <label>📅 Fecha de Vencimiento</label>
                 <input type="text" id="entrega-vence-${esc(p.key)}" placeholder="DD-MM-AAAA" autocomplete="off">
             </div>
-
             <div class="entrega-form-group">
-                <label>🎟️ Código de Renovación PagoNorte (opcional)</label>
+                <label>🎟️ Código de Renovación (opcional)</label>
                 <input type="text" id="entrega-codigo-${esc(p.key)}" placeholder="Código de aprobación" autocomplete="off">
             </div>
-
             <button class="entrega-btn-guardar" onclick="entregarStreamingManual('${esc(p.key)}')">
                 💾 Guardar y enviar por WhatsApp
             </button>
@@ -1498,7 +1544,6 @@ function renderizarTarjetaPedido(p) {
                     <span class="pedido-metodo">${esc(metodo)}</span>
                 </div>
             </div>
-
             <div class="pedido-body">
                 <div class="pedido-producto">
                     ${iconBox}
@@ -1509,13 +1554,11 @@ function renderizarTarjetaPedido(p) {
                     Ref: ${esc(p.referencia_pago || p.referencia || 'N/A')}
                 </div>
             </div>
-
             <div class="pedido-jugador-box">
                 <div><strong>ID de Jugador:</strong> ${esc(idJugador)}</div>
                 <div><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</div>
                 <div><strong>📱 WhatsApp:</strong> ${esc(p.whatsapp_cliente || '—')}</div>
             </div>
-
             <div class="pedido-timeline">
                 <div class="timeline-step ${stepRecibido}">
                     <div class="timeline-icon">${iconRecibido}</div>
@@ -1532,7 +1575,6 @@ function renderizarTarjetaPedido(p) {
                     <div class="timeline-label">Completado</div>
                 </div>
             </div>
-
             ${detalleExpandido}
             ${formularioEntrega}
         </div>
@@ -1570,9 +1612,6 @@ function esc(valor) {
     }[c]));
 }
 
-// ══════════════════════════════════════
-// 🆕 ENTREGA MANUAL DE STREAMING
-// ══════════════════════════════════════
 async function entregarStreamingManual(pedidoKey) {
     const correo = document.getElementById(`entrega-correo-${pedidoKey}`)?.value.trim();
     const clave = document.getElementById(`entrega-clave-${pedidoKey}`)?.value.trim();
@@ -1626,10 +1665,8 @@ async function entregarStreamingManual(pedidoKey) {
         }
 
         await db.ref('pedidos/' + pedidoKey).update(actualizacion);
+        mostrarMensaje('✅ Guardado', 'Los datos se guardaron y el cliente puede verlos', 'exito');
 
-        mostrarMensaje('✅ Guardado', 'Los datos se guardaron y el cliente puede verlos en Mis Pedidos', 'exito');
-
-        // 🆕 Abrir WhatsApp con los datos
         const whatsapp = pedido.whatsapp_cliente || pedido.whatsapp || pedido.id_jugador;
         if (whatsapp) {
             const numeroLimpio = String(whatsapp).replace(/\D/g, '');
@@ -1656,9 +1693,7 @@ async function entregarStreamingManual(pedidoKey) {
             window.open(`https://wa.me/${numeroConCodigo}?text=${encodeURIComponent(mensaje)}`, '_blank');
         }
 
-        // Recargar la lista
         await cargarPedidosAdmin();
-
     } catch (e) {
         console.error('Error guardando entrega manual:', e);
         mostrarMensaje('Error', e.message, 'error');
@@ -1669,23 +1704,15 @@ async function entregarStreamingManual(pedidoKey) {
     }
 }
 
-// ══════════════════════════════════════
-// 🆕 CONTAR PEDIDOS PENDIENTES
-// ══════════════════════════════════════
 function actualizarBadgePendientes() {
     const badge = document.getElementById('badgePendientes');
     if (!badge) return;
-
     const pendientes = todosLosPedidos.filter(p => {
         const juego = String(p.juego || '').toUpperCase();
-        const esStreaming = p.es_streaming === true ||
-                            juego.includes('NETFLIX') ||
-                            juego.includes('DISNEY') ||
-                            juego.includes('HBO');
+        const esStreaming = p.es_streaming === true || juego.includes('NETFLIX') || juego.includes('DISNEY') || juego.includes('HBO');
         const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
         return esStreaming && !tieneDatos;
     }).length;
-
     if (pendientes > 0) {
         badge.textContent = pendientes;
         badge.style.display = 'inline-block';
@@ -1694,13 +1721,10 @@ function actualizarBadgePendientes() {
     }
 }
 
-// ══════════════════════════════════════
-// 👤 USUARIOS
-// ══════════════════════════════════════
+// USUARIOS
 async function cargarUsuarios(){
     const contenedor = document.getElementById('listaUsuariosAdmin');
     contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⏳</div>Cargando usuarios...</div>';
-
     try {
         let usuariosArray = [];
         const usuariosSnap = await db.ref('usuarios').once('value');
@@ -1743,7 +1767,6 @@ function renderizarUsuarios(){
     const buscar = document.getElementById('buscarUsuarios').value.trim().toLowerCase();
 
     let lista = [...todosLosUsuarios];
-
     if (filtro === 'bloqueados') lista = lista.filter(u => u.bloqueado === true);
     else if (filtro === 'activos') lista = lista.filter(u => u.bloqueado !== true);
 
@@ -1760,7 +1783,6 @@ function renderizarUsuarios(){
         contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">📭</div>No hay usuarios con ese filtro</div>';
         return;
     }
-
     contenedor.innerHTML = lista.map(u => renderizarTarjetaUsuario(u)).join('');
 }
 
@@ -1769,7 +1791,6 @@ function renderizarTarjetaUsuario(u){
     const badge = bloqueado
         ? '<span class="usuario-badge bloqueado">🚫 BLOQUEADO</span>'
         : '<span class="usuario-badge activo">✅ ACTIVO</span>';
-
     const nombre = u.nombre || u.displayName || 'Sin nombre';
     const correo = u.correo || u.email || 'Sin correo';
     const inicial = String(nombre).charAt(0).toUpperCase() || '?';
@@ -1824,9 +1845,7 @@ async function desbloquearUsuario(uid){
     } catch(e) { mostrarMensaje('Error', e.message, 'error'); }
 }
 
-// ══════════════════════════════════════
-// 📅 VENCIMIENTOS
-// ══════════════════════════════════════
+// VENCIMIENTOS
 function parseFechaVencimiento(str){
     if (!str) return null;
     str = String(str).trim();
@@ -1867,11 +1886,9 @@ function etiquetaPorDias(dias){
 async function cargarVencimientos(){
     const contenedor = document.getElementById('listaVencimientos');
     contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⏳</div>Cargando vencimientos...</div>';
-
     try {
         const snap = await db.ref('pedidos').limitToLast(500).once('value');
         const datos = snap.val() || {};
-
         vencimientosCache = Object.values(datos).filter(p => {
             if (!p.es_streaming) return false;
             const fecha = p.datos_streaming && p.datos_streaming.fecha_vencimiento;
@@ -1950,7 +1967,6 @@ function renderizarVencimientos(){
         contenedor.innerHTML = `<div class="lista-vacia"><div class="icono">📭</div>No hay vencimientos con ese filtro</div>`;
         return;
     }
-
     contenedor.innerHTML = lista.map(p => renderizarTarjetaVenc(p)).join('');
 }
 
