@@ -3,90 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente RecargasGames</title>
+    <title>Soporte RecargasGames</title>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0a0e1a; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
         .chat-header {
             background: linear-gradient(135deg, #10a37f, #0d8a6b);
-            padding: 14px 18px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
+
+        /* 🆕 Avatar circular con tu logo */
         .avatar {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.6);
         }
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
         .chat-header h3 { font-size: 15px; font-weight: 700; }
         .chat-header p { font-size: 11px; opacity: 0.85; }
+
         .chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
         .message {
-            max-width: 88%; padding: 11px 14px; border-radius: 14px; font-size: 14px;
-            line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+            max-width: 88%;
+            padding: 11px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
         .user { align-self: flex-end; background: #10a37f; color: #fff; border-bottom-right-radius: 4px; }
         .assistant { align-self: flex-start; background: #1e2a45; color: #e2e8f0; border-bottom-left-radius: 4px; }
-        .typing { display: flex; gap: 4px; padding: 14px 18px; align-self: flex-start; background: #1e2a45; border-radius: 14px; }
-        .typing span { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; animation: bounce 1.4s infinite; }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-5px); opacity: 1; } }
-
-        /* TABLA DE PRECIOS */
-        .tabla-precios {
-            align-self: flex-start;
-            max-width: 95%;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 4px;
-        }
-        .tabla-titulo {
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.1));
-            color: #f5d76e;
-            font-size: 13px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            padding: 9px 12px;
+        .sistema {
+            align-self: center;
+            background: rgba(16, 163, 127, 0.15);
+            border: 1px solid rgba(16, 163, 127, 0.4);
+            color: #4ade80;
+            font-size: 12px;
             text-align: center;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-        }
-        .tabla-fila {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            padding: 8px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            gap: 8px;
-            font-size: 13px;
-        }
-        .tabla-fila:last-child { border-bottom: none; }
-        .tabla-fila.oferta { background: rgba(245, 158, 11, 0.08); }
-        .tabla-fila .paquete {
-            color: #e2e8f0; font-weight: 600;
-            display: flex; align-items: center; gap: 5px;
-        }
-        .tabla-fila .paquete .fuego { font-size: 12px; }
-        .tabla-fila .precio {
-            text-align: right;
-            display: flex; flex-direction: column;
-            align-items: flex-end; line-height: 1.2;
-        }
-        .tabla-fila .precio .bs { color: #f5d76e; font-weight: 800; font-size: 13px; }
-        .tabla-fila .precio .usd { color: #94a3b8; font-size: 10px; font-weight: 500; }
-        .tabla-nota {
-            background: rgba(59, 109, 255, 0.1);
-            border-top: 1px solid rgba(59, 109, 255, 0.3);
-            padding: 8px 12px;
-            font-size: 11px;
-            color: #93c5fd;
-            text-align: center;
+            padding: 8px 14px;
+            border-radius: 10px;
+            max-width: 90%;
         }
 
         .input-area {
@@ -110,83 +92,47 @@
 <body>
 
 <div class="chat-header">
-    <div class="avatar">🤖</div>
+    <!-- 🆕 Burbujita con el logo.png -->
+    <div class="avatar">
+        <img src="logo.png" alt="RecargasGames">
+    </div>
     <div>
-        <h3>Asistente RecargasGames</h3>
-        <p>Pregúntame lo que quieras</p>
+        <h3>Soporte RecargasGames</h3>
+        <p>Cuéntanos tu duda o problema</p>
     </div>
 </div>
 
-<div class="chat-box" id="chatBox"></div>
+<div class="chat-box" id="chatBox">
+    <div class="message assistant">
+        ¡Hola! 👋 Soy el equipo de soporte de RecargasGames.
+        Escríbenos tu duda, problema o pedido y te responderemos lo antes posible.
+    </div>
+    <div class="sistema">
+        💬 Tu mensaje llegará directamente a nuestro equipo
+    </div>
+</div>
 
 <div class="input-area">
-    <input type="text" id="inputMensaje" placeholder="Escribe tu pregunta..." autocomplete="off">
+    <input type="text" id="inputMensaje" placeholder="Escribe tu mensaje..." autocomplete="off">
     <button id="btnEnviar" aria-label="Enviar">➤</button>
 </div>
 
 <script>
     // ═══════════════════════════════════════════════
-    // CONFIGURACIÓN
+    // FIREBASE
     // ═══════════════════════════════════════════════
-    const OPENROUTER_KEY = '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';
-    const MODELO = 'openai/gpt-3.5-turbo';
-    const WHATSAPP = '584228242411';
-
-    // ═══════════════════════════════════════════════
-    // PRECIOS REALES
-    // ═══════════════════════════════════════════════
-    const PRECIOS = {
-        'Free Fire': {
-            emoji: '💎',
-            paquetes: {
-                '110 Diamantes': { bs: 786, usd: 0.81 },
-                '341 Diamantes': { bs: 2522, usd: 2.60 },
-                '572 Diamantes': { bs: 4074, usd: 4.20 },
-                '1166 Diamantes': { bs: 7566, usd: 7.80 },
-                '2398 Diamantes': { bs: 14841, usd: 15.30 },
-                '6160 Diamantes': { bs: 37830, usd: 39.00, oferta: true },
-                'Tarjeta Semanal (7 días)': { bs: 2425, usd: 2.50 },
-                'Tarjeta Mensual (30 días)': { bs: 10670, usd: 11.00 }
-            }
-        },
-        'Blood Strike': {
-            emoji: '🥇',
-            paquetes: {
-                '105 Golds': { bs: 873, usd: 0.90 },
-                '320 Golds': { bs: 2600, usd: 2.68 },
-                '540 Golds': { bs: 4346, usd: 4.48 },
-                '1100 Golds': { bs: 8633, usd: 8.90 },
-                '2260 Golds': { bs: 17363, usd: 17.90 },
-                '5800 Golds': { bs: 43359, usd: 44.70, oferta: true }
-            }
-        },
-        'Roblox': {
-            emoji: '💰',
-            paquetes: {
-                '50 Robux': { bs: 970, usd: 1.00 },
-                '100 Robux': { bs: 1649, usd: 1.70 },
-                '275 Robux': { bs: 3395, usd: 3.50 },
-                '360 Robux': { bs: 4074, usd: 4.20 },
-                '555 Robux': { bs: 6839, usd: 7.05 },
-                '1000 Robux': { bs: 11155, usd: 11.50 },
-                '2000 Robux': { bs: 21340, usd: 22.00 },
-                '2400 Robux': { bs: 25705, usd: 26.50 }
-            }
-        },
-        'Mobile Legends': {
-            emoji: '💎',
-            paquetes: {
-                '55 Diamantes': { bs: 834, usd: 0.86 },
-                '86 Diamantes': { bs: 1164, usd: 1.20 },
-                '112 Diamantes': { bs: 1707, usd: 1.76 },
-                '172 Diamantes': { bs: 4850, usd: 5.00 },
-                '257 Diamantes': { bs: 6984, usd: 7.20 },
-                '429 Diamantes': { bs: 11834, usd: 12.20 },
-                '706 Diamantes': { bs: 18915, usd: 19.50 },
-                '1050 Diamantes': { bs: 28615, usd: 29.50, oferta: true }
-            }
-        }
+    const firebaseConfig = {
+        apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+        authDomain: "free-52119.firebaseapp.com",
+        databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "free-52119",
+        storageBucket: "free-52119.firebasestorage.app",
+        messagingSenderId: "632240144599",
+        appId: "1:632240144599:web:e31c25665ffe19c194b092"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
 
     // ═══════════════════════════════════════════════
     // UI
@@ -195,91 +141,32 @@
     const inputMensaje = document.getElementById('inputMensaje');
     const btnEnviar = document.getElementById('btnEnviar');
 
-    let mensajes = JSON.parse(sessionStorage.getItem('chatHistorial') || '[]');
+    let usuarioActual = null;
+    let nombreUsuario = 'Cliente';
+
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            usuarioActual = user.uid;
+            nombreUsuario = user.displayName || user.email || 'Cliente';
+        }
+    });
 
     function scrollAbajo() { chatBox.scrollTop = chatBox.scrollHeight; }
 
-    function agregarMensaje(rol, contenido, guardar = true) {
+    function agregarMensaje(rol, contenido) {
         const div = document.createElement('div');
         div.className = `message ${rol}`;
         div.textContent = contenido;
         chatBox.appendChild(div);
         scrollAbajo();
-        if (guardar) {
-            mensajes.push({ role: rol, content: contenido });
-            sessionStorage.setItem('chatHistorial', JSON.stringify(mensajes));
-        }
     }
 
-    function agregarTablaPrecios(juego) {
-        const cat = PRECIOS[juego];
-        if (!cat) return;
-
-        const wrap = document.createElement('div');
-        wrap.className = 'tabla-precios';
-
-        let html = `<div class="tabla-titulo">${cat.emoji} ${juego}</div>`;
-
-        Object.keys(cat.paquetes).forEach((paq) => {
-            const p = cat.paquetes[paq];
-            const esOferta = p.oferta;
-            html += `
-                <div class="tabla-fila ${esOferta ? 'oferta' : ''}">
-                    <div class="paquete">
-                        ${esOferta ? '<span class="fuego">🔥</span>' : ''}
-                        ${paq}
-                    </div>
-                    <div class="precio">
-                        <span class="bs">${p.bs.toLocaleString('es-VE')} Bs</span>
-                        <span class="usd">≈ $${p.usd.toFixed(2)}</span>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += `<div class="tabla-nota">💳 Pago Móvil · Binance · Zelle</div>`;
-
-        wrap.innerHTML = html;
-        chatBox.appendChild(wrap);
-        scrollAbajo();
-
-        mensajes.push({ role: 'assistant', content: `[Tabla de precios de ${juego} mostrada]` });
-        sessionStorage.setItem('chatHistorial', JSON.stringify(mensajes));
-    }
-
-    function mostrarTyping() {
+    function agregarSistema(contenido) {
         const div = document.createElement('div');
-        div.className = 'message assistant typing';
-        div.innerHTML = '<span></span><span></span><span></span>';
+        div.className = 'sistema';
+        div.textContent = contenido;
         chatBox.appendChild(div);
         scrollAbajo();
-        return div;
-    }
-
-    // ═══════════════════════════════════════════════
-    // DETECCIÓN
-    // ═══════════════════════════════════════════════
-    function detectarJuego(texto) {
-        const t = String(texto || '').toLowerCase();
-        if (/free\s*fire|freefire|\bff\b/.test(t)) return 'Free Fire';
-        if (/blood\s*strike|bloodstrike/.test(t)) return 'Blood Strike';
-        if (/roblox|robux/.test(t)) return 'Roblox';
-        if (/mobile\s*legends|\bmlbb?\b|\bml\b/.test(t)) return 'Mobile Legends';
-        return null;
-    }
-
-    function quiereVerTodosLosPrecios(texto) {
-        const t = String(texto || '').toLowerCase();
-        return /precios?|cuánto|cuanto|costo|vale|lista|todos|planes|paquetes|tarifas/.test(t);
-    }
-
-    function detectarPaqueteEspecifico(texto) {
-        const t = String(texto || '').toLowerCase();
-        const match = t.match(/(\d+)\s*(diamantes?|golds?|robux|robuxs?)/);
-        if (match) return { cantidad: match[1] };
-        if (/tarjeta\s*semanal/.test(t)) return { tipo: 'tarjeta_semanal' };
-        if (/tarjeta\s*mensual/.test(t)) return { tipo: 'tarjeta_mensual' };
-        return null;
     }
 
     // ═══════════════════════════════════════════════
@@ -294,105 +181,29 @@
         btnEnviar.disabled = true;
         inputMensaje.disabled = true;
 
-        const typing = mostrarTyping();
-
         try {
-            const ultimosMensajesUsuario = mensajes
-                .filter((m) => m.role === 'user')
-                .slice(-3)
-                .map((m) => m.content)
-                .join(' ');
+            const nuevoMensaje = {
+                mensaje: texto,
+                uid: usuarioActual || 'anonimo',
+                nombre: nombreUsuario,
+                fecha: new Date().toISOString(),
+                estado: 'nuevo',
+                origen: 'chatbot'
+            };
 
-            const juegoEnMensaje = detectarJuego(texto);
-            const juegoEnContexto = detectarJuego(ultimosMensajesUsuario);
-            const juegoActivo = juegoEnMensaje || juegoEnContexto;
+            await db.ref('mensajes_soporte').push(nuevoMensaje);
 
-            // 1. Paquete específico con juego activo
-            const paqueteEspecifico = detectarPaqueteEspecifico(texto);
-            if (juegoActivo && paqueteEspecifico && !quiereVerTodosLosPrecios(texto)) {
-                const respuestaPaq = responderPaqueteEspecifico(juegoActivo, paqueteEspecifico);
-                typing.remove();
-                agregarMensaje('assistant', respuestaPaq);
-                return;
-            }
+            agregarSistema('✅ Mensaje enviado. Nuestro equipo te responderá pronto.');
 
-            // 2. Pedir todos los precios
-            if (juegoActivo && quiereVerTodosLosPrecios(texto)) {
-                const systemPrompt = construirSystemPrompt();
-
-                const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENROUTER_KEY}`,
-                        'HTTP-Referer': location.origin || 'https://recargasgames.vercel.app',
-                        'X-Title': 'RecargasGames'
-                    },
-                    body: JSON.stringify({
-                        model: MODELO,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            ...mensajes.slice(-12)
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 150
-                    })
-                });
-
-                typing.remove();
-
-                let intro = `¡Claro! Aquí tienes los precios de ${juegoActivo} 👇`;
-
-                if (resp.ok) {
-                    const data = await resp.json();
-                    const respuestaIA = data.choices?.[0]?.message?.content || '';
-                    const limpio = limpiarRespuestaIA(respuestaIA);
-                    if (limpio && limpio.length < 200) intro = limpio;
-                }
-
-                agregarMensaje('assistant', intro);
-                agregarTablaPrecios(juegoActivo);
-                return;
-            }
-
-            // 3. Conversación general
-            const systemPrompt = construirSystemPrompt();
-
-            const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENROUTER_KEY}`,
-                    'HTTP-Referer': location.origin || 'https://recargasgames.vercel.app',
-                    'X-Title': 'RecargasGames'
-                },
-                body: JSON.stringify({
-                    model: MODELO,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        ...mensajes.slice(-12)
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 300
-                })
-            });
-
-            typing.remove();
-
-            if (!resp.ok) {
-                console.error('OpenRouter error:', await resp.text());
-                responderFallback(texto, juegoActivo);
-                return;
-            }
-
-            const data = await resp.json();
-            const respuestaIA = data.choices?.[0]?.message?.content || '';
-            agregarMensaje('assistant', respuestaIA || respuestaFallbackTexto(texto));
+            setTimeout(() => {
+                agregarMensaje('assistant',
+                    'Mientras tanto, también puedes escribirnos directo por WhatsApp: +58 422-824-2411 💬');
+            }, 800);
 
         } catch (error) {
-            typing.remove();
-            console.error(error);
-            responderFallback(texto);
+            console.error('Error:', error);
+            agregarMensaje('assistant',
+                '⚠️ No pudimos enviar tu mensaje. Intenta de nuevo o escríbenos por WhatsApp: +58 422-824-2411');
         } finally {
             btnEnviar.disabled = false;
             inputMensaje.disabled = false;
@@ -400,194 +211,13 @@
         }
     }
 
-    function limpiarRespuestaIA(texto) {
-        if (!texto) return '';
-        if (texto.length > 250 && /\d+\s*Bs/.test(texto)) {
-            return texto.split('\n')[0].trim() || 'Aquí tienes los precios 👇';
-        }
-        return texto.trim();
-    }
-
-    // ═══════════════════════════════════════════════
-    // RESPUESTA ESPECÍFICA DE PAQUETE
-    // ═══════════════════════════════════════════════
-    function responderPaqueteEspecifico(juego, paq) {
-        const cat = PRECIOS[juego];
-        if (!cat) return 'No encontré ese paquete.';
-
-        const keys = Object.keys(cat.paquetes);
-
-        if (paq.tipo === 'tarjeta_semanal') {
-            const key = keys.find((k) => /semanal/i.test(k));
-            if (key) {
-                const p = cat.paquetes[key];
-                return `📅 ${key} de ${juego}: ${p.bs.toLocaleString('es-VE')} Bs (≈ $${p.usd.toFixed(2)}) 🎫\n\nEntra al juego en la web, elige esta tarjeta y pon tu ID.`;
-            }
-        }
-        if (paq.tipo === 'tarjeta_mensual') {
-            const key = keys.find((k) => /mensual/i.test(k));
-            if (key) {
-                const p = cat.paquetes[key];
-                return `📅 ${key} de ${juego}: ${p.bs.toLocaleString('es-VE')} Bs (≈ $${p.usd.toFixed(2)}) 🎫\n\nEntra al juego en la web, elige esta tarjeta y pon tu ID.`;
-            }
-        }
-        if (paq.cantidad) {
-            const key = keys.find((k) => k.startsWith(paq.cantidad + ' '));
-            if (key) {
-                const p = cat.paquetes[key];
-                return `💎 ${key} de ${juego}: ${p.bs.toLocaleString('es-VE')} Bs (≈ $${p.usd.toFixed(2)})${p.oferta ? ' 🔥' : ''}\n\n¿Quieres hacer el pedido? Entra al juego en la web y pon tu ID.`;
-            }
-        }
-        return `No encontré ese paquete exacto 🤔. Aquí tienes todos los de ${juego}:`;
-    }
-
-    // ═══════════════════════════════════════════════
-    // FALLBACK
-    // ═══════════════════════════════════════════════
-    function responderFallback(texto, juegoActivo) {
-        const juego = juegoActivo || detectarJuego(texto);
-        if (juego && quiereVerTodosLosPrecios(texto)) {
-            agregarMensaje('assistant', `¡Claro! Aquí tienes los precios de ${juego} 👇`);
-            agregarTablaPrecios(juego);
-            return;
-        }
-        agregarMensaje('assistant', respuestaFallbackTexto(texto));
-    }
-
-    function respuestaFallbackTexto(texto) {
-        const t = texto.toLowerCase();
-
-        if (t.includes('hola') || t.includes('buenas') || t.includes('buenos')) {
-            return '¡Hola! 👋 ¿En qué te ayudo? Puedo darte precios de juegos o resolver tus dudas.';
-        }
-        if (t.includes('seguro') || t.includes('confiable') || t.includes('estafa') || t.includes('timo')) {
-            return '¡Totalmente seguros! 🔒 Llevamos tiempo en el mercado y tenemos miles de clientes satisfechos. Cada pedido pasa por verificación y te atendemos por WhatsApp: +58 422-824-2411';
-        }
-        if (t.includes('garantía') || t.includes('garantia') || t.includes('reembolso')) {
-            return 'Sí, tienes garantía 🛡️. Si tu recarga no llega correctamente, te devolvemos el dinero o lo resolvemos. Escríbenos al +58 422-824-2411';
-        }
-        if (t.includes('recarg') || t.includes('cómo') || t.includes('como')) {
-            return 'Recargar es fácil 🚀:\n\n1️⃣ Elige tu juego\n2️⃣ Selecciona el paquete\n3️⃣ Ingresa tu ID\n4️⃣ Paga con Pago Móvil, Binance o Zelle\n5️⃣ Recibe al instante ✅';
-        }
-        if (t.includes('precio') || t.includes('cuánto') || t.includes('cuanto') || t.includes('costo') || t.includes('vale')) {
-            return 'Claro 😊 Dime de qué juego quieres el precio:\n\n• Free Fire\n• Blood Strike\n• Roblox\n• Mobile Legends\n\nEj: "precios de Free Fire"';
-        }
-        if (t.includes('pago') || t.includes('pagar') || t.includes('método')) {
-            return 'Aceptamos 💳:\n\n• Pago Móvil\n• Binance\n• Zelle\n• Transferencia';
-        }
-        if (t.includes('tarda') || t.includes('tiempo') || t.includes('demora')) {
-            return 'Los juegos se acreditan al instante ⚡. Si algo tarda más de 30 min, escríbenos: +58 422-824-2411';
-        }
-        if (t.includes('soporte') || t.includes('ayuda') || t.includes('problema')) {
-            return 'Escríbenos por WhatsApp: +58 422-824-2411 💬 Te atendemos al instante.';
-        }
-        if (t.includes('gracias')) {
-            return '¡De nada! 🙌 Cualquier cosa aquí estoy.';
-        }
-        if (t.includes('promo') || t.includes('oferta') || t.includes('descuento')) {
-            return '¡Claro que sí! 🔥 Escríbenos al +58 422-824-2411 y te paso las promos del día.';
-        }
-
-        return 'Cuéntame más 👍 Puedo darte precios de juegos, resolver dudas sobre el pago, la seguridad, o cómo recargar.';
-    }
-
-    // ═══════════════════════════════════════════════
-    // PROMPT
-    // ═══════════════════════════════════════════════
-    function formatearPreciosParaIA() {
-        let txt = 'LISTA DE PRECIOS REALES:\n\n';
-        Object.keys(PRECIOS).forEach((juego) => {
-            txt += `🎮 ${juego}:\n`;
-            Object.keys(PRECIOS[juego].paquetes).forEach((paq) => {
-                const p = PRECIOS[juego].paquetes[paq];
-                const oferta = p.oferta ? ' 🔥 OFERTA' : '';
-                txt += `   - ${paq}: ${p.bs} Bs (≈ $${p.usd} USD)${oferta}\n`;
-            });
-            txt += '\n';
-        });
-        return txt;
-    }
-
-    function construirSystemPrompt() {
-        return `Eres "Rigo", el asistente virtual de RecargasGames, tienda venezolana de recargas de juegos y streaming.
-
-PERSONALIDAD:
-- Amable, cercano, venezolano, con chispa pero respetuoso.
-- Español siempre. Respuestas CORTAS (1-3 líneas).
-- NUNCA dices "no entendí", "no sé" ni "no puedo ayudarte". Siempre ofreces alternativa.
-- RECUERDAS la conversación anterior.
-
-SOBRE LA TIENDA:
-- Llevamos tiempo en el mercado venezolano.
-- Somos 100% confiables y seguros. Miles de clientes satisfechos.
-- Acreditación al instante en la mayoría de juegos.
-- Todos los pagos se verifican antes de entregar.
-- Ofrecemos garantía: si algo falla, se resuelve o se reembolsa.
-- Atención personalizada por WhatsApp: +58 422-824-2411.
-
-MÉTODOS DE PAGO:
-- Pago Móvil (Bs)
-- Binance (USDT)
-- Zelle (USD)
-- Transferencia bancaria
-
-TIEMPO DE ENTREGA:
-- Juegos (Free Fire, Blood Strike, ML, Roblox): al instante
-- Si algo tarda más de 30 min, se resuelve por WhatsApp.
-
-JUEGOS DISPONIBLES:
-- Free Fire 💎
-- Blood Strike 🥇
-- Roblox 💰
-- Mobile Legends 💎
-
-${formatearPreciosParaIA()}
-
-REGLAS IMPORTANTES:
-1. Si preguntan si es seguro/confiable: responde con seguridad y confianza. Menciona garantía y WhatsApp.
-2. Si preguntan por TODOS los precios de un juego: di algo corto como "¡Claro! Aquí tienes los precios 👇" (la tabla se muestra visualmente aparte).
-3. Si preguntan por un paquete específico (ej: "110 diamantes"): da el precio exacto en texto.
-4. Si quieren comprar: "Entra al juego en la web y pon tu ID".
-5. Si tienen un problema con un pedido: da el WhatsApp.
-6. Si preguntan algo fuera de la tienda (chistes, clima, etc.): responde amable y redirige.
-7. NUNCA menciones que eres IA ni que usas una API.
-8. Emojis con moderación (1-2 por mensaje).
-9. Si te saludan, saluda y pregunta en qué ayudar.
-10. Si el usuario insiste en algo que no puedes hacer, ofrece alternativas útiles.
-
-EJEMPLOS DE RESPUESTAS:
-- "¿es seguro?" → "¡Totalmente seguros! 🔒 Tenemos años en el mercado y miles de clientes contentos. Cada pedido pasa por verificación y si algo falla te lo resolvemos. ¿Quieres probar con un pedido?"
-- "¿cómo pago?" → "Aceptamos Pago Móvil, Binance, Zelle y transferencia 💳. Elige tu paquete y te sale la opción."
-- "¿cuánto tarda?" → "Al instante en juegos ⚡. Roblox puede tardar unos minutos. Si pasa de 30 min, escríbenos."
-- "precios de Free Fire" → "¡Claro! Aquí tienes los precios de Free Fire 👇"
-- "110 diamantes" → "110 diamantes de Free Fire: 786 Bs (≈ $0.81) 💎"
-- "no me llegó" → "Uy, vamos a resolverlo. Escríbenos a wa.me/584228242411 con tu número de pedido y te atendemos al instante. 🙌"
-- "gracias" → "¡De nada! 🙌"`;
-    }
-
     // ═══════════════════════════════════════════════
     // EVENTOS
     // ═══════════════════════════════════════════════
     btnEnviar.addEventListener('click', enviarMensaje);
-    inputMensaje.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarMensaje(); });
-
-    // ═══════════════════════════════════════════════
-    // ARRANQUE
-    // ═══════════════════════════════════════════════
-    if (mensajes.length === 0) {
-        agregarMensaje('assistant',
-            '¡Hola! 👋 Soy Rigo, tu asistente. Puedes preguntarme cualquier cosa: precios, cómo recargar, métodos de pago, o si tenemos garantía. 🎮',
-            true
-        );
-    } else {
-        mensajes.forEach((m) => {
-            const div = document.createElement('div');
-            div.className = `message ${m.role}`;
-            div.textContent = m.content;
-            chatBox.appendChild(div);
-        });
-        scrollAbajo();
-    }
+    inputMensaje.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') enviarMensaje();
+    });
 </script>
 
 </body>
