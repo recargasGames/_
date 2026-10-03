@@ -3,33 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente</title>
+    <title>Asistente RecargasGames</title>
 
-    <!-- Firebase para leer precios reales -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body {
-            background: #0a0e1a;
-            color: #fff;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            background: #0a0e1a; color: #fff;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
         .chat-header {
             background: linear-gradient(135deg, #10a37f, #0d8a6b);
-            padding: 14px 18px;
-            display: flex; align-items: center; gap: 10px;
+            padding: 14px 18px; display: flex; align-items: center; gap: 10px;
             flex-shrink: 0;
         }
         .avatar {
             width: 38px; height: 38px; border-radius: 50%;
             background: rgba(255,255,255,0.2);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
         }
         .chat-header h3 { font-size: 15px; font-weight: 700; }
         .chat-header p { font-size: 11px; opacity: 0.85; }
@@ -41,80 +34,43 @@
         .message {
             max-width: 88%; padding: 11px 14px;
             border-radius: 14px; font-size: 14px;
-            line-height: 1.45; white-space: pre-wrap; word-wrap: break-word;
+            line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
         }
         .user { align-self: flex-end; background: #10a37f; color: #fff; border-bottom-right-radius: 4px; }
         .assistant { align-self: flex-start; background: #1e2a45; color: #e2e8f0; border-bottom-left-radius: 4px; }
 
-        /* OPCIONES (botones) */
-        .opciones {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 4px;
-            align-self: flex-start;
-            max-width: 90%;
+        .typing { display: flex; gap: 4px; padding: 14px 18px; align-self: flex-start; background: #1e2a45; border-radius: 14px; }
+        .typing span {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #94a3b8; animation: bounce 1.4s infinite;
         }
-        .opcion {
-            padding: 9px 14px;
-            border-radius: 22px;
-            background: rgba(16, 163, 127, 0.12);
-            border: 1px solid rgba(16, 163, 127, 0.55);
-            color: #4ade80;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-            user-select: none;
-        }
-        .opcion:hover {
-            background: rgba(16, 163, 127, 0.28);
-            transform: translateY(-1px);
-        }
-        .opcion:active { transform: translateY(0); }
-        .opcion.volver {
-            background: rgba(148, 163, 184, 0.12);
-            border-color: rgba(148, 163, 184, 0.5);
-            color: #cbd5e1;
-        }
-        .opcion.soporte {
-            background: rgba(37, 211, 102, 0.15);
-            border-color: rgba(37, 211, 102, 0.6);
-            color: #4ade80;
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-5px); opacity: 1; }
         }
 
-        /* Lista de precios */
-        .precio-lista {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(212, 175, 55, 0.25);
-            border-radius: 12px;
-            padding: 10px 12px;
-            align-self: flex-start;
-            max-width: 90%;
-            font-size: 13px;
-            line-height: 1.6;
+        /* Sugerencias rápidas (opcional) */
+        .sugerencias {
+            display: flex; gap: 6px; padding: 8px 12px;
+            overflow-x: auto; background: #0d1627;
+            border-top: 1px solid rgba(30, 42, 69, 0.5);
+            scrollbar-width: none; flex-shrink: 0;
         }
-        .precio-lista .titulo-lista {
-            color: #f5d76e;
-            font-weight: 800;
-            font-size: 13px;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .sugerencias::-webkit-scrollbar { display: none; }
+        .sug-chip {
+            flex-shrink: 0; padding: 6px 12px; border-radius: 16px;
+            background: rgba(16, 163, 127, 0.15);
+            border: 1px solid rgba(16, 163, 127, 0.4);
+            color: #4ade80; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit; white-space: nowrap;
+            transition: all 0.2s;
         }
-        .precio-lista .fila {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dashed rgba(255,255,255,0.06);
-        }
-        .precio-lista .fila:last-child { border-bottom: none; }
-        .precio-lista .fila .nom { color: #cbd5e1; }
-        .precio-lista .fila .pre { color: #4ade80; font-weight: 700; }
+        .sug-chip:hover { background: rgba(16, 163, 127, 0.3); }
 
         .input-area {
-            display: flex; gap: 8px; padding: 10px 12px;
+            display: flex; gap: 8px; padding: 12px;
             background: #0d1627;
             border-top: 1px solid rgba(30, 42, 69, 0.8);
             flex-shrink: 0;
@@ -142,20 +98,28 @@
     <div class="avatar">🤖</div>
     <div>
         <h3>Asistente RecargasGames</h3>
-        <p>Elige una opción 👇</p>
+        <p>Pregúntame lo que quieras</p>
     </div>
 </div>
 
 <div class="chat-box" id="chatBox"></div>
 
+<div class="sugerencias" id="sugerencias">
+    <button class="sug-chip" data-msg="¿Cuánto cuesta Free Fire 110 diamantes?">Free Fire 110 💎</button>
+    <button class="sug-chip" data-msg="Precios de Netflix">Netflix</button>
+    <button class="sug-chip" data-msg="Precios de Disney+">Disney+</button>
+    <button class="sug-chip" data-msg="Precios de Roblox">Roblox</button>
+    <button class="sug-chip" data-msg="¿Cómo recargo?">¿Cómo recargo?</button>
+</div>
+
 <div class="input-area">
-    <input type="text" id="inputMensaje" placeholder="O escribe tu pregunta..." autocomplete="off">
+    <input type="text" id="inputMensaje" placeholder="Escribe tu pregunta..." autocomplete="off">
     <button id="btnEnviar" aria-label="Enviar">➤</button>
 </div>
 
 <script>
     // ═══════════════════════════════════════════════
-    // FIREBASE
+    // FIREBASE (para pedidos del usuario si quieres después)
     // ═══════════════════════════════════════════════
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -169,273 +133,270 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const WHATSAPP = '584228242411';
-    const chatBox = document.getElementById('chatBox');
-
-    // Caché de precios
-    let preciosCache = null;
-    async function obtenerPrecios() {
-        if (preciosCache) return preciosCache;
-        const snap = await db.ref('productos').once('value');
-        preciosCache = snap.val() || {};
-        return preciosCache;
-    }
+    // ═══════════════════════════════════════════════
+    // LISTA DE PÁGINAS HTML DONDE ESTÁN LOS PRECIOS
+    // ═══════════════════════════════════════════════
+    const PAGINAS_PRECIOS = [
+        { archivo: 'freefire.html',        juego: 'Free Fire' },
+        { archivo: 'roblox.html',          juego: 'Roblox' },
+        { archivo: 'netflix.html',         juego: 'Netflix' },
+        { archivo: 'disney.html',          juego: 'Disney+' },
+        { archivo: 'hbo.html',             juego: 'HBO Max' },
+        { archivo: 'mobilelegends.html',   juego: 'Mobile Legends' },
+        { archivo: 'bloodstrike.html',     juego: 'Blood Strike' },
+        { archivo: 'spotify.html',         juego: 'Spotify' }
+    ];
 
     // ═══════════════════════════════════════════════
-    // HELPERS
+    // CACHÉ DE PRECIOS EXTRAÍDOS DE LOS HTML
     // ═══════════════════════════════════════════════
-    function scrollAbajo() {
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    let preciosExtraidos = null;
 
-    function agregarBot(texto) {
-        const div = document.createElement('div');
-        div.className = 'message assistant';
-        div.textContent = texto;
-        chatBox.appendChild(div);
-        scrollAbajo();
-    }
+    async function extraerPreciosDeHTML() {
+        if (preciosExtraidos) return preciosExtraidos;
 
-    function agregarUsuario(texto) {
-        const div = document.createElement('div');
-        div.className = 'message user';
-        div.textContent = texto;
-        chatBox.appendChild(div);
-        scrollAbajo();
-    }
+        const resultado = {};
 
-    function agregarListaPrecios(titulo, items) {
-        const div = document.createElement('div');
-        div.className = 'precio-lista';
-        let html = `<div class="titulo-lista">${titulo}</div>`;
-        items.forEach((it) => {
-            html += `<div class="fila"><span class="nom">${it.nombre}</span><span class="pre">$${it.precio}</span></div>`;
-        });
-        div.innerHTML = html;
-        chatBox.appendChild(div);
-        scrollAbajo();
-    }
+        for (const pagina of PAGINAS_PRECIOS) {
+            try {
+                const resp = await fetch(pagina.archivo);
+                if (!resp.ok) continue;
+                const html = await resp.text();
 
-    function agregarOpciones(opciones) {
-        // opciones = [{ texto, callback, clase? }]
-        const wrap = document.createElement('div');
-        wrap.className = 'opciones';
-        opciones.forEach((op) => {
-            const btn = document.createElement('button');
-            btn.className = 'opcion ' + (op.clase || '');
-            btn.textContent = op.texto;
-            btn.addEventListener('click', () => {
-                agregarUsuario(op.texto);
-                wrap.remove(); // quita los botones al elegir
-                op.callback();
-            });
-            wrap.appendChild(btn);
-        });
-        chatBox.appendChild(wrap);
-        scrollAbajo();
-    }
-
-    function abrirWhatsApp(mensaje) {
-        const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
-    }
-
-    // ═══════════════════════════════════════════════
-    // MENÚ PRINCIPAL
-    // ═══════════════════════════════════════════════
-    function menuPrincipal() {
-        agregarBot('¿Qué necesitas hoy? Elige una opción 👇');
-        agregarOpciones([
-            { texto: '💎 Ver precios de juegos', callback: () => menuJuegos() },
-            { texto: '🎬 Ver precios de streaming', callback: () => menuStreaming() },
-            { texto: '🛒 Cómo recargar', callback: () => comoRecargar() },
-            { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte() }
-        ]);
-    }
-
-    // ─────── JUEGOS ───────
-    function menuJuegos() {
-        agregarBot('¿De qué juego quieres ver los precios? 🎮');
-        agregarOpciones([
-            { texto: '🔥 Free Fire', callback: () => mostrarPreciosDe('freefire', 'Free Fire') },
-            { texto: '🎮 Roblox', callback: () => mostrarPreciosDe('roblox', 'Roblox') },
-            { texto: '🔫 Blood Strike', callback: () => mostrarPreciosDe('bloodstrike', 'Blood Strike') },
-            { texto: '📱 Mobile Legends', callback: () => mostrarPreciosDe('mobilelegends', 'Mobile Legends') },
-            { texto: '⬅️ Volver', clase: 'volver', callback: () => menuPrincipal() }
-        ]);
-    }
-
-    // ─────── STREAMING ───────
-    function menuStreaming() {
-        agregarBot('¿Qué servicio de streaming te interesa? 🎬');
-        agregarOpciones([
-            { texto: '🎬 Netflix', callback: () => mostrarPreciosDe('netflix', 'Netflix') },
-            { texto: '🏰 Disney+', callback: () => mostrarPreciosDe('disney', 'Disney+') },
-            { texto: '📺 HBO Max', callback: () => mostrarPreciosDe('hbo', 'HBO Max') },
-            { texto: '🎵 Spotify', callback: () => mostrarPreciosDe('spotify', 'Spotify') },
-            { texto: '⬅️ Volver', clase: 'volver', callback: () => menuPrincipal() }
-        ]);
-    }
-
-    // ─────── MOSTRAR PRECIOS DE UNA CATEGORÍA ───────
-    async function mostrarPreciosDe(clave, nombreBonito) {
-        agregarBot(`Buscando precios de ${nombreBonito}... ⏳`);
-
-        try {
-            const precios = await obtenerPrecios();
-            const cat = precios[clave];
-
-            if (!cat) {
-                agregarBot(`Ups, no encontré la categoría "${nombreBonito}". Te paso con soporte 👇`);
-                agregarOpciones([
-                    { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte(`Hola, quiero precios de ${nombreBonito}`) },
-                    { texto: '⬅️ Volver al menú', clase: 'volver', callback: () => menuPrincipal() }
-                ]);
-                return;
-            }
-
-            // Estructura: { paquetes: { "110💎": { precio: 0.79 }, ... } } o directo { "110💎": 0.79 }
-            let items = [];
-            const fuente = cat.paquetes || cat;
-
-            Object.keys(fuente).forEach((k) => {
-                const v = fuente[k];
-                const precio = (typeof v === 'object' && v !== null)
-                    ? (v.precio || v.monto || v.valor)
-                    : v;
-                if (precio !== undefined) {
-                    items.push({ nombre: k, precio: Number(precio).toFixed(2) });
+                // Extraer los precios del HTML
+                const items = extraerPreciosDelHTML(html);
+                if (items.length > 0) {
+                    resultado[pagina.juego] = items;
                 }
+            } catch (e) {
+                console.warn(`No se pudo leer ${pagina.archivo}:`, e.message);
+            }
+        }
+
+        preciosExtraidos = resultado;
+        return resultado;
+    }
+
+    // Extrae pares (nombre del producto, precio) del HTML
+    function extraerPreciosDelHTML(html) {
+        const items = [];
+
+        // Patrón 1: elementos con clase "precio" o "price" con texto "$X.XX"
+        // Busca bloques tipo: <div class="paquete"><h3>110 diamantes</h3><span>$0.79</span></div>
+        // Es un poco flexible: busca $ con números seguido de texto cercano
+        const regexPrecio = /\$[\d]+(?:[.,]\d{1,2})?/g;
+        const precios = html.match(regexPrecio) || [];
+
+        // También intenta extraer los nombres de paquetes desde data-attributes o headings
+        // Buscamos patrones tipo: data-nombre="110 diamantes" data-precio="0.79"
+        const regexData = /data-(?:nombre|name|producto|paquete)="([^"]+)"[^>]*data-(?:precio|price|monto)="([^"]+)"/gi;
+        let match;
+        while ((match = regexData.exec(html)) !== null) {
+            items.push({ nombre: match[1].trim(), precio: match[2].trim() });
+        }
+
+        // Si no encontró data-attributes, intenta con clases comunes
+        if (items.length === 0) {
+            const regexClase = /<(?:h[1-6]|span|div|p)[^>]*class="[^"]*(?:nombre|titulo|paquete|item)[^"]*"[^>]*>([^<]+)<\/[^>]*>[\s\S]{0,300}?\$([\d.,]+)/gi;
+            while ((match = regexClase.exec(html)) !== null) {
+                items.push({ nombre: match[1].trim(), precio: match[2].trim() });
+            }
+        }
+
+        // Si aún no encontró nada, devuelve los precios crudos
+        if (items.length === 0 && precios.length > 0) {
+            precios.forEach((p, i) => {
+                items.push({ nombre: `Paquete ${i + 1}`, precio: p.replace('$', '').trim() });
             });
-
-            if (items.length === 0) {
-                agregarBot(`No hay paquetes disponibles para ${nombreBonito} por ahora. Te paso con soporte 👇`);
-                agregarOpciones([
-                    { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte(`Hola, quiero información de ${nombreBonito}`) },
-                    { texto: '⬅️ Volver al menú', clase: 'volver', callback: () => menuPrincipal() }
-                ]);
-                return;
-            }
-
-            agregarListaPrecios(`💎 ${nombreBonito}`, items);
-
-            agregarBot('¿Quieres hacer un pedido o ver algo más?');
-            agregarOpciones([
-                { texto: '🛒 Hacer pedido', callback: () => irSoporte(`Hola, quiero hacer un pedido de ${nombreBonito}`) },
-                { texto: '🔄 Otros precios', callback: () => menuJuegosSiEsJuego(clave) },
-                { texto: '⬅️ Menú principal', clase: 'volver', callback: () => menuPrincipal() }
-            ]);
-
-        } catch (e) {
-            console.error(e);
-            agregarBot('😵 No pude cargar los precios ahora. Prueba de nuevo o escríbenos por WhatsApp.');
-            agregarOpciones([
-                { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte(`Hola, necesito precios de ${nombreBonito}`) },
-                { texto: '⬅️ Menú principal', clase: 'volver', callback: () => menuPrincipal() }
-            ]);
         }
-    }
 
-    function menuJuegosSiEsJuego(clave) {
-        const juegos = ['freefire', 'roblox', 'bloodstrike', 'mobilelegends'];
-        if (juegos.includes(clave)) return menuJuegos();
-        return menuStreaming();
-    }
-
-    // ─────── CÓMO RECARGAR ───────
-    function comoRecargar() {
-        agregarBot(
-`Recargar es súper fácil 🚀:
-
-1️⃣ Elige el juego o streaming en la tienda.
-2️⃣ Elige el paquete que quieras.
-3️⃣ Ingresa tu ID de jugador (o los datos de la cuenta).
-4️⃣ Paga con Pago Móvil o el método que elijas.
-5️⃣ Te llega el código o los datos de acceso al instante. ✅
-
-¿Qué quieres hacer ahora?`
-        );
-        agregarOpciones([
-            { texto: '💎 Ver precios', callback: () => menuPrincipal() },
-            { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte('Hola, necesito ayuda para recargar') },
-            { texto: '⬅️ Menú principal', clase: 'volver', callback: () => menuPrincipal() }
-        ]);
-    }
-
-    // ─────── SOPORTE ───────
-    function irSoporte(mensajeExtra) {
-        const texto = mensajeExtra || 'Hola, necesito ayuda con mi pedido.';
-        agregarBot('Te estoy abriendo WhatsApp con nuestro equipo de soporte 💬 ...');
-        setTimeout(() => abrirWhatsApp(texto), 800);
+        return items;
     }
 
     // ═══════════════════════════════════════════════
-    // BÚSQUEDA POR TEXTO LIBRE (fallback)
+    // VARIABLES DEL CHAT
     // ═══════════════════════════════════════════════
-    const MAPA_JUEGOS = {
-        'free fire': ['freefire', 'Free Fire'],
-        'freefire': ['freefire', 'Free Fire'],
-        'ff': ['freefire', 'Free Fire'],
-        'roblox': ['roblox', 'Roblox'],
-        'blood strike': ['bloodstrike', 'Blood Strike'],
-        'bloodstrike': ['bloodstrike', 'Blood Strike'],
-        'mobile legends': ['mobilelegends', 'Mobile Legends'],
-        'ml': ['mobilelegends', 'Mobile Legends'],
-        'netflix': ['netflix', 'Netflix'],
-        'disney': ['disney', 'Disney+'],
-        'hbo': ['hbo', 'HBO Max'],
-        'max': ['hbo', 'HBO Max'],
-        'spotify': ['spotify', 'Spotify']
-    };
-
-    async function buscarPorTexto(texto) {
-        const t = texto.toLowerCase();
-
-        // Buscar palabras clave
-        for (const key of Object.keys(MAPA_JUEGOS)) {
-            if (t.includes(key)) {
-                const [clave, nombre] = MAPA_JUEGOS[key];
-                return mostrarPreciosDe(clave, nombre);
-            }
-        }
-
-        if (t.includes('recarg') || t.includes('cómo') || t.includes('como')) {
-            return comoRecargar();
-        }
-        if (t.includes('soporte') || t.includes('ayuda') || t.includes('problema') || t.includes('whatsapp')) {
-            return irSoporte();
-        }
-        if (t.includes('precio') || t.includes('cuánto') || t.includes('cuanto')) {
-            return menuPrincipal();
-        }
-
-        // No reconocido
-        agregarBot('No entendí bien 🤔. Pero puedes elegir una opción:');
-        menuPrincipal();
-    }
-
-    // ═══════════════════════════════════════════════
-    // INPUT DE TEXTO
-    // ═══════════════════════════════════════════════
+    const chatBox = document.getElementById('chatBox');
     const inputMensaje = document.getElementById('inputMensaje');
     const btnEnviar = document.getElementById('btnEnviar');
+    const sugerencias = document.getElementById('sugerencias');
 
-    function enviarTexto() {
-        const texto = inputMensaje.value.trim();
-        if (!texto) return;
-        agregarUsuario(texto);
-        inputMensaje.value = '';
-        buscarPorTexto(texto);
+    // Cargar historial previo de la conversación
+    let mensajes = JSON.parse(sessionStorage.getItem('chatHistorial') || '[]');
+
+    // ═══════════════════════════════════════════════
+    // HELPERS DE UI
+    // ═══════════════════════════════════════════════
+    function scrollAbajo() { chatBox.scrollTop = chatBox.scrollHeight; }
+
+    function agregarMensaje(rol, contenido, guardar = true) {
+        const div = document.createElement('div');
+        div.className = `message ${rol}`;
+        div.textContent = contenido;
+        chatBox.appendChild(div);
+        scrollAbajo();
+        if (guardar) {
+            mensajes.push({ role: rol, content: contenido });
+            sessionStorage.setItem('chatHistorial', JSON.stringify(mensajes));
+        }
     }
 
-    btnEnviar.addEventListener('click', enviarTexto);
-    inputMensaje.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarTexto(); });
+    function mostrarTyping() {
+        const div = document.createElement('div');
+        div.className = 'message assistant typing';
+        div.innerHTML = '<span></span><span></span><span></span>';
+        chatBox.appendChild(div);
+        scrollAbajo();
+        return div;
+    }
+
+    // ═══════════════════════════════════════════════
+    // ENVIAR MENSAJE A LA IA
+    // ═══════════════════════════════════════════════
+    async function enviarMensaje() {
+        const texto = inputMensaje.value.trim();
+        if (!texto) return;
+
+        agregarMensaje('user', texto);
+        inputMensaje.value = '';
+        btnEnviar.disabled = true;
+        inputMensaje.disabled = true;
+
+        const typing = mostrarTyping();
+
+        try {
+            // 1. Obtener precios reales de los HTML
+            let contextoPrecios = '';
+            try {
+                const precios = await extraerPreciosDeHTML();
+                contextoPrecios = formatearPreciosParaIA(precios);
+            } catch (e) {
+                contextoPrecios = 'No se pudieron leer los precios ahora.';
+            }
+
+            // 2. Construir el system prompt
+            const systemPrompt = construirSystemPrompt(contextoPrecios);
+
+            // 3. Llamar al backend (Vercel /api/chatbot)
+            const respuesta = await fetch('/api/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    systemPrompt,
+                    mensajes: mensajes.slice(-12) // últimos 12 mensajes para no gastar tokens
+                })
+            });
+
+            typing.remove();
+
+            if (!respuesta.ok) {
+                agregarMensaje('assistant',
+                    '¡Ups! Tuve un problema técnico. Pero puedes escribirme de nuevo o contactar a soporte por WhatsApp: +58 422-824-2411');
+                return;
+            }
+
+            const data = await respuesta.json();
+            const respuestaIA = data.respuesta || 'Disculpa, ¿me repites la pregunta?';
+            agregarMensaje('assistant', respuestaIA);
+
+        } catch (error) {
+            typing.remove();
+            console.error(error);
+            agregarMensaje('assistant',
+                'Ups, algo falló en la conexión. Intenta otra vez, o escríbenos por WhatsApp: +58 422-824-2411');
+        } finally {
+            btnEnviar.disabled = false;
+            inputMensaje.disabled = false;
+            inputMensaje.focus();
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    // CONSTRUIR EL PROMPT DEL ASISTENTE
+    // ═══════════════════════════════════════════════
+    function formatearPreciosParaIA(precios) {
+        let txt = 'LISTA DE PRECIOS REALES (extraída de la tienda):\n\n';
+        Object.keys(precios).forEach((juego) => {
+            txt += `🎮 ${juego}:\n`;
+            precios[juego].forEach((p) => {
+                txt += `   - ${p.nombre}: $${p.precio}\n`;
+            });
+            txt += '\n';
+        });
+        return txt;
+    }
+
+    function construirSystemPrompt(contextoPrecios) {
+        return `Eres "Rigo", el asistente virtual de RecargasGames, una tienda venezolana de recargas de juegos y streaming.
+
+PERSONALIDAD:
+- Amable, cercano, venezolano, con chispa pero respetuoso.
+- Hablas en español siempre.
+- Nunca dices "no entendí", "no sé" o "no puedo ayudarte" sin ofrecer una alternativa útil.
+- Si no tienes una respuesta exacta, das tu mejor aproximación o invitas a WhatsApp.
+- Respuestas cortas, claras y útiles. Nada de párrafos largos.
+
+INFORMACIÓN QUE MANEJAS:
+- WhatsApp de soporte: +58 422-824-2411 (https://wa.me/584228242411)
+- Métodos de pago: Pago Móvil, Binance, Zelle, transferencia.
+- Tiempo de entrega: al instante en la mayoría de juegos; streaming manual hasta 30 min.
+- Los precios están en dólares (USD).
+
+${contextoPrecios}
+
+REGLAS ESTRICTAS:
+1. Da el precio EXACTO de la lista cuando te pregunten por un producto.
+2. Nunca inventes precios que no estén en la lista. Si no está, di "no lo tengo a mano pero te lo confirmo por WhatsApp" y da el número.
+3. Si preguntan por algo que no sea de la tienda (ej: chistes, clima, etc.), responde amablemente y redirige al tema de recargas.
+4. Si el usuario pregunta algo ambiguo, haz una suposición razonable y responde; no preguntes "¿a qué te refieres?".
+5. Si el cliente quiere comprar o tiene un problema con un pedido, dale el WhatsApp.
+6. Nunca menciones que eres una IA ni que usas una API.
+7. Usa emojis con moderación (1 o 2 por respuesta).
+8. Si el usuario te pide algo que no puedes hacer, ofrece una alternativa.
+
+EJEMPLOS DE RESPUESTAS:
+- "¿Cuánto cuesta Netflix?" → "Netflix lo tenemos desde $X.XX al mes 🎬. ¿Quieres ver todos los planes?"
+- "Hola" → "¡Hola! 👋 ¿En qué te ayudo hoy?"
+- "No me llegó el pedido" → "Uy, vamos a resolverlo. Escríbenos a wa.me/584228242411 con tu número de pedido y te atendemos al instante. 🙌"
+- "¿Hacen descuentos?" → "¡Claro que sí! Escríbenos por WhatsApp al +58 422-824-2411 y te paso las promos del día. 🔥"`;
+    }
+
+    // ═══════════════════════════════════════════════
+    // EVENTOS
+    // ═══════════════════════════════════════════════
+    btnEnviar.addEventListener('click', enviarMensaje);
+    inputMensaje.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarMensaje(); });
+
+    sugerencias.addEventListener('click', (e) => {
+        const chip = e.target.closest('.sug-chip');
+        if (!chip) return;
+        inputMensaje.value = chip.dataset.msg;
+        enviarMensaje();
+    });
 
     // ═══════════════════════════════════════════════
     // ARRANQUE
     // ═══════════════════════════════════════════════
-    agregarBot('¡Hola! 👋 Soy el asistente de RecargasGames.');
-    menuPrincipal();
+    if (mensajes.length === 0) {
+        agregarMensaje('assistant',
+            '¡Hola! 👋 Soy Rigo, tu asistente. Pregúntame por precios de juegos, streaming, o cómo recargar. 🎮',
+            false
+        );
+        mensajes.push({ role: 'assistant', content: '¡Hola! 👋 Soy Rigo, tu asistente.' });
+        sessionStorage.setItem('chatHistorial', JSON.stringify(mensajes));
+    } else {
+        // Restaurar historial previo
+        mensajes.forEach((m) => {
+            const div = document.createElement('div');
+            div.className = `message ${m.role}`;
+            div.textContent = m.content;
+            chatBox.appendChild(div);
+        });
+        scrollAbajo();
+    }
+
+    // Precargar precios en segundo plano
+    extraerPreciosDeHTML().catch(() => {});
 </script>
 
 </body>
