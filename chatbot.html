@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte RecargasGames</title>
 
+    <!-- 🔥 FIREBASE: Base de datos conectada -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -12,21 +13,32 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0a0e1a; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
         .chat-header {
             background: linear-gradient(135deg, #10a37f, #0d8a6b);
-            padding: 14px 18px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
         }
         .avatar {
-            width: 44px; height: 44px; border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
             background: #ffffff;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
             border: 2px solid rgba(255, 255, 255, 0.6);
         }
         .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .chat-header h3 { font-size: 15px; font-weight: 700; }
         .chat-header p { font-size: 11px; opacity: 0.85; }
+
         .chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
         .message {
             max-width: 88%; padding: 11px 14px; border-radius: 14px; font-size: 14px;
@@ -45,6 +57,7 @@
             border-radius: 10px;
             max-width: 90%;
         }
+
         .input-area {
             display: flex; gap: 8px; padding: 12px;
             background: #0d1627; border-top: 1px solid rgba(30, 42, 69, 0.8); flex-shrink: 0;
@@ -90,7 +103,7 @@
 
 <script>
     // ═══════════════════════════════════════════════
-    // FIREBASE
+    // 🔥 FIREBASE: CONEXIÓN A LA BASE DE DATOS
     // ═══════════════════════════════════════════════
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -105,6 +118,9 @@
     const db = firebase.database();
     const auth = firebase.auth();
 
+    // ═══════════════════════════════════════════════
+    // UI
+    // ═══════════════════════════════════════════════
     const chatBox = document.getElementById('chatBox');
     const inputMensaje = document.getElementById('inputMensaje');
     const btnEnviar = document.getElementById('btnEnviar');
@@ -113,6 +129,7 @@
     let nombreUsuario = 'Cliente';
     let emailUsuario = '';
 
+    // Detectar si hay un usuario logueado
     auth.onAuthStateChanged((user) => {
         if (user) {
             usuarioActual = user.uid;
@@ -139,16 +156,21 @@
         scrollAbajo();
     }
 
+    // ═══════════════════════════════════════════════
+    // 📤 ENVIAR MENSAJE Y GUARDAR EN FIREBASE
+    // ═══════════════════════════════════════════════
     async function enviarMensaje() {
         const texto = inputMensaje.value.trim();
         if (!texto) return;
 
+        // Mostrar el mensaje en pantalla
         agregarMensaje('user', texto);
         inputMensaje.value = '';
         btnEnviar.disabled = true;
         inputMensaje.disabled = true;
 
         try {
+            // 🔥 GUARDAR EN FIREBASE (nodo: mensajes_soporte)
             const nuevoMensaje = {
                 mensaje: texto,
                 uid: usuarioActual || 'anonimo',
@@ -162,6 +184,7 @@
 
             await db.ref('mensajes_soporte').push(nuevoMensaje);
 
+            // Confirmación al usuario
             agregarSistema('✅ Mensaje enviado. Nuestro equipo te responderá pronto.');
 
             setTimeout(() => {
@@ -170,7 +193,7 @@
             }, 800);
 
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error guardando en Firebase:', error);
             agregarMensaje('assistant',
                 '⚠️ No pudimos enviar tu mensaje. Intenta de nuevo o escríbenos por WhatsApp: +58 422-824-2411');
         } finally {
@@ -180,6 +203,9 @@
         }
     }
 
+    // ═══════════════════════════════════════════════
+    // EVENTOS
+    // ═══════════════════════════════════════════════
     btnEnviar.addEventListener('click', enviarMensaje);
     inputMensaje.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') enviarMensaje();
