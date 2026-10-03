@@ -11,7 +11,7 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'HTTP-Referer': process.env.URL || 'https://recargasgames.shop',
+        'HTTP-Referer': 'https://recargasgames.shop',
         'X-Title': 'Recargas Games'
       },
       body: JSON.stringify({
@@ -20,6 +20,11 @@ export default async function handler(req, res) {
         temperature: 0.7
       })
     });
+
+    if (!respuesta.ok) {
+      const errorData = await respuesta.json();
+      return res.status(respuesta.status).json(errorData);
+    }
 
     const datos = await respuesta.json();
     res.status(200).json(datos);
