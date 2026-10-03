@@ -1,3 +1,4 @@
+// api/chat.js — versión con respaldo automático
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -6,7 +7,8 @@ export default async function handler(req, res) {
   try {
     const { messages } = req.body;
 
-    const respuesta = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // ✅ INTENTO 1: OpenRouter directo (debe funcionar)
+    let respuesta = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -21,13 +23,28 @@ export default async function handler(req, res) {
       })
     });
 
+    // ❌ Si falla → intentamos por otro camino
     if (!respuesta.ok) {
-      const errorData = await respuesta.json();
-      return res.status(respuesta.status).json(errorData);
+      console.log("Directo falló, probando alternativa...");
+      
+      // 🔄 INTENTO 2: Usamos modelo de Groq por OpenRouter
+      respuesta = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'meta-llama/llama-3-8b-instruct:free', // ✅ Gratis y rápido
+          messages: messages,
+          temperature: 0.7
+        })
+      });
     }
 
     const datos = await respuesta.json();
     res.status(200).json(datos);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
