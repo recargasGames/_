@@ -48,20 +48,33 @@
         const estado = document.getElementById('estado');
         let historial = [];
 
-        // 📋 INFORMACIÓN DE TU TIENDA
+        // 📋 INFORMACIÓN COMPLETA DE TU TIENDA — Aquí se edita todo
         const SISTEMA = `
-Eres el asistente de RECARGAS GAMES. Responde amable, claro y breve.
+Eres el asistente oficial de RECARGAS GAMES. Responde SIEMPRE en español, amable, claro y breve.
 
-📦 PRODUCTOS:
-• Netflix 1 Pantalla → 3.8$ / 3.500 Bs
-• Netflix Completa → 13$ / 12.500 Bs
-• Disney+ 1 Pantalla → 3.5$ / 3.500 Bs
-• Disney+ Completa → 9$ / 12.500 Bs
-• Free Fire → desde 770 Bs
-• Roblox, Blood Strike, COD, PUBG, Mobile Legends disponibles
+📦 LISTA DE PRECIOS:
+• 🎬 Netflix 1 Pantalla → 3.8$ / 3.500 Bs
+• 🎬 Netflix Cuenta Completa → 13$ / 12.500 Bs
+• 🎬 Disney+ 1 Pantalla → 3.5$ / 3.500 Bs
+• 🎬 Disney+ Cuenta Completa → 9$ / 12.500 Bs
+• 🔥 Free Fire Diamantes → desde 770 Bs
+• 🎮 Roblox → desde 3.5$
+• 🎮 Blood Strike, COD Mobile, PUBG, Mobile Legends disponibles
 
-💳 Pago Móvil: Banco Venezuela 0102 — Cédula: 32824869 — Tel: 04228242411
-🌐 recargasgames.shop | ⏰ 7AM - 11PM
+💳 FORMAS DE PAGO:
+• Pago Móvil: Banco Venezuela (0102) — Cédula: 32824869 — Tel: 04228242411
+• Binance / USDT
+• Transferencia Bancaria
+
+🌐 PÁGINA WEB: recargasgames.shop
+⏰ HORARIO: 7:00 AM — 11:00 PM
+📲 WHATSAPP: +58 422 824 2411
+
+CÓMO COMPRAR:
+1️⃣ Elige tu producto
+2️⃣ Realiza el pago
+3️⃣ Envía el comprobante por WhatsApp o en la web
+4️⃣ Recibes tu cuenta/recarga al instante ✅
         `.trim();
 
         async function enviar() {
@@ -69,8 +82,6 @@ Eres el asistente de RECARGAS GAMES. Responde amable, claro y breve.
             if(!texto) return;
             
             agregarMensaje(texto, 'cliente');
-            historial.push({ role: 'user', content: texto });
-            
             pregunta.value = '';
             btnEnviar.disabled = true;
             estado.textContent = "⏳ Consultando...";
@@ -79,14 +90,15 @@ Eres el asistente de RECARGAS GAMES. Responde amable, claro y breve.
             agregarMensaje('Escribiendo...', 'ia', idCargando);
 
             try {
-                // 🔒 LLAMAMOS A NUESTRA FUNCIÓN DE VERSEL — SIN CLAVE AQUÍ
+                // 🔒 Llamada segura a Vercel
                 const respuesta = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         messages: [
                             { role: 'system', content: SISTEMA },
-                            ...historial
+                            ...historial,
+                            { role: 'user', content: texto }
                         ]
                     })
                 });
@@ -94,7 +106,7 @@ Eres el asistente de RECARGAS GAMES. Responde amable, claro y breve.
                 if(!respuesta.ok) throw new Error('Error del servidor');
                 
                 const datos = await respuesta.json();
-                const textoRespuesta = datos?.choices?.[0]?.message?.content || "No entendí";
+                const textoRespuesta = datos?.choices?.[0]?.message?.content || "No entendí. Pregúntame por Netflix, Disney+, Free Fire, Roblox o precios 😊";
 
                 document.getElementById(idCargando)?.remove();
                 agregarMensaje(textoRespuesta, 'ia');
@@ -106,7 +118,7 @@ Eres el asistente de RECARGAS GAMES. Responde amable, claro y breve.
                 document.getElementById(idCargando)?.remove();
                 estado.textContent = "❌ " + error.message;
                 estado.className = "estado error";
-                agregarMensaje("Error: " + error.message, 'ia');
+                agregarMensaje("Error: " + error.message + "\n\nIntenta de nuevo.", 'ia');
             }
 
             btnEnviar.disabled = false;
