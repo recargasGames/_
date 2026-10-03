@@ -10,14 +10,10 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body {
-            background: #0a0e1a; color: #fff;
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-        }
+        body { background: #0a0e1a; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         .chat-header {
             background: linear-gradient(135deg, #10a37f, #0d8a6b);
-            padding: 14px 18px; display: flex; align-items: center; gap: 10px;
-            flex-shrink: 0;
+            padding: 14px 18px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
         }
         .avatar {
             width: 38px; height: 38px; border-radius: 50%;
@@ -26,67 +22,47 @@
         }
         .chat-header h3 { font-size: 15px; font-weight: 700; }
         .chat-header p { font-size: 11px; opacity: 0.85; }
-
-        .chat-box {
-            flex: 1; overflow-y: auto; padding: 16px;
-            display: flex; flex-direction: column; gap: 10px;
-        }
+        .chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
         .message {
-            max-width: 88%; padding: 11px 14px;
-            border-radius: 14px; font-size: 14px;
+            max-width: 88%; padding: 11px 14px; border-radius: 14px; font-size: 14px;
             line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
         }
         .user { align-self: flex-end; background: #10a37f; color: #fff; border-bottom-right-radius: 4px; }
         .assistant { align-self: flex-start; background: #1e2a45; color: #e2e8f0; border-bottom-left-radius: 4px; }
-
         .typing { display: flex; gap: 4px; padding: 14px 18px; align-self: flex-start; background: #1e2a45; border-radius: 14px; }
-        .typing span {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: #94a3b8; animation: bounce 1.4s infinite;
-        }
+        .typing span { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; animation: bounce 1.4s infinite; }
         .typing span:nth-child(2) { animation-delay: 0.2s; }
         .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-            30% { transform: translateY(-5px); opacity: 1; }
-        }
+        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-5px); opacity: 1; } }
 
         .sugerencias {
-            display: flex; gap: 6px; padding: 8px 12px;
-            overflow-x: auto; background: #0d1627;
-            border-top: 1px solid rgba(30, 42, 69, 0.5);
+            display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto;
+            background: #0d1627; border-top: 1px solid rgba(30, 42, 69, 0.5);
             scrollbar-width: none; flex-shrink: 0;
         }
         .sugerencias::-webkit-scrollbar { display: none; }
         .sug-chip {
             flex-shrink: 0; padding: 6px 12px; border-radius: 16px;
-            background: rgba(16, 163, 127, 0.15);
-            border: 1px solid rgba(16, 163, 127, 0.4);
+            background: rgba(16, 163, 127, 0.15); border: 1px solid rgba(16, 163, 127, 0.4);
             color: #4ade80; font-size: 12px; font-weight: 600;
-            cursor: pointer; font-family: inherit; white-space: nowrap;
-            transition: all 0.2s;
+            cursor: pointer; font-family: inherit; white-space: nowrap; transition: all 0.2s;
         }
         .sug-chip:hover { background: rgba(16, 163, 127, 0.3); }
 
         .input-area {
             display: flex; gap: 8px; padding: 12px;
-            background: #0d1627;
-            border-top: 1px solid rgba(30, 42, 69, 0.8);
-            flex-shrink: 0;
+            background: #0d1627; border-top: 1px solid rgba(30, 42, 69, 0.8); flex-shrink: 0;
         }
         .input-area input {
             flex: 1; padding: 11px 14px; border-radius: 22px;
             border: 1px solid rgba(30, 42, 69, 0.9);
-            background: #060c20; color: #fff; font-size: 14px;
-            outline: none; font-family: inherit;
+            background: #060c20; color: #fff; font-size: 14px; outline: none; font-family: inherit;
         }
         .input-area input:focus { border-color: #10a37f; }
         .input-area button {
             width: 44px; height: 44px; border-radius: 50%;
-            border: none; background: #10a37f; color: #fff;
-            font-size: 18px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            border: none; background: #10a37f; color: #fff; font-size: 18px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .input-area button:disabled { background: #475569; cursor: not-allowed; }
     </style>
@@ -104,10 +80,10 @@
 <div class="chat-box" id="chatBox"></div>
 
 <div class="sugerencias" id="sugerencias">
-    <button class="sug-chip" data-msg="¿Cuánto cuesta Free Fire 110 diamantes?">Free Fire 110 💎</button>
-    <button class="sug-chip" data-msg="Precios de Netflix">Netflix</button>
-    <button class="sug-chip" data-msg="Precios de Disney+">Disney+</button>
-    <button class="sug-chip" data-msg="Precios de Roblox">Roblox</button>
+    <button class="sug-chip" data-msg="Precios de Free Fire">Free Fire 💎</button>
+    <button class="sug-chip" data-msg="Precios de Blood Strike">Blood Strike 🥇</button>
+    <button class="sug-chip" data-msg="Precios de Roblox">Roblox 💰</button>
+    <button class="sug-chip" data-msg="Precios de Mobile Legends">Mobile Legends 💎</button>
     <button class="sug-chip" data-msg="¿Cómo recargo?">¿Cómo recargo?</button>
 </div>
 
@@ -124,94 +100,49 @@
     const MODELO = 'openai/gpt-3.5-turbo';
     const WHATSAPP = '584228242411';
 
-    // Detectar si estamos en local o en producción (Vercel)
-    const ES_LOCAL = location.hostname === 'localhost' ||
-                     location.hostname === '127.0.0.1' ||
-                     location.protocol === 'file:';
-
     // ═══════════════════════════════════════════════
-    // FIREBASE
+    // PRECIOS REALES (de tus capturas)
     // ═══════════════════════════════════════════════
-    const firebaseConfig = {
-        apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
-        authDomain: "free-52119.firebaseapp.com",
-        databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "free-52119",
-        storageBucket: "free-52119.firebasestorage.app",
-        messagingSenderId: "632240144599",
-        appId: "1:632240144599:web:e31c25665ffe19c194b092"
+    const PRECIOS = {
+        'Free Fire': {
+            '110 Diamantes': { bs: 786, usd: 0.81 },
+            '341 Diamantes': { bs: 2522, usd: 2.60 },
+            '572 Diamantes': { bs: 4074, usd: 4.20 },
+            '1166 Diamantes': { bs: 7566, usd: 7.80 },
+            '2398 Diamantes': { bs: 14841, usd: 15.30 },
+            '6160 Diamantes': { bs: 37830, usd: 39.00, oferta: true },
+            'Tarjeta Semanal (7 días)': { bs: 2425, usd: 2.50 },
+            'Tarjeta Mensual (30 días)': { bs: 10670, usd: 11.00 }
+        },
+        'Blood Strike': {
+            '105 Golds': { bs: 873, usd: 0.90 },
+            '320 Golds': { bs: 2600, usd: 2.68 },
+            '540 Golds': { bs: 4346, usd: 4.48 },
+            '1100 Golds': { bs: 8633, usd: 8.90 },
+            '2260 Golds': { bs: 17363, usd: 17.90 },
+            '5800 Golds': { bs: 43359, usd: 44.70, oferta: true }
+        },
+        'Roblox': {
+            '50 Robux': { bs: 970, usd: 1.00 },
+            '100 Robux': { bs: 1649, usd: 1.70 },
+            '275 Robux': { bs: 3395, usd: 3.50 },
+            '360 Robux': { bs: 4074, usd: 4.20 },
+            '555 Robux': { bs: 6839, usd: 7.05 },
+            '1000 Robux': { bs: 11155, usd: 11.50 },
+            '2000 Robux': { bs: 21340, usd: 22.00 },
+            '2400 Robux': { bs: 25705, usd: 26.50 }
+        },
+        'Mobile Legends': {
+            '55 Diamantes': { bs: 834, usd: 0.86 },
+            '86 Diamantes': { bs: 1164, usd: 1.20 },
+            '112 Diamantes': { bs: 1707, usd: 1.76 },
+            '172 Diamantes': { bs: 4850, usd: 5.00 },
+            '257 Diamantes': { bs: 6984, usd: 7.20 },
+            '429 Diamantes': { bs: 11834, usd: 12.20 },
+            '706 Diamantes': { bs: 18915, usd: 19.50 },
+            '1050 Diamantes': { bs: 28615, usd: 29.50, oferta: true }
+        }
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // ═══════════════════════════════════════════════
-    // PÁGINAS CON PRECIOS
-    // ═══════════════════════════════════════════════
-    const PAGINAS_PRECIOS = [
-        { archivo: 'freefire.html',      juego: 'Free Fire' },
-        { archivo: 'roblox.html',        juego: 'Roblox' },
-        { archivo: 'netflix.html',       juego: 'Netflix' },
-        { archivo: 'disney.html',        juego: 'Disney+' },
-        { archivo: 'hbo.html',           juego: 'HBO Max' },
-        { archivo: 'mobilelegends.html', juego: 'Mobile Legends' },
-        { archivo: 'bloodstrike.html',   juego: 'Blood Strike' },
-        { archivo: 'spotify.html',       juego: 'Spotify' }
-    ];
-
-    let preciosExtraidos = null;
-
-    async function extraerPreciosDeHTML() {
-        if (preciosExtraidos) return preciosExtraidos;
-
-        const resultado = {};
-
-        for (const pagina of PAGINAS_PRECIOS) {
-            try {
-                const resp = await fetch(pagina.archivo);
-                if (!resp.ok) continue;
-                const html = await resp.text();
-
-                const items = extraerPreciosDelHTML(html);
-                if (items.length > 0) {
-                    resultado[pagina.juego] = items;
-                }
-            } catch (e) {
-                console.warn(`No se pudo leer ${pagina.archivo}:`, e.message);
-            }
-        }
-
-        preciosExtraidos = resultado;
-        return resultado;
-    }
-
-    function extraerPreciosDelHTML(html) {
-        const items = [];
-
-        // 1) data-nombre / data-precio
-        const regexData = /data-(?:nombre|name|producto|paquete)="([^"]+)"[^>]*data-(?:precio|price|monto)="([^"]+)"/gi;
-        let match;
-        while ((match = regexData.exec(html)) !== null) {
-            items.push({ nombre: match[1].trim(), precio: match[2].trim() });
-        }
-
-        // 2) Patrón: nombre en h3/span + precio con $
-        if (items.length === 0) {
-            const regexClase = /<(?:h[1-6]|span|div|p)[^>]*class="[^"]*(?:nombre|titulo|paquete|item|producto)[^"]*"[^>]*>([^<]+)<\/[^>]*>[\s\S]{0,300}?\$([\d.,]+)/gi;
-            while ((match = regexClase.exec(html)) !== null) {
-                items.push({ nombre: match[1].trim(), precio: match[2].trim() });
-            }
-        }
-
-        // 3) Fallback: cualquier $X.XX
-        if (items.length === 0) {
-            const precios = html.match(/\$[\d]+(?:[.,]\d{1,2})?/g) || [];
-            precios.forEach((p, i) => {
-                items.push({ nombre: `Paquete ${i + 1}`, precio: p.replace('$', '').trim() });
-            });
-        }
-
-        return items.slice(0, 20);
-    }
 
     // ═══════════════════════════════════════════════
     // UI
@@ -247,6 +178,23 @@
     }
 
     // ═══════════════════════════════════════════════
+    // CONSTRUIR CONTEXTO DE PRECIOS
+    // ═══════════════════════════════════════════════
+    function formatearPreciosParaIA() {
+        let txt = 'LISTA DE PRECIOS REALES (actualizada):\n\n';
+        Object.keys(PRECIOS).forEach((juego) => {
+            txt += `🎮 ${juego}:\n`;
+            Object.keys(PRECIOS[juego]).forEach((paq) => {
+                const p = PRECIOS[juego][paq];
+                const oferta = p.oferta ? ' 🔥 OFERTA' : '';
+                txt += `   - ${paq}: ${p.bs} Bs (≈ $${p.usd} USD)${oferta}\n`;
+            });
+            txt += '\n';
+        });
+        return txt;
+    }
+
+    // ═══════════════════════════════════════════════
     // ENVIAR MENSAJE
     // ═══════════════════════════════════════════════
     async function enviarMensaje() {
@@ -261,82 +209,43 @@
         const typing = mostrarTyping();
 
         try {
-            // 1. Obtener precios de los HTML
-            let contextoPrecios = '';
-            try {
-                const precios = await extraerPreciosDeHTML();
-                contextoPrecios = formatearPreciosParaIA(precios);
-            } catch (e) {
-                contextoPrecios = '';
+            const systemPrompt = construirSystemPrompt();
+
+            const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENROUTER_KEY}`,
+                    'HTTP-Referer': location.origin || 'https://recargasgames.vercel.app',
+                    'X-Title': 'RecargasGames'
+                },
+                body: JSON.stringify({
+                    model: MODELO,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        ...mensajes.slice(-12)
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500
+                })
+            });
+
+            typing.remove();
+
+            if (!resp.ok) {
+                console.error('OpenRouter error:', await resp.text());
+                agregarMensaje('assistant', respuestaFallback(texto));
+                return;
             }
 
-            // 2. Construir system prompt
-            const systemPrompt = construirSystemPrompt(contextoPrecios);
-
-            // 3. Llamar a la IA (local directo / Vercel con backend)
-            let respuestaIA = '';
-
-            if (ES_LOCAL) {
-                // Modo local: llamada directa a OpenRouter
-                const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENROUTER_KEY}`,
-                        'HTTP-Referer': location.origin,
-                        'X-Title': 'RecargasGames'
-                    },
-                    body: JSON.stringify({
-                        model: MODELO,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            ...mensajes.slice(-12)
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 500
-                    })
-                });
-
-                typing.remove();
-
-                if (!resp.ok) {
-                    const errText = await resp.text();
-                    console.error('OpenRouter error:', errText);
-                    agregarMensaje('assistant', 'Disculpa, tuve un problema. ¿Me repites? O escríbenos por WhatsApp: +58 422-824-2411');
-                    return;
-                }
-
-                const data = await resp.json();
-                respuestaIA = data.choices?.[0]?.message?.content || 'Disculpa, ¿me repites?';
-
-            } else {
-                // Modo producción: usar backend de Vercel
-                const resp = await fetch('/api/chatbot', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        systemPrompt,
-                        mensajes: mensajes.slice(-12)
-                    })
-                });
-
-                typing.remove();
-
-                if (!resp.ok) {
-                    agregarMensaje('assistant', 'Disculpa, tuve un problema. ¿Me repites? O escríbenos por WhatsApp: +58 422-824-2411');
-                    return;
-                }
-
-                const data = await resp.json();
-                respuestaIA = data.respuesta || 'Disculpa, ¿me repites?';
-            }
-
+            const data = await resp.json();
+            const respuestaIA = data.choices?.[0]?.message?.content || respuestaFallback(texto);
             agregarMensaje('assistant', respuestaIA);
 
         } catch (error) {
             typing.remove();
             console.error(error);
-            agregarMensaje('assistant', 'Ups, algo falló. Intenta otra vez o escríbenos por WhatsApp: +58 422-824-2411');
+            agregarMensaje('assistant', respuestaFallback(texto));
         } finally {
             btnEnviar.disabled = false;
             inputMensaje.disabled = false;
@@ -345,54 +254,103 @@
     }
 
     // ═══════════════════════════════════════════════
-    // PROMPT DEL ASISTENTE
+    // FALLBACK (sin IA)
     // ═══════════════════════════════════════════════
-    function formatearPreciosParaIA(precios) {
-        if (!precios || Object.keys(precios).length === 0) return '';
-        let txt = 'LISTA DE PRECIOS REALES (extraída de la tienda):\n\n';
-        Object.keys(precios).forEach((juego) => {
-            txt += `🎮 ${juego}:\n`;
-            precios[juego].forEach((p) => {
-                txt += `   - ${p.nombre}: $${p.precio}\n`;
-            });
-            txt += '\n';
-        });
-        return txt;
+    function respuestaFallback(texto) {
+        const t = texto.toLowerCase();
+
+        const mapa = {
+            'free fire': 'Free Fire', 'freefire': 'Free Fire', 'ff': 'Free Fire',
+            'roblox': 'Roblox', 'robux': 'Roblox',
+            'blood strike': 'Blood Strike', 'bloodstrike': 'Blood Strike',
+            'mobile legends': 'Mobile Legends', 'ml': 'Mobile Legends',
+            'mlbb': 'Mobile Legends'
+        };
+
+        for (const key of Object.keys(mapa)) {
+            if (t.includes(key)) {
+                const juego = mapa[key];
+                let resp = `Precios de ${juego} 👇\n\n`;
+                Object.keys(PRECIOS[juego]).forEach((paq) => {
+                    const p = PRECIOS[juego][paq];
+                    const oferta = p.oferta ? ' 🔥' : '';
+                    resp += `• ${paq}: ${p.bs} Bs (≈ $${p.usd})${oferta}\n`;
+                });
+                resp += `\n¿Quieres hacer un pedido? Entra al juego en la web y pon tu ID o escríbenos: +58 422-824-2411 🛒`;
+                return resp;
+            }
+        }
+
+        if (t.includes('hola') || t.includes('buenas') || t.includes('buenos')) {
+            return '¡Hola! 👋 ¿En qué te ayudo? Puedo darte precios de Free Fire, Blood Strike, Roblox, Mobile Legends, o ayudarte a recargar.';
+        }
+
+        if (t.includes('recarg') || t.includes('cómo') || t.includes('como')) {
+            return 'Recargar es fácil 🚀:\n\n1️⃣ Elige tu juego en la web\n2️⃣ Selecciona el paquete\n3️⃣ Ingresa tu ID (o WhatsApp en Roblox)\n4️⃣ Paga con Pago Móvil o Binance\n5️⃣ Recibe al instante ✅\n\n¿Te ayudo con algo más?';
+        }
+
+        if (t.includes('precio') || t.includes('cuánto') || t.includes('cuanto') || t.includes('costo') || t.includes('vale')) {
+            return 'Claro 😊 Dime de qué juego quieres el precio:\n\n• Free Fire\n• Blood Strike\n• Roblox\n• Mobile Legends\n\nEj: "precios de Free Fire"';
+        }
+
+        if (t.includes('pago') || t.includes('pagar') || t.includes('método')) {
+            return 'Aceptamos 💳:\n\n• Pago Móvil\n• Binance\n• Zelle\n• Transferencia\n\nAl elegir tu paquete te sale el método de pago. ¿Te ayudo?';
+        }
+
+        if (t.includes('tarda') || t.includes('tiempo') || t.includes('demora')) {
+            return 'Los juegos se acreditan **al instante** ⚡. Roblox y streaming pueden tardar unos minutos. Si pasa de 30 min, escríbenos: +58 422-824-2411';
+        }
+
+        if (t.includes('soporte') || t.includes('ayuda') || t.includes('problema') || t.includes('error')) {
+            return 'Escríbenos por WhatsApp y te atendemos al instante: +58 422-824-2411 💬';
+        }
+
+        if (t.includes('gracias') || t.includes('bueno')) {
+            return '¡De nada! 🙌 Cualquier cosa aquí estoy.';
+        }
+
+        if (t.includes('descuento') || t.includes('promo') || t.includes('oferta')) {
+            return '¡Claro que sí! 🔥 Escríbenos por WhatsApp al +58 422-824-2411 y te paso las promos del día.';
+        }
+
+        return 'Entiendo 👍 Cuéntame más. Puedo darte precios de juegos (Free Fire, Blood Strike, Roblox, Mobile Legends) o ayudarte con la recarga.';
     }
 
-    function construirSystemPrompt(contextoPrecios) {
-        return `Eres "Rigo", el asistente virtual de RecargasGames, una tienda venezolana de recargas de juegos y streaming.
+    // ═══════════════════════════════════════════════
+    // PROMPT PARA LA IA
+    // ═══════════════════════════════════════════════
+    function construirSystemPrompt() {
+        return `Eres "Rigo", el asistente virtual de RecargasGames, una tienda venezolana de recargas de juegos.
 
 PERSONALIDAD:
 - Amable, cercano, venezolano, con chispa pero respetuoso.
-- Hablas en español siempre.
-- NUNCA dices "no entendí", "no sé" o "no puedo ayudarte" sin ofrecer una alternativa útil.
-- Si no tienes una respuesta exacta, das tu mejor aproximación o invitas a WhatsApp.
-- Respuestas cortas, claras y útiles.
+- Español siempre. Respuestas CORTAS (máximo 5-6 líneas).
+- NUNCA dices "no entendí", "no sé" ni "no puedo ayudarte". Siempre ofreces alternativa.
 
-INFORMACIÓN QUE MANEJAS:
-- WhatsApp de soporte: +58 422-824-2411 (https://wa.me/584228242411)
+INFORMACIÓN:
+- WhatsApp: +58 422-824-2411 (https://wa.me/584228242411)
 - Métodos de pago: Pago Móvil, Binance, Zelle, transferencia.
-- Tiempo de entrega: al instante en juegos; streaming manual hasta 30 min.
-- Los precios están en dólares (USD).
+- Juegos disponibles: Free Fire, Blood Strike, Roblox, Mobile Legends.
+- Acreditación: al instante en juegos; Roblox puede tardar minutos.
+- Los precios están en bolívares (Bs) y su equivalente en USD.
 
-${contextoPrecios}
+${formatearPreciosParaIA()}
 
-REGLAS ESTRICTAS:
-1. Da el precio EXACTO de la lista cuando te pregunten por un producto.
-2. Nunca inventes precios que no estén en la lista. Si no está, di "no lo tengo a mano pero te lo confirmo por WhatsApp" y da el número.
-3. Si preguntan por algo que no sea de la tienda, responde amablemente y redirige al tema de recargas.
-4. Si el usuario pregunta algo ambiguo, haz una suposición razonable y responde.
-5. Si el cliente quiere comprar o tiene un problema con un pedido, dale el WhatsApp.
-6. Nunca menciones que eres una IA ni que usas una API.
-7. Usa emojis con moderación (1 o 2 por respuesta).
-8. Si el usuario te saluda, saluda de vuelta y pregunta en qué puedes ayudar.
+REGLAS:
+1. Da precios EXACTOS de la lista (Bs y USD).
+2. Cuando el usuario pregunte por un juego, muestra TODOS sus paquetes con precios.
+3. Si hay "oferta" indícalo con 🔥.
+4. Si el cliente quiere comprar, dile: "Entra al juego en la web, elige el paquete y pon tu ID / WhatsApp".
+5. Si tiene un problema con un pedido, dale el WhatsApp.
+6. Nunca menciones que eres IA.
+7. Emojis con moderación (1-3).
+8. Si te saludan, saluda y pregunta en qué ayudar.
+9. Si preguntan algo que no es de la tienda, responde amable y redirige.
 
 EJEMPLOS:
-- "¿Cuánto cuesta Netflix?" → "Netflix lo tenemos desde $X.XX al mes 🎬. ¿Quieres ver todos los planes?"
-- "Hola" → "¡Hola! 👋 ¿En qué te ayudo hoy?"
-- "No me llegó el pedido" → "Uy, vamos a resolverlo. Escríbenos a wa.me/584228242411 con tu número de pedido. 🙌"
-- "¿Hacen descuentos?" → "¡Claro! Escríbenos por WhatsApp al +58 422-824-2411 y te paso las promos del día. 🔥"`;
+- "precios de Free Fire" → lista los 6 paquetes + 2 tarjetas con precios.
+- "hola" → "¡Hola! 👋 ¿En qué te ayudo hoy?"
+- "cuánto cuesta 110 diamantes" → "110 diamantes de Free Fire: 786 Bs (≈ $0.81) 💎. ¿Quieres hacer el pedido?"`;
     }
 
     // ═══════════════════════════════════════════════
@@ -413,7 +371,7 @@ EJEMPLOS:
     // ═══════════════════════════════════════════════
     if (mensajes.length === 0) {
         agregarMensaje('assistant',
-            '¡Hola! 👋 Soy Rigo, tu asistente. Pregúntame por precios de juegos, streaming, o cómo recargar. 🎮',
+            '¡Hola! 👋 Soy Rigo, tu asistente. Pregúntame por precios de Free Fire, Blood Strike, Roblox, Mobile Legends, o cómo recargar. 🎮',
             true
         );
     } else {
@@ -425,9 +383,6 @@ EJEMPLOS:
         });
         scrollAbajo();
     }
-
-    // Precargar precios en segundo plano
-    extraerPreciosDeHTML().catch(() => {});
 </script>
 
 </body>
