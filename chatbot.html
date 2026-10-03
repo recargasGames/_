@@ -1,322 +1,169 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RECARGAS GAMES — Asistente y Verificación</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
-        :root{
-            --fondo-oscuro:#0b1020;
-            --tarjeta:#151c35;
-            --dorado:#f5c542;
-            --dorado-claro:#f9d766;
-            --azul-borde:#2a3560;
-            --texto:#e6e9f2;
-            --usuario:#2563eb;
-            --exito:#10b981;
-            --error:#ef4444;
-        }
-        body{background:var(--fondo-oscuro);color:var(--texto);min-height:100vh;padding:16px}
-        .contenedor{max-width:520px;margin:0 auto}
-        .cabecera{text-align:center;margin-bottom:20px}
-        .logo{font-size:1.4rem;font-weight:bold;color:var(--dorado);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px}
-        .subtitulo{font-size:0.85rem;color:#8892b0}
-
-        /* CHAT */
-        .chat{background:var(--tarjeta);border-radius:16px;padding:16px;height:480px;overflow-y:auto;border:1px solid var(--azul-borde);margin-bottom:12px}
-        .mensaje{margin-bottom:14px;padding:12px 16px;border-radius:14px;max-width:85%;line-height:1.5}
-        .cliente{background:var(--usuario);margin-left:auto;border-bottom-right-radius:4px}
-        .sistema{background:#1e2a4a;margin-right:auto;border-bottom-left-radius:4px;border:1px solid var(--azul-borde)}
-        .exito{border-left:3px solid var(--exito)}
-        .error-msg{border-left:3px solid var(--error)}
-        .aviso-whatsapp{background:rgba(16,185,129,0.1);border:1px solid var(--exito);border-radius:10px;padding:10px;margin:10px 0;font-size:0.9rem}
-
-        /* ENTRADA */
-        .zona-entrada{display:flex;flex-direction:column;gap:10px}
-        .fila-superior{display:flex;gap:10px;align-items:center}
-        input[type="text"]{flex:1;padding:14px;border-radius:10px;border:1px solid var(--azul-borde);background:var(--tarjeta);color:var(--texto);font-size:1rem}
-        .btn{padding:14px 18px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;transition:transform 0.1s}
-        .btn:active{transform:scale(0.97)}
-        .btn-dorado{background:linear-gradient(135deg,var(--dorado),var(--dorado-claro));color:#000}
-        .btn-dorado:hover{opacity:0.95}
-        .btn-archivo{background:#2a3560;color:white;padding:12px;border-radius:10px;text-align:center;cursor:pointer;font-size:0.9rem}
-        .btn-archivo:hover{background:#354280}
-        .vista-previa{margin-top:10px;border-radius:10px;overflow:hidden;max-height:150px;border:1px solid var(--azul-borde);display:none}
-        .vista-previa img{width:100%;height:100%;object-fit:contain;background:#0f1525}
-        .etiqueta-oculta{display:none}
-        .estado{font-size:0.8rem;margin-top:8px;text-align:center;color:#94a3b8}
-        .cargando{color:var(--dorado)}
-        .oculto{display:none !important}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECARGASGAMES - Free Fire</title>
+<style>
+:root{
+    --fondo-oscuro:#2b1f14;
+    --caja-fondo:#3d2c1e;
+    --borde-naranja:#e67e22;
+    --texto-dorado:#f9c80e;
+    --texto-blanco:#ffffff;
+    --texto-claro:#f0e6d6;
+    --pago-movil:#1e4d2b;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
+body{
+    background-color:#1a120b;
+    color:var(--texto-blanco);
+    padding:20px;
+    line-height:1.6;
+}
+.contenedor{
+    max-width:450px;
+    margin:0 auto;
+}
+.tarjeta{
+    background-color:var(--caja-fondo);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:16px;
+    border:1px solid var(--borde-naranja);
+}
+.titulo-seccion{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.diamante{color:#60a5fa}
+.nivel{color:#ef4444}
+.tarjetas{color:#f9c80e}
+.fila-botones{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+    gap:10px;
+    margin-bottom:12px;
+}
+.boton-cantidad{
+    background-color:var(--fondo-oscuro);
+    border:2px solid var(--borde-naranja);
+    border-radius:10px;
+    padding:12px 8px;
+    text-align:center;
+    cursor:pointer;
+    transition:transform .2s;
+}
+.boton-cantidad:hover{transform:scale(1.05)}
+.numero{font-size:20px;font-weight:bold;color:var(--texto-dorado)}
+.precio{font-size:15px;color:var(--texto-claro)}
+.otro-monto{
+    margin:14px 0;
+    font-style:italic;
+    color:#ddd;
+}
+.lista-paquetes{
+    list-style:none;
+    padding-left:6px;
+}
+.lista-paquetes li{
+    padding:6px 0;
+    border-bottom:1px dashed rgba(255,255,255,.1);
+}
+.texto-dorado{color:var(--texto-dorado);font-weight:500}
+.descuento{
+    margin-top:14px;
+    padding:10px;
+    background-color:rgba(249,200,14,.1);
+    border-radius:8px;
+    font-weight:500;
+}
+.pago-movil{
+    background-color:var(--pago-movil);
+    border-radius:10px;
+    padding:14px;
+    margin-top:16px;
+}
+.input-mensaje{
+    width:100%;
+    margin-top:12px;
+    padding:12px;
+    border-radius:8px;
+    border:none;
+    font-size:16px;
+    background-color:#2c2c2c;
+    color:white;
+}
+</style>
 </head>
 <body>
-    <div class="contenedor">
-        <div class="cabecera">
-            <div class="logo">🎮 RECARGAS GAMES</div>
-            <div class="subtitulo">Asistente • Verificación • Recargas</div>
-        </div>
+<div class="contenedor">
 
-        <div class="chat" id="chat">
-            <div class="mensaje sistema">¡Hola! 👋 Bienvenido a RECARGAS GAMES 😊\n\nEscribe:\n• <b>Netflix</b> o <b>Disney</b> → ver planes\n• <b>Free Fire</b> / <b>Roblox</b> → ver recargas\n• Sube la imagen del comprobante → extraigo la referencia automáticamente\n• O escribe la referencia directamente\n\n¿En qué te ayudo?</div>
-        </div>
-
-        <div class="zona-entrada">
-            <div class="fila-superior">
-                <input type="text" id="textoEntrada" placeholder="Escribe tu mensaje o referencia...">
-                <button class="btn btn-dorado" onclick="enviar()">Enviar</button>
-            </div>
-            
-            <label class="btn-archivo" for="archivoImagen">
-                📷 Subir comprobante de pago
-            </label>
-            <input type="file" id="archivoImagen" accept="image/*" class="etiqueta-oculta">
-            
-            <div class="vista-previa" id="vistaPrevia">
-                <img id="imagenPreview" alt="Vista previa">
-            </div>
-        </div>
-
-        <p class="estado" id="estado">✅ Listo para recibir</p>
+<!-- 💎 DIAMANTES -->
+<div class="tarjeta">
+    <div class="titulo-seccion">
+        <span class="diamante">💎</span> DIAMANTES FREE FIRE
     </div>
+    <div class="fila-botones">
+        <div class="boton-cantidad">
+            <div class="numero">110</div>
+            <div class="precio">Bs 755</div>
+        </div>
+        <div class="boton-cantidad">
+            <div class="numero">220</div>
+            <div class="precio">Bs 1.511</div>
+        </div>
+        <div class="boton-cantidad">
+            <div class="numero">341</div>
+            <div class="precio">Bs 2.266</div>
+        </div>
+        <div class="boton-cantidad">
+            <div class="numero">572</div>
+            <div class="precio">Bs 3.800</div>
+        </div>
+    </div>
+    <p class="otro-monto">🔧 ¿Otra cantidad? Escríbemela</p>
+</div>
 
-    <script>
-        // =============================================
-        // 🔧 CONFIGURACIÓN
-        // =============================================
-        const TU_WHATSAPP = "+584228242411"; // Tu número con código de país
-        const TASA_USD = 970; // Tasa Bs por USD
+<!-- 📦 PASES DE NIVEL -->
+<div class="tarjeta">
+    <div class="titulo-seccion">
+        <span class="nivel">📦</span> PASES DE NIVEL
+    </div>
+    <ul class="lista-paquetes">
+        <li>▫️ Pase Nivel 6 — <span class="texto-dorado">Bs 390</span></li>
+        <li>▫️ Pase Nivel 10 — <span class="texto-dorado">Bs 823</span></li>
+        <li>▫️ Pase Nivel 15 — <span class="texto-dorado">Bs 823</span></li>
+        <li>▫️ Pase Nivel 20 — <span class="texto-dorado">Bs 823</span></li>
+        <li>▫️ Pase Nivel 25 — <span class="texto-dorado">Bs 823</span></li>
+        <li>▫️ Pase Nivel 30 — <span class="texto-dorado">Bs 1.256</span></li>
+    </ul>
+</div>
 
-        // BASE DE DATOS DE PRODUCTOS
-        const PRODUCTOS = {
-            netflix: {
-                nombre: "Netflix",
-                planes: [
-                    {nombre: "Perfil Netflix", precioBs: 3686, precioUsd: 3.80, descripcion: "1 perfil • 30 días • HD"},
-                    {nombre: "Cuenta Completa Netflix", precioBs: 12610, precioUsd: 13.00, descripcion: "Cuenta completa • 30 días"}
-                ]
-            },
-            disney: {
-                nombre: "Disney+",
-                planes: [
-                    {nombre: "Perfil Disney+", precioBs: 3424, precioUsd: 3.53, descripcion: "1 perfil • 30 días • Full HD"},
-                    {nombre: "Cuenta Completa Disney+", precioBs: 8730, precioUsd: 9.00, descripcion: "Cuenta completa • 30 días"}
-                ]
-            },
-            freefire: {
-                nombre: "Free Fire",
-                paquetes: [
-                    {cantidad: "110", moneda: "Diamantes", precioBs: 786, precioUsd: 0.81},
-                    {cantidad: "341", moneda: "Diamantes", precioBs: 2522, precioUsd: 2.60},
-                    {cantidad: "572", moneda: "Diamantes", precioBs: 4074, precioUsd: 4.20},
-                    {cantidad: "1166", moneda: "Diamantes", precioBs: 7566, precioUsd: 7.80},
-                    {cantidad: "2398", moneda: "Diamantes", precioBs: 14841, precioUsd: 15.30},
-                    {cantidad: "6160", moneda: "Diamantes", precioBs: 37830, precioUsd: 39.00, etiqueta: "🔥 Mega oferta"}
-                ]
-            },
-            roblox: {
-                nombre: "Roblox",
-                paquetes: [
-                    {cantidad: "50", moneda: "Robux", precioBs: 970, precioUsd: 1.00},
-                    {cantidad: "100", moneda: "Robux", precioBs: 1649, precioUsd: 1.70},
-                    {cantidad: "275", moneda: "Robux", precioBs: 3395, precioUsd: 3.50},
-                    {cantidad: "555", moneda: "Robux", precioBs: 6839, precioUsd: 7.05},
-                    {cantidad: "1000", moneda: "Robux", precioBs: 11155, precioUsd: 11.50}
-                ]
-            },
-            bloodstrike: {
-                nombre: "Blood Strike",
-                paquetes: [
-                    {cantidad: "105", moneda: "Golds", precioBs: 873, precioUsd: 0.90},
-                    {cantidad: "320", moneda: "Golds", precioBs: 2600, precioUsd: 2.68},
-                    {cantidad: "1100", moneda: "Golds", precioBs: 8633, precioUsd: 8.90}
-                ]
-            },
-            mobilelegends: {
-                nombre: "Mobile Legends",
-                paquetes: [
-                    {cantidad: "55", moneda: "Diamantes", precioBs: 834, precioUsd: 0.86},
-                    {cantidad: "172", moneda: "Diamantes", precioBs: 4850, precioUsd: 5.00},
-                    {cantidad: "1050", moneda: "Diamantes", precioBs: 28615, precioUsd: 29.50, etiqueta: "🔥 Mega oferta"}
-                ]
-            }
-        };
+<!-- 🎫 TARJETAS -->
+<div class="tarjeta">
+    <div class="titulo-seccion">
+        <span class="tarjetas">🎫</span> TARJETAS
+    </div>
+    <ul class="lista-paquetes">
+        <li>▫️ Semanal Básica — <span class="texto-dorado">Bs 747</span></li>
+        <li>▫️ Tarjeta Semanal — <span class="texto-dorado">Bs 2.423</span></li>
+        <li>▫️ Tarjeta Mensual — <span class="texto-dorado">Bs 11.648</span></li>
+    </ul>
+    <p class="descuento">💳 Son tus precios con descuento por estar registrado.</p>
+</div>
 
-        // DATOS DE PAGO
-        const DATOS_PAGO = {
-            banco: "Banco de Venezuela",
-            codigo: "0102",
-            cedula: "32824869",
-            telefono: "04228242411",
-            titular: "Recargas Games"
-        };
+<!-- 🏦 PAGO MÓVIL -->
+<div class="pago-movil">
+    <div class="titulo-seccion">🏦 PAGO MÓVIL</div>
+    <p>Banco: R4 Banco Microfinanciero</p>
+    <input type="text" class="input-mensaje" placeholder="Escribe tu mensaje...">
+</div>
 
-        // =============================================
-        // 📱 FUNCIONES DEL CHAT
-        // =============================================
-        const chat = document.getElementById('chat');
-        const textoEntrada = document.getElementById('textoEntrada');
-        const archivoImagen = document.getElementById('archivoImagen');
-        const vistaPrevia = document.getElementById('vistaPrevia');
-        const imagenPreview = document.getElementById('imagenPreview');
-        const estado = document.getElementById('estado');
-        let imagenBase64 = null;
-
-        // Previsualizar imagen
-        archivoImagen.addEventListener('change', function(e) {
-            const archivo = e.target.files[0];
-            if(!archivo) return;
-            
-            const lector = new FileReader();
-            lector.onload = function(event) {
-                imagenBase64 = event.target.result;
-                imagenPreview.src = imagenBase64;
-                vistaPrevia.style.display = 'block';
-                estado.textContent = "✅ Imagen cargada — presiona Enviar";
-            };
-            lector.readAsDataURL(archivo);
-        });
-
-        // Enviar mensaje
-        async function enviar() {
-            const texto = textoEntrada.value.trim();
-            
-            if(!texto && !imagenBase64) return;
-
-            // Mostrar mensaje del cliente
-            if(texto) agregarMensaje(texto, 'cliente');
-            if(imagenBase64) {
-                agregarMensaje("[📷 Imagen del comprobante subida]", 'cliente');
-            }
-
-            textoEntrada.value = '';
-            estado.textContent = "⏳ Procesando...";
-
-            // Procesar
-            await new Promise(res => setTimeout(res, 600));
-            
-            let respuesta = '';
-            let referenciaExtraida = null;
-
-            // 1. Si hay imagen → simular extracción de datos
-            if(imagenBase64) {
-                respuesta = procesarImagen();
-                imagenBase64 = null;
-                vistaPrevia.style.display = 'none';
-                archivoImagen.value = '';
-            }
-            // 2. Si hay texto → procesar comando
-            else if(texto) {
-                respuesta = procesarTexto(texto);
-                // Extraer referencia si la escribe
-                const refMatch = texto.match(/referencia\s*[:=]?\s*([A-Z0-9]{6,12})/i) ||
-                                texto.match(/ref\s*[:=]?\s*([A-Z0-9]{6,12})/i) ||
-                                texto.match(/\b([A-Z0-9]{8,10})\b/);
-                if(refMatch) referenciaExtraida = refMatch[1];
-            }
-
-            agregarMensaje(respuesta, 'sistema');
-
-            // Si se detectó referencia → paso de verificación
-            if(referenciaExtraida || respuesta.includes('REFERENCIA DETECTADA')) {
-                const ref = referenciaExtraida || "SIMULADA-" + Math.random().toString(36).substr(2,8).toUpperCase();
-                await new Promise(res => setTimeout(res, 800));
-                agregarMensaje(`✅ REFERENCIA: ${ref}\n\n🔍 Verificando pago...`, 'sistema');
-                
-                await new Promise(res => setTimeout(res, 1200));
-                agregarMensaje(`✅ PAGO VERIFICADO ✅\n\nMonto: Confirmado ✅\nReferencia: ${ref}\n\n🚀 Procesando recarga...\nTe llegará al instante ✅`, 'sistema exito');
-
-                // 🔔 ENVIAR A TU WHATSAPP
-                const mensajeWhatsApp = encodeURIComponent(
-                    `🔔 NUEVO PAGO RECIBIDO\n\nReferencia: ${ref}\nCliente: ${texto || 'Subió comprobante'}\nFecha: ${new Date().toLocaleString('es-VE')}`
-                );
-                window.open(`https://wa.me/${TU_WHATSAPP.replace(/\D/g,'')}?text=${mensajeWhatsApp}`, '_blank');
-                
-                agregarMensaje(`📲 Notificación enviada a tu WhatsApp ✅`, 'sistema');
-            }
-
-            estado.textContent = "✅ Listo";
-        }
-
-        // Procesar comandos de texto
-        function procesarTexto(texto) {
-            const t = texto.toLowerCase();
-
-            if(/hola|buenas|saludo|buen día|buenos días|buenas tardes|buenas noches/.test(t)) {
-                notificarWhatsApp("Cliente saludó");
-                return "¡Hola! 👋 Bienvenido a RECARGAS GAMES 😊\n\n¿Qué deseas?\n• Netflix / Disney+ → ver planes\n• Free Fire / Roblox / Blood Strike → ver recargas\n• Sube imagen del comprobante → verifico el pago\n• Escribe tu referencia → la confirmo";
-            }
-
-            if(/netflix/.test(t)) {
-                let res = "🎬 NETFLIX — Planes disponibles:\n\n";
-                PRODUCTOS.netflix.planes.forEach(p => {
-                    res += `✅ ${p.nombre}\n   ${p.descripcion}\n   ${p.precioBs} Bs ≈ ${p.precioUsd}$\n\n`;
-                });
-                res += `💳 Pago Móvil: ${DATOS_PAGO.banco} ${DATOS_PAGO.codigo}\nC.I.: ${DATOS_PAGO.cedula}\nTel: ${DATOS_PAGO.telefono}\n\nSube el comprobante o escribe la referencia ✅`;
-                return res;
-            }
-
-            if(/disney/.test(t)) {
-                let res = "🎬 DISNEY+ — Planes disponibles:\n\n";
-                PRODUCTOS.disney.planes.forEach(p => {
-                    res += `✅ ${p.nombre}\n   ${p.descripcion}\n   ${p.precioBs} Bs ≈ ${p.precioUsd}$\n\n`;
-                });
-                res += `💳 Pago Móvil: ${DATOS_PAGO.banco} ${DATOS_PAGO.codigo}\nC.I.: ${DATOS_PAGO.cedula}\nTel: ${DATOS_PAGO.telefono}`;
-                return res;
-            }
-
-            if(/free fire|freefire|diamantes/.test(t)) {
-                let res = "🔥 FREE FIRE — Recargas:\n\n";
-                PRODUCTOS.freefire.paquetes.forEach(p => {
-                    res += `${p.etiqueta ? p.etiqueta+' ' : ''}${p.cantidad} ${p.moneda} → ${p.precioBs} Bs ≈ ${p.precioUsd}$\n`;
-                });
-                res += `\n💳 Pago Móvil: ${DATOS_PAGO.banco} ${DATOS_PAGO.codigo}\nC.I.: ${DATOS_PAGO.cedula}\nTel: ${DATOS_PAGO.telefono}`;
-                return res;
-            }
-
-            if(/roblox/.test(t)) {
-                let res = "🎮 ROBLOX — Recargas:\n\n";
-                PRODUCTOS.roblox.paquetes.forEach(p => {
-                    res += `${p.cantidad} ${p.moneda} → ${p.precioBs} Bs ≈ ${p.precioUsd}$\n`;
-                });
-                res += `\n💳 Pago Móvil: ${DATOS_PAGO.banco} ${DATOS_PAGO.codigo}\nC.I.: ${DATOS_PAGO.cedula}\nTel: ${DATOS_PAGO.telefono}`;
-                return res;
-            }
-
-            if(/pago|datos|móvil|movil|binance/.test(t)) {
-                return `💳 DATOS DE PAGO:\n\n✅ Pago Móvil:\nBanco: ${DATOS_PAGO.banco} (${DATOS_PAGO.codigo})\nC.I.: ${DATOS_PAGO.cedula}\nTeléfono: ${DATOS_PAGO.telefono}\nTitular: ${DATOS_PAGO.titular}\n\n✅ Binance / USDT disponible\nTasa: ${TASA_USD} Bs por USD\n\n📲 Sube el comprobante y te verifico al instante ✅`;
-            }
-
-            if(/referencia|ref\s*:|pago|comprobante/.test(t)) {
-                return "🔍 Buscando referencia...\n\nLa detecté automáticamente 👇";
-            }
-
-            return "No entendí bien 😅 Puedes escribirme:\n• Netflix\n• Disney\n• Free Fire\n• Roblox\n• Pago\n\nO sube la imagen del comprobante 📷";
-        }
-
-        // Simular extracción desde imagen
-        function procesarImagen() {
-            const refSimulada = "REF-" + Math.random().toString(36).substr(2, 8).toUpperCase();
-            return `📷 Imagen recibida ✅\n\n🔍 Extrayendo datos...\n\n✅ REFERENCIA ENCONTRADA: ${refSimulada}\nMonto: Detectado ✅\nBanco: Banco de Venezuela ✅\n\n🔍 Verificando...`;
-        }
-
-        // Notificar a tu WhatsApp
-        function notificarWhatsApp(mensaje) {
-            const texto = encodeURIComponent(`🔔 RECARGAS GAMES — ${mensaje}`);
-            // No abrimos automático aquí para no molestar, solo cuando hay pago real
-        }
-
-        // Agregar mensaje al chat
-        function agregarMensaje(texto, tipo, claseExtra='') {
-            const div = document.createElement('div');
-            div.className = `mensaje ${tipo} ${claseExtra}`;
-            div.innerHTML = texto.replace(/\n/g, '<br>');
-            chat.appendChild(div);
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        // Enter para enviar
-        textoEntrada.addEventListener('keydown', e => e.key === 'Enter' && enviar());
-    </script>
+</div>
 </body>
 </html>
