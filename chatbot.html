@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Soporte RecargasGames</title>
 
-    <!-- 🔥 FIREBASE: Base de datos conectada -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -40,12 +39,63 @@
         .chat-header p { font-size: 11px; opacity: 0.85; }
 
         .chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* Mensaje base */
         .message {
-            max-width: 88%; padding: 11px 14px; border-radius: 14px; font-size: 14px;
-            line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+            max-width: 88%;
+            padding: 11px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            position: relative;
         }
-        .user { align-self: flex-end; background: #10a37f; color: #fff; border-bottom-right-radius: 4px; }
-        .assistant { align-self: flex-start; background: #1e2a45; color: #e2e8f0; border-bottom-left-radius: 4px; }
+
+        /* 🆕 Mensajes del usuario con hora + tilde */
+        .user {
+            align-self: flex-end;
+            background: #10a37f;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            padding-bottom: 20px; /* espacio para hora y tilde */
+        }
+        .user .meta {
+            position: absolute;
+            right: 10px;
+            bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .user .meta .hora { opacity: 0.85; }
+        .user .meta .tilde {
+            font-size: 12px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.75);
+            transition: color 0.3s;
+        }
+        /* ✓ Enviado */
+        .user .meta .tilde.enviado {
+            color: rgba(255, 255, 255, 0.75);
+        }
+        /* ✓✓ Visto */
+        .user .meta .tilde.visto {
+            color: #7dd3fc;
+        }
+
+        /* Mensajes del bot (bienvenida, sistema) */
+        .assistant {
+            align-self: flex-start;
+            background: #1e2a45;
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
         .sistema {
             align-self: center;
             background: rgba(16, 163, 127, 0.15);
@@ -93,7 +143,6 @@
         ¡Hola! 👋 Soy el equipo de soporte de RecargasGames.
         Escríbenos tu duda, problema o pedido y te responderemos lo antes posible.
     </div>
-    <div class="sistema">💬 Tu mensaje llegará directamente a nuestro equipo</div>
 </div>
 
 <div class="input-area">
@@ -103,7 +152,7 @@
 
 <script>
     // ═══════════════════════════════════════════════
-    // 🔥 FIREBASE: CONEXIÓN A LA BASE DE DATOS
+    // FIREBASE
     // ═══════════════════════════════════════════════
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -129,7 +178,6 @@
     let nombreUsuario = 'Cliente';
     let emailUsuario = '';
 
-    // Detectar si hay un usuario logueado
     auth.onAuthStateChanged((user) => {
         if (user) {
             usuarioActual = user.uid;
@@ -140,6 +188,14 @@
 
     function scrollAbajo() { chatBox.scrollTop = chatBox.scrollHeight; }
 
+    function horaActual() {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+    }
+
+    // Agrega un mensaje del bot
     function agregarMensaje(rol, contenido) {
         const div = document.createElement('div');
         div.className = `message ${rol}`;
@@ -148,29 +204,41 @@
         scrollAbajo();
     }
 
-    function agregarSistema(contenido) {
+    // 🆕 Agrega un mensaje del usuario con hora + tilde
+    // keyMensaje: la clave de Firebase (para poder actualizar el tilde cuando se lea)
+    function agregarMensajeUsuario(texto, keyMensaje) {
         const div = document.createElement('div');
-        div.className = 'sistema';
-        div.textContent = contenido;
+        div.className = 'message user';
+        div.dataset.key = keyMensaje || '';
+
+        const spanTexto = document.createElement('span');
+        spanTexto.textContent = texto;
+        div.appendChild(spanTexto);
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML = `
+            <span class="hora">${horaActual()}</span>
+            <span class="tilde enviado" id="tilde-${keyMensaje}">✓</span>
+        `;
+        div.appendChild(meta);
+
         chatBox.appendChild(div);
         scrollAbajo();
     }
 
     // ═══════════════════════════════════════════════
-    // 📤 ENVIAR MENSAJE Y GUARDAR EN FIREBASE
+    // ENVIAR MENSAJE
     // ═══════════════════════════════════════════════
     async function enviarMensaje() {
         const texto = inputMensaje.value.trim();
         if (!texto) return;
 
-        // Mostrar el mensaje en pantalla
-        agregarMensaje('user', texto);
         inputMensaje.value = '';
         btnEnviar.disabled = true;
         inputMensaje.disabled = true;
 
         try {
-            // 🔥 GUARDAR EN FIREBASE (nodo: mensajes_soporte)
             const nuevoMensaje = {
                 mensaje: texto,
                 uid: usuarioActual || 'anonimo',
@@ -182,20 +250,29 @@
                 origen: 'chatbot'
             };
 
-            await db.ref('mensajes_soporte').push(nuevoMensaje);
+            // Guardar en Firebase
+            const ref = await db.ref('mensajes_soporte').push(nuevoMensaje);
+            const key = ref.key;
 
-            // Confirmación al usuario
-            agregarSistema('✅ Mensaje enviado. Nuestro equipo te responderá pronto.');
+            // Mostrar en el chat con la hora y el tilde
+            agregarMensajeUsuario(texto, key);
 
-            setTimeout(() => {
-                agregarMensaje('assistant',
-                    'Mientras tanto, también puedes escribirnos directo por WhatsApp: +58 422-824-2411 💬');
-            }, 800);
+            // 🆕 Escuchar cuando el admin marque como leído → cambiar a ✓✓ azul
+            db.ref('mensajes_soporte/' + key + '/estado').on('value', (snap) => {
+                const estado = snap.val();
+                const tilde = document.getElementById(`tilde-${key}`);
+                if (!tilde) return;
+                if (estado === 'leido') {
+                    tilde.textContent = '✓✓';
+                    tilde.classList.remove('enviado');
+                    tilde.classList.add('visto');
+                }
+            });
 
         } catch (error) {
             console.error('Error guardando en Firebase:', error);
-            agregarMensaje('assistant',
-                '⚠️ No pudimos enviar tu mensaje. Intenta de nuevo o escríbenos por WhatsApp: +58 422-824-2411');
+            // En caso de error, igual mostramos el mensaje local con tilde gris
+            agregarMensajeUsuario(texto, 'error-' + Date.now());
         } finally {
             btnEnviar.disabled = false;
             inputMensaje.disabled = false;
@@ -203,9 +280,6 @@
         }
     }
 
-    // ═══════════════════════════════════════════════
-    // EVENTOS
-    // ═══════════════════════════════════════════════
     btnEnviar.addEventListener('click', enviarMensaje);
     inputMensaje.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') enviarMensaje();
