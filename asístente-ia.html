@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RECARGAS GAMES — Asistente IA</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+        :root{--azul:#3b82f6;--fondo:#0f172a;--tarjeta:#1e293b;--texto:#f1f5f9;--borde:#334155}
+        body{background:var(--fondo);color:var(--texto);min-height:100vh;padding:20px;display:flex;justify-content:center;align-items:center}
+        .contenedor{width:100%;max-width:550px}
+        h1{text-align:center;margin-bottom:20px;color:var(--azul);font-size:1.4rem}
+        .chat{background:var(--tarjeta);border-radius:16px;padding:20px;height:450px;overflow-y:auto;margin-bottom:15px;border:1px solid var(--borde)}
+        .mensaje{margin-bottom:12px;padding:10px 14px;border-radius:12px;max-width:85%;line-height:1.5}
+        .cliente{background:var(--azul);margin-left:auto;border-bottom-right-radius:4px}
+        .ia{background:#475569;margin-right:auto;border-bottom-left-radius:4px;white-space:pre-wrap}
+        .cargando{opacity:0.7}
+        .entrada{display:flex;gap:10px}
+        input{flex:1;padding:14px;border-radius:10px;border:1px solid var(--borde);background:var(--tarjeta);color:var(--texto);font-size:1rem}
+        button{padding:14px 24px;background:var(--azul);border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer}
+        button:hover{background:#2563eb}
+        button:disabled{opacity:0.5;cursor:not-allowed}
+        .estado{font-size:0.85rem;margin-top:10px;text-align:center}
+        .ok{color:#10b981}
+        .error{color:#ef4444}
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>🤖 RECARGAS GAMES — Asistente IA</h1>
+        
+        <div class="chat" id="chat">
+            <div class="mensaje ia">¡Hola! 👋 Soy el asistente de Recargas Games. Pregúntame sobre precios, productos o cómo comprar 😊</div>
+        </div>
+
+        <div class="entrada">
+            <input type="text" id="pregunta" placeholder="Ej: ¿cuánto cuesta Netflix?">
+            <button id="btnEnviar" onclick="enviar()">Enviar</button>
+        </div>
+        
+        <p id="estado" class="estado ok">✅ Conectado — ¡Pregunta!</p>
+    </div>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const pregunta = document.getElementById('pregunta');
+        const btnEnviar = document.getElementById('btnEnviar');
+        const estado = document.getElementById('estado');
+        let historial = [];
+
+        // 📋 INFORMACIÓN DE TU TIENDA
+        const SISTEMA = `
+Eres el asistente de RECARGAS GAMES. Responde amable, claro y breve.
+
+📦 PRODUCTOS:
+• Netflix 1 Pantalla → 3.8$ / 3.500 Bs
+• Netflix Completa → 13$ / 12.500 Bs
+• Disney+ 1 Pantalla → 3.5$ / 3.500 Bs
+• Disney+ Completa → 9$ / 12.500 Bs
+• Free Fire → desde 770 Bs
+• Roblox, Blood Strike, COD, PUBG, Mobile Legends disponibles
+
+💳 Pago Móvil: Banco Venezuela 0102 — Cédula: 32824869 — Tel: 04228242411
+🌐 recargasgames.shop | ⏰ 7AM - 11PM
+        `.trim();
+
+        async function enviar() {
+            const texto = pregunta.value.trim();
+            if(!texto) return;
+            
+            agregarMensaje(texto, 'cliente');
+            historial.push({ role: 'user', content: texto });
+            
+            pregunta.value = '';
+            btnEnviar.disabled = true;
+            estado.textContent = "⏳ Consultando...";
+
+            const idCargando = 'cargando-'+Date.now();
+            agregarMensaje('Escribiendo...', 'ia', idCargando);
+
+            try {
+                // 🔒 LLAMAMOS A NUESTRA FUNCIÓN DE VERSEL — SIN CLAVE AQUÍ
+                const respuesta = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: 'system', content: SISTEMA },
+                            ...historial
+                        ]
+                    })
+                });
+
+                if(!respuesta.ok) throw new Error('Error del servidor');
+                
+                const datos = await respuesta.json();
+                const textoRespuesta = datos?.choices?.[0]?.message?.content || "No entendí";
+
+                document.getElementById(idCargando)?.remove();
+                agregarMensaje(textoRespuesta, 'ia');
+                historial.push({ role: 'assistant', content: textoRespuesta });
+                estado.textContent = "✅ Listo";
+                estado.className = "estado ok";
+
+            } catch (error) {
+                document.getElementById(idCargando)?.remove();
+                estado.textContent = "❌ " + error.message;
+                estado.className = "estado error";
+                agregarMensaje("Error: " + error.message, 'ia');
+            }
+
+            btnEnviar.disabled = false;
+            pregunta.focus();
+        }
+
+        function agregarMensaje(texto, tipo, id=null) {
+            const div = document.createElement('div');
+            div.className = `mensaje ${tipo}`;
+            if(id) div.id = id;
+            div.textContent = texto;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        pregunta.addEventListener('keydown', e => e.key === 'Enter' && enviar());
+    </script>
+</body>
+</html>
