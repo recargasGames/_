@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistente</title>
+
+    <!-- Firebase para leer precios reales -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body {
@@ -34,26 +39,82 @@
             display: flex; flex-direction: column; gap: 10px;
         }
         .message {
-            max-width: 85%; padding: 11px 14px;
+            max-width: 88%; padding: 11px 14px;
             border-radius: 14px; font-size: 14px;
             line-height: 1.45; white-space: pre-wrap; word-wrap: break-word;
         }
         .user { align-self: flex-end; background: #10a37f; color: #fff; border-bottom-right-radius: 4px; }
         .assistant { align-self: flex-start; background: #1e2a45; color: #e2e8f0; border-bottom-left-radius: 4px; }
-        .typing { display: flex; gap: 4px; padding: 14px 18px; }
-        .typing span {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: #94a3b8; animation: bounce 1.4s infinite;
+
+        /* OPCIONES (botones) */
+        .opciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+            align-self: flex-start;
+            max-width: 90%;
         }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-            30% { transform: translateY(-5px); opacity: 1; }
+        .opcion {
+            padding: 9px 14px;
+            border-radius: 22px;
+            background: rgba(16, 163, 127, 0.12);
+            border: 1px solid rgba(16, 163, 127, 0.55);
+            color: #4ade80;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            user-select: none;
+        }
+        .opcion:hover {
+            background: rgba(16, 163, 127, 0.28);
+            transform: translateY(-1px);
+        }
+        .opcion:active { transform: translateY(0); }
+        .opcion.volver {
+            background: rgba(148, 163, 184, 0.12);
+            border-color: rgba(148, 163, 184, 0.5);
+            color: #cbd5e1;
+        }
+        .opcion.soporte {
+            background: rgba(37, 211, 102, 0.15);
+            border-color: rgba(37, 211, 102, 0.6);
+            color: #4ade80;
         }
 
+        /* Lista de precios */
+        .precio-lista {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 12px;
+            padding: 10px 12px;
+            align-self: flex-start;
+            max-width: 90%;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .precio-lista .titulo-lista {
+            color: #f5d76e;
+            font-weight: 800;
+            font-size: 13px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .precio-lista .fila {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.06);
+        }
+        .precio-lista .fila:last-child { border-bottom: none; }
+        .precio-lista .fila .nom { color: #cbd5e1; }
+        .precio-lista .fila .pre { color: #4ade80; font-weight: 700; }
+
         .input-area {
-            display: flex; gap: 8px; padding: 12px;
+            display: flex; gap: 8px; padding: 10px 12px;
             background: #0d1627;
             border-top: 1px solid rgba(30, 42, 69, 0.8);
             flex-shrink: 0;
@@ -81,88 +142,300 @@
     <div class="avatar">🤖</div>
     <div>
         <h3>Asistente RecargasGames</h3>
-        <p>En línea</p>
+        <p>Elige una opción 👇</p>
     </div>
 </div>
 
-<div class="chat-box" id="chatBox">
-    <div class="message assistant">¡Hola! 👋 Pregúntame por precios de juegos o streaming.</div>
-</div>
+<div class="chat-box" id="chatBox"></div>
 
 <div class="input-area">
-    <input type="text" id="inputMensaje" placeholder="Escribe tu pregunta..." autocomplete="off">
+    <input type="text" id="inputMensaje" placeholder="O escribe tu pregunta..." autocomplete="off">
     <button id="btnEnviar" aria-label="Enviar">➤</button>
 </div>
 
 <script>
-    const API_URL = '/api/chatbot';
+    // ═══════════════════════════════════════════════
+    // FIREBASE
+    // ═══════════════════════════════════════════════
+    const firebaseConfig = {
+        apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+        authDomain: "free-52119.firebaseapp.com",
+        databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "free-52119",
+        storageBucket: "free-52119.firebasestorage.app",
+        messagingSenderId: "632240144599",
+        appId: "1:632240144599:web:e31c25665ffe19c194b092"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
+    const WHATSAPP = '584228242411';
     const chatBox = document.getElementById('chatBox');
-    const inputMensaje = document.getElementById('inputMensaje');
-    const btnEnviar = document.getElementById('btnEnviar');
-    let mensajes = [];
 
-    async function enviarMensaje() {
-        const texto = inputMensaje.value.trim();
-        if (!texto) return;
+    // Caché de precios
+    let preciosCache = null;
+    async function obtenerPrecios() {
+        if (preciosCache) return preciosCache;
+        const snap = await db.ref('productos').once('value');
+        preciosCache = snap.val() || {};
+        return preciosCache;
+    }
 
-        agregarMensaje('user', texto);
-        mensajes.push({ role: 'user', content: texto });
-        inputMensaje.value = '';
+    // ═══════════════════════════════════════════════
+    // HELPERS
+    // ═══════════════════════════════════════════════
+    function scrollAbajo() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-        btnEnviar.disabled = true;
-        inputMensaje.disabled = true;
-        const typing = mostrarTyping();
+    function agregarBot(texto) {
+        const div = document.createElement('div');
+        div.className = 'message assistant';
+        div.textContent = texto;
+        chatBox.appendChild(div);
+        scrollAbajo();
+    }
+
+    function agregarUsuario(texto) {
+        const div = document.createElement('div');
+        div.className = 'message user';
+        div.textContent = texto;
+        chatBox.appendChild(div);
+        scrollAbajo();
+    }
+
+    function agregarListaPrecios(titulo, items) {
+        const div = document.createElement('div');
+        div.className = 'precio-lista';
+        let html = `<div class="titulo-lista">${titulo}</div>`;
+        items.forEach((it) => {
+            html += `<div class="fila"><span class="nom">${it.nombre}</span><span class="pre">$${it.precio}</span></div>`;
+        });
+        div.innerHTML = html;
+        chatBox.appendChild(div);
+        scrollAbajo();
+    }
+
+    function agregarOpciones(opciones) {
+        // opciones = [{ texto, callback, clase? }]
+        const wrap = document.createElement('div');
+        wrap.className = 'opciones';
+        opciones.forEach((op) => {
+            const btn = document.createElement('button');
+            btn.className = 'opcion ' + (op.clase || '');
+            btn.textContent = op.texto;
+            btn.addEventListener('click', () => {
+                agregarUsuario(op.texto);
+                wrap.remove(); // quita los botones al elegir
+                op.callback();
+            });
+            wrap.appendChild(btn);
+        });
+        chatBox.appendChild(wrap);
+        scrollAbajo();
+    }
+
+    function abrirWhatsApp(mensaje) {
+        const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+    }
+
+    // ═══════════════════════════════════════════════
+    // MENÚ PRINCIPAL
+    // ═══════════════════════════════════════════════
+    function menuPrincipal() {
+        agregarBot('¿Qué necesitas hoy? Elige una opción 👇');
+        agregarOpciones([
+            { texto: '💎 Ver precios de juegos', callback: () => menuJuegos() },
+            { texto: '🎬 Ver precios de streaming', callback: () => menuStreaming() },
+            { texto: '🛒 Cómo recargar', callback: () => comoRecargar() },
+            { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte() }
+        ]);
+    }
+
+    // ─────── JUEGOS ───────
+    function menuJuegos() {
+        agregarBot('¿De qué juego quieres ver los precios? 🎮');
+        agregarOpciones([
+            { texto: '🔥 Free Fire', callback: () => mostrarPreciosDe('freefire', 'Free Fire') },
+            { texto: '🎮 Roblox', callback: () => mostrarPreciosDe('roblox', 'Roblox') },
+            { texto: '🔫 Blood Strike', callback: () => mostrarPreciosDe('bloodstrike', 'Blood Strike') },
+            { texto: '📱 Mobile Legends', callback: () => mostrarPreciosDe('mobilelegends', 'Mobile Legends') },
+            { texto: '⬅️ Volver', clase: 'volver', callback: () => menuPrincipal() }
+        ]);
+    }
+
+    // ─────── STREAMING ───────
+    function menuStreaming() {
+        agregarBot('¿Qué servicio de streaming te interesa? 🎬');
+        agregarOpciones([
+            { texto: '🎬 Netflix', callback: () => mostrarPreciosDe('netflix', 'Netflix') },
+            { texto: '🏰 Disney+', callback: () => mostrarPreciosDe('disney', 'Disney+') },
+            { texto: '📺 HBO Max', callback: () => mostrarPreciosDe('hbo', 'HBO Max') },
+            { texto: '🎵 Spotify', callback: () => mostrarPreciosDe('spotify', 'Spotify') },
+            { texto: '⬅️ Volver', clase: 'volver', callback: () => menuPrincipal() }
+        ]);
+    }
+
+    // ─────── MOSTRAR PRECIOS DE UNA CATEGORÍA ───────
+    async function mostrarPreciosDe(clave, nombreBonito) {
+        agregarBot(`Buscando precios de ${nombreBonito}... ⏳`);
 
         try {
-            const r = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mensajes })
-            });
+            const precios = await obtenerPrecios();
+            const cat = precios[clave];
 
-            typing.remove();
-
-            if (!r.ok) {
-                agregarMensaje('assistant', '⚠️ Ups, hubo un error. Intenta de nuevo.');
+            if (!cat) {
+                agregarBot(`Ups, no encontré la categoría "${nombreBonito}". Te paso con soporte 👇`);
+                agregarOpciones([
+                    { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte(`Hola, quiero precios de ${nombreBonito}`) },
+                    { texto: '⬅️ Volver al menú', clase: 'volver', callback: () => menuPrincipal() }
+                ]);
                 return;
             }
 
-            const data = await r.json();
-            const respuesta = data.respuesta || 'Sin respuesta';
-            agregarMensaje('assistant', respuesta);
-            mensajes.push({ role: 'assistant', content: respuesta });
+            // Estructura: { paquetes: { "110💎": { precio: 0.79 }, ... } } o directo { "110💎": 0.79 }
+            let items = [];
+            const fuente = cat.paquetes || cat;
 
-        } catch (error) {
-            typing.remove();
-            console.error(error);
-            agregarMensaje('assistant', '⚠️ Sin conexión. Intenta más tarde.');
-        } finally {
-            btnEnviar.disabled = false;
-            inputMensaje.disabled = false;
-            inputMensaje.focus();
+            Object.keys(fuente).forEach((k) => {
+                const v = fuente[k];
+                const precio = (typeof v === 'object' && v !== null)
+                    ? (v.precio || v.monto || v.valor)
+                    : v;
+                if (precio !== undefined) {
+                    items.push({ nombre: k, precio: Number(precio).toFixed(2) });
+                }
+            });
+
+            if (items.length === 0) {
+                agregarBot(`No hay paquetes disponibles para ${nombreBonito} por ahora. Te paso con soporte 👇`);
+                agregarOpciones([
+                    { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte(`Hola, quiero información de ${nombreBonito}`) },
+                    { texto: '⬅️ Volver al menú', clase: 'volver', callback: () => menuPrincipal() }
+                ]);
+                return;
+            }
+
+            agregarListaPrecios(`💎 ${nombreBonito}`, items);
+
+            agregarBot('¿Quieres hacer un pedido o ver algo más?');
+            agregarOpciones([
+                { texto: '🛒 Hacer pedido', callback: () => irSoporte(`Hola, quiero hacer un pedido de ${nombreBonito}`) },
+                { texto: '🔄 Otros precios', callback: () => menuJuegosSiEsJuego(clave) },
+                { texto: '⬅️ Menú principal', clase: 'volver', callback: () => menuPrincipal() }
+            ]);
+
+        } catch (e) {
+            console.error(e);
+            agregarBot('😵 No pude cargar los precios ahora. Prueba de nuevo o escríbenos por WhatsApp.');
+            agregarOpciones([
+                { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte(`Hola, necesito precios de ${nombreBonito}`) },
+                { texto: '⬅️ Menú principal', clase: 'volver', callback: () => menuPrincipal() }
+            ]);
         }
     }
 
-    function agregarMensaje(rol, contenido) {
-        const div = document.createElement('div');
-        div.className = `message ${rol}`;
-        div.textContent = contenido;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+    function menuJuegosSiEsJuego(clave) {
+        const juegos = ['freefire', 'roblox', 'bloodstrike', 'mobilelegends'];
+        if (juegos.includes(clave)) return menuJuegos();
+        return menuStreaming();
     }
 
-    function mostrarTyping() {
-        const div = document.createElement('div');
-        div.className = 'message assistant typing';
-        div.innerHTML = '<span></span><span></span><span></span>';
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return div;
+    // ─────── CÓMO RECARGAR ───────
+    function comoRecargar() {
+        agregarBot(
+`Recargar es súper fácil 🚀:
+
+1️⃣ Elige el juego o streaming en la tienda.
+2️⃣ Elige el paquete que quieras.
+3️⃣ Ingresa tu ID de jugador (o los datos de la cuenta).
+4️⃣ Paga con Pago Móvil o el método que elijas.
+5️⃣ Te llega el código o los datos de acceso al instante. ✅
+
+¿Qué quieres hacer ahora?`
+        );
+        agregarOpciones([
+            { texto: '💎 Ver precios', callback: () => menuPrincipal() },
+            { texto: '💬 Hablar con soporte', clase: 'soporte', callback: () => irSoporte('Hola, necesito ayuda para recargar') },
+            { texto: '⬅️ Menú principal', clase: 'volver', callback: () => menuPrincipal() }
+        ]);
     }
 
-    btnEnviar.addEventListener('click', enviarMensaje);
-    inputMensaje.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarMensaje(); });
+    // ─────── SOPORTE ───────
+    function irSoporte(mensajeExtra) {
+        const texto = mensajeExtra || 'Hola, necesito ayuda con mi pedido.';
+        agregarBot('Te estoy abriendo WhatsApp con nuestro equipo de soporte 💬 ...');
+        setTimeout(() => abrirWhatsApp(texto), 800);
+    }
+
+    // ═══════════════════════════════════════════════
+    // BÚSQUEDA POR TEXTO LIBRE (fallback)
+    // ═══════════════════════════════════════════════
+    const MAPA_JUEGOS = {
+        'free fire': ['freefire', 'Free Fire'],
+        'freefire': ['freefire', 'Free Fire'],
+        'ff': ['freefire', 'Free Fire'],
+        'roblox': ['roblox', 'Roblox'],
+        'blood strike': ['bloodstrike', 'Blood Strike'],
+        'bloodstrike': ['bloodstrike', 'Blood Strike'],
+        'mobile legends': ['mobilelegends', 'Mobile Legends'],
+        'ml': ['mobilelegends', 'Mobile Legends'],
+        'netflix': ['netflix', 'Netflix'],
+        'disney': ['disney', 'Disney+'],
+        'hbo': ['hbo', 'HBO Max'],
+        'max': ['hbo', 'HBO Max'],
+        'spotify': ['spotify', 'Spotify']
+    };
+
+    async function buscarPorTexto(texto) {
+        const t = texto.toLowerCase();
+
+        // Buscar palabras clave
+        for (const key of Object.keys(MAPA_JUEGOS)) {
+            if (t.includes(key)) {
+                const [clave, nombre] = MAPA_JUEGOS[key];
+                return mostrarPreciosDe(clave, nombre);
+            }
+        }
+
+        if (t.includes('recarg') || t.includes('cómo') || t.includes('como')) {
+            return comoRecargar();
+        }
+        if (t.includes('soporte') || t.includes('ayuda') || t.includes('problema') || t.includes('whatsapp')) {
+            return irSoporte();
+        }
+        if (t.includes('precio') || t.includes('cuánto') || t.includes('cuanto')) {
+            return menuPrincipal();
+        }
+
+        // No reconocido
+        agregarBot('No entendí bien 🤔. Pero puedes elegir una opción:');
+        menuPrincipal();
+    }
+
+    // ═══════════════════════════════════════════════
+    // INPUT DE TEXTO
+    // ═══════════════════════════════════════════════
+    const inputMensaje = document.getElementById('inputMensaje');
+    const btnEnviar = document.getElementById('btnEnviar');
+
+    function enviarTexto() {
+        const texto = inputMensaje.value.trim();
+        if (!texto) return;
+        agregarUsuario(texto);
+        inputMensaje.value = '';
+        buscarPorTexto(texto);
+    }
+
+    btnEnviar.addEventListener('click', enviarTexto);
+    inputMensaje.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarTexto(); });
+
+    // ═══════════════════════════════════════════════
+    // ARRANQUE
+    // ═══════════════════════════════════════════════
+    agregarBot('¡Hola! 👋 Soy el asistente de RecargasGames.');
+    menuPrincipal();
 </script>
 
 </body>
