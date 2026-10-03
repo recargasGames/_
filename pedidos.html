@@ -14,12 +14,15 @@
         :root {
             --alto-nav: 64px;
             --dorado-claro: #f5d76e;
-            --card-bg: rgba(13, 22, 39, 0.75);
-            --card-borde: rgba(30, 42, 69, 0.6);
-            --azul-brillante: #4a7aff;
-            --verde-brillante: #00d26a;
+            --panel-bg: rgba(8, 13, 26, 0.88);
+            --card-bg: rgba(12, 18, 34, 0.92);
+            --card-borde: rgba(255, 255, 255, 0.1);
+            --azul-brillante: #3b6dff;
+            --verde-brillante: #10b981;
+            --verde-precio: #14c58a;
             --naranja: #f59e0b;
             --rojo: #ef4444;
+            --muted: #9aa8c2;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
@@ -28,8 +31,8 @@
             background: #000;
             color: white;
             min-height: 100vh;
-            padding-top: 80px;
-            padding-bottom: calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
+            padding-top: 68px;
+            padding-bottom: calc(var(--alto-nav) + 16px + env(safe-area-inset-bottom));
         }
         a:focus-visible, button:focus-visible, input:focus-visible {
             outline: 2px solid var(--dorado-claro);
@@ -40,8 +43,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: -2; pointer-events: none;
             opacity: 1; filter: brightness(1.15);
-            will-change: transform; transform: translateZ(0);
-            backface-visibility: hidden; -webkit-backface-visibility: hidden;
+            transform: translateZ(0);
         }
         .video-overlay {
             position: fixed; inset: 0;
@@ -49,64 +51,104 @@
                 rgba(10,14,26,0.15) 0%,
                 rgba(10,14,26,0.35) 60%,
                 rgba(10,14,26,0.6) 100%);
-            z-index: -1; pointer-events: none; transform: translateZ(0);
+            z-index: -1; pointer-events: none;
         }
 
+        /* TOPBAR */
         .topbar {
             position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-            background: rgba(11, 18, 32, 0.9);
+            background: rgba(11, 18, 32, 0.92);
             border-bottom: 2px solid #3b82f6;
-            padding: 12px 20px;
+            padding: 8px 14px;
             display: flex; justify-content: space-between; align-items: center;
-            transform: translateZ(0);
         }
-        .topbar .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
-        .topbar .logo img { height: 45px; border-radius: 10px; }
-        .topbar .logo h1 { font-size: 20px; font-weight: 700; color: white; }
+        .topbar .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; }
+        .topbar .logo img { height: 34px; border-radius: 8px; }
+        .topbar .logo h1 { font-size: 15px; font-weight: 700; color: white; }
         .topbar .logo h1 span { color: #3b82f6; }
         .topbar .btn-back {
             background: none; border: none; color: #cbd5e1;
-            font-size: 14px; cursor: pointer; transition: 0.3s;
-            padding: 8px 12px; border-radius: 8px; font-family: inherit;
+            font-size: 13px; cursor: pointer; transition: 0.3s;
+            padding: 6px 10px; border-radius: 7px; font-family: inherit;
         }
         .topbar .btn-back:hover { background: rgba(255,255,255,0.08); color: white; }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 16px; position: relative; z-index: 1; }
-
-        .page-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 14px; flex-wrap: wrap; gap: 10px;
-        }
-        .page-header h2 { font-size: 24px; font-weight: 700; }
-        .page-header h2 span { color: #3b82f6; }
-        .page-header .total {
-            font-size: 13px; color: #cbd5e1;
-            background: rgba(14, 26, 58, 0.85);
-            border: 1px solid var(--card-borde);
-            padding: 5px 14px; border-radius: 20px;
-            backdrop-filter: blur(5px);
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 14px 14px 0;
+            position: relative;
+            z-index: 1;
         }
 
+        /* TARJETAS DE RESUMEN */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stat {
+            background: rgba(10, 16, 32, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 12px 6px 10px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .stat.azul { border-color: rgba(59, 109, 255, 0.55); }
+        .stat-icono {
+            width: 38px; height: 38px;
+            border-radius: 11px;
+            margin: 0 auto 6px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .stat-icono svg { width: 19px; height: 19px; fill: #fff; }
+        .stat.azul .stat-icono { background: linear-gradient(135deg, #3b6dff, #5b8cff); }
+        .stat.naranja .stat-icono { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .stat.verde .stat-icono { background: linear-gradient(135deg, #10b981, #14d9a0); }
+        .stat-num { font-size: 22px; font-weight: 800; line-height: 1.1; }
+        .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        /* PANEL */
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 22px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .panel-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 20px 20px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .panel-header svg { width: 22px; height: 22px; fill: var(--azul-brillante); flex-shrink: 0; }
+        .panel-header h2 { font-size: 22px; font-weight: 800; letter-spacing: 0.2px; }
+        .panel-body { padding: 14px; }
+
+        /* CHIPS */
         .chips {
             display: flex; gap: 6px; overflow-x: auto;
-            padding-bottom: 3px; margin-bottom: 10px;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch;
+            padding-bottom: 2px; margin-bottom: 10px;
+            scrollbar-width: none;
         }
         .chips::-webkit-scrollbar { display: none; }
         .chip {
             flex-shrink: 0;
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 7px 12px; border-radius: 20px;
-            background: rgba(14, 26, 58, 0.75);
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 12px; border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-borde);
-            color: #cbd5e1; font-size: 13px; font-weight: 600;
+            color: #cbd5e1; font-size: 12px; font-weight: 600;
             cursor: pointer; font-family: inherit; transition: all 0.25s;
-            backdrop-filter: blur(5px);
         }
         .chip .n {
-            font-size: 11px; color: #94a3b8;
+            font-size: 10px; color: #94a3b8;
             background: rgba(255,255,255,0.08);
-            padding: 1px 7px; border-radius: 10px;
+            padding: 1px 6px; border-radius: 8px;
         }
         .chip:hover { border-color: rgba(212, 175, 55, 0.5); color: var(--dorado-claro); }
         .chip.activo {
@@ -115,137 +157,235 @@
             border-color: rgba(212,175,55,0.55);
         }
 
-        .buscador { margin-bottom: 14px; }
+        /* BUSCADOR */
+        .buscador { margin-bottom: 12px; }
         .buscador input {
-            width: 100%; padding: 11px 14px;
-            border-radius: 11px; background: rgba(6, 12, 32, 0.75);
+            width: 100%; padding: 10px 14px;
+            border-radius: 12px; background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--card-borde);
-            color: white; font-size: 14px; font-family: inherit;
-            backdrop-filter: blur(5px);
+            color: white; font-size: 13px; font-family: inherit;
         }
         .buscador input::placeholder { color: #94a3b8; }
-        .buscador input:focus { outline: none; border-color: #3b82f6; }
+        .buscador input:focus { outline: none; border-color: var(--azul-brillante); }
 
-        .pedidos-list { display: flex; flex-direction: column; gap: 10px; }
+        .pedidos-list { display: flex; flex-direction: column; gap: 14px; }
 
-        /* ═══════════════════════════════════════════════
-           TARJETAS — DISEÑO INTACTO
-           ═══════════════════════════════════════════════ */
+        /* TARJETA DE PEDIDO */
         .pedido-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 12px;
+            border-radius: 20px;
+            padding: 16px 16px 14px;
             border: 1px solid var(--card-borde);
             color: #fff;
-            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-            transition: border-color 0.3s, background 0.3s;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+            transition: border-color 0.3s, box-shadow 0.3s;
             cursor: pointer;
             user-select: none;
+            overflow: hidden;
         }
-        .pedido-card:hover {
-            border-color: #3b82f6;
-            background: rgba(13, 22, 39, 0.85);
+        .pedido-card:hover { border-color: rgba(59, 109, 255, 0.6); }
+        .pedido-card.expandido {
+            border-color: var(--dorado-claro);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.25);
         }
         .pedido-card.est-cancelado { border-color: rgba(239, 68, 68, 0.45); }
-        .pedido-card.expandido { border-color: var(--dorado-claro); box-shadow: 0 0 18px rgba(212, 175, 55, 0.2); }
 
         .pedido-header {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            gap: 10px;
+            align-items: center;
+            gap: 6px 12px;
+            margin-bottom: 14px;
         }
-        .pedido-header-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-        .pedido-id { font-size: 16px; font-weight: 700; color: var(--azul-brillante); word-break: break-all; }
-        .pedido-fecha { font-size: 11px; color: #8899b0; display: flex; align-items: center; gap: 5px; }
-        .pedido-header-right { text-align: right; flex-shrink: 0; }
-        .pedido-precio { font-size: 16px; font-weight: 700; color: var(--verde-brillante); display: block; }
-        .pedido-card.est-cancelado .pedido-precio { color: #8899b0; text-decoration: line-through; }
-        .pedido-metodo { font-size: 10px; color: #8899b0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pedido-header-left, .pedido-header-right {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px 10px;
+        }
+        .pedido-id {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--azul-brillante);
+            white-space: nowrap;
+        }
+        .pedido-fecha-inline {
+            font-size: 12px;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .pedido-fecha-inline svg, .pedido-metodo svg {
+            width: 13px; height: 13px; fill: var(--muted); flex-shrink: 0;
+        }
+        .pedido-precio {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--verde-precio);
+            line-height: 1;
+        }
+        .pedido-metodo {
+            font-size: 12px;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            text-transform: uppercase;
+        }
+        .pedido-card.est-cancelado .pedido-precio { color: var(--muted); text-decoration: line-through; }
 
         .estado-badge {
-            align-self: flex-start;
-            display: inline-flex; align-items: center; gap: 5px;
-            margin-top: 3px; padding: 3px 10px;
-            border-radius: 20px; font-size: 11px; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 9px; border-radius: 11px;
+            font-size: 10px; font-weight: 700;
             border: 1px solid transparent;
+            white-space: nowrap;
+            margin-left: auto;
         }
         .estado-badge::before {
-            content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+            content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor;
         }
-        .estado-badge.completado { color: var(--verde-brillante); background: rgba(0, 210, 106, 0.15); border-color: rgba(0, 210, 106, 0.5); }
+        .estado-badge.completado { color: var(--verde-brillante); background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.5); }
         .estado-badge.pendiente  { color: var(--naranja); background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.5); }
-        .estado-badge.procesando { color: var(--azul-brillante); background: rgba(74, 122, 255, 0.15); border-color: rgba(74, 122, 255, 0.5); }
+        .estado-badge.procesando { color: #6b93ff; background: rgba(59, 109, 255, 0.15); border-color: rgba(59, 109, 255, 0.5); }
         .estado-badge.cancelado  { color: var(--rojo); background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.5); }
 
-        .pedido-body { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-        .pedido-producto { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
-        .pedido-producto svg { width: 16px; height: 16px; fill: none; stroke: var(--azul-brillante); stroke-width: 2; flex-shrink: 0; }
-        .pedido-referencia {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 11px; color: #8899b0;
-            background: rgba(17, 28, 50, 0.7);
-            padding: 5px 8px; border-radius: 5px; word-break: break-all;
+        .pedido-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 14px;
         }
-        .pedido-referencia svg { width: 12px; height: 12px; fill: none; stroke: #8899b0; stroke-width: 2; flex-shrink: 0; }
+        .pedido-producto {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            flex-wrap: wrap;
+        }
+        .pedido-producto > svg {
+            width: 18px; height: 18px;
+            fill: var(--azul-brillante);
+            flex-shrink: 0;
+        }
+        .pedido-referencia {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 7px 12px;
+            border-radius: 9px;
+            word-break: break-all;
+        }
+        .pedido-referencia svg { width: 14px; height: 14px; fill: var(--azul-brillante); flex-shrink: 0; }
 
         .pedido-jugador-box {
-            background: rgba(22, 34, 59, 0.7);
-            border: 1px solid rgba(37, 50, 77, 0.8);
-            border-radius: 6px; padding: 8px 10px; margin-bottom: 10px;
-            font-size: 12px; line-height: 1.5; color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
-        .pedido-jugador-box strong { color: #fff; }
+        .pedido-jugador-box strong { color: #fff; font-weight: 700; }
+        .pedido-jugador-box span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
 
         .pedido-timeline {
-            display: flex; align-items: center; justify-content: space-between;
-            position: relative; padding-top: 10px;
-            border-top: 1px solid rgba(30, 42, 69, 0.6);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding-top: 4px;
         }
-        .timeline-step { display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2; width: 70px; text-align: center; }
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 78px;
+            text-align: center;
+        }
         .timeline-icon {
-            width: 26px; height: 26px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: #1e2a45; color: #8899b0; transition: all 0.3s;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e2a45;
+            color: #8899b0;
+            transition: all 0.3s;
         }
-        .timeline-icon svg { width: 13px; height: 13px; fill: currentColor; }
-        .timeline-step.recibido .timeline-icon { background: var(--azul-brillante); color: #fff; }
-        .timeline-step.verificando .timeline-icon { background: var(--naranja); color: #fff; }
+        .timeline-icon svg { width: 17px; height: 17px; fill: currentColor; }
+        .timeline-step.recibido .timeline-icon,
+        .timeline-step.verificando .timeline-icon,
         .timeline-step.completado .timeline-icon { background: var(--verde-brillante); color: #fff; }
-        .timeline-label { font-size: 10px; font-weight: 600; color: #8899b0; }
+        .timeline-step.espera .timeline-icon { background: var(--naranja); color: #fff; }
+        .timeline-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #8899b0;
+        }
         .timeline-step.recibido .timeline-label,
         .timeline-step.verificando .timeline-label,
-        .timeline-step.completado .timeline-label { color: #fff; }
-        .timeline-line { flex: 1; height: 2px; background: #1e2a45; margin-top: -18px; z-index: 1; border-radius: 2px; transition: background 0.3s; }
-        .timeline-line.active { background: var(--azul-brillante); }
-        .timeline-line.completed { background: var(--verde-brillante); }
+        .timeline-step.completado .timeline-label,
+        .timeline-step.espera .timeline-label { color: #fff; }
+        .timeline-line {
+            flex: 1;
+            height: 3px;
+            background: #1e2a45;
+            margin-top: 15px;
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+        .timeline-line.active, .timeline-line.completed { background: var(--azul-brillante); }
 
-        /* ═══════════════════════════════════════════════
-           PANEL EXPANDIBLE (AL TOCAR LA TARJETA)
-           ═══════════════════════════════════════════════ */
+        .aviso-tocar {
+            text-align: center;
+            font-size: 11px;
+            color: var(--dorado-claro);
+            padding-top: 10px;
+            margin-top: 12px;
+            border-top: 1px dashed rgba(212, 175, 55, 0.25);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .pedido-card.expandido .aviso-tocar { color: #94a3b8; }
+
         .detalle-expandido {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease, margin 0.3s ease, padding 0.3s ease;
             background: rgba(10, 14, 26, 0.9);
-            border-radius: 10px;
+            border-radius: 12px;
             margin-top: 0;
-            padding: 0 12px;
+            padding: 0 10px;
             border: 1px solid transparent;
         }
         .pedido-card.expandido .detalle-expandido {
-            max-height: 2000px;
+            max-height: 1500px;
             margin-top: 12px;
-            padding: 14px 12px;
+            padding: 12px 10px;
             border-color: rgba(212, 175, 55, 0.3);
         }
         .detalle-expandido h4 {
             font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
             color: var(--dorado-claro);
             margin-bottom: 10px;
             border-bottom: 1px solid rgba(212, 175, 55, 0.2);
@@ -253,268 +393,254 @@
             text-align: center;
         }
 
-        /* ── Resumen rápido (para juegos) ── */
-        .resumen-juego {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 12px;
-            background: rgba(34, 197, 94, 0.08);
-            border: 1.5px solid rgba(34, 197, 94, 0.4);
-            border-radius: 10px;
-        }
-        .resumen-juego .fila {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            padding: 4px 0;
-        }
-        .resumen-juego .fila .label { color: #94a3b8; }
-        .resumen-juego .fila .valor { color: #fff; font-weight: 700; word-break: break-all; text-align: right; }
-
-        /* ── PIN del código ── */
         .pin-box {
-            margin-top: 8px;
-            padding: 12px;
+            margin-top: 6px;
+            padding: 11px;
             background: rgba(34, 197, 94, 0.12);
             border: 1.5px solid #22c55e;
             border-radius: 10px;
             text-align: center;
         }
-        .pin-box .pin-label { font-size: 11px; color: #cbd5e1; letter-spacing: 1px; text-transform: uppercase; }
+        .pin-box .pin-label { font-size: 10px; color: #cbd5e1; letter-spacing: 1px; text-transform: uppercase; }
         .pin-box .pin-value {
-            font-size: 22px; font-weight: 700; color: #4ade80; letter-spacing: 2px;
-            margin: 6px 0; word-break: break-all;
+            font-size: 16px; font-weight: 700; color: #4ade80;
+            letter-spacing: 1.5px; margin: 6px 0; word-break: break-all;
             font-family: 'Courier New', Consolas, monospace;
         }
         .pin-box .btn-copiar {
             background: rgba(34, 197, 94, 0.25); color: #4ade80; border: none;
-            padding: 8px 22px; border-radius: 7px; font-weight: 700;
-            cursor: pointer; font-size: 13px; font-family: inherit;
+            padding: 6px 18px; border-radius: 7px; font-weight: 700;
+            cursor: pointer; font-size: 12px; font-family: inherit;
         }
         .pin-box .btn-copiar:hover { background: rgba(34, 197, 94, 0.4); }
 
-        /* ── Streaming ── */
         .streaming-box {
-            margin-top: 8px;
-            padding: 12px;
-            background: linear-gradient(135deg, rgba(229, 9, 20, 0.08), rgba(17, 60, 207, 0.06));
+            margin-top: 6px;
+            padding: 11px;
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1), rgba(17, 60, 207, 0.08));
             border: 1.5px solid rgba(212, 175, 55, 0.5);
             border-radius: 10px;
         }
         .streaming-box .streaming-titulo {
-            font-size: 13px; font-weight: 800; color: var(--dorado-claro);
-            text-align: center; margin-bottom: 10px;
-            text-transform: uppercase; letter-spacing: 1px;
+            font-size: 12px; font-weight: 800; color: var(--dorado-claro);
+            text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px;
         }
         .dato-entrega {
             display: flex; flex-direction: column; gap: 3px;
-            padding: 9px 11px;
+            padding: 9px 10px;
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(212, 175, 55, 0.15);
-            border-radius: 8px;
-            margin-bottom: 7px;
+            border-radius: 8px; margin-bottom: 6px;
         }
         .dato-entrega:last-of-type { margin-bottom: 0; }
-        .dato-entrega .dato-label {
-            font-size: 9px; color: #94a3b8; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.8px;
-        }
-        .dato-entrega .dato-contenido { display: flex; align-items: center; gap: 8px; }
+        .dato-entrega .dato-label { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+        .dato-entrega .dato-contenido { display: flex; align-items: center; gap: 6px; }
         .dato-entrega .dato-valor {
             flex: 1; font-size: 13px; font-weight: 700; color: #fff;
             word-break: break-word; overflow-wrap: anywhere;
             font-family: 'Courier New', Consolas, monospace; line-height: 1.3;
         }
         .dato-entrega .btn-copiar-dato {
-            width: 32px; height: 32px;
+            width: 30px; height: 30px;
             background: rgba(212, 175, 55, 0.15);
             border: 1px solid rgba(212, 175, 55, 0.5);
-            border-radius: 8px; color: var(--dorado-claro); cursor: pointer;
+            border-radius: 7px; color: var(--dorado-claro); cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; padding: 0; font-family: inherit;
         }
-        .dato-entrega .btn-copiar-dato svg {
-            width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none;
-        }
+        .dato-entrega .btn-copiar-dato svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; fill: none; }
         .dato-entrega .btn-copiar-dato:hover { background: rgba(212, 175, 55, 0.3); }
-        .dato-entrega .btn-copiar-dato.copiado {
-            background: rgba(34, 197, 94, 0.25);
-            border-color: rgba(34, 197, 94, 0.6); color: #4ade80;
-        }
+        .dato-entrega .btn-copiar-dato.copiado { background: rgba(34, 197, 94, 0.25); border-color: rgba(34, 197, 94, 0.6); color: #4ade80; }
         .dato-entrega .btn-copiar-dato.copiado svg { display: none; }
-        .dato-entrega .btn-copiar-dato.copiado::after { content: '✓'; font-size: 16px; font-weight: bold; }
+        .dato-entrega .btn-copiar-dato.copiado::after { content: '✓'; font-size: 15px; font-weight: bold; }
 
-        .dato-entrega.codigo-renovacion {
-            background: rgba(212, 175, 55, 0.1);
-            border-color: rgba(212, 175, 55, 0.55);
-            border-width: 1.5px;
-        }
+        .dato-entrega.codigo-renovacion { background: rgba(212, 175, 55, 0.1); border-color: rgba(212, 175, 55, 0.55); border-width: 1.5px; }
         .dato-entrega.codigo-renovacion .dato-label { color: var(--dorado-claro); }
         .dato-entrega.codigo-renovacion .dato-valor { color: var(--dorado-claro); font-weight: 800; }
 
-        .aviso-renovacion {
-            margin-top: 8px; font-size: 11px; color: #fcd34d;
-            text-align: center; line-height: 1.3;
-        }
+        .aviso-renovacion { margin-top: 6px; font-size: 10px; color: #fcd34d; text-align: center; line-height: 1.3; }
 
-        /* 🆕 Botón GUARDAR IMAGEN */
-        .btn-guardar-imagen {
-            width: 100%;
-            padding: 11px 16px;
-            margin-top: 10px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(59, 130, 246, 0.1));
-            border: 1.5px solid rgba(59, 130, 246, 0.6);
-            border-radius: 10px;
-            color: #93c5fd;
-            font-size: 13px;
-            font-weight: 800;
-            cursor: pointer;
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-        .btn-guardar-imagen:hover {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(59, 130, 246, 0.2));
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
-        }
-        .btn-guardar-imagen:active { transform: translateY(0); }
-        .btn-guardar-imagen.guardado {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.15));
-            border-color: rgba(34, 197, 94, 0.7);
-            color: #4ade80;
-        }
-
-        .ayuda-streaming {
-            display: block; margin-top: 10px; text-align: center;
-            font-size: 12px; color: #cbd5e1; text-decoration: underline;
-        }
+        .ayuda-streaming { display: block; margin-top: 9px; text-align: center; font-size: 11px; color: #cbd5e1; text-decoration: underline; }
         .ayuda-streaming:hover { color: var(--dorado-claro); }
 
-        /* ── Manual / Pendiente ── */
-        .manual-box, .pendiente-manual-box {
-            margin-top: 8px;
-            padding: 12px;
+        .manual-box {
+            margin-top: 6px; padding: 11px;
             background: rgba(37, 211, 102, 0.12);
-            border: 1.5px solid #25D366;
-            border-radius: 10px;
-            text-align: center;
+            border: 1.5px solid #25D366; border-radius: 10px; text-align: center;
         }
-        .manual-box .manual-text { font-size: 12px; color: #cbd5e1; margin-bottom: 8px; }
-        .manual-box .btn-whatsapp,
-        .pendiente-manual-box .btn-whatsapp-pendiente {
+        .manual-box .manual-text { font-size: 12px; color: #cbd5e1; margin-bottom: 7px; }
+        .manual-box .btn-whatsapp {
             background: #25D366; color: #06210f; border: none;
-            padding: 9px 18px; border-radius: 8px; font-weight: 800;
-            text-decoration: none; display: inline-block;
-            transition: 0.3s; font-size: 12px;
-        }
-        .pendiente-manual-box .titulo-pendiente {
-            font-size: 13px; font-weight: 800; color: #fbbf24; margin-bottom: 6px;
-        }
-        .pendiente-manual-box .desc-pendiente {
-            font-size: 12px; color: #cbd5e1; line-height: 1.4; margin-bottom: 10px;
+            padding: 7px 16px; border-radius: 7px; font-weight: 800;
+            text-decoration: none; display: inline-block; font-size: 12px;
         }
 
-        /* ── Cancelado ── */
         .aviso-estado {
-            margin-top: 8px; padding: 9px 12px;
-            border-radius: 9px; font-size: 12px; line-height: 1.4;
-            border: 1px solid transparent;
+            margin-top: 6px; padding: 8px 10px; border-radius: 8px;
+            font-size: 12px; line-height: 1.35; border: 1px solid transparent;
         }
         .aviso-estado.cancelado { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; }
 
-        .acciones { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .acciones { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
         .btn-accion {
-            flex: 1; min-width: 110px;
+            flex: 1; min-width: 90px;
             display: inline-flex; align-items: center; justify-content: center;
-            padding: 9px 12px; border-radius: 9px;
+            padding: 8px 10px; border-radius: 9px;
             font-size: 12px; font-weight: 700; font-family: inherit;
             text-decoration: none; cursor: pointer; transition: all 0.25s;
             border: 1px solid transparent;
         }
-        .btn-accion.dorado {
-            color: var(--dorado-claro);
-            background: rgba(212, 175, 55, 0.12);
-            border-color: rgba(212, 175, 55, 0.55);
-        }
+        .btn-accion.dorado { color: var(--dorado-claro); background: rgba(212, 175, 55, 0.12); border-color: rgba(212, 175, 55, 0.55); }
         .btn-accion.dorado:hover { background: rgba(212, 175, 55, 0.25); }
         .btn-accion.wa { color: #4ade80; background: transparent; border-color: rgba(37, 211, 102, 0.6); }
         .btn-accion.wa:hover { background: rgba(37, 211, 102, 0.15); }
 
-        /* Loading / Sin pedidos */
-        .sin-pedidos {
-            text-align: center; padding: 40px 20px;
-            background: var(--card-bg); border-radius: 14px; border: 1px solid var(--card-borde);
-            backdrop-filter: blur(10px);
+        /* ═══════════════════════════════════════════════
+           PAGINACIÓN
+           ═══════════════════════════════════════════════ */
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            padding: 18px 10px 6px;
+            flex-wrap: wrap;
         }
-        .sin-pedidos .icono { font-size: 48px; margin-bottom: 12px; }
-        .sin-pedidos h3 { font-size: 19px; margin-bottom: 6px; }
-        .sin-pedidos p { color: #cbd5e1; font-size: 14px; line-height: 1.4; }
-        .sin-pedidos .btn-tienda {
-            display: inline-block; margin-top: 14px; padding: 11px 26px;
-            background: linear-gradient(135deg, #d4af37, #f5d76e);
-            color: #0a0e1a; border: none; border-radius: 10px;
-            font-weight: 800; font-size: 14px; cursor: pointer; text-decoration: none;
+        .pag-btn {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-borde);
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pag-btn:hover:not(:disabled) {
+            border-color: rgba(212, 175, 55, 0.5);
+            color: var(--dorado-claro);
+        }
+        .pag-btn.activo {
+            background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(59,130,246,0.15));
+            border-color: rgba(212,175,55,0.7);
+            color: var(--dorado-claro);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+        }
+        .pag-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .pag-info {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+            text-align: center;
+        }
+        .pag-puntos {
+            color: var(--muted);
+            padding: 0 4px;
+            font-weight: 700;
+            user-select: none;
         }
 
-        .loading { text-align: center; padding: 30px; color: #94a3b8; }
+        .sin-pedidos {
+            text-align: center; padding: 28px 14px;
+            background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-borde);
+        }
+        .sin-pedidos .icono { font-size: 38px; margin-bottom: 8px; }
+        .sin-pedidos h3 { font-size: 16px; margin-bottom: 4px; }
+        .sin-pedidos p { color: #cbd5e1; font-size: 13px; line-height: 1.4; }
+        .sin-pedidos .btn-tienda {
+            display: inline-block; margin-top: 12px; padding: 9px 22px;
+            background: linear-gradient(135deg, #d4af37, #f5d76e);
+            color: #0a0e1a; border: none; border-radius: 10px;
+            font-weight: 800; font-size: 13px; text-decoration: none;
+        }
+
+        .loading { text-align: center; padding: 24px; color: #94a3b8; }
         .loading .spinner {
-            width: 36px; height: 36px; border: 3px solid rgba(59, 130, 246, 0.2);
+            width: 28px; height: 28px; border: 3px solid rgba(59, 130, 246, 0.2);
             border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;
-            margin: 0 auto 12px;
+            margin: 0 auto 10px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Toast */
         .toast {
-            position: fixed; left: 50%; bottom: calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
+            position: fixed; left: 50%;
+            bottom: calc(var(--alto-nav) + 16px + env(safe-area-inset-bottom));
             transform: translate(-50%, 20px); max-width: calc(100% - 32px);
-            padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; line-height: 1.3;
+            padding: 9px 14px; border-radius: 10px; font-size: 12px; font-weight: 600;
             background: rgba(10, 14, 26, 0.97); border: 1px solid rgba(212, 175, 55, 0.5);
-            color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 3000; text-align: center;
         }
         .toast.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
 
-        /* Nav inferior */
+        .notif-pedido {
+            position: fixed; top: 90px; left: 50%;
+            transform: translateX(-50%) translateY(-120%);
+            max-width: calc(100% - 32px); width: 300px;
+            padding: 12px 14px; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
+            border: 2px solid #4ade80;
+            box-shadow: 0 20px 60px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.3);
+            color: #fff; z-index: 5000;
+            display: flex; align-items: center; gap: 10px;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+        }
+        .notif-pedido.visible { transform: translateX(-50%) translateY(0); }
+        .notif-pedido .notif-icono {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+            animation: latido 1s ease-in-out infinite;
+        }
+        @keyframes latido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .notif-pedido .notif-texto { flex: 1; min-width: 0; }
+        .notif-pedido .notif-titulo { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+        .notif-pedido .notif-sub { font-size: 10px; color: rgba(255, 255, 255, 0.95); line-height: 1.3; font-weight: 500; }
+        .notif-pedido .notif-cerrar {
+            background: rgba(255, 255, 255, 0.2); border: none; color: #fff;
+            width: 26px; height: 26px; border-radius: 50%;
+            cursor: pointer; font-size: 14px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: 0.2s; font-family: inherit;
+        }
+        .notif-pedido .notif-cerrar:hover { background: rgba(255, 255, 255, 0.35); transform: rotate(90deg); }
+
         .nav-inferior {
             position: fixed; left: 0; right: 0; bottom: 0; z-index: 999;
-            background: rgba(5, 8, 16, 0.96); border-top: 1px solid rgba(212, 175, 55, 0.25);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.5); padding-bottom: env(safe-area-inset-bottom);
+            background: rgba(5, 8, 16, 0.96);
+            border-top: 1px solid rgba(212, 175, 55, 0.25);
+            padding-bottom: env(safe-area-inset-bottom);
         }
         .nav-inferior-inner { display: flex; max-width: 900px; margin: 0 auto; height: var(--alto-nav); }
         .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-            color: #9ca3af; text-decoration: none; font-size: 12px; font-weight: 600; transition: color 0.2s;
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+            color: #9ca3af; text-decoration: none; font-size: 11px; font-weight: 600;
         }
         .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .nav-item:hover, .nav-item.active { color: var(--dorado-claro); }
         .nav-item.soporte { color: #4ade80; }
 
-        @media (max-width: 768px) {
-            .page-header { flex-direction: column; align-items: flex-start; }
-        }
-        @media (max-width: 500px) {
-            .container { padding: 12px; }
-            .topbar .logo h1 { font-size: 16px; }
-            .pedido-card { padding: 10px; }
-            .pedido-id { font-size: 15px; }
-            .pedido-precio { font-size: 15px; }
-            .pedido-jugador-box { font-size: 11px; padding: 7px 9px; }
-            .timeline-step { width: 55px; }
-            .timeline-icon { width: 24px; height: 24px; }
-            .timeline-icon svg { width: 12px; height: 12px; }
-            .timeline-label { font-size: 9px; }
-            .streaming-box { padding: 12px; }
-            .dato-entrega { padding: 9px 11px; }
-            .dato-entrega .dato-valor { font-size: 13px; }
-            .dato-entrega .btn-copiar-dato { width: 32px; height: 32px; }
-            .video-fondo { opacity: 0.85; filter: brightness(1.05); }
+        @media (max-width: 380px) {
+            .container { padding: 10px 8px 0; }
+            .panel-body { padding: 10px; }
+            .pedido-card { padding: 12px 12px 10px; }
+            .pedido-id, .pedido-precio { font-size: 16px; }
+            .timeline-step { width: 66px; }
+            .timeline-label { font-size: 11px; }
+            .stat-num { font-size: 19px; }
+            .pag-btn { min-width: 34px; height: 34px; font-size: 12px; }
         }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
@@ -539,29 +665,60 @@
 
 <main class="container">
 
-    <div class="page-header">
-        <h2>Mis <span>pedidos</span></h2>
-        <span class="total" id="totalPedidos">0 pedidos</span>
-    </div>
-
-    <div class="chips" id="chips" role="group" aria-label="Filtrar por estado">
-        <button class="chip activo" data-estado="todos">Todos <span class="n" id="n-todos">0</span></button>
-        <button class="chip" data-estado="completado">Completados <span class="n" id="n-completado">0</span></button>
-        <button class="chip" data-estado="pendiente">Pendientes <span class="n" id="n-pendiente">0</span></button>
-        <button class="chip" data-estado="procesando">Procesando <span class="n" id="n-procesando">0</span></button>
-        <button class="chip" data-estado="cancelado">Cancelados <span class="n" id="n-cancelado">0</span></button>
-    </div>
-
-    <div class="buscador">
-        <input type="search" id="buscarInput" placeholder="Buscar por número de pedido, referencia o juego" aria-label="Buscar pedidos" autocomplete="off">
-    </div>
-
-    <div class="pedidos-list" id="listaPedidos" aria-live="polite">
-        <div class="loading">
-            <div class="spinner"></div>
-            <p>Cargando tus pedidos...</p>
+    <section class="stats" aria-label="Resumen de pedidos">
+        <div class="stat azul">
+            <div class="stat-icono">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7V6a5 5 0 0 1 10 0v1h2.2a1 1 0 0 1 1 1.1l-1 11.2A2 2 0 0 1 17.2 21H6.8a2 2 0 0 1-2-1.7l-1-11.2a1 1 0 0 1 1-1.1H7zm2 0h6V6a3 3 0 0 0-6 0v1z"/></svg>
+            </div>
+            <div class="stat-num" id="stat-total">0</div>
+            <div class="stat-label">Total Pedidos</div>
         </div>
-    </div>
+        <div class="stat naranja">
+            <div class="stat-icono">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5v5.4l3.7 2.2-.9 1.5L11 13V7h2z"/></svg>
+            </div>
+            <div class="stat-num" id="stat-pendientes">0</div>
+            <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat verde">
+            <div class="stat-icono">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 14.3-3.9-3.9 1.4-1.4 2.5 2.5 5.4-5.4 1.4 1.4-6.8 6.8z"/></svg>
+            </div>
+            <div class="stat-num" id="stat-completados">0</div>
+            <div class="stat-label">Completados</div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h14a1 1 0 0 1 1 1v19l-3-2-2.5 2-2.5-2-2.5 2L7 20l-3 2V3a1 1 0 0 1 1-1zm3 6v2h8V8H8zm0 4v2h8v-2H8zm0 4v2h5v-2H8z"/></svg>
+            <h2>Mis Pedidos</h2>
+        </div>
+
+        <div class="panel-body">
+            <div class="chips" id="chips" role="group" aria-label="Filtrar por estado">
+                <button class="chip activo" data-estado="todos">Todos <span class="n" id="n-todos">0</span></button>
+                <button class="chip" data-estado="completado">Hechos <span class="n" id="n-completado">0</span></button>
+                <button class="chip" data-estado="pendiente">Pend. <span class="n" id="n-pendiente">0</span></button>
+                <button class="chip" data-estado="procesando">Proc. <span class="n" id="n-procesando">0</span></button>
+                <button class="chip" data-estado="cancelado">Canc. <span class="n" id="n-cancelado">0</span></button>
+            </div>
+
+            <div class="buscador">
+                <input type="search" id="buscarInput" placeholder="Buscar pedido..." aria-label="Buscar pedidos" autocomplete="off">
+            </div>
+
+            <div class="pedidos-list" id="listaPedidos" aria-live="polite">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando tus pedidos...</p>
+                </div>
+            </div>
+
+            <div class="paginacion" id="paginacion"></div>
+            <div class="pag-info" id="pagInfo"></div>
+        </div>
+    </section>
 
 </main>
 
@@ -605,39 +762,23 @@
     const db = firebase.database();
 
     const WHATSAPP = '584228242411';
+    const POR_PAGINA = 5; // 🆕 5 pedidos por página
 
     let todosPedidos = [];
+    let pedidosFiltrados = []; // 🆕 lista filtrada actual
+    let paginaActual = 1;      // 🆕 página actual
     let uidActual = null;
     let consultaActual = null;
     let estadoFiltro = 'todos';
     let toastTimer = null;
+    let pedidosVistos = new Set();
+    let primeraCarga = true;
 
     const listaEl = document.getElementById('listaPedidos');
     const buscarEl = document.getElementById('buscarInput');
     const toastEl = document.getElementById('toast');
-
-    const PAGINAS = [
-        [/FREE\s*FIRE|\bFF\b/, 'freefire.html'],
-        [/BLOOD\s*STRIKE|BLOCK\s*STRIKE/, 'bloodstrike.html'],
-        [/ROBLOX/, 'roblox.html'],
-        [/MOBILE\s*LEGENDS|\bML\b/, 'ml.html'],
-        [/CALL\s*OF\s*DUTY|\bCOD\b/, 'cod.html'],
-        [/PUBG/, 'pubg.html'],
-        [/ARENA\s*BREAKOUT/, 'arenabreakout.html'],
-        [/DELTA/, 'delta.html'],
-        [/BIGO/, 'bigo.html'],
-        [/GIFT|PLAYSTATION|\bPSN\b/, 'gift-cards.html'],
-        [/NETFLIX/, 'netflix.html'],
-        [/DISNEY/, 'disney.html']
-    ];
-
-    function paginaDelJuego(pedido) {
-        const texto = (String(pedido.juego || '') + ' ' + String(pedido.producto || '')).toUpperCase();
-        for (const [patron, pagina] of PAGINAS) {
-            if (patron.test(texto)) return pagina;
-        }
-        return 'index.html';
-    }
+    const paginacionEl = document.getElementById('paginacion');
+    const pagInfoEl = document.getElementById('pagInfo');
 
     function esc(valor) {
         return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
@@ -652,38 +793,76 @@
         toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3000);
     }
 
+    function mostrarNotifPedido(pedido) {
+        const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || 'N/A';
+        const juego = pedido.juego || 'Producto';
+        const producto = pedido.producto || '';
+
+        const notif = document.createElement('div');
+        notif.className = 'notif-pedido';
+        notif.innerHTML = `
+            <div class="notif-icono">🎉</div>
+            <div class="notif-texto">
+                <div class="notif-titulo">¡Pedido #${esc(idPedido)}!</div>
+                <div class="notif-sub">${esc(juego)}${producto ? ' - ' + esc(producto) : ''}</div>
+            </div>
+            <button class="notif-cerrar" aria-label="Cerrar">✕</button>
+        `;
+
+        document.body.appendChild(notif);
+        requestAnimationFrame(() => notif.classList.add('visible'));
+
+        const btnCerrar = notif.querySelector('.notif-cerrar');
+        btnCerrar.onclick = () => cerrarNotif(notif);
+        setTimeout(() => cerrarNotif(notif), 6000);
+
+        reproducirSonido();
+        vibrar();
+    }
+
+    function cerrarNotif(notif) {
+        if (!notif || !notif.parentNode) return;
+        notif.classList.remove('visible');
+        setTimeout(() => {
+            if (notif.parentNode) notif.parentNode.removeChild(notif);
+        }, 500);
+    }
+
+    function reproducirSonido() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const notas = [523.25, 659.25, 783.99];
+            notas.forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                const t = ctx.currentTime + (i * 0.1);
+                gain.gain.setValueAtTime(0, t);
+                gain.gain.linearRampToValueAtTime(0.15, t + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc.start(t);
+                osc.stop(t + 0.4);
+            });
+            setTimeout(() => { try { ctx.close(); } catch(e) {} }, 1000);
+        } catch(e) {}
+    }
+
+    function vibrar() {
+        if (navigator.vibrate) {
+            try { navigator.vibrate([200, 100, 200]); } catch(e) {}
+        }
+    }
+
     function normalizarEstado(raw) {
         const e = String(raw || 'pendiente').toLowerCase().trim();
         if (['completado', 'completada', 'completed', 'completada_ok'].includes(e)) return 'completado';
         if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
         if (['procesando', 'processing'].includes(e)) return 'procesando';
         return 'pendiente';
-    }
-
-    const ETIQUETA_ESTADO = {
-        completado: 'Completado',
-        pendiente: 'Pendiente',
-        procesando: 'Procesando',
-        cancelado: 'Cancelado'
-    };
-
-    function detectarServicioStreaming(pedido) {
-        if (pedido.datos_streaming && pedido.datos_streaming.servicio) return pedido.datos_streaming.servicio;
-        const combo = (String(pedido.juego || '') + ' ' + String(pedido.producto || '')).toUpperCase();
-        if (/NETFLIX|\bNF\b/.test(combo)) return 'Netflix';
-        if (/DISNEY|\bDS\b/.test(combo)) return 'Disney+';
-        if (/\bHBO\b|\bMAX\b/.test(combo)) return 'HBO Max';
-        if (/SPOTIFY/.test(combo)) return 'Spotify';
-        if (/PARAMOUNT/.test(combo)) return 'Paramount+';
-        if (/CRUNCHYROLL/.test(combo)) return 'Crunchyroll';
-        return 'Streaming';
-    }
-
-    function esProductoStreaming(pedido) {
-        if (pedido.es_streaming === true) return true;
-        if (pedido.datos_streaming) return true;
-        const combo = (String(pedido.juego || '') + ' ' + String(pedido.producto || '')).toUpperCase();
-        return /NETFLIX|DISNEY|\bHBO\b|SPOTIFY|PARAMOUNT|CRUNCHYROLL/.test(combo);
     }
 
     document.getElementById('btnVolver').addEventListener('click', () => {
@@ -705,19 +884,35 @@
         consultaActual = db.ref('pedidos').orderByChild('uid').equalTo(uidActual);
 
         consultaActual.on('value', (snapshot) => {
-            todosPedidos = [];
+            const nuevosPedidos = [];
+            const idsActuales = new Set();
+
             snapshot.forEach((childSnapshot) => {
                 const pedido = childSnapshot.val();
                 pedido.key = childSnapshot.key;
                 pedido._estado = normalizarEstado(pedido.estado);
-                todosPedidos.push(pedido);
+                nuevosPedidos.push(pedido);
+                idsActuales.add(childSnapshot.key);
             });
-            todosPedidos.sort((a, b) => {
+
+            if (!primeraCarga) {
+                nuevosPedidos.forEach((p) => {
+                    if (!pedidosVistos.has(p.key)) mostrarNotifPedido(p);
+                });
+            }
+
+            pedidosVistos = idsActuales;
+            primeraCarga = false;
+
+            nuevosPedidos.sort((a, b) => {
                 if (a.fecha && b.fecha) return new Date(b.fecha) - new Date(a.fecha);
                 return 0;
             });
+
+            todosPedidos = nuevosPedidos;
             actualizarContadores();
             filtrarPedidos();
+
         }, (error) => {
             console.error('Error cargando pedidos:', error);
             listaEl.innerHTML = `
@@ -737,14 +932,19 @@
         Object.keys(cuentas).forEach((k) => {
             document.getElementById('n-' + k).textContent = cuentas[k];
         });
-        document.getElementById('totalPedidos').textContent =
-            `${todosPedidos.length} ${todosPedidos.length === 1 ? 'pedido' : 'pedidos'}`;
+        document.getElementById('stat-total').textContent = cuentas.todos;
+        document.getElementById('stat-pendientes').textContent = cuentas.pendiente;
+        document.getElementById('stat-completados').textContent = cuentas.completado;
     }
 
     function filtrarPedidos() {
         const busqueda = buscarEl.value.toLowerCase().trim();
         let filtrados = todosPedidos;
-        if (estadoFiltro !== 'todos') filtrados = filtrados.filter((p) => p._estado === estadoFiltro);
+
+        if (estadoFiltro !== 'todos') {
+            filtrados = filtrados.filter((p) => p._estado === estadoFiltro);
+        }
+
         if (busqueda) {
             filtrados = filtrados.filter((p) => {
                 const id = String(p.numero_pedido || p.referencia || p.key || '').toLowerCase();
@@ -753,16 +953,108 @@
                 return id.includes(busqueda) || juego.includes(busqueda) || ref.includes(busqueda);
             });
         }
-        mostrarPedidos(filtrados);
+
+        pedidosFiltrados = filtrados;
+        paginaActual = 1; // Al filtrar, volvemos a la página 1
+        renderizarPagina();
     }
+
+    // ═══════════════════════════════════════════════
+    // RENDERIZAR PÁGINA ACTUAL
+    // ═══════════════════════════════════════════════
+    function renderizarPagina() {
+        const total = pedidosFiltrados.length;
+        const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        if (paginaActual < 1) paginaActual = 1;
+
+        const inicio = (paginaActual - 1) * POR_PAGINA;
+        const fin = inicio + POR_PAGINA;
+        const pedidosPagina = pedidosFiltrados.slice(inicio, fin);
+
+        mostrarPedidos(pedidosPagina);
+        renderizarPaginacion(totalPaginas, total);
+    }
+
+    // ═══════════════════════════════════════════════
+    // RENDERIZAR BOTONES DE PAGINACIÓN
+    // ═══════════════════════════════════════════════
+    function renderizarPaginacion(totalPaginas, totalPedidos) {
+        if (totalPedidos === 0) {
+            paginacionEl.innerHTML = '';
+            pagInfoEl.textContent = '';
+            return;
+        }
+
+        let html = '';
+
+        // Botón "Anterior"
+        html += `<button class="pag-btn" data-pag="ant" ${paginaActual === 1 ? 'disabled' : ''}>‹</button>`;
+
+        // Generar números de página con "…" si hay muchas
+        const paginas = generarPaginas(paginaActual, totalPaginas);
+        paginas.forEach((p) => {
+            if (p === '...') {
+                html += `<span class="pag-puntos">…</span>`;
+            } else {
+                html += `<button class="pag-btn ${p === paginaActual ? 'activo' : ''}" data-pag="${p}">${p}</button>`;
+            }
+        });
+
+        // Botón "Siguiente"
+        html += `<button class="pag-btn" data-pag="sig" ${paginaActual === totalPaginas ? 'disabled' : ''}>›</button>`;
+
+        paginacionEl.innerHTML = html;
+
+        const desde = (paginaActual - 1) * POR_PAGINA + 1;
+        const hasta = Math.min(paginaActual * POR_PAGINA, totalPedidos);
+        pagInfoEl.textContent = `Mostrando ${desde}-${hasta} de ${totalPedidos} pedidos · Página ${paginaActual} de ${totalPaginas}`;
+    }
+
+    // Genera una lista de páginas con "…" si son muchas
+    function generarPaginas(actual, total) {
+        const paginas = [];
+        if (total <= 7) {
+            for (let i = 1; i <= total; i++) paginas.push(i);
+            return paginas;
+        }
+
+        paginas.push(1);
+        if (actual > 4) paginas.push('...');
+
+        const inicio = Math.max(2, actual - 1);
+        const fin = Math.min(total - 1, actual + 1);
+        for (let i = inicio; i <= fin; i++) paginas.push(i);
+
+        if (actual < total - 3) paginas.push('...');
+        paginas.push(total);
+
+        return paginas;
+    }
+
+    // Click en los botones de paginación
+    paginacionEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.pag-btn');
+        if (!btn || btn.disabled) return;
+
+        const val = btn.dataset.pag;
+        if (val === 'ant') paginaActual = Math.max(1, paginaActual - 1);
+        else if (val === 'sig') paginaActual = paginaActual + 1;
+        else paginaActual = parseInt(val);
+
+        renderizarPagina();
+
+        // Scroll suave hacia arriba del panel
+        document.querySelector('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     function formatearFecha(valor) {
         if (!valor) return 'Sin fecha';
         const fecha = new Date(valor);
         if (isNaN(fecha.getTime())) return String(valor);
         return fecha.toLocaleString('es-VE', {
-            day: '2-digit', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
+            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
         });
     }
 
@@ -771,21 +1063,17 @@
         return isNaN(n) ? '0.00' : n.toFixed(2);
     }
 
-    function enlaceWhatsApp(texto) {
-        return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`;
-    }
-
     const ICONOS = {
-        caja: `<svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`,
-        ref: `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+        caja: `<svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1H3V8zm0 3h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8zm7 2v2h4v-2h-4z"/></svg>`,
+        ref: `<svg viewBox="0 0 24 24"><path d="M5 2h14a1 1 0 0 1 1 1v19l-3-2-2.5 2-2.5-2-2.5 2L7 20l-3 2V3a1 1 0 0 1 1-1zm3 6v2h8V8H8zm0 4v2h8v-2H8zm0 4v2h5v-2H8z"/></svg>`,
+        recibido: `<svg viewBox="0 0 24 24"><path d="M5 2h14a1 1 0 0 1 1 1v19l-3-2-2.5 2-2.5-2-2.5 2L7 20l-3 2V3a1 1 0 0 1 1-1zm3 6v2h8V8H8zm0 4v2h8v-2H8zm0 4v2h5v-2H8z"/></svg>`,
         check: `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`,
         lupa: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
+        calendario: `<svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V9h14v10zM7 11h5v5H7z"/></svg>`,
+        cartera: `<svg viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h13v3H5.5a.5.5 0 0 0 0 1H21v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6zm14 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>`,
         copiar: `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`
     };
 
-    // ═══════════════════════════════════════════════
-    // MOSTRAR PEDIDOS (TARJETAS + PANEL EXPANDIBLE)
-    // ═══════════════════════════════════════════════
     function mostrarPedidos(pedidos) {
         if (pedidos.length === 0) {
             const sinNinguno = todosPedidos.length === 0;
@@ -811,180 +1099,145 @@
             const producto = pedido.producto || '';
             const monto = formatearMonto(pedido.monto_usd || pedido.monto);
             const metodo = pedido.metodo || 'Pago Móvil';
-            const idJugador = pedido.id_jugador || pedido.player_id || '';
-            const nombreJugador = pedido.nombre_jugador || pedido.player_name || '';
-            const paginaJuego = paginaDelJuego(pedido);
+            const idJugador = pedido.id_jugador || pedido.player_id || 'No especificado';
+            const nombreJugador = pedido.nombre_jugador || pedido.player_name || 'No especificado';
 
-            const esStreaming = esProductoStreaming(pedido);
-            const servicioStreaming = detectarServicioStreaming(pedido);
-
-            // Timeline
             let stepRecibido = 'recibido';
             let stepVerificando = '';
             let stepCompletado = '';
             let line1 = 'active';
             let line2 = '';
+
             if (estado === 'completado') {
                 stepVerificando = 'verificando';
                 stepCompletado = 'completado';
                 line1 = 'completed';
                 line2 = 'completed';
             } else if (estado === 'procesando') {
-                stepVerificando = 'verificando';
+                stepVerificando = 'espera';
             }
 
             const timelineHtml = estado === 'cancelado' ? '' : `
                 <div class="pedido-timeline">
                     <div class="timeline-step ${stepRecibido}">
-                        <div class="timeline-icon">${ICONOS.check}</div>
+                        <div class="timeline-icon">${ICONOS.recibido}</div>
                         <div class="timeline-label">Recibido</div>
                     </div>
                     <div class="timeline-line ${line1}"></div>
                     <div class="timeline-step ${stepVerificando}">
                         <div class="timeline-icon">${ICONOS.lupa}</div>
-                        <div class="timeline-label">Verificado</div>
+                        <div class="timeline-label">Verificando</div>
                     </div>
                     <div class="timeline-line ${line2}"></div>
                     <div class="timeline-step ${stepCompletado}">
                         <div class="timeline-icon">${ICONOS.check}</div>
-                        <div class="timeline-label">Entregado</div>
+                        <div class="timeline-label">Completado</div>
                     </div>
                 </div>
             `;
 
-            // Jugador en la tarjeta (si aplica)
             let jugadorHtml = '';
-            if (!esStreaming && (idJugador || nombreJugador)) {
+            if (idJugador !== 'No especificado' || nombreJugador !== 'No especificado') {
                 jugadorHtml = `
                     <div class="pedido-jugador-box">
-                        ${idJugador ? `<div><strong>ID:</strong> ${esc(idJugador)}</div>` : ''}
-                        ${nombreJugador ? `<div><strong>Nombre:</strong> ${esc(nombreJugador)}</div>` : ''}
+                        ${idJugador !== 'No especificado' ? `<span><strong>ID de Jugador:</strong> ${esc(idJugador)}</span>` : ''}
+                        ${nombreJugador !== 'No especificado' ? `<span><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</span>` : ''}
                     </div>
                 `;
             }
 
-            // ═══════════════════════════════════════════════
-            // CONTENIDO DEL PANEL EXPANDIBLE
-            // ═══════════════════════════════════════════════
+            const esStreaming = pedido.es_streaming === true ||
+                                (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
+
             let detalleInterno = '';
 
-            // ── Resumen rápido para juegos (Free Fire, etc.) ──
-            if (!esStreaming && estado !== 'cancelado') {
-                // Si tiene PIN, mostramos resumen + PIN
-                const pinValue = pedido.pin || (pedido.codigos && pedido.codigos[0]) || '';
+            if (!esStreaming && estado !== 'cancelado' && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
+                const pinValue = pedido.pin || pedido.codigos[0];
+                const etiqueta = juego.toUpperCase().includes('ROBLOX') ? 'Tu PIN de Roblox' : 'Tu código';
                 detalleInterno += `
-                    <div class="resumen-juego">
-                        <div class="fila">
-                            <span class="label">Juego:</span>
-                            <span class="valor">${esc(juego)}</span>
-                        </div>
-                        ${producto ? `
-                        <div class="fila">
-                            <span class="label">Producto:</span>
-                            <span class="valor">${esc(producto)}</span>
-                        </div>` : ''}
-                        ${idJugador ? `
-                        <div class="fila">
-                            <span class="label">ID Jugador:</span>
-                            <span class="valor">${esc(idJugador)}</span>
-                        </div>` : ''}
-                        ${nombreJugador ? `
-                        <div class="fila">
-                            <span class="label">Nombre:</span>
-                            <span class="valor">${esc(nombreJugador)}</span>
-                        </div>` : ''}
+                    <div class="pin-box">
+                        <div class="pin-label">${etiqueta}</div>
+                        <div class="pin-value">${esc(pinValue)}</div>
+                        <button class="btn-copiar" data-pin="${esc(pinValue)}">Copiar</button>
                     </div>
                 `;
-
-                if (pinValue) {
-                    const etiqueta = juego.toUpperCase().includes('ROBLOX') ? 'Tu PIN de Roblox' : 'Tu código';
-                    detalleInterno += `
-                        <div class="pin-box">
-                            <div class="pin-label">${etiqueta}</div>
-                            <div class="pin-value">${esc(pinValue)}</div>
-                            <button class="btn-copiar" data-pin="${esc(pinValue)}">Copiar</button>
-                        </div>
-                    `;
-                }
             }
 
-            // ── Streaming (Netflix, Disney, HBO, etc.) ──
+            if (!esStreaming && estado !== 'cancelado' && !pedido.pin && (!pedido.codigos || pedido.codigos.length === 0)) {
+                detalleInterno += `
+                    <div class="pin-box">
+                        <div class="pin-label">Resumen del pedido</div>
+                        <div class="pin-value" style="font-size:14px;letter-spacing:0.3px;">${esc(juego)}${producto ? ' - ' + esc(producto) : ''}</div>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:3px;">ID: ${esc(idJugador)}</div>
+                    </div>
+                `;
+            }
+
             if (esStreaming && estado !== 'cancelado' && pedido.datos_streaming) {
                 const d = pedido.datos_streaming;
                 const codAprob = pedido.codigo_aprobacion || '';
                 const tieneValor = (v) => v !== undefined && v !== null && String(v).trim() !== '';
 
-                const campos = [];
-                if (tieneValor(d.correo)) campos.push({ label: 'Correo', valor: String(d.correo), clase: '' });
-                if (tieneValor(d.clave)) campos.push({ label: 'Contraseña', valor: String(d.clave), clase: '' });
-                if (tieneValor(d.perfil)) campos.push({ label: 'Perfil', valor: String(d.perfil), clase: '' });
-                if (tieneValor(d.pin_perfil)) campos.push({ label: 'PIN del perfil', valor: String(d.pin_perfil), clase: '' });
-                if (tieneValor(d.fecha_vencimiento)) campos.push({ label: 'Vence', valor: String(d.fecha_vencimiento), clase: '' });
-                if (tieneValor(codAprob)) campos.push({ label: 'Código de renovación', valor: String(codAprob), clase: 'codigo-renovacion' });
-
-                // Guardamos los datos en un data-attribute para poder generar la imagen
-                const datosParaImagen = campos.map(c => ({ label: c.label, valor: c.valor }));
-
-                const camposHtml = campos.map((c, i) => `
-                    <div class="dato-entrega ${c.clase}">
-                        <div class="dato-label">${esc(c.label)}</div>
-                        <div class="dato-contenido">
-                            <div class="dato-valor">${esc(c.valor)}</div>
-                            <button class="btn-copiar-dato" data-copiar="${esc(c.valor)}" aria-label="Copiar ${esc(c.label)}">
-                                ${ICONOS.copiar}
-                            </button>
+                let camposHtml = '';
+                const agregarDato = (label, valor, clase = '') => {
+                    if (!tieneValor(valor)) return '';
+                    const v = esc(valor);
+                    return `
+                        <div class="dato-entrega ${clase}">
+                            <div class="dato-label">${label}</div>
+                            <div class="dato-contenido">
+                                <div class="dato-valor">${v}</div>
+                                <button class="btn-copiar-dato" data-copiar="${v}" aria-label="Copiar ${label}">
+                                    ${ICONOS.copiar}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                };
 
-                const tienePerfil = tieneValor(d.perfil);
-                const titulo = tienePerfil
-                    ? `Datos de tu perfil de ${esc(servicioStreaming)}`
-                    : `Datos de tu cuenta de ${esc(servicioStreaming)}`;
+                camposHtml += agregarDato('📧 CORREO', d.correo);
+                camposHtml += agregarDato('🔑 CONTRASEÑA', d.clave);
+                camposHtml += agregarDato('👤 PERFIL', d.perfil);
+                camposHtml += agregarDato('🔢 PIN', d.pin_perfil);
+                camposHtml += agregarDato('📅 VENCE', d.fecha_vencimiento);
+                if (tieneValor(codAprob)) {
+                    camposHtml += agregarDato('🎟️ RENOVACIÓN', codAprob, 'codigo-renovacion');
+                    camposHtml += `<div class="aviso-renovacion">⚠️ Guarda este código para renovar.</div>`;
+                }
 
-                const mensajeAyuda = `Hola, necesito ayuda para iniciar sesión en ${servicioStreaming}. Pedido ${idPedido}`;
-
-                detalleInterno += `
-                    <div class="streaming-box">
-                        <div class="streaming-titulo">${titulo}</div>
-                        ${camposHtml}
-                        ${tieneValor(codAprob) ? `<div class="aviso-renovacion">Guarda el código: lo necesitas para renovar.</div>` : ''}
-
-                        <button class="btn-guardar-imagen"
-                            data-pedido-key="${esc(pedido.key)}"
-                            data-servicio="${esc(servicioStreaming)}"
-                            data-id="${esc(idPedido)}"
-                            data-datos='${esc(JSON.stringify(datosParaImagen))}'>
-                            💾 Guardar imagen con los datos
-                        </button>
-
-                        <a class="ayuda-streaming" href="${enlaceWhatsApp(mensajeAyuda)}" target="_blank" rel="noopener">
-                            ¿Problemas para entrar? Escríbenos
-                        </a>
-                    </div>
-                `;
+                if (camposHtml) {
+                    const titulo = d.perfil ? '🎬 Datos del perfil' : '🎬 Datos de la cuenta';
+                    const mensajeAyuda = `Hola, necesito ayuda con mi pedido ${idPedido}`;
+                    detalleInterno += `
+                        <div class="streaming-box">
+                            <div class="streaming-titulo">${titulo}</div>
+                            ${camposHtml}
+                            <a class="ayuda-streaming" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensajeAyuda)}" target="_blank" rel="noopener">
+                                ¿Problemas? Escríbenos
+                            </a>
+                        </div>
+                    `;
+                }
             } else if (esStreaming && estado !== 'cancelado') {
-                const mensaje = enlaceWhatsApp(`Hola, necesito los datos de mi pedido ${idPedido} (${servicioStreaming})`);
+                const mensaje = `Hola, necesito los datos de mi pedido ${idPedido}`;
                 detalleInterno += `
-                    <div class="pendiente-manual-box">
-                        <div class="titulo-pendiente">Preparando tu entrega de ${esc(servicioStreaming)}</div>
-                        <div class="desc-pendiente">Te enviaremos los datos por WhatsApp.</div>
-                        <a href="${mensaje}" target="_blank" rel="noopener" class="btn-whatsapp-pendiente">
-                            💬 Consultar por WhatsApp
+                    <div class="manual-box">
+                        <div class="manual-text">⚠️ Este pedido requiere entrega manual.</div>
+                        <a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje)}" target="_blank" rel="noopener" class="btn-whatsapp">
+                            Pedir por WhatsApp
                         </a>
                     </div>
                 `;
             }
 
-            // ── Manual no streaming ──
             if (!esStreaming && estado !== 'cancelado') {
                 const esManual = (pedido.metodo_pago === 'MANUAL') ||
                                  (pedido.paquete && String(pedido.paquete).startsWith('manual_'));
                 if (esManual) {
                     detalleInterno += `
                         <div class="manual-box">
-                            <div class="manual-text">Este producto se entrega de forma manual.</div>
-                            <a href="${enlaceWhatsApp(`Hola, necesito mi entrega del pedido ${idPedido}`)}" target="_blank" rel="noopener" class="btn-whatsapp">
+                            <div class="manual-text">Entrega manual.</div>
+                            <a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, necesito mi pedido ' + idPedido)}" target="_blank" rel="noopener" class="btn-whatsapp">
                                 Pedir por WhatsApp
                             </a>
                         </div>
@@ -992,48 +1245,41 @@
                 }
             }
 
-            // ── Cancelado ──
             if (estado === 'cancelado') {
                 const motivo = pedido.motivo_cancelacion || pedido.motivo || 'No pudimos verificar el pago.';
                 detalleInterno += `
                     <div class="aviso-estado cancelado">${esc(motivo)}</div>
                     <div class="acciones">
-                        <a class="btn-accion dorado" href="${esc(paginaJuego)}">Reintentar</a>
-                        <a class="btn-accion wa" href="${enlaceWhatsApp(`Hola, mi pedido ${idPedido} fue cancelado`)}" target="_blank" rel="noopener">Soporte</a>
+                        <a class="btn-accion dorado" href="index.html">Reintentar</a>
+                        <a class="btn-accion wa" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('Hola, mi pedido ' + idPedido + ' fue cancelado')}" target="_blank" rel="noopener">Soporte</a>
                     </div>
                 `;
             }
 
-            // ── Acciones completado ──
-            if (estado === 'completado') {
-                detalleInterno += `
-                    <div class="acciones">
-                        <a class="btn-accion dorado" href="${esc(paginaJuego)}">${esStreaming ? 'Renovar' : 'Recargar de nuevo'}</a>
-                    </div>
-                `;
-            }
-
-            // ═══════════════════════════════════════════════
-            // TARJETA COMPLETA
-            // ═══════════════════════════════════════════════
             html += `
                 <article class="pedido-card est-${estado}" data-pedido-key="${esc(pedido.key)}">
                     <div class="pedido-header">
                         <div class="pedido-header-left">
-                            <div class="pedido-id">#${esc(idPedido)}</div>
-                            <div class="pedido-fecha">${esc(formatearFecha(pedido.fecha))}</div>
-                            <span class="estado-badge ${estado}">${ETIQUETA_ESTADO[estado]}</span>
+                            <span class="pedido-id">#${esc(idPedido)}</span>
+                            <span class="pedido-fecha-inline">
+                                ${ICONOS.calendario}
+                                ${esc(formatearFecha(pedido.fecha))}
+                            </span>
                         </div>
                         <div class="pedido-header-right">
                             <span class="pedido-precio">$${esc(monto)}</span>
-                            <span class="pedido-metodo">${esc(metodo)}</span>
+                            <span class="pedido-metodo">
+                                ${ICONOS.cartera}
+                                ${esc(metodo)}
+                            </span>
                         </div>
                     </div>
 
                     <div class="pedido-body">
                         <div class="pedido-producto">
                             ${ICONOS.caja}
-                            <span>${esc(juego)}${producto ? ' · ' + esc(producto) : ''}</span>
+                            <span>${esc(juego)}${producto ? ' - ' + esc(producto) : ''}</span>
+                            <span class="estado-badge ${estado}">${estado.charAt(0).toUpperCase() + estado.slice(1)}</span>
                         </div>
                         <div class="pedido-referencia">
                             ${ICONOS.ref}
@@ -1048,6 +1294,8 @@
                         <h4>📋 Detalles del Pedido</h4>
                         ${detalleInterno}
                     </div>
+
+                    <div class="aviso-tocar">👆 Toca para ver los datos</div>
                 </article>
             `;
         });
@@ -1055,163 +1303,55 @@
         listaEl.innerHTML = html;
     }
 
-    // ═══════════════════════════════════════════════
-    // CLICK EN TARJETA: EXPANDE / CONTRAE
-    // ═══════════════════════════════════════════════
     listaEl.addEventListener('click', (e) => {
-        // Si toca un botón, no expande
-        if (e.target.closest('.btn-copiar') || e.target.closest('.btn-copiar-dato') ||
-            e.target.closest('.btn-guardar-imagen') || e.target.closest('.btn-whatsapp') ||
-            e.target.closest('.btn-accion') || e.target.closest('.ayuda-streaming')) {
-            return;
-        }
-
+        if (e.target.closest('.btn-copiar') || e.target.closest('.btn-copiar-dato') || e.target.closest('a')) return;
         const card = e.target.closest('.pedido-card');
         if (!card) return;
+
         card.classList.toggle('expandido');
+
+        const aviso = card.querySelector('.aviso-tocar');
+        if (aviso) {
+            aviso.textContent = card.classList.contains('expandido')
+                ? '👆 Toca para ocultar'
+                : '👆 Toca para ver los datos';
+        }
     });
 
-    // ═══════════════════════════════════════════════
-    // COPIAR PIN / DATOS
-    // ═══════════════════════════════════════════════
-    function copiarTexto(texto, onOk) {
+    listaEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-copiar');
+        if (!btn) return;
+        e.stopPropagation();
+        const pin = btn.dataset.pin;
+        if (!pin) return;
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(texto)
-                .then(() => { if (onOk) onOk(); avisar('✓ Copiado'); })
+            navigator.clipboard.writeText(pin)
+                .then(() => avisar('✓ Copiado'))
                 .catch(() => avisar('No se pudo copiar'));
         } else {
             avisar('Mantén presionado para copiar');
         }
-    }
-
-    listaEl.addEventListener('click', (e) => {
-        const btnPin = e.target.closest('.btn-copiar');
-        if (btnPin) {
-            e.stopPropagation();
-            copiarTexto(btnPin.dataset.pin);
-            return;
-        }
-        const btnDato = e.target.closest('.btn-copiar-dato');
-        if (btnDato) {
-            e.stopPropagation();
-            copiarTexto(btnDato.dataset.copiar, () => {
-                btnDato.classList.add('copiado');
-                setTimeout(() => btnDato.classList.remove('copiado'), 1500);
-            });
-        }
     });
 
-    // ═══════════════════════════════════════════════
-    // 🆕 GUARDAR IMAGEN CON LOS DATOS DE STREAMING
-    // ═══════════════════════════════════════════════
     listaEl.addEventListener('click', (e) => {
-        const btn = e.target.closest('.btn-guardar-imagen');
+        const btn = e.target.closest('.btn-copiar-dato');
         if (!btn) return;
         e.stopPropagation();
-
-        const servicio = btn.dataset.servicio;
-        const idPedido = btn.dataset.id;
-        let datos = [];
-        try {
-            datos = JSON.parse(btn.dataset.datos || '[]');
-        } catch (err) {
-            avisar('Error al leer los datos');
-            return;
+        const texto = btn.dataset.copiar;
+        if (!texto) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(texto)
+                .then(() => {
+                    btn.classList.add('copiado');
+                    setTimeout(() => btn.classList.remove('copiado'), 1500);
+                    avisar('✓ Copiado');
+                })
+                .catch(() => avisar('No se pudo copiar'));
+        } else {
+            avisar('Mantén presionado para copiar');
         }
-
-        if (!datos.length) {
-            avisar('No hay datos para guardar');
-            return;
-        }
-
-        // Generar la imagen
-        const canvas = document.createElement('canvas');
-        const W = 700;
-        const H = 200 + datos.length * 90;
-        canvas.width = W;
-        canvas.height = H;
-        const ctx = canvas.getContext('2d');
-
-        // Fondo oscuro
-        ctx.fillStyle = '#0a0e1a';
-        ctx.fillRect(0, 0, W, H);
-
-        // Borde dorado
-        ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(8, 8, W - 16, H - 16);
-
-        // Encabezado
-        ctx.fillStyle = '#f5d76e';
-        ctx.font = 'bold 32px "Segoe UI", Tahoma, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('🎬 ' + servicio, W / 2, 70);
-
-        // ID pedido
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '18px "Segoe UI", Tahoma, sans-serif';
-        ctx.fillText('Pedido #' + idPedido, W / 2, 100);
-
-        // Línea
-        ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(60, 120);
-        ctx.lineTo(W - 60, 120);
-        ctx.stroke();
-
-        // Datos
-        let y = 165;
-        datos.forEach((d) => {
-            // Etiqueta
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = 'bold 14px "Segoe UI", Tahoma, sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(d.label.toUpperCase(), 60, y);
-
-            // Valor
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 22px "Courier New", monospace';
-            ctx.textAlign = 'left';
-            ctx.fillText(d.valor, 60, y + 30);
-
-            y += 80;
-        });
-
-        // Pie
-        ctx.fillStyle = '#f5d76e';
-        ctx.font = 'bold 14px "Segoe UI", Tahoma, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('⭐ RecargasGames ⭐', W / 2, H - 30);
-
-        // Convertir a imagen y descargar
-        canvas.toBlob((blob) => {
-            if (!blob) {
-                avisar('No se pudo generar la imagen');
-                return;
-            }
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `datos-${servicio.toLowerCase().replace(/\s+/g, '-')}-${idPedido}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            btn.classList.add('guardado');
-            btn.innerHTML = '✅ Imagen guardada';
-            avisar('Imagen guardada en tu galería');
-            setTimeout(() => {
-                btn.classList.remove('guardado');
-                btn.innerHTML = '💾 Guardar imagen con los datos';
-            }, 3000);
-        }, 'image/png');
     });
 
-    // ═══════════════════════════════════════════════
-    // FILTROS Y BÚSQUEDA
-    // ═══════════════════════════════════════════════
     document.getElementById('chips').addEventListener('click', (e) => {
         const chip = e.target.closest('.chip');
         if (!chip) return;
