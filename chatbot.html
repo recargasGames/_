@@ -1,169 +1,522 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RECARGASGAMES - Free Fire</title>
-<style>
-:root{
-    --fondo-oscuro:#2b1f14;
-    --caja-fondo:#3d2c1e;
-    --borde-naranja:#e67e22;
-    --texto-dorado:#f9c80e;
-    --texto-blanco:#ffffff;
-    --texto-claro:#f0e6d6;
-    --pago-movil:#1e4d2b;
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
-body{
-    background-color:#1a120b;
-    color:var(--texto-blanco);
-    padding:20px;
-    line-height:1.6;
-}
-.contenedor{
-    max-width:450px;
-    margin:0 auto;
-}
-.tarjeta{
-    background-color:var(--caja-fondo);
-    border-radius:14px;
-    padding:20px;
-    margin-bottom:16px;
-    border:1px solid var(--borde-naranja);
-}
-.titulo-seccion{
-    font-size:18px;
-    font-weight:bold;
-    margin-bottom:14px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-.diamante{color:#60a5fa}
-.nivel{color:#ef4444}
-.tarjetas{color:#f9c80e}
-.fila-botones{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
-    gap:10px;
-    margin-bottom:12px;
-}
-.boton-cantidad{
-    background-color:var(--fondo-oscuro);
-    border:2px solid var(--borde-naranja);
-    border-radius:10px;
-    padding:12px 8px;
-    text-align:center;
-    cursor:pointer;
-    transition:transform .2s;
-}
-.boton-cantidad:hover{transform:scale(1.05)}
-.numero{font-size:20px;font-weight:bold;color:var(--texto-dorado)}
-.precio{font-size:15px;color:var(--texto-claro)}
-.otro-monto{
-    margin:14px 0;
-    font-style:italic;
-    color:#ddd;
-}
-.lista-paquetes{
-    list-style:none;
-    padding-left:6px;
-}
-.lista-paquetes li{
-    padding:6px 0;
-    border-bottom:1px dashed rgba(255,255,255,.1);
-}
-.texto-dorado{color:var(--texto-dorado);font-weight:500}
-.descuento{
-    margin-top:14px;
-    padding:10px;
-    background-color:rgba(249,200,14,.1);
-    border-radius:8px;
-    font-weight:500;
-}
-.pago-movil{
-    background-color:var(--pago-movil);
-    border-radius:10px;
-    padding:14px;
-    margin-top:16px;
-}
-.input-mensaje{
-    width:100%;
-    margin-top:12px;
-    padding:12px;
-    border-radius:8px;
-    border:none;
-    font-size:16px;
-    background-color:#2c2c2c;
-    color:white;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente RecargasGames</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0e1a; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header {
+            background: linear-gradient(135deg, #10a37f, #0d8a6b);
+            padding: 14px 18px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+        }
+        .avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center; font-size: 20px;
+        }
+        .chat-header h3 { font-size: 15px; font-weight: 700; }
+        .chat-header p { font-size: 11px; opacity: 0.85; }
+        .chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .message {
+            max-width: 88%; padding: 11px 14px; border-radius: 14px; font-size: 14px;
+            line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+        }
+        .user { align-self: flex-end; background: #10a37f; color: #fff; border-bottom-right-radius: 4px; }
+        .assistant { align-self: flex-start; background: #1e2a45; color: #e2e8f0; border-bottom-left-radius: 4px; }
+        .typing { display: flex; gap: 4px; padding: 14px 18px; align-self: flex-start; background: #1e2a45; border-radius: 14px; }
+        .typing span { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; animation: bounce 1.4s infinite; }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-5px); opacity: 1; } }
+
+        /* ══════════ TABLA DE PRECIOS ══════════ */
+        .tabla-precios {
+            align-self: flex-start;
+            max-width: 95%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .tabla-titulo {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.1));
+            color: #f5d76e;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 9px 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .tabla-fila {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            gap: 8px;
+            font-size: 13px;
+        }
+        .tabla-fila:last-child { border-bottom: none; }
+        .tabla-fila.oferta {
+            background: rgba(245, 158, 11, 0.08);
+        }
+        .tabla-fila .paquete {
+            color: #e2e8f0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .tabla-fila .paquete .fuego {
+            font-size: 12px;
+        }
+        .tabla-fila .precio {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            line-height: 1.2;
+        }
+        .tabla-fila .precio .bs {
+            color: #f5d76e;
+            font-weight: 800;
+            font-size: 13px;
+        }
+        .tabla-fila .precio .usd {
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .tabla-nota {
+            background: rgba(59, 109, 255, 0.1);
+            border-top: 1px solid rgba(59, 109, 255, 0.3);
+            padding: 8px 12px;
+            font-size: 11px;
+            color: #93c5fd;
+            text-align: center;
+        }
+        /* ══════════════════════════════════════ */
+
+        .sugerencias {
+            display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto;
+            background: #0d1627; border-top: 1px solid rgba(30, 42, 69, 0.5);
+            scrollbar-width: none; flex-shrink: 0;
+        }
+        .sugerencias::-webkit-scrollbar { display: none; }
+        .sug-chip {
+            flex-shrink: 0; padding: 6px 12px; border-radius: 16px;
+            background: rgba(16, 163, 127, 0.15); border: 1px solid rgba(16, 163, 127, 0.4);
+            color: #4ade80; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: inherit; white-space: nowrap; transition: all 0.2s;
+        }
+        .sug-chip:hover { background: rgba(16, 163, 127, 0.3); }
+
+        .input-area {
+            display: flex; gap: 8px; padding: 12px;
+            background: #0d1627; border-top: 1px solid rgba(30, 42, 69, 0.8); flex-shrink: 0;
+        }
+        .input-area input {
+            flex: 1; padding: 11px 14px; border-radius: 22px;
+            border: 1px solid rgba(30, 42, 69, 0.9);
+            background: #060c20; color: #fff; font-size: 14px; outline: none; font-family: inherit;
+        }
+        .input-area input:focus { border-color: #10a37f; }
+        .input-area button {
+            width: 44px; height: 44px; border-radius: 50%;
+            border: none; background: #10a37f; color: #fff; font-size: 18px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .input-area button:disabled { background: #475569; cursor: not-allowed; }
+    </style>
 </head>
 <body>
-<div class="contenedor">
 
-<!-- 💎 DIAMANTES -->
-<div class="tarjeta">
-    <div class="titulo-seccion">
-        <span class="diamante">💎</span> DIAMANTES FREE FIRE
+<div class="chat-header">
+    <div class="avatar">🤖</div>
+    <div>
+        <h3>Asistente RecargasGames</h3>
+        <p>Pregúntame lo que quieras</p>
     </div>
-    <div class="fila-botones">
-        <div class="boton-cantidad">
-            <div class="numero">110</div>
-            <div class="precio">Bs 755</div>
-        </div>
-        <div class="boton-cantidad">
-            <div class="numero">220</div>
-            <div class="precio">Bs 1.511</div>
-        </div>
-        <div class="boton-cantidad">
-            <div class="numero">341</div>
-            <div class="precio">Bs 2.266</div>
-        </div>
-        <div class="boton-cantidad">
-            <div class="numero">572</div>
-            <div class="precio">Bs 3.800</div>
-        </div>
-    </div>
-    <p class="otro-monto">🔧 ¿Otra cantidad? Escríbemela</p>
 </div>
 
-<!-- 📦 PASES DE NIVEL -->
-<div class="tarjeta">
-    <div class="titulo-seccion">
-        <span class="nivel">📦</span> PASES DE NIVEL
-    </div>
-    <ul class="lista-paquetes">
-        <li>▫️ Pase Nivel 6 — <span class="texto-dorado">Bs 390</span></li>
-        <li>▫️ Pase Nivel 10 — <span class="texto-dorado">Bs 823</span></li>
-        <li>▫️ Pase Nivel 15 — <span class="texto-dorado">Bs 823</span></li>
-        <li>▫️ Pase Nivel 20 — <span class="texto-dorado">Bs 823</span></li>
-        <li>▫️ Pase Nivel 25 — <span class="texto-dorado">Bs 823</span></li>
-        <li>▫️ Pase Nivel 30 — <span class="texto-dorado">Bs 1.256</span></li>
-    </ul>
+<div class="chat-box" id="chatBox"></div>
+
+<div class="sugerencias" id="sugerencias">
+    <button class="sug-chip" data-msg="Precios de Free Fire">Free Fire 💎</button>
+    <button class="sug-chip" data-msg="Precios de Blood Strike">Blood Strike 🥇</button>
+    <button class="sug-chip" data-msg="Precios de Roblox">Roblox 💰</button>
+    <button class="sug-chip" data-msg="Precios de Mobile Legends">Mobile Legends 💎</button>
+    <button class="sug-chip" data-msg="¿Cómo recargo?">¿Cómo recargo?</button>
 </div>
 
-<!-- 🎫 TARJETAS -->
-<div class="tarjeta">
-    <div class="titulo-seccion">
-        <span class="tarjetas">🎫</span> TARJETAS
-    </div>
-    <ul class="lista-paquetes">
-        <li>▫️ Semanal Básica — <span class="texto-dorado">Bs 747</span></li>
-        <li>▫️ Tarjeta Semanal — <span class="texto-dorado">Bs 2.423</span></li>
-        <li>▫️ Tarjeta Mensual — <span class="texto-dorado">Bs 11.648</span></li>
-    </ul>
-    <p class="descuento">💳 Son tus precios con descuento por estar registrado.</p>
+<div class="input-area">
+    <input type="text" id="inputMensaje" placeholder="Escribe tu pregunta..." autocomplete="off">
+    <button id="btnEnviar" aria-label="Enviar">➤</button>
 </div>
 
-<!-- 🏦 PAGO MÓVIL -->
-<div class="pago-movil">
-    <div class="titulo-seccion">🏦 PAGO MÓVIL</div>
-    <p>Banco: R4 Banco Microfinanciero</p>
-    <input type="text" class="input-mensaje" placeholder="Escribe tu mensaje...">
-</div>
+<script>
+    // ═══════════════════════════════════════════════
+    // CONFIGURACIÓN
+    // ═══════════════════════════════════════════════
+    const OPENROUTER_KEY = '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';
+    const MODELO = 'openai/gpt-3.5-turbo';
+    const WHATSAPP = '584228242411';
 
-</div>
+    // ═══════════════════════════════════════════════
+    // PRECIOS REALES
+    // ═══════════════════════════════════════════════
+    const PRECIOS = {
+        'Free Fire': {
+            emoji: '💎',
+            paquetes: {
+                '110 Diamantes': { bs: 786, usd: 0.81 },
+                '341 Diamantes': { bs: 2522, usd: 2.60 },
+                '572 Diamantes': { bs: 4074, usd: 4.20 },
+                '1166 Diamantes': { bs: 7566, usd: 7.80 },
+                '2398 Diamantes': { bs: 14841, usd: 15.30 },
+                '6160 Diamantes': { bs: 37830, usd: 39.00, oferta: true },
+                'Tarjeta Semanal (7 días)': { bs: 2425, usd: 2.50 },
+                'Tarjeta Mensual (30 días)': { bs: 10670, usd: 11.00 }
+            }
+        },
+        'Blood Strike': {
+            emoji: '🥇',
+            paquetes: {
+                '105 Golds': { bs: 873, usd: 0.90 },
+                '320 Golds': { bs: 2600, usd: 2.68 },
+                '540 Golds': { bs: 4346, usd: 4.48 },
+                '1100 Golds': { bs: 8633, usd: 8.90 },
+                '2260 Golds': { bs: 17363, usd: 17.90 },
+                '5800 Golds': { bs: 43359, usd: 44.70, oferta: true }
+            }
+        },
+        'Roblox': {
+            emoji: '💰',
+            paquetes: {
+                '50 Robux': { bs: 970, usd: 1.00 },
+                '100 Robux': { bs: 1649, usd: 1.70 },
+                '275 Robux': { bs: 3395, usd: 3.50 },
+                '360 Robux': { bs: 4074, usd: 4.20 },
+                '555 Robux': { bs: 6839, usd: 7.05 },
+                '1000 Robux': { bs: 11155, usd: 11.50 },
+                '2000 Robux': { bs: 21340, usd: 22.00 },
+                '2400 Robux': { bs: 25705, usd: 26.50 }
+            }
+        },
+        'Mobile Legends': {
+            emoji: '💎',
+            paquetes: {
+                '55 Diamantes': { bs: 834, usd: 0.86 },
+                '86 Diamantes': { bs: 1164, usd: 1.20 },
+                '112 Diamantes': { bs: 1707, usd: 1.76 },
+                '172 Diamantes': { bs: 4850, usd: 5.00 },
+                '257 Diamantes': { bs: 6984, usd: 7.20 },
+                '429 Diamantes': { bs: 11834, usd: 12.20 },
+                '706 Diamantes': { bs: 18915, usd: 19.50 },
+                '1050 Diamantes': { bs: 28615, usd: 29.50, oferta: true }
+            }
+        }
+    };
+
+    // ═══════════════════════════════════════════════
+    // UI
+    // ═══════════════════════════════════════════════
+    const chatBox = document.getElementById('chatBox');
+    const inputMensaje = document.getElementById('inputMensaje');
+    const btnEnviar = document.getElementById('btnEnviar');
+    const sugerencias = document.getElementById('sugerencias');
+
+    let mensajes = JSON.parse(sessionStorage.getItem('chatHistorial') || '[]');
+
+    function scrollAbajo() { chatBox.scrollTop = chatBox.scrollHeight; }
+
+    function agregarMensaje(rol, contenido, guardar = true) {
+        const div = document.createElement('div');
+        div.className = `message ${rol}`;
+        div.textContent = contenido;
+        chatBox.appendChild(div);
+        scrollAbajo();
+        if (guardar) {
+            mensajes.push({ role: rol, content: contenido });
+            sessionStorage.setItem('chatHistorial', JSON.stringify(mensajes));
+        }
+    }
+
+    // 🆕 Tabla de precios HTML ordenada
+    function agregarTablaPrecios(juego) {
+        const cat = PRECIOS[juego];
+        if (!cat) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'tabla-precios';
+
+        let html = `<div class="tabla-titulo">${cat.emoji} ${juego}</div>`;
+
+        Object.keys(cat.paquetes).forEach((paq) => {
+            const p = cat.paquetes[paq];
+            const esOferta = p.oferta;
+            html += `
+                <div class="tabla-fila ${esOferta ? 'oferta' : ''}">
+                    <div class="paquete">
+                        ${esOferta ? '<span class="fuego">🔥</span>' : ''}
+                        ${paq}
+                    </div>
+                    <div class="precio">
+                        <span class="bs">${p.bs.toLocaleString('es-VE')} Bs</span>
+                        <span class="usd">≈ $${p.usd.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `<div class="tabla-nota">💳 Pago Móvil · Binance · Zelle</div>`;
+
+        wrap.innerHTML = html;
+        chatBox.appendChild(wrap);
+        scrollAbajo();
+
+        // Guardamos en el historial un resumen
+        mensajes.push({
+            role: 'assistant',
+            content: `[Tabla de precios de ${juego} mostrada]`
+        });
+        sessionStorage.setItem('chatHistorial', JSON.stringify(mensajes));
+    }
+
+    function mostrarTyping() {
+        const div = document.createElement('div');
+        div.className = 'message assistant typing';
+        div.innerHTML = '<span></span><span></span><span></span>';
+        chatBox.appendChild(div);
+        scrollAbajo();
+        return div;
+    }
+
+    // ═══════════════════════════════════════════════
+    // ENVIAR MENSAJE
+    // ═══════════════════════════════════════════════
+    async function enviarMensaje() {
+        const texto = inputMensaje.value.trim();
+        if (!texto) return;
+
+        agregarMensaje('user', texto);
+        inputMensaje.value = '';
+        btnEnviar.disabled = true;
+        inputMensaje.disabled = true;
+
+        const typing = mostrarTyping();
+
+        try {
+            const systemPrompt = construirSystemPrompt();
+
+            const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${OPENROUTER_KEY}`,
+                    'HTTP-Referer': location.origin || 'https://recargasgames.vercel.app',
+                    'X-Title': 'RecargasGames'
+                },
+                body: JSON.stringify({
+                    model: MODELO,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        ...mensajes.slice(-12)
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 400
+                })
+            });
+
+            typing.remove();
+
+            if (!resp.ok) {
+                console.error('OpenRouter error:', await resp.text());
+                responderFallback(texto);
+                return;
+            }
+
+            const data = await resp.json();
+            const respuestaIA = data.choices?.[0]?.message?.content || '';
+
+            // Detectar si la IA mencionó un juego para mostrar la tabla
+            const juegoDetectado = detectarJuego(texto) || detectarJuego(respuestaIA);
+
+            if (juegoDetectado) {
+                // Mostramos la tabla visual primero
+                agregarTablaPrecios(juegoDetectado);
+                // Y si la IA respondió algo más, lo mostramos como texto corto
+                const textoLimpio = limpiarRespuestaIA(respuestaIA);
+                if (textoLimpio) agregarMensaje('assistant', textoLimpio);
+            } else {
+                agregarMensaje('assistant', respuestaIA || respuestaFallbackTexto(texto));
+            }
+
+        } catch (error) {
+            typing.remove();
+            console.error(error);
+            responderFallback(texto);
+        } finally {
+            btnEnviar.disabled = false;
+            inputMensaje.disabled = false;
+            inputMensaje.focus();
+        }
+    }
+
+    // Detecta si en el texto se menciona un juego
+    function detectarJuego(texto) {
+        const t = String(texto || '').toLowerCase();
+        if (/free\s*fire|freefire|\bff\b/.test(t)) return 'Free Fire';
+        if (/blood\s*strike|bloodstrike/.test(t)) return 'Blood Strike';
+        if (/roblox|robux/.test(t)) return 'Roblox';
+        if (/mobile\s*legends|\bmlbb?\b/.test(t)) return 'Mobile Legends';
+        return null;
+    }
+
+    // Limpia la respuesta de la IA si repite toda la lista (nos quedamos con la intro)
+    function limpiarRespuestaIA(texto) {
+        if (!texto) return '';
+        // Si la IA escribió toda la lista con precios, la cortamos
+        if (texto.length > 250 && /\d+\s*Bs/.test(texto)) {
+            const primeraLinea = texto.split('\n')[0].trim();
+            return primeraLinea || 'Aquí tienes los precios 👇';
+        }
+        return texto.trim();
+    }
+
+    // ═══════════════════════════════════════════════
+    // FALLBACK
+    // ═══════════════════════════════════════════════
+    function responderFallback(texto) {
+        const juego = detectarJuego(texto);
+        if (juego) {
+            agregarTablaPrecios(juego);
+            return;
+        }
+        agregarMensaje('assistant', respuestaFallbackTexto(texto));
+    }
+
+    function respuestaFallbackTexto(texto) {
+        const t = texto.toLowerCase();
+
+        if (t.includes('hola') || t.includes('buenas') || t.includes('buenos')) {
+            return '¡Hola! 👋 ¿En qué te ayudo? Puedo darte precios de Free Fire, Blood Strike, Roblox o Mobile Legends.';
+        }
+        if (t.includes('recarg') || t.includes('cómo') || t.includes('como')) {
+            return 'Recargar es fácil 🚀:\n\n1️⃣ Elige tu juego\n2️⃣ Selecciona el paquete\n3️⃣ Ingresa tu ID\n4️⃣ Paga con Pago Móvil, Binance o Zelle\n5️⃣ Recibe al instante ✅';
+        }
+        if (t.includes('precio') || t.includes('cuánto') || t.includes('cuanto') || t.includes('costo') || t.includes('vale')) {
+            return 'Claro 😊 Dime de qué juego quieres el precio:\n\n• Free Fire\n• Blood Strike\n• Roblox\n• Mobile Legends\n\nEj: "precios de Free Fire"';
+        }
+        if (t.includes('pago') || t.includes('pagar') || t.includes('método')) {
+            return 'Aceptamos 💳:\n\n• Pago Móvil\n• Binance\n• Zelle\n• Transferencia';
+        }
+        if (t.includes('tarda') || t.includes('tiempo') || t.includes('demora')) {
+            return 'Los juegos se acreditan al instante ⚡. Si algo tarda más de 30 min, escríbenos: +58 422-824-2411';
+        }
+        if (t.includes('soporte') || t.includes('ayuda') || t.includes('problema')) {
+            return 'Escríbenos por WhatsApp: +58 422-824-2411 💬 Te atendemos al instante.';
+        }
+        if (t.includes('gracias')) {
+            return '¡De nada! 🙌 Cualquier cosa aquí estoy.';
+        }
+        if (t.includes('promo') || t.includes('oferta') || t.includes('descuento')) {
+            return '¡Claro que sí! 🔥 Escríbenos al +58 422-824-2411 y te paso las promos del día.';
+        }
+
+        return 'Cuéntame más 👍 Puedo darte precios de Free Fire, Blood Strike, Roblox o Mobile Legends.';
+    }
+
+    // ═══════════════════════════════════════════════
+    // PROMPT PARA LA IA
+    // ═══════════════════════════════════════════════
+    function formatearPreciosParaIA() {
+        let txt = 'LISTA DE PRECIOS REALES:\n\n';
+        Object.keys(PRECIOS).forEach((juego) => {
+            txt += `🎮 ${juego}:\n`;
+            Object.keys(PRECIOS[juego].paquetes).forEach((paq) => {
+                const p = PRECIOS[juego].paquetes[paq];
+                const oferta = p.oferta ? ' 🔥 OFERTA' : '';
+                txt += `   - ${paq}: ${p.bs} Bs (≈ $${p.usd} USD)${oferta}\n`;
+            });
+            txt += '\n';
+        });
+        return txt;
+    }
+
+    function construirSystemPrompt() {
+        return `Eres "Rigo", el asistente virtual de RecargasGames, tienda venezolana de recargas de juegos.
+
+PERSONALIDAD:
+- Amable, cercano, venezolano. Español siempre.
+- Respuestas MUY CORTAS (1-2 líneas máximo).
+- NUNCA dices "no entendí", "no sé" ni "no puedo ayudarte".
+
+DATOS:
+- WhatsApp: +58 422-824-2411
+- Métodos de pago: Pago Móvil, Binance, Zelle, transferencia.
+- Juegos: Free Fire, Blood Strike, Roblox, Mobile Legends.
+- Precios en Bs y USD.
+
+${formatearPreciosParaIA()}
+
+REGLAS IMPORTANTES:
+1. Si el usuario pregunta por un juego, NO escribas la lista de precios completa. Solo di algo corto como "¡Claro! Aquí tienes los precios de Free Fire 👇" o "Estos son los precios 🎮" porque la lista se mostrará visualmente.
+2. Para preguntas específicas de un paquete (ej: "cuánto cuesta 110 diamantes"), sí da el precio exacto en texto: "786 Bs (≈ $0.81) 💎".
+3. Si el cliente quiere comprar, dile: "Entra al juego en la web y pon tu ID".
+4. Si tiene problema con un pedido, dale el WhatsApp.
+5. Nunca menciones que eres IA.
+6. Emojis con moderación (1-2).
+7. Si te saludan, saluda y pregunta en qué ayudar.
+
+EJEMPLOS:
+- "precios de Free Fire" → "¡Claro! Aquí tienes los precios de Free Fire 👇"
+- "hola" → "¡Hola! 👋 ¿En qué te ayudo hoy?"
+- "cuánto cuesta 110 diamantes" → "110 diamantes de Free Fire: 786 Bs (≈ $0.81) 💎"
+- "gracias" → "¡De nada! 🙌"`;
+    }
+
+    // ═══════════════════════════════════════════════
+    // EVENTOS
+    // ═══════════════════════════════════════════════
+    btnEnviar.addEventListener('click', enviarMensaje);
+    inputMensaje.addEventListener('keydown', (e) => { if (e.key === 'Enter') enviarMensaje(); });
+
+    sugerencias.addEventListener('click', (e) => {
+        const chip = e.target.closest('.sug-chip');
+        if (!chip) return;
+        inputMensaje.value = chip.dataset.msg;
+        enviarMensaje();
+    });
+
+    // ═══════════════════════════════════════════════
+    // ARRANQUE
+    // ═══════════════════════════════════════════════
+    if (mensajes.length === 0) {
+        agregarMensaje('assistant',
+            '¡Hola! 👋 Soy Rigo, tu asistente. Pregúntame por precios de Free Fire, Blood Strike, Roblox o Mobile Legends. 🎮',
+            true
+        );
+    } else {
+        mensajes.forEach((m) => {
+            const div = document.createElement('div');
+            div.className = `message ${m.role}`;
+            div.textContent = m.content;
+            chatBox.appendChild(div);
+        });
+        scrollAbajo();
+    }
+</script>
+
 </body>
 </html>
