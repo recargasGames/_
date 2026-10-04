@@ -12,7 +12,6 @@
 <meta name="apple-mobile-web-app-title" content="Admin RecargasGames">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
-<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -20,12 +19,11 @@
 
 <style>
 :root{
-    --color-principal:#3b82f6;
+    --color-dorado:#d4af37;
+    --color-dorado-claro:#f5d76e;
     --color-exito:#10b981;
     --color-peligro:#ef4444;
     --color-amarillo:#f59e0b;
-    --color-dorado:#d4af37;
-    --color-dorado-claro:#f5d76e;
     --color-borde:rgba(212,175,55,0.22);
     --color-texto:#e2e8f0;
     --card-bg: rgba(13, 22, 39, 0.85);
@@ -41,7 +39,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 
 /* LOGIN */
 .login-container{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:relative;z-index:1}
-.login-box{background:linear-gradient(135deg,rgba(20,30,55,0.9),rgba(10,14,26,0.98));border:1px solid var(--color-borde);border-radius:26px;padding:42px 32px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:modalSlide 0.5s cubic-bezier(0.34,1.56,0.64,1);position:relative;overflow:hidden}
+.login-box{background:linear-gradient(135deg,rgba(20,30,55,0.9),rgba(10,14,26,0.98));border:1px solid var(--color-borde);border-radius:26px;padding:42px 32px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.08);backdrop-filter:blur(14px);animation:modalSlide 0.5s cubic-bezier(0.34,1.56,0.64,1)}
 @keyframes modalSlide{from{transform:translateY(-30px) scale(0.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .logo-login{text-align:center;margin-bottom:22px}
 .logo-login img{height:80px;border-radius:16px;filter:drop-shadow(0 0 20px rgba(212,175,55,0.5))}
@@ -52,8 +50,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .input-group label{display:block;margin-bottom:8px;font-weight:700;color:#cbd5e1;font-size:12px;text-transform:uppercase;letter-spacing:1px}
 .input-group input{width:100%;padding:15px 18px;border-radius:14px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.12);color:#fff;font-size:15px;transition:all 0.3s;font-family:inherit}
 .input-group input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
-.btn-login{width:100%;padding:16px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;animation:shineBadge 3s ease infinite;color:#0a0e1a;border:none;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;transition:.25s;text-transform:uppercase;letter-spacing:1.5px;box-shadow:0 10px 30px rgba(212,175,55,0.35);font-family:inherit}
-@keyframes shineBadge{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.btn-login{width:100%;padding:16px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;transition:.25s;text-transform:uppercase;letter-spacing:1.5px;box-shadow:0 10px 30px rgba(212,175,55,0.35);font-family:inherit}
 .btn-login:hover{transform:translateY(-2px);box-shadow:0 15px 45px rgba(212,175,55,0.55)}
 .btn-login:disabled{opacity:0.6;cursor:not-allowed;transform:none}
 .error-login{color:var(--color-peligro);text-align:center;margin-top:15px;padding:14px;background:rgba(239,68,68,0.12);border-radius:12px;display:none;font-size:14px;font-weight:600;border:1px solid rgba(239,68,68,0.3)}
@@ -79,34 +76,38 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .grupo-input{margin-bottom:20px}
 .grupo-input label{display:block;margin-bottom:8px;color:#cbd5e1;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:0.5px}
 .grupo-input input[type="text"],.grupo-input input[type="number"],.grupo-input input[type="email"],.grupo-input input[type="tel"],.grupo-input textarea,.grupo-input select{width:100%;padding:13px 16px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-size:15px;transition:all 0.3s;font-family:inherit}
-.grupo-input input:focus,.grupo-input textarea:focus,.grupo-input select:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
-.grupo-input textarea{min-height:100px;resize:vertical}
-.grupo-input select{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 12px center;background-size:18px;padding-right:40px}
+.grupo-input input:focus,.grupo-input select:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
+.grupo-input select{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 12px center;background-size:18px;padding-right:40px}
 
 .btn-guardar{padding:13px 26px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:12px;font-weight:800;cursor:pointer;font-size:14px;transition:.25s;font-family:inherit;letter-spacing:0.5px;text-transform:uppercase;box-shadow:0 6px 20px rgba(16,185,129,0.3)}
 .btn-guardar:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(16,185,129,0.5)}
 .btn-imagen{padding:11px 18px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;transition:.25s;font-family:inherit}
-.btn-imagen:hover{transform:translateY(-2px)}
 
-/* SELECTOR DE TIPO DE CÓDIGO */
-.tipo-codigo-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;padding:8px;background:rgba(0,0,0,0.25);border-radius:16px;border:1px solid rgba(255,255,255,0.08)}
-.tipo-codigo-opcion{padding:16px 14px;border-radius:12px;background:transparent;border:2px solid transparent;cursor:pointer;text-align:center;transition:.25s;font-family:inherit}
-.tipo-codigo-opcion .icono-tipo{font-size:28px;margin-bottom:6px;display:block}
-.tipo-codigo-opcion .titulo-tipo{font-size:14px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;display:block}
-.tipo-codigo-opcion .subtitulo-tipo{font-size:11px;color:#64748b;display:block}
-.tipo-codigo-opcion.activo.juego{background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(16,185,129,0.05));border-color:rgba(16,185,129,0.6);box-shadow:0 0 25px rgba(16,185,129,0.25)}
-.tipo-codigo-opcion.activo.juego .titulo-tipo{color:#4ade80}
-.tipo-codigo-opcion.activo.juego .subtitulo-tipo{color:#86efac}
-.tipo-codigo-opcion.activo.streaming{background:linear-gradient(135deg,rgba(212,175,55,0.18),rgba(212,175,55,0.05));border-color:rgba(212,175,55,0.6);box-shadow:0 0 25px rgba(212,175,55,0.25)}
-.tipo-codigo-opcion.activo.streaming .titulo-tipo{color:var(--color-dorado-claro)}
-.tipo-codigo-opcion.activo.streaming .subtitulo-tipo{color:#fbbf24}
-.tipo-codigo-opcion:hover:not(.activo){background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.15)}
+/* PAGINACIÓN */
+.paginacion-container{display:flex;justify-content:center;align-items:center;gap:8px;margin:20px 0;padding:16px;background:linear-gradient(135deg,rgba(20,30,55,0.6),rgba(10,14,26,0.8));border-radius:16px;border:1px solid var(--color-borde);flex-wrap:wrap}
+.paginacion-info{flex:1 1 100%;text-align:center;color:#94a3b8;font-size:13px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(212,175,55,0.15)}
+.paginacion-info strong{color:var(--color-dorado-claro);font-weight:800}
+.paginacion-btn{min-width:42px;height:42px;padding:0 14px;border-radius:12px;border:1px solid rgba(212,175,55,0.3);background:rgba(0,0,0,0.3);color:#cbd5e1;font-weight:800;font-size:14px;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;font-family:inherit;gap:6px}
+.paginacion-btn:hover:not(:disabled):not(.activa){background:rgba(212,175,55,0.15);color:var(--color-dorado-claro);border-color:rgba(212,175,55,0.5);transform:translateY(-2px)}
+.paginacion-btn.activa{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;border-color:var(--color-dorado);box-shadow:0 6px 20px rgba(212,175,55,0.4);transform:scale(1.05)}
+.paginacion-btn:disabled{opacity:0.35;cursor:not-allowed;background:rgba(0,0,0,0.2)}
+.paginacion-btn.nav{background:rgba(59,130,246,0.12);color:#93c5fd;border-color:rgba(59,130,246,0.35);font-size:16px}
+.paginacion-btn.nav:hover:not(:disabled){background:rgba(59,130,246,0.25);color:#bfdbfe;border-color:rgba(59,130,246,0.6)}
+.paginacion-btn.puntos{background:transparent;border:none;color:#64748b;cursor:default;pointer-events:none}
+.paginacion-selector{display:flex;align-items:center;gap:8px;margin-left:12px;padding-left:12px;border-left:1px solid rgba(212,175,55,0.2);color:#94a3b8;font-size:12px;font-weight:600}
+.paginacion-selector select{padding:8px 12px;background:rgba(0,0,0,0.35);border:1px solid rgba(212,175,55,0.3);border-radius:8px;color:#fff;font-size:12px;font-family:inherit;cursor:pointer}
+@media (max-width:700px){
+    .paginacion-container{gap:6px;padding:12px}
+    .paginacion-btn{min-width:38px;height:38px;padding:0 10px;font-size:13px}
+    .paginacion-selector{margin-left:0;padding-left:0;border-left:none;width:100%;justify-content:center;margin-top:8px}
+}
 
-/* TARJETAS DE PEDIDO */
+/* PEDIDOS */
 .pedido-card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin: 12px 16px; border: 1px solid rgba(30, 42, 69, 0.8); color: #fff; transition: border-color 0.2s; cursor: pointer; }
 .pedido-card:hover { border-color: #3b82f6; }
 .pedido-card.expandido { border-color: var(--color-dorado-claro); }
 .pedido-card.pendiente-manual { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 20px rgba(245, 158, 11, 0.2); }
+.pedido-card.fallido { border-color: rgba(239,68,68,0.5); }
 .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
 .pedido-header-left { display: flex; flex-direction: column; gap: 4px; }
 .pedido-id { font-size: 18px; font-weight: 700; color: var(--azul-brillante); }
@@ -151,30 +152,33 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .badge-estado.cancelado { background: rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); }
 .badge-estado.procesando { background: rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.4); }
 
+/* ACCIONES DEL PEDIDO */
+.pedido-acciones { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid rgba(30,42,69,0.8); }
+.pedido-accion-btn { flex: 1; min-width: 130px; padding: 11px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: all 0.25s; border: none; font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.pedido-accion-btn.completar { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+.pedido-accion-btn.completar:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(16,185,129,0.5); }
+.pedido-accion-btn.eliminar { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+.pedido-accion-btn.eliminar:hover { background: rgba(239,68,68,0.3); color: #fff; transform: translateY(-2px); }
+.pedido-accion-btn.reintentar { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.4); }
+.pedido-accion-btn.reintentar:hover { background: rgba(59,130,246,0.3); color: #fff; transform: translateY(-2px); }
+
 /* ENTREGA MANUAL */
-.entrega-manual-box { margin-top: 16px; padding: 18px 16px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border: 2px solid rgba(245, 158, 11, 0.6); border-radius: 14px; backdrop-filter: blur(5px); animation: pulsePendiente 2s ease-in-out infinite; cursor: default; }
-@keyframes pulsePendiente { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); } 50% { box-shadow: 0 0 20px 5px rgba(245, 158, 11, 0.15); } }
+.entrega-manual-box { margin-top: 16px; padding: 18px 16px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border: 2px solid rgba(245, 158, 11, 0.6); border-radius: 14px; cursor: default; }
 .entrega-manual-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(245, 158, 11, 0.3); }
-.entrega-manual-header .icono-alerta { font-size: 24px; animation: pulseIcono 1.5s ease-in-out infinite; }
-@keyframes pulseIcono { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+.entrega-manual-header .icono-alerta { font-size: 24px; }
 .entrega-manual-header .titulo-alerta { font-size: 14px; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; }
 .entrega-manual-header .subtitulo-alerta { font-size: 11px; color: #cbd5e1; margin-top: 2px; }
 .entrega-form-group { margin-bottom: 12px; }
 .entrega-form-group label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.5px; }
-.entrega-form-group input { width: 100%; padding: 11px 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; color: #fff; font-size: 14px; font-family: 'Courier New', 'Consolas', monospace; transition: all 0.3s; }
+.entrega-form-group input { width: 100%; padding: 11px 14px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; color: #fff; font-size: 14px; font-family: 'Courier New', 'Consolas', monospace; }
 .entrega-form-group input:focus { outline: none; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15); }
-.entrega-form-group input::placeholder { color: #6b7280; font-family: 'Segoe UI', sans-serif; font-size: 13px; }
-.entrega-btn-guardar { width: 100%; padding: 14px 18px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; font-family: inherit; transition: all 0.3s; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35); margin-top: 6px; }
-.entrega-btn-guardar:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5); }
-.entrega-btn-guardar:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-.entrega-btn-cancelar { width: 100%; padding: 11px 18px; background: rgba(71, 85, 105, 0.3); color: #cbd5e1; border: 1px solid rgba(71, 85, 105, 0.6); border-radius: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; font-family: inherit; transition: all 0.3s; margin-top: 8px; }
-.entrega-btn-cancelar:hover { background: rgba(71, 85, 105, 0.5); color: #fff; }
+.entrega-btn-guardar { width: 100%; padding: 14px 18px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; font-family: inherit; margin-top: 6px; }
+.entrega-btn-cancelar { width: 100%; padding: 11px 18px; background: rgba(71, 85, 105, 0.3); color: #cbd5e1; border: 1px solid rgba(71, 85, 105, 0.6); border-radius: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; font-family: inherit; margin-top: 8px; }
 
-.tab .badge-pendiente-tab { display: inline-block; background: #ef4444; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 10px; margin-left: 6px; animation: pulseBadge 1.5s ease-in-out infinite; vertical-align: middle; }
-@keyframes pulseBadge { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 50% { transform: scale(1.1); box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.3); } }
+.tab .badge-pendiente-tab { display: inline-block; background: #ef4444; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
 
 /* USUARIOS */
-.usuario-card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin: 12px 16px; border: 1px solid rgba(30, 42, 69, 0.8); color: #fff; transition: border-color 0.2s; }
+.usuario-card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin: 12px 16px; border: 1px solid rgba(30, 42, 69, 0.8); color: #fff; }
 .usuario-card:hover { border-color: #3b82f6; }
 .usuario-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
 .usuario-info-principal { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
@@ -182,7 +186,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .usuario-datos { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .usuario-nombre { font-size: 15px; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .usuario-correo { font-size: 12px; color: #8899b0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.usuario-badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.usuario-badge { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 10px; text-transform: uppercase; white-space: nowrap; }
 .usuario-badge.activo { background: rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.5); }
 .usuario-badge.bloqueado { background: rgba(239,68,68,0.2); color:#fca5a5; border:1px solid rgba(239,68,68,0.5); }
 .usuario-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(30, 42, 69, 0.8); }
@@ -190,21 +194,28 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .usuario-meta strong { color: var(--color-dorado-claro); }
 .usuario-meta .pedidos-count { color: var(--azul-brillante); font-weight: 800; }
 .usuario-acciones { display: flex; gap: 8px; margin-top: 12px; }
-.usuario-btn { flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: .25s; border: none; font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px; }
+.usuario-btn { flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; border: none; font-family: inherit; text-transform: uppercase; }
 .usuario-btn.bloquear { background: rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); }
-.usuario-btn.bloquear:hover { background: rgba(245,158,11,0.35); }
 .usuario-btn.activar { background: rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); }
-.usuario-btn.activar:hover { background: rgba(16,185,129,0.35); }
 
 /* CÓDIGOS */
 .info-panel-codigos{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03));border:1px solid rgba(59,130,246,0.35);border-radius:14px;padding:16px;margin-bottom:20px;font-size:13px;color:#cbd5e1;line-height:1.6}
 .info-panel-codigos strong{color:#93c5fd}
 .info-panel-codigos code{background:rgba(0,0,0,0.3);padding:2px 8px;border-radius:6px;font-family:'Courier New',monospace;color:var(--color-dorado-claro);font-size:12px}
+.tipo-codigo-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;padding:8px;background:rgba(0,0,0,0.25);border-radius:16px;border:1px solid rgba(255,255,255,0.08)}
+.tipo-codigo-opcion{padding:16px 14px;border-radius:12px;background:transparent;border:2px solid transparent;cursor:pointer;text-align:center;transition:.25s;font-family:inherit}
+.tipo-codigo-opcion .icono-tipo{font-size:28px;margin-bottom:6px;display:block}
+.tipo-codigo-opcion .titulo-tipo{font-size:14px;font-weight:900;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;display:block}
+.tipo-codigo-opcion .subtitulo-tipo{font-size:11px;color:#64748b;display:block}
+.tipo-codigo-opcion.activo.juego{background:linear-gradient(135deg,rgba(16,185,129,0.18),rgba(16,185,129,0.05));border-color:rgba(16,185,129,0.6)}
+.tipo-codigo-opcion.activo.juego .titulo-tipo{color:#4ade80}
+.tipo-codigo-opcion.activo.streaming{background:linear-gradient(135deg,rgba(212,175,55,0.18),rgba(212,175,55,0.05));border-color:rgba(212,175,55,0.6)}
+.tipo-codigo-opcion.activo.streaming .titulo-tipo{color:var(--color-dorado-claro)}
 
 .preview-codigo-box{background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));border:1px dashed rgba(212,175,55,0.4);border-radius:14px;padding:16px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center}
 .preview-codigo-item{flex:1;min-width:140px;text-align:center}
 .preview-codigo-label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px}
-.preview-codigo-valor{font-size:18px;font-weight:900;color:var(--color-dorado-claro);font-family:'Courier New',monospace;line-height:1.3}
+.preview-codigo-valor{font-size:18px;font-weight:900;color:var(--color-dorado-claro);font-family:'Courier New',monospace}
 .preview-codigo-valor.usd{color:#93c5fd}
 
 .codigo-card{background:linear-gradient(135deg,rgba(20,30,55,0.7),rgba(10,14,26,0.85));border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:.3s;position:relative;overflow:hidden;margin-bottom:10px}
@@ -215,8 +226,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .codigo-info{flex:1;min-width:0}
 .codigo-valor{font-family:'Courier New',monospace;font-size:18px;font-weight:900;color:var(--color-dorado-claro);letter-spacing:2px;margin-bottom:6px;word-break:break-all}
 .codigo-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:#94a3b8}
-.codigo-meta span{display:flex;align-items:center;gap:4px}
-.codigo-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;margin-top:6px}
+.codigo-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:800;text-transform:uppercase;margin-top:6px}
 .badge-disponible{background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(34,197,94,0.5)}
 .badge-usado-cod{background:rgba(107,114,128,0.2);color:#9ca3af;border:1px solid rgba(107,114,128,0.5)}
 .badge-renovacion{background:rgba(212,175,55,0.2);color:#f5d76e;border:1px solid rgba(212,175,55,0.6)}
@@ -225,79 +235,54 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .codigo-acciones{display:flex;gap:6px;flex-shrink:0}
 .codigo-btn{width:36px;height:36px;border-radius:10px;border:1px solid;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s;font-family:inherit;padding:0}
 .codigo-btn.copiar{color:var(--color-dorado-claro);border-color:rgba(212,175,55,0.4);background:rgba(212,175,55,0.1)}
-.codigo-btn.copiar:hover{background:rgba(212,175,55,0.25);transform:scale(1.08)}
-.codigo-btn.copiado{background:rgba(34,197,94,0.2)!important;border-color:rgba(34,197,94,0.5)!important;color:#4ade80!important}
 .codigo-btn.borrar{color:#f87171;border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.1)}
-.codigo-btn.borrar:hover{background:rgba(239,68,68,0.25);transform:scale(1.08)}
 
 .lista-vacia{text-align:center;padding:40px 20px;color:#64748b;font-size:14px;background:rgba(0,0,0,0.2);border-radius:16px;border:1px dashed rgba(255,255,255,0.1)}
 .lista-vacia .icono{font-size:48px;margin-bottom:12px;opacity:0.5}
 
-.codigo-generado{margin-top:20px;padding:22px 18px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.6);border-radius:14px;text-align:center;display:none;animation:codigoPulse 2s ease-in-out infinite}
+.codigo-generado{margin-top:20px;padding:22px 18px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.6);border-radius:14px;text-align:center;display:none}
 .codigo-generado.activo{display:block}
-@keyframes codigoPulse{0%,100%{box-shadow:0 0 30px rgba(34,197,94,0.2)}50%{box-shadow:0 0 50px rgba(34,197,94,0.4)}}
 .codigo-generado .etiqueta{font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin-bottom:8px}
 .codigo-generado .codigos-lista{font-family:'Courier New',monospace;font-size:18px;font-weight:900;color:#22c55e;letter-spacing:2px;margin:10px 0;word-break:break-all;line-height:1.6}
 
 /* VENCIMIENTOS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin-bottom:30px}
-.stat-card{background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.9));border:1px solid var(--color-borde);border-radius:18px;padding:24px 20px;text-align:center;transition:.35s;position:relative;overflow:hidden}
-.stat-card:hover{transform:translateY(-5px);border-color:rgba(212,175,55,0.5);box-shadow:0 20px 45px rgba(0,0,0,0.5)}
+.stat-card{background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.9));border:1px solid var(--color-borde);border-radius:18px;padding:24px 20px;text-align:center;transition:.35s;cursor:pointer}
+.stat-card:hover{transform:translateY(-5px);border-color:rgba(212,175,55,0.5)}
 .stat-icono{font-size:28px;margin-bottom:10px}
 .stat-valor{font-size:34px;font-weight:900;color:var(--color-dorado-claro);margin-bottom:6px}
 .stat-etiqueta{color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
 
-.venc-card{background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.9));border:1px solid var(--color-borde);border-radius:16px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;transition:.3s;display:flex;flex-direction:column;gap:12px}
-.venc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:#6b7280}
-.venc-card.rojo::before{background:linear-gradient(180deg,#ef4444,#b91c1c);box-shadow:0 0 20px rgba(239,68,68,0.6)}
-.venc-card.rojo{border-color:rgba(239,68,68,0.5);box-shadow:0 0 25px rgba(239,68,68,0.15)}
-.venc-card.amarillo::before{background:linear-gradient(180deg,#f59e0b,#b45309);box-shadow:0 0 20px rgba(245,158,11,0.5)}
-.venc-card.amarillo{border-color:rgba(245,158,11,0.45)}
-.venc-card.verde::before{background:linear-gradient(180deg,#10b981,#047857);box-shadow:0 0 20px rgba(16,185,129,0.5)}
-.venc-card.verde{border-color:rgba(16,185,129,0.45)}
-.venc-card.neutro::before{background:linear-gradient(180deg,#3b82f6,#1d4ed8)}
-.venc-card.vencido::before{background:linear-gradient(180deg,#7f1d1d,#450a0a);animation:pulsoRojo 1.5s ease-in-out infinite}
-
+.venc-card{background:linear-gradient(135deg,rgba(20,30,55,0.75),rgba(10,14,26,0.9));border:1px solid var(--color-borde);border-radius:16px;padding:18px;margin-bottom:14px;display:flex;flex-direction:column;gap:12px}
 .venc-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
-.venc-cliente{font-size:16px;font-weight:900;color:#fff;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.venc-dias{font-size:11px;font-weight:800;padding:4px 10px;border-radius:10px;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+.venc-cliente{font-size:16px;font-weight:900;color:#fff}
+.venc-dias{font-size:11px;font-weight:800;padding:4px 10px;border-radius:10px;text-transform:uppercase}
 .venc-dias.rojo{background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.5)}
 .venc-dias.amarillo{background:rgba(245,158,11,0.2);color:#fbbf24;border:1px solid rgba(245,158,11,0.5)}
 .venc-dias.verde{background:rgba(16,185,129,0.2);color:#6ee7b7;border:1px solid rgba(16,185,129,0.5)}
 .venc-dias.neutro{background:rgba(59,130,246,0.2);color:#93c5fd;border:1px solid rgba(59,130,246,0.5)}
-.venc-dias.vencido{background:rgba(127,29,29,0.3);color:#fca5a5;border:1px solid rgba(239,68,68,0.6)}
-
 .venc-meta{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:#cbd5e1}
-.venc-meta span{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.25);padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05)}
-.venc-meta strong{color:var(--color-dorado-claro)}
-.venc-meta .codigo{font-family:'Courier New',monospace;color:#93c5fd;font-weight:900;letter-spacing:1px}
-
+.venc-meta span{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.25);padding:5px 10px;border-radius:8px;font-size:12px}
 .venc-acciones{display:flex;gap:8px;flex-wrap:wrap}
-.venc-btn{flex:1;min-width:110px;padding:11px 14px;border-radius:11px;font-weight:800;font-size:12px;cursor:pointer;transition:.25s;border:none;font-family:inherit;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;justify-content:center;gap:6px}
-.venc-btn.whatsapp{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;box-shadow:0 6px 20px rgba(37,211,102,0.3)}
-.venc-btn.whatsapp:hover{transform:translateY(-2px)}
-.venc-btn.renovar{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;box-shadow:0 6px 20px rgba(212,175,55,0.35)}
-.venc-btn.renovar:hover{transform:translateY(-2px)}
+.venc-btn{flex:1;min-width:110px;padding:11px 14px;border-radius:11px;font-weight:800;font-size:12px;cursor:pointer;border:none;font-family:inherit;text-transform:uppercase}
+.venc-btn.whatsapp{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff}
+.venc-btn.renovar{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a}
 .venc-btn.copiar{background:rgba(59,130,246,0.15);color:#93c5fd;border:1px solid rgba(59,130,246,0.4)}
-.venc-btn.copiar:hover{background:rgba(59,130,246,0.3)}
 
-.install-app-btn{position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,rgba(212,175,55,0.5),rgba(59,130,246,0.5));color:white;border:1px solid rgba(212,175,55,0.7);padding:12px 22px;border-radius:50px;font-size:14px;font-weight:800;cursor:pointer;z-index:1000;transition:all 0.3s;box-shadow:0 8px 30px rgba(0,0,0,0.4);display:none;letter-spacing:0.5px}
-.install-app-btn:hover{transform:translateY(-3px)}
+.install-app-btn{position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,rgba(212,175,55,0.5),rgba(59,130,246,0.5));color:white;border:1px solid rgba(212,175,55,0.7);padding:12px 22px;border-radius:50px;font-size:14px;font-weight:800;cursor:pointer;z-index:1000;display:none}
 
+/* MENSAJES */
 .mensaje-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;justify-content:center;align-items:center;padding:20px}
-.mensaje-overlay.activo{display:flex;animation:fadeIn 0.25s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.mensaje-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.35);border-radius:26px;padding:36px 28px 26px;max-width:440px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.8);text-align:center;position:relative;animation:mensajeSlide 0.35s cubic-bezier(0.34,1.56,0.64,1)}
-@keyframes mensajeSlide{from{transform:translateY(30px) scale(0.9);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.mensaje-overlay.activo{display:flex}
+.mensaje-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.35);border-radius:26px;padding:36px 28px 26px;max-width:440px;width:100%;text-align:center}
 .mensaje-icono{width:80px;height:80px;margin:0 auto 20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:bold}
 .mensaje-icono.exito{background:rgba(16,185,129,0.2);border:2px solid #10b981;color:#6ee7b7}
 .mensaje-icono.error{background:rgba(239,68,68,0.2);border:2px solid #ef4444;color:#fca5a5}
 .mensaje-icono.info{background:rgba(59,130,246,0.2);border:2px solid #3b82f6;color:#93c5fd}
 .mensaje-icono.advertencia{background:rgba(212,175,55,0.2);border:2px solid #d4af37;color:var(--color-dorado-claro)}
-.mensaje-titulo{font-size:20px;font-weight:900;color:var(--color-dorado-claro);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px}
+.mensaje-titulo{font-size:20px;font-weight:900;color:var(--color-dorado-claro);margin-bottom:14px;text-transform:uppercase}
 .mensaje-texto{color:#cbd5e1;line-height:1.6;margin-bottom:22px;font-size:14px;white-space:pre-line}
-.mensaje-btn{flex:1;padding:15px;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:1px;border:none;font-family:inherit;transition:.2s;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a}
-.mensaje-btn:hover{transform:translateY(-2px)}
+.mensaje-btn{flex:1;padding:15px;border-radius:14px;font-size:14px;font-weight:900;cursor:pointer;text-transform:uppercase;border:none;font-family:inherit;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a}
 .mensaje-btn.peligro{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
 .mensaje-btn.secundario{background:rgba(71,85,105,0.4);color:#cbd5e1;border:1px solid rgba(71,85,105,0.6)}
 .mensaje-botones{display:flex;gap:10px}
@@ -306,96 +291,112 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .busqueda-container input{flex:1;min-width:200px;padding:12px 16px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-size:14px;font-family:inherit}
 .busqueda-container input:focus{outline:none;border-color:var(--color-dorado)}
 .filtro-select{padding:12px 16px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-size:14px;font-family:inherit;cursor:pointer}
-.filtro-select:focus{outline:none;border-color:var(--color-dorado)}
 .oculto{display:none !important}
-.cargando{color:#94a3b8;text-align:center;padding:40px;font-size:14px}
 
-/* ═══════════════════════════════════════════════
-   💬 BOTÓN FLOTANTE DEL CHAT
-   ═══════════════════════════════════════════════ */
+/* BOTÓN FLOTANTE DEL CHAT CON LOGO */
 .chat-flotante-btn {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    width: 62px;
-    height: 62px;
+    width: 68px;
+    height: 68px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #10a37f, #0d8a6b);
-    border: 2px solid rgba(255,255,255,0.4);
-    color: #fff;
-    font-size: 28px;
+    background: #0a0e1a;
+    border: 3px solid rgba(16,163,127,0.8);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9998;
-    box-shadow: 0 8px 25px rgba(16, 163, 127, 0.5);
+    box-shadow: 0 8px 30px rgba(16, 163, 127, 0.55), 0 0 0 0 rgba(16,163,127,0.6);
     transition: all 0.3s;
     padding: 0;
+    overflow: visible;
+    animation: chatPulse 2.5s infinite;
 }
-.chat-flotante-btn:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 12px 35px rgba(16, 163, 127, 0.7);
+@keyframes chatPulse {
+    0%, 100% { box-shadow: 0 8px 30px rgba(16, 163, 127, 0.55), 0 0 0 0 rgba(16,163,127,0.6); }
+    50% { box-shadow: 0 8px 30px rgba(16, 163, 127, 0.55), 0 0 0 14px rgba(16,163,127,0); }
+}
+.chat-flotante-btn:hover { transform: translateY(-4px) scale(1.08); }
+.chat-flotante-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
 }
 .chat-flotante-btn .badge-chat {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -6px;
+    right: -6px;
     background: #ef4444;
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 900;
-    min-width: 22px;
-    height: 22px;
-    border-radius: 11px;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 5px;
-    border: 2px solid #0a0e1a;
+    padding: 0 6px;
+    border: 3px solid #0a0e1a;
     animation: pulseBadge 1.5s ease-in-out infinite;
 }
 
-/* ═══════════════════════════════════════════════
-   💬 PANEL DEL MINI-CHAT (LISTA + CONVERSACIÓN)
-   ═══════════════════════════════════════════════ */
+/* PANEL DEL CHAT MEJORADO */
 .chat-panel {
     position: fixed;
-    bottom: 110px;
+    bottom: 115px;
     right: 30px;
-    width: 380px;
+    width: 420px;
     max-width: calc(100vw - 40px);
-    height: 550px;
+    height: 620px;
     max-height: calc(100vh - 160px);
     background: #0a0e1a;
     border: 2px solid rgba(16, 163, 127, 0.5);
-    border-radius: 18px;
+    border-radius: 20px;
     z-index: 9999;
     display: none;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+    box-shadow: 0 25px 70px rgba(0,0,0,0.85);
 }
-.chat-panel.abierto { display: flex; }
+.chat-panel.abierto { display: flex; animation: chatSlide 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes chatSlide {
+    from { transform: translateY(30px) scale(0.9); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
 
 .chat-panel-header {
     background: linear-gradient(135deg, #10a37f, #0d8a6b);
-    padding: 14px 16px;
+    padding: 16px 18px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex-shrink: 0;
     border-bottom: 1px solid rgba(255,255,255,0.15);
 }
+.chat-panel-header .avatar-header {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.5);
+    flex-shrink: 0;
+    background: #fff;
+}
+.chat-panel-header .avatar-header img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .chat-panel-header .btn-volver {
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.2);
     border: none;
     color: #fff;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     display: none;
     align-items: center;
     justify-content: center;
@@ -403,14 +404,14 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 }
 .chat-panel-header .btn-volver.visible { display: flex; }
 .chat-panel-header .info { flex: 1; min-width: 0; }
-.chat-panel-header h3 { font-size: 15px; font-weight: 800; color: #fff; }
-.chat-panel-header p { font-size: 11px; color: rgba(255,255,255,0.8); }
+.chat-panel-header h3 { font-size: 16px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-panel-header p { font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-panel-header .btn-cerrar-chat {
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.2);
     border: none;
     color: #fff;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
     font-size: 16px;
@@ -419,84 +420,39 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
     justify-content: center;
     flex-shrink: 0;
 }
+.chat-panel-header .btn-cerrar-chat:hover { background: rgba(239,68,68,0.6); transform: rotate(90deg); transition: all 0.3s; }
 
-.chat-lista { flex: 1; overflow-y: auto; padding: 8px; }
-.chat-lista-vacia { text-align: center; padding: 40px 20px; color: #64748b; font-size: 14px; }
-.chat-item {
-    display: flex; align-items: center; gap: 12px; padding: 12px;
-    border-radius: 12px; cursor: pointer; transition: background 0.2s;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.chat-item:hover { background: rgba(59, 130, 246, 0.08); }
-.chat-item.tiene-nuevos { background: rgba(16, 163, 127, 0.08); }
-.chat-item .avatar-chat {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: linear-gradient(135deg, #d4af37, #3b82f6);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 18px; color: #fff; flex-shrink: 0;
-}
+.chat-lista { flex: 1; overflow-y: auto; padding: 10px; background: #06101f; }
+.chat-lista::-webkit-scrollbar { width: 6px; }
+.chat-lista::-webkit-scrollbar-thumb { background: rgba(16,163,127,0.4); border-radius: 3px; }
+.chat-lista-vacia { text-align: center; padding: 50px 20px; color: #64748b; font-size: 14px; }
+.chat-item { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; background: rgba(13, 22, 39, 0.6); }
+.chat-item:hover { background: rgba(16, 163, 127, 0.1); border-color: rgba(16,163,127,0.4); transform: translateX(4px); }
+.chat-item.tiene-nuevos { background: rgba(16, 163, 127, 0.12); border-color: rgba(16,163,127,0.4); }
+.chat-item .avatar-chat { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #3b82f6); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; color: #fff; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.15); }
 .chat-item .datos-chat { flex: 1; min-width: 0; }
-.chat-item .nombre-chat {
-    font-size: 14px; font-weight: 700; color: #fff;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 3px;
-}
-.chat-item .preview-chat {
-    font-size: 12px; color: #8899b0;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.chat-item.tiene-nuevos .preview-chat { color: #4ade80; font-weight: 600; }
-.chat-item .badge-nuevo-chat {
-    background: #ef4444; color: #fff; font-size: 10px; font-weight: 900;
-    padding: 2px 7px; border-radius: 10px; flex-shrink: 0;
-}
+.chat-item .nombre-chat { font-size: 15px; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+.chat-item .preview-chat { font-size: 13px; color: #8899b0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-item.tiene-nuevos .preview-chat { color: #4ade80; font-weight: 700; }
+.chat-item .badge-nuevo-chat { background: #ef4444; color: #fff; font-size: 11px; font-weight: 900; padding: 3px 9px; border-radius: 12px; flex-shrink: 0; }
 
 .chat-conversacion { flex: 1; display: none; flex-direction: column; overflow: hidden; }
 .chat-conversacion.visible { display: flex; }
+.mensajes-chat { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: #06101f; }
+.mensajes-chat::-webkit-scrollbar { width: 6px; }
+.mensajes-chat::-webkit-scrollbar-thumb { background: rgba(16,163,127,0.4); border-radius: 3px; }
 
-.mensajes-chat {
-    flex: 1; overflow-y: auto; padding: 14px;
-    display: flex; flex-direction: column; gap: 8px;
-    background: #06101f;
-}
+.msg-bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; position: relative; padding-bottom: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.msg-bubble.cliente { align-self: flex-end; background: linear-gradient(135deg, #10a37f, #0d8a6b); color: #fff; border-bottom-right-radius: 6px; }
+.msg-bubble.admin { align-self: flex-start; background: linear-gradient(135deg, #1e3a8a, #1e40af); color: #e2e8f0; border-bottom-left-radius: 6px; }
+.msg-bubble .hora-msg { position: absolute; right: 12px; bottom: 5px; font-size: 10px; opacity: 0.8; font-weight: 600; }
+.msg-bubble.admin .hora-msg { right: auto; left: 12px; color: #f5d76e; font-weight: 700; }
 
-.msg-bubble {
-    max-width: 78%; padding: 10px 13px; border-radius: 14px;
-    font-size: 13px; line-height: 1.45;
-    white-space: pre-wrap; word-wrap: break-word;
-    position: relative; padding-bottom: 18px;
-}
-.msg-bubble.cliente {
-    align-self: flex-end; background: #10a37f; color: #fff;
-    border-bottom-right-radius: 4px;
-}
-.msg-bubble.admin {
-    align-self: flex-start;
-    background: linear-gradient(135deg, #1e3a8a, #1e40af);
-    color: #e2e8f0; border-bottom-left-radius: 4px;
-}
-.msg-bubble .hora-msg {
-    position: absolute; right: 10px; bottom: 3px;
-    font-size: 9px; opacity: 0.75;
-}
-.msg-bubble.admin .hora-msg {
-    right: auto; left: 10px; color: #f5d76e; font-weight: 700;
-}
-
-.chat-input-area {
-    display: flex; gap: 8px; padding: 10px;
-    background: #0d1627; border-top: 1px solid rgba(30, 42, 69, 0.8); flex-shrink: 0;
-}
-.chat-input-area input {
-    flex: 1; padding: 10px 14px; border-radius: 20px;
-    border: 1px solid rgba(30, 42, 69, 0.9);
-    background: #060c20; color: #fff; font-size: 13px; outline: none; font-family: inherit;
-}
-.chat-input-area input:focus { border-color: #10a37f; }
-.chat-input-area button {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: none; background: #10a37f; color: #fff; font-size: 16px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
+.chat-input-area { display: flex; gap: 10px; padding: 14px; background: #0d1627; border-top: 1px solid rgba(30, 42, 69, 0.8); flex-shrink: 0; }
+.chat-input-area input { flex: 1; padding: 12px 18px; border-radius: 24px; border: 1px solid rgba(30, 42, 69, 0.9); background: #060c20; color: #fff; font-size: 14px; outline: none; font-family: inherit; }
+.chat-input-area input:focus { border-color: #10a37f; box-shadow: 0 0 0 3px rgba(16,163,127,0.15); }
+.chat-input-area button { width: 44px; height: 44px; border-radius: 50%; border: none; background: linear-gradient(135deg, #10a37f, #0d8a6b); color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chat-input-area button:hover:not(:disabled) { transform: scale(1.08); }
 .chat-input-area button:disabled { background: #475569; cursor: not-allowed; }
 
 @media (max-width:700px){
@@ -507,26 +463,24 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
     .tab{padding:10px 14px;font-size:12px}
     .tarjeta{padding:18px}
     .login-box{padding:32px 22px}
-    .login-titulo{font-size:22px}
     .video-fondo{opacity:0.85;filter:brightness(1.05)}
     .codigo-card{flex-direction:column;align-items:stretch}
     .codigo-acciones{justify-content:flex-end}
     .pedido-card, .usuario-card { margin: 10px 12px; }
-    .chat-panel { bottom: 100px; right: 15px; width: calc(100vw - 30px); }
-    .chat-flotante-btn { bottom: 20px; right: 15px; width: 56px; height: 56px; font-size: 24px; }
+    .chat-panel { bottom: 100px; right: 15px; left: 15px; width: auto; }
+    .chat-flotante-btn { bottom: 20px; right: 15px; width: 60px; height: 60px; }
     .tipo-codigo-selector{grid-template-columns:1fr}
+    .pedido-accion-btn { min-width: 100px; font-size: 11px; }
 }
 @media (max-width:500px){
     .panel-titulo{font-size:16px}
     .tarjeta-titulo{font-size:15px}
     .mensaje-botones{flex-direction:column}
     .pedido-card, .usuario-card { padding: 12px; margin: 8px 10px; }
-    .pedido-id { font-size: 16px; }
-    .pedido-precio { font-size: 16px; }
     .timeline-step { width: 60px; }
     .timeline-icon { width: 28px; height: 28px; }
-    .timeline-icon svg { width: 14px; height: 14px; }
     .timeline-label { font-size: 10px; }
+    .msg-bubble { max-width: 88%; }
 }
 </style>
 </head>
@@ -586,8 +540,8 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         <div class="tarjeta" style="padding-bottom:0">
             <h3 class="tarjeta-titulo">📋 Todos los Pedidos</h3>
             <div class="busqueda-container">
-                <input type="text" id="buscarPedidos" placeholder="🔍 Buscar por número, referencia o jugador..." oninput="renderizarPedidos()">
-                <select class="filtro-select" id="filtroPedidos" onchange="renderizarPedidos()">
+                <input type="text" id="buscarPedidos" placeholder="🔍 Buscar por número, referencia o jugador..." oninput="paginaPedidosActual = 1; renderizarPedidos();">
+                <select class="filtro-select" id="filtroPedidos" onchange="paginaPedidosActual = 1; renderizarPedidos();">
                     <option value="">Todos</option>
                     <option value="completado">✅ Completados</option>
                     <option value="pendiente">⏳ Pendientes</option>
@@ -602,6 +556,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
                     Cargando pedidos...
                 </div>
             </div>
+            <div id="paginacionPedidos"></div>
         </div>
     </div>
 
@@ -612,11 +567,9 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 
             <div class="info-panel-codigos">
                 <strong>💡 Sistema de códigos aleatorios seguros</strong><br>
-                Los códigos son <strong>aleatorios e imposibles de adivinar</strong>. No siguen secuencia.<br><br>
+                Los códigos son <strong>aleatorios e imposibles de adivinar</strong>.<br><br>
                 <strong>🎮 JUEGOS:</strong> Códigos <code>TEST-XXXXXX</code> → Central One (Free Fire, Roblox)<br>
-                <strong>🎬 STREAMING:</strong> Códigos <code>RG-XXXXXX</code> → PagoNorte (Netflix, Disney+)<br>
-                <br>
-                <strong>💰 TASA:</strong> El precio en Bs se calcula automáticamente consultando <code>api/tasa.js</code>.
+                <strong>🎬 STREAMING:</strong> Códigos <code>RG-XXXXXX</code> → PagoNorte (Netflix, Disney+)
             </div>
 
             <label style="display:block;margin-bottom:10px;color:#cbd5e1;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">🎯 Tipo de código</label>
@@ -635,19 +588,17 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 
             <div class="grupo-input">
                 <label id="labelProducto">🎯 Producto</label>
-                <select id="productoCodigo" onchange="actualizarPreviewCodigo()">
-                    <!-- Se llena dinámicamente según el tipo -->
-                </select>
+                <select id="productoCodigo" onchange="actualizarPreviewCodigo()"></select>
             </div>
 
             <div class="preview-codigo-box">
                 <div class="preview-codigo-item">
                     <div class="preview-codigo-label">📦 Producto</div>
-                    <div class="preview-codigo-valor" id="previewProducto">110 Diamantes</div>
+                    <div class="preview-codigo-valor" id="previewProducto">-</div>
                 </div>
                 <div class="preview-codigo-item">
                     <div class="preview-codigo-label">💵 Precio USD</div>
-                    <div class="preview-codigo-valor usd" id="previewUsd">$0.81</div>
+                    <div class="preview-codigo-valor usd" id="previewUsd">-</div>
                 </div>
                 <div class="preview-codigo-item">
                     <div class="preview-codigo-label">💰 Tasa</div>
@@ -675,12 +626,8 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
             </div>
 
             <div class="grupo-input" id="grupoRenovacion" style="display:none">
-                <label>🎟️ Código de Aprobación PagoNorte (solo para RENOVACIONES)</label>
+                <label>🎟️ Código de Aprobación PagoNorte (solo RENOVACIONES)</label>
                 <input type="text" id="codigoAprobacionPagoNorte" placeholder="Ej: 123456789" maxlength="30" style="font-family:'Courier New',monospace;letter-spacing:1px;">
-                <p style="font-size:12px;color:#94a3b8;margin-top:6px;line-height:1.5;">
-                    💡 <strong>Renovación:</strong> Pega aquí el código de aprobación que PagoNorte te dio.<br>
-                    🛒 <strong>Compra nueva:</strong> Deja este campo <strong>vacío</strong>.
-                </p>
             </div>
 
             <button class="btn-guardar" id="btnGenerarCodigo" onclick="generarCodigos()" style="width:100%;padding:16px">🎲 Generar Códigos</button>
@@ -702,7 +649,6 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
                     <option value="rg">🎬 Solo STREAMING (RG)</option>
                     <option value="disponibles">✅ Disponibles</option>
                     <option value="usados">❌ Usados</option>
-                    <option value="renovaciones">🔄 Renovaciones</option>
                 </select>
             </div>
             <div id="listaCodigosContainer">
@@ -719,7 +665,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         <div class="tarjeta" style="padding-bottom:0">
             <h3 class="tarjeta-titulo">👤 Usuarios Registrados</h3>
             <div class="busqueda-container">
-                <input type="text" id="buscarUsuarios" placeholder="🔍 Buscar por nombre, correo o ID..." oninput="renderizarUsuarios()">
+                <input type="text" id="buscarUsuarios" placeholder="🔍 Buscar..." oninput="renderizarUsuarios()">
                 <select class="filtro-select" id="filtroUsuarios" onchange="renderizarUsuarios()">
                     <option value="">Todos</option>
                     <option value="activos">✅ Activos</option>
@@ -739,43 +685,39 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
     <div id="tab-vencimientos" class="contenido-tab oculto">
         <div class="tarjeta">
             <h3 class="tarjeta-titulo">📅 Vencimientos de Streaming</h3>
-
             <div class="stats-grid" style="margin-bottom:20px">
-                <div class="stat-card" style="cursor:pointer" onclick="setFiltroVenc('hoy', event)">
+                <div class="stat-card" onclick="setFiltroVenc('hoy', event)">
                     <div class="stat-icono">🔴</div>
                     <div class="stat-valor" id="statVencHoy">0</div>
                     <div class="stat-etiqueta">Vencen Hoy</div>
                 </div>
-                <div class="stat-card" style="cursor:pointer" onclick="setFiltroVenc('3dias', event)">
+                <div class="stat-card" onclick="setFiltroVenc('3dias', event)">
                     <div class="stat-icono">🟡</div>
                     <div class="stat-valor" id="statVenc3d">0</div>
                     <div class="stat-etiqueta">En 3 Días</div>
                 </div>
-                <div class="stat-card" style="cursor:pointer" onclick="setFiltroVenc('7dias', event)">
+                <div class="stat-card" onclick="setFiltroVenc('7dias', event)">
                     <div class="stat-icono">🟢</div>
                     <div class="stat-valor" id="statVenc7d">0</div>
                     <div class="stat-etiqueta">En 7 Días</div>
                 </div>
-                <div class="stat-card" style="cursor:pointer" onclick="setFiltroVenc('vencidos', event)">
+                <div class="stat-card" onclick="setFiltroVenc('vencidos', event)">
                     <div class="stat-icono">⚠️</div>
                     <div class="stat-valor" id="statVencVencidos">0</div>
                     <div class="stat-etiqueta">Ya Vencidos</div>
                 </div>
             </div>
-
             <div class="busqueda-container">
-                <input type="text" id="buscarVencimientos" placeholder="🔍 Buscar por nombre, WhatsApp o código..." oninput="renderizarVencimientos()">
+                <input type="text" id="buscarVencimientos" placeholder="🔍 Buscar..." oninput="renderizarVencimientos()">
                 <select class="filtro-select" id="filtroVencimientos" onchange="renderizarVencimientos()">
-                    <option value="todos">📋 Todos los activos</option>
+                    <option value="todos">📋 Todos</option>
                     <option value="hoy">🔴 Vencen HOY</option>
                     <option value="3dias">🟡 Próximos 3 días</option>
                     <option value="7dias">🟢 Próximos 7 días</option>
-                    <option value="mes">📆 Este mes</option>
                     <option value="vencidos">⚠️ Ya vencidos</option>
                 </select>
-                <button class="btn-imagen" onclick="cargarVencimientos()" title="Recargar">🔄</button>
+                <button class="btn-imagen" onclick="cargarVencimientos()">🔄</button>
             </div>
-
             <div id="listaVencimientos">
                 <div class="lista-vacia">
                     <div class="icono">📅</div>
@@ -784,21 +726,23 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
             </div>
         </div>
     </div>
-
 </div>
 
 <button class="install-app-btn" id="installAppBtn">📲 Instalar App</button>
 
-<!-- 💬 BOTÓN FLOTANTE DEL CHAT ADMIN -->
-<button class="chat-flotante-btn" id="chatFlotanteBtn" onclick="toggleChatAdmin()">
-    💬
+<!-- BOTÓN FLOTANTE DEL CHAT CON LOGO -->
+<button class="chat-flotante-btn" id="chatFlotanteBtn" onclick="toggleChatAdmin()" aria-label="Abrir chat">
+    <img src="logo.png" alt="Chat">
     <span class="badge-chat" id="badgeChatAdmin" style="display:none;">0</span>
 </button>
 
-<!-- 💬 PANEL DEL CHAT -->
+<!-- PANEL DEL CHAT -->
 <div class="chat-panel" id="chatPanel">
     <div class="chat-panel-header">
         <button class="btn-volver" id="btnVolverChat" onclick="volverALista()">←</button>
+        <div class="avatar-header" id="avatarHeader">
+            <img src="logo.png" alt="Avatar">
+        </div>
         <div class="info">
             <h3 id="chatTitulo">💬 Conversaciones</h3>
             <p id="chatSubtitulo">Selecciona un cliente</p>
@@ -807,7 +751,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
     </div>
 
     <div class="chat-lista" id="chatLista">
-        <div class="chat-lista-vacia">Cargando...</div>
+        <div class="chat-lista-vacia">Cargando conversaciones...</div>
     </div>
 
     <div class="chat-conversacion" id="chatConversacion">
@@ -831,7 +775,9 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 </div>
 
 <script>
+// ═══════════════════════════════════════════════
 // FIREBASE
+// ═══════════════════════════════════════════════
 const firebaseConfig = {
     apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
     authDomain: "free-52119.firebaseapp.com",
@@ -845,8 +791,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-const refCodigosRG = db.ref("codigos_rg");       // 🎬 STREAMING
-const refCodigosTEST = db.ref("codigos_test");   // 🎮 JUEGOS
+const refCodigosRG = db.ref("codigos_rg");
+const refCodigosTEST = db.ref("codigos_test");
 
 let sesionActiva = false;
 let deferredPrompt = null;
@@ -855,44 +801,40 @@ let ultimosCodigosGenerados = [];
 let todosLosPedidos = [];
 let todosLosUsuarios = [];
 let vencimientosCache = [];
-let tipoCodigoSeleccionado = 'juego'; // 'juego' | 'streaming'
+let tipoCodigoSeleccionado = 'juego';
 
-// ═══════════════════════════════════════════════════════════
-// 🎯 PRODUCTOS DIVIDIDOS POR TIPO
-// ═══════════════════════════════════════════════════════════
+// PAGINACIÓN
+let paginaPedidosActual = 1;
+let pedidosPorPagina = 10;
 
-// 🎮 PRODUCTOS DE JUEGOS (van a codigos_test)
+// PRODUCTOS
 const PRODUCTOS_JUEGOS = {
-    'ff_110':     { producto: '110 Diamantes Free Fire',   juego: 'FREE FIRE', paquete: '110',             usd: 0.81,  tipo: 'central_one' },
-    'ff_341':     { producto: '341 Diamantes Free Fire',   juego: 'FREE FIRE', paquete: '341',             usd: 2.60,  tipo: 'central_one' },
-    'ff_572':     { producto: '572 Diamantes Free Fire',   juego: 'FREE FIRE', paquete: '572',             usd: 4.20,  tipo: 'central_one' },
-    'ff_1166':    { producto: '1166 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '1166',            usd: 7.80,  tipo: 'central_one' },
-    'ff_2398':    { producto: '2398 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '2398',            usd: 15.30, tipo: 'central_one' },
-    'ff_6160':    { producto: '6160 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '6160',            usd: 39.00, tipo: 'central_one' },
-    'rb_50':      { producto: '50 Robux Roblox',           juego: 'ROBLOX',    paquete: '81dfdc57-1feb-4e72-8be6-7e119a348c48', usd: 1.00,  tipo: 'central_one' },
-    'rb_100':     { producto: '100 Robux Roblox',          juego: 'ROBLOX',    paquete: 'ea9298ae-944b-498b-9d82-a8128624cbbd', usd: 2.00,  tipo: 'central_one' },
-    'rb_275':     { producto: '275 Robux Roblox',          juego: 'ROBLOX',    paquete: '2ed3da74-e7e6-4c1b-a609-b630855303b6', usd: 5.00,  tipo: 'central_one' },
-    'rb_360':     { producto: '360 Robux Roblox',          juego: 'ROBLOX',    paquete: '5cafd861-3893-49a7-a9be-7815492c04c2', usd: 6.50,  tipo: 'central_one' },
-    'rb_555':     { producto: '555 Robux Roblox',          juego: 'ROBLOX',    paquete: '9defafba-f584-4378-ab8c-ce656d2a7c7e', usd: 10.00, tipo: 'central_one' },
-    'rb_1000':    { producto: '1000 Robux Roblox',         juego: 'ROBLOX',    paquete: '586763f0-6a06-4f5b-9eaf-cb7f66ae2ce2', usd: 18.00, tipo: 'central_one' },
-    'rb_2000':    { producto: '2000 Robux Roblox',         juego: 'ROBLOX',    paquete: '898ed399-6901-4582-9755-e5299f7dfb40', usd: 36.00, tipo: 'central_one' },
-    'rb_2400':    { producto: '2400 Robux Roblox',         juego: 'ROBLOX',    paquete: '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc', usd: 43.00, tipo: 'central_one' }
+    'ff_110': { producto: '110 Diamantes Free Fire', juego: 'FREE FIRE', paquete: '110', usd: 0.81, tipo: 'central_one' },
+    'ff_341': { producto: '341 Diamantes Free Fire', juego: 'FREE FIRE', paquete: '341', usd: 2.60, tipo: 'central_one' },
+    'ff_572': { producto: '572 Diamantes Free Fire', juego: 'FREE FIRE', paquete: '572', usd: 4.20, tipo: 'central_one' },
+    'ff_1166': { producto: '1166 Diamantes Free Fire', juego: 'FREE FIRE', paquete: '1166', usd: 7.80, tipo: 'central_one' },
+    'ff_2398': { producto: '2398 Diamantes Free Fire', juego: 'FREE FIRE', paquete: '2398', usd: 15.30, tipo: 'central_one' },
+    'ff_6160': { producto: '6160 Diamantes Free Fire', juego: 'FREE FIRE', paquete: '6160', usd: 39.00, tipo: 'central_one' },
+    'rb_50': { producto: '50 Robux Roblox', juego: 'ROBLOX', paquete: '81dfdc57-1feb-4e72-8be6-7e119a348c48', usd: 1.00, tipo: 'central_one' },
+    'rb_100': { producto: '100 Robux Roblox', juego: 'ROBLOX', paquete: 'ea9298ae-944b-498b-9d82-a8128624cbbd', usd: 2.00, tipo: 'central_one' },
+    'rb_275': { producto: '275 Robux Roblox', juego: 'ROBLOX', paquete: '2ed3da74-e7e6-4c1b-a609-b630855303b6', usd: 5.00, tipo: 'central_one' },
+    'rb_555': { producto: '555 Robux Roblox', juego: 'ROBLOX', paquete: '9defafba-f584-4378-ab8c-ce656d2a7c7e', usd: 10.00, tipo: 'central_one' },
+    'rb_1000': { producto: '1000 Robux Roblox', juego: 'ROBLOX', paquete: '586763f0-6a06-4f5b-9eaf-cb7f66ae2ce2', usd: 18.00, tipo: 'central_one' },
+    'rb_2400': { producto: '2400 Robux Roblox', juego: 'ROBLOX', paquete: '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc', usd: 43.00, tipo: 'central_one' }
 };
 
-// 🎬 PRODUCTOS DE STREAMING (van a codigos_rg)
 const PRODUCTOS_STREAMING = {
-    'nf_perfil':  { producto: 'Perfil Netflix',   juego: 'NETFLIX',  paquete: 'netflix_perfil',  usd: 3.80,  tipo: 'pagonorte' },
-    'nf_cuenta':  { producto: 'Cuenta Netflix',   juego: 'NETFLIX',  paquete: 'netflix_cuenta',  usd: 13.00, tipo: 'pagonorte' },
-    'ds_perfil':  { producto: 'Perfil Disney+',   juego: 'DISNEY+',  paquete: 'disney_perfil',   usd: 3.53,  tipo: 'pagonorte' },
-    'ds_cuenta':  { producto: 'Cuenta Disney+',   juego: 'DISNEY+',  paquete: 'disney_cuenta',   usd: 9.00,  tipo: 'pagonorte' }
+    'nf_perfil': { producto: 'Perfil Netflix', juego: 'NETFLIX', paquete: 'netflix_perfil', usd: 3.80, tipo: 'pagonorte' },
+    'nf_cuenta': { producto: 'Cuenta Netflix', juego: 'NETFLIX', paquete: 'netflix_cuenta', usd: 13.00, tipo: 'pagonorte' },
+    'ds_perfil': { producto: 'Perfil Disney+', juego: 'DISNEY+', paquete: 'disney_perfil', usd: 3.53, tipo: 'pagonorte' },
+    'ds_cuenta': { producto: 'Cuenta Disney+', juego: 'DISNEY+', paquete: 'disney_cuenta', usd: 9.00, tipo: 'pagonorte' }
 };
 
 let tasaCodigosActual = 940;
 
-// ═══════════════════════════════════════════════════════════
-// 🔐 GENERADOR DE CÓDIGOS ALEATORIOS SEGUROS
-// ═══════════════════════════════════════════════════════════
-// Caracteres sin ambigüedad (sin 0/O, sin 1/I/L)
+// ═══════════════════════════════════════════════
+// 🔐 GENERADOR DE CÓDIGOS ALEATORIOS
+// ═══════════════════════════════════════════════
 const CHARS_CODIGO = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 
 function generarParteAleatoria(longitud = 6) {
@@ -906,26 +848,23 @@ function generarParteAleatoria(longitud = 6) {
 }
 
 async function generarCodigoUnico(prefijo, refNodo) {
-    // Intentar hasta 50 veces para evitar colisión
     for (let i = 0; i < 50; i++) {
         const parteAleatoria = generarParteAleatoria(6);
         const codigo = prefijo + parteAleatoria;
         const snap = await refNodo.child(codigo).once('value');
         if (!snap.exists()) return codigo;
     }
-    // Si tras 50 intentos no hay éxito, agregar más caracteres
-    const parteExtra = generarParteAleatoria(8);
-    return prefijo + parteExtra;
+    return prefijo + generarParteAleatoria(8);
 }
 
 // PWA
-function estaInstalada(){
+function estaInstalada() {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
-function esIOS(){
+function esIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
-function actualizarBotonInstalar(){
+function actualizarBotonInstalar() {
     const btn = document.getElementById('installAppBtn');
     if (estaInstalada()) { btn.style.display = 'none'; return; }
     if (esIOS()) { btn.style.display = 'block'; return; }
@@ -962,7 +901,7 @@ document.getElementById('installAppBtn').addEventListener('click', async () => {
 });
 
 // MODAL
-function mostrarMensaje(titulo, texto, tipo='info', botones=null){
+function mostrarMensaje(titulo, texto, tipo = 'info', botones = null) {
     document.getElementById('mensajeIcono').className = 'mensaje-icono ' + tipo;
     document.getElementById('mensajeIcono').textContent =
         tipo === 'exito' ? '✓' :
@@ -981,7 +920,7 @@ function mostrarMensaje(titulo, texto, tipo='info', botones=null){
     }
     document.getElementById('mensajeOverlay').classList.add('activo');
 }
-function cerrarMensaje(){
+function cerrarMensaje() {
     document.getElementById('mensajeOverlay').classList.remove('activo');
 }
 document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
@@ -989,7 +928,7 @@ document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
 });
 
 // LOGIN
-async function iniciarSesion(){
+async function iniciarSesion() {
     const correo = document.getElementById('correo').value.trim();
     const contrasena = document.getElementById('contrasena').value;
     const btn = document.getElementById('btnLogin');
@@ -1030,7 +969,6 @@ async function iniciarSesion(){
         let msg = 'Correo o contraseña incorrectos';
         if (err.code === 'auth/too-many-requests') msg = 'Demasiados intentos. Espera unos minutos.';
         if (err.code === 'auth/invalid-email') msg = 'Correo inválido';
-        if (err.code === 'auth/network-request-failed') msg = '⚠️ Error de red';
         error.textContent = msg;
         error.style.display = 'block';
         btn.disabled = false;
@@ -1038,7 +976,7 @@ async function iniciarSesion(){
     }
 }
 
-async function cerrarSesion(){
+async function cerrarSesion() {
     await auth.signOut();
     sesionActiva = false;
     document.getElementById('panelPrincipal').style.display = 'none';
@@ -1050,14 +988,13 @@ async function cerrarSesion(){
 }
 
 // TABS
-function cambiarTab(nombre, event){
+function cambiarTab(nombre, event) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('activa'));
     document.querySelectorAll('.contenido-tab').forEach(c => c.classList.add('oculto'));
     event.target.classList.add('activa');
     document.getElementById('tab-' + nombre).classList.remove('oculto');
-    
+
     if (nombre === 'codigos') {
-        // Cargar productos según el tipo actual
         llenarSelectorProductos();
         cargarCodigos();
         actualizarPreviewCodigo();
@@ -1070,23 +1007,13 @@ function cambiarTab(nombre, event){
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🎯 SELECTOR DE TIPO DE CÓDIGO
-// ═══════════════════════════════════════════════════════════
+// SELECTOR TIPO CÓDIGO
 function seleccionarTipoCodigo(tipo) {
     tipoCodigoSeleccionado = tipo;
-
     document.getElementById('tipoJuego').classList.toggle('activo', tipo === 'juego');
     document.getElementById('tipoStreaming').classList.toggle('activo', tipo === 'streaming');
-
-    // Mostrar/ocultar campo de código de aprobación PagoNorte
     document.getElementById('grupoRenovacion').style.display = tipo === 'streaming' ? 'block' : 'none';
-
-    // Actualizar label
-    document.getElementById('labelProducto').textContent = tipo === 'juego'
-        ? '🎮 Producto (Juego)'
-        : '🎬 Producto (Streaming)';
-
+    document.getElementById('labelProducto').textContent = tipo === 'juego' ? '🎮 Producto (Juego)' : '🎬 Producto (Streaming)';
     llenarSelectorProductos();
     actualizarPreviewCodigo();
 }
@@ -1094,9 +1021,7 @@ function seleccionarTipoCodigo(tipo) {
 function llenarSelectorProductos() {
     const select = document.getElementById('productoCodigo');
     select.innerHTML = '';
-
     const productos = tipoCodigoSeleccionado === 'juego' ? PRODUCTOS_JUEGOS : PRODUCTOS_STREAMING;
-
     Object.entries(productos).forEach(([key, config]) => {
         const option = document.createElement('option');
         option.value = key;
@@ -1111,8 +1036,7 @@ function obtenerConfigProductoActual() {
     return productos[key];
 }
 
-// GENERADOR DE CÓDIGOS
-async function cargarTasaCodigos(){
+async function cargarTasaCodigos() {
     try {
         const res = await fetch('/api/tasa');
         const data = await res.json();
@@ -1121,7 +1045,7 @@ async function cargarTasaCodigos(){
             actualizarPreviewCodigo();
             return;
         }
-    } catch(e){}
+    } catch (e) { }
 
     try {
         const snap = await db.ref('configuracion/tasaDolar').once('value');
@@ -1130,13 +1054,12 @@ async function cargarTasaCodigos(){
             tasaCodigosActual = parseFloat(tasaDB);
             actualizarPreviewCodigo();
         }
-    } catch(e){}
+    } catch (e) { }
 }
 
-function actualizarPreviewCodigo(){
+function actualizarPreviewCodigo() {
     const config = obtenerConfigProductoActual();
     if (!config) return;
-
     const montoBs = Math.round(config.usd * tasaCodigosActual);
     document.getElementById('previewProducto').textContent = config.producto;
     document.getElementById('previewUsd').textContent = '$' + config.usd.toFixed(2);
@@ -1144,7 +1067,7 @@ function actualizarPreviewCodigo(){
     document.getElementById('previewMontoBs').textContent = montoBs.toLocaleString('es-VE') + ' Bs';
 }
 
-async function generarCodigos(){
+async function generarCodigos() {
     const btn = document.getElementById('btnGenerarCodigo');
     const config = obtenerConfigProductoActual();
     const cantidad = parseInt(document.getElementById('cantidadCodigos').value) || 1;
@@ -1152,14 +1075,8 @@ async function generarCodigos(){
     const whatsapp = document.getElementById('whatsappCodigo').value.trim();
     const codigoAprobacionPagoNorte = (document.getElementById('codigoAprobacionPagoNorte')?.value || '').trim();
 
-    if (!config) {
-        mostrarMensaje('Producto inválido', 'Selecciona un producto', 'error');
-        return;
-    }
-    if (cantidad < 1 || cantidad > 100) {
-        mostrarMensaje('Cantidad inválida', 'Debe ser entre 1 y 100', 'error');
-        return;
-    }
+    if (!config) { mostrarMensaje('Producto inválido', 'Selecciona un producto', 'error'); return; }
+    if (cantidad < 1 || cantidad > 100) { mostrarMensaje('Cantidad inválida', 'Debe ser entre 1 y 100', 'error'); return; }
 
     btn.disabled = true;
     btn.innerHTML = '⏳ Generando...';
@@ -1168,8 +1085,6 @@ async function generarCodigos(){
         await cargarTasaCodigos();
         const montoBs = Math.round(config.usd * tasaCodigosActual);
         const codigos = [];
-
-        // 🎯 Determinar prefijo y nodo según el tipo
         const esJuego = tipoCodigoSeleccionado === 'juego';
         const prefijo = esJuego ? 'TEST-' : 'RG-';
         const refNodo = esJuego ? refCodigosTEST : refCodigosRG;
@@ -1177,32 +1092,20 @@ async function generarCodigos(){
         for (let i = 0; i < cantidad; i++) {
             const codigo = await generarCodigoUnico(prefijo, refNodo);
             const datosCodigo = {
-                codigo: codigo,
-                producto: config.producto,
-                juego: config.juego,
-                paquete: config.paquete,
-                tipo: config.tipo,
-                monto_usd: config.usd,
-                monto_bs: montoBs,
-                tasa_al_crear: tasaCodigosActual,
-                nota: nota || '',
-                whatsapp_cliente: whatsapp || '',
-                activa: true,
-                usada: false,
-                uso_unico: true,
-                veces_usada: 0,
+                codigo, producto: config.producto, juego: config.juego, paquete: config.paquete,
+                tipo: config.tipo, monto_usd: config.usd, monto_bs: montoBs, tasa_al_crear: tasaCodigosActual,
+                nota: nota || '', whatsapp_cliente: whatsapp || '', activa: true, usada: false,
+                uso_unico: true, veces_usada: 0,
                 fecha_creacion: new Date().toISOString(),
                 fecha_creacion_legible: new Date().toLocaleString('es-VE'),
                 fecha_uso: null,
                 creado_por: auth.currentUser ? auth.currentUser.email : 'admin',
                 sistema: esJuego ? 'TEST' : 'RG'
             };
-
             if (codigoAprobacionPagoNorte && !esJuego) {
                 datosCodigo.es_renovacion = true;
                 datosCodigo.codigo_aprobacion_pagonorte = codigoAprobacionPagoNorte;
             }
-
             await refNodo.child(codigo).set(datosCodigo);
             codigos.push(codigo);
         }
@@ -1211,26 +1114,16 @@ async function generarCodigos(){
         document.getElementById('codigosGeneradosLista').innerHTML = codigos.join('<br>');
         document.getElementById('codigoGeneradoBox').classList.add('activo');
 
-        const sistemaLabel = esJuego ? '🎮 JUEGOS (TEST)' : '🎬 STREAMING (RG)';
-        const tipoMensaje = codigoAprobacionPagoNorte ? '🔄 RENOVACIÓN' : '🛒 Compra nueva';
-        
         mostrarMensaje(
             '✅ ' + cantidad + ' código' + (cantidad > 1 ? 's' : '') + ' generado' + (cantidad > 1 ? 's' : ''),
-            codigos.join('\n') + '\n\n' +
-            `Sistema: ${sistemaLabel}\n` +
-            `Tipo: ${tipoMensaje}\n` +
-            `Producto: ${config.producto}\n` +
-            `Monto: ${montoBs.toLocaleString('es-VE')} Bs` +
-            (codigoAprobacionPagoNorte ? `\n🎟️ Código aprobación: ${codigoAprobacionPagoNorte}` : ''),
+            codigos.join('\n') + '\n\n' + `Producto: ${config.producto}\nMonto: ${montoBs.toLocaleString('es-VE')} Bs`,
             'exito'
         );
 
         document.getElementById('notaCodigo').value = '';
         document.getElementById('whatsappCodigo').value = '';
         document.getElementById('cantidadCodigos').value = '1';
-        if (document.getElementById('codigoAprobacionPagoNorte')) {
-            document.getElementById('codigoAprobacionPagoNorte').value = '';
-        }
+        if (document.getElementById('codigoAprobacionPagoNorte')) document.getElementById('codigoAprobacionPagoNorte').value = '';
 
         cargarCodigos();
     } catch (error) {
@@ -1242,61 +1135,47 @@ async function generarCodigos(){
     }
 }
 
-function copiarTodosGenerados(){
+function copiarTodosGenerados() {
     if (ultimosCodigosGenerados.length === 0) return;
     navigator.clipboard.writeText(ultimosCodigosGenerados.join('\n'))
-        .then(() => mostrarMensaje('Copiado', 'Todos los códigos copiados', 'exito'))
-        .catch(() => mostrarMensaje('Error', 'No se pudo copiar', 'error'));
+        .then(() => mostrarMensaje('Copiado', 'Todos los códigos copiados', 'exito'));
 }
 
-// ═══════════════════════════════════════════════════════════
-// 📋 CARGAR CÓDIGOS (de ambos nodos)
-// ═══════════════════════════════════════════════════════════
-async function cargarCodigos(){
+async function cargarCodigos() {
     try {
         const contenedor = document.getElementById('listaCodigosContainer');
         const filtro = document.getElementById('filtroCodigos').value;
         const buscar = document.getElementById('buscarCodigos').value.trim().toUpperCase();
 
         let codigos = [];
-
-        // Cargar según el filtro
-        if (filtro === 'test') {
-            codigos = await obtenerCodigosDeNodo(refCodigosTEST, 'TEST');
-        } else if (filtro === 'rg') {
-            codigos = await obtenerCodigosDeNodo(refCodigosRG, 'RG');
-        } else {
-            // Cargar ambos
+        if (filtro === 'test') codigos = await obtenerCodigosDeNodo(refCodigosTEST, 'TEST');
+        else if (filtro === 'rg') codigos = await obtenerCodigosDeNodo(refCodigosRG, 'RG');
+        else {
             const test = await obtenerCodigosDeNodo(refCodigosTEST, 'TEST');
             const rg = await obtenerCodigosDeNodo(refCodigosRG, 'RG');
             codigos = [...test, ...rg];
         }
 
-        // Aplicar filtros adicionales
         if (filtro === 'disponibles') codigos = codigos.filter(c => !c.usada);
         else if (filtro === 'usados') codigos = codigos.filter(c => c.usada === true);
-        else if (filtro === 'renovaciones') codigos = codigos.filter(c => c.es_renovacion === true || !!c.codigo_aprobacion_pagonorte);
 
         if (buscar) {
             codigos = codigos.filter(c =>
                 (c.codigo || '').toUpperCase().includes(buscar) ||
                 (c.whatsapp_cliente || '').includes(buscar) ||
                 (c.nota || '').toUpperCase().includes(buscar) ||
-                (c.producto || '').toUpperCase().includes(buscar) ||
-                (c.codigo_aprobacion_pagonorte || '').includes(buscar)
+                (c.producto || '').toUpperCase().includes(buscar)
             );
         }
 
         codigos.sort((a, b) => (b.fecha_creacion || '').localeCompare(a.fecha_creacion || ''));
 
         if (codigos.length === 0) {
-            contenedor.innerHTML = `<div class="lista-vacia"><div class="icono">🔍</div>No hay códigos con ese filtro</div>`;
+            contenedor.innerHTML = `<div class="lista-vacia"><div class="icono">🔍</div>No hay códigos</div>`;
             return;
         }
-
         contenedor.innerHTML = codigos.map(c => renderizarCodigo(c)).join('');
     } catch (e) {
-        console.error('Error cargando códigos:', e);
         document.getElementById('listaCodigosContainer').innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>';
     }
 }
@@ -1304,105 +1183,87 @@ async function cargarCodigos(){
 async function obtenerCodigosDeNodo(refNodo, sistema) {
     const snap = await refNodo.limitToLast(200).once('value');
     const datos = snap.val() || {};
-    return Object.values(datos).map(c => ({...c, _sistema: sistema}));
+    return Object.values(datos).map(c => ({ ...c, _sistema: sistema }));
 }
 
-function renderizarCodigo(c){
+function renderizarCodigo(c) {
     const usada = c.usada === true;
     const esRenovacion = c.es_renovacion === true || !!c.codigo_aprobacion_pagonorte;
     const clase = usada ? 'usado' : (esRenovacion ? 'renovacion' : '');
-    const badge = usada 
-        ? '<span class="codigo-badge badge-usado-cod">USADO</span>' 
-        : '<span class="codigo-badge badge-disponible">DISPONIBLE</span>';
-    const badgeRenovacion = esRenovacion ? '<span class="codigo-badge badge-renovacion" style="margin-left:6px;">🔄 RENOVACIÓN</span>' : '';
-
+    const badge = usada ? '<span class="codigo-badge badge-usado-cod">USADO</span>' : '<span class="codigo-badge badge-disponible">DISPONIBLE</span>';
     const esTest = c._sistema === 'TEST' || (c.codigo || '').startsWith('TEST-');
-    const badgeSistema = esTest
-        ? '<span class="codigo-badge badge-test" style="margin-left:6px;">🎮 JUEGO</span>'
-        : '<span class="codigo-badge badge-rg" style="margin-left:6px;">🎬 STREAMING</span>';
+    const badgeSistema = esTest ? '<span class="codigo-badge badge-test">🎮 JUEGO</span>' : '<span class="codigo-badge badge-rg">🎬 STREAMING</span>';
 
     const meta = [];
     meta.push(`<span>📦 ${c.producto || 'N/A'}</span>`);
     meta.push(`<span>💰 ${(c.monto_bs || 0).toLocaleString('es-VE')} Bs</span>`);
     if (c.whatsapp_cliente) meta.push(`<span>📱 ${c.whatsapp_cliente}</span>`);
     meta.push(`<span>📅 ${c.fecha_creacion_legible || '-'}</span>`);
-    if (c.codigo_aprobacion_pagonorte) meta.push(`<span>🎟️ Aprobación: <strong style="color:#93c5fd;">${c.codigo_aprobacion_pagonorte}</strong></span>`);
 
-    const notaHtml = c.nota ? `<div style="font-size:12px;color:#94a3b8;margin-top:6px;">📝 ${c.nota}</div>` : '';
     const sistemaGuardar = esTest ? 'codigos_test' : 'codigos_rg';
 
     return `
         <div class="codigo-card ${clase}">
             <div class="codigo-info">
-                <div class="codigo-valor">${c.codigo}${badgeSistema}${badgeRenovacion}</div>
+                <div class="codigo-valor">${c.codigo} ${badgeSistema}</div>
                 <div class="codigo-meta">${meta.join('')}</div>
                 ${badge}
-                ${notaHtml}
             </div>
             <div class="codigo-acciones">
-                <button class="codigo-btn copiar" onclick="copiarCodigo('${c.codigo}', this)" title="Copiar">📋</button>
-                <button class="codigo-btn borrar" onclick="borrarCodigo('${c.codigo}', '${sistemaGuardar}')" title="Borrar">🗑️</button>
+                <button class="codigo-btn copiar" onclick="copiarCodigo('${c.codigo}', this)">📋</button>
+                <button class="codigo-btn borrar" onclick="borrarCodigo('${c.codigo}', '${sistemaGuardar}')">🗑️</button>
             </div>
         </div>
     `;
 }
 
-function copiarCodigo(codigo, boton){
+function copiarCodigo(codigo, boton) {
     navigator.clipboard.writeText(codigo).then(() => {
-        boton.classList.add('copiado');
         boton.textContent = '✓';
-        setTimeout(() => { boton.classList.remove('copiado'); boton.textContent = '📋'; }, 1500);
+        setTimeout(() => { boton.textContent = '📋'; }, 1500);
         mostrarMensaje('Copiado', codigo, 'exito');
-    }).catch(() => mostrarMensaje('Error', 'No se pudo copiar', 'error'));
+    });
 }
 
-function borrarCodigo(codigo, sistema){
-    const nombreSistema = sistema === 'codigos_test' ? '🎮 JUEGO (TEST)' : '🎬 STREAMING (RG)';
-    mostrarMensaje(
-        '¿Borrar código?', 
-        `¿Seguro que quieres borrar ${codigo}?\n\nSistema: ${nombreSistema}`, 
-        'advertencia', 
-        [
-            { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
-            { clase: 'peligro', texto: '🗑️ Borrar', onclick: `confirmarBorrar('${codigo}', '${sistema}')` }
-        ]
-    );
+function borrarCodigo(codigo, sistema) {
+    mostrarMensaje('¿Borrar código?', `¿Borrar ${codigo}?`, 'advertencia', [
+        { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
+        { clase: 'peligro', texto: '🗑️ Borrar', onclick: `confirmarBorrar('${codigo}', '${sistema}')` }
+    ]);
 }
 
-async function confirmarBorrar(codigo, sistema){
+async function confirmarBorrar(codigo, sistema) {
     cerrarMensaje();
     try {
         const refNodo = sistema === 'codigos_test' ? refCodigosTEST : refCodigosRG;
         await refNodo.child(codigo).remove();
         mostrarMensaje('Borrado', codigo + ' eliminado', 'exito');
         cargarCodigos();
-    } catch(e) {
-        mostrarMensaje('Error', e.message, 'error');
-    }
+    } catch (e) { mostrarMensaje('Error', e.message, 'error'); }
 }
 
 // CARGAR DATOS PANEL
-async function cargarDatosPanel(){
-    try { await cargarTasaCodigos(); } catch(e){ console.error(e); }
-    try { await cargarPedidosAdmin(); } catch(e){ console.error(e); }
-    try { await cargarUsuarios(); } catch(e){ console.error(e); }
-    try { llenarSelectorProductos(); } catch(e){ console.error(e); }
-    try { await cargarCodigos(); } catch(e){ console.error(e); }
-    try { await cargarConversaciones(); } catch(e){ console.error(e); }
+async function cargarDatosPanel() {
+    try { await cargarTasaCodigos(); } catch (e) { }
+    try { await cargarPedidosAdmin(); } catch (e) { }
+    try { await cargarUsuarios(); } catch (e) { }
+    try { llenarSelectorProductos(); } catch (e) { }
+    try { await cargarCodigos(); } catch (e) { }
+    try { await cargarConversaciones(); } catch (e) { }
 }
 
-function formatearFecha(iso){
+function formatearFecha(iso) {
     if (!iso) return '—';
     try {
         const d = new Date(iso);
         if (isNaN(d.getTime())) return iso;
-        return d.toLocaleDateString('es-VE') + ' ' + d.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
-    } catch(e) { return iso; }
+        return d.toLocaleDateString('es-VE') + ' ' + d.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return iso; }
 }
 
 function horaActual() {
     const d = new Date();
-    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function esc(valor) {
@@ -1411,22 +1272,57 @@ function esc(valor) {
     }[c]));
 }
 
+// ═══════════════════════════════════════════════
+// 🎯 ES STREAMING (fix del bug)
+// ═══════════════════════════════════════════════
+function esPedidoDeStreaming(p) {
+    // ⚠️ FIX: Solo es streaming si REALMENTE lo es
+    const juego = String(p.juego || '').toUpperCase();
+    const producto = String(p.producto || '').toUpperCase();
+    const paquete = String(p.paquete || '').toLowerCase();
+
+    // 1. Por bandera explícita
+    if (p.es_streaming === true) return true;
+
+    // 2. Por el campo "tipo_producto" guardado en la pasarela
+    if (p.tipo_producto === 'streaming') return true;
+    if (p.tipo_producto === 'juego' || p.tipo_producto === 'giftcard') return false;
+
+    // 3. Por el campo "tipo" del producto
+    if (p.tipo === 'pagonorte') return true;
+    if (p.tipo === 'central_one') return false;
+
+    // 4. Por el juego (más estricto, comparando exacto)
+    const juegosStreaming = ['NETFLIX', 'DISNEY', 'DISNEY+', 'HBO', 'HBO MAX', 'SPOTIFY', 'STREAMING', 'PARAMOUNT', 'STAR+', 'STAR PLUS', 'CRUNCHYROLL', 'PRIME VIDEO', 'AMAZON PRIME'];
+    for (const s of juegosStreaming) {
+        if (juego === s || juego.includes(s)) return true;
+    }
+
+    // 5. Por el paquete (más estricto)
+    if (paquete.startsWith('netflix_') || paquete.startsWith('disney_') || paquete.startsWith('hbo_')) {
+        return true;
+    }
+
+    // ❌ Si llega aquí → NO es streaming
+    return false;
+}
+
 // PEDIDOS
-async function cargarPedidosAdmin(){
+async function cargarPedidosAdmin() {
     try {
-        const snap = await db.ref('pedidos').limitToLast(500).once('value');
+        const snap = await db.ref('pedidos').limitToLast(1000).once('value');
         const datos = snap.val() || {};
-        todosLosPedidos = Object.entries(datos).map(([key, p]) => ({...p, key}));
+        todosLosPedidos = Object.entries(datos).map(([key, p]) => ({ ...p, key }));
         renderizarPedidos();
         actualizarBadgePendientes();
     } catch (e) {
-        console.error('Error cargando pedidos:', e);
         document.getElementById('listaPedidosAdmin').innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>';
     }
 }
 
-function renderizarPedidos(){
+function renderizarPedidos() {
     const contenedor = document.getElementById('listaPedidosAdmin');
+    const paginacionContainer = document.getElementById('paginacionPedidos');
     const filtro = document.getElementById('filtroPedidos').value;
     const buscar = document.getElementById('buscarPedidos').value.trim().toLowerCase();
 
@@ -1434,18 +1330,16 @@ function renderizarPedidos(){
 
     if (filtro === 'pendiente_manual') {
         lista = lista.filter(p => {
-            const juego = String(p.juego || '').toUpperCase();
-            const esStreaming = p.es_streaming === true || juego.includes('NETFLIX') || juego.includes('DISNEY') || juego.includes('HBO');
-            const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
-            return esStreaming && !tieneDatos;
+            // ✅ FIX: Solo pedidos que REALMENTE son streaming y necesitan datos
+            return esPedidoDeStreaming(p) && !tieneDatosEntrega(p);
         });
     } else if (filtro) {
         lista = lista.filter(p => {
             const e = String(p.estado || '').toLowerCase();
-            if (filtro === 'completado') return ['completada','completado','completed'].includes(e);
+            if (filtro === 'completado') return ['completada', 'completado', 'completed'].includes(e);
             if (filtro === 'pendiente') return e === 'pendiente';
             if (filtro === 'procesando') return e === 'procesando' || e === 'processing';
-            if (filtro === 'cancelado') return ['cancelado','cancelada','cancelled'].includes(e);
+            if (filtro === 'cancelado') return ['cancelado', 'cancelada', 'cancelled'].includes(e);
             return true;
         });
     }
@@ -1460,14 +1354,112 @@ function renderizarPedidos(){
         });
     }
 
-    lista.sort((a,b) => new Date(b.fecha || 0).getTime() - new Date(a.fecha || 0).getTime());
+    lista.sort((a, b) => new Date(b.fecha || 0).getTime() - new Date(a.fecha || 0).getTime());
 
-    if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">📭</div>No hay pedidos con ese filtro</div>';
+    const totalPedidos = lista.length;
+    const totalPaginas = Math.max(1, Math.ceil(totalPedidos / pedidosPorPagina));
+
+    if (paginaPedidosActual > totalPaginas) paginaPedidosActual = totalPaginas;
+    if (paginaPedidosActual < 1) paginaPedidosActual = 1;
+
+    const inicio = (paginaPedidosActual - 1) * pedidosPorPagina;
+    const fin = inicio + pedidosPorPagina;
+    const pagina = lista.slice(inicio, fin);
+
+    if (pagina.length === 0) {
+        contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">📭</div>No hay pedidos</div>';
+        paginacionContainer.innerHTML = '';
         return;
     }
 
-    contenedor.innerHTML = lista.map(p => renderizarTarjetaPedido(p)).join('');
+    contenedor.innerHTML = pagina.map(p => renderizarTarjetaPedido(p)).join('');
+
+    renderizarPaginacion(totalPedidos, totalPaginas, inicio, Math.min(fin, totalPedidos));
+}
+
+function renderizarPaginacion(total, totalPaginas, inicio, fin) {
+    const contenedor = document.getElementById('paginacionPedidos');
+
+    if (totalPaginas <= 1) {
+        contenedor.innerHTML = `
+            <div class="paginacion-container">
+                <div class="paginacion-info">Mostrando <strong>${total}</strong> pedido${total !== 1 ? 's' : ''}</div>
+            </div>
+        `;
+        return;
+    }
+
+    let html = `<div class="paginacion-container">`;
+    html += `<div class="paginacion-info">Mostrando <strong>${inicio + 1}-${fin}</strong> de <strong>${total}</strong> pedidos · Página <strong>${paginaPedidosActual}</strong> de <strong>${totalPaginas}</strong></div>`;
+
+    // Botón ← Anterior
+    html += `<button class="paginacion-btn nav" onclick="cambiarPagina(${paginaPedidosActual - 1})" ${paginaPedidosActual === 1 ? 'disabled' : ''}>←</button>`;
+
+    // Números de página
+    const paginas = calcularPaginas(totalPaginas, paginaPedidosActual);
+    paginas.forEach(p => {
+        if (p === '...') {
+            html += `<button class="paginacion-btn puntos" disabled>...</button>`;
+        } else {
+            html += `<button class="paginacion-btn ${p === paginaPedidosActual ? 'activa' : ''}" onclick="cambiarPagina(${p})">${p}</button>`;
+        }
+    });
+
+    // Botón → Siguiente
+    html += `<button class="paginacion-btn nav" onclick="cambiarPagina(${paginaPedidosActual + 1})" ${paginaPedidosActual === totalPaginas ? 'disabled' : ''}>→</button>`;
+
+    // Selector de pedidos por página
+    html += `
+        <div class="paginacion-selector">
+            <label>Por página:</label>
+            <select onchange="cambiarPorPagina(this.value)">
+                <option value="5" ${pedidosPorPagina === 5 ? 'selected' : ''}>5</option>
+                <option value="10" ${pedidosPorPagina === 10 ? 'selected' : ''}>10</option>
+                <option value="25" ${pedidosPorPagina === 25 ? 'selected' : ''}>25</option>
+                <option value="50" ${pedidosPorPagina === 50 ? 'selected' : ''}>50</option>
+                <option value="100" ${pedidosPorPagina === 100 ? 'selected' : ''}>100</option>
+            </select>
+        </div>
+    `;
+
+    html += `</div>`;
+    contenedor.innerHTML = html;
+}
+
+function calcularPaginas(total, actual) {
+    const paginas = [];
+    const maxVisible = 5;
+
+    if (total <= maxVisible + 2) {
+        for (let i = 1; i <= total; i++) paginas.push(i);
+    } else {
+        paginas.push(1);
+        let start = Math.max(2, actual - 1);
+        let end = Math.min(total - 1, actual + 1);
+
+        if (start > 2) paginas.push('...');
+        for (let i = start; i <= end; i++) paginas.push(i);
+        if (end < total - 1) paginas.push('...');
+        paginas.push(total);
+    }
+    return paginas;
+}
+
+function cambiarPagina(numero) {
+    paginaPedidosActual = numero;
+    renderizarPedidos();
+    document.getElementById('tab-pedidos').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cambiarPorPagina(valor) {
+    pedidosPorPagina = parseInt(valor) || 10;
+    paginaPedidosActual = 1;
+    renderizarPedidos();
+}
+
+function tieneDatosEntrega(p) {
+    const d = p.datos_streaming;
+    return d && (d.correo || d.clave || d.usuario || d.password);
 }
 
 function renderizarTarjetaPedido(p) {
@@ -1480,11 +1472,9 @@ function renderizarTarjetaPedido(p) {
     const idJugador = p.id_jugador || p.player_id || 'No especificado';
     const nombreJugador = p.nombre_jugador || p.player_name || 'No especificado';
 
-    const esStreaming = p.es_streaming === true || 
-                        (juego.toUpperCase().includes('NETFLIX') ||
-                         juego.toUpperCase().includes('DISNEY') ||
-                         juego.toUpperCase().includes('HBO'));
-    const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
+    // ✅ FIX: Solo marcar como requiere entrega manual si REALMENTE es streaming
+    const esStreaming = esPedidoDeStreaming(p);
+    const tieneDatos = tieneDatosEntrega(p);
     const requiereEntregaManual = esStreaming && !tieneDatos;
 
     let stepRecibido = 'recibido';
@@ -1507,7 +1497,7 @@ function renderizarTarjetaPedido(p) {
     }
 
     const iconBox = `<svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`;
-    const iconRef = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+    const iconRef = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
     const iconRecibido = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
     const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
     const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
@@ -1515,15 +1505,15 @@ function renderizarTarjetaPedido(p) {
     const detalleExpandido = `
         <div class="detalle-expandido">
             <h4>📋 Detalles del Pedido</h4>
-            <div class="detalle-fila"><span class="label">Número de Pedido:</span><span class="valor">#${esc(idPedido)}</span></div>
+            <div class="detalle-fila"><span class="label">Número:</span><span class="valor">#${esc(idPedido)}</span></div>
             <div class="detalle-fila"><span class="label">Fecha:</span><span class="valor">${esc(formatearFecha(p.fecha))}</span></div>
             <div class="detalle-fila"><span class="label">Producto:</span><span class="valor">${esc(juego)} ${producto ? '- ' + esc(producto) : ''}</span></div>
             <div class="detalle-fila"><span class="label">Monto:</span><span class="valor">$${esc(monto)}</span></div>
-            <div class="detalle-fila"><span class="label">Método de Pago:</span><span class="valor">${esc(metodo)}</span></div>
-            <div class="detalle-fila"><span class="label">Referencia de Pago:</span><span class="valor">${esc(p.referencia_pago || p.referencia || 'N/A')}</span></div>
-            <div class="detalle-fila"><span class="label">ID de Jugador:</span><span class="valor">${esc(idJugador)}</span></div>
-            <div class="detalle-fila"><span class="label">Nombre de Jugador:</span><span class="valor">${esc(nombreJugador)}</span></div>
-            <div class="detalle-fila"><span class="label">WhatsApp Cliente:</span><span class="valor">${esc(p.whatsapp_cliente || '—')}</span></div>
+            <div class="detalle-fila"><span class="label">Método:</span><span class="valor">${esc(metodo)}</span></div>
+            <div class="detalle-fila"><span class="label">Referencia:</span><span class="valor">${esc(p.referencia_pago || p.referencia || 'N/A')}</span></div>
+            <div class="detalle-fila"><span class="label">ID Jugador:</span><span class="valor">${esc(idJugador)}</span></div>
+            <div class="detalle-fila"><span class="label">Nombre:</span><span class="valor">${esc(nombreJugador)}</span></div>
+            <div class="detalle-fila"><span class="label">WhatsApp:</span><span class="valor">${esc(p.whatsapp_cliente || '—')}</span></div>
             <div class="detalle-fila"><span class="label">Estado:</span><span class="valor"><span class="badge-estado ${estado}">${TEXTO_ESTADO[estado]}</span></span></div>
         </div>
     `;
@@ -1534,41 +1524,31 @@ function renderizarTarjetaPedido(p) {
                 <div class="icono-alerta">🚨</div>
                 <div>
                     <div class="titulo-alerta">Entrega Manual Requerida</div>
-                    <div class="subtitulo-alerta">PagoNorte no devolvió los datos. Ingresalos aquí.</div>
+                    <div class="subtitulo-alerta">Es streaming y no tiene datos. Ingresalos aquí.</div>
                 </div>
             </div>
-            <div class="entrega-form-group">
-                <label>📧 Correo</label>
-                <input type="email" id="entrega-correo-${esc(p.key)}" placeholder="correo@ejemplo.com" autocomplete="off">
-            </div>
-            <div class="entrega-form-group">
-                <label>🔑 Contraseña</label>
-                <input type="text" id="entrega-clave-${esc(p.key)}" placeholder="Contraseña de la cuenta" autocomplete="off">
-            </div>
-            <div class="entrega-form-group">
-                <label>👤 Perfil (si aplica)</label>
-                <input type="text" id="entrega-perfil-${esc(p.key)}" placeholder="Ej: 1, 2, 3, 4" autocomplete="off">
-            </div>
-            <div class="entrega-form-group">
-                <label>🔢 PIN del Perfil (si aplica)</label>
-                <input type="text" id="entrega-pin-${esc(p.key)}" placeholder="Ej: 0644" autocomplete="off">
-            </div>
-            <div class="entrega-form-group">
-                <label>📅 Fecha de Vencimiento</label>
-                <input type="text" id="entrega-vence-${esc(p.key)}" placeholder="DD-MM-AAAA" autocomplete="off">
-            </div>
-            <div class="entrega-form-group">
-                <label>🎟️ Código de Renovación (opcional)</label>
-                <input type="text" id="entrega-codigo-${esc(p.key)}" placeholder="Código de aprobación" autocomplete="off">
-            </div>
-            <button class="entrega-btn-guardar" onclick="entregarStreamingManual('${esc(p.key)}')">
-                💾 Guardar y enviar por WhatsApp
-            </button>
-            <button class="entrega-btn-cancelar" onclick="event.stopPropagation();toggleDetalle(this.closest('.pedido-card'))">
-                Cancelar
-            </button>
+            <div class="entrega-form-group"><label>📧 Correo</label><input type="email" id="entrega-correo-${esc(p.key)}" placeholder="correo@ejemplo.com"></div>
+            <div class="entrega-form-group"><label>🔑 Contraseña</label><input type="text" id="entrega-clave-${esc(p.key)}" placeholder="Contraseña"></div>
+            <div class="entrega-form-group"><label>👤 Perfil</label><input type="text" id="entrega-perfil-${esc(p.key)}" placeholder="Ej: 1, 2, 3"></div>
+            <div class="entrega-form-group"><label>🔢 PIN</label><input type="text" id="entrega-pin-${esc(p.key)}" placeholder="Ej: 0644"></div>
+            <div class="entrega-form-group"><label>📅 Vencimiento</label><input type="text" id="entrega-vence-${esc(p.key)}" placeholder="DD-MM-AAAA"></div>
+            <button class="entrega-btn-guardar" onclick="entregarStreamingManual('${esc(p.key)}')">💾 Guardar y enviar por WhatsApp</button>
         </div>
     ` : '';
+
+    // 🆕 ACCIONES DEL PEDIDO
+    const acciones = `
+        <div class="pedido-acciones" onclick="event.stopPropagation()">
+            ${estado !== 'completado' ? `
+                <button class="pedido-accion-btn completar" onclick="completarPedido('${esc(p.key)}')">
+                    ✅ Marcar Completado
+                </button>
+            ` : ''}
+            <button class="pedido-accion-btn eliminar" onclick="eliminarPedido('${esc(p.key)}', '${esc(idPedido)}')">
+                🗑️ Eliminar
+            </button>
+        </div>
+    `;
 
     return `
         <div class="pedido-card ${requiereEntregaManual ? 'pendiente-manual' : ''}" onclick="toggleDetalle(this)">
@@ -1576,7 +1556,7 @@ function renderizarTarjetaPedido(p) {
                 <div class="pedido-header-left">
                     <div class="pedido-id">#${esc(idPedido)}${requiereEntregaManual ? ' 🚨' : ''}</div>
                     <div class="pedido-fecha">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#8899b0"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#8899b0"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
                         ${esc(formatearFecha(p.fecha))}
                     </div>
                 </div>
@@ -1586,38 +1566,24 @@ function renderizarTarjetaPedido(p) {
                 </div>
             </div>
             <div class="pedido-body">
-                <div class="pedido-producto">
-                    ${iconBox}
-                    ${esc(juego)} ${producto ? '- ' + esc(producto) : ''}
-                </div>
-                <div class="pedido-referencia">
-                    ${iconRef}
-                    Ref: ${esc(p.referencia_pago || p.referencia || 'N/A')}
-                </div>
+                <div class="pedido-producto">${iconBox} ${esc(juego)} ${producto ? '- ' + esc(producto) : ''}</div>
+                <div class="pedido-referencia">${iconRef} Ref: ${esc(p.referencia_pago || p.referencia || 'N/A')}</div>
             </div>
             <div class="pedido-jugador-box">
-                <div><strong>ID de Jugador:</strong> ${esc(idJugador)}</div>
-                <div><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</div>
+                <div><strong>ID:</strong> ${esc(idJugador)}</div>
+                <div><strong>Nombre:</strong> ${esc(nombreJugador)}</div>
                 <div><strong>📱 WhatsApp:</strong> ${esc(p.whatsapp_cliente || '—')}</div>
             </div>
             <div class="pedido-timeline">
-                <div class="timeline-step ${stepRecibido}">
-                    <div class="timeline-icon">${iconRecibido}</div>
-                    <div class="timeline-label">Recibido</div>
-                </div>
+                <div class="timeline-step ${stepRecibido}"><div class="timeline-icon">${iconRecibido}</div><div class="timeline-label">Recibido</div></div>
                 <div class="timeline-line ${line1}"></div>
-                <div class="timeline-step ${stepVerificando}">
-                    <div class="timeline-icon">${iconVerificando}</div>
-                    <div class="timeline-label">Verificando</div>
-                </div>
+                <div class="timeline-step ${stepVerificando}"><div class="timeline-icon">${iconVerificando}</div><div class="timeline-label">Verificando</div></div>
                 <div class="timeline-line ${line2}"></div>
-                <div class="timeline-step ${stepCompletado}">
-                    <div class="timeline-icon">${iconCompletado}</div>
-                    <div class="timeline-label">Completado</div>
-                </div>
+                <div class="timeline-step ${stepCompletado}"><div class="timeline-icon">${iconCompletado}</div><div class="timeline-label">Completado</div></div>
             </div>
             ${detalleExpandido}
             ${formularioEntrega}
+            ${acciones}
         </div>
     `;
 }
@@ -1628,7 +1594,7 @@ function toggleDetalle(card) {
 
 function normalizarEstado(raw) {
     const e = String(raw || 'pendiente').toLowerCase().trim();
-    if (['completado', 'completada', 'completed', 'completada_ok'].includes(e)) return 'completado';
+    if (['completado', 'completada', 'completed'].includes(e)) return 'completado';
     if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
     if (['procesando', 'processing'].includes(e)) return 'procesando';
     return 'pendiente';
@@ -1647,107 +1613,113 @@ function formatearMontoAdmin(valor) {
     return isNaN(num) ? '0.00' : num.toFixed(2);
 }
 
+// 🆕 COMPLETAR PEDIDO MANUALMENTE
+async function completarPedido(pedidoKey) {
+    mostrarMensaje('¿Marcar como completado?', 'El pedido se marcará como completado. ¿Continuar?', 'advertencia', [
+        { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
+        { clase: '', texto: '✅ Completar', onclick: `confirmarCompletar('${pedidoKey}')` }
+    ]);
+}
+
+async function confirmarCompletar(pedidoKey) {
+    cerrarMensaje();
+    try {
+        await db.ref('pedidos/' + pedidoKey).update({
+            estado: 'completada',
+            fecha_completado: new Date().toISOString(),
+            completado_por: auth.currentUser ? auth.currentUser.email : 'admin'
+        });
+        mostrarMensaje('✅ Completado', 'El pedido se marcó como completado', 'exito');
+        const p = todosLosPedidos.find(x => x.key === pedidoKey);
+        if (p) p.estado = 'completada';
+        renderizarPedidos();
+    } catch (e) {
+        mostrarMensaje('Error', e.message, 'error');
+    }
+}
+
+// 🆕 ELIMINAR PEDIDO
+function eliminarPedido(pedidoKey, idPedido) {
+    mostrarMensaje('⚠️ ¿Eliminar pedido?', `¿Seguro que quieres eliminar el pedido #${idPedido}?\n\nEsta acción NO se puede deshacer.`, 'advertencia', [
+        { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
+        { clase: 'peligro', texto: '🗑️ Eliminar', onclick: `confirmarEliminar('${pedidoKey}')` }
+    ]);
+}
+
+async function confirmarEliminar(pedidoKey) {
+    cerrarMensaje();
+    try {
+        await db.ref('pedidos/' + pedidoKey).remove();
+        mostrarMensaje('🗑️ Eliminado', 'El pedido fue eliminado', 'exito');
+        todosLosPedidos = todosLosPedidos.filter(x => x.key !== pedidoKey);
+        renderizarPedidos();
+        actualizarBadgePendientes();
+    } catch (e) {
+        mostrarMensaje('Error', e.message, 'error');
+    }
+}
+
 async function entregarStreamingManual(pedidoKey) {
     const correo = document.getElementById(`entrega-correo-${pedidoKey}`)?.value.trim();
     const clave = document.getElementById(`entrega-clave-${pedidoKey}`)?.value.trim();
     const perfil = document.getElementById(`entrega-perfil-${pedidoKey}`)?.value.trim();
     const pin = document.getElementById(`entrega-pin-${pedidoKey}`)?.value.trim();
     const vence = document.getElementById(`entrega-vence-${pedidoKey}`)?.value.trim();
-    const codigoRenovacion = document.getElementById(`entrega-codigo-${pedidoKey}`)?.value.trim();
 
     if (!correo || !clave) {
-        mostrarMensaje('Faltan datos', 'El correo y la contraseña son obligatorios', 'advertencia');
+        mostrarMensaje('Faltan datos', 'Correo y contraseña son obligatorios', 'advertencia');
         return;
     }
 
     const pedido = todosLosPedidos.find(x => x.key === pedidoKey);
-    if (!pedido) {
-        mostrarMensaje('Error', 'No se encontró el pedido', 'error');
-        return;
-    }
-
-    const btn = document.querySelector(`#entrega-correo-${pedidoKey}`)?.closest('.entrega-manual-box')?.querySelector('.entrega-btn-guardar');
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = '⏳ Guardando...';
-    }
+    if (!pedido) { mostrarMensaje('Error', 'No se encontró el pedido', 'error'); return; }
 
     try {
         const datosStreaming = {
-            correo: correo,
-            usuario: correo,
-            clave: clave,
-            password: clave,
-            perfil: perfil || '',
-            pin_perfil: pin || '',
+            correo, usuario: correo, clave, password: clave,
+            perfil: perfil || '', pin_perfil: pin || '',
             fecha_vencimiento: vence || '',
             entregado_manual: true,
             entregado_por: auth.currentUser ? auth.currentUser.email : 'admin',
-            fecha_entrega: new Date().toISOString(),
-            fecha_entrega_legible: new Date().toLocaleString('es-VE')
+            fecha_entrega: new Date().toISOString()
         };
 
-        const actualizacion = {
+        await db.ref('pedidos/' + pedidoKey).update({
             datos_streaming: datosStreaming,
             estado: 'completada',
             entrega_manual: true,
             fecha_entrega_manual: new Date().toISOString()
-        };
+        });
 
-        if (codigoRenovacion) {
-            actualizacion.codigo_aprobacion = codigoRenovacion;
-            actualizacion.codigo_aprobacion_pagonorte = codigoRenovacion;
-        }
-
-        await db.ref('pedidos/' + pedidoKey).update(actualizacion);
-        mostrarMensaje('✅ Guardado', 'Los datos se guardaron y el cliente puede verlos', 'exito');
+        mostrarMensaje('✅ Guardado', 'Los datos se guardaron', 'exito');
 
         const whatsapp = pedido.whatsapp_cliente || pedido.whatsapp || pedido.id_jugador;
         if (whatsapp) {
             const numeroLimpio = String(whatsapp).replace(/\D/g, '');
             const numeroConCodigo = numeroLimpio.startsWith('58') ? numeroLimpio : '58' + numeroLimpio.replace(/^0/, '');
-            
-            let mensaje = `🎬 *RECARGAS GAMES*\n\n`;
-            mensaje += `¡Hola! 👋 Aquí están los datos de tu cuenta:\n\n`;
-            mensaje += `📦 *Producto:* ${pedido.producto || pedido.juego || 'Streaming'}\n`;
-            mensaje += `📋 *Pedido:* ${pedido.numero_pedido || pedidoKey}\n\n`;
-            mensaje += `━━━━━━━━━━━━━━━━━━━━\n`;
-            mensaje += `🔐 *DATOS DE ACCESO*\n`;
-            mensaje += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-            mensaje += `📧 *Correo:* ${correo}\n`;
-            mensaje += `🔑 *Clave:* ${clave}\n`;
+
+            let mensaje = `🎬 *RECARGAS GAMES*\n\n¡Hola! 👋 Aquí están los datos de tu cuenta:\n\n`;
+            mensaje += `📦 *Producto:* ${pedido.producto || pedido.juego}\n📋 *Pedido:* ${pedido.numero_pedido || pedidoKey}\n\n`;
+            mensaje += `━━━━━━━━━━━━━━━━━━━━\n🔐 *DATOS DE ACCESO*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+            mensaje += `📧 *Correo:* ${correo}\n🔑 *Clave:* ${clave}\n`;
             if (perfil) mensaje += `👤 *Perfil:* ${perfil}\n`;
             if (pin) mensaje += `🔢 *PIN:* ${pin}\n`;
             if (vence) mensaje += `📅 *Vence:* ${vence}\n`;
-            if (codigoRenovacion) mensaje += `\n🎟️ *Código de Renovación:* ${codigoRenovacion}\n`;
-            mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n`;
-            mensaje += `⚠️ *No compartas estos datos con nadie.*\n\n`;
-            mensaje += `¿Problemas? Escríbenos: +58 422-8242411\n\n`;
-            mensaje += `¡Gracias por tu compra! 🙌`;
+            mensaje += `\n━━━━━━━━━━━━━━━━━━━━\n⚠️ *No compartas estos datos.*\n\n¡Gracias por tu compra! 🙌`;
 
             window.open(`https://wa.me/${numeroConCodigo}?text=${encodeURIComponent(mensaje)}`, '_blank');
         }
 
         await cargarPedidosAdmin();
     } catch (e) {
-        console.error('Error guardando entrega manual:', e);
         mostrarMensaje('Error', e.message, 'error');
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = '💾 Guardar y enviar por WhatsApp';
-        }
     }
 }
 
 function actualizarBadgePendientes() {
     const badge = document.getElementById('badgePendientes');
     if (!badge) return;
-    const pendientes = todosLosPedidos.filter(p => {
-        const juego = String(p.juego || '').toUpperCase();
-        const esStreaming = p.es_streaming === true || juego.includes('NETFLIX') || juego.includes('DISNEY') || juego.includes('HBO');
-        const tieneDatos = p.datos_streaming && (p.datos_streaming.correo || p.datos_streaming.clave);
-        return esStreaming && !tieneDatos;
-    }).length;
+    const pendientes = todosLosPedidos.filter(p => esPedidoDeStreaming(p) && !tieneDatosEntrega(p)).length;
     if (pendientes > 0) {
         badge.textContent = pendientes;
         badge.style.display = 'inline-block';
@@ -1757,16 +1729,16 @@ function actualizarBadgePendientes() {
 }
 
 // USUARIOS
-async function cargarUsuarios(){
+async function cargarUsuarios() {
     const contenedor = document.getElementById('listaUsuariosAdmin');
-    contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⏳</div>Cargando usuarios...</div>';
+    contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⏳</div>Cargando...</div>';
     try {
         let usuariosArray = [];
         const usuariosSnap = await db.ref('usuarios').once('value');
         const usuariosData = usuariosSnap.val();
 
         if (usuariosData && Object.keys(usuariosData).length > 0) {
-            usuariosArray = Object.entries(usuariosData).map(([uid, data]) => ({...data, uid}));
+            usuariosArray = Object.entries(usuariosData).map(([uid, data]) => ({ ...data, uid }));
         } else {
             const pedidosSnap = await db.ref('pedidos').once('value');
             const pedidos = pedidosSnap.val() || {};
@@ -1775,12 +1747,10 @@ async function cargarUsuarios(){
                 const uid = p.uid || 'anon-' + (p.id_jugador || Math.random().toString(36).substring(7));
                 if (!usuariosUnicos[uid]) {
                     usuariosUnicos[uid] = {
-                        uid,
-                        correo: p.email || p.correo || 'Anónimo',
+                        uid, correo: p.email || p.correo || 'Anónimo',
                         nombre: p.nombre_jugador || 'Sin nombre',
                         id_jugador: p.id_jugador || '—',
-                        totalPedidos: 0,
-                        fechaRegistroISO: p.fecha || null
+                        totalPedidos: 0, fechaRegistroISO: p.fecha || null
                     };
                 }
                 usuariosUnicos[uid].totalPedidos++;
@@ -1790,13 +1760,12 @@ async function cargarUsuarios(){
 
         todosLosUsuarios = usuariosArray;
         renderizarUsuarios();
-    } catch(e) {
-        console.error('Error cargando usuarios:', e);
-        contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">❌</div>Error: ' + e.message + '</div>';
+    } catch (e) {
+        contenedor.innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>';
     }
 }
 
-function renderizarUsuarios(){
+function renderizarUsuarios() {
     const contenedor = document.getElementById('listaUsuariosAdmin');
     const filtro = document.getElementById('filtroUsuarios').value;
     const buscar = document.getElementById('buscarUsuarios').value.trim().toLowerCase();
@@ -1809,29 +1778,25 @@ function renderizarUsuarios(){
         lista = lista.filter(u =>
             (u.correo || '').toLowerCase().includes(buscar) ||
             (u.nombre || '').toLowerCase().includes(buscar) ||
-            (u.id_jugador || '').toLowerCase().includes(buscar) ||
-            (u.whatsapp || '').toLowerCase().includes(buscar)
+            (u.id_jugador || '').toLowerCase().includes(buscar)
         );
     }
 
     if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">📭</div>No hay usuarios con ese filtro</div>';
+        contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">📭</div>No hay usuarios</div>';
         return;
     }
     contenedor.innerHTML = lista.map(u => renderizarTarjetaUsuario(u)).join('');
 }
 
-function renderizarTarjetaUsuario(u){
+function renderizarTarjetaUsuario(u) {
     const bloqueado = u.bloqueado === true;
-    const badge = bloqueado
-        ? '<span class="usuario-badge bloqueado">🚫 BLOQUEADO</span>'
-        : '<span class="usuario-badge activo">✅ ACTIVO</span>';
+    const badge = bloqueado ? '<span class="usuario-badge bloqueado">🚫 BLOQUEADO</span>' : '<span class="usuario-badge activo">✅ ACTIVO</span>';
     const nombre = u.nombre || u.displayName || 'Sin nombre';
     const correo = u.correo || u.email || 'Sin correo';
     const inicial = String(nombre).charAt(0).toUpperCase() || '?';
     const idJugador = u.id_jugador || u.whatsapp || '—';
     const totalPedidos = u.totalPedidos || 0;
-    const fechaReg = formatearFecha(u.fechaRegistroISO || u.fechaRegistro);
 
     return `
         <div class="usuario-card">
@@ -1848,7 +1813,6 @@ function renderizarTarjetaUsuario(u){
             <div class="usuario-meta">
                 <span>🆔 <strong>${esc(idJugador)}</strong></span>
                 <span>📦 Pedidos: <span class="pedidos-count">${totalPedidos}</span></span>
-                <span>📅 ${esc(fechaReg)}</span>
             </div>
             <div class="usuario-acciones">
                 ${bloqueado
@@ -1860,57 +1824,53 @@ function renderizarTarjetaUsuario(u){
     `;
 }
 
-async function bloquearUsuario(uid){
-    try {
-        await db.ref('usuarios/' + uid).update({ bloqueado: true, fechaBloqueo: new Date().toISOString() });
-        mostrarMensaje('✅ Bloqueado', 'El usuario fue bloqueado', 'exito');
-        const u = todosLosUsuarios.find(x => x.uid === uid);
-        if (u) u.bloqueado = true;
-        renderizarUsuarios();
-    } catch(e) { mostrarMensaje('Error', e.message, 'error'); }
+async function bloquearUsuario(uid) {
+    await db.ref('usuarios/' + uid).update({ bloqueado: true });
+    mostrarMensaje('Bloqueado', 'Usuario bloqueado', 'exito');
+    const u = todosLosUsuarios.find(x => x.uid === uid);
+    if (u) u.bloqueado = true;
+    renderizarUsuarios();
 }
 
-async function desbloquearUsuario(uid){
-    try {
-        await db.ref('usuarios/' + uid).update({ bloqueado: false, fechaDesbloqueo: new Date().toISOString() });
-        mostrarMensaje('✅ Desbloqueado', 'El usuario puede comprar', 'exito');
-        const u = todosLosUsuarios.find(x => x.uid === uid);
-        if (u) u.bloqueado = false;
-        renderizarUsuarios();
-    } catch(e) { mostrarMensaje('Error', e.message, 'error'); }
+async function desbloquearUsuario(uid) {
+    await db.ref('usuarios/' + uid).update({ bloqueado: false });
+    mostrarMensaje('Activado', 'Usuario activado', 'exito');
+    const u = todosLosUsuarios.find(x => x.uid === uid);
+    if (u) u.bloqueado = false;
+    renderizarUsuarios();
 }
 
 // VENCIMIENTOS
-function parseFechaVencimiento(str){
+function parseFechaVencimiento(str) {
     if (!str) return null;
     str = String(str).trim();
     const m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
     if (m) {
         let dia = parseInt(m[1]), mes = parseInt(m[2]), anio = parseInt(m[3]);
         if (anio < 100) anio += 2000;
-        if (mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31) return new Date(anio, mes - 1, dia);
+        return new Date(anio, mes - 1, dia);
     }
     const d = new Date(str);
     return isNaN(d.getTime()) ? null : d;
 }
 
-function diasHastaVencer(fechaVenc){
+function diasHastaVencer(fechaVenc) {
     if (!fechaVenc) return null;
-    const hoy = new Date(); hoy.setHours(0,0,0,0);
-    const v = new Date(fechaVenc); v.setHours(0,0,0,0);
+    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    const v = new Date(fechaVenc); v.setHours(0, 0, 0, 0);
     return Math.round((v - hoy) / 86400000);
 }
 
-function clasePorDias(dias){
+function clasePorDias(dias) {
     if (dias === null) return 'neutro';
-    if (dias < 0) return 'vencido';
+    if (dias < 0) return 'neutro';
     if (dias === 0) return 'rojo';
     if (dias <= 3) return 'amarillo';
     if (dias <= 7) return 'verde';
     return 'neutro';
 }
 
-function etiquetaPorDias(dias){
+function etiquetaPorDias(dias) {
     if (dias === null) return 'Sin fecha';
     if (dias < 0) return `Vencido hace ${Math.abs(dias)}d`;
     if (dias === 0) return '¡Vence HOY!';
@@ -1918,20 +1878,18 @@ function etiquetaPorDias(dias){
     return `Vence en ${dias} días`;
 }
 
-async function cargarVencimientos(){
+async function cargarVencimientos() {
     const contenedor = document.getElementById('listaVencimientos');
-    contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⏳</div>Cargando vencimientos...</div>';
+    contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⏳</div>Cargando...</div>';
     try {
         const snap = await db.ref('pedidos').limitToLast(500).once('value');
         const datos = snap.val() || {};
         vencimientosCache = Object.values(datos).filter(p => {
-            if (!p.es_streaming) return false;
-            const fecha = p.datos_streaming && p.datos_streaming.fecha_vencimiento;
-            return !!fecha;
+            if (!esPedidoDeStreaming(p)) return false;
+            return !!(p.datos_streaming && p.datos_streaming.fecha_vencimiento);
         }).map(p => {
             const fechaVenc = parseFechaVencimiento(p.datos_streaming.fecha_vencimiento);
-            const dias = diasHastaVencer(fechaVenc);
-            return {...p, _fechaVenc: fechaVenc, _dias: dias};
+            return { ...p, _fechaVenc: fechaVenc, _dias: diasHastaVencer(fechaVenc) };
         }).sort((a, b) => {
             if (!a._fechaVenc) return 1;
             if (!b._fechaVenc) return -1;
@@ -1941,12 +1899,11 @@ async function cargarVencimientos(){
         actualizarStatsVenc();
         renderizarVencimientos();
     } catch (e) {
-        console.error('Error cargando vencimientos:', e);
         contenedor.innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>';
     }
 }
 
-function actualizarStatsVenc(){
+function actualizarStatsVenc() {
     let hoy = 0, tres = 0, siete = 0, vencidos = 0;
     vencimientosCache.forEach(p => {
         if (p._dias === null) return;
@@ -1961,7 +1918,7 @@ function actualizarStatsVenc(){
     document.getElementById('statVencVencidos').textContent = vencidos;
 }
 
-function setFiltroVenc(valor, event){
+function setFiltroVenc(valor, event) {
     document.getElementById('filtroVencimientos').value = valor;
     renderizarVencimientos();
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('activa'));
@@ -1971,138 +1928,96 @@ function setFiltroVenc(valor, event){
     document.getElementById('tab-vencimientos').classList.remove('oculto');
 }
 
-function renderizarVencimientos(){
+function renderizarVencimientos() {
     const contenedor = document.getElementById('listaVencimientos');
     const filtro = document.getElementById('filtroVencimientos').value;
     const buscar = document.getElementById('buscarVencimientos').value.trim().toLowerCase();
 
     let lista = [...vencimientosCache];
-    const hoy = new Date(); hoy.setHours(0,0,0,0);
 
     if (filtro === 'hoy') lista = lista.filter(p => p._dias === 0);
     else if (filtro === '3dias') lista = lista.filter(p => p._dias !== null && p._dias >= 0 && p._dias <= 3);
     else if (filtro === '7dias') lista = lista.filter(p => p._dias !== null && p._dias >= 0 && p._dias <= 7);
     else if (filtro === 'vencidos') lista = lista.filter(p => p._dias !== null && p._dias < 0);
-    else if (filtro === 'mes') {
-        const mesActual = hoy.getMonth(), anioActual = hoy.getFullYear();
-        lista = lista.filter(p => p._fechaVenc && p._fechaVenc.getMonth() === mesActual && p._fechaVenc.getFullYear() === anioActual);
-    }
 
     if (buscar) {
         lista = lista.filter(p => {
-            const nombre = (p.nombre_jugador || p.nombre_cliente || p.cliente || '').toLowerCase();
-            const wpp = String(p.whatsapp_cliente || p.whatsapp || p.id_jugador || '').toLowerCase();
-            const cod = String(p.codigo_aprobacion || '').toLowerCase();
-            const serv = String((p.datos_streaming && p.datos_streaming.servicio) || p.producto || p.juego || '').toLowerCase();
-            return nombre.includes(buscar) || wpp.includes(buscar) || cod.includes(buscar) || serv.includes(buscar);
+            const nombre = (p.nombre_jugador || p.nombre_cliente || '').toLowerCase();
+            const wpp = String(p.whatsapp_cliente || p.whatsapp || '').toLowerCase();
+            const serv = String(p.producto || p.juego || '').toLowerCase();
+            return nombre.includes(buscar) || wpp.includes(buscar) || serv.includes(buscar);
         });
     }
 
     if (lista.length === 0) {
-        contenedor.innerHTML = `<div class="lista-vacia"><div class="icono">📭</div>No hay vencimientos con ese filtro</div>`;
+        contenedor.innerHTML = `<div class="lista-vacia"><div class="icono">📭</div>No hay vencimientos</div>`;
         return;
     }
     contenedor.innerHTML = lista.map(p => renderizarTarjetaVenc(p)).join('');
 }
 
-function renderizarTarjetaVenc(p){
+function renderizarTarjetaVenc(p) {
     const clase = clasePorDias(p._dias);
     const etiqueta = etiquetaPorDias(p._dias);
-    const nombre = p.nombre_jugador || p.nombre_cliente || p.cliente || 'Cliente';
-    const whatsapp = String(p.whatsapp_cliente || p.whatsapp || p.id_jugador || '').replace(/\D/g, '');
-    const servicio = (p.datos_streaming && p.datos_streaming.servicio) || p.producto || p.juego || 'Streaming';
+    const nombre = p.nombre_jugador || p.nombre_cliente || 'Cliente';
+    const whatsapp = String(p.whatsapp_cliente || p.whatsapp || '').replace(/\D/g, '');
+    const servicio = p.producto || p.juego || 'Streaming';
     const fechaVenc = p.datos_streaming.fecha_vencimiento || '—';
     const precio = p.precio_usd || p.monto_usd || '—';
-    const codigo = p.codigo_aprobacion || p.numero_pedido || '—';
-    const idPedido = p.numero_pedido || p.id || codigo;
+    const idPedido = p.numero_pedido || p.key;
 
     return `
-        <div class="venc-card ${clase}">
+        <div class="venc-card">
             <div class="venc-header">
-                <div class="venc-cliente">👤 ${nombre}</div>
+                <div class="venc-cliente">👤 ${esc(nombre)}</div>
                 <div class="venc-dias ${clase}">${etiqueta}</div>
             </div>
             <div class="venc-meta">
-                <span>🎬 <strong>${servicio}</strong></span>
-                <span>📅 Vence: <strong>${fechaVenc}</strong></span>
-                <span>💵 Renovación: <strong>$${precio}</strong></span>
-                ${whatsapp ? `<span>📱 ${whatsapp}</span>` : ''}
-                ${codigo && codigo !== '—' ? `<span>🔑 <span class="codigo">${codigo}</span></span>` : ''}
+                <span>🎬 <strong>${esc(servicio)}</strong></span>
+                <span>📅 Vence: <strong>${esc(fechaVenc)}</strong></span>
+                <span>💵 <strong>$${esc(precio)}</strong></span>
+                ${whatsapp ? `<span>📱 ${esc(whatsapp)}</span>` : ''}
             </div>
             <div class="venc-acciones">
                 <button class="venc-btn whatsapp" onclick="recordarCliente('${idPedido}')">📲 Recordar</button>
                 <button class="venc-btn renovar" onclick="renovarCliente('${idPedido}')">🔄 Renovar</button>
-                <button class="venc-btn copiar" onclick="copiarMensajeVenc('${idPedido}', this)">📋</button>
             </div>
         </div>
     `;
 }
 
-function buscarPorId(idPedido){
-    return vencimientosCache.find(p => String(p.numero_pedido || p.id || p.codigo_aprobacion) === String(idPedido));
+function buscarPorId(idPedido) {
+    return vencimientosCache.find(p => String(p.numero_pedido || p.key) === String(idPedido));
 }
 
-function recordarCliente(idPedido){
+function recordarCliente(idPedido) {
     const p = buscarPorId(idPedido);
     if (!p) return;
-    const nombre = p.nombre_jugador || p.nombre_cliente || p.cliente || 'Cliente';
-    const whatsapp = String(p.whatsapp_cliente || p.whatsapp || p.id_jugador || '').replace(/\D/g, '');
-    if (!whatsapp) {
-        mostrarMensaje('Sin WhatsApp', 'Este pedido no tiene WhatsApp registrado', 'advertencia');
-        return;
-    }
-    const servicio = (p.datos_streaming && p.datos_streaming.servicio) || p.producto || p.juego || 'Streaming';
+    const nombre = p.nombre_jugador || 'Cliente';
+    const whatsapp = String(p.whatsapp_cliente || p.whatsapp || '').replace(/\D/g, '');
+    if (!whatsapp) { mostrarMensaje('Sin WhatsApp', 'Sin WhatsApp registrado', 'advertencia'); return; }
+    const servicio = p.producto || p.juego || 'Streaming';
     const fechaVenc = p.datos_streaming.fecha_vencimiento || '—';
-    const precio = p.precio_usd || p.monto_usd || '—';
+    const precio = p.monto_usd || '—';
     const mensaje = encodeURIComponent(
-        `Hola ${nombre} 👋 Te escribo de *RecargasGames*.\n\n` +
-        `Tu cuenta de *${servicio}* vence el *${fechaVenc}*.\n` +
-        `Precio de renovación: *$${precio}*\n\n` +
-        `¿Deseas renovarla? Responde *SÍ* y te paso los datos de pago. ¡Gracias! 🎬`
+        `Hola ${nombre} 👋 Te escribo de *RecargasGames*.\n\nTu *${servicio}* vence el *${fechaVenc}*.\nPrecio: *$${precio}*\n\n¿Deseas renovarla? 🎬`
     );
     const numero = whatsapp.startsWith('58') ? whatsapp : '58' + whatsapp.replace(/^0/, '');
     window.open(`https://wa.me/${numero}?text=${mensaje}`, '_blank');
 }
 
-function renovarCliente(idPedido){
+function renovarCliente(idPedido) {
     const p = buscarPorId(idPedido);
     if (!p) return;
-    const nombre = p.nombre_jugador || p.nombre_cliente || p.cliente || 'Cliente';
-    const codigo = p.codigo_aprobacion || p.numero_pedido || '—';
-    const servicio = (p.datos_streaming && p.datos_streaming.servicio) || p.producto || p.juego || 'Streaming';
-    const precio = p.precio_usd || p.monto_usd || '—';
     mostrarMensaje(
-        '🔄 Renovar cuenta',
-        `Cliente: ${nombre}\nServicio: ${servicio}\nPrecio: $${precio}\nCódigo: ${codigo}\n\n` +
-        `Para renovar:\n1. Genera un código RG en la pestaña Códigos (tipo STREAMING)\n2. Pega el código de aprobación: ${codigo}\n3. Envíale el RG al cliente por WhatsApp\n4. El cliente lo usa en Netflix → Renovar`,
-        'info',
-        [
-            { clase: 'secundario', texto: 'Cerrar', onclick: 'cerrarMensaje()' },
-            { clase: '', texto: '📲 Avisar por WhatsApp', onclick: `cerrarMensaje();recordarCliente('${idPedido}')` }
-        ]
+        '🔄 Renovar',
+        `Cliente: ${p.nombre_jugador || 'Cliente'}\nProducto: ${p.producto || p.juego}\n\nGenera un código RG nuevo en la pestaña Códigos.`,
+        'info'
     );
 }
 
-function copiarMensajeVenc(idPedido, boton){
-    const p = buscarPorId(idPedido);
-    if (!p) return;
-    const nombre = p.nombre_jugador || p.nombre_cliente || p.cliente || 'Cliente';
-    const servicio = (p.datos_streaming && p.datos_streaming.servicio) || p.producto || p.juego || 'Streaming';
-    const fechaVenc = p.datos_streaming.fecha_vencimiento || '—';
-    const precio = p.precio_usd || p.monto_usd || '—';
-    const mensaje =
-        `Hola ${nombre} 👋 Te escribo de *RecargasGames*.\n\n` +
-        `Tu cuenta de *${servicio}* vence el *${fechaVenc}*.\n` +
-        `Precio de renovación: *$${precio}*\n\n` +
-        `¿Deseas renovarla? Responde *SÍ* y te paso los datos de pago. ¡Gracias! 🎬`;
-    navigator.clipboard.writeText(mensaje).then(() => {
-        if (boton) { boton.textContent = '✓'; setTimeout(() => { boton.textContent = '📋'; }, 1500); }
-        mostrarMensaje('Copiado', 'Mensaje listo para pegar en WhatsApp', 'exito');
-    }).catch(() => mostrarMensaje('Error', 'No se pudo copiar', 'error'));
-}
-
 // ══════════════════════════════════════
-// 💬 CHAT ADMIN (mini-chat con clientes)
+// 💬 CHAT ADMIN MEJORADO
 // ══════════════════════════════════════
 let conversacionActiva = null;
 let conversacionesCache = [];
@@ -2118,10 +2033,7 @@ function toggleChatAdmin() {
         cargarConversaciones();
     } else {
         conversacionActiva = null;
-        if (mensajesUnsubscribe) {
-            mensajesUnsubscribe.off();
-            mensajesUnsubscribe = null;
-        }
+        if (mensajesUnsubscribe) { mensajesUnsubscribe.off(); mensajesUnsubscribe = null; }
     }
 }
 
@@ -2132,10 +2044,10 @@ function volverALista() {
     document.getElementById('chatTitulo').textContent = '💬 Conversaciones';
     document.getElementById('chatSubtitulo').textContent = 'Selecciona un cliente';
 
-    if (mensajesUnsubscribe) {
-        mensajesUnsubscribe.off();
-        mensajesUnsubscribe = null;
-    }
+    // Reset avatar al logo
+    document.getElementById('avatarHeader').innerHTML = '<img src="logo.png" alt="Avatar">';
+
+    if (mensajesUnsubscribe) { mensajesUnsubscribe.off(); mensajesUnsubscribe = null; }
     conversacionActiva = null;
 }
 
@@ -2145,8 +2057,7 @@ function cargarConversaciones() {
     conversacionesUnsubscribe = db.ref('conversaciones').on('value', (snap) => {
         const datos = snap.val() || {};
         conversacionesCache = Object.entries(datos).map(([key, c]) => ({
-            key,
-            ...c,
+            key, ...c,
             _ultima: c.ultima_actividad ? new Date(c.ultima_actividad).getTime() : 0
         })).sort((a, b) => b._ultima - a._ultima);
 
@@ -2203,7 +2114,7 @@ async function abrirConversacion(key) {
     document.getElementById('chatConversacion').classList.add('visible');
     document.getElementById('btnVolverChat').classList.add('visible');
     document.getElementById('chatTitulo').textContent = c.nombre || 'Cliente';
-    document.getElementById('chatSubtitulo').textContent = c.email || 'Cliente';
+    document.getElementById('chatSubtitulo').textContent = c.email || c.whatsapp_cliente || 'Cliente';
 
     await db.ref('conversaciones/' + key).update({ tiene_nuevos: false });
 
@@ -2224,18 +2135,17 @@ function cargarMensajesConversacion(key) {
     if (mensajesUnsubscribe) mensajesUnsubscribe.off();
 
     const contenedor = document.getElementById('mensajesChat');
-    contenedor.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:12px;">Cargando mensajes...</div>';
+    contenedor.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;">Cargando...</div>';
 
     mensajesUnsubscribe = db.ref('conversaciones/' + key + '/mensajes')
         .orderByChild('timestamp')
         .on('value', (snap) => {
             const datos = snap.val() || {};
-            const mensajes = Object.entries(datos)
-                .map(([k, m]) => ({ key: k, ...m }))
+            const mensajes = Object.entries(datos).map(([k, m]) => ({ key: k, ...m }))
                 .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
             if (mensajes.length === 0) {
-                contenedor.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:12px;">Sin mensajes aún</div>';
+                contenedor.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;">Sin mensajes aún</div>';
                 return;
             }
 
@@ -2264,21 +2174,19 @@ async function enviarRespuestaAdmin() {
     input.disabled = true;
 
     try {
-        const mensaje = {
+        await db.ref('conversaciones/' + conversacionActiva + '/mensajes').push({
             rol: 'admin',
             texto: texto,
             timestamp: Date.now(),
-            hora: horaActual()
-        };
-
-        await db.ref('conversaciones/' + conversacionActiva + '/mensajes').push(mensaje);
+            hora: horaActual(),
+            estado: 'enviado'
+        });
         await db.ref('conversaciones/' + conversacionActiva).update({
             ultimo_mensaje: '👤 ' + texto.substring(0, 45),
             ultima_actividad: new Date().toISOString(),
             tiene_nuevos: false
         });
     } catch (e) {
-        console.error('Error enviando respuesta:', e);
         mostrarMensaje('Error', e.message, 'error');
     } finally {
         btn.disabled = false;
@@ -2298,9 +2206,7 @@ document.addEventListener('keydown', (e) => {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw-admin.js')
-            .then(() => console.log('✅ SW Admin'))
-            .catch((err) => console.warn('⚠️ SW:', err.message));
+        navigator.serviceWorker.register('/sw-admin.js').catch(() => { });
     });
 }
 </script>
