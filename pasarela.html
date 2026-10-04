@@ -202,9 +202,9 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 </div>
 
 <script>
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🎯 CONFIGURACIÓN DE PROVEEDORES
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 const JUEGOS_CENTRAL_ONE = ['FREE FIRE','FF','BLOOD STRIKE','PUBG','PUBG MOBILE','MOBILE LEGENDS','ML','CALL OF DUTY','COD','CODM','ARENA BREAKOUT','DELTA FORCE','BIGO LIVE','BIGO','ROBLOX','PLAYSTATION','PSN','XBOX','NINTENDO','GOOGLE PLAY','GPLAY','GIFT CARD'];
 const JUEGOS_STREAMING_PAGONORTE = ['NETFLIX','DISNEY','DISNEY+','HBO','HBO MAX','SPOTIFY','STREAMING','PARAMOUNT','STAR+','STAR PLUS','CRUNCHYROLL','PRIME VIDEO','AMAZON PRIME'];
 const MAPA_PAGONORTE = {'netflix_perfil':'recargaPerfilNetflix','netflix_cuenta':'recargaCuentaNetflix','disney_perfil':'recargaPerfilDisnep','disney_cuenta':'recargaCuentaDisnep','hbo_perfil':'recargaPerfilHbo','hbo_cuenta':'recargaCuentaHbo'};
@@ -212,9 +212,9 @@ const MAPA_PAGONORTE = {'netflix_perfil':'recargaPerfilNetflix','netflix_cuenta'
 const MODO_RENOVACION = localStorage.getItem('modo_renovacion') === 'true';
 const CODIGO_RENOVACION = localStorage.getItem('codigo_aprobacion') || '';
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🎨 SISTEMA DE MENSAJES
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ' };
 function mostrarMensaje(titulo, mensaje, tipo='info', textoBoton='Entendido') {
     return new Promise((resolve) => {
@@ -230,9 +230,9 @@ function mostrarMensaje(titulo, mensaje, tipo='info', textoBoton='Entendido') {
 function cerrarMensaje() { document.getElementById('mensajeOverlay').classList.remove('activo'); }
 document.getElementById('mensajeOverlay').addEventListener('click', (e) => { if (e.target.id === 'mensajeOverlay') cerrarMensaje(); });
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🔥 FIREBASE
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 const firebaseConfig = {apiKey:"AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",authDomain:"free-52119.firebaseapp.com",databaseURL:"https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"free-52119",storageBucket:"free-52119.firebasestorage.app",messagingSenderId:"632240144599",appId:"1:632240144599:web:e31c25665ffe19c194b092"};
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -245,18 +245,18 @@ const refManuales = db.ref("referencias_manuales");
 const refCodigosRG = db.ref("codigos_rg");
 const refCodigosTEST = db.ref("codigos_test");
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🔑 CONFIGURACIÓN API
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
 const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
 const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betasario`;
 const WHATSAPP_PASARELA_URL = 'https://recargasgames-shop.vercel.app/api/enviar-whatsapp-pasarela';
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 📋 DATOS DEL PEDIDO
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 const juego = localStorage.getItem('juego_seleccionado') || "";
 const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || "";
 const nombreJugador = localStorage.getItem('nombre_jugador') || idJugador || "Sin nombre";
@@ -285,22 +285,46 @@ if (nombreJugador && nombreJugador !== idJugador && nombreJugador !== 'Sin nombr
     document.getElementById('filaNombre').style.display = 'flex';
 } else { document.getElementById('filaNombre').style.display = 'none'; }
 
-// ==============================================
-// 🎯 DETECCIÓN DE TIPO DE PRODUCTO
-// ==============================================
+// ═══════════════════════════════════════════════════════════
+// 🎯 DETECCIÓN DE TIPO DE PRODUCTO (MEJORADA)
+// ═══════════════════════════════════════════════════════════
 function detectarTipoProducto(juegoOverride, productoOverride, paqueteOverride) {
     const juegoCheck = String(juegoOverride || juego || '').toUpperCase().trim();
     const productoCheck = String(productoOverride || producto || '').toUpperCase().trim();
     const paqueteCheck = String(paqueteOverride || paqueteCod || '').toLowerCase().trim();
     const proveedorCheck = proveedorGuardado;
+
     if (proveedorCheck === 'pagonorte') return 'streaming';
     if (proveedorCheck === 'central_one' || proveedorCheck === 'centralone') return 'juego';
+
     if (paqueteCheck && MAPA_PAGONORTE[paqueteCheck]) return 'streaming';
-    for (const key of Object.keys(MAPA_PAGONORTE)) { const prefijo = key.split('_')[0]; if (paqueteCheck.startsWith(prefijo + '_')) return 'streaming'; }
-    for (const j of JUEGOS_CENTRAL_ONE) { if (juegoCheck === j || juegoCheck.includes(j)) return 'juego'; }
-    for (const s of JUEGOS_STREAMING_PAGONORTE) { if (juegoCheck === s || juegoCheck.includes(s)) return 'streaming'; }
-    for (const s of JUEGOS_STREAMING_PAGONORTE) { if (productoCheck.includes(s)) return 'streaming'; }
-    if (productoCheck.includes('PERFIL') || productoCheck.includes('CUENTA')) { for (const j of JUEGOS_CENTRAL_ONE) { if (productoCheck.includes(j)) return 'juego'; } return 'streaming'; }
+    for (const key of Object.keys(MAPA_PAGONORTE)) {
+        const prefijo = key.split('_')[0];
+        if (paqueteCheck.startsWith(prefijo + '_')) return 'streaming';
+    }
+
+    // 🔥 PRIORIDAD: juegos primero (comparación exacta)
+    for (const j of JUEGOS_CENTRAL_ONE) {
+        if (juegoCheck === j) return 'juego';
+    }
+    for (const j of JUEGOS_CENTRAL_ONE) {
+        if (juegoCheck.includes(j)) return 'juego';
+    }
+
+    for (const s of JUEGOS_STREAMING_PAGONORTE) {
+        if (juegoCheck === s || juegoCheck.includes(s)) return 'streaming';
+    }
+    for (const s of JUEGOS_STREAMING_PAGONORTE) {
+        if (productoCheck.includes(s)) return 'streaming';
+    }
+
+    if (productoCheck.includes('PERFIL') || productoCheck.includes('CUENTA')) {
+        for (const j of JUEGOS_CENTRAL_ONE) {
+            if (productoCheck.includes(j)) return 'juego';
+        }
+        return 'streaming';
+    }
+
     return 'juego';
 }
 function esProductoStreaming(paquete) { return detectarTipoProducto(null, null, paquete) === 'streaming'; }
@@ -320,9 +344,9 @@ function obtenerTipoPagoNorte(juegoOverride, productoOverride, paqueteOverride) 
 }
 function generarReferenciaInterna(productoCodigo) { const ts = Date.now(); const rand = Math.random().toString(36).substring(2, 6).toUpperCase(); const partes = String(productoCodigo || 'GEN').toUpperCase().split('_'); return `RG-${partes.join('-')}-${ts}-${rand}`; }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🎁 APLICAR CUPÓN
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 function aplicarCupon() {
     const input = document.getElementById('cuponInput'); const btn = document.getElementById('cuponBtn'); const msg = document.getElementById('cuponMsg'); const box = document.getElementById('cuponBox');
     const codigo = input.value.trim().toUpperCase();
@@ -348,15 +372,15 @@ function aplicarCupon() {
 }
 document.getElementById('cuponInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') { e.preventDefault(); aplicarCupon(); } });
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🎯 PASO INICIAL
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 function mostrarPasoInicial() { if (metodoPago === 'BINANCE') { mostrarPaso('pasoBinanceDeshabilitado'); } else { mostrarPaso('pasoDatos'); } }
 function cambiarAPagoMovil() { metodoPago = 'PAGO MOVIL'; localStorage.setItem('metodo_pago', 'PAGO MOVIL'); mostrarPaso('pasoDatos'); }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 📋 COPIAR
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 function copiarTexto(texto, boton) {
     navigator.clipboard.writeText(texto).then(() => { boton.classList.add('copiado'); setTimeout(() => boton.classList.remove('copiado'), 2000); }).catch(() => { mostrarMensaje('Copiar', 'Copia manualmente: ' + texto, 'info'); });
 }
@@ -365,9 +389,9 @@ function copiarTodosLosDatos(boton) {
     navigator.clipboard.writeText(datos).then(() => { const originalText = boton.innerHTML; boton.innerHTML = `✓ Datos copiados`; setTimeout(() => { boton.innerHTML = originalText; }, 2500); }).catch(() => { mostrarMensaje('Copiar', 'Copia manualmente:\n\n' + datos, 'info'); });
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 📢 TELEGRAM
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 function enviarTelegram(mensaje) {
     fetch('/api/notificar-telegram', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje }) })
     .then(r => r.json()).then(data => { if (!data.ok) console.warn('⚠️ Telegram no enviado:', data); }).catch(err => console.log("Error Telegram:", err));
@@ -386,9 +410,9 @@ function notificarAdmin(tipo, datos = {}) {
     enviarTelegram(mensaje);
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 📱 ENVÍO DE WHATSAPP DESDE LA PASARELA
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 function esPedidoStreamingPasarela(pedido) {
     const juegoP = String(pedido.juego || '').toUpperCase();
     const paqueteP = String(pedido.paquete || '').toLowerCase();
@@ -493,9 +517,9 @@ async function enviarWhatsAppDesdePasarela(pedido, pedidoKey) {
     }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🚨 GUARDAR REFERENCIA FALSA
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function guardarReferenciaFalsa(referencia, motivo) {
     try {
         const nueva = refReferenciasFalsas.push();
@@ -503,17 +527,17 @@ async function guardarReferenciaFalsa(referencia, motivo) {
     } catch (e) { console.error('Error guardando ref falsa:', e); }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🔒 FIREBASE - REFERENCIAS Y CUPONES
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function verificarReferenciaEnFirebase(ref) { try { const snap = await refReferencias.child(ref).once('value'); return snap.exists(); } catch (e) { return false; } }
 async function marcarReferenciaComoUsada(ref) { try { await refReferencias.child(ref).set({ fecha_uso: new Date().toISOString(), juego, id_jugador: idJugador, producto, monto_usd: precioUsdFinal, monto_bs: precioBsFinal, paquete: paqueteCod, metodo_pago: metodoPago, cupon: cuponAplicado || null, descuento: descuentoAplicado || 0, whatsapp_cliente: whatsappCliente || null }); return true; } catch (e) { return false; } }
 async function verificarCuponUsado(codigo) { try { const snap = await refCupones.child(codigo).once('value'); return snap.exists(); } catch (e) { return false; } }
 async function marcarCuponComoUsado(codigo) { try { await refCupones.child(codigo).set({ fecha_uso: new Date().toISOString(), id_jugador: idJugador, producto: producto, descuento: descuentoAplicado }); return true; } catch (e) { return false; } }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🆕 REFERENCIAS MANUALES
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function verificarReferenciaManual(codigo) {
     try {
         const snap = await refManuales.child(codigo).once('value');
@@ -537,9 +561,9 @@ async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🎲 CÓDIGOS TEST (JUEGOS) Y RG (STREAMING)
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function verificarCodigoTEST(codigo) {
     try {
         const snap = await refCodigosTEST.child(codigo).once('value');
@@ -581,9 +605,9 @@ async function marcarCodigoRGComoUsado(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🔢 GENERAR NÚMERO DE PEDIDO
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function generarNumeroPedido() {
     try {
         const contadorRef = db.ref('configuracion/contador_pedidos');
@@ -593,9 +617,9 @@ async function generarNumeroPedido() {
     } catch (error) { return Date.now().toString().slice(-4); }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 💾 GUARDAR PEDIDO EN FIREBASE (CON WHATSAPP AUTOMÁTICO)
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos, extras = {}) {
     const MAX_INTENTOS = 3;
     let ultimoError = null;
@@ -619,7 +643,8 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
                 fecha: new Date().toISOString(), fecha_legible: new Date().toLocaleString('es-VE'),
                 metodo: metodoPago, referencia_pago: referencia, whatsapp_cliente: whatsappCliente || null,
                 pin: codigos && codigos.length > 0 ? codigos[0] : null, codigos: codigos || [],
-                tipo_producto: detectarTipoProducto(), es_manual: referencia.startsWith('MANUAL-') || false,
+                tipo_producto: extras.tipo_producto || detectarTipoProducto(),
+                es_manual: referencia.startsWith('MANUAL-') || false,
                 es_test: referencia.startsWith('TEST-') || false, es_codigo_rg: referencia.startsWith('RG-') || false,
                 user_agent: navigator.userAgent.substring(0, 200), origen: 'pasarela'
             };
@@ -637,7 +662,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             await nuevoPedido.set(pedidoData);
             console.log('✅ PEDIDO GUARDADO:', nuevoPedido.key, numeroMostrar);
 
-            // 👤 Actualizar usuario si está logueado
             if (user && user.uid) {
                 try {
                     const userRef = db.ref('usuarios/' + user.uid);
@@ -654,7 +678,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
                 } catch (errUser) { console.warn('⚠️ No se pudo actualizar usuario:', errUser.message); }
             }
 
-            // 📱 ENVIAR WHATSAPP AL CLIENTE AUTOMÁTICAMENTE
             if (whatsappCliente && whatsappCliente.length >= 8) {
                 try {
                     const pedidoCompleto = { ...pedidoData, datos_streaming: extras.datos_streaming || null, pin: codigos && codigos.length > 0 ? codigos[0] : null, codigos: codigos || [] };
@@ -676,9 +699,9 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
     return { id: null, numero: null, numeroMostrar: '#----', exito: false, error: ultimoError };
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // ⚡ VERIFICAR PAGO EN PÁBILO
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function verificarPagoPabilo(referencia) {
     let montoPago = String(precioBsFinal).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(precioBsFinal);
@@ -695,9 +718,9 @@ async function verificarPagoPabilo(referencia) {
     } catch(error) { return false; }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🎮 CENTRAL ONE (JUEGOS)
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugadorOverride) {
     const juegoEnviar = (juegoOverride || juego).toUpperCase();
     const paqueteEnviar = paqueteOverride || paqueteCod;
@@ -717,9 +740,9 @@ async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugador
     }
 }
 
-// ============================================
+// ═══════════════════════════════════════════════════════════
 // 🎬 PAGONORTE - STREAMING
-// ============================================
+// ═══════════════════════════════════════════════════════════
 async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoRGInfo = null) {
     try {
         const juegoFinal = codigoRGInfo?.juego || juego;
@@ -755,9 +778,9 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
     }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🔥 FLUJO PRINCIPAL
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 function mostrarPaso(idPaso) { document.querySelectorAll('.paso-box').forEach(p => p.classList.remove('activo')); document.getElementById(idPaso).classList.add('activo'); }
 
 async function ejecutarRecarga(datosProducto = null, esStreamingForzado = null) {
@@ -765,8 +788,38 @@ async function ejecutarRecarga(datosProducto = null, esStreamingForzado = null) 
     const productoUsar = datosProducto?.producto || producto;
     const paqueteUsar = datosProducto?.paquete || paqueteCod;
     const idUsar = datosProducto?.id_jugador || idJugador;
-    const tipo = esStreamingForzado !== null ? (esStreamingForzado ? 'streaming' : 'juego') : detectarTipoProducto(juegoUsar, productoUsar, paqueteUsar);
-    console.log(`🎯 Tipo: ${tipo.toUpperCase()} | Juego: ${juegoUsar} | Paquete: ${paqueteUsar}`);
+
+    // 🔥 LEER tipo y tipo_producto del código
+    const tipoProductoGuardado = String(datosProducto?.tipo_producto || '').toLowerCase().trim();
+    const tipoGuardado = String(datosProducto?.tipo || '').toLowerCase().trim();
+
+    let tipo = 'juego';
+
+    if (tipoGuardado === 'central_one') {
+        tipo = 'juego';
+    } else if (tipoGuardado === 'pagonorte') {
+        tipo = 'streaming';
+    } else if (tipoProductoGuardado === 'streaming') {
+        tipo = 'streaming';
+    } else if (tipoProductoGuardado === 'juego' || tipoProductoGuardado === 'giftcard') {
+        tipo = 'juego';
+    } else if (esStreamingForzado !== null) {
+        tipo = esStreamingForzado ? 'streaming' : 'juego';
+    } else {
+        tipo = detectarTipoProducto(juegoUsar, productoUsar, paqueteUsar);
+    }
+
+    console.log('═══════════════════════════════════════════');
+    console.log('🎯 EJECUTANDO RECARGA');
+    console.log('   Juego:', juegoUsar);
+    console.log('   Producto:', productoUsar);
+    console.log('   Paquete:', paqueteUsar);
+    console.log('   tipo (guardado):', tipoGuardado || '(no)');
+    console.log('   tipo_producto:', tipoProductoGuardado || '(no)');
+    console.log('   ➜ DECISIÓN:', tipo.toUpperCase());
+    console.log('   ➜ Va a:', tipo === 'streaming' ? '🎬 PagoNorte' : '🎮 Central One');
+    console.log('═══════════════════════════════════════════');
+
     if (tipo === 'streaming') {
         const referenciaInterna = generarReferenciaInterna(paqueteUsar);
         const resultado = await enviarRecargaPagoNorte(paqueteUsar, referenciaInterna, datosProducto);
@@ -812,9 +865,17 @@ async function iniciarVerificacion() {
             mostrarPaso('pasoPagoConfirmado');
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
-            const resultadoRecarga = await ejecutarRecarga({ juego: resultadoTEST.data.juego, producto: resultadoTEST.data.producto, paquete: resultadoTEST.data.paquete, id_jugador: resultadoTEST.data.id_jugador || idJugador }, false);
+            // 🚀 EJECUTAR RECARGA (Central One) — pasando tipo y tipo_producto
+            const resultadoRecarga = await ejecutarRecarga({
+                juego: resultadoTEST.data.juego,
+                producto: resultadoTEST.data.producto,
+                paquete: resultadoTEST.data.paquete,
+                id_jugador: resultadoTEST.data.id_jugador || idJugador,
+                tipo: resultadoTEST.data.tipo,
+                tipo_producto: resultadoTEST.data.tipo_producto
+            }, false);
             await new Promise(r => setTimeout(r, 1000));
-            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (Código TEST)', resultadoRecarga.codigos || [], { es_streaming: false, codigo_test: referencia, monto_test_usd: resultadoTEST.data.monto_usd, monto_test_bs: resultadoTEST.data.monto_bs });
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (Código TEST)', resultadoRecarga.codigos || [], { es_streaming: false, tipo_producto: resultadoTEST.data.tipo_producto, codigo_test: referencia, monto_test_usd: resultadoTEST.data.monto_usd, monto_test_bs: resultadoTEST.data.monto_bs });
             const numeroPedido = infoPedido.numeroMostrar;
             await marcarCodigoTESTComoUsado(referencia, numeroPedido);
             if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, false, referencia, numeroPedido, resultadoRecarga.referencia_interna);
@@ -839,9 +900,17 @@ async function iniciarVerificacion() {
             mostrarPaso('pasoPagoConfirmado');
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
-            const resultadoRecarga = await ejecutarRecarga({ juego: resultadoRG.data.juego, producto: resultadoRG.data.producto, paquete: resultadoRG.data.paquete, id_jugador: resultadoRG.data.id_jugador || idJugador, codigo_aprobacion_pagonorte: resultadoRG.data.codigo_aprobacion_pagonorte }, true);
+            const resultadoRecarga = await ejecutarRecarga({
+                juego: resultadoRG.data.juego,
+                producto: resultadoRG.data.producto,
+                paquete: resultadoRG.data.paquete,
+                id_jugador: resultadoRG.data.id_jugador || idJugador,
+                tipo: resultadoRG.data.tipo,
+                tipo_producto: resultadoRG.data.tipo_producto,
+                codigo_aprobacion_pagonorte: resultadoRG.data.codigo_aprobacion_pagonorte
+            }, true);
             await new Promise(r => setTimeout(r, 1000));
-            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'PagoNorte (Código RG)', resultadoRecarga.codigos || [], { es_streaming: true, codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null, datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna || null, codigo_rg: referencia, monto_rg_usd: resultadoRG.data.monto_usd, monto_rg_bs: resultadoRG.data.monto_bs });
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'PagoNorte (Código RG)', resultadoRecarga.codigos || [], { es_streaming: true, tipo_producto: resultadoRG.data.tipo_producto, codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null, datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna || null, codigo_rg: referencia, monto_rg_usd: resultadoRG.data.monto_usd, monto_rg_bs: resultadoRG.data.monto_bs });
             const numeroPedido = infoPedido.numeroMostrar;
             await marcarCodigoRGComoUsado(referencia, numeroPedido);
             if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, true, referencia, numeroPedido, resultadoRecarga.referencia_interna);
@@ -866,9 +935,16 @@ async function iniciarVerificacion() {
             mostrarPaso('pasoPagoConfirmado');
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
-            const resultadoRecarga = await ejecutarRecarga();
+            const resultadoRecarga = await ejecutarRecarga({
+                tipo: resultadoManual.data.tipo,
+                tipo_producto: resultadoManual.data.tipo_producto,
+                juego: resultadoManual.data.juego,
+                producto: resultadoManual.data.producto,
+                paquete: resultadoManual.data.paquete,
+                id_jugador: resultadoManual.data.id_jugador || idJugador
+            });
             await new Promise(r => setTimeout(r, 1000));
-            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', resultadoRecarga.es_streaming ? 'PagoNorte' : 'Central One', resultadoRecarga.codigos || [], { es_streaming: resultadoRecarga.es_streaming, codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null, datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna || null });
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', resultadoRecarga.es_streaming ? 'PagoNorte' : 'Central One', resultadoRecarga.codigos || [], { es_streaming: resultadoRecarga.es_streaming, tipo_producto: resultadoManual.data.tipo_producto, codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null, datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna || null });
             const numeroPedido = infoPedido.numeroMostrar;
             await marcarReferenciaManualComoUsada(referencia, numeroPedido);
             if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, resultadoRecarga.es_streaming, referencia, numeroPedido, resultadoRecarga.referencia_interna);
@@ -909,32 +985,9 @@ async function iniciarVerificacion() {
     }
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🎨 RESULTADOS
-// ==============================================
-function obtenerNombreJuegoBonito(j) {
-    j = (j || juego || '').toUpperCase();
-    if (j.includes('ROBLOX')) return 'Roblox';
-    if (j.includes('PLAYSTATION') || j.includes('PSN')) return 'PlayStation';
-    if (j.includes('XBOX')) return 'Xbox';
-    if (j.includes('NINTENDO')) return 'Nintendo';
-    if (j.includes('GOOGLE PLAY') || j.includes('GPLAY')) return 'Google Play';
-    if (j.includes('NETFLIX')) return 'Netflix';
-    if (j.includes('DISNEY')) return 'Disney+';
-    if (j.includes('HBO')) return 'HBO Max';
-    if (j.includes('FREE FIRE') || j === 'FF') return 'Free Fire';
-    return juego || 'Recarga';
-}
-function obtenerLinkCanje(j) {
-    j = (j || juego || '').toUpperCase();
-    if (j.includes('ROBLOX')) return 'https://www.roblox.com/es/redeem';
-    if (j.includes('PLAYSTATION') || j.includes('PSN')) return 'https://store.playstation.com/redeem';
-    if (j.includes('XBOX')) return 'https://redeem.microsoft.com';
-    if (j.includes('NINTENDO')) return 'https://ec.nintendo.com/redeem';
-    if (j.includes('GOOGLE PLAY') || j.includes('GPLAY')) return 'https://play.google.com/redeem';
-    return 'https://www.roblox.com/es/redeem';
-}
-
+// ═══════════════════════════════════════════════════════════
 function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
     document.getElementById('resPedido').textContent = numeroPedido;
     document.getElementById('resProducto').textContent = producto;
@@ -1003,9 +1056,9 @@ function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) 
     enviarTelegram(msgAdmin);
 }
 
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 // 🚀 INICIALIZAR
-// ==============================================
+// ═══════════════════════════════════════════════════════════
 mostrarPasoInicial();
 console.log('═══════════════════════════════════════════');
 console.log('🚀 PASARELA RECARGASGAMES CARGADA');
