@@ -52,13 +52,13 @@
             position: relative;
         }
 
-        /* 🆕 Mensajes del usuario con hora + tilde */
+        /* Mensajes del usuario con hora + tilde */
         .user {
             align-self: flex-end;
             background: #10a37f;
             color: #fff;
             border-bottom-right-radius: 4px;
-            padding-bottom: 20px; /* espacio para hora y tilde */
+            padding-bottom: 20px;
         }
         .user .meta {
             position: absolute;
@@ -79,13 +79,32 @@
             color: rgba(255, 255, 255, 0.75);
             transition: color 0.3s;
         }
-        /* ✓ Enviado */
         .user .meta .tilde.enviado {
             color: rgba(255, 255, 255, 0.75);
         }
-        /* ✓✓ Visto */
         .user .meta .tilde.visto {
             color: #7dd3fc;
+        }
+
+        /* Mensajes del admin (respuesta) */
+        .admin {
+            align-self: flex-start;
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: #e2e8f0;
+            border-bottom-left-radius: 4px;
+            padding-bottom: 20px;
+        }
+        .admin .meta-admin {
+            position: absolute;
+            left: 10px;
+            bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: rgba(245, 215, 110, 0.85);
+            font-weight: 700;
+            letter-spacing: 0.3px;
         }
 
         /* Mensajes del bot (bienvenida, sistema) */
@@ -124,6 +143,14 @@
             cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .input-area button:disabled { background: #475569; cursor: not-allowed; }
+
+        /* Cargando */
+        .cargando {
+            text-align: center;
+            padding: 12px;
+            color: #64748b;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -152,7 +179,7 @@
 
 <script>
     // ═══════════════════════════════════════════════
-    // FIREBASE
+    // 🔥 FIREBASE - MISMA BASE DE DATOS
     // ═══════════════════════════════════════════════
     const firebaseConfig = {
         apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -177,16 +204,193 @@
     let usuarioActual = null;
     let nombreUsuario = 'Cliente';
     let emailUsuario = '';
+    let conversacionKey = null;       // 🔑 clave de la conversación activa
+    let mensajesUnsubscribe = null;   // 🔌 listener de mensajes en tiempo real
 
+    // ═══════════════════════════════════════════════
+    // 🔐 IDENTIFICAR AL USUARIO (anónimo o logueado)
+    // ═══════════════════════════════════════════════
+    function obtenerIdentificadorUsuario() {
+        // 1️⃣ Si está logueado → usar su UID
+        if (usuarioActual) return usuarioActual;
+
+        // 2️⃣ Si no, usar whatsapp guardado en localStorage
+        const whatsapp = (
+            localStorage.getItem('whatsapp') ||
+            localStorage.getItem('whatsapp_comprador') ||
+            localStorage.getItem('telefono_cliente') ||
+            ''
+        ).trim();
+        if (whatsapp && whatsapp.length >= 8) {
+            return 'wa_' + whatsapp.replace(/\D/g, '');
+        }
+
+        // 3️⃣ Último recurso: usar el ID del jugador
+        const idJugador = localStorage.getItem('id_jugador') || localStorage.getItem('correo') || '';
+        if (idJugador && idJugador.length >= 4) {
+            return 'jug_' + String(idJugador).replace(/\W/g, '').substring(0, 20);
+        }
+
+        // 4️⃣ Fallback: sessionStorage (se pierde al cerrar navegador)
+        let tempId = sessionStorage.getItem('temp_chat_id');
+        if (!tempId) {
+            tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+            sessionStorage.setItem('temp_chat_id', tempId);
+        }
+        return tempId;
+    }
+
+    function obtenerNombreMostrar() {
+        if (usuarioActual && (nombreUsuario !== 'Cliente')) return nombreUsuario;
+
+        const nombre = localStorage.getItem('nombre_jugador') || localStorage.getItem('nombre') || '';
+        if (nombre && nombre !== 'Sin nombre') return nombre;
+
+        const whatsapp = (
+            localStorage.getItem('whatsapp') ||
+            localStorage.getItem('whatsapp_comprador') ||
+            ''
+        ).trim();
+        if (whatsapp) return 'Cliente ' + whatsapp.slice(-4);
+
+        return 'Cliente';
+    }
+
+    // ═══════════════════════════════════════════════
+    // 🚀 INICIAR CONVERSACIÓN
+    // ═══════════════════════════════════════════════
+    async function iniciarConversacion() {
+        const uid = obtenerIdentificadorUsuario();
+        const nombre = obtenerNombreMostrar();
+
+        // 🔑 La conversación se guarda en "conversaciones/<uid>"
+        conversacionKey = uid;
+
+        try {
+            // Verificar si ya existe la conversación
+            const snap = await db.ref('conversaciones/' + conversacionKey).once('value');
+
+            if (!snap.exists()) {
+                // Crear conversación nueva
+                await db.ref('conversaciones/' + conversacionKey).set({
+                    nombre: nombre,
+                    email: emailUsuario || '',
+                    uid: uid,
+                    whatsapp_cliente: (
+                        localStorage.getItem('whatsapp') ||
+                        localStorage.getItem('whatsapp_comprador') ||
+                        ''
+                    ).trim() || '',
+                    id_jugador: localStorage.getItem('id_jugador') || '',
+                    fecha_inicio: new Date().toISOString(),
+                    fecha_inicio_legible: new Date().toLocaleString('es-VE'),
+                    ultima_actividad: new Date().toISOString(),
+                    ultimo_mensaje: '',
+                    tiene_nuevos: false,
+                    es_anonimo: !usuarioActual,
+                    origen: 'chat_soporte'
+                });
+            }
+
+            // 🔌 Escuchar mensajes en tiempo real
+            escucharMensajes();
+
+        } catch (error) {
+            console.error('❌ Error iniciando conversación:', error);
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    // 🔌 ESCUCHAR MENSAJES EN TIEMPO REAL
+    // ═══════════════════════════════════════════════
+    function escucharMensajes() {
+        if (mensajesUnsubscribe) mensajesUnsubscribe.off();
+
+        // Limpiar el chat (excepto el mensaje de bienvenida)
+        chatBox.innerHTML = `
+            <div class="message assistant">
+                ¡Hola! 👋 Soy el equipo de soporte de RecargasGames.
+                Escríbenos tu duda, problema o pedido y te responderemos lo antes posible.
+            </div>
+        `;
+
+        mensajesUnsubscribe = db.ref('conversaciones/' + conversacionKey + '/mensajes')
+            .orderByChild('timestamp')
+            .on('value', (snap) => {
+                const datos = snap.val() || {};
+                const mensajes = Object.entries(datos)
+                    .map(([k, m]) => ({ key: k, ...m }))
+                    .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+                // Redibujar todos los mensajes
+                chatBox.innerHTML = `
+                    <div class="message assistant">
+                        ¡Hola! 👋 Soy el equipo de soporte de RecargasGames.
+                        Escríbenos tu duda, problema o pedido y te responderemos lo antes posible.
+                    </div>
+                `;
+
+                mensajes.forEach(m => {
+                    if (m.rol === 'usuario') {
+                        agregarMensajeUsuario(m.texto, m.key, m.hora || '', m.estado || 'enviado');
+                    } else if (m.rol === 'admin') {
+                        agregarMensajeAdmin(m.texto, m.hora || '');
+                    }
+                });
+
+                scrollAbajo();
+
+                // Marcar como leídos los mensajes del admin
+                marcarComoLeidos();
+            });
+    }
+
+    // ═══════════════════════════════════════════════
+    // ✅ MARCAR MENSAJES DEL ADMIN COMO LEÍDOS
+    // ═══════════════════════════════════════════════
+    async function marcarComoLeidos() {
+        if (!conversacionKey) return;
+        try {
+            const snap = await db.ref('conversaciones/' + conversacionKey + '/mensajes').once('value');
+            const mensajes = snap.val() || {};
+            const updates = {};
+            Object.entries(mensajes).forEach(([k, m]) => {
+                if (m.rol === 'admin' && m.estado !== 'leido') {
+                    updates[`conversaciones/${conversacionKey}/mensajes/${k}/estado`] = 'leido';
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                await db.ref().update(updates);
+            }
+        } catch (e) {
+            console.warn('Error marcando como leídos:', e);
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    // 🔔 AUTH STATE
+    // ═══════════════════════════════════════════════
     auth.onAuthStateChanged((user) => {
         if (user) {
             usuarioActual = user.uid;
             nombreUsuario = user.displayName || user.email || 'Cliente';
             emailUsuario = user.email || '';
+        } else {
+            usuarioActual = null;
+            nombreUsuario = 'Cliente';
+            emailUsuario = '';
         }
+
+        // Iniciar conversación (o reiniciar si cambia el usuario)
+        iniciarConversacion();
     });
 
-    function scrollAbajo() { chatBox.scrollTop = chatBox.scrollHeight; }
+    // ═══════════════════════════════════════════════
+    // 🎨 UTILIDADES
+    // ═══════════════════════════════════════════════
+    function scrollAbajo() {
+        setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
+    }
 
     function horaActual() {
         const d = new Date();
@@ -195,84 +399,106 @@
         return `${hh}:${mm}`;
     }
 
-    // Agrega un mensaje del bot
-    function agregarMensaje(rol, contenido) {
-        const div = document.createElement('div');
-        div.className = `message ${rol}`;
-        div.textContent = contenido;
-        chatBox.appendChild(div);
-        scrollAbajo();
-    }
-
     // 🆕 Agrega un mensaje del usuario con hora + tilde
-    // keyMensaje: la clave de Firebase (para poder actualizar el tilde cuando se lea)
-    function agregarMensajeUsuario(texto, keyMensaje) {
+    function agregarMensajeUsuario(texto, keyMensaje, horaMsg, estado) {
         const div = document.createElement('div');
         div.className = 'message user';
-        div.dataset.key = keyMensaje || '';
+
+        const spanTexto = document.createElement('span');
+        spanTexto.textContent = texto;
+        div.appendChild(spanTexto);
+
+        const estadoFinal = estado === 'leido' ? 'visto' : 'enviado';
+        const tildeChar = estadoFinal === 'visto' ? '✓✓' : '✓';
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML = `
+            <span class="hora">${horaMsg || horaActual()}</span>
+            <span class="tilde ${estadoFinal}" id="tilde-${keyMensaje}">${tildeChar}</span>
+        `;
+        div.appendChild(meta);
+
+        chatBox.appendChild(div);
+    }
+
+    // 🆕 Agrega un mensaje del admin
+    function agregarMensajeAdmin(texto, horaMsg) {
+        const div = document.createElement('div');
+        div.className = 'message admin';
 
         const spanTexto = document.createElement('span');
         spanTexto.textContent = texto;
         div.appendChild(spanTexto);
 
         const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.innerHTML = `
-            <span class="hora">${horaActual()}</span>
-            <span class="tilde enviado" id="tilde-${keyMensaje}">✓</span>
-        `;
+        meta.className = 'meta-admin';
+        meta.innerHTML = `SOPORTE · ${horaMsg || horaActual()}`;
         div.appendChild(meta);
 
         chatBox.appendChild(div);
-        scrollAbajo();
     }
 
     // ═══════════════════════════════════════════════
-    // ENVIAR MENSAJE
+    // 📤 ENVIAR MENSAJE
     // ═══════════════════════════════════════════════
     async function enviarMensaje() {
         const texto = inputMensaje.value.trim();
-        if (!texto) return;
+        if (!texto || !conversacionKey) return;
 
         inputMensaje.value = '';
         btnEnviar.disabled = true;
         inputMensaje.disabled = true;
 
         try {
-            const nuevoMensaje = {
-                mensaje: texto,
-                uid: usuarioActual || 'anonimo',
-                nombre: nombreUsuario,
-                email: emailUsuario,
-                fecha: new Date().toISOString(),
-                fecha_legible: new Date().toLocaleString('es-VE'),
-                estado: 'nuevo',
-                origen: 'chatbot'
+            const hora = horaActual();
+            const mensaje = {
+                rol: 'usuario',
+                texto: texto,
+                timestamp: Date.now(),
+                hora: hora,
+                estado: 'enviado',
+                uid: usuarioActual || conversacionKey
             };
 
-            // Guardar en Firebase
-            const ref = await db.ref('mensajes_soporte').push(nuevoMensaje);
+            // 1️⃣ Guardar mensaje en la conversación
+            const ref = await db.ref('conversaciones/' + conversacionKey + '/mensajes').push(mensaje);
             const key = ref.key;
 
-            // Mostrar en el chat con la hora y el tilde
-            agregarMensajeUsuario(texto, key);
-
-            // 🆕 Escuchar cuando el admin marque como leído → cambiar a ✓✓ azul
-            db.ref('mensajes_soporte/' + key + '/estado').on('value', (snap) => {
-                const estado = snap.val();
-                const tilde = document.getElementById(`tilde-${key}`);
-                if (!tilde) return;
-                if (estado === 'leido') {
-                    tilde.textContent = '✓✓';
-                    tilde.classList.remove('enviado');
-                    tilde.classList.add('visto');
-                }
+            // 2️⃣ Actualizar metadata de la conversación
+            await db.ref('conversaciones/' + conversacionKey).update({
+                nombre: obtenerNombreMostrar(),
+                ultimo_mensaje: '💬 ' + texto.substring(0, 45),
+                ultima_actividad: new Date().toISOString(),
+                tiene_nuevos: true,
+                whatsapp_cliente: (
+                    localStorage.getItem('whatsapp') ||
+                    localStorage.getItem('whatsapp_comprador') ||
+                    ''
+                ).trim() || '',
+                id_jugador: localStorage.getItem('id_jugador') || ''
             });
 
+            // 3️⃣ Escuchar el estado del mensaje (para el ✓✓ azul cuando el admin lo lea)
+            db.ref('conversaciones/' + conversacionKey + '/mensajes/' + key + '/estado')
+                .on('value', (snap) => {
+                    const estado = snap.val();
+                    const tilde = document.getElementById(`tilde-${key}`);
+                    if (!tilde) return;
+                    if (estado === 'leido') {
+                        tilde.textContent = '✓✓';
+                        tilde.classList.remove('enviado');
+                        tilde.classList.add('visto');
+                    }
+                });
+
         } catch (error) {
-            console.error('Error guardando en Firebase:', error);
-            // En caso de error, igual mostramos el mensaje local con tilde gris
-            agregarMensajeUsuario(texto, 'error-' + Date.now());
+            console.error('❌ Error guardando mensaje:', error);
+
+            // Mostrar mensaje local aunque falle
+            const key = 'error-' + Date.now();
+            agregarMensajeUsuario(texto, key, horaActual(), 'enviado');
+            scrollAbajo();
         } finally {
             btnEnviar.disabled = false;
             inputMensaje.disabled = false;
@@ -280,10 +506,26 @@
         }
     }
 
+    // ═══════════════════════════════════════════════
+    // 🎯 EVENTOS
+    // ═══════════════════════════════════════════════
     btnEnviar.addEventListener('click', enviarMensaje);
     inputMensaje.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') enviarMensaje();
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            enviarMensaje();
+        }
     });
+
+    // ═══════════════════════════════════════════════
+    // 📊 LOG INICIAL
+    // ═══════════════════════════════════════════════
+    console.log('═══════════════════════════════════════════');
+    console.log('💬 CHAT SOPORTE RECARGASGAMES');
+    console.log('═══════════════════════════════════════════');
+    console.log('🔥 Firebase:', firebaseConfig.projectId);
+    console.log('📂 Nodo:', 'conversaciones/');
+    console.log('═══════════════════════════════════════════');
 </script>
 
 </body>
