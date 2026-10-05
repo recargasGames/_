@@ -1,10 +1,6 @@
 // api/asignar-perfil.js
-// Asigna un perfil libre de las cuentas propias del admin
-// Usa require (CommonJS) por el "type": "commonjs" en api/package.json
+import admin from 'firebase-admin';
 
-const admin = require('firebase-admin');
-
-// Inicializar Firebase Admin (solo una vez)
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert({
@@ -18,7 +14,7 @@ if (!admin.apps.length) {
 
 const db = admin.database();
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -35,8 +31,6 @@ module.exports = async function handler(req, res) {
 
         const servicioKey = String(servicio).toLowerCase();
         const refCuentas = db.ref(`cuentas_streaming/${servicioKey}`);
-
-        // 1. Leer todas las cuentas del servicio
         const snap = await refCuentas.once('value');
         const cuentas = snap.val() || {};
 
@@ -48,17 +42,14 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // 2. Buscar la primera cuenta activa con perfil libre
         let cuentaElegida = null;
         let perfilElegido = null;
 
         for (const cuentaId of Object.keys(cuentas)) {
             const cuenta = cuentas[cuentaId];
             if (cuenta.estado !== 'activa') continue;
-
             const perfiles = cuenta.perfiles || {};
             const perfilLibre = Object.values(perfiles).find(p => p.estado === 'libre');
-
             if (perfilLibre) {
                 cuentaElegida = { id: cuentaId, data: cuenta };
                 perfilElegido = perfilLibre;
@@ -74,7 +65,6 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // 3. Marcar el perfil como ocupado (transacción para evitar doble asignación)
         const perfilRef = refCuentas.child(cuentaElegida.id).child('perfiles').child(perfilElegido.numero);
         const pedidoId = pedido || `PED-${Date.now()}`;
 
@@ -97,7 +87,6 @@ module.exports = async function handler(req, res) {
             });
         }
 
-        // 4. Devolver los datos del perfil
         return res.status(200).json({
             ok: true,
             estado: 'Aprobado',
@@ -119,4 +108,4 @@ module.exports = async function handler(req, res) {
         console.error('❌ Error asignar-perfil:', error);
         return res.status(500).json({ ok: false, error: 'Error interno', detalle: error.message });
     }
-};
+}
