@@ -213,6 +213,15 @@ const MODO_RENOVACION = localStorage.getItem('modo_renovacion') === 'true';
 const CODIGO_RENOVACION = localStorage.getItem('codigo_aprobacion') || '';
 
 // ═══════════════════════════════════════════════════════════
+// 🕐 UTILIDAD: FECHA EN HORA DE CARACAS (UTC-4)
+// ═══════════════════════════════════════════════════════════
+function fechaCaracas() {
+    const ahora = new Date();
+    const caracas = new Date(ahora.getTime() - (4 * 60 * 60 * 1000));
+    return caracas.toISOString().split('T')[0];
+}
+
+// ═══════════════════════════════════════════════════════════
 // 🎨 SISTEMA DE MENSAJES
 // ═══════════════════════════════════════════════════════════
 const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ' };
@@ -248,7 +257,6 @@ const refCodigosTEST = db.ref("codigos_test");
 // ═══════════════════════════════════════════════════════════
 // 🔑 CONFIGURACIÓN API (SEGURA - URLS RELATIVAS)
 // ═══════════════════════════════════════════════════════════
-// 🔒 Las API keys están seguras en las variables de entorno de Vercel
 const URL_VERIFICAR_PAGO = '/api/verificar-pago';
 const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
 const URL_TELEGRAM = '/api/notificar-telegram';
@@ -289,7 +297,7 @@ if (nombreJugador && nombreJugador !== idJugador && nombreJugador !== 'Sin nombr
 } else { document.getElementById('filaNombre').style.display = 'none'; }
 
 // ═══════════════════════════════════════════════════════════
-// 🎯 DETECCIÓN DE TIPO DE PRODUCTO (MEJORADA)
+// 🎯 DETECCIÓN DE TIPO DE PRODUCTO
 // ═══════════════════════════════════════════════════════════
 function detectarTipoProducto(juegoOverride, productoOverride, paqueteOverride) {
     const juegoCheck = String(juegoOverride || juego || '').toUpperCase().trim();
@@ -306,27 +314,15 @@ function detectarTipoProducto(juegoOverride, productoOverride, paqueteOverride) 
         if (paqueteCheck.startsWith(prefijo + '_')) return 'streaming';
     }
 
-    for (const j of JUEGOS_CENTRAL_ONE) {
-        if (juegoCheck === j) return 'juego';
-    }
-    for (const j of JUEGOS_CENTRAL_ONE) {
-        if (juegoCheck.includes(j)) return 'juego';
-    }
-
-    for (const s of JUEGOS_STREAMING_PAGONORTE) {
-        if (juegoCheck === s || juegoCheck.includes(s)) return 'streaming';
-    }
-    for (const s of JUEGOS_STREAMING_PAGONORTE) {
-        if (productoCheck.includes(s)) return 'streaming';
-    }
+    for (const j of JUEGOS_CENTRAL_ONE) { if (juegoCheck === j) return 'juego'; }
+    for (const j of JUEGOS_CENTRAL_ONE) { if (juegoCheck.includes(j)) return 'juego'; }
+    for (const s of JUEGOS_STREAMING_PAGONORTE) { if (juegoCheck === s || juegoCheck.includes(s)) return 'streaming'; }
+    for (const s of JUEGOS_STREAMING_PAGONORTE) { if (productoCheck.includes(s)) return 'streaming'; }
 
     if (productoCheck.includes('PERFIL') || productoCheck.includes('CUENTA')) {
-        for (const j of JUEGOS_CENTRAL_ONE) {
-            if (productoCheck.includes(j)) return 'juego';
-        }
+        for (const j of JUEGOS_CENTRAL_ONE) { if (productoCheck.includes(j)) return 'juego'; }
         return 'streaming';
     }
-
     return 'juego';
 }
 function esProductoStreaming(paquete) { return detectarTipoProducto(null, null, paquete) === 'streaming'; }
@@ -620,7 +616,7 @@ async function generarNumeroPedido() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 💾 GUARDAR PEDIDO EN FIREBASE (CON WHATSAPP AUTOMÁTICO)
+// 💾 GUARDAR PEDIDO EN FIREBASE
 // ═══════════════════════════════════════════════════════════
 async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos, extras = {}) {
     const MAX_INTENTOS = 3;
@@ -660,7 +656,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             }
             if (extras.codigo_test) { pedidoData.codigo_test = extras.codigo_test; pedidoData.monto_test_usd = extras.monto_test_usd; pedidoData.monto_test_bs = extras.monto_test_bs; }
             if (extras.codigo_rg) { pedidoData.codigo_rg = extras.codigo_rg; pedidoData.monto_rg_usd = extras.monto_rg_usd; pedidoData.monto_rg_bs = extras.monto_rg_bs; }
-            console.log('💾 Datos a guardar:', pedidoData);
             await nuevoPedido.set(pedidoData);
             console.log('✅ PEDIDO GUARDADO:', nuevoPedido.key, numeroMostrar);
 
@@ -680,13 +675,17 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
                 } catch (errUser) { console.warn('⚠️ No se pudo actualizar usuario:', errUser.message); }
             }
 
-            if (whatsappCliente && whatsappCliente.length >= 8) {
+            // ✅ WhatsApp solo si el pedido quedó COMPLETADA (no en PENDIENTE)
+            const debeEnviarWhatsApp = (estado === "COMPLETADA") && whatsappCliente && whatsappCliente.length >= 8;
+            if (debeEnviarWhatsApp) {
                 try {
                     const pedidoCompleto = { ...pedidoData, datos_streaming: extras.datos_streaming || null, pin: codigos && codigos.length > 0 ? codigos[0] : null, codigos: codigos || [] };
                     enviarWhatsAppDesdePasarela(pedidoCompleto, nuevoPedido.key)
                         .then(r => { if (r.ok) console.log('✅ WhatsApp enviado al cliente'); else console.warn('⚠️ WhatsApp no enviado:', r.motivo); })
                         .catch(err => console.warn('Error WhatsApp:', err));
                 } catch (e) { console.warn('Error preparando WhatsApp:', e); }
+            } else if (whatsappCliente && whatsappCliente.length >= 8 && estado !== "COMPLETADA") {
+                console.log('ℹ️ WhatsApp NO enviado (pedido en estado:', estado, '— admin debe confirmarlo manualmente)');
             }
 
             return { id: nuevoPedido.key, numero: numeroPedido, numeroMostrar, exito: true };
@@ -702,15 +701,19 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
 }
 
 // ═══════════════════════════════════════════════════════════
-// ⚡ VERIFICAR PAGO EN PÁBILO (VÍA VERCEL — SIN KEYS EXPUESTAS)
+// ⚡ VERIFICAR PAGO EN PÁBILO (VÍA VERCEL)
+// ✅ CORREGIDO: monto con decimales, fecha Caracas, devuelve es_nuevo
 // ═══════════════════════════════════════════════════════════
 async function verificarPagoPabilo(referencia) {
-    let montoPago = String(precioBsFinal).replace(/[.,]/g, '');
-    montoPago = parseInt(montoPago) || Math.round(precioBsFinal);
-    const fecha = new Date().toISOString().split('T')[0];
+    // ✅ CORREGIDO: NO multiplicar por 100. Enviar monto decimal real.
+    const montoPago = Number(precioBsFinal) || 0;
+    const fecha = fechaCaracas();
 
     try {
         console.log('🔍 Verificando pago vía Vercel...');
+        console.log('   Referencia:', referencia);
+        console.log('   Monto:', montoPago);
+        console.log('   Fecha (Caracas):', fecha);
 
         const res = await fetch(URL_VERIFICAR_PAGO, {
             method: 'POST',
@@ -727,14 +730,19 @@ async function verificarPagoPabilo(referencia) {
 
         if (!data.ok) {
             console.warn('⚠️ Error verificando pago:', data.error);
-            return false;
+            return { confirmado: false, es_nuevo: null };
         }
 
-        return data.confirmado === true;
+        return {
+            confirmado: data.confirmado === true,
+            es_nuevo: data.es_nuevo,
+            pago: data.pago || null,
+            mensaje: data.mensaje || ''
+        };
 
     } catch (error) {
         console.error('❌ Error verificando pago:', error);
-        return false;
+        return { confirmado: false, es_nuevo: null };
     }
 }
 
@@ -814,27 +822,15 @@ async function ejecutarRecarga(datosProducto = null, esStreamingForzado = null) 
 
     let tipo = 'juego';
 
-    if (tipoGuardado === 'central_one') {
-        tipo = 'juego';
-    } else if (tipoGuardado === 'pagonorte') {
-        tipo = 'streaming';
-    } else if (tipoProductoGuardado === 'streaming') {
-        tipo = 'streaming';
-    } else if (tipoProductoGuardado === 'juego' || tipoProductoGuardado === 'giftcard') {
-        tipo = 'juego';
-    } else if (esStreamingForzado !== null) {
-        tipo = esStreamingForzado ? 'streaming' : 'juego';
-    } else {
-        tipo = detectarTipoProducto(juegoUsar, productoUsar, paqueteUsar);
-    }
+    if (tipoGuardado === 'central_one') tipo = 'juego';
+    else if (tipoGuardado === 'pagonorte') tipo = 'streaming';
+    else if (tipoProductoGuardado === 'streaming') tipo = 'streaming';
+    else if (tipoProductoGuardado === 'juego' || tipoProductoGuardado === 'giftcard') tipo = 'juego';
+    else if (esStreamingForzado !== null) tipo = esStreamingForzado ? 'streaming' : 'juego';
+    else tipo = detectarTipoProducto(juegoUsar, productoUsar, paqueteUsar);
 
     console.log('═══════════════════════════════════════════');
     console.log('🎯 EJECUTANDO RECARGA');
-    console.log('   Juego:', juegoUsar);
-    console.log('   Producto:', productoUsar);
-    console.log('   Paquete:', paqueteUsar);
-    console.log('   tipo (guardado):', tipoGuardado || '(no)');
-    console.log('   tipo_producto:', tipoProductoGuardado || '(no)');
     console.log('   ➜ DECISIÓN:', tipo.toUpperCase());
     console.log('   ➜ Va a:', tipo === 'streaming' ? '🎬 PagoNorte' : '🎮 Central One');
     console.log('═══════════════════════════════════════════');
@@ -885,12 +881,8 @@ async function iniciarVerificacion() {
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
             const resultadoRecarga = await ejecutarRecarga({
-                juego: resultadoTEST.data.juego,
-                producto: resultadoTEST.data.producto,
-                paquete: resultadoTEST.data.paquete,
-                id_jugador: resultadoTEST.data.id_jugador || idJugador,
-                tipo: resultadoTEST.data.tipo,
-                tipo_producto: resultadoTEST.data.tipo_producto
+                juego: resultadoTEST.data.juego, producto: resultadoTEST.data.producto, paquete: resultadoTEST.data.paquete,
+                id_jugador: resultadoTEST.data.id_jugador || idJugador, tipo: resultadoTEST.data.tipo, tipo_producto: resultadoTEST.data.tipo_producto
             }, false);
             await new Promise(r => setTimeout(r, 1000));
             const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (Código TEST)', resultadoRecarga.codigos || [], { es_streaming: false, tipo_producto: resultadoTEST.data.tipo_producto, codigo_test: referencia, monto_test_usd: resultadoTEST.data.monto_usd, monto_test_bs: resultadoTEST.data.monto_bs });
@@ -919,12 +911,8 @@ async function iniciarVerificacion() {
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
             const resultadoRecarga = await ejecutarRecarga({
-                juego: resultadoRG.data.juego,
-                producto: resultadoRG.data.producto,
-                paquete: resultadoRG.data.paquete,
-                id_jugador: resultadoRG.data.id_jugador || idJugador,
-                tipo: resultadoRG.data.tipo,
-                tipo_producto: resultadoRG.data.tipo_producto,
+                juego: resultadoRG.data.juego, producto: resultadoRG.data.producto, paquete: resultadoRG.data.paquete,
+                id_jugador: resultadoRG.data.id_jugador || idJugador, tipo: resultadoRG.data.tipo, tipo_producto: resultadoRG.data.tipo_producto,
                 codigo_aprobacion_pagonorte: resultadoRG.data.codigo_aprobacion_pagonorte
             }, true);
             await new Promise(r => setTimeout(r, 1000));
@@ -954,12 +942,9 @@ async function iniciarVerificacion() {
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
             const resultadoRecarga = await ejecutarRecarga({
-                tipo: resultadoManual.data.tipo,
-                tipo_producto: resultadoManual.data.tipo_producto,
-                juego: resultadoManual.data.juego,
-                producto: resultadoManual.data.producto,
-                paquete: resultadoManual.data.paquete,
-                id_jugador: resultadoManual.data.id_jugador || idJugador
+                tipo: resultadoManual.data.tipo, tipo_producto: resultadoManual.data.tipo_producto,
+                juego: resultadoManual.data.juego, producto: resultadoManual.data.producto,
+                paquete: resultadoManual.data.paquete, id_jugador: resultadoManual.data.id_jugador || idJugador
             });
             await new Promise(r => setTimeout(r, 1000));
             const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', resultadoRecarga.es_streaming ? 'PagoNorte' : 'Central One', resultadoRecarga.codigos || [], { es_streaming: resultadoRecarga.es_streaming, tipo_producto: resultadoManual.data.tipo_producto, codigo_aprobacion: resultadoRecarga.codigo_aprobacion || null, datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna || null });
@@ -972,15 +957,36 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // 💳 NORMAL
+        // 💳 NORMAL (Pago Móvil real)
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) { notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ YA USADA' }); await guardarReferenciaFalsa(referencia, 'Duplicada'); mostrarPaso('pasoReferenciaUsada'); btn.disabled = false; btn.innerHTML = '✅ Verificar Pago'; return; }
+        
         if (cuponAplicado) {
             const cuponYaUsado = await verificarCuponUsado(cuponAplicado);
             if (cuponYaUsado) { notificarAdmin('cupon_usado', { referencia }); mostrarMensaje('Cupón usado', 'Este cupón ya fue utilizado.', 'advertencia'); descuentoAplicado = 0; cuponAplicado = ""; precioUsdFinal = precioUsdOriginal; precioBsFinal = precioBsOriginal; mostrarPaso('pasoDatos'); btn.disabled = false; btn.innerHTML = '✅ Verificar Pago'; return; }
         }
-        const pagoConfirmado = await verificarPagoPabilo(referencia);
-        if (!pagoConfirmado) { notificarAdmin('falso', { referencia, mensaje_extra: '⚠️ NO ENCONTRADA' }); await guardarReferenciaFalsa(referencia, 'No en Pábilo'); document.getElementById('msgError').textContent = 'Verifica tu referencia.'; setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); btn.disabled = false; btn.innerHTML = '✅ Verificar Pago'; return; }
+
+        // ✅ CORREGIDO: verificarPagoPabilo ahora devuelve objeto, no boolean
+        const resultadoVerif = await verificarPagoPabilo(referencia);
+
+        if (!resultadoVerif.confirmado) {
+            notificarAdmin('falso', { referencia, mensaje_extra: '⚠️ NO ENCONTRADA' });
+            await guardarReferenciaFalsa(referencia, 'No en Pábilo');
+            document.getElementById('msgError').textContent = 'Verifica tu referencia.';
+            setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800);
+            btn.disabled = false; btn.innerHTML = '✅ Verificar Pago';
+            return;
+        }
+
+        // ✅ NUEVO: si Pábilo dice que NO es nuevo, bloquear duplicado
+        if (resultadoVerif.es_nuevo === false) {
+            notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ Ya usado según Pábilo (is_new: false)' });
+            await guardarReferenciaFalsa(referencia, 'Ya usada en Pábilo');
+            mostrarPaso('pasoReferenciaUsada');
+            btn.disabled = false; btn.innerHTML = '✅ Verificar Pago';
+            return;
+        }
+
         await marcarReferenciaComoUsada(referencia);
         if (cuponAplicado) await marcarCuponComoUsado(cuponAplicado);
         mostrarPaso('pasoPagoConfirmado');
@@ -1081,8 +1087,6 @@ mostrarPasoInicial();
 console.log('═══════════════════════════════════════════');
 console.log('🚀 PASARELA RECARGASGAMES CARGADA');
 console.log('═══════════════════════════════════════════');
-console.log('🌐 Dominio: recargasgames.shop');
-console.log('🔒 API Pábilo: protegida vía Vercel');
 console.log('🎮 Juego:', juego);
 console.log('📦 Producto:', producto);
 console.log('📦 Paquete:', paqueteCod);
@@ -1090,7 +1094,6 @@ console.log('💳 Método:', metodoPago);
 console.log('🏢 Proveedor:', proveedorGuardado || '(no especificado)');
 console.log('📱 WhatsApp:', whatsappCliente || '(no proporcionado)');
 console.log('🎯 TIPO:', detectarTipoProducto().toUpperCase());
-console.log('   → Irá a:', detectarTipoProducto() === 'streaming' ? 'PagoNorte 🎬' : 'Central One 🎮');
 console.log('🔄 Renovación:', MODO_RENOVACION ? 'SÍ' : 'NO');
 console.log('═══════════════════════════════════════════');
 
