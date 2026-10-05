@@ -246,12 +246,15 @@ const refCodigosRG = db.ref("codigos_rg");
 const refCodigosTEST = db.ref("codigos_test");
 
 // ═══════════════════════════════════════════════════════════
-// 🔑 CONFIGURACIÓN API
+// 🔑 CONFIGURACIÓN API (SEGURA - URLS RELATIVAS)
 // ═══════════════════════════════════════════════════════════
-const USER_BANK_ID = "6a93ac1b98055a34bd8b05f2";
-const API_KEY = "5349b9e7-1c73-406d-ac8c-ad4345241789";
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betasario`;
-const WHATSAPP_PASARELA_URL = 'https://recargasgames-shop.vercel.app/api/enviar-whatsapp-pasarela';
+// 🔒 Las API keys están seguras en las variables de entorno de Vercel
+const URL_VERIFICAR_PAGO = '/api/verificar-pago';
+const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
+const URL_TELEGRAM = '/api/notificar-telegram';
+const URL_CENTRAL_ONE = '/api/central-one';
+const URL_PAGONORTE = '/api/pagonorte';
+
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
 // ═══════════════════════════════════════════════════════════
@@ -303,7 +306,6 @@ function detectarTipoProducto(juegoOverride, productoOverride, paqueteOverride) 
         if (paqueteCheck.startsWith(prefijo + '_')) return 'streaming';
     }
 
-    // 🔥 PRIORIDAD: juegos primero (comparación exacta)
     for (const j of JUEGOS_CENTRAL_ONE) {
         if (juegoCheck === j) return 'juego';
     }
@@ -393,7 +395,7 @@ function copiarTodosLosDatos(boton) {
 // 📢 TELEGRAM
 // ═══════════════════════════════════════════════════════════
 function enviarTelegram(mensaje) {
-    fetch('/api/notificar-telegram', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje }) })
+    fetch(URL_TELEGRAM, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje }) })
     .then(r => r.json()).then(data => { if (!data.ok) console.warn('⚠️ Telegram no enviado:', data); }).catch(err => console.log("Error Telegram:", err));
 }
 function notificarAdmin(tipo, datos = {}) {
@@ -491,7 +493,7 @@ async function enviarWhatsAppDesdePasarela(pedido, pedidoKey) {
         const datos = pedido.datos_streaming || {};
         const datosCuenta = (datos.correo || datos.usuario) ? `Correo: ${datos.correo || datos.usuario}\nClave: ${datos.clave || datos.password || ''}` : '';
         console.log('📱 Enviando WhatsApp desde pasarela a:', '+' + tel);
-        const res = await fetch(WHATSAPP_PASARELA_URL, {
+        const res = await fetch(URL_WHATSAPP_PASARELA, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -700,22 +702,40 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
 }
 
 // ═══════════════════════════════════════════════════════════
-// ⚡ VERIFICAR PAGO EN PÁBILO
+// ⚡ VERIFICAR PAGO EN PÁBILO (VÍA VERCEL — SIN KEYS EXPUESTAS)
 // ═══════════════════════════════════════════════════════════
 async function verificarPagoPabilo(referencia) {
     let montoPago = String(precioBsFinal).replace(/[.,]/g, '');
     montoPago = parseInt(montoPago) || Math.round(precioBsFinal);
     const fecha = new Date().toISOString().split('T')[0];
+
     try {
-        const res = await fetch(API_PABILO_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` }, body: JSON.stringify({ bank_reference: referencia, amount: montoPago, movement_type: "GENERIC", fecha_pago: fecha }) });
-        const datos = await res.json();
-        if (res.ok && datos) {
-            const msg = (datos.message || datos.status || datos.estado || "").toLowerCase();
-            const dataStatus = (datos.data?.status || "").toLowerCase();
-            return msg.includes('confirmado') || msg.includes('aprobado') || msg.includes('pagado') || dataStatus === 'paid' || datos.success === true || datos.paid === true;
+        console.log('🔍 Verificando pago vía Vercel...');
+
+        const res = await fetch(URL_VERIFICAR_PAGO, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                referencia: referencia,
+                monto: montoPago,
+                fecha: fecha
+            })
+        });
+
+        const data = await res.json();
+        console.log('📥 Respuesta Vercel:', data);
+
+        if (!data.ok) {
+            console.warn('⚠️ Error verificando pago:', data.error);
+            return false;
         }
+
+        return data.confirmado === true;
+
+    } catch (error) {
+        console.error('❌ Error verificando pago:', error);
         return false;
-    } catch(error) { return false; }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -727,7 +747,7 @@ async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugador
     const idEnviar = idJugadorOverride || idJugador;
     console.log('🎮 CENTRAL ONE →', { juego: juegoEnviar, paquete: paqueteEnviar, id: idEnviar });
     try {
-        const res = await fetch('/api/central-one', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: 'recarga', datos: { juego: juegoEnviar, id_jugador: idEnviar, paquete: paqueteEnviar, email: idEnviar } }) });
+        const res = await fetch(URL_CENTRAL_ONE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ accion: 'recarga', datos: { juego: juegoEnviar, id_jugador: idEnviar, paquete: paqueteEnviar, email: idEnviar } }) });
         const data = await res.json();
         if (!res.ok) {
             if (data.sinSaldo) return { exito: false, silencioso: true, motivo_admin: 'SALDO INSUFICIENTE EN CENTRAL ONE', mensaje: 'Tu recarga llegará a tu cuenta muy pronto' };
@@ -758,7 +778,7 @@ async function enviarRecargaPagoNorte(productoCodigo, referenciaInterna, codigoR
         else if (esRenovacionNormal) { accion = 'renovar'; codigoAprobacionFinal = CODIGO_RENOVACION; }
         const payload = { accion, producto: tipoPagoNorte, referencia: referenciaInterna };
         if (accion === 'renovar') payload.codigo_aprobacion = codigoAprobacionFinal;
-        const res = await fetch('/api/pagonorte', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const res = await fetch(URL_PAGONORTE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const data = await res.json();
         if (data.ok === true && data.estado === 'Aprobado' && data.datos) {
             return { exito: true, estado: 'Aprobado', codigo_aprobacion: data.codigo_aprobacion || '', codigo_aprobacion_original: data.codigo_aprobacion_original || codigoAprobacionFinal, id_solicitud: data.id_solicitud || '', datos: data.datos || {}, mensaje: data.mensaje || 'Operación aprobada', es_renovacion: accion === 'renovar' };
@@ -789,7 +809,6 @@ async function ejecutarRecarga(datosProducto = null, esStreamingForzado = null) 
     const paqueteUsar = datosProducto?.paquete || paqueteCod;
     const idUsar = datosProducto?.id_jugador || idJugador;
 
-    // 🔥 LEER tipo y tipo_producto del código
     const tipoProductoGuardado = String(datosProducto?.tipo_producto || '').toLowerCase().trim();
     const tipoGuardado = String(datosProducto?.tipo || '').toLowerCase().trim();
 
@@ -865,7 +884,6 @@ async function iniciarVerificacion() {
             mostrarPaso('pasoPagoConfirmado');
             await new Promise(r => setTimeout(r, 1000));
             mostrarPaso('pasoConectandoServidor');
-            // 🚀 EJECUTAR RECARGA (Central One) — pasando tipo y tipo_producto
             const resultadoRecarga = await ejecutarRecarga({
                 juego: resultadoTEST.data.juego,
                 producto: resultadoTEST.data.producto,
@@ -1063,6 +1081,8 @@ mostrarPasoInicial();
 console.log('═══════════════════════════════════════════');
 console.log('🚀 PASARELA RECARGASGAMES CARGADA');
 console.log('═══════════════════════════════════════════');
+console.log('🌐 Dominio: recargasgames.shop');
+console.log('🔒 API Pábilo: protegida vía Vercel');
 console.log('🎮 Juego:', juego);
 console.log('📦 Producto:', producto);
 console.log('📦 Paquete:', paqueteCod);
