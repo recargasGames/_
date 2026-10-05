@@ -1,15 +1,28 @@
 // ═══════════════════════════════════════════════════════════
-// 🔐 ENDPOINT VERCEL - Verifica pagos con Pábilo
-// Variables: USER_BANK_ID y API_KEY (sin prefijo PABILO_)
+// 🔐 ENDPOINT VERCEL - Verifica pagos con Pábilo (CORREGIDO)
+// Variables de entorno: USER_BANK_ID y API_KEY
+// Documentación: https://pabilo.app/docs/verify-payments
 // ═══════════════════════════════════════════════════════════
 
 const USER_BANK_ID = process.env.USER_BANK_ID;
 const API_KEY = process.env.API_KEY;
 
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betasario`;
+// ✅ CORREGIDO: "betaserio" (no "betasario")
+const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betaserio`;
+
+// ═══════════════════════════════════════════════════════════
+// 🕐 UTILIDAD: Fecha en hora de Caracas (UTC-4)
+// ═══════════════════════════════════════════════════════════
+function fechaCaracas() {
+    const ahora = new Date();
+    const caracas = new Date(ahora.getTime() - (4 * 60 * 60 * 1000));
+    return caracas.toISOString().split('T')[0]; // YYYY-MM-DD
+}
 
 export default async function handler(req, res) {
+    // ─────────────────────────────────────────────────────
     // CORS
+    // ─────────────────────────────────────────────────────
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -23,7 +36,9 @@ export default async function handler(req, res) {
     }
 
     try {
+        // ─────────────────────────────────────────────────
         // 1. Validar variables de entorno
+        // ─────────────────────────────────────────────────
         if (!USER_BANK_ID || !API_KEY) {
             console.error('❌ Faltan variables USER_BANK_ID o API_KEY');
             return res.status(500).json({
@@ -36,13 +51,15 @@ export default async function handler(req, res) {
             });
         }
 
-        // 2. Recibir datos del frontend
+        // ─────────────────────────────────────────────────
+        // 2. Recibir y validar datos del frontend
+        // ─────────────────────────────────────────────────
         const { referencia, monto, fecha } = req.body || {};
 
-        if (!referencia || !monto) {
+        if (!referencia) {
             return res.status(400).json({
                 ok: false,
-                error: 'Faltan datos: referencia y monto son obligatorios'
+                error: 'Falta la referencia del pago'
             });
         }
 
@@ -51,35 +68,54 @@ export default async function handler(req, res) {
             return res.status(400).json({ ok: false, error: 'Referencia inválida' });
         }
 
-        const montoNum = parseInt(String(monto).replace(/\D/g, '')) || 0;
-        const fechaFinal = fecha || new Date().toISOString().split('T')[0];
+        // ✅ CORREGIDO: amount como número decimal, NO multiplicado por 100
+        // La documentación pide "amount: number" con decimales (ej: 100.00)
+        let montoNum = 0;
+        if (monto !== undefined && monto !== null && monto !== '') {
+            // Acepta "180.50", "180,50" o 180.5
+            const montoStr = String(monto).replace(',', '.');
+            montoNum = Number(montoStr);
+            if (isNaN(montoNum)) montoNum = 0;
+            // Redondear a 2 decimales (una sola vez, como dice la doc)
+            montoNum = Math.round(montoNum * 100) / 100;
+        }
+
+        // ✅ CORREGIDO: fecha en hora de Caracas (o la que envíe el frontend)
+        const fechaFinal = fecha || fechaCaracas();
+
+        // ─────────────────────────────────────────────────
+        // 3. Logs de diagnóstico (sin exponer la API key completa)
+        // ─────────────────────────────────────────────────
+        const bodyEnviar = {
+            bank_reference: refLimpia,
+            amount: montoNum,
+            movement_type: "GENERIC",
+            fecha_pago: fechaFinal
+        };
 
         console.log('═══════════════════════════════════════════');
         console.log('🔍 Verificando pago en Pábilo:');
-        console.log('   Referencia:', refLimpia);
-        console.log('   Monto (Bs):', montoNum);
-        console.log('   Fecha:', fechaFinal);
         console.log('   URL:', API_PABILO_URL);
         console.log('   USER_BANK_ID:', USER_BANK_ID);
-        console.log('   API_KEY:', API_KEY ? 'existe (' + API_KEY.length + ' chars)' : 'NO');
+        console.log('   API_KEY:', API_KEY ? `existe (${API_KEY.length} chars)` : 'NO');
+        console.log('   Body a enviar:', JSON.stringify(bodyEnviar));
         console.log('═══════════════════════════════════════════');
 
-        // 3. Llamar a Pábilo con header Authorization: Bearer
+        // ─────────────────────────────────────────────────
+        // 4. Llamar a Pábilo
+        // ─────────────────────────────────────────────────
         const pabiloRes = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${API_KEY}`
             },
-            body: JSON.stringify({
-                bank_reference: refLimpia,
-                amount: montoNum,
-                movement_type: "GENERIC",
-                fecha_pago: fechaFinal
-            })
+            body: JSON.stringify(bodyEnviar)
         });
 
-        // 4. Leer respuesta
+        // ─────────────────────────────────────────────────
+        // 5. Leer respuesta (JSON o texto)
+        // ─────────────────────────────────────────────────
         let datos;
         try {
             datos = await pabiloRes.json();
@@ -95,24 +131,29 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log('📥 Pábilo respondió (status', pabiloRes.status + '):');
+        console.log('📥 Pábilo respondió (status ' + pabiloRes.status + '):');
         console.log('   ', JSON.stringify(datos).substring(0, 500));
 
-        // 5. Manejar 404 (pago no encontrado)
+        // ─────────────────────────────────────────────────
+        // 6. Manejo de errores HTTP específicos
+        // ─────────────────────────────────────────────────
+
+        // 404 → Pago NO encontrado
         if (pabiloRes.status === 404) {
-            console.log('⚠️ Pago NO encontrado (404)');
+            console.log('⚠️ Pago NO encontrado (404):', datos.message);
             return res.status(200).json({
                 ok: true,
                 confirmado: false,
+                es_nuevo: false,
                 mensaje: 'Pago no encontrado',
                 pabilo_error: datos.error || 'PAYMENT_NOT_FOUND',
                 pabilo_mensaje: datos.message || 'Sin detalles'
             });
         }
 
-        // 6. Manejar 401 (API key inválida)
+        // 401 → API Key inválida
         if (pabiloRes.status === 401) {
-            console.error('❌ API Key de Pábilo inválida');
+            console.error('❌ API Key de Pábilo inválida o inactiva');
             return res.status(401).json({
                 ok: false,
                 error: 'API Key inválida. Revisa API_KEY en Vercel.',
@@ -120,7 +161,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // 7. Manejar 403 (sin permisos)
+        // 403 → Sin permisos
         if (pabiloRes.status === 403) {
             console.error('❌ Sin permisos en Pábilo:', datos.message);
             return res.status(403).json({
@@ -130,32 +171,51 @@ export default async function handler(req, res) {
             });
         }
 
-        // 8. Manejar 402 (sin créditos)
+        // 402 → Sin créditos
         if (pabiloRes.status === 402) {
             console.error('❌ Sin créditos en Pábilo');
             return res.status(200).json({
                 ok: true,
                 confirmado: false,
+                es_nuevo: false,
                 mensaje: 'Sin créditos en Pábilo',
                 error_sistema: true
             });
         }
 
-        // 9. Manejar otros errores
+        // 400 → Bad Request (faltan datos)
+        if (pabiloRes.status === 400) {
+            console.error('❌ Bad Request de Pábilo:', datos.message);
+            return res.status(200).json({
+                ok: true,
+                confirmado: false,
+                es_nuevo: false,
+                mensaje: datos.message || 'Datos incompletos',
+                pabilo_error: datos.error || 'BAD_REQUEST',
+                pabilo_data: datos
+            });
+        }
+
+        // Otros errores
         if (!pabiloRes.ok) {
             console.warn(`⚠️ Pábilo error ${pabiloRes.status}:`, datos);
             return res.status(200).json({
                 ok: true,
                 confirmado: false,
+                es_nuevo: false,
                 mensaje: datos.message || 'Error del proveedor',
                 pabilo_status: pabiloRes.status,
                 pabilo_data: datos
             });
         }
 
-        // 10. ✅ Pago verificado
-        const pagoData = datos.user_bank_payment || datos.data?.user_bank_payment;
-        const isNew = datos.is_new !== undefined ? datos.is_new : (datos.data?.is_new !== false);
+        // ─────────────────────────────────────────────────
+        // 7. ✅ Pago verificado — extraer datos
+        // ─────────────────────────────────────────────────
+        // La respuesta puede venir directa o anidada en .data
+        const respuestaReal = datos.data || datos;
+        const pagoData = respuestaReal.user_bank_payment;
+        const isNew = respuestaReal.is_new !== undefined ? respuestaReal.is_new : true;
 
         if (pagoData) {
             console.log(`✅ Pago ENCONTRADO. is_new: ${isNew}, status: ${pagoData.status}`);
@@ -164,33 +224,44 @@ export default async function handler(req, res) {
                 ok: true,
                 confirmado: true,
                 es_nuevo: isNew,
-                mensaje: 'Pago confirmado',
+                mensaje: respuestaReal.message || 'Pago confirmado',
                 pago: {
                     id: pagoData.id,
                     referencia: pagoData.bank_reference_id,
                     monto: pagoData.amount,
                     status: pagoData.status,
-                    fecha: datos.payment_date || pagoData.payment_date
-                }
+                    movement_type: pagoData.movement_type,
+                    fecha: respuestaReal.payment_date || pagoData.payment_date,
+                    created_at: pagoData.created_at
+                },
+                creditos_restantes: respuestaReal.user_credits_total
             });
         }
 
-        // 11. Fallback: si tiene message "payment confirmed"
-        const msg = (datos.message || '').toLowerCase();
-        if (msg.includes('confirmed') || msg.includes('confirmado')) {
+        // ─────────────────────────────────────────────────
+        // 8. Fallback: si el mensaje dice "confirmed"
+        // ─────────────────────────────────────────────────
+        const msg = String(respuestaReal.message || datos.message || '').toLowerCase();
+        if (msg.includes('confirmed') || msg.includes('confirmado') || msg.includes('paid')) {
             console.log('✅ Pago confirmado (por mensaje)');
             return res.status(200).json({
                 ok: true,
                 confirmado: true,
+                es_nuevo: isNew,
                 mensaje: 'Pago confirmado'
             });
         }
 
-        // 12. Por defecto: no encontrado
+        // ─────────────────────────────────────────────────
+        // 9. Por defecto: no encontrado
+        // ─────────────────────────────────────────────────
+        console.log('⚠️ Respuesta sin pago claro:', JSON.stringify(datos).substring(0, 300));
         return res.status(200).json({
             ok: true,
             confirmado: false,
-            mensaje: datos.message || 'Pago no confirmado'
+            es_nuevo: false,
+            mensaje: respuestaReal.message || datos.message || 'Pago no confirmado',
+            pabilo_data: datos
         });
 
     } catch (error) {
