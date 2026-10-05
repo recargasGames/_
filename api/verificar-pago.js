@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════════════════════
 // 🔐 ENDPOINT VERCEL - Verifica pagos con Pábilo
-// Versión CORREGIDA según documentación oficial
+// Versión FINAL CORREGIDA
+// - Header correcto: Authorization: Bearer (no appKey)
+// - Según conversación con Andrus (soporte Pábilo)
 // ═══════════════════════════════════════════════════════════
 
 const USER_BANK_ID = process.env.PABILO_USER_BANK_ID;
@@ -43,25 +45,29 @@ export default async function handler(req, res) {
         }
 
         const refLimpia = String(referencia).trim();
-        if (refLimpia.length < 6) {
+        if (refLimpia.length < 3) {
             return res.status(400).json({ ok: false, error: 'Referencia inválida' });
         }
 
         const montoNum = parseInt(String(monto).replace(/\D/g, '')) || 0;
         const fechaFinal = fecha || new Date().toISOString().split('T')[0];
 
-        console.log(`🔍 Verificando pago en Pábilo:`);
-        console.log(`   Referencia: ${refLimpia}`);
-        console.log(`   Monto: ${montoNum}`);
-        console.log(`   Fecha: ${fechaFinal}`);
-        console.log(`   URL: ${API_PABILO_URL}`);
+        console.log('═══════════════════════════════════════════');
+        console.log('🔍 Verificando pago en Pábilo:');
+        console.log('   Referencia:', refLimpia);
+        console.log('   Monto (Bs):', montoNum);
+        console.log('   Fecha:', fechaFinal);
+        console.log('   URL:', API_PABILO_URL);
+        console.log('   Header: Authorization: Bearer ***');
+        console.log('═══════════════════════════════════════════');
 
         // 3. Llamar a Pábilo con el header CORRECTO
+        // 🔥 CAMBIO CLAVE: Authorization: Bearer (NO appKey)
         const pabiloRes = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'appKey': API_KEY                    // ✅ CORREGIDO: 'appKey' no 'Authorization'
+                'Authorization': `Bearer ${API_KEY}`
             },
             body: JSON.stringify({
                 bank_reference: refLimpia,
@@ -76,17 +82,23 @@ export default async function handler(req, res) {
         try {
             datos = await pabiloRes.json();
         } catch (e) {
-            console.error('❌ Pábilo no devolvió JSON:', e);
+            const texto = await pabiloRes.text().catch(() => '');
+            console.error('❌ Pábilo no devolvió JSON. Status:', pabiloRes.status);
+            console.error('   Respuesta texto:', texto.substring(0, 500));
             return res.status(500).json({
                 ok: false,
-                error: 'Respuesta inválida del proveedor'
+                error: 'Respuesta inválida del proveedor',
+                status: pabiloRes.status,
+                respuesta_texto: texto.substring(0, 200)
             });
         }
 
-        console.log(`📥 Pábilo respondió (${pabiloRes.status}):`, JSON.stringify(datos).substring(0, 300));
+        console.log('📥 Pábilo respondió (status', pabiloRes.status + '):');
+        console.log('   ', JSON.stringify(datos).substring(0, 500));
 
-        // 5. Manejar 404 (pago no encontrado) - SÍ es una respuesta válida
+        // 5. Manejar 404 (pago no encontrado) - SÍ es respuesta válida
         if (pabiloRes.status === 404) {
+            console.log('⚠️ Pago NO encontrado (404)');
             return res.status(200).json({
                 ok: true,
                 confirmado: false,
@@ -101,11 +113,22 @@ export default async function handler(req, res) {
             console.error('❌ API Key de Pábilo inválida');
             return res.status(401).json({
                 ok: false,
-                error: 'API Key inválida. Revisa PABILO_API_KEY en Vercel.'
+                error: 'API Key inválida. Revisa PABILO_API_KEY en Vercel.',
+                pabilo_data: datos
             });
         }
 
-        // 7. Manejar 402 (sin créditos)
+        // 7. Manejar 403 (sin permisos)
+        if (pabiloRes.status === 403) {
+            console.error('❌ Sin permisos en Pábilo:', datos.message);
+            return res.status(403).json({
+                ok: false,
+                error: 'Sin permisos en Pábilo: ' + (datos.message || ''),
+                pabilo_data: datos
+            });
+        }
+
+        // 8. Manejar 402 (sin créditos)
         if (pabiloRes.status === 402) {
             console.error('❌ Sin créditos en Pábilo');
             return res.status(200).json({
@@ -116,7 +139,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // 8. Manejar otros errores
+        // 9. Manejar otros errores
         if (!pabiloRes.ok) {
             console.warn(`⚠️ Pábilo error ${pabiloRes.status}:`, datos);
             return res.status(200).json({
@@ -128,9 +151,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // 9. ✅ Pago verificado - detectar si es nuevo o ya validado
-        // Según la doc, cuando el pago existe devuelve: 
-        // { user_bank_payment: {...}, is_new: true/false, credit_cost: X }
+        // 10. ✅ Pago verificado - detectar si es nuevo o ya validado
         const pagoData = datos.user_bank_payment || datos.data?.user_bank_payment;
         const isNew = datos.is_new !== undefined ? datos.is_new : (datos.data?.is_new !== false);
 
@@ -152,9 +173,10 @@ export default async function handler(req, res) {
             });
         }
 
-        // 10. Fallback: si tiene message "payment confirmed"
+        // 11. Fallback: si tiene message "payment confirmed"
         const msg = (datos.message || '').toLowerCase();
         if (msg.includes('confirmed') || msg.includes('confirmado')) {
+            console.log('✅ Pago confirmado (por mensaje)');
             return res.status(200).json({
                 ok: true,
                 confirmado: true,
@@ -162,7 +184,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // 11. Por defecto: no encontrado
+        // 12. Por defecto: no encontrado
         return res.status(200).json({
             ok: true,
             confirmado: false,
