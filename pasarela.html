@@ -75,6 +75,8 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .volver-btn{display:inline-block;margin-top:25px;color:#94a3b8;text-decoration:none;text-align:center;width:100%;font-size:16px;transition:.2s}
 .volver-btn:hover{color:var(--color-dorado-claro)}
 .aviso-box{background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:15px;margin-top:15px;font-size:14px;color:#f5d76e}
+.debug-box{background:rgba(239,68,68,0.15);border:2px solid rgba(239,68,68,0.6);border-radius:12px;padding:15px;margin-top:15px;font-size:12px;color:#fca5a5;font-family:'Courier New',monospace;text-align:left;word-break:break-all;line-height:1.5}
+.debug-box strong{color:#f87171;display:block;margin-bottom:8px;font-size:13px}
 .binance-deshabilitado{background:linear-gradient(135deg, rgba(243,186,47,0.1), rgba(243,186,47,0.03));border:2px solid rgba(243,186,47,0.4);border-radius:18px;padding:30px 22px;margin-bottom:20px;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.35)}
 .binance-deshabilitado .icono-binance{font-size:64px;margin-bottom:15px}
 .binance-deshabilitado h3{color:#f3ba2f;font-size:20px;font-weight:800;margin-bottom:10px;text-transform:uppercase}
@@ -153,6 +155,7 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
             <div class="dato-line"><div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div><button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
             <div class="dato-line"><div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div><button class="copiar-btn" onclick="copiarTexto('32824869', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
             <div class="dato-line"><div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div><button class="copiar-btn" onclick="copiarTexto('04228242411', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <div class="dato-line"><div class="dato-texto"><strong>Cuenta BDV:</strong> <span>01020496810001453601</span></div><button class="copiar-btn" onclick="copiarTexto('01020496810001453601', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
             <div class="dato-line"><div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">-</span></div><button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
             <button class="copiar-todo-btn" onclick="copiarTodosLosDatos(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar todos los datos de pago</button>
             <div class="cupon-box" id="cuponBox">
@@ -165,6 +168,15 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
         </div>
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
         <button class="btn-confirmar" id="btnVerificar" onclick="iniciarVerificacion()">✅ Verificar Pago</button>
+
+        <!-- 🔍 DEBUG: Información de Pábilo visible -->
+        <div class="debug-box">
+            <strong>🔧 MODO PRUEBA - DATOS DE PÁBILO</strong>
+            <div>UserBankID: <span id="debugUserBank">cargando...</span></div>
+            <div>API Key: <span id="debugApiKey">cargando...</span></div>
+            <div>Endpoint: /api/verificar-pago</div>
+            <div>Estado: <span id="debugEstado" style="color:#fbbf24;">listo para probar</span></div>
+        </div>
     </div>
 
     <div id="pasoVerificandoPago" class="paso-box"><div class="spinner-circle"></div><div class="texto-principal">Verificando pago...</div><div class="texto-secundario" id="subtituloVerificando">Estamos buscando tu pago en el sistema bancario...</div></div>
@@ -202,6 +214,29 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════
+// 🔧 MODO DEBUG - CONFIGURACIÓN VISIBLE PARA PRUEBAS
+// ═══════════════════════════════════════════════════════════
+const DEBUG_MODE = true; // ⚠️ Cambiar a false antes de producción
+
+// 🔥 DATOS DE PÁBILO VISIBLES (SOLO PARA DEBUG)
+const PABILO_USER_BANK_ID_DEBUG = "6a93ac1b98055a34bd8b05f2";
+const PABILO_API_KEY_DEBUG = "5349b9e7-1c73-406d-ac8c-ad4345241789";
+const PABILO_BACKUP_USER_BANK_ID_DEBUG = "6a9438bf98055a34bd8b3758";
+
+// Mostrar los datos en pantalla si estamos en debug
+if (DEBUG_MODE) {
+    document.addEventListener('DOMContentLoaded', () => {
+        const debugUserBank = document.getElementById('debugUserBank');
+        const debugApiKey = document.getElementById('debugApiKey');
+        const debugEstado = document.getElementById('debugEstado');
+        
+        if (debugUserBank) debugUserBank.textContent = PABILO_USER_BANK_ID_DEBUG;
+        if (debugApiKey) debugApiKey.textContent = PABILO_API_KEY_DEBUG;
+        if (debugEstado) debugEstado.textContent = 'esperando prueba';
+    });
+}
+
 // ═══════════════════════════════════════════════════════════
 // 🎯 CONFIGURACIÓN DE PROVEEDORES
 // ═══════════════════════════════════════════════════════════
@@ -246,9 +281,8 @@ const refCodigosRG = db.ref("codigos_rg");
 const refCodigosTEST = db.ref("codigos_test");
 
 // ═══════════════════════════════════════════════════════════
-// 🔑 CONFIGURACIÓN API (SEGURA - URLS RELATIVAS)
+// 🔑 CONFIGURACIÓN API
 // ═══════════════════════════════════════════════════════════
-// 🔒 Las API keys están seguras en las variables de entorno de Vercel
 const URL_VERIFICAR_PAGO = '/api/verificar-pago';
 const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
 const URL_TELEGRAM = '/api/notificar-telegram';
@@ -289,7 +323,7 @@ if (nombreJugador && nombreJugador !== idJugador && nombreJugador !== 'Sin nombr
 } else { document.getElementById('filaNombre').style.display = 'none'; }
 
 // ═══════════════════════════════════════════════════════════
-// 🎯 DETECCIÓN DE TIPO DE PRODUCTO (MEJORADA)
+// 🎯 DETECCIÓN DE TIPO DE PRODUCTO
 // ═══════════════════════════════════════════════════════════
 function detectarTipoProducto(juegoOverride, productoOverride, paqueteOverride) {
     const juegoCheck = String(juegoOverride || juego || '').toUpperCase().trim();
@@ -387,7 +421,7 @@ function copiarTexto(texto, boton) {
     navigator.clipboard.writeText(texto).then(() => { boton.classList.add('copiado'); setTimeout(() => boton.classList.remove('copiado'), 2000); }).catch(() => { mostrarMensaje('Copiar', 'Copia manualmente: ' + texto, 'info'); });
 }
 function copiarTodosLosDatos(boton) {
-    const datos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBsFinal} Bs`;
+    const datos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nCuenta: 01020496810001453601\nMonto: ${precioBsFinal} Bs`;
     navigator.clipboard.writeText(datos).then(() => { const originalText = boton.innerHTML; boton.innerHTML = `✓ Datos copiados`; setTimeout(() => { boton.innerHTML = originalText; }, 2500); }).catch(() => { mostrarMensaje('Copiar', 'Copia manualmente:\n\n' + datos, 'info'); });
 }
 
@@ -413,7 +447,7 @@ function notificarAdmin(tipo, datos = {}) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 📱 ENVÍO DE WHATSAPP DESDE LA PASARELA
+// 📱 WHATSAPP
 // ═══════════════════════════════════════════════════════════
 function esPedidoStreamingPasarela(pedido) {
     const juegoP = String(pedido.juego || '').toUpperCase();
@@ -564,7 +598,7 @@ async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🎲 CÓDIGOS TEST (JUEGOS) Y RG (STREAMING)
+// 🎲 CÓDIGOS TEST Y RG
 // ═══════════════════════════════════════════════════════════
 async function verificarCodigoTEST(codigo) {
     try {
@@ -620,7 +654,7 @@ async function generarNumeroPedido() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 💾 GUARDAR PEDIDO EN FIREBASE (CON WHATSAPP AUTOMÁTICO)
+// 💾 GUARDAR PEDIDO EN FIREBASE
 // ═══════════════════════════════════════════════════════════
 async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos, extras = {}) {
     const MAX_INTENTOS = 3;
@@ -702,7 +736,7 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
 }
 
 // ═══════════════════════════════════════════════════════════
-// ⚡ VERIFICAR PAGO EN PÁBILO (VÍA VERCEL — SIN KEYS EXPUESTAS)
+// ⚡ VERIFICAR PAGO EN PÁBILO (VÍA VERCEL)
 // ═══════════════════════════════════════════════════════════
 async function verificarPagoPabilo(referencia) {
     let montoPago = String(precioBsFinal).replace(/[.,]/g, '');
@@ -711,6 +745,9 @@ async function verificarPagoPabilo(referencia) {
 
     try {
         console.log('🔍 Verificando pago vía Vercel...');
+        console.log('   Referencia:', referencia);
+        console.log('   Monto Bs:', montoPago);
+        console.log('   Fecha:', fecha);
 
         const res = await fetch(URL_VERIFICAR_PAGO, {
             method: 'POST',
@@ -808,33 +845,22 @@ async function ejecutarRecarga(datosProducto = null, esStreamingForzado = null) 
     const productoUsar = datosProducto?.producto || producto;
     const paqueteUsar = datosProducto?.paquete || paqueteCod;
     const idUsar = datosProducto?.id_jugador || idJugador;
-
     const tipoProductoGuardado = String(datosProducto?.tipo_producto || '').toLowerCase().trim();
     const tipoGuardado = String(datosProducto?.tipo || '').toLowerCase().trim();
 
     let tipo = 'juego';
-
-    if (tipoGuardado === 'central_one') {
-        tipo = 'juego';
-    } else if (tipoGuardado === 'pagonorte') {
-        tipo = 'streaming';
-    } else if (tipoProductoGuardado === 'streaming') {
-        tipo = 'streaming';
-    } else if (tipoProductoGuardado === 'juego' || tipoProductoGuardado === 'giftcard') {
-        tipo = 'juego';
-    } else if (esStreamingForzado !== null) {
-        tipo = esStreamingForzado ? 'streaming' : 'juego';
-    } else {
-        tipo = detectarTipoProducto(juegoUsar, productoUsar, paqueteUsar);
-    }
+    if (tipoGuardado === 'central_one') tipo = 'juego';
+    else if (tipoGuardado === 'pagonorte') tipo = 'streaming';
+    else if (tipoProductoGuardado === 'streaming') tipo = 'streaming';
+    else if (tipoProductoGuardado === 'juego' || tipoProductoGuardado === 'giftcard') tipo = 'juego';
+    else if (esStreamingForzado !== null) tipo = esStreamingForzado ? 'streaming' : 'juego';
+    else tipo = detectarTipoProducto(juegoUsar, productoUsar, paqueteUsar);
 
     console.log('═══════════════════════════════════════════');
     console.log('🎯 EJECUTANDO RECARGA');
     console.log('   Juego:', juegoUsar);
     console.log('   Producto:', productoUsar);
     console.log('   Paquete:', paqueteUsar);
-    console.log('   tipo (guardado):', tipoGuardado || '(no)');
-    console.log('   tipo_producto:', tipoProductoGuardado || '(no)');
     console.log('   ➜ DECISIÓN:', tipo.toUpperCase());
     console.log('   ➜ Va a:', tipo === 'streaming' ? '🎬 PagoNorte' : '🎮 Central One');
     console.log('═══════════════════════════════════════════');
@@ -857,6 +883,13 @@ async function iniciarVerificacion() {
     const btn = document.getElementById('btnVerificar');
     if (!referencia || referencia.length < 6) { mostrarMensaje('Referencia inválida', 'Escribe la referencia completa del pago (mínimo 6 dígitos).', 'advertencia'); return; }
     btn.disabled = true; btn.innerHTML = '⏳ Verificando...';
+
+    // 🔍 Actualizar estado de debug
+    if (DEBUG_MODE) {
+        const debugEstado = document.getElementById('debugEstado');
+        if (debugEstado) debugEstado.textContent = 'verificando ' + referencia + '...';
+    }
+
     const esManual = referencia.startsWith('MANUAL-');
     const esTest = referencia.startsWith('TEST-');
     const esCodigoRG = referencia.startsWith('RG-');
@@ -972,7 +1005,7 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // 💳 NORMAL
+        // 💳 REFERENCIA BANCARIA NORMAL
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) { notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ YA USADA' }); await guardarReferenciaFalsa(referencia, 'Duplicada'); mostrarPaso('pasoReferenciaUsada'); btn.disabled = false; btn.innerHTML = '✅ Verificar Pago'; return; }
         if (cuponAplicado) {
@@ -980,7 +1013,7 @@ async function iniciarVerificacion() {
             if (cuponYaUsado) { notificarAdmin('cupon_usado', { referencia }); mostrarMensaje('Cupón usado', 'Este cupón ya fue utilizado.', 'advertencia'); descuentoAplicado = 0; cuponAplicado = ""; precioUsdFinal = precioUsdOriginal; precioBsFinal = precioBsOriginal; mostrarPaso('pasoDatos'); btn.disabled = false; btn.innerHTML = '✅ Verificar Pago'; return; }
         }
         const pagoConfirmado = await verificarPagoPabilo(referencia);
-        if (!pagoConfirmado) { notificarAdmin('falso', { referencia, mensaje_extra: '⚠️ NO ENCONTRADA' }); await guardarReferenciaFalsa(referencia, 'No en Pábilo'); document.getElementById('msgError').textContent = 'Verifica tu referencia.'; setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); btn.disabled = false; btn.innerHTML = '✅ Verificar Pago'; return; }
+        if (!pagoConfirmado) { notificarAdmin('falso', { referencia, mensaje_extra: '⚠️ NO ENCONTRADA' }); await guardarReferenciaFalsa(referencia, 'No en Pábilo'); document.getElementById('msgError').textContent = 'Verifica tu referencia e inténtalo de nuevo.'; setTimeout(() => mostrarPaso('pasoPagoNoEncontrado'), 800); btn.disabled = false; btn.innerHTML = '✅ Verificar Pago'; return; }
         await marcarReferenciaComoUsada(referencia);
         if (cuponAplicado) await marcarCuponComoUsado(cuponAplicado);
         mostrarPaso('pasoPagoConfirmado');
@@ -1000,6 +1033,10 @@ async function iniciarVerificacion() {
         notificarAdmin('error', { referencia, mensaje_extra: `❌ ${error.message}` });
     } finally {
         btn.disabled = false; btn.innerHTML = '✅ Verificar Pago';
+        if (DEBUG_MODE) {
+            const debugEstado = document.getElementById('debugEstado');
+            if (debugEstado) debugEstado.textContent = 'prueba terminada';
+        }
     }
 }
 
@@ -1080,9 +1117,13 @@ function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) 
 mostrarPasoInicial();
 console.log('═══════════════════════════════════════════');
 console.log('🚀 PASARELA RECARGASGAMES CARGADA');
+console.log('   MODO DEBUG:', DEBUG_MODE ? 'ACTIVADO' : 'DESACTIVADO');
 console.log('═══════════════════════════════════════════');
-console.log('🌐 Dominio: recargasgames.shop');
-console.log('🔒 API Pábilo: protegida vía Vercel');
+console.log('🔧 DATOS DE PÁBILO (DEBUG):');
+console.log('   UserBankID:', PABILO_USER_BANK_ID_DEBUG);
+console.log('   API Key:', PABILO_API_KEY_DEBUG);
+console.log('   Backup UserBankID:', PABILO_BACKUP_USER_BANK_ID_DEBUG);
+console.log('═══════════════════════════════════════════');
 console.log('🎮 Juego:', juego);
 console.log('📦 Producto:', producto);
 console.log('📦 Paquete:', paqueteCod);
