@@ -1,69 +1,37 @@
 // ═══════════════════════════════════════════════════════════
-// 🔐 ENDPOINT VERCEL - Verifica pagos con Pábilo
-// Versión FINAL CORREGIDA
-// - Header correcto: Authorization: Bearer (no appKey)
-// - Según conversación con Andrus (soporte Pábilo)
+// 🔐 VERIFICADOR DE PAGOS PÁBILO - RecargasGames
 // ═══════════════════════════════════════════════════════════
 
 const USER_BANK_ID = process.env.PABILO_USER_BANK_ID;
 const API_KEY = process.env.PABILO_API_KEY;
 
-const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}/betasario`;
+// ✅ URL CORRECTA (sin sufijo raro)
+const API_PABILO_URL = `https://api.pabilo.app/userbankpayment/${USER_BANK_ID}`;
 
 export default async function handler(req, res) {
-    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ ok: false, error: 'Método no permitido' });
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Método no permitido' });
 
     try {
-        // 1. Validar variables de entorno
         if (!USER_BANK_ID || !API_KEY) {
-            console.error('❌ Faltan variables PABILO_USER_BANK_ID o PABILO_API_KEY');
-            return res.status(500).json({
-                ok: false,
-                error: 'Configuración incompleta del servidor'
-            });
+            return res.status(500).json({ ok: false, error: 'Faltan credenciales Pábilo' });
         }
 
-        // 2. Recibir datos del frontend
-        const { referencia, monto, fecha } = req.body || {};
-
+        const { referencia, monto } = req.body || {};
         if (!referencia || !monto) {
-            return res.status(400).json({
-                ok: false,
-                error: 'Faltan datos: referencia y monto son obligatorios'
-            });
+            return res.status(400).json({ ok: false, error: 'Falta referencia o monto' });
         }
 
-        const refLimpia = String(referencia).trim();
-        if (refLimpia.length < 3) {
-            return res.status(400).json({ ok: false, error: 'Referencia inválida' });
-        }
-
+        const refLimpia = String(referencia).trim().replace(/\s|-/g, '');
         const montoNum = parseInt(String(monto).replace(/\D/g, '')) || 0;
-        const fechaFinal = fecha || new Date().toISOString().split('T')[0];
 
-        console.log('═══════════════════════════════════════════');
-        console.log('🔍 Verificando pago en Pábilo:');
-        console.log('   Referencia:', refLimpia);
-        console.log('   Monto (Bs):', montoNum);
-        console.log('   Fecha:', fechaFinal);
-        console.log('   URL:', API_PABILO_URL);
-        console.log('   Header: Authorization: Bearer ***');
-        console.log('═══════════════════════════════════════════');
+        console.log('🔍 Verificando:', { referencia: refLimpia, monto: montoNum });
 
-        // 3. Llamar a Pábilo con el header CORRECTO
-        // 🔥 CAMBIO CLAVE: Authorization: Bearer (NO appKey)
-        const pabiloRes = await fetch(API_PABILO_URL, {
+        const respuesta = await fetch(API_PABILO_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -71,132 +39,48 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 bank_reference: refLimpia,
-                amount: montoNum,
-                movement_type: "GENERIC",
-                fecha_pago: fechaFinal
+                amount: montoNum
             })
         });
 
-        // 4. Leer respuesta
-        let datos;
-        try {
-            datos = await pabiloRes.json();
-        } catch (e) {
-            const texto = await pabiloRes.text().catch(() => '');
-            console.error('❌ Pábilo no devolvió JSON. Status:', pabiloRes.status);
-            console.error('   Respuesta texto:', texto.substring(0, 500));
-            return res.status(500).json({
-                ok: false,
-                error: 'Respuesta inválida del proveedor',
-                status: pabiloRes.status,
-                respuesta_texto: texto.substring(0, 200)
-            });
-        }
-
-        console.log('📥 Pábilo respondió (status', pabiloRes.status + '):');
-        console.log('   ', JSON.stringify(datos).substring(0, 500));
-
-        // 5. Manejar 404 (pago no encontrado) - SÍ es respuesta válida
-        if (pabiloRes.status === 404) {
-            console.log('⚠️ Pago NO encontrado (404)');
+        // Pago NO encontrado = respuesta normal
+        if (respuesta.status === 404) {
             return res.status(200).json({
                 ok: true,
                 confirmado: false,
-                mensaje: 'Pago no encontrado',
-                pabilo_error: datos.error || 'PAYMENT_NOT_FOUND',
-                pabilo_mensaje: datos.message || 'Sin detalles'
+                mensaje: 'Pago no encontrado — verifica que la referencia y el monto sean exactos'
             });
         }
 
-        // 6. Manejar 401 (API key inválida)
-        if (pabiloRes.status === 401) {
-            console.error('❌ API Key de Pábilo inválida');
-            return res.status(401).json({
-                ok: false,
-                error: 'API Key inválida. Revisa PABILO_API_KEY en Vercel.',
-                pabilo_data: datos
-            });
-        }
-
-        // 7. Manejar 403 (sin permisos)
-        if (pabiloRes.status === 403) {
-            console.error('❌ Sin permisos en Pábilo:', datos.message);
-            return res.status(403).json({
-                ok: false,
-                error: 'Sin permisos en Pábilo: ' + (datos.message || ''),
-                pabilo_data: datos
-            });
-        }
-
-        // 8. Manejar 402 (sin créditos)
-        if (pabiloRes.status === 402) {
-            console.error('❌ Sin créditos en Pábilo');
+        // Clave mal puesta
+        if (respuesta.status === 401) {
             return res.status(200).json({
-                ok: true,
-                confirmado: false,
-                mensaje: 'Sin créditos en Pábilo',
-                error_sistema: true
+                ok: false,
+                error: 'API Key incorrecta en Vercel'
             });
         }
 
-        // 9. Manejar otros errores
-        if (!pabiloRes.ok) {
-            console.warn(`⚠️ Pábilo error ${pabiloRes.status}:`, datos);
-            return res.status(200).json({
-                ok: true,
-                confirmado: false,
-                mensaje: datos.message || 'Error del proveedor',
-                pabilo_status: pabiloRes.status,
-                pabilo_data: datos
-            });
-        }
+        const datos = await respuesta.json();
 
-        // 10. ✅ Pago verificado - detectar si es nuevo o ya validado
-        const pagoData = datos.user_bank_payment || datos.data?.user_bank_payment;
-        const isNew = datos.is_new !== undefined ? datos.is_new : (datos.data?.is_new !== false);
-
-        if (pagoData) {
-            console.log(`✅ Pago ENCONTRADO. is_new: ${isNew}, status: ${pagoData.status}`);
-
+        // ✅ Pago ENCONTRADO
+        if (respuesta.ok && (datos.user_bank_payment || datos.success || datos.confirmed)) {
             return res.status(200).json({
                 ok: true,
                 confirmado: true,
-                es_nuevo: isNew,
-                mensaje: 'Pago confirmado',
-                pago: {
-                    id: pagoData.id,
-                    referencia: pagoData.bank_reference_id,
-                    monto: pagoData.amount,
-                    status: pagoData.status,
-                    fecha: datos.payment_date || pagoData.payment_date
-                }
+                mensaje: '✅ Pago verificado',
+                pago: datos.user_bank_payment || datos
             });
         }
 
-        // 11. Fallback: si tiene message "payment confirmed"
-        const msg = (datos.message || '').toLowerCase();
-        if (msg.includes('confirmed') || msg.includes('confirmado')) {
-            console.log('✅ Pago confirmado (por mensaje)');
-            return res.status(200).json({
-                ok: true,
-                confirmado: true,
-                mensaje: 'Pago confirmado'
-            });
-        }
-
-        // 12. Por defecto: no encontrado
+        // Cualquier otra cosa
         return res.status(200).json({
             ok: true,
             confirmado: false,
-            mensaje: datos.message || 'Pago no confirmado'
+            mensaje: datos.message || 'Pago no confirmado aún'
         });
 
-    } catch (error) {
-        console.error('❌ Error crítico:', error);
-        return res.status(500).json({
-            ok: false,
-            error: 'Error interno del servidor',
-            detalle: error.message
-        });
+    } catch (err) {
+        console.error('Error:', err.message);
+        return res.status(500).json({ ok: false, error: 'Error: ' + err.message });
     }
 }
