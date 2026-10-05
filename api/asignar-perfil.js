@@ -2,13 +2,32 @@
 import admin from 'firebase-admin';
 
 if (!admin.apps.length) {
+    // ✅ Procesar la private key para asegurar que los \n se interpreten bien
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
+    // Si viene con comillas dobles, quitarlas
+    privateKey = privateKey.replace(/^"|"$/g, '');
+    // Reemplazar \n literales por saltos de línea reales
+    privateKey = privateKey.replace(/\\n/g, '\n');
+
+    // ✅ Asegurar que la databaseURL esté correcta
+    let databaseURL = process.env.FIREBASE_DATABASE_URL || '';
+    databaseURL = databaseURL.replace(/^"|"$/g, '').trim();
+
+    console.log('🔍 DEBUG Firebase init:');
+    console.log('   projectId:', process.env.FIREBASE_PROJECT_ID);
+    console.log('   clientEmail:', process.env.FIREBASE_CLIENT_EMAIL?.substring(0, 40) + '...');
+    console.log('   databaseURL:', databaseURL);
+    console.log('   privateKey length:', privateKey.length);
+    console.log('   privateKey starts:', privateKey.substring(0, 30));
+    console.log('   privateKey ends:', privateKey.substring(privateKey.length - 30));
+
     admin.initializeApp({
         credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+            projectId: process.env.FIREBASE_PROJECT_ID?.trim(),
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL?.trim(),
+            privateKey: privateKey
         }),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
+        databaseURL: databaseURL
     });
 }
 
@@ -29,10 +48,19 @@ export default async function handler(req, res) {
             return res.status(400).json({ ok: false, error: 'Falta: servicio' });
         }
 
+        console.log('🔍 Buscando perfiles de:', servicio);
+
         const servicioKey = String(servicio).toLowerCase();
         const refCuentas = db.ref(`cuentas_streaming/${servicioKey}`);
-        const snap = await refCuentas.once('value');
+        
+        // ✅ Timeout de 8 segundos para no colgarse
+        const snap = await Promise.race([
+            refCuentas.once('value'),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase timeout')), 8000))
+        ]);
+
         const cuentas = snap.val() || {};
+        console.log('📦 Cuentas encontradas:', Object.keys(cuentas).length);
 
         if (Object.keys(cuentas).length === 0) {
             return res.status(200).json({
