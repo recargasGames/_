@@ -51,11 +51,20 @@
     --muted:#8792a6;
     --green:#22c55e;
     --red:#ef4444;
-    --nav:68px;
+    --nav:64px;
+    --header:56px;
 }
 
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html{
+    scroll-behavior:smooth;
+}
 
 body{
     min-height:100vh;
@@ -66,8 +75,8 @@ body{
         radial-gradient(circle at 90% 20%,rgba(212,175,55,.09),transparent 30%),
         linear-gradient(180deg,#05070d,#070b13 45%,#04060b);
     overflow-x:hidden;
-    padding-top:96px;
-    padding-bottom:calc(var(--nav) + 25px + env(safe-area-inset-bottom));
+    padding-top:calc(var(--header) + 44px);
+    padding-bottom:calc(var(--nav) + 20px + env(safe-area-inset-bottom));
 }
 
 body::before{
@@ -83,6 +92,7 @@ body::before{
 }
 
 a{color:inherit}
+
 button,input{font-family:inherit}
 
 button:focus-visible,a:focus-visible,input:focus-visible{
@@ -117,15 +127,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .particula-dorada:nth-child(1){left:5%;animation-delay:0s}
-.particula-dorada:nth-child(2){left:14%;animation-delay:3s}
-.particula-dorada:nth-child(3){left:24%;animation-delay:6s}
-.particula-dorada:nth-child(4){left:36%;animation-delay:2s}
-.particula-dorada:nth-child(5){left:48%;animation-delay:8s}
-.particula-dorada:nth-child(6){left:59%;animation-delay:4s}
-.particula-dorada:nth-child(7){left:69%;animation-delay:1s}
-.particula-dorada:nth-child(8){left:78%;animation-delay:7s}
-.particula-dorada:nth-child(9){left:88%;animation-delay:5s}
-.particula-dorada:nth-child(10){left:95%;animation-delay:9s}
+.particula-dorada:nth-child(2){left:18%;animation-delay:3s}
+.particula-dorada:nth-child(3){left:32%;animation-delay:6s}
+.particula-dorada:nth-child(4){left:48%;animation-delay:2s}
+.particula-dorada:nth-child(5){left:66%;animation-delay:8s}
+.particula-dorada:nth-child(6){left:84%;animation-delay:4s}
 
 @keyframes flotar{
     0%{transform:translateY(110vh);opacity:0}
@@ -134,63 +140,65 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     100%{transform:translateY(-20vh);opacity:0}
 }
 
-/* ═══════════ HEADER ═══════════ */
+/* ============ HEADER ============ */
+
 .barra-superior{
     position:fixed;top:0;left:0;right:0;z-index:999;
-    background:rgba(5,8,15,.88);
+    background:rgba(5,8,15,.9);
     backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
     border-bottom:1px solid rgba(255,255,255,.07);
     box-shadow:0 8px 35px rgba(0,0,0,.35);
 }
 
 .header{
-    height:65px;padding:8px 20px;
+    height:var(--header);padding:6px 14px;
     display:flex;justify-content:space-between;align-items:center;
-    max-width:1250px;margin:auto;
+    max-width:1250px;margin:auto;gap:8px;
 }
 
-.header-left{display:flex;align-items:center;gap:14px}
-.brand{display:flex;align-items:center;text-decoration:none}
+.brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
 
 .brand img{
-    width:48px;height:48px;object-fit:contain;border-radius:14px;
+    width:42px;height:42px;object-fit:contain;border-radius:12px;
     filter:drop-shadow(0 0 8px rgba(0,153,255,.35))
            drop-shadow(0 0 8px rgba(212,175,55,.2));
     transition:.3s;
 }
 
-.brand img:hover{
-    transform:scale(1.05);
-    filter:drop-shadow(0 0 14px rgba(0,153,255,.65))
-           drop-shadow(0 0 14px rgba(212,175,55,.4));
+.header-right{display:flex;align-items:center;gap:6px}
+
+.header-icon-btn{
+    width:38px;height:38px;border-radius:11px;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.035);
+    color:#dbe4f0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;transition:.25s;
+    flex-shrink:0;
 }
 
-.brand-texto{
-    display:flex;
-    flex-direction:column;
-    line-height:1;
+.header-icon-btn svg{
+    width:19px;height:19px;fill:none;
+    stroke:currentColor;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round;
 }
 
-.brand-titulo{
-    font-size:16px;
-    font-weight:900;
-    background:linear-gradient(90deg,#fff,var(--gold2),#fff);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    letter-spacing:-.3px;
+.header-icon-btn:hover,.header-icon-btn:active{
+    color:var(--gold2);
+    border-color:rgba(212,175,55,.4);
+    background:rgba(212,175,55,.08);
 }
 
-.brand-sub{
-    font-size:9px;
-    color:#7f8ba0;
-    font-weight:700;
-    letter-spacing:2px;
-    margin-top:2px;
-    text-transform:uppercase;
+.header-icon-btn .badge-dot{
+    position:absolute;top:5px;right:5px;
+    width:8px;height:8px;border-radius:50%;
+    background:var(--gold2);
+    border:2px solid #05080f;
+    box-shadow:0 0 8px rgba(212,175,55,.8);
+    display:none;
 }
 
-.header-right{display:flex;align-items:center;gap:12px}
+.header-icon-btn.tiene-alerta .badge-dot{display:block}
 
 .btn-perfil{
     border:0;background:transparent;color:white;
@@ -198,17 +206,21 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .avatar-circle{
-    width:40px;height:40px;border-radius:50%;overflow:hidden;
+    width:38px;height:38px;border-radius:50%;overflow:hidden;
     border:2px solid rgba(212,175,55,.55);
     background:linear-gradient(135deg,var(--gold),var(--blue));
     position:relative;
     display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
 }
 
-.avatar-circle img{width:100%;height:100%;object-fit:cover;display:none}
+.avatar-circle img{
+    width:100%;height:100%;object-fit:cover;
+    display:none;
+}
 
 .avatar-circle .avatar-inicial{
-    font-size:16px;font-weight:900;color:#fff;
+    font-size:15px;font-weight:900;color:#fff;
     display:flex;align-items:center;justify-content:center;
     width:100%;height:100%;
 }
@@ -227,13 +239,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     white-space:nowrap;font-size:13px;
 }
 
-.perfil-flecha{color:#8d98ab;font-size:11px}
-
 .menu-hamburguesa{
-    width:42px;height:42px;border-radius:12px;
+    width:38px;height:38px;border-radius:11px;
     border:1px solid rgba(255,255,255,.09);
     background:rgba(255,255,255,.04);
-    color:white;font-size:22px;cursor:pointer;transition:.3s;
+    color:white;font-size:20px;cursor:pointer;transition:.3s;
+    flex-shrink:0;
 }
 
 .menu-hamburguesa:hover{
@@ -242,16 +253,19 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     background:rgba(212,175,55,.08);
 }
 
+/* ============ MENUS FLOTANTES ============ */
+
 .menu-perfil,.menu-flotante{
-    position:absolute;right:15px;top:57px;width:265px;
+    position:absolute;right:12px;top:calc(var(--header) - 4px);width:260px;
     background:rgba(7,11,19,.98);
     backdrop-filter:blur(20px);
     border:1px solid rgba(212,175,55,.25);
-    border-radius:18px;
+    border-radius:16px;
     box-shadow:0 25px 70px rgba(0,0,0,.7);
     overflow:hidden;opacity:0;visibility:hidden;
     transform:translateY(-10px) scale(.97);
     transition:.25s;
+    z-index:1000;
 }
 
 .menu-perfil.activo,.menu-flotante.activo{
@@ -259,13 +273,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .menu-perfil-header{
-    padding:17px;display:flex;gap:12px;align-items:center;
+    padding:15px;display:flex;gap:12px;align-items:center;
     background:linear-gradient(135deg,rgba(212,175,55,.1),rgba(37,135,255,.08));
     border-bottom:1px solid rgba(255,255,255,.06);
 }
 
 .avatar-grande{
-    width:46px;height:46px;border-radius:50%;overflow:hidden;
+    width:44px;height:44px;border-radius:50%;overflow:hidden;
     border:2px solid rgba(212,175,55,.45);
     background:linear-gradient(135deg,var(--gold),var(--blue));
     display:flex;align-items:center;justify-content:center;
@@ -278,28 +292,32 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 .avatar-grande.tiene-foto span{display:none}
 
 .menu-perfil-header h4{font-size:14px}
-.menu-perfil-header p{color:#7f8ba0;font-size:11px;margin-top:3px}
+
+.menu-perfil-header p{color:#7f8ba0;font-size:11px;margin-top:3px;word-break:break-all}
 
 .menu-perfil-opcion,.menu-opcion{
     display:flex;align-items:center;gap:11px;
     text-decoration:none;color:#dce3ef;
-    padding:14px 18px;font-size:14px;
+    padding:13px 17px;font-size:13.5px;
     border-bottom:1px solid rgba(255,255,255,.045);
     transition:.2s;
 }
 
-.menu-perfil-opcion:hover,.menu-opcion:hover{
-    background:linear-gradient(90deg,rgba(37,135,255,.1),rgba(212,175,55,.06));
-    color:var(--gold2);padding-left:23px;
+.menu-perfil-opcion:active,.menu-opcion:active{
+    background:linear-gradient(90deg,rgba(37,135,255,.12),rgba(212,175,55,.08));
+    color:var(--gold2);
 }
 
 .menu-perfil-opcion.danger{color:#f87171}
+
 .menu-divider{height:1px;background:rgba(212,175,55,.12)}
+
+/* ============ CATEGORIAS CHIPS ============ */
 
 .games-menu{
     max-width:1250px;margin:auto;
     display:flex;gap:8px;overflow-x:auto;
-    scrollbar-width:none;padding:7px 20px 9px;
+    scrollbar-width:none;padding:6px 14px 10px;
 }
 
 .games-menu::-webkit-scrollbar{display:none}
@@ -307,28 +325,82 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 .games-menu a{
     white-space:nowrap;text-decoration:none;color:#8994a7;
     font-size:12px;font-weight:700;
-    padding:7px 15px;border-radius:30px;
+    padding:9px 15px;border-radius:30px;
     border:1px solid transparent;transition:.25s;
+    display:inline-flex;align-items:center;
+    min-height:36px;
+    background:rgba(255,255,255,.03);
 }
 
-.games-menu a:hover,.games-menu a.active{
+.games-menu a:active{transform:scale(.96)}
+
+.games-menu a.active{
     color:white;
-    border-color:rgba(37,135,255,.35);
-    background:linear-gradient(135deg,rgba(37,135,255,.17),rgba(212,175,55,.08));
-    box-shadow:0 0 20px rgba(37,135,255,.08);
+    border-color:rgba(37,135,255,.4);
+    background:linear-gradient(135deg,rgba(37,135,255,.2),rgba(212,175,55,.1));
+    box-shadow:0 0 20px rgba(37,135,255,.12);
 }
 
-/* ═══════════ MAIN ═══════════ */
+/* ============ MAIN ============ */
+
 .main{
-    width:min(1100px,calc(100% - 30px));
+    width:min(1100px,calc(100% - 24px));
     margin:auto;position:relative;
 }
 
-/* ═══════════ HERO ═══════════ */
+/* ============ BUSCADOR ============ */
+
+.buscador{
+    position:relative;margin:8px 0 16px;
+    display:flex;align-items:center;
+}
+
+.buscador .lupa-icon{
+    position:absolute;left:16px;top:50%;
+    transform:translateY(-50%);
+    width:20px;height:20px;
+    stroke:#77849a;fill:none;stroke-width:2;
+    pointer-events:none;
+}
+
+.buscador input{
+    width:100%;height:54px;
+    padding:0 46px 0 46px;
+    color:white;background:rgba(10,15,25,.82);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:16px;font-size:15px;
+    transition:.3s;
+    box-shadow:0 10px 35px rgba(0,0,0,.2);
+}
+
+.buscador input::placeholder{color:#6f7b8e}
+
+.buscador input:focus{
+    border-color:rgba(37,135,255,.6);
+    box-shadow:0 0 0 3px rgba(37,135,255,.1),
+               0 10px 40px rgba(0,0,0,.3);
+    outline:none;
+}
+
+.buscador-clear{
+    position:absolute;right:10px;top:50%;
+    transform:translateY(-50%);
+    width:34px;height:34px;border-radius:50%;
+    border:0;background:rgba(255,255,255,.06);
+    color:#aab4c4;font-size:16px;cursor:pointer;
+    display:none;align-items:center;justify-content:center;
+    transition:.2s;
+}
+
+.buscador-clear.visible{display:flex}
+
+.buscador-clear:active{background:rgba(212,175,55,.15);color:var(--gold2)}
+
+/* ============ HERO ============ */
+
 .hero{
-    min-height:400px;
-    margin:15px 0 22px;
-    border-radius:30px;
+    min-height:300px;margin:0 0 18px;
+    border-radius:24px;
     border:1px solid rgba(255,255,255,.09);
     overflow:hidden;position:relative;
     display:flex;align-items:center;
@@ -357,53 +429,41 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     pointer-events:none;
 }
 
-.hero-contenido{
-    position:relative;z-index:3;
-    padding:50px 45px;
-    max-width:640px;
-}
+.hero-contenido{position:relative;z-index:3;padding:32px 26px;max-width:620px}
 
 .hero-badge{
     display:inline-flex;align-items:center;gap:7px;
-    padding:7px 13px;border-radius:30px;
+    padding:6px 12px;border-radius:30px;
     background:rgba(212,175,55,.1);
     border:1px solid rgba(212,175,55,.35);
-    color:var(--gold2);font-size:11px;font-weight:800;
-    letter-spacing:1.5px;margin-bottom:17px;
-    animation:shineBadge 3s ease infinite;
-    background-size:200% 100%;
-}
-
-@keyframes shineBadge{
-    0%,100%{background-position:0% 50%}
-    50%{background-position:100% 50%}
+    color:var(--gold2);font-size:10px;font-weight:800;
+    letter-spacing:1.5px;margin-bottom:14px;
 }
 
 .hero h1{
-    font-size:clamp(30px,5vw,55px);
-    line-height:1.02;font-weight:900;
-    letter-spacing:-1.5px;margin-bottom:17px;
+    font-size:clamp(28px,4.6vw,50px);
+    line-height:1.05;font-weight:900;
+    letter-spacing:-1.2px;margin-bottom:14px;
 }
 
 .hero h1 span{
     background:linear-gradient(90deg,#fff,var(--gold2),#fff);
-    background-size:200% 100%;
     -webkit-background-clip:text;background-clip:text;
     color:transparent;
-    animation:shineBadge 4s ease infinite;
 }
 
 .hero p{
-    color:#aeb9ca;font-size:15px;line-height:1.6;
-    max-width:500px;margin-bottom:25px;
+    color:#aeb9ca;font-size:14px;line-height:1.55;
+    max-width:500px;margin-bottom:20px;
 }
 
 .hero-botones{display:flex;gap:10px;flex-wrap:wrap}
 
 .hero-btn{
-    text-decoration:none;padding:13px 22px;
+    text-decoration:none;padding:12px 18px;
     border-radius:12px;font-size:13px;font-weight:800;
-    transition:.3s;display:inline-flex;align-items:center;gap:8px;
+    transition:.25s;display:inline-flex;align-items:center;gap:6px;
+    min-height:44px;
 }
 
 .hero-btn.principal{
@@ -412,21 +472,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     box-shadow:0 8px 25px rgba(212,175,55,.25);
 }
 
-.hero-btn.principal:hover{
-    box-shadow:0 12px 35px rgba(212,175,55,.45);
-}
-
 .hero-btn.secundario{
-    color:#dbe7f7;background:rgba(255,255,255,.05);
+    color:#dbe7f7;background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.12);
 }
 
-.hero-btn.secundario:hover{
-    background:rgba(255,255,255,.09);
-    border-color:rgba(255,255,255,.2);
-}
-
-.hero-btn:hover{transform:translateY(-3px)}
+.hero-btn:active{transform:scale(.96)}
 
 .hero-visual{
     position:absolute;right:-20px;bottom:-30px;
@@ -434,24 +485,18 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .hero-orb{
-    position:absolute;width:310px;height:310px;
+    position:absolute;width:280px;height:280px;
     right:40px;top:20px;border-radius:50%;
     background:
         radial-gradient(circle at 40% 35%,rgba(0,210,255,.45),transparent 12%),
         radial-gradient(circle,rgba(37,135,255,.2),rgba(37,135,255,.02) 65%,transparent 70%);
     box-shadow:0 0 70px rgba(37,135,255,.18),
                inset 0 0 50px rgba(0,200,255,.1);
-    animation:pulseOrb 3s ease-in-out infinite;
-}
-
-@keyframes pulseOrb{
-    0%,100%{transform:scale(1);opacity:.9}
-    50%{transform:scale(1.05);opacity:1}
 }
 
 .hero-logo{
-    position:absolute;right:95px;top:82px;
-    width:190px;height:190px;object-fit:contain;
+    position:absolute;right:95px;top:62px;
+    width:175px;height:175px;object-fit:contain;
     filter:drop-shadow(0 0 20px rgba(37,135,255,.45))
            drop-shadow(0 0 15px rgba(212,175,55,.3));
     animation:flotarLogo 4s ease-in-out infinite;
@@ -462,90 +507,18 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     50%{transform:translateY(-10px)}
 }
 
-/* ═══════════ STATS ═══════════ */
-.stats-strip{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:11px;
-    margin:0 0 25px;
-}
+/* ============ PAGOS STRIP ============ */
 
-.stat-card{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:14px 16px;
-    background:rgba(10,15,25,.65);
-    border:1px solid rgba(255,255,255,.07);
-    border-radius:15px;
-    transition:.3s;
-}
-
-.stat-card:hover{
-    border-color:rgba(37,135,255,.3);
-    transform:translateY(-2px);
-}
-
-.stat-icono{
-    width:38px;height:38px;border-radius:10px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:18px;flex-shrink:0;
-    background:linear-gradient(135deg,rgba(37,135,255,.15),rgba(212,175,55,.08));
-    border:1px solid rgba(37,135,255,.2);
-}
-
-.stat-info{display:flex;flex-direction:column;gap:2px;min-width:0}
-.stat-valor{
-    font-size:15px;font-weight:900;color:white;
-    line-height:1;letter-spacing:-.3px;
-}
-.stat-label{
-    font-size:10px;color:#7f8ba0;font-weight:700;
-    letter-spacing:.5px;text-transform:uppercase;
-}
-
-/* ═══════════ BUSCADOR ═══════════ */
-.buscador{position:relative;margin:0 0 20px}
-
-.buscador svg{
-    position:absolute;left:17px;top:50%;
-    transform:translateY(-50%);
-    width:19px;height:19px;
-    stroke:#77849a;fill:none;stroke-width:2;
-}
-
-.buscador input{
-    width:100%;height:54px;
-    padding:0 20px 0 48px;
-    color:white;background:rgba(10,15,25,.78);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:16px;font-size:14px;
-    transition:.3s;
-    box-shadow:0 10px 35px rgba(0,0,0,.2);
-}
-
-.buscador input::placeholder{color:#6f7b8e}
-
-.buscador input:focus{
-    border-color:rgba(37,135,255,.6);
-    box-shadow:0 0 0 3px rgba(37,135,255,.1),
-               0 10px 40px rgba(0,0,0,.3);
-    outline:none;
-}
-
-/* ═══════════ PAGOS ═══════════ */
 .pagos-strip{
     display:flex;align-items:center;justify-content:space-between;
-    gap:12px;padding:13px 17px;margin-bottom:30px;
+    gap:10px;padding:11px 14px;margin-bottom:22px;
     border:1px solid rgba(255,255,255,.07);
     background:rgba(10,15,24,.65);
-    border-radius:15px;
+    border-radius:14px;
+    flex-wrap:wrap;
 }
 
-.pagos-strip .etiqueta{
-    color:#79859a;font-size:12px;font-weight:700;
-    display:flex;align-items:center;gap:7px;
-}
+.pagos-strip .etiqueta{color:#79859a;font-size:12px;font-weight:700}
 
 .metodos{display:flex;gap:7px;flex-wrap:wrap}
 
@@ -554,52 +527,46 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     padding:6px 10px;border-radius:8px;
     color:#dce5f3;background:rgba(37,135,255,.08);
     border:1px solid rgba(37,135,255,.18);
-    transition:.2s;
+    display:inline-flex;align-items:center;gap:5px;
 }
 
-.metodos span:hover{
-    background:rgba(37,135,255,.15);
-    border-color:rgba(37,135,255,.35);
-}
+/* ============ SECCIONES ============ */
 
-/* ═══════════ SECCIONES ═══════════ */
-.seccion{scroll-margin-top:125px;margin-bottom:45px}
+.seccion{scroll-margin-top:130px;margin-bottom:38px}
 
 .seccion-titulo{
     display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:18px;
-    gap:12px;
+    margin-bottom:14px;
 }
 
 .seccion-titulo .titulo-principal{
     display:flex;align-items:center;gap:10px;
-    font-size:20px;font-weight:900;
+    font-size:19px;font-weight:900;
 }
 
 .seccion-titulo .titulo-principal::before{
-    content:"";width:4px;height:25px;border-radius:10px;
+    content:"";width:4px;height:24px;border-radius:10px;
     background:linear-gradient(var(--blue2),var(--gold));
     box-shadow:0 0 12px rgba(0,180,255,.5);
 }
 
 .seccion-titulo small{color:#68758a;font-size:11px;font-weight:600}
 
-/* ═══════════ GRID DE JUEGOS ═══════════ */
+/* ============ GRID DE JUEGOS ============ */
+
 .games-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
 }
 
 .game-link{
     position:relative;overflow:hidden;text-decoration:none;
-    border-radius:18px;
+    border-radius:16px;
     background:linear-gradient(180deg,
         rgba(17,25,40,.88),
         rgba(8,12,20,.96));
     border:1px solid rgba(255,255,255,.07);
     box-shadow:0 12px 35px rgba(0,0,0,.3);
-    transition:transform .35s,border-color .35s,box-shadow .35s;
+    transition:transform .3s,border-color .3s,box-shadow .3s;
     display:flex;
     flex-direction:column;
 }
@@ -610,17 +577,24 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     transform:scaleX(0);transform-origin:left;transition:.35s;
 }
 
-.game-link:hover{
-    transform:translateY(-7px);
-    border-color:rgba(37,135,255,.35);
-    box-shadow:0 20px 50px rgba(0,0,0,.5),
-               0 0 25px rgba(37,135,255,.08);
+.game-link:active{
+    transform:scale(.97);
+    border-color:rgba(37,135,255,.5);
 }
 
-.game-link:hover::after{transform:scaleX(1)}
+@media(hover:hover){
+    .game-link:hover{
+        transform:translateY(-5px);
+        border-color:rgba(37,135,255,.35);
+        box-shadow:0 20px 50px rgba(0,0,0,.5),
+                   0 0 25px rgba(37,135,255,.08);
+    }
+    .game-link:hover::after{transform:scaleX(1)}
+    .game-link:hover .game-img{transform:scale(1.08)}
+}
 
 .game-img-wrap{
-    position:relative;height:130px;overflow:hidden;background:#0d1421;
+    position:relative;height:118px;overflow:hidden;background:#0d1421;
     flex-shrink:0;
 }
 
@@ -629,8 +603,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     display:block;transition:transform .55s ease;
 }
 
-.game-link:hover .game-img{transform:scale(1.08)}
-
 .game-img-wrap::after{
     content:"";position:absolute;inset:0;
     background:linear-gradient(180deg,transparent 45%,rgba(3,6,11,.85));
@@ -638,8 +610,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .game-badge{
-    position:absolute;z-index:4;left:10px;top:10px;
-    padding:5px 9px;border-radius:8px;color:#06101b;
+    position:absolute;z-index:4;left:8px;top:8px;
+    padding:4px 8px;border-radius:7px;color:#06101b;
     background:linear-gradient(135deg,var(--gold),var(--gold2));
     font-size:9px;font-weight:900;
     text-transform:uppercase;letter-spacing:.5px;
@@ -653,64 +625,113 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .game-info{
-    padding:8px 10px 10px;
+    padding:9px 10px 10px;
     display:flex;
     flex-direction:column;
-    gap:2px;
+    gap:4px;
 }
 
 .game-nombre{
     font-size:12.5px;
-    font-weight:850;
+    font-weight:800;
     color:#f4f7fb;
     line-height:1.15;
-    margin-bottom:2px;
 }
 
 .game-meta{
     display:flex;align-items:center;gap:5px;
-    color:#6ee7a0;font-size:9.5px;font-weight:700;
+    color:#6ee7a0;font-size:10px;font-weight:700;
     line-height:1.2;
 }
 
 .game-meta::before{
-    content:"";width:5px;height:5px;border-radius:50%;
-    background:#22c55e;box-shadow:0 0 9px #22c55e;
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 9px #22c55e;
     flex-shrink:0;
+    animation:pulsoVerde 2s ease-in-out infinite;
+}
+
+@keyframes pulsoVerde{
+    0%,100%{box-shadow:0 0 4px #22c55e}
+    50%{box-shadow:0 0 12px #22c55e}
 }
 
 .game-meta.neutro{color:#9ba7b9}
+
 .game-meta.neutro::before{
     background:var(--gold);
     box-shadow:0 0 9px rgba(212,175,55,.7);
+    animation:none;
 }
 
-/* ═══════════ SPECIAL GRID ═══════════ */
+/* ============ GRID SPECIAL ============ */
+
 .special-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px;
+    display:grid;grid-template-columns:repeat(2,1fr);gap:14px;
 }
 
-.special-card{min-height:160px}
+.special-card{min-height:150px}
 
-/* ═══════════ SIN RESULTADOS ═══════════ */
+/* ============ SIN RESULTADOS ============ */
+
 .sin-resultados{
-    display:none;text-align:center;padding:35px 20px;
-    border-radius:18px;background:rgba(10,15,25,.8);
+    display:none;text-align:center;padding:32px 20px;
+    border-radius:16px;background:rgba(10,15,25,.8);
     border:1px solid rgba(255,255,255,.08);
+    margin-bottom:22px;
 }
 
 .sin-resultados.visible{display:block}
 
 .sin-resultados h4{color:var(--gold2);margin-bottom:8px}
-.sin-resultados p{color:#8b96a9;font-size:13px}
-.sin-resultados a{color:var(--blue2);font-weight:700}
 
-/* ═══════════ FOOTER ═══════════ */
+.sin-resultados p{color:#8b96a9;font-size:13px;line-height:1.6}
+
+.sin-resultados a{color:var(--blue2);font-weight:700;text-decoration:none}
+
+/* ============ CTA FINAL ============ */
+
+.cta-final{
+    margin:30px 0 10px;
+    padding:24px 20px;
+    border-radius:18px;
+    background:
+        radial-gradient(circle at 90% 20%,rgba(212,175,55,.1),transparent 40%),
+        radial-gradient(circle at 10% 80%,rgba(37,135,255,.12),transparent 45%),
+        linear-gradient(135deg,#0c1424,#070a12);
+    border:1px solid rgba(255,255,255,.08);
+    text-align:center;
+}
+
+.cta-final h3{
+    font-size:16px;font-weight:900;
+    margin-bottom:8px;color:#f5f8ff;
+}
+
+.cta-final p{
+    color:#93a0b4;font-size:13px;
+    margin-bottom:16px;line-height:1.55;
+}
+
+.cta-final a{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 20px;border-radius:12px;
+    text-decoration:none;font-size:13px;font-weight:800;
+    color:#031108;
+    background:linear-gradient(135deg,#22c55e,#4ade80);
+    box-shadow:0 8px 25px rgba(34,197,94,.25);
+    transition:.25s;
+    min-height:44px;
+}
+
+.cta-final a:active{transform:scale(.96)}
+
+/* ============ FOOTER ============ */
+
 .footer{
-    max-width:1100px;margin:70px auto 0;
-    padding:40px 20px 35px;text-align:center;
+    max-width:1100px;margin:50px auto 0;
+    padding:35px 20px 30px;text-align:center;
     border-top:1px solid rgba(255,255,255,.06);
 }
 
@@ -718,7 +739,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
 .payment-methods{
     display:flex;justify-content:center;gap:8px;
-    flex-wrap:wrap;margin:18px 0;
+    flex-wrap:wrap;margin:16px 0;
 }
 
 .payment-methods span{
@@ -733,11 +754,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     color:#586477;font-size:10px;line-height:1.7;
 }
 
-/* ═══════════ NAV INFERIOR ═══════════ */
+/* ============ NAV INFERIOR ============ */
+
 .nav-inferior{
     position:fixed;bottom:0;left:0;right:0;height:var(--nav);
     z-index:999;padding-bottom:env(safe-area-inset-bottom);
-    background:rgba(5,8,14,.94);
+    background:rgba(5,8,14,.95);
     backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
     border-top:1px solid rgba(255,255,255,.07);
     box-shadow:0 -10px 35px rgba(0,0,0,.4);
@@ -750,9 +772,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 .nav-item{
     flex:1;display:flex;flex-direction:column;
     justify-content:center;align-items:center;
-    gap:4px;text-decoration:none;
+    gap:3px;text-decoration:none;
     color:#667287;font-size:10px;font-weight:700;
-    transition:.2s;
+    transition:.2s;position:relative;
 }
 
 .nav-item svg{
@@ -762,30 +784,46 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .nav-item.active{color:var(--gold2)}
+
+.nav-item.active::before{
+    content:"";position:absolute;top:0;left:50%;
+    transform:translateX(-50%);
+    width:26px;height:3px;border-radius:0 0 4px 4px;
+    background:linear-gradient(90deg,var(--blue2),var(--gold));
+    box-shadow:0 0 12px rgba(212,175,55,.6);
+}
+
 .nav-item.soporte{color:#4ade80}
 
-/* ═══════════ BOTONES FLOTANTES ═══════════ */
+.nav-item .badge-pedido{
+    position:absolute;top:10px;right:calc(50% - 18px);
+    width:8px;height:8px;border-radius:50%;
+    background:var(--gold2);
+    box-shadow:0 0 8px rgba(212,175,55,.8);
+    display:none;
+}
+
+.nav-item.tiene-pedido .badge-pedido{display:block}
+
+/* ============ INSTALAR ============ */
+
 .install-app-btn{
-    display:none;position:fixed;left:18px;
-    bottom:calc(var(--nav) + 18px + env(safe-area-inset-bottom));
-    z-index:998;padding:10px 15px;
+    display:none;position:fixed;left:14px;
+    bottom:calc(var(--nav) + 14px + env(safe-area-inset-bottom));
+    z-index:998;padding:10px 14px;
     border:1px solid rgba(212,175,55,.4);
     border-radius:30px;color:white;
-    background:rgba(10,15,25,.9);
+    background:rgba(10,15,25,.92);
     backdrop-filter:blur(15px);
     box-shadow:0 10px 30px rgba(0,0,0,.4);
     font-size:11px;font-weight:800;cursor:pointer;
-    transition:.3s;
 }
 
-.install-app-btn:hover{
-    background:rgba(212,175,55,.15);
-    border-color:var(--gold);
-}
+/* ============ BACK TO TOP ============ */
 
 .back-to-top{
-    position:fixed;right:18px;
-    bottom:calc(var(--nav) + 18px + env(safe-area-inset-bottom));
+    position:fixed;right:14px;
+    bottom:calc(var(--nav) + 14px + env(safe-area-inset-bottom));
     width:42px;height:42px;
     display:flex;align-items:center;justify-content:center;
     border-radius:50%;color:#06101a;
@@ -793,14 +831,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     text-decoration:none;font-size:18px;font-weight:900;
     z-index:998;opacity:0;visibility:hidden;
     transform:translateY(10px);transition:.3s;
-    box-shadow:0 8px 25px rgba(212,175,55,.4);
 }
 
 .back-to-top.show{
     opacity:1;visibility:visible;transform:translateY(0);
 }
 
-/* ═══════════ MODALES ═══════════ */
+/* ============ MODAL LOGIN ============ */
+
 .modal-overlay{
     position:fixed;inset:0;z-index:3000;display:none;
     align-items:center;justify-content:center;padding:20px;
@@ -811,7 +849,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
 .modal-login{
     position:relative;width:min(420px,100%);
-    padding:32px;border-radius:23px;
+    padding:30px 26px;border-radius:22px;
     background:linear-gradient(145deg,#111a2a,#080c14);
     border:1px solid rgba(212,175,55,.25);
     box-shadow:0 30px 100px rgba(0,0,0,.7);
@@ -824,29 +862,28 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 }
 
 .close-modal-btn{
-    position:absolute;top:13px;right:16px;border:0;
+    position:absolute;top:12px;right:14px;border:0;
     background:transparent;color:#758196;font-size:22px;cursor:pointer;
-    transition:.2s;
+    width:34px;height:34px;border-radius:50%;
 }
 
-.close-modal-btn:hover{color:var(--gold2);transform:rotate(90deg)}
+.close-modal-btn:active{background:rgba(255,255,255,.06)}
 
 .modal-login h2{
-    text-align:center;margin-bottom:25px;font-size:21px;
+    text-align:center;margin-bottom:22px;font-size:20px;
 }
 
-.form-group{margin-bottom:17px}
+.form-group{margin-bottom:15px}
 
 .form-group label{
     display:block;color:#aeb8c8;font-size:11px;
-    font-weight:800;margin-bottom:7px;
+    font-weight:800;margin-bottom:6px;
 }
 
 .form-group input{
     width:100%;padding:13px 14px;border-radius:11px;
     border:1px solid rgba(255,255,255,.09);
-    background:rgba(0,0,0,.25);color:white;font-size:14px;
-    transition:.2s;
+    background:rgba(0,0,0,.25);color:white;font-size:15px;
 }
 
 .form-group input:focus{
@@ -858,19 +895,18 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     width:100%;padding:14px;border:0;border-radius:11px;
     background:linear-gradient(135deg,var(--gold),var(--gold2));
     color:#080b11;font-size:13px;font-weight:900;
-    cursor:pointer;margin-top:5px;transition:.3s;
+    cursor:pointer;margin-top:5px;
+    min-height:46px;
 }
 
-.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,.4)}
-.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-submit:disabled{opacity:.6}
 
 .auth-links{
-    text-align:center;margin-top:18px;
+    text-align:center;margin-top:16px;
     color:#727f92;font-size:12px;line-height:2;
 }
 
 .auth-links a{color:var(--gold2);text-decoration:none}
-.auth-links a:hover{text-decoration:underline}
 
 .message{
     display:none;padding:10px;border-radius:9px;
@@ -889,7 +925,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     border:1px solid rgba(34,197,94,.25);
 }
 
-/* ═══════════ MENSAJE PERSONALIZADO ═══════════ */
+/* ============ MENSAJE PERSONALIZADO ============ */
+
 .mensaje-overlay{
     position:fixed;inset:0;z-index:9999;display:none;
     align-items:center;justify-content:center;padding:20px;
@@ -900,51 +937,45 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
 .mensaje-box{
     width:min(420px,100%);position:relative;
-    padding:30px 23px 23px;border-radius:22px;
+    padding:30px 22px 22px;border-radius:22px;
     text-align:center;
     background:linear-gradient(145deg,#111a2a,#080c14);
     border:1px solid rgba(212,175,55,.25);
     box-shadow:0 30px 90px rgba(0,0,0,.75);
-    animation:modalEntrada .3s ease;
 }
 
 .mensaje-cerrar{
-    position:absolute;top:12px;right:15px;
+    position:absolute;top:10px;right:14px;
     background:none;border:0;color:#778398;
-    font-size:22px;cursor:pointer;transition:.2s;
+    font-size:22px;cursor:pointer;
+    width:34px;height:34px;border-radius:50%;
 }
 
-.mensaje-cerrar:hover{color:var(--gold2);transform:rotate(90deg)}
-
 .mensaje-icono{
-    width:65px;height:65px;margin:0 auto 15px;
+    width:62px;height:62px;margin:0 auto 14px;
     display:flex;align-items:center;justify-content:center;
-    border-radius:50%;font-size:30px;
+    border-radius:50%;font-size:28px;
 }
 
 .mensaje-icono.exito{
     color:#4ade80;background:rgba(34,197,94,.12);
     border:1px solid rgba(34,197,94,.4);
-    box-shadow:0 0 30px rgba(34,197,94,.3);
 }
 
 .mensaje-icono.error{
     color:#f87171;background:rgba(239,68,68,.12);
     border:1px solid rgba(239,68,68,.4);
-    box-shadow:0 0 30px rgba(239,68,68,.3);
 }
 
 .mensaje-icono.advertencia,
 .mensaje-icono.confirmacion{
     color:var(--gold2);background:rgba(212,175,55,.12);
     border:1px solid rgba(212,175,55,.4);
-    box-shadow:0 0 30px rgba(212,175,55,.3);
 }
 
 .mensaje-icono.info{
     color:#60a5fa;background:rgba(37,135,255,.12);
     border:1px solid rgba(37,135,255,.4);
-    box-shadow:0 0 30px rgba(37,135,255,.3);
 }
 
 .mensaje-titulo{
@@ -954,7 +985,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
 .mensaje-texto{
     color:#aab5c6;font-size:13px;line-height:1.6;
-    white-space:pre-line;margin-bottom:20px;
+    white-space:pre-line;margin-bottom:18px;
 }
 
 .mensaje-botones{display:flex;gap:9px}
@@ -962,7 +993,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 .mensaje-btn{
     flex:1;min-height:45px;border-radius:10px;
     border:0;font-size:12px;font-weight:900;cursor:pointer;
-    transition:.2s;font-family:inherit;
 }
 
 .mensaje-btn.principal{
@@ -970,102 +1000,89 @@ button:focus-visible,a:focus-visible,input:focus-visible{
     color:#05070d;
 }
 
-.mensaje-btn.principal:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 25px rgba(212,175,55,.4);
-}
-
 .mensaje-btn.secundario{
     background:rgba(255,255,255,.06);color:#c4cedc;
     border:1px solid rgba(255,255,255,.1);
 }
 
-.mensaje-btn.secundario:hover{
-    background:rgba(255,255,255,.1);color:white;
-}
+.mensaje-btn.peligro{background:#dc2626;color:white}
 
-.mensaje-btn.peligro{
-    background:linear-gradient(135deg,#dc2626,#ef4444);
-    color:white;
-}
+/* ============ RESPONSIVE ============ */
 
-.mensaje-btn.peligro:hover{
-    box-shadow:0 8px 25px rgba(239,68,68,.4);
-}
-
-/* ═══════════ RESPONSIVE ═══════════ */
 @media(min-width:800px){
-    body{padding-bottom:25px}
+    body{padding-bottom:25px;padding-top:calc(var(--header) + 50px)}
     .nav-inferior{display:none}
     .main{width:min(1100px,calc(100% - 50px))}
     .footer{margin-bottom:0}
-    .install-app-btn{bottom:18px}
-    .back-to-top{bottom:18px}
+    .install-app-btn,.back-to-top{
+        bottom:20px;
+    }
+    .games-grid{grid-template-columns:repeat(4,1fr)}
 }
 
-@media(max-width:900px){
+@media(max-width:900px) and (min-width:651px){
     .games-grid{grid-template-columns:repeat(3,1fr)}
     .hero-visual{opacity:.65;right:-80px}
 }
 
 @media(max-width:650px){
-    body{padding-top:94px}
-    .header{height:60px;padding:7px 14px}
-    .brand img{width:43px;height:43px}
-    .brand-texto{display:none}
-    .games-menu{padding:6px 13px 8px}
-    .games-menu a{padding:7px 13px;font-size:11px}
-    .main{width:calc(100% - 24px)}
-    .hero{min-height:410px;border-radius:23px;align-items:flex-start}
+    body{padding-top:calc(var(--header) + 46px)}
+    .main{width:calc(100% - 20px)}
+    .hero{min-height:300px;border-radius:20px;align-items:flex-start}
     .hero::after{
         background:linear-gradient(180deg,
-            rgba(5,8,14,.86) 0%,
-            rgba(5,8,14,.75) 55%,
-            rgba(5,8,14,.92) 100%);
+            rgba(5,8,14,.82) 0%,
+            rgba(5,8,14,.72) 50%,
+            rgba(5,8,14,.94) 100%);
     }
-    .hero-contenido{padding:28px 22px;max-width:100%}
-    .hero h1{font-size:32px;letter-spacing:-1px}
-    .hero p{font-size:13px;max-width:95%}
-    .hero-visual{width:100%;height:170px;right:0;bottom:0;opacity:.7}
+    .hero-contenido{padding:22px 20px;max-width:100%}
+    .hero h1{font-size:28px;letter-spacing:-.8px}
+    .hero p{font-size:13px;max-width:100%}
+    .hero-visual{width:100%;height:150px;right:0;bottom:0;opacity:.65}
     .hero-orb{
-        width:220px;height:220px;
-        right:50%;transform:translateX(50%);top:10px;
+        width:180px;height:180px;
+        right:50%;transform:translateX(50%);top:8px;
     }
     .hero-logo{
-        width:115px;height:115px;
-        right:50%;transform:translateX(50%);top:48px;
+        width:95px;height:95px;
+        right:50%;transform:translateX(50%);top:38px;
     }
     @keyframes flotarLogo{
         0%,100%{transform:translateX(50%) translateY(0)}
-        50%{transform:translateX(50%) translateY(-7px)}
+        50%{transform:translateX(50%) translateY(-6px)}
     }
-    .stats-strip{grid-template-columns:1fr;gap:8px}
-    .stat-card{padding:11px 13px}
-    .stat-icono{width:34px;height:34px;font-size:16px}
-    .stat-valor{font-size:14px}
-    .buscador input{height:50px}
-    .pagos-strip{align-items:flex-start;flex-direction:column}
-    .games-grid{grid-template-columns:repeat(2,1fr);gap:11px}
-    .game-img-wrap{height:110px}
-    .game-info{padding:8px 10px 10px}
+    .buscador input{height:52px;font-size:14px}
+    .games-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+    .game-img-wrap{height:104px}
+    .game-info{padding:8px 10px 9px}
     .game-nombre{font-size:12px}
-    .game-meta{font-size:9px}
-    .special-grid{grid-template-columns:repeat(2,1fr);gap:11px}
-    .special-card .game-img-wrap{height:110px}
+    .game-meta{font-size:9.5px}
+    .special-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+    .special-card .game-img-wrap{height:104px}
+    .special-card{min-height:140px}
     .seccion-titulo .titulo-principal{font-size:17px}
     .seccion-titulo small{display:none}
-    .menu-perfil,.menu-flotante{right:7px;width:245px}
-    .perfil-nombre,.perfil-flecha{display:none}
-    .footer{margin-top:50px;padding-bottom:35px}
+    .menu-perfil,.menu-flotante{right:8px;width:240px}
+    .perfil-nombre{display:none}
+    .footer{margin-top:40px;padding-bottom:30px}
+    .particula-dorada:nth-child(n+7){display:none}
+    .video-fondo{opacity:.1}
+    .cta-final{padding:20px 16px}
+    .cta-final h3{font-size:15px}
 }
 
 @media(max-width:390px){
-    .hero h1{font-size:28px}
-    .hero{min-height:390px}
-    .game-img-wrap{height:100px}
-    .game-nombre{font-size:11px}
-    .game-meta{font-size:8.5px}
+    .hero h1{font-size:25px}
+    .hero{min-height:280px}
+    .hero p{font-size:12.5px}
+    .game-img-wrap{height:96px}
+    .game-nombre{font-size:11.5px}
+    .game-meta{font-size:9px}
     .mensaje-botones{flex-direction:column}
+    .header-icon-btn{width:36px;height:36px}
+    .avatar-circle{width:36px;height:36px}
+    .menu-hamburguesa{width:36px;height:36px}
+    .brand img{width:38px;height:38px}
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -1082,17 +1099,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 <body onclick="cerrarTodosLosMenus(event)">
 
 <!-- VIDEO DE FONDO -->
-<video autoplay muted loop playsinline class="video-fondo">
+<video autoplay muted loop playsinline preload="metadata" poster="logo.png" class="video-fondo">
     <source src="inicio.mp4" type="video/mp4">
 </video>
+
 <div class="video-overlay"></div>
 
 <!-- PARTICULAS -->
 <div class="particulas-fondo">
-    <div class="particula-dorada"></div>
-    <div class="particula-dorada"></div>
-    <div class="particula-dorada"></div>
-    <div class="particula-dorada"></div>
     <div class="particula-dorada"></div>
     <div class="particula-dorada"></div>
     <div class="particula-dorada"></div>
@@ -1106,104 +1120,205 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
     <header class="header">
 
-        <div class="header-left">
-            <a href="index.html" class="brand">
-                <img src="logo.png" alt="Recargas Games">
-                <div class="brand-texto">
-                    <span class="brand-titulo">Recargas Games</span>
-                    <span class="brand-sub">Gaming Store</span>
-                </div>
-            </a>
-        </div>
+        <a href="index.html" class="brand">
+            <img src="logo.png" alt="Recargas Games" fetchpriority="high">
+        </a>
 
         <div class="header-right">
 
+            <!-- BUSCAR -->
+            <button
+                class="header-icon-btn"
+                id="btnHeaderBuscar"
+                aria-label="Buscar"
+                onclick="event.stopPropagation(); enfocarBuscador()">
+
+                <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="M20 20l-4-4"></path>
+                </svg>
+
+            </button>
+
+            <!-- NOTIFICACIONES -->
+            <button
+                class="header-icon-btn"
+                id="btnNotificaciones"
+                aria-label="Notificaciones"
+                onclick="event.stopPropagation(); accionNotificaciones()">
+
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 16v-5a6 6 0 0 0-12 0v5l-2 3h16z"></path>
+                    <path d="M10 20a2 2 0 0 0 4 0"></path>
+                </svg>
+
+                <span class="badge-dot" id="notifBadge"></span>
+
+            </button>
+
+            <!-- PERFIL -->
             <div id="perfilContainer" style="position:relative;display:none;">
-                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil"
+
+                <button
+                    class="btn-perfil"
+                    id="btnPerfil"
+                    aria-label="Abrir menú de perfil"
                     onclick="event.stopPropagation(); toggleMenuPerfil()">
+
                     <div class="avatar-circle" id="avatarCircle">
                         <img src="" alt="Usuario" id="avatarImg">
                         <span class="avatar-inicial" id="avatarInicial">U</span>
                         <span class="online-dot"></span>
                     </div>
+
                     <span class="perfil-nombre" id="perfilNombre">Usuario</span>
-                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+
                 </button>
 
-                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                <div
+                    class="menu-perfil"
+                    id="menuPerfil"
+                    onclick="event.stopPropagation()">
+
                     <div class="menu-perfil-header">
+
                         <div class="avatar-grande" id="avatarGrande">
                             <img src="" alt="Usuario" id="avatarGrandeImg">
                             <span id="avatarGrandeInicial">U</span>
                         </div>
-                        <div>
+
+                        <div style="min-width:0;flex:1;">
                             <h4 id="nombreCompleto">Usuario</h4>
                             <p id="emailUsuario">usuario@email.com</p>
                         </div>
+
                     </div>
+
                     <a href="dashboard.html" class="menu-perfil-opcion">📊 Mi Panel</a>
                     <a href="perfil.html" class="menu-perfil-opcion">👤 Editar Perfil</a>
                     <a href="pedidos.html" class="menu-perfil-opcion">📦 Mis Pedidos</a>
+
                     <div class="menu-divider"></div>
-                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion">🚪 Cerrar Sesión</a>
+
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion">
+                        🚪 Cerrar Sesión
+                    </a>
+
                 </div>
+
             </div>
 
-            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú"
-                onclick="event.stopPropagation(); alternarMenu()">☰</button>
+            <!-- HAMBURGUESA -->
+            <button
+                class="menu-hamburguesa"
+                id="btnMenu"
+                aria-label="Abrir menú"
+                onclick="event.stopPropagation(); alternarMenu()">
+
+                ☰
+
+            </button>
 
         </div>
 
-        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
-            <a href="#" class="menu-opcion" id="menuHamburguesaLogin"
-                onclick="abrirModalLogin();return false;" style="color:#d4af37;">
+        <!-- MENU HAMBURGUESA -->
+        <div
+            class="menu-flotante"
+            id="menuFlotante"
+            onclick="event.stopPropagation()">
+
+            <a
+                href="#"
+                class="menu-opcion"
+                id="menuHamburguesaLogin"
+                onclick="abrirModalLogin();return false;"
+                style="color:#d4af37;">
+
                 🔑 Iniciar Sesión
+
             </a>
-            <a href="register.html" class="menu-opcion" id="menuHamburguesaRegister">
+
+            <a
+                href="register.html"
+                class="menu-opcion"
+                id="menuHamburguesaRegister">
+
                 📝 Crear Cuenta
+
             </a>
+
             <div class="menu-divider"></div>
-            <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">
+
+            <a
+                href="dashboard.html"
+                class="menu-opcion"
+                id="menuHamburguesaDashboard"
+                style="display:none;">
+
                 📊 Mi Panel
+
             </a>
-            <a href="#" class="menu-opcion" id="menuHamburguesaLogout" style="display:none;color:#ef4444;">
+
+            <a
+                href="#"
+                class="menu-opcion"
+                id="menuHamburguesaLogout"
+                style="display:none;color:#ef4444;">
+
                 🚪 Cerrar Sesión
+
             </a>
+
         </div>
 
     </header>
 
+    <!-- CATEGORIAS -->
     <nav class="games-menu" id="categorias">
-        <a href="#inicio" class="active" data-seccion="inicio">Inicio</a>
+
+        <a href="#inicio" class="active" data-seccion="inicio">Todos</a>
         <a href="#juegos" data-seccion="juegos">🎮 Juegos</a>
         <a href="#giftcards" data-seccion="giftcards">🎁 Gift Cards</a>
         <a href="#streaming" data-seccion="streaming">🎬 Streaming</a>
+
     </nav>
 
 </div>
 
 <!-- LOGIN -->
 <div class="modal-overlay" id="modalLogin">
+
     <div class="modal-login">
+
         <button class="close-modal-btn" onclick="cerrarModalLogin()">✕</button>
+
         <h2>🔑 Iniciar Sesión</h2>
+
         <form id="loginForm">
+
             <div class="form-group">
                 <label for="loginEmail">📧 Correo electrónico</label>
                 <input type="email" id="loginEmail" placeholder="tu@email.com" required>
             </div>
+
             <div class="form-group">
                 <label for="loginPassword">🔑 Contraseña</label>
                 <input type="password" id="loginPassword" placeholder="Tu contraseña" required>
             </div>
+
             <button type="submit" class="btn-submit" id="loginBtn">Ingresar</button>
+
         </form>
+
         <div id="loginMessage" class="message"></div>
+
         <div class="auth-links">
             <p>¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></p>
             <p><a href="recuperar.html">¿Olvidaste tu contraseña?</a></p>
         </div>
+
     </div>
+
 </div>
 
 <!-- CONTENIDO -->
@@ -1211,66 +1326,88 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
     <!-- HERO -->
     <section class="hero">
+
         <div class="hero-contenido">
+
             <div class="hero-badge">★ RECARGAS GAMES</div>
-            <h1>Tu mundo gaming, <span>sin límites.</span></h1>
-            <p>Recarga tus juegos favoritos, compra Gift Cards y disfruta de tus servicios digitales de forma rápida, segura y sencilla.</p>
+
+            <h1>
+                Tu mundo gaming,
+                <span>sin límites.</span>
+            </h1>
+
+            <p>
+                Recarga tus juegos favoritos, compra Gift Cards
+                y disfruta de tus servicios digitales de forma
+                rápida, segura y sencilla.
+            </p>
+
             <div class="hero-botones">
+
                 <a href="#juegos" class="hero-btn principal">🎮 Ver juegos</a>
-                <a href="https://wa.me/584228242411" target="_blank" rel="noopener" class="hero-btn secundario">💬 Soporte</a>
+
+                <a
+                    href="https://wa.me/584228242411"
+                    target="_blank"
+                    rel="noopener"
+                    class="hero-btn secundario">
+
+                    💬 Soporte
+
+                </a>
+
             </div>
+
         </div>
+
         <div class="hero-visual">
             <div class="hero-orb"></div>
-            <img src="logo.png" class="hero-logo" alt="Recargas Games">
+            <img src="logo.png" class="hero-logo" alt="Recargas Games" loading="lazy">
         </div>
-    </section>
 
-    <!-- STATS -->
-    <div class="stats-strip">
-        <div class="stat-card">
-            <div class="stat-icono">⚡</div>
-            <div class="stat-info">
-                <span class="stat-valor">Instantáneo</span>
-                <span class="stat-label">Entrega rápida</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icono">🔒</div>
-            <div class="stat-info">
-                <span class="stat-valor">100% Seguro</span>
-                <span class="stat-label">Pagos verificados</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icono">💬</div>
-            <div class="stat-info">
-                <span class="stat-valor">24/7</span>
-                <span class="stat-label">Soporte WhatsApp</span>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- BUSCADOR -->
     <div class="buscador">
-        <svg viewBox="0 0 24 24">
+
+        <svg class="lupa-icon" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="7"></circle>
             <path d="M20 20l-4-4"></path>
         </svg>
-        <input type="search" id="buscador" placeholder="Buscar juego, Gift Card o servicio..." autocomplete="off">
+
+        <input
+            type="search"
+            id="buscador"
+            placeholder="Buscar juego, Gift Card o servicio..."
+            autocomplete="off">
+
+        <button
+            class="buscador-clear"
+            id="buscadorClear"
+            aria-label="Limpiar búsqueda"
+            onclick="limpiarBuscador()">
+
+            ✕
+
+        </button>
+
     </div>
 
     <!-- PAGOS -->
     <div class="pagos-strip">
+
         <span class="etiqueta">💳 Métodos de pago</span>
+
         <div class="metodos">
             <span>🇻🇪 Pago Móvil</span>
             <span>🟡 Binance USDT</span>
         </div>
+
     </div>
 
     <!-- JUEGOS -->
     <section class="seccion" id="juegos">
+
         <div class="seccion-titulo">
             <div class="titulo-principal">🎮 Videojuegos</div>
             <small>Recargas disponibles</small>
@@ -1371,31 +1508,43 @@ button:focus-visible,a:focus-visible,input:focus-visible{
             </a>
 
         </div>
+
     </section>
 
     <!-- GIFT CARDS -->
     <section class="seccion" id="giftcards">
+
         <div class="seccion-titulo">
             <div class="titulo-principal">🎁 Gift Cards</div>
             <small>Tarjetas digitales</small>
         </div>
 
         <div class="special-grid">
-            <a href="gift-cards.html?marca=playstation" class="game-link special-card" data-nombre="playstation gift card psn">
+
+            <a
+                href="gift-cards.html?marca=playstation"
+                class="game-link special-card"
+                data-nombre="playstation gift card psn">
+
                 <div class="game-img-wrap">
                     <span class="game-badge">Disponible</span>
                     <img src="giftcards.png" class="game-img" alt="PlayStation Gift Card" loading="lazy">
                 </div>
+
                 <div class="game-info">
                     <div class="game-nombre">PlayStation</div>
                     <div class="game-meta neutro">Ver tarjetas disponibles</div>
                 </div>
+
             </a>
+
         </div>
+
     </section>
 
     <!-- STREAMING -->
     <section class="seccion" id="streaming">
+
         <div class="seccion-titulo">
             <div class="titulo-principal">🎬 Streaming</div>
             <small>Entretenimiento digital</small>
@@ -1403,99 +1552,163 @@ button:focus-visible,a:focus-visible,input:focus-visible{
 
         <div class="special-grid">
 
-            <a href="netflix.html" class="game-link special-card" data-nombre="netflix streaming series peliculas">
+            <a
+                href="netflix.html"
+                class="game-link special-card"
+                data-nombre="netflix streaming series peliculas">
+
                 <div class="game-img-wrap">
                     <img src="netflix.png" class="game-img" alt="Netflix" loading="lazy">
                 </div>
+
                 <div class="game-info">
                     <div class="game-nombre">Netflix</div>
                     <div class="game-meta neutro">Ver planes</div>
                 </div>
+
             </a>
 
-            <a href="netflix-codigo-tv.html" class="game-link special-card" data-nombre="netflix codigo hogar tv streaming">
+            <a
+                href="netflix-codigo-tv.html"
+                class="game-link special-card"
+                data-nombre="netflix codigo hogar tv streaming">
+
                 <div class="game-img-wrap">
                     <span class="game-badge rojo">CÓDIGO HOGAR</span>
                     <img src="netflix.png" class="game-img" alt="Netflix Código Hogar" loading="lazy">
                 </div>
+
                 <div class="game-info">
                     <div class="game-nombre">Netflix Código Hogar</div>
                     <div class="game-meta neutro">Ver planes</div>
                 </div>
+
             </a>
 
-            <a href="disney.html" class="game-link special-card" data-nombre="disney streaming peliculas">
+            <a
+                href="disney.html"
+                class="game-link special-card"
+                data-nombre="disney streaming peliculas">
+
                 <div class="game-img-wrap">
                     <img src="disney.png" class="game-img" alt="Disney+" loading="lazy">
                 </div>
+
                 <div class="game-info">
                     <div class="game-nombre">Disney+</div>
                     <div class="game-meta neutro">Ver planes</div>
                 </div>
+
             </a>
 
-            <a href="hbo.html" class="game-link special-card" data-nombre="hbo max streaming series peliculas">
+            <a
+                href="hbo.html"
+                class="game-link special-card"
+                data-nombre="hbo max streaming series peliculas">
+
                 <div class="game-img-wrap">
                     <img src="hbo.png" class="game-img" alt="HBO Max" loading="lazy">
                 </div>
+
                 <div class="game-info">
                     <div class="game-nombre">HBO Max</div>
                     <div class="game-meta neutro">Ver planes</div>
                 </div>
+
             </a>
 
         </div>
+
     </section>
 
     <!-- SIN RESULTADOS -->
     <div class="sin-resultados" id="sinResultados">
+
         <h4>No encontramos ese producto</h4>
-        <p>Prueba con otro nombre o <a href="https://wa.me/584228242411" target="_blank" rel="noopener">escríbenos por WhatsApp</a> y lo consultamos.</p>
+
+        <p>
+            Prueba con otro nombre o
+            <a href="https://wa.me/584228242411" target="_blank" rel="noopener">
+                escríbenos por WhatsApp
+            </a>
+            y lo consultamos.
+        </p>
+
     </div>
+
+    <!-- CTA FINAL -->
+    <section class="cta-final" id="ctaFinal">
+
+        <h3>¿No encuentras tu juego o servicio?</h3>
+        <p>Escríbenos y lo gestionamos por ti. Respuesta rápida por WhatsApp.</p>
+
+        <a href="https://wa.me/584228242411" target="_blank" rel="noopener">
+            💬 Hablar por WhatsApp
+        </a>
+
+    </section>
 
 </main>
 
 <!-- FOOTER -->
 <footer class="footer">
+
     <p class="copyright">© 2026 RecargasGames · Todos los derechos reservados</p>
+
     <div class="payment-methods">
         <span>🇻🇪 Pago Móvil</span>
         <span>🟡 Binance USDT</span>
     </div>
+
     <p class="disclaimer">
-        No somos aliados oficiales de Garena, Codashop, PlayStation, Xbox, Netflix, HBO ni ninguna otra marca.
-        Los nombres de productos, marcas y logotipos son propiedad de sus respectivos dueños.
+        No somos aliados oficiales de Garena, Codashop,
+        PlayStation, Xbox, Netflix, HBO ni ninguna otra marca.
+        Los nombres de productos, marcas y logotipos son
+        propiedad de sus respectivos dueños.
         Ofrecemos un servicio de intermediación de recargas.
     </p>
+
 </footer>
 
-<!-- NAV INFERIOR -->
+<!-- NAVEGACIÓN INFERIOR -->
 <nav class="nav-inferior">
+
     <div class="nav-inferior-inner">
+
         <a href="#inicio" class="nav-item active" data-nav="inicio">
             <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
             Inicio
         </a>
+
         <a href="#juegos" class="nav-item" data-nav="juegos">
             <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
             Juegos
         </a>
+
         <a href="pedidos.html" class="nav-item" id="navPedidos">
             <svg viewBox="0 0 24 24"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
             Pedidos
+            <span class="badge-pedido"></span>
         </a>
+
         <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
             Soporte
         </a>
+
     </div>
+
 </nav>
 
 <!-- INSTALAR -->
-<button class="install-app-btn" id="installAppBtn">📲 Instalar Aplicación</button>
+<button class="install-app-btn" id="installAppBtn">
+    📲 Instalar Aplicación
+</button>
 
 <!-- VOLVER ARRIBA -->
-<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">
+    ↑
+</a>
 
 <!-- MENSAJE PERSONALIZADO -->
 <div class="mensaje-overlay" id="mensajeOverlay">
@@ -1518,9 +1731,11 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
+
 /* =====================================================
    MENSAJES
 ===================================================== */
+
 let _mensajeCallback = null;
 let usuarioActual = null;
 
@@ -1533,7 +1748,9 @@ const ICONOS = {
 };
 
 function mostrarMensaje(titulo,mensaje,tipo="info",textoBoton="Entendido"){
+
     return new Promise((resolve)=>{
+
         const overlay = document.getElementById("mensajeOverlay");
         const icono = document.getElementById("mensajeIcono");
         const tituloEl = document.getElementById("mensajeTitulo");
@@ -1559,10 +1776,14 @@ function mostrarMensaje(titulo,mensaje,tipo="info",textoBoton="Entendido"){
 
         _mensajeCallback = resolve;
         overlay.classList.add("activo");
+
     });
+
 }
 
+
 function mostrarConfirmacion(titulo,mensaje,callback,opciones={}){
+
     const overlay = document.getElementById("mensajeOverlay");
     const icono = document.getElementById("mensajeIcono");
     const tituloEl = document.getElementById("mensajeTitulo");
@@ -1591,39 +1812,50 @@ function mostrarConfirmacion(titulo,mensaje,callback,opciones={}){
 
     document.getElementById("mensajeBtnCancelar").onclick = ()=>{
         cerrarMensajePersonalizado();
-        if(typeof callback==="function"){ callback(false); }
+        if(typeof callback==="function"){
+            callback(false);
+        }
     };
 
     document.getElementById("mensajeBtnAceptar").onclick = ()=>{
         cerrarMensajePersonalizado();
-        if(typeof callback==="function"){ callback(true); }
+        if(typeof callback==="function"){
+            callback(true);
+        }
     };
 
     overlay.classList.add("activo");
+
 }
 
+
 function cerrarMensajePersonalizado(){
+
     const overlay = document.getElementById("mensajeOverlay");
     overlay.classList.remove("activo");
+
     if(_mensajeCallback){
         _mensajeCallback(false);
         _mensajeCallback=null;
     }
+
 }
+
 
 window.mostrarMensaje = mostrarMensaje;
 window.mostrarConfirmacion = mostrarConfirmacion;
 window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
 
+
 /* =====================================================
    ELEMENTOS
 ===================================================== */
+
 const perfilContainer = document.getElementById("perfilContainer");
 const menuPerfil = document.getElementById("menuPerfil");
 const perfilNombre = document.getElementById("perfilNombre");
 const nombreCompleto = document.getElementById("nombreCompleto");
 const emailUsuario = document.getElementById("emailUsuario");
-const perfilFlecha = document.getElementById("perfilFlecha");
 const menuFlotante = document.getElementById("menuFlotante");
 const menuHamburguesaLogin = document.getElementById("menuHamburguesaLogin");
 const menuHamburguesaRegister = document.getElementById("menuHamburguesaRegister");
@@ -1644,27 +1876,65 @@ const avatarInicial = document.getElementById("avatarInicial");
 const avatarGrande = document.getElementById("avatarGrande");
 const avatarGrandeImg = document.getElementById("avatarGrandeImg");
 const avatarGrandeInicial = document.getElementById("avatarGrandeInicial");
+const btnNotificaciones = document.getElementById("btnNotificaciones");
+const notifBadge = document.getElementById("notifBadge");
+const ctaFinal = document.getElementById("ctaFinal");
+
 
 /* =====================================================
    NOTIFICACIONES
 ===================================================== */
-function pedirPermisoNotificaciones(){
-    if(!("Notification" in window)) return;
+
+function actualizarBadgeNotif(){
+
+    if(!("Notification" in window)){
+
+        btnNotificaciones.classList.remove("tiene-alerta");
+        return;
+
+    }
+
     if(Notification.permission === "default"){
+        btnNotificaciones.classList.add("tiene-alerta");
+    }else{
+        btnNotificaciones.classList.remove("tiene-alerta");
+    }
+
+}
+
+
+function pedirPermisoNotificaciones(){
+
+    if(!("Notification" in window)) return;
+
+    if(Notification.permission === "default"){
+
         setTimeout(()=>{
+
             Notification.requestPermission().then(permiso=>{
+
+                actualizarBadgeNotif();
+
                 if(permiso === "granted"){
                     console.log("✅ Notificaciones activadas");
                 }
+
             });
+
         }, 3000);
+
     }
+
 }
 
+
 function enviarNotificacion(titulo, cuerpo, opciones={}){
+
     if(!("Notification" in window)) return false;
     if(Notification.permission !== "granted") return false;
+
     try{
+
         const notif = new Notification(titulo, {
             body: cuerpo,
             icon: "/logo.png",
@@ -1672,267 +1942,549 @@ function enviarNotificacion(titulo, cuerpo, opciones={}){
             vibrate: [200,100,200],
             ...opciones
         });
+
         setTimeout(()=>{ try{ notif.close(); }catch(e){} }, 7000);
+
         return true;
-    }catch(e){ return false; }
+
+    }catch(e){
+        return false;
+    }
+
 }
+
+
 window.enviarNotificacion = enviarNotificacion;
+
+
+window.accionNotificaciones = function(){
+
+    if(!("Notification" in window)){
+
+        mostrarMensaje(
+            "Notificaciones no disponibles",
+            "Tu navegador no soporta notificaciones.",
+            "info"
+        );
+        return;
+
+    }
+
+    if(Notification.permission === "granted"){
+
+        mostrarMensaje(
+            "Notificaciones activas",
+            "Te avisaremos cuando tengas novedades importantes.",
+            "exito"
+        );
+
+    }else if(Notification.permission === "denied"){
+
+        mostrarMensaje(
+            "Notificaciones bloqueadas",
+            "Para activarlas, ve a los ajustes de tu navegador y permite las notificaciones para este sitio.",
+            "advertencia"
+        );
+
+    }else{
+
+        Notification.requestPermission().then(permiso=>{
+
+            actualizarBadgeNotif();
+
+            if(permiso === "granted"){
+                mostrarMensaje(
+                    "¡Listo!",
+                    "Notificaciones activadas correctamente.",
+                    "exito"
+                );
+            }
+
+        });
+
+    }
+
+};
+
 
 /* =====================================================
    FIREBASE / USUARIO
 ===================================================== */
+
 function cargarFotoPerfil(user){
+
     let foto = localStorage.getItem("foto_perfil_" + user.uid);
+
     if(foto && foto.startsWith("data:image")){
+
         avatarImg.src = foto;
         avatarGrandeImg.src = foto;
+
         avatarCircle.classList.add("tiene-foto");
         avatarGrande.classList.add("tiene-foto");
+
     }else{
+
         avatarCircle.classList.remove("tiene-foto");
         avatarGrande.classList.remove("tiene-foto");
+
     }
+
 }
 
 function ponerInicialAvatar(nombre){
+
     const inicial = String(nombre || "U").charAt(0).toUpperCase();
+
     avatarInicial.textContent = inicial;
     avatarGrandeInicial.textContent = inicial;
+
 }
+
 
 function actualizarUI(user){
+
     usuarioActual = user;
+
     if(user){
+
         const nombre = user.displayName || "Usuario";
         const email = user.email || "usuario@email.com";
+
         perfilContainer.style.display="block";
-        perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0,12)+"..." : nombre;
+
+        perfilNombre.textContent = nombre.length > 12
+            ? nombre.substring(0,12)+"..."
+            : nombre;
+
         nombreCompleto.textContent = nombre;
         emailUsuario.textContent = email;
+
         ponerInicialAvatar(nombre);
         cargarFotoPerfil(user);
+
         menuHamburguesaLogin.style.display="none";
         menuHamburguesaRegister.style.display="none";
+
         menuHamburguesaDashboard.style.display="flex";
         menuHamburguesaLogout.style.display="flex";
+
+        navPedidos.classList.add("tiene-pedido");
+
         pedirPermisoNotificaciones();
+
     }else{
+
         perfilContainer.style.display="none";
+
         menuHamburguesaLogin.style.display="flex";
         menuHamburguesaRegister.style.display="flex";
+
         menuHamburguesaDashboard.style.display="none";
         menuHamburguesaLogout.style.display="none";
+
+        navPedidos.classList.remove("tiene-pedido");
+
     }
+
+    actualizarBadgeNotif();
+
 }
 
-onAuthStateChanged(auth,(user)=>{ actualizarUI(user); });
+
+onAuthStateChanged(auth,(user)=>{
+    actualizarUI(user);
+});
+
 
 /* =====================================================
    MENUS
 ===================================================== */
+
 window.toggleMenuPerfil=function(){
     menuPerfil.classList.toggle("activo");
-    perfilFlecha.classList.toggle("abierta");
     menuFlotante.classList.remove("activo");
 };
+
 
 window.alternarMenu=function(){
     menuFlotante.classList.toggle("activo");
     menuPerfil.classList.remove("activo");
-    perfilFlecha.classList.remove("abierta");
 };
 
+
 window.cerrarTodosLosMenus=function(e){
+
     const btnMenu = document.getElementById("btnMenu");
     const btnPerfil = document.getElementById("btnPerfil");
-    if(!menuPerfil.contains(e.target) && (!btnPerfil || !btnPerfil.contains(e.target))){
+
+    if(
+        !menuPerfil.contains(e.target) &&
+        (!btnPerfil || !btnPerfil.contains(e.target))
+    ){
         menuPerfil.classList.remove("activo");
-        perfilFlecha.classList.remove("abierta");
     }
-    if(!menuFlotante.contains(e.target) && !btnMenu.contains(e.target)){
+
+    if(
+        !menuFlotante.contains(e.target) &&
+        !btnMenu.contains(e.target)
+    ){
         menuFlotante.classList.remove("activo");
     }
+
 };
+
+
+window.enfocarBuscador = function(){
+
+    const buscador = document.getElementById("buscador");
+
+    buscador.scrollIntoView({behavior:"smooth",block:"center"});
+
+    setTimeout(()=>{
+        buscador.focus();
+    },300);
+
+};
+
+
+window.limpiarBuscador = function(){
+
+    const buscador = document.getElementById("buscador");
+    buscador.value = "";
+    buscador.dispatchEvent(new Event("input"));
+    buscador.focus();
+
+};
+
 
 /* =====================================================
    LOGIN
 ===================================================== */
+
 window.abrirModalLogin=function(){
+
     modalLogin.classList.add("active");
+
     loginMessage.className="message";
     loginMessage.style.display="none";
+
     loginEmail.value="";
     loginPassword.value="";
+
     menuPerfil.classList.remove("activo");
     menuFlotante.classList.remove("activo");
+
 };
+
 
 window.cerrarModalLogin=function(){
     modalLogin.classList.remove("active");
 };
 
+
 modalLogin.addEventListener("click",(e)=>{
-    if(e.target===modalLogin){ cerrarModalLogin(); }
+    if(e.target===modalLogin){
+        cerrarModalLogin();
+    }
 });
 
+
 loginForm.addEventListener("submit",async(e)=>{
+
     e.preventDefault();
+
     const email = loginEmail.value.trim();
     const password = loginPassword.value;
+
     loginBtn.disabled=true;
     loginBtn.textContent="Ingresando...";
 
     try{
+
         await signInWithEmailAndPassword(auth,email,password);
+
         loginMessage.className="message success";
         loginMessage.textContent="✅ ¡Bienvenido!";
         loginMessage.style.display="block";
+
         setTimeout(()=>{
             cerrarModalLogin();
             window.location.reload();
         },900);
+
     }catch(error){
+
         let msg="❌ ";
+
         switch(error.code){
-            case "auth/user-not-found": msg+="Usuario no encontrado"; break;
-            case "auth/wrong-password": msg+="Contraseña incorrecta"; break;
-            case "auth/invalid-credential": msg+="Correo o contraseña incorrectos"; break;
-            case "auth/invalid-email": msg+="Correo inválido"; break;
-            case "auth/too-many-requests": msg+="Demasiados intentos. Intenta más tarde"; break;
-            default: msg+="No se pudo iniciar sesión";
+
+            case "auth/user-not-found":
+                msg+="Usuario no encontrado";
+                break;
+
+            case "auth/wrong-password":
+                msg+="Contraseña incorrecta";
+                break;
+
+            case "auth/invalid-credential":
+                msg+="Correo o contraseña incorrectos";
+                break;
+
+            case "auth/invalid-email":
+                msg+="Correo inválido";
+                break;
+
+            case "auth/too-many-requests":
+                msg+="Demasiados intentos. Intenta más tarde";
+                break;
+
+            default:
+                msg+="No se pudo iniciar sesión";
+
         }
+
         loginMessage.className="message error";
         loginMessage.textContent=msg;
         loginMessage.style.display="block";
+
         loginBtn.disabled=false;
         loginBtn.textContent="Ingresar";
+
     }
+
 });
+
 
 /* =====================================================
    CERRAR SESION
 ===================================================== */
+
 async function ejecutarLogout(){
+
     try{
+
         await signOut(auth);
         window.location.reload();
+
     }catch(error){
-        mostrarMensaje("Error","No fue posible cerrar la sesión.","error");
+
+        mostrarMensaje(
+            "Error",
+            "No fue posible cerrar la sesión.",
+            "error"
+        );
+
     }
+
 }
 
-function pedirCierreSesion(e){
+
+function confirmarLogout(e){
+
     e.preventDefault();
+
     mostrarConfirmacion(
         "Cerrar sesión",
         "¿Seguro que quieres cerrar sesión?",
-        (confirmado)=>{ if(confirmado){ ejecutarLogout(); } },
-        { tipo:"confirmacion", textoAceptar:"Cerrar sesión", textoCancelar:"Cancelar", peligro:true }
+        (confirmado)=>{
+            if(confirmado){
+                ejecutarLogout();
+            }
+        },
+        {
+            tipo:"confirmacion",
+            textoAceptar:"Cerrar sesión",
+            textoCancelar:"Cancelar",
+            peligro:true
+        }
     );
+
 }
 
-btnCerrarSesion.addEventListener("click", pedirCierreSesion);
-menuHamburguesaLogout.addEventListener("click", pedirCierreSesion);
+
+btnCerrarSesion.addEventListener("click",confirmarLogout);
+menuHamburguesaLogout.addEventListener("click",confirmarLogout);
+
 
 /* =====================================================
    PEDIDOS
 ===================================================== */
+
 navPedidos.addEventListener("click",(e)=>{
+
     if(!usuarioActual){
         e.preventDefault();
         abrirModalLogin();
     }
+
 });
+
 
 /* =====================================================
    BUSCADOR
 ===================================================== */
+
 const inputBuscador = document.getElementById("buscador");
+const buscadorClear = document.getElementById("buscadorClear");
 const sinResultados = document.getElementById("sinResultados");
 const tarjetas = Array.from(document.querySelectorAll(".game-link"));
 const secciones = Array.from(document.querySelectorAll(".seccion"));
 
+
 function normalizar(texto){
+
     return texto
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g,"")
         .trim();
+
 }
 
+
 function filtrarCatalogo(){
+
     const q = normalizar(inputBuscador.value);
     let visibles=0;
 
     tarjetas.forEach(card=>{
-        const nombre = normalizar(card.dataset.nombre || card.textContent);
+
+        const nombre = normalizar(
+            card.dataset.nombre || card.textContent
+        );
+
         const visible = q==="" || nombre.includes(q);
+
         card.style.display = visible ? "" : "none";
-        if(visible){ visibles++; }
+
+        if(visible){
+            visibles++;
+        }
+
     });
+
 
     secciones.forEach(sec=>{
-        const hay = Array.from(sec.querySelectorAll(".game-link")).some(c=>c.style.display!=="none");
+
+        const hay = Array.from(
+            sec.querySelectorAll(".game-link")
+        ).some(c=>c.style.display!=="none");
+
         sec.style.display = hay ? "" : "none";
+
     });
 
-    sinResultados.classList.toggle("visible", q!=="" && visibles===0);
+
+    sinResultados.classList.toggle(
+        "visible",
+        q!=="" && visibles===0
+    );
+
+    buscadorClear.classList.toggle("visible", q!=="");
+
+    if(ctaFinal){
+        ctaFinal.style.display = (q==="") ? "" : "none";
+    }
+
 }
 
+
 inputBuscador.addEventListener("input",filtrarCatalogo);
+
 
 /* =====================================================
    NAVEGACION
 ===================================================== */
-const chips = Array.from(document.querySelectorAll("#categorias a"));
-const itemsNav = Array.from(document.querySelectorAll(".nav-item[data-nav]"));
+
+const chips = Array.from(
+    document.querySelectorAll("#categorias a")
+);
+
+const itemsNav = Array.from(
+    document.querySelectorAll(".nav-item[data-nav]")
+);
+
 
 function marcarActivo(id){
+
     chips.forEach(a=>{
         a.classList.toggle("active",a.dataset.seccion===id);
     });
+
     itemsNav.forEach(a=>{
         a.classList.toggle("active",a.dataset.nav===id);
     });
-    const activo = chips.find(a=>a.dataset.seccion===id);
+
+    const activo = chips.find(
+        a=>a.dataset.seccion===id
+    );
+
     if(activo){
-        activo.scrollIntoView({ inline:"center", block:"nearest" });
+        activo.scrollIntoView({
+            inline:"center",
+            block:"nearest",
+            behavior:"smooth"
+        });
     }
+
 }
+
 
 const observador = new IntersectionObserver(
     entradas=>{
+
         entradas.forEach(entrada=>{
+
             if(entrada.isIntersecting){
                 marcarActivo(entrada.target.id);
             }
+
         });
+
     },
-    { rootMargin:"-35% 0px -55% 0px" }
+    {
+        rootMargin:"-35% 0px -55% 0px"
+    }
 );
 
-secciones.forEach(sec=>{ observador.observe(sec); });
+
+secciones.forEach(sec=>{
+    observador.observe(sec);
+});
+
 
 window.addEventListener("scroll",()=>{
-    document.getElementById("backToTop").classList.toggle("show",window.scrollY>350);
-    if(window.scrollY<200){ marcarActivo("inicio"); }
+
+    document.getElementById("backToTop")
+        .classList.toggle("show",window.scrollY>350);
+
+    if(window.scrollY<200){
+        marcarActivo("inicio");
+    }
+
 },{passive:true});
+
 
 chips[0].addEventListener("click",e=>{
     e.preventDefault();
     window.scrollTo({top:0,behavior:"smooth"});
 });
 
+
 itemsNav[0].addEventListener("click",e=>{
     e.preventDefault();
     window.scrollTo({top:0,behavior:"smooth"});
 });
 
+
 /* =====================================================
    PWA
 ===================================================== */
+
 let deferredPrompt=null;
 let esInstalable=false;
+
 
 function estaInstalada(){
     return(
@@ -1942,69 +2494,111 @@ function estaInstalada(){
     );
 }
 
+
 function esIOS(){
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
+
 function actualizarBotonInstalar(){
-    if(estaInstalada()){ installAppBtn.style.display="none"; return; }
-    if(esIOS()){ installAppBtn.style.display="block"; return; }
-    installAppBtn.style.display = esInstalable ? "block" : "none";
-}
 
-actualizarBotonInstalar();
-
-if("serviceWorker" in navigator){
-    window.addEventListener("load",()=>{
-        navigator.serviceWorker.register("/sw.js")
-            .then(reg=>console.log("SW registrado:",reg.scope))
-            .catch(err=>console.warn("SW:",err.message));
-    });
-}
-
-window.addEventListener("beforeinstallprompt",e=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    esInstalable=true;
-    actualizarBotonInstalar();
-});
-
-window.addEventListener("appinstalled",()=>{
-    esInstalable=false;
-    deferredPrompt=null;
-    installAppBtn.style.display="none";
-});
-
-installAppBtn.addEventListener("click",async()=>{
-    if(estaInstalada()){ installAppBtn.style.display="none"; return; }
-
-    if(deferredPrompt){
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        if(result.outcome==="accepted"){
-            installAppBtn.textContent="✅ ¡Instalada!";
-            setTimeout(()=>{
-                installAppBtn.textContent="📲 Instalar Aplicación";
-                actualizarBotonInstalar();
-            },3000);
-        }
-        deferredPrompt=null;
+    if(estaInstalada()){
+        installAppBtn.style.display="none";
         return;
     }
 
     if(esIOS()){
+        installAppBtn.style.display="block";
+        return;
+    }
+
+    installAppBtn.style.display = esInstalable ? "block" : "none";
+
+}
+
+
+actualizarBotonInstalar();
+
+
+if("serviceWorker" in navigator){
+
+    window.addEventListener("load",()=>{
+
+        navigator.serviceWorker.register("/sw.js")
+            .then(reg=>console.log("SW registrado:",reg.scope))
+            .catch(err=>console.warn("SW:",err.message));
+
+    });
+
+}
+
+
+window.addEventListener("beforeinstallprompt",e=>{
+
+    e.preventDefault();
+    deferredPrompt=e;
+    esInstalable=true;
+    actualizarBotonInstalar();
+
+});
+
+
+window.addEventListener("appinstalled",()=>{
+
+    esInstalable=false;
+    deferredPrompt=null;
+    installAppBtn.style.display="none";
+
+});
+
+
+installAppBtn.addEventListener("click",async()=>{
+
+    if(estaInstalada()){
+        installAppBtn.style.display="none";
+        return;
+    }
+
+    if(deferredPrompt){
+
+        deferredPrompt.prompt();
+
+        const result = await deferredPrompt.userChoice;
+
+        if(result.outcome==="accepted"){
+
+            installAppBtn.textContent="✅ ¡Instalada!";
+
+            setTimeout(()=>{
+                installAppBtn.textContent="📲 Instalar Aplicación";
+                actualizarBotonInstalar();
+            },3000);
+
+        }
+
+        deferredPrompt=null;
+        return;
+
+    }
+
+    if(esIOS()){
+
         mostrarMensaje(
             "Instalar Recargas Games",
             "1️⃣ Toca el botón Compartir en Safari\n2️⃣ Selecciona «Añadir a pantalla de inicio»\n3️⃣ Pulsa «Añadir»",
             "info"
         );
+
     }else{
+
         mostrarMensaje(
             "Instalar Recargas Games",
             "En Chrome o Edge puedes instalar la aplicación desde el menú del navegador o desde el icono de instalación de la barra de direcciones.",
             "info"
         );
+
     }
+
 });
 
 </script>
