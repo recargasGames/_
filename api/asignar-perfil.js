@@ -2,24 +2,9 @@
 import admin from 'firebase-admin';
 
 if (!admin.apps.length) {
-    // ✅ Procesar la private key para asegurar que los \n se interpreten bien
     let privateKey = process.env.FIREBASE_PRIVATE_KEY || '';
-    // Si viene con comillas dobles, quitarlas
     privateKey = privateKey.replace(/^"|"$/g, '');
-    // Reemplazar \n literales por saltos de línea reales
     privateKey = privateKey.replace(/\\n/g, '\n');
-
-    // ✅ Asegurar que la databaseURL esté correcta
-    let databaseURL = process.env.FIREBASE_DATABASE_URL || '';
-    databaseURL = databaseURL.replace(/^"|"$/g, '').trim();
-
-    console.log('🔍 DEBUG Firebase init:');
-    console.log('   projectId:', process.env.FIREBASE_PROJECT_ID);
-    console.log('   clientEmail:', process.env.FIREBASE_CLIENT_EMAIL?.substring(0, 40) + '...');
-    console.log('   databaseURL:', databaseURL);
-    console.log('   privateKey length:', privateKey.length);
-    console.log('   privateKey starts:', privateKey.substring(0, 30));
-    console.log('   privateKey ends:', privateKey.substring(privateKey.length - 30));
 
     admin.initializeApp({
         credential: admin.credential.cert({
@@ -27,7 +12,7 @@ if (!admin.apps.length) {
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL?.trim(),
             privateKey: privateKey
         }),
-        databaseURL: databaseURL
+        databaseURL: (process.env.FIREBASE_DATABASE_URL || '').replace(/^"|"$/g, '').trim()
     });
 }
 
@@ -48,19 +33,10 @@ export default async function handler(req, res) {
             return res.status(400).json({ ok: false, error: 'Falta: servicio' });
         }
 
-        console.log('🔍 Buscando perfiles de:', servicio);
-
         const servicioKey = String(servicio).toLowerCase();
         const refCuentas = db.ref(`cuentas_streaming/${servicioKey}`);
-        
-        // ✅ Timeout de 8 segundos para no colgarse
-        const snap = await Promise.race([
-            refCuentas.once('value'),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Firebase timeout')), 8000))
-        ]);
-
+        const snap = await refCuentas.once('value');
         const cuentas = snap.val() || {};
-        console.log('📦 Cuentas encontradas:', Object.keys(cuentas).length);
 
         if (Object.keys(cuentas).length === 0) {
             return res.status(200).json({
@@ -70,22 +46,50 @@ export default async function handler(req, res) {
             });
         }
 
+        // 🔍 DEBUG: Ver toda la info de las cuentas
+        console.log('═══════════════════════════════════════');
+        console.log('🔍 DEBUG ASIGNAR PERFIL');
+        console.log('   Servicio:', servicio);
+        console.log('   Total cuentas:', Object.keys(cuentas).length);
+
+        // Buscar TODOS los perfiles con estado 'libre' (case-insensitive)
         let cuentaElegida = null;
         let perfilElegido = null;
+        let perfilNumero = null;
 
         for (const cuentaId of Object.keys(cuentas)) {
             const cuenta = cuentas[cuentaId];
-            if (cuenta.estado !== 'activa') continue;
-            const perfiles = cuenta.perfiles || {};
-            const perfilLibre = Object.values(perfiles).find(p => p.estado === 'libre');
-            if (perfilLibre) {
-                cuentaElegida = { id: cuentaId, data: cuenta };
-                perfilElegido = perfilLibre;
-                break;
+            console.log(`\n📦 Cuenta: ${cuentaId}`);
+            console.log(`   Estado: ${cuenta.estado}`);
+            console.log(`   Correo: ${cuenta.correo}`);
+
+            if (cuenta.estado !== 'activa') {
+                console.log(`   ⏭️ Saltando: no está activa`);
+                continue;
             }
+
+            const perfiles = cuenta.perfiles || {};
+            console.log(`   Total perfiles: ${Object.keys(perfiles).length}`);
+
+            for (const num of Object.keys(perfiles)) {
+                const p = perfiles[num];
+                console.log(`   - Perfil ${num}: estado="${p.estado}" (tipo: ${typeof p.estado})`);
+                
+                // ✅ Comparación case-insensitive
+                const estadoNormalizado = String(p.estado || '').toLowerCase().trim();
+                if (estadoNormalizado === 'libre') {
+                    cuentaElegida = { id: cuentaId, data: cuenta };
+                    perfilElegido = p;
+                    perfilNumero = num;
+                    console.log(`   ✅ ENCONTRADO LIBRE: Perfil ${num}`);
+                    break;
+                }
+            }
+            if (cuentaElegida) break;
         }
 
         if (!cuentaElegida) {
+            console.log('❌ NO SE ENCONTRARON PERFILES LIBRES');
             return res.status(200).json({
                 ok: false,
                 error: 'NO_HAY_PERFILES',
@@ -93,27 +97,20 @@ export default async function handler(req, res) {
             });
         }
 
-        const perfilRef = refCuentas.child(cuentaElegida.id).child('perfiles').child(perfilElegido.numero);
+        console.log(`\n✅ ASIGNANDO Perfil ${perfilNumero} de cuenta ${cuentaElegida.id}`);
+
+        // Marcar como ocupado (sin transacción para simplificar)
+        const perfilRef = refCuentas.child(cuentaElegida.id).child('perfiles').child(perfilNumero);
         const pedidoId = pedido || `PED-${Date.now()}`;
 
-        const resultado = await perfilRef.transaction((perfilActual) => {
-            if (!perfilActual || perfilActual.estado !== 'libre') return;
-            return {
-                ...perfilActual,
-                estado: 'ocupado',
-                cliente: cliente || 'Cliente',
-                pedido: pedidoId,
-                fecha: new Date().toISOString()
-            };
+        await perfilRef.update({
+            estado: 'ocupado',
+            cliente: cliente || 'Cliente',
+            pedido: pedidoId,
+            fecha: new Date().toISOString()
         });
 
-        if (!resultado.committed) {
-            return res.status(200).json({
-                ok: false,
-                error: 'PERFIL_OCUPADO',
-                mensaje: 'El perfil fue tomado por otra venta. Reintenta.'
-            });
-        }
+        console.log('✅ Perfil marcado como ocupado');
 
         return res.status(200).json({
             ok: true,
@@ -124,8 +121,8 @@ export default async function handler(req, res) {
             datos: {
                 correo: cuentaElegida.data.correo,
                 clave: cuentaElegida.data.clave,
-                perfil: 'Perfil ' + perfilElegido.numero,
-                numero_perfil: perfilElegido.numero,
+                perfil: 'Perfil ' + perfilNumero,
+                numero_perfil: parseInt(perfilNumero),
                 pin_perfil: perfilElegido.pin,
                 fecha_vencimiento: cuentaElegida.data.fecha_vencimiento
             },
