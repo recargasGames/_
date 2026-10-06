@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netflix - RecargasGames</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif}
+body{background:#0a0e1a;color:#fff;min-height:100vh;padding:20px;background-image:radial-gradient(circle at 20% 10%, rgba(229,9,20,0.15), transparent 50%), radial-gradient(circle at 80% 90%, rgba(212,175,55,0.08), transparent 50%)}
+.container{max-width:600px;margin:0 auto;padding-top:20px}
+.header{text-align:center;margin-bottom:40px}
+.logo{font-size:48px;font-weight:900;background:linear-gradient(135deg,#e50914,#b00710);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;margin-bottom:8px}
+.subtitulo{color:#9ca3af;font-size:14px;letter-spacing:1px;text-transform:uppercase}
+.productos{display:flex;flex-direction:column;gap:16px}
+.producto{background:linear-gradient(135deg,rgba(20,30,55,0.85),rgba(10,14,26,0.95));border:2px solid rgba(229,9,20,0.4);border-radius:18px;padding:22px;display:flex;justify-content:space-between;align-items:center;gap:14px;transition:.3s;cursor:pointer}
+.producto:hover{border-color:#e50914;transform:translateY(-3px);box-shadow:0 15px 40px rgba(229,9,20,0.3)}
+.producto-info{flex:1;min-width:0}
+.producto-nombre{font-size:17px;font-weight:800;color:#fff;margin-bottom:6px}
+.producto-detalle{font-size:13px;color:#9ca3af;line-height:1.5}
+.producto-precio{text-align:right;flex-shrink:0}
+.precio-usd{font-size:22px;font-weight:900;color:#d4af37;display:block}
+.precio-bs{font-size:12px;color:#9ca3af;margin-top:2px}
+.btn-comprar{margin-top:12px;padding:10px 20px;background:linear-gradient(135deg,#e50914,#b00710);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:inherit;width:100%;transition:.2s}
+.btn-comprar:hover{transform:scale(1.03);box-shadow:0 8px 25px rgba(229,9,20,0.5)}
+.volver{display:inline-block;margin-top:30px;color:#9ca3af;text-decoration:none;font-size:14px}
+.volver:hover{color:#d4af37}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">NETFLIX</div>
+        <div class="subtitulo">Elige tu producto</div>
+    </div>
+
+    <div class="productos" id="productos"></div>
+
+    <a href="index.html" class="volver">← Volver al inicio</a>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// PRODUCTOS DISPONIBLES
+// ═══════════════════════════════════════════════
+const TASA_BS = 940; // Tasa del dólar (se actualizará sola si tienes endpoint)
+
+const PRODUCTOS = [
+    {
+        id: 'netflix_perfil',
+        nombre: 'Perfil Netflix',
+        detalle: '1 perfil individual · 30 días · Con PIN de seguridad',
+        precio_usd: 3.20,
+        paquete: 'netflix_perfil',
+        servicio: 'netflix'
+    },
+    {
+        id: 'netflix_cuenta',
+        nombre: 'Cuenta Netflix Completa',
+        detalle: 'Cuenta completa con 5 perfiles · 30 días',
+        precio_usd: 13.00,
+        paquete: 'netflix_cuenta',
+        servicio: 'netflix'
+    },
+    {
+        id: 'disney_perfil',
+        nombre: 'Perfil Disney+',
+        detalle: '1 perfil individual · 30 días',
+        precio_usd: 3.53,
+        paquete: 'disney_perfil',
+        servicio: 'disney'
+    },
+    {
+        id: 'disney_cuenta',
+        nombre: 'Cuenta Disney+ Completa',
+        detalle: 'Cuenta completa con 4 perfiles · 30 días',
+        precio_usd: 9.00,
+        paquete: 'disney_cuenta',
+        servicio: 'disney'
+    },
+    {
+        id: 'hbo_perfil',
+        nombre: 'Perfil HBO Max',
+        detalle: '1 perfil individual · 30 días',
+        precio_usd: 3.50,
+        paquete: 'hbo_perfil',
+        servicio: 'hbo'
+    },
+    {
+        id: 'hbo_cuenta',
+        nombre: 'Cuenta HBO Max Completa',
+        detalle: 'Cuenta completa · 30 días',
+        precio_usd: 8.00,
+        paquete: 'hbo_cuenta',
+        servicio: 'hbo'
+    }
+];
+
+// ═══════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════
+function renderProductos() {
+    const container = document.getElementById('productos');
+    container.innerHTML = PRODUCTOS.map(p => `
+        <div class="producto">
+            <div class="producto-info">
+                <div class="producto-nombre">${p.nombre}</div>
+                <div class="producto-detalle">${p.detalle}</div>
+                <div class="producto-precio">
+                    <span class="precio-usd">$${p.precio_usd.toFixed(2)}</span>
+                    <span class="precio-bs">${Math.round(p.precio_usd * TASA_BS).toLocaleString('es-VE')} Bs</span>
+                </div>
+                <button class="btn-comprar" onclick="comprar('${p.id}')">Comprar ahora</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// COMPRAR
+// ═══════════════════════════════════════════════
+function comprar(productoId) {
+    const prod = PRODUCTOS.find(p => p.id === productoId);
+    if (!prod) return;
+
+    // Guardar en localStorage para que verificar-netflix lo lea
+    localStorage.setItem('juego_seleccionado', 'NETFLIX'); // O DISNEY+ / HBO según servicio
+    localStorage.setItem('producto_seleccionado', prod.nombre);
+    localStorage.setItem('paquete_codigo', prod.paquete);
+    localStorage.setItem('precio_usd', prod.precio_usd.toString());
+    localStorage.setItem('precio_en_bs', Math.round(prod.precio_usd * TASA_BS).toString());
+    localStorage.setItem('proveedor', 'cuentas_propias');
+    localStorage.setItem('servicio_streaming', prod.servicio);
+    localStorage.setItem('metodo_pago', 'PAGO MOVIL');
+
+    // Ir a la página de verificación
+    window.location.href = 'verificar-netflix.html';
+}
+
+// Intentar cargar tasa real (si existe endpoint)
+fetch('/api/tasa').then(r => r.json()).then(d => {
+    if (d.ok && d.tasa_usdt) {
+        // Recargar con tasa real
+        renderProductosConTasa(Math.round(d.tasa_usdt));
+    }
+}).catch(() => {});
+
+function renderProductosConTasa(tasa) {
+    const container = document.getElementById('productos');
+    container.innerHTML = PRODUCTOS.map(p => `
+        <div class="producto">
+            <div class="producto-info">
+                <div class="producto-nombre">${p.nombre}</div>
+                <div class="producto-detalle">${p.detalle}</div>
+                <div class="producto-precio">
+                    <span class="precio-usd">$${p.precio_usd.toFixed(2)}</span>
+                    <span class="precio-bs">${Math.round(p.precio_usd * tasa).toLocaleString('es-VE')} Bs</span>
+                </div>
+                <button class="btn-comprar" onclick="comprar('${p.id}')">Comprar ahora</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+renderProductos();
+</script>
+</body>
+</html>
