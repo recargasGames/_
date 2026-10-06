@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirmar Pago - Netflix</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif}
+body{background:#0a0e1a;color:#fff;min-height:100vh;padding:20px}
+.container{max-width:480px;margin:0 auto;padding-top:20px}
+.titulo{text-align:center;font-size:24px;font-weight:900;color:#d4af37;margin-bottom:24px;letter-spacing:1px}
+.tarjeta{background:linear-gradient(135deg,rgba(20,30,55,0.85),rgba(10,14,26,0.95));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:22px;margin-bottom:20px}
+.tarjeta-titulo{font-size:14px;font-weight:800;color:#f5d76e;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px}
+.resumen-fila{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(212,175,55,0.12);font-size:14px}
+.resumen-fila:last-child{border-bottom:none}
+.resumen-fila span:first-child{color:#9ca3af}
+.resumen-fila span:last-child{font-weight:700}
+.verde{color:#d4af37}
+.dato{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:10px;border:1px solid rgba(212,175,55,0.1)}
+.dato-texto{font-size:14px}
+.dato-texto strong{color:#9ca3af;margin-right:6px}
+.btn-copiar{width:40px;height:40px;border-radius:8px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);color:#f5d76e;cursor:pointer;font-size:16px}
+.btn-copiar:hover{background:rgba(212,175,55,0.25)}
+.input-ref{width:100%;padding:14px;border-radius:12px;background:rgba(0,0,0,0.4);border:1px solid rgba(212,175,55,0.3);color:#fff;font-size:16px;margin-bottom:12px;font-family:inherit;letter-spacing:1px}
+.input-ref:focus{outline:none;border-color:#d4af37;box-shadow:0 0 0 3px rgba(212,175,55,0.15)}
+.btn-confirmar{width:100%;padding:16px;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;border:none;border-radius:12px;font-size:16px;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:inherit}
+.btn-confirmar:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,175,55,0.5)}
+.btn-confirmar:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.spinner{width:70px;height:70px;border:3px solid rgba(212,175,55,0.2);border-top-color:#d4af37;border-radius:50%;animation:spin 1s linear infinite;margin:30px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.oculto{display:none}
+.datos-entrega{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.6);border-radius:16px;padding:20px;margin-top:20px}
+.datos-entrega h3{color:#4ade80;font-size:16px;margin-bottom:15px;text-align:center;letter-spacing:1px;text-transform:uppercase}
+.dato-entrega{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(0,0,0,0.3);border-radius:10px;margin-bottom:8px}
+.dato-entrega .label{color:#86efac;font-size:13px;font-weight:700}
+.dato-entrega .valor{color:#fff;font-weight:800;font-size:15px;font-family:'Courier New',monospace;letter-spacing:1px}
+.btn-copiar-todo{width:100%;padding:14px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:15px;font-family:inherit}
+.btn-copiar-todo:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(34,197,94,0.5)}
+.volver{display:block;text-align:center;color:#9ca3af;text-decoration:none;margin-top:20px;font-size:14px}
+.volver:hover{color:#d4af37}
+.mensaje-error{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);border-radius:12px;padding:16px;color:#fca5a5;text-align:center;font-size:14px;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1 class="titulo">💳 Confirmar Pago</h1>
+
+    <!-- PASO 1: Mostrar datos de pago -->
+    <div id="pasoDatos">
+        <div class="tarjeta">
+            <h2 class="tarjeta-titulo">📋 Resumen de compra</h2>
+            <div class="resumen-fila"><span>🎬 Servicio</span><span id="resJuego">-</span></div>
+            <div class="resumen-fila"><span>📦 Producto</span><span id="resProducto">-</span></div>
+            <div class="resumen-fila"><span>💰 Total</span><span class="verde" id="resMonto">-</span></div>
+        </div>
+
+        <div class="tarjeta">
+            <h2 class="tarjeta-titulo">🏦 Datos para Pago Móvil</h2>
+            <div class="dato">
+                <div class="dato-texto"><strong>Banco:</strong> (0102) BDV</div>
+                <button class="btn-copiar" onclick="copiar('(0102) BDV')">📋</button>
+            </div>
+            <div class="dato">
+                <div class="dato-texto"><strong>Cédula:</strong> 32824869</div>
+                <button class="btn-copiar" onclick="copiar('32824869')">📋</button>
+            </div>
+            <div class="dato">
+                <div class="dato-texto"><strong>Teléfono:</strong> 04228242411</div>
+                <button class="btn-copiar" onclick="copiar('04228242411')">📋</button>
+            </div>
+            <div class="dato">
+                <div class="dato-texto"><strong>Monto:</strong> <span id="montoBs">-</span></div>
+                <button class="btn-copiar" onclick="copiarMonto()">📋</button>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <h2 class="tarjeta-titulo">🔢 Ingresa tu referencia</h2>
+            <input type="text" class="input-ref" id="inputReferencia" placeholder="Ej: 123456789" maxlength="20" autocomplete="off">
+            <button class="btn-confirmar" id="btnVerificar" onclick="verificarPago()">✅ Verificar y recibir datos</button>
+        </div>
+
+        <a href="netflix.html" class="volver">← Volver al catálogo</a>
+    </div>
+
+    <!-- PASO 2: Cargando -->
+    <div id="pasoCargando" class="oculto">
+        <div class="spinner"></div>
+        <p style="text-align:center;color:#9ca3af;font-size:14px">Verificando tu pago...</p>
+    </div>
+
+    <!-- PASO 3: Datos entregados -->
+    <div id="pasoExito" class="oculto">
+        <div class="datos-entrega">
+            <h3>✅ ¡Pago Verificado!</h3>
+            <p style="text-align:center;color:#cbd5e1;font-size:13px;margin-bottom:15px">Guarda estos datos. También te los enviamos por WhatsApp.</p>
+            <div class="dato-entrega"><span class="label">📧 Correo</span><span class="valor" id="outCorreo">-</span></div>
+            <div class="dato-entrega"><span class="label">🔑 Clave</span><span class="valor" id="outClave">-</span></div>
+            <div class="dato-entrega"><span class="label">👤 Perfil</span><span class="valor" id="outPerfil">-</span></div>
+            <div class="dato-entrega"><span class="label">🔢 PIN</span><span class="valor" id="outPin">-</span></div>
+            <div class="dato-entrega"><span class="label">📅 Vence</span><span class="valor" id="outVence">-</span></div>
+            <button class="btn-copiar-todo" onclick="copiarTodo()">📋 Copiar todos los datos</button>
+        </div>
+        <a href="index.html" class="volver">← Volver al inicio</a>
+    </div>
+
+    <!-- PASO 4: Error -->
+    <div id="pasoError" class="oculto">
+        <div class="mensaje-error" id="mensajeError">Error</div>
+        <a href="netflix.html" class="volver">← Volver a intentar</a>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATOS DEL PEDIDO
+// ═══════════════════════════════════════════════
+const juego = localStorage.getItem('juego_seleccionado') || 'NETFLIX';
+const producto = localStorage.getItem('producto_seleccionado') || 'Perfil Netflix';
+const paquete = localStorage.getItem('paquete_codigo') || 'netflix_perfil';
+const precioUsd = parseFloat(localStorage.getItem('precio_usd') || '0');
+const precioBs = parseInt(localStorage.getItem('precio_en_bs') || '0');
+const servicio = localStorage.getItem('servicio_streaming') || 'netflix';
+
+document.getElementById('resJuego').textContent = juego;
+document.getElementById('resProducto').textContent = producto;
+document.getElementById('resMonto').textContent = `$${precioUsd.toFixed(2)} / ${precioBs.toLocaleString('es-VE')} Bs`;
+document.getElementById('montoBs').textContent = precioBs.toLocaleString('es-VE') + ' Bs';
+
+// ═══════════════════════════════════════════════
+// FUNCIONES AUXILIARES
+// ═══════════════════════════════════════════════
+function copiar(texto) {
+    navigator.clipboard.writeText(texto);
+    alert('✅ Copiado: ' + texto);
+}
+function copiarMonto() {
+    copiar(precioBs.toString());
+}
+function mostrarPaso(id) {
+    document.querySelectorAll('.container > div[id^="paso"]').forEach(d => d.classList.add('oculto'));
+    document.getElementById(id).classList.remove('oculto');
+}
+
+// ═══════════════════════════════════════════════
+// VERIFICAR PAGO
+// ═══════════════════════════════════════════════
+async function verificarPago() {
+    const ref = document.getElementById('inputReferencia').value.trim();
+    const btn = document.getElementById('btnVerificar');
+
+    // Validación básica (mínimo 6 caracteres)
+    if (!ref || ref.length < 6) {
+        alert('Escribe la referencia completa (mínimo 6 dígitos)');
+        return;
+    }
+
+    // ⚠️ PRUEBA: Si empieza con "TEST", saltar verificación de Pábilo
+    const esTest = ref.toUpperCase().startsWith('TEST');
+
+    btn.disabled = true;
+    btn.textContent = 'Verificando...';
+    mostrarPaso('pasoCargando');
+
+    try {
+        // Si no es TEST, verificar con Pábilo primero
+        if (!esTest) {
+            const resVerif = await fetch('/api/verificar-pago', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    referencia: ref,
+                    monto: precioBs,
+                    fecha: new Date().toISOString().split('T')[0]
+                })
+            });
+            const dataVerif = await resVerif.json();
+            if (!dataVerif.confirmado) {
+                mostrarPaso('pasoDatos');
+                document.getElementById('pasoError').classList.remove('oculto');
+                document.getElementById('mensajeError').textContent = '❌ Pago no encontrado. Verifica tu referencia.';
+                btn.disabled = false;
+                btn.textContent = '✅ Verificar y recibir datos';
+                return;
+            }
+        }
+
+        // Asignar perfil desde nuestras cuentas propias
+        const res = await fetch('/api/asignar-perfil', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                servicio: servicio,
+                cliente: 'Cliente',
+                pedido: ref
+            })
+        });
+        const data = await res.json();
+
+        if (!data.ok) {
+            mostrarPaso('pasoDatos');
+            document.getElementById('pasoError').classList.remove('oculto');
+            document.getElementById('mensajeError').textContent = '❌ ' + (data.mensaje || data.error || 'Error');
+            btn.disabled = false;
+            btn.textContent = '✅ Verificar y recibir datos';
+            return;
+        }
+
+        // Mostrar datos al cliente
+        document.getElementById('outCorreo').textContent = data.datos.correo;
+        document.getElementById('outClave').textContent = data.datos.clave;
+        document.getElementById('outPerfil').textContent = data.datos.perfil;
+        document.getElementById('outPin').textContent = data.datos.pin_perfil;
+        document.getElementById('outVence').textContent = data.datos.fecha_vencimiento;
+
+        // Guardar para copiar todo junto
+        window.datosFinales = data.datos;
+
+        mostrarPaso('pasoExito');
+
+    } catch (e) {
+        console.error('Error:', e);
+        mostrarPaso('pasoDatos');
+        document.getElementById('pasoError').classList.remove('oculto');
+        document.getElementById('mensajeError').textContent = '❌ Error de conexión. Reintenta.';
+        btn.disabled = false;
+        btn.textContent = '✅ Verificar y recibir datos';
+    }
+}
+
+function copiarTodo() {
+    const d = window.datosFinales;
+    if (!d) return;
+    const texto = `🎬 DATOS NETFLIX\n\n📧 Correo: ${d.correo}\n🔑 Clave: ${d.clave}\n👤 Perfil: ${d.perfil}\n🔢 PIN: ${d.pin_perfil}\n📅 Vence: ${d.fecha_vencimiento}`;
+    navigator.clipboard.writeText(texto);
+    alert('✅ Todos los datos copiados');
+}
+</script>
+</body>
+</html>
