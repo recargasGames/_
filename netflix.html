@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
 :root{
@@ -182,7 +183,6 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .aviso-info{margin-top:16px;padding:14px 16px;background:rgba(59,130,246,0.1);border-left:4px solid #3b82f6;border-radius:10px;font-size:13px;color:#cbd5e1;line-height:1.6;}
 .aviso-info strong{color:#93c5fd}
 
-/* ══════════ SPINNER ARREGLADO ══════════ */
 .spinner-circle{
     width:80px;height:80px;
     border:3px solid rgba(212,175,55,0.2);
@@ -212,17 +212,98 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .texto-principal{font-size:24px;font-weight:800;margin-bottom:10px;background:linear-gradient(135deg,#fff,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .texto-secundario{font-size:15px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto;white-space:pre-line;}
 
+/* ═══ TARJETA DESCARGA IMAGEN ═══ */
+#tarjetaDescarga{
+    margin:20px auto 0;
+    background:linear-gradient(160deg,#0a0e1a 0%,#141e37 100%);
+    border:2px solid rgba(212,175,55,0.5);
+    border-radius:20px;
+    padding:22px 20px 24px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.15);
+}
+#tarjetaDescarga::before{
+    content:'';
+    position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+    background:radial-gradient(circle,rgba(212,175,55,0.08) 0%,transparent 60%);
+    pointer-events:none;
+}
+.tarj-logo{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    padding-bottom:14px;margin-bottom:16px;
+    border-bottom:2px solid rgba(212,175,55,0.3);
+}
+.tarj-logo img{height:44px;width:auto;border-radius:10px;filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));}
+.tarj-logo-text{
+    font-size:17px;font-weight:900;
+    background:linear-gradient(135deg,#fff,#d4af37,#fff);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    letter-spacing:1px;
+}
+.tarj-estado{
+    display:inline-block;
+    background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));
+    color:#4ade80;font-size:12px;font-weight:800;
+    padding:6px 14px;border-radius:20px;
+    border:1px solid rgba(34,197,94,0.5);
+    margin-bottom:14px;
+    letter-spacing:1px;
+}
+.tarj-titulo{
+    font-size:16px;font-weight:800;color:#d4af37;
+    margin-bottom:14px;letter-spacing:1.5px;text-transform:uppercase;
+}
+.tarj-fila{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    background:rgba(0,0,0,0.35);
+    border:1px solid rgba(212,175,55,0.2);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    text-align:left;
+}
+.tarj-fila:last-child{margin-bottom:0}
+.tarj-fila .tarj-label{color:#94a3b8;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.tarj-fila .tarj-valor{color:#fff;font-size:15px;font-weight:800;word-break:break-all;text-align:right;flex:1;}
+.tarj-fila.tarj-verde{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.04));border-color:rgba(34,197,94,0.5);}
+.tarj-fila.tarj-verde .tarj-valor{color:#4ade80;font-size:17px;letter-spacing:2px;}
+.tarj-fila.tarj-dorada{background:linear-gradient(135deg,rgba(212,175,55,0.18),rgba(212,175,55,0.05));border-color:rgba(212,175,55,0.5);}
+.tarj-fila.tarj-dorada .tarj-valor{color:#f5d76e;font-size:20px;letter-spacing:3px;}
+.tarj-vencimiento{
+    margin-top:14px;padding:14px;
+    background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(212,175,55,0.06));
+    border:2px solid rgba(212,175,55,0.6);
+    border-radius:14px;
+    text-align:center;
+}
+.tarj-vencimiento .vlabel{font-size:11px;color:#d4af37;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin-bottom:6px;}
+.tarj-vencimiento .vvalue{font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;}
+.tarj-footer{
+    margin-top:18px;padding-top:14px;
+    border-top:1px dashed rgba(212,175,55,0.3);
+    font-size:11px;color:#94a3b8;line-height:1.5;
+}
+.tarj-footer strong{color:#f5d76e;}
+
+.btn-imagen{
+    width:100%;padding:16px;margin-top:18px;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:#fff;border:none;border-radius:14px;
+    font-size:16px;font-weight:800;cursor:pointer;
+    transition:.3s;text-transform:uppercase;letter-spacing:1px;
+    box-shadow:0 4px 15px rgba(34,197,94,0.4);
+    font-family:inherit;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-imagen:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(34,197,94,0.6);}
+.btn-imagen:disabled{opacity:0.6;cursor:wait;transform:none;}
+
 .vencimiento-box{margin-top:20px;padding:22px;background:linear-gradient(135deg,rgba(212,175,55,0.18),rgba(212,175,55,0.06));border:2px solid rgba(212,175,55,0.6);border-radius:16px;text-align:center;box-shadow:0 0 40px rgba(212,175,55,0.3);}
 .vencimiento-box .vencimiento-label{font-size:11px;color:var(--color-dorado-claro);text-transform:uppercase;letter-spacing:2px;font-weight:800;margin-bottom:10px;}
 .vencimiento-box .vencimiento-value{font-size:30px;font-weight:900;color:#fff;letter-spacing:2px;margin:12px 0;word-break:break-all;text-shadow:0 0 20px rgba(212,175,55,0.6);}
 .vencimiento-box .vencimiento-sub{font-size:13px;color:#cbd5e1;margin-top:8px;line-height:1.5;}
-
-.codigo-renovacion-box{margin-top:20px;padding:24px;background:linear-gradient(135deg,rgba(34,197,94,0.18),rgba(34,197,94,0.06));border:2px solid rgba(34,197,94,0.6);border-radius:16px;text-align:center;box-shadow:0 0 40px rgba(34,197,94,0.35);}
-.codigo-renovacion-box .cod-label{font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:2px;font-weight:800;margin-bottom:10px;}
-.codigo-renovacion-box .cod-value{font-size:24px;font-weight:900;color:#4ade80;letter-spacing:3px;margin:12px 0;word-break:break-all;text-shadow:0 0 20px rgba(34,197,94,0.6);}
-.codigo-renovacion-box .cod-sub{font-size:13px;color:#cbd5e1;margin-top:8px;line-height:1.5;}
-.btn-copiar-pin{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(34,197,94,0.4);transition:.3s;font-family:inherit;}
-.btn-copiar-pin:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(34,197,94,0.6);}
 
 .steps-info{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03));border:1px solid rgba(59,130,246,0.3);border-radius:16px;padding:18px;margin-bottom:20px;position:relative;z-index:1;}
 .steps-info h4{color:#93c5fd;font-size:15px;font-weight:800;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:8px;}
@@ -305,11 +386,9 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
     .video-fondo{opacity:0.85;filter:brightness(1.05)}
 }
 @media(max-width:400px){.mensaje-botones{flex-direction:column}}
-/* ⚠️ SOLO se respeta prefers-reduced-motion en animaciones decorativas, NO en el spinner funcional */
 @media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     .icono-exito,.icono-amarillo,.icono-error,.progreso-bola,.progreso-paso,.btn-buy,.btn-accion,.toast,.seccion,.tab-content{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}
-    /* El spinner SÍ debe girar siempre porque informa progreso */
 }
 </style>
 </head>
@@ -446,7 +525,6 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
         </div>
     </div>
 
-    <!-- SECCIÓN 1: CATÁLOGO -->
     <section class="seccion activa" id="seccion-catalogo">
         <div class="pagina-titulo">
             <h1>Recarga Netflix</h1>
@@ -513,7 +591,6 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
         </div>
     </section>
 
-    <!-- SECCIÓN 2: WHATSAPP -->
     <section class="seccion" id="seccion-jugador">
         <button class="btn-volver-flujo" onclick="volverAlCatalogo()">← Volver al catálogo</button>
 
@@ -546,7 +623,6 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
         <button class="btn-accion" id="btnContinuarPago" onclick="irAlPago()" disabled style="opacity:0.5;">CONTINUAR AL PAGO →</button>
     </section>
 
-    <!-- SECCIÓN 3: PAGO -->
     <section class="seccion" id="seccion-pago">
         <button class="btn-volver-flujo" onclick="volverAJugador()">← Volver a datos</button>
 
@@ -590,7 +666,7 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 
         <div class="datos-pago-box">
             <label style="display:block;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
-            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: TEST-1234" maxlength="30" autocomplete="off">
+            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" autocomplete="off">
         </div>
 
         <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
@@ -603,7 +679,6 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
         <button class="btn-accion" id="btnVerificar" onclick="iniciarVerificacion()" style="margin-top:14px;">✅ VERIFICAR PAGO</button>
     </section>
 
-    <!-- SECCIÓN 4: ESTADOS -->
     <section class="seccion" id="seccion-verificando">
         <div class="estado-box">
             <div class="spinner-circle"></div>
@@ -628,7 +703,6 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
         </div>
     </section>
 
-    <!-- SECCIÓN 5: ÉXITO -->
     <section class="seccion" id="seccion-exito">
         <div class="estado-box">
             <div class="icono-circle icono-exito">✓</div>
@@ -644,7 +718,7 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
             <div class="resumen-fila"><span class="resumen-etiqueta">💰 Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
         </div>
 
-        <div id="pinContainer"></div>
+        <div id="tarjetaContenedor"></div>
 
         <button class="btn-accion" onclick="realizarOtraRecarga()" style="margin-top:20px;">🔄 REALIZAR OTRA COMPRA</button>
         <a href="pedidos.html" style="display:block;text-align:center;color:#94a3b8;text-decoration:none;margin-top:14px;font-size:14px;">📋 Ver mis pedidos</a>
@@ -695,7 +769,6 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
 
-<!-- SCRIPT 1: MÓDULO -->
 <script type="module">
 import { auth } from './firebase-config.js';
 import {
@@ -890,7 +963,6 @@ document.getElementById('resetPasswordLink').addEventListener('click', async (e)
 });
 </script>
 
-<!-- SCRIPT 2: LÓGICA COMPLETA -->
 <script>
 const firebaseConfig = {
     apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
@@ -919,7 +991,8 @@ const URL_ASIGNAR_PERFIL = '/api/asignar-perfil';
 
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
-// 🔥 CÓDIGOS TEST LOCALES — aprueban al instante sin consultar Firebase ni cobrar
+// 🔥 CÓDIGOS TEST LOCALES — aprueban al instante sin consultar Firebase
+// (el placeholder del input NO los muestra, es tu secreto)
 const CODIGOS_TEST_LOCALES = ['TEST-1234', 'TEST-0001', 'TEST-9999', 'TEST-ABC', 'TEST'];
 
 function esCodigoTestLocal(ref) {
@@ -1463,7 +1536,7 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
                     const pedidoCompleto = {
                         ...pedidoData,
                         datos_streaming: extras.datos_streaming || null,
-                        codigo_renovacion: extras.codigo_renovacion || '',
+                        codigo_renovacion: extras.codigo_renovacion || extras.codigo_aprobacion || '',
                         pin: codigos && codigos.length > 0 ? codigos[0] : null,
                         codigos: codigos || []
                     };
@@ -1508,7 +1581,6 @@ function generarReferenciaInterna(productoCodigo) {
     return `RG-${partes.join('-')}-${ts}-${rand}`;
 }
 
-// 🔥 ASIGNAR PERFIL — endpoints exactos
 async function enviarAsignarPerfil(productoCodigo, referenciaInterna, datosExtra = {}) {
     try {
         const d = getDatosPedidoActuales();
@@ -1600,7 +1672,7 @@ async function iniciarVerificacion() {
     marcarProgreso(3);
 
     try {
-        // 🔥 TEST LOCAL (TEST-1234, etc.) — Aprueba al instante
+        // 🔥 TEST LOCAL — aprueba y guarda en Firebase
         if (esTestLocal) {
             await new Promise(res => setTimeout(res, 1500));
             const referenciaInterna = generarReferenciaInterna('TEST');
@@ -1609,7 +1681,25 @@ async function iniciarVerificacion() {
             mostrarSeccion('seccion-procesando');
             const resultadoRecarga = await ejecutarRecarga({ paquete: productoElegido?.paqueteCodigo, es_test_local: true });
             await new Promise(res => setTimeout(res, 900));
-            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Asignar-perfil (TEST Local)', resultadoRecarga.codigos || [], { datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna, codigo_aprobacion: resultadoRecarga.codigo_aprobacion, codigo_renovacion: resultadoRecarga.codigo_aprobacion, codigo_test: referencia });
+            // ✅ AHORA SÍ GUARDA CON TODOS LOS PARÁMETROS
+            const infoPedido = await guardarPedidoEnFirebase(
+                referencia,
+                resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE",
+                resultadoRecarga.id_solicitud || '',
+                'Asignar-perfil (TEST Local)',
+                resultadoRecarga.codigos || [],
+                {
+                    datos_streaming: resultadoRecarga.datos || null,
+                    referencia_interna: resultadoRecarga.referencia_interna,
+                    codigo_aprobacion: resultadoRecarga.codigo_aprobacion,
+                    codigo_renovacion: resultadoRecarga.codigo_aprobacion,
+                    codigo_test: referencia,
+                    es_renovacion: false
+                }
+            );
+            console.log('✅ Pedido TEST guardado en Firebase:', infoPedido);
+            notificarAdmin('codigo_test', { referencia, mensaje_extra: `🧪 TEST LOCAL procesado — Pedido ${infoPedido.numeroMostrar}` });
+
             if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, true, referencia, infoPedido.numeroMostrar, resultadoRecarga.referencia_interna);
             else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
             else { document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.'; mostrarSeccion('seccion-error'); }
@@ -1617,7 +1707,6 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // TEST Firebase
         if (esTest) {
             const r = await verificarCodigoTEST(referencia);
             if (!r.valido) {
@@ -1638,7 +1727,7 @@ async function iniciarVerificacion() {
                 tipo: r.data.tipo, tipo_producto: r.data.tipo_producto
             });
             await new Promise(res => setTimeout(res, 1000));
-            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Asignar-perfil (TEST)', resultadoRecarga.codigos || [], { datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna, codigo_aprobacion: resultadoRecarga.codigo_aprobacion, codigo_renovacion: resultadoRecarga.codigo_aprobacion, codigo_test: referencia, monto_test_usd: r.data.monto_usd, monto_test_bs: r.data.monto_bs });
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Asignar-perfil (TEST Firebase)', resultadoRecarga.codigos || [], { datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna, codigo_aprobacion: resultadoRecarga.codigo_aprobacion, codigo_renovacion: resultadoRecarga.codigo_aprobacion, codigo_test: referencia, monto_test_usd: r.data.monto_usd, monto_test_bs: r.data.monto_bs });
             await marcarCodigoTESTComoUsado(referencia, infoPedido.numeroMostrar);
             if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, true, referencia, infoPedido.numeroMostrar, resultadoRecarga.referencia_interna);
             else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
@@ -1646,7 +1735,6 @@ async function iniciarVerificacion() {
             btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
             return;
         }
-        // RG admin
         if (esCodigoRG) {
             const r = await verificarCodigoRG(referencia);
             if (!r.valido) {
@@ -1676,7 +1764,6 @@ async function iniciarVerificacion() {
             btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
             return;
         }
-        // MANUAL
         if (esManual) {
             const r = await verificarReferenciaManual(referencia);
             if (!r.valida) {
@@ -1771,6 +1858,129 @@ async function iniciarVerificacion() {
     }
 }
 
+// 🎨 TARJETA VISUAL PARA DESCARGA
+function generarTarjetaHTML(datos, meta) {
+    const dd = datos || {};
+    const correo = dd.correo || dd.usuario || '—';
+    const clave = dd.clave || dd.password || '—';
+    const perfil = dd.perfil || '—';
+    const pin = dd.pin_perfil || '—';
+    const vencimiento = dd.fecha_vencimiento || '—';
+    const codigoRenov = meta.codigo_aprobacion || '';
+    const producto = meta.producto || 'Netflix';
+    const pedido = meta.numeroPedido || '#----';
+
+    let html = `<div id="tarjetaDescarga">
+        <div class="tarj-logo">
+            <img src="logo.png" alt="Recargas Games" crossorigin="anonymous">
+            <div class="tarj-logo-text">RECARGAS GAMES</div>
+        </div>
+        <div class="tarj-estado">✓ COMPRA EXITOSA</div>
+        <div class="tarj-titulo">🎬 Datos de tu Cuenta</div>
+        <div class="tarj-fila">
+            <span class="tarj-label">📦 Producto</span>
+            <span class="tarj-valor">${producto}</span>
+        </div>
+        <div class="tarj-fila">
+            <span class="tarj-label">📋 Pedido</span>
+            <span class="tarj-valor">${pedido}</span>
+        </div>
+        <div class="tarj-fila">
+            <span class="tarj-label">📧 Correo</span>
+            <span class="tarj-valor">${correo}</span>
+        </div>
+        <div class="tarj-fila">
+            <span class="tarj-label">🔑 Clave</span>
+            <span class="tarj-valor">${clave}</span>
+        </div>
+        <div class="tarj-fila">
+            <span class="tarj-label">👤 Perfil</span>
+            <span class="tarj-valor">${perfil}</span>
+        </div>
+        <div class="tarj-fila">
+            <span class="tarj-label">🔢 PIN</span>
+            <span class="tarj-valor">${pin}</span>
+        </div>`;
+
+    if (vencimiento !== '—') {
+        html += `<div class="tarj-vencimiento">
+            <div class="vlabel">📅 Vence</div>
+            <div class="vvalue">${vencimiento}</div>
+        </div>`;
+    }
+
+    if (codigoRenov) {
+        html += `<div class="tarj-fila tarj-dorada" style="margin-top:14px;">
+            <span class="tarj-label">🔑 Código Renovación</span>
+            <span class="tarj-valor">${codigoRenov}</span>
+        </div>`;
+    }
+
+    html += `<div class="tarj-footer">
+        ⚠️ <strong>No compartas estos datos</strong> con nadie.<br>
+        💬 Soporte: <strong>+58 422-8242411</strong><br>
+        🌐 recargasgames.com
+    </div>
+    </div>
+    <button class="btn-imagen" id="btnDescargarImagen" onclick="descargarTarjeta()">📥 GUARDAR IMAGEN</button>
+    <button class="btn-imagen" id="btnCopiarTodo" onclick="copiarTodoElTexto()" style="background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;margin-top:10px;">📋 COPIAR TODO EL TEXTO</button>`;
+
+    return html;
+}
+
+let tarjetaDatosActuales = null;
+function descargarTarjeta() {
+    const tarjeta = document.getElementById('tarjetaDescarga');
+    if (!tarjeta) { avisar('No hay datos para descargar', 'error'); return; }
+    const btn = document.getElementById('btnDescargarImagen');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Generando...';
+
+    html2canvas(tarjeta, {
+        backgroundColor: '#0a0e1a',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: false
+    }).then((canvas) => {
+        const link = document.createElement('a');
+        const pedido = (tarjetaDatosActuales?.numeroPedido || 'pedido').replace('#','');
+        link.download = `recargasgames-${pedido}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        avisar('✅ Imagen guardada. Revisa tus descargas.', 'exito');
+        btn.disabled = false;
+        btn.innerHTML = '📥 GUARDAR IMAGEN';
+    }).catch((err) => {
+        console.error('Error generando imagen:', err);
+        avisar('No se pudo generar la imagen. Intenta desde otro navegador.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '📥 GUARDAR IMAGEN';
+    });
+}
+window.descargarTarjeta = descargarTarjeta;
+
+function copiarTodoElTexto() {
+    if (!tarjetaDatosActuales) { avisar('No hay datos para copiar', 'error'); return; }
+    const t = tarjetaDatosActuales;
+    const d = t.datos || {};
+    let txt = `🎬 RECARGAS GAMES — ${t.producto}\n`;
+    txt += `📋 Pedido: ${t.numeroPedido}\n\n`;
+    txt += `📧 Correo: ${d.correo || d.usuario || '—'}\n`;
+    txt += `🔑 Clave: ${d.clave || d.password || '—'}\n`;
+    txt += `👤 Perfil: ${d.perfil || '—'}\n`;
+    txt += `🔢 PIN: ${d.pin_perfil || '—'}\n`;
+    if (d.fecha_vencimiento) txt += `📅 Vence: ${d.fecha_vencimiento}\n`;
+    if (t.codigo_aprobacion) txt += `\n🔑 Código de renovación: ${t.codigo_aprobacion}\n`;
+    txt += `\n⚠️ No compartas estos datos con nadie.\n💬 Soporte: +58 422-8242411`;
+    navigator.clipboard.writeText(txt).then(() => {
+        avisar('✅ Copiado al portapapeles', 'exito');
+    }).catch(() => {
+        avisar('Copia manualmente los datos', 'error');
+    });
+}
+window.copiarTodoElTexto = copiarTodoElTexto;
+
 function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
     const d = getDatosPedidoActuales();
     document.getElementById('resPedido').textContent = numeroPedido;
@@ -1781,35 +1991,22 @@ function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, nume
 
     const esRenovacion = resultadoRecarga.es_renovacion || MODO_RENOVACION;
     document.getElementById('tituloExito').textContent = esRenovacion ? '¡Renovación Exitosa!' : '¡Compra Exitosa!';
-    document.getElementById('subtituloExito').textContent = esRenovacion ? 'Tu cuenta se extendió 30 días más.' : 'Aquí están tus datos de acceso. Guárdalos bien.';
+    document.getElementById('subtituloExito').textContent = esRenovacion ? 'Tu cuenta se extendió 30 días más.' : 'Guarda esta imagen. También te enviamos los datos por WhatsApp.';
 
-    const dd = resultadoRecarga.datos || {};
-    let htmlDatos = `<div class="datos-pago-box" style="margin-top:20px;"><h3 class="titulo-seccion" style="margin-top:0;">🎬 Datos de tu Cuenta</h3>`;
-    const campos = [
-        { label:'📧 Correo', valor: dd.correo || dd.usuario },
-        { label:'🔑 Contraseña', valor: dd.clave || dd.password },
-        { label:'👤 Perfil', valor: dd.perfil },
-        { label:'🔢 PIN Perfil', valor: dd.pin_perfil }
-    ];
-    campos.forEach(c => {
-        if (c.valor && c.valor.toString().trim() !== '') {
-            const valorSeguro = String(c.valor).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-            htmlDatos += `<div class="dato-line"><div class="dato-texto"><strong>${c.label}:</strong> <span>${c.valor}</span></div><button class="copiar-btn" onclick="navigator.clipboard.writeText('${valorSeguro}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>`;
-        }
+    tarjetaDatosActuales = {
+        datos: resultadoRecarga.datos || {},
+        codigo_aprobacion: resultadoRecarga.codigo_aprobacion || '',
+        producto: d.producto,
+        numeroPedido: numeroPedido
+    };
+
+    const htmlTarjeta = generarTarjetaHTML(resultadoRecarga.datos || {}, {
+        codigo_aprobacion: resultadoRecarga.codigo_aprobacion || '',
+        producto: d.producto,
+        numeroPedido: numeroPedido
     });
-    htmlDatos += `</div>`;
-    if (dd.fecha_vencimiento) {
-        htmlDatos += `<div class="vencimiento-box"><div class="vencimiento-label">📅 ${esRenovacion ? 'NUEVA FECHA' : 'FECHA DE VENCIMIENTO'}</div><div class="vencimiento-value">${dd.fecha_vencimiento}</div><div class="vencimiento-sub">${esRenovacion ? '✅ Extendida 30 días más' : '⏰ Guarda esta fecha'}</div></div>`;
-    }
-    if (resultadoRecarga.codigo_aprobacion) {
-        htmlDatos += `<div class="codigo-renovacion-box">
-            <div class="cod-label">🔑 Código de Renovación</div>
-            <div class="cod-value" id="codRenovValor">${resultadoRecarga.codigo_aprobacion}</div>
-            <button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${resultadoRecarga.codigo_aprobacion}'); mostrarMensaje('Copiado', 'Código copiado.', 'exito')" style="margin-top:8px;">📋 Copiar código</button>
-            <div class="cod-sub">⚠️ <strong>Guárdalo.</strong> Lo necesitas para renovar el próximo mes.</div>
-        </div>`;
-    }
-    document.getElementById('pinContainer').innerHTML = htmlDatos;
+
+    document.getElementById('tarjetaContenedor').innerHTML = htmlTarjeta;
     mostrarSeccion('seccion-exito');
     marcarProgreso(4);
     notificarAdmin('exito', { referencia, mensaje_extra: `🎬 Streaming ${esRenovacion ? 'RENOVADO' : 'entregado'}` });
@@ -1831,7 +2028,7 @@ function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) 
     document.getElementById('resNombre').textContent = d.whatsapp || d.nombreJugador;
     document.getElementById('resReferencia').textContent = referencia;
     document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
-    document.getElementById('pinContainer').innerHTML = '';
+    document.getElementById('tarjetaContenedor').innerHTML = '';
     mostrarSeccion('seccion-exito');
     marcarProgreso(4);
     let msgAdmin = `<b>🚨 PAGO VERIFICADO - ATENCIÓN</b>\n\n`;
@@ -1846,6 +2043,7 @@ function realizarOtraRecarga() {
     whatsappOk = false;
     descuentoAplicado = 0; cuponAplicado = "";
     precioUsdFinal = 0; precioBsFinal = 0;
+    tarjetaDatosActuales = null;
     if (inputId) inputId.value = "";
     if (statusDiv) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; }
     document.getElementById('referenciaPago').value = "";
@@ -1858,7 +2056,7 @@ function realizarOtraRecarga() {
     document.getElementById('cuponMsg').className = 'cupon-msg';
     document.getElementById('filaSubtotal').style.display = 'none';
     document.getElementById('filaDescuento').style.display = 'none';
-    document.getElementById('pinContainer').innerHTML = '';
+    document.getElementById('tarjetaContenedor').innerHTML = '';
     ['juego_seleccionado','producto_seleccionado','paquete_codigo','paquete',
      'precio_usd','precio_en_bs','metodo_pago','proveedor','servicio_streaming',
      'cupon_aplicado','descuento_porcentaje','precio_usd_final','precio_bs_final']
@@ -1950,6 +2148,7 @@ console.log('══════════════════════�
 console.log('🚀 NETFLIX UNIFICADO CARGADO');
 console.log('   Endpoint: /api/asignar-perfil');
 console.log('   Tests locales: TEST-1234, TEST-0001, TEST-9999, TEST-ABC, TEST');
+console.log('   Tarjeta descargable con html2canvas ✓');
 console.log('═══════════════════════════════════════════');
 </script>
 </body>
