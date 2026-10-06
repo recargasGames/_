@@ -581,31 +581,42 @@
         }
         .toast.visible { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
 
+        /* ============================================
+           NOTIFICACIÓN TIPO WHATSAPP
+           ============================================ */
         .notif-pedido {
             position: fixed; top: 90px; left: 50%;
             transform: translateX(-50%) translateY(-120%);
-            max-width: calc(100% - 32px); width: 300px;
+            max-width: calc(100% - 32px); width: 320px;
             padding: 12px 14px; border-radius: 12px;
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.96), rgba(22, 163, 74, 0.96));
             border: 2px solid #4ade80;
             box-shadow: 0 20px 60px rgba(34, 197, 94, 0.5), 0 0 40px rgba(34, 197, 94, 0.3);
             color: #fff; z-index: 5000;
             display: flex; align-items: center; gap: 10px;
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         .notif-pedido.visible { transform: translateX(-50%) translateY(0); }
         .notif-pedido .notif-icono {
             width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.22);
             display: flex; align-items: center; justify-content: center;
             font-size: 20px; flex-shrink: 0;
             animation: latido 1s ease-in-out infinite;
         }
         @keyframes latido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         .notif-pedido .notif-texto { flex: 1; min-width: 0; }
-        .notif-pedido .notif-titulo { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
-        .notif-pedido .notif-sub { font-size: 10px; color: rgba(255, 255, 255, 0.95); line-height: 1.3; font-weight: 500; }
+        .notif-pedido .notif-titulo {
+            font-size: 12px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px;
+        }
+        .notif-pedido .notif-sub {
+            font-size: 11px; color: rgba(255, 255, 255, 0.95);
+            line-height: 1.3; font-weight: 500;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
         .notif-pedido .notif-cerrar {
             background: rgba(255, 255, 255, 0.2); border: none; color: #fff;
             width: 26px; height: 26px; border-radius: 50%;
@@ -639,6 +650,7 @@
             .timeline-label { font-size: 11px; }
             .stat-num { font-size: 19px; }
             .pag-btn { min-width: 34px; height: 34px; font-size: 12px; }
+            .notif-pedido { width: calc(100% - 24px); }
         }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
@@ -822,6 +834,7 @@
     let estadoFiltro = 'todos';
     let toastTimer = null;
     let pedidosVistos = new Set();
+    let estadosVistos = new Map(); // key → estado anterior
     let primeraCarga = true;
 
     const listaEl = document.getElementById('listaPedidos');
@@ -829,6 +842,10 @@
     const toastEl = document.getElementById('toast');
     const paginacionEl = document.getElementById('paginacion');
     const pagInfoEl = document.getElementById('pagInfo');
+
+    /* =====================================================
+       UTILIDADES
+       ===================================================== */
 
     function esc(valor) {
         return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
@@ -843,18 +860,86 @@
         toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3000);
     }
 
+    function normalizarEstado(raw) {
+        const e = String(raw || 'pendiente').toLowerCase().trim();
+        if (['completado', 'completada', 'completed', 'completada_ok'].includes(e)) return 'completado';
+        if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
+        if (['procesando', 'processing'].includes(e)) return 'procesando';
+        return 'pendiente';
+    }
+
+    /* =====================================================
+       NOTIFICACIONES
+       ===================================================== */
+
+    // Pide permiso al cargar la página (una sola vez)
+    function pedirPermisoNotificaciones() {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default') {
+            // Pequeño retraso para no ser agresivo
+            setTimeout(() => {
+                Notification.requestPermission().then((permiso) => {
+                    if (permiso === 'granted') {
+                        console.log('✅ Notificaciones activadas');
+                    }
+                });
+            }, 2000);
+        }
+    }
+
+    // Notificación nativa del sistema (aparece como WhatsApp)
+    function enviarNotifSistema(pedido) {
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+
+        try {
+            const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || 'N/A';
+            const juego = pedido.juego || 'Producto';
+            const producto = pedido.producto || '';
+            const cuerpo = producto ? `${juego} · ${producto}` : juego;
+
+            const notif = new Notification('🎉 ¡Recarga completada!', {
+                body: cuerpo,
+                icon: '/logo.png',
+                badge: '/logo.png',
+                vibrate: [200, 100, 200],
+                tag: 'recarga-' + idPedido,
+                renotify: true,
+                silent: false
+            });
+
+            notif.onclick = () => {
+                window.focus();
+                window.location.href = 'pedidos.html';
+                notif.close();
+            };
+
+            // Cerrar sola después de 6 segundos
+            setTimeout(() => {
+                try { notif.close(); } catch(e) {}
+            }, 6000);
+
+        } catch(e) {
+            console.warn('No se pudo enviar notificación del sistema:', e.message);
+        }
+    }
+
+    // Tarjeta flotante tipo WhatsApp (dentro de la página)
     function mostrarNotifPedido(pedido) {
         const idPedido = pedido.numero_pedido || pedido.order_id || pedido.referencia || 'N/A';
         const juego = pedido.juego || 'Producto';
         const producto = pedido.producto || '';
+
+        // Eliminar notificaciones previas (para que no se acumulen)
+        document.querySelectorAll('.notif-pedido').forEach(n => n.remove());
 
         const notif = document.createElement('div');
         notif.className = 'notif-pedido';
         notif.innerHTML = `
             <div class="notif-icono">🎉</div>
             <div class="notif-texto">
-                <div class="notif-titulo">¡Pedido #${esc(idPedido)}!</div>
-                <div class="notif-sub">${esc(juego)}${producto ? ' - ' + esc(producto) : ''}</div>
+                <div class="notif-titulo">¡Recarga completada!</div>
+                <div class="notif-sub">${esc(juego)}${producto ? ' · ' + esc(producto) : ''}</div>
             </div>
             <button class="notif-cerrar" aria-label="Cerrar">✕</button>
         `;
@@ -864,8 +949,17 @@
 
         const btnCerrar = notif.querySelector('.notif-cerrar');
         btnCerrar.onclick = () => cerrarNotif(notif);
+
+        // Auto-cerrar a los 6 segundos
         setTimeout(() => cerrarNotif(notif), 6000);
 
+        // Al tocar la tarjeta → abrir pedidos.html
+        notif.addEventListener('click', (e) => {
+            if (e.target.closest('.notif-cerrar')) return;
+            window.location.href = 'pedidos.html';
+        });
+
+        // Sonido tipo "tin"
         reproducirSonido();
         vibrar();
     }
@@ -878,24 +972,30 @@
         }, 500);
     }
 
+    // Sonido "tin" corto tipo WhatsApp
     function reproducirSonido() {
         try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) return;
             const ctx = new AudioCtx();
-            const notas = [523.25, 659.25, 783.99];
-            notas.forEach((freq, i) => {
+            // Acorde tipo WhatsApp: dos notas rápidas y agudas
+            const notas = [
+                { freq: 880.00, delay: 0.00, dur: 0.15 },  // A5
+                { freq: 1174.66, delay: 0.10, dur: 0.20 } // D6
+            ];
+            notas.forEach(({ freq, delay, dur }) => {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                osc.connect(gain); gain.connect(ctx.destination);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
                 osc.frequency.value = freq;
                 osc.type = 'sine';
-                const t = ctx.currentTime + (i * 0.1);
+                const t = ctx.currentTime + delay;
                 gain.gain.setValueAtTime(0, t);
-                gain.gain.linearRampToValueAtTime(0.15, t + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
                 osc.start(t);
-                osc.stop(t + 0.4);
+                osc.stop(t + dur);
             });
             setTimeout(() => { try { ctx.close(); } catch(e) {} }, 1000);
         } catch(e) {}
@@ -907,13 +1007,9 @@
         }
     }
 
-    function normalizarEstado(raw) {
-        const e = String(raw || 'pendiente').toLowerCase().trim();
-        if (['completado', 'completada', 'completed', 'completada_ok'].includes(e)) return 'completado';
-        if (['cancelado', 'cancelada', 'cancelled', 'canceled'].includes(e)) return 'cancelado';
-        if (['procesando', 'processing'].includes(e)) return 'procesando';
-        return 'pendiente';
-    }
+    /* =====================================================
+       CARGA DE DATOS
+       ===================================================== */
 
     document.getElementById('btnVolver').addEventListener('click', () => {
         if (window.history.length > 1) window.history.back();
@@ -926,6 +1022,7 @@
             return;
         }
         uidActual = user.uid;
+        pedirPermisoNotificaciones();
         cargarPedidos();
     });
 
@@ -936,6 +1033,8 @@
         consultaActual.on('value', (snapshot) => {
             const nuevosPedidos = [];
             const idsActuales = new Set();
+            const estadosActuales = new Map();
+            const pedidosCompletadosNuevos = [];
 
             snapshot.forEach((childSnapshot) => {
                 const pedido = childSnapshot.val();
@@ -943,15 +1042,32 @@
                 pedido._estado = normalizarEstado(pedido.estado);
                 nuevosPedidos.push(pedido);
                 idsActuales.add(childSnapshot.key);
+                estadosActuales.set(childSnapshot.key, pedido._estado);
+
+                // Detectar pedidos recién completados
+                if (!primeraCarga) {
+                    const estadoAnterior = estadosVistos.get(childSnapshot.key);
+                    const esNuevo = !pedidosVistos.has(childSnapshot.key);
+
+                    // Caso 1: pedido nuevo que YA está completado
+                    if (esNuevo && pedido._estado === 'completado') {
+                        pedidosCompletadosNuevos.push(pedido);
+                    }
+                    // Caso 2: pedido existente que cambió A completado
+                    else if (!esNuevo && estadoAnterior !== 'completado' && pedido._estado === 'completado') {
+                        pedidosCompletadosNuevos.push(pedido);
+                    }
+                }
             });
 
-            if (!primeraCarga) {
-                nuevosPedidos.forEach((p) => {
-                    if (!pedidosVistos.has(p.key)) mostrarNotifPedido(p);
-                });
-            }
+            // Disparar notificaciones (una sola vez por pedido completado)
+            pedidosCompletadosNuevos.forEach((p) => {
+                mostrarNotifPedido(p);
+                enviarNotifSistema(p);
+            });
 
             pedidosVistos = idsActuales;
+            estadosVistos = estadosActuales;
             primeraCarga = false;
 
             nuevosPedidos.sort((a, b) => {
