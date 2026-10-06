@@ -46,42 +46,31 @@ export default async function handler(req, res) {
             });
         }
 
-        // 🔍 DEBUG: Ver toda la info de las cuentas
         console.log('═══════════════════════════════════════');
-        console.log('🔍 DEBUG ASIGNAR PERFIL');
+        console.log('🔍 BUSCANDO PERFIL LIBRE');
         console.log('   Servicio:', servicio);
-        console.log('   Total cuentas:', Object.keys(cuentas).length);
+        console.log('   Cuentas totales:', Object.keys(cuentas).length);
 
-        // Buscar TODOS los perfiles con estado 'libre' (case-insensitive)
         let cuentaElegida = null;
         let perfilElegido = null;
         let perfilNumero = null;
 
         for (const cuentaId of Object.keys(cuentas)) {
             const cuenta = cuentas[cuentaId];
-            console.log(`\n📦 Cuenta: ${cuentaId}`);
-            console.log(`   Estado: ${cuenta.estado}`);
-            console.log(`   Correo: ${cuenta.correo}`);
+            console.log(`📦 Cuenta: ${cuentaId} | estado: ${cuenta.estado}`);
 
-            if (cuenta.estado !== 'activa') {
-                console.log(`   ⏭️ Saltando: no está activa`);
-                continue;
-            }
+            if (cuenta.estado !== 'activa') continue;
 
             const perfiles = cuenta.perfiles || {};
-            console.log(`   Total perfiles: ${Object.keys(perfiles).length}`);
-
             for (const num of Object.keys(perfiles)) {
                 const p = perfiles[num];
-                console.log(`   - Perfil ${num}: estado="${p.estado}" (tipo: ${typeof p.estado})`);
-                
-                // ✅ Comparación case-insensitive
-                const estadoNormalizado = String(p.estado || '').toLowerCase().trim();
-                if (estadoNormalizado === 'libre') {
+                console.log(`   - Perfil ${num}: estado="${p.estado}"`);
+
+                if (String(p.estado || '').toLowerCase().trim() === 'libre') {
                     cuentaElegida = { id: cuentaId, data: cuenta };
                     perfilElegido = p;
                     perfilNumero = num;
-                    console.log(`   ✅ ENCONTRADO LIBRE: Perfil ${num}`);
+                    console.log(`   ✅ PERFIL LIBRE: ${num}`);
                     break;
                 }
             }
@@ -89,7 +78,6 @@ export default async function handler(req, res) {
         }
 
         if (!cuentaElegida) {
-            console.log('❌ NO SE ENCONTRARON PERFILES LIBRES');
             return res.status(200).json({
                 ok: false,
                 error: 'NO_HAY_PERFILES',
@@ -97,20 +85,21 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log(`\n✅ ASIGNANDO Perfil ${perfilNumero} de cuenta ${cuentaElegida.id}`);
-
-        // Marcar como ocupado (sin transacción para simplificar)
-        const perfilRef = refCuentas.child(cuentaElegida.id).child('perfiles').child(perfilNumero);
         const pedidoId = pedido || `PED-${Date.now()}`;
 
-        await perfilRef.update({
-            estado: 'ocupado',
-            cliente: cliente || 'Cliente',
-            pedido: pedidoId,
-            fecha: new Date().toISOString()
-        });
+        // ✅ ACTUALIZACIÓN SIMPLE (sin transacción)
+        await refCuentas
+            .child(cuentaElegida.id)
+            .child('perfiles')
+            .child(perfilNumero)
+            .update({
+                estado: 'ocupado',
+                cliente: cliente || 'Cliente',
+                pedido: pedidoId,
+                fecha: new Date().toISOString()
+            });
 
-        console.log('✅ Perfil marcado como ocupado');
+        console.log(`✅ Perfil ${perfilNumero} marcado como ocupado`);
 
         return res.status(200).json({
             ok: true,
