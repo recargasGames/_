@@ -269,6 +269,7 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .mensaje-botones{display:flex;gap:12px;justify-content:center;position:relative;z-index:1;}
 .mensaje-btn{flex:1;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px;border:none;font-family:inherit;min-height:48px;}
 .mensaje-btn.principal{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;box-shadow:0 4px 15px rgba(212,175,55,0.4);}
+.mensaje-btn.secundario{background:rgba(71,85,105,0.3);color:#cbd5e1;border:1px solid rgba(71,85,105,0.6);}
 
 @media(max-width:500px){
     body{padding-top:100px}
@@ -669,13 +670,10 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   RECARGASGAMES — NETFLIX — FLUJO UNIFICADO (misma estructura que Free Fire)
-   Todo en un solo script. Sin module. Sin doble init.
+   RECARGASGAMES — NETFLIX — FLUJO UNIFICADO (estructura Free Fire)
+   Todo en un solo script. Un solo firebase.initializeApp.
    ═══════════════════════════════════════════════════════════════ */
 
-// ═══════════════════════════════════════════════════════════
-// 🔥 FIREBASE — UN SOLO initializeApp
-// ═══════════════════════════════════════════════════════════
 const firebaseConfig = {
     apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
     authDomain: "free-52119.firebaseapp.com",
@@ -695,18 +693,14 @@ const refCupones = db.ref("cupones_usados");
 const refManuales = db.ref("referencias_manuales");
 const refCodigosTEST = db.ref("codigos_test");
 
-// ═══════════════════════════════════════════════════════════
-// 🔑 APIs
-// ═══════════════════════════════════════════════════════════
 const URL_VERIFICAR_PAGO = '/api/verificar-pago';
 const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
 const URL_TELEGRAM = '/api/notificar-telegram';
 const URL_ASIGNAR_PERFIL = '/api/asignar-perfil';
-const URL_DISPONIBILIDAD_NETFLIX = '/api/disponibilidad-netflix'; // ← aún no existe, se ignora si falla
+const URL_DISPONIBILIDAD_NETFLIX = '/api/disponibilidad-netflix';
 
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
-// Códigos TEST locales (ocultos, solo tú los conoces)
 const CODIGOS_TEST_LOCALES = ['TEST-1234', 'TEST-0001', 'TEST-9999', 'TEST-ABC', 'TEST'];
 function esCodigoTestLocal(ref) {
     const r = String(ref || '').trim().toUpperCase();
@@ -722,9 +716,6 @@ function fechaCaracas() {
     return caracas.toISOString().split('T')[0];
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🎨 MENSAJES
-// ═══════════════════════════════════════════════════════════
 const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ' };
 function mostrarMensaje(titulo, mensaje, tipo='info', textoBoton='Entendido') {
     return new Promise((resolve) => {
@@ -740,9 +731,6 @@ function mostrarMensaje(titulo, mensaje, tipo='info', textoBoton='Entendido') {
 function cerrarMensaje() { document.getElementById('mensajeOverlay').classList.remove('activo'); }
 document.getElementById('mensajeOverlay').addEventListener('click', (e) => { if (e.target.id === 'mensajeOverlay') cerrarMensaje(); });
 
-// ═══════════════════════════════════════════════════════════
-// 🧭 NAVEGACIÓN
-// ═══════════════════════════════════════════════════════════
 function mostrarSeccion(id) {
     document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
     const el = document.getElementById(id);
@@ -765,9 +753,6 @@ function volverAlPago()     {
     mostrarSeccion('seccion-pago'); marcarProgreso(3);
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🛒 ESTADO
-// ═══════════════════════════════════════════════════════════
 const juegoActual = "NETFLIX";
 let metodo = "PAGO MOVIL";
 let tasa = 930;
@@ -787,9 +772,6 @@ function avisar(mensaje, tipo = 'info') {
     toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3800);
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🎬 TABS
-// ═══════════════════════════════════════════════════════════
 window.cambiarTab = function(tabId, boton) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('activo'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
@@ -797,9 +779,6 @@ window.cambiarTab = function(tabId, boton) {
     boton.classList.add('activo');
 };
 
-// ═══════════════════════════════════════════════════════════
-// 📱 WHATSAPP
-// ═══════════════════════════════════════════════════════════
 const inputId = document.getElementById('jugadorId');
 const statusDiv = document.getElementById('idStatus');
 const btnContinuar = document.getElementById('btnContinuarPago');
@@ -851,9 +830,6 @@ if (inputId) {
     });
 }
 
-// ═══════════════════════════════════════════════════════════
-// 💰 TASA
-// ═══════════════════════════════════════════════════════════
 async function cargarTasa() {
     const tasaGuardada = localStorage.getItem('tasa_usd_ves');
     tasa = tasaGuardada ? parseFloat(tasaGuardada) : 930;
@@ -897,9 +873,6 @@ document.querySelectorAll('.pay-box').forEach((box) => {
     });
 });
 
-// ═══════════════════════════════════════════════════════════
-// 🔍 VERIFICAR DISPONIBILIDAD (chequeo de tarjetas)
-// ═══════════════════════════════════════════════════════════
 async function verificarDisponibilidad() {
     const tarjetas = document.querySelectorAll('#gridNetflix .product-card');
     if (!tarjetas.length) return;
@@ -907,7 +880,6 @@ async function verificarDisponibilidad() {
     try {
         const r = await fetch(URL_DISPONIBILIDAD_NETFLIX);
         if (!r.ok) {
-            // Endpoint aún no existe — no rompemos nada
             tarjetas.forEach(c => { c.classList.remove('consultando'); c.classList.remove('agotado'); });
             console.log('ℹ️ Disponibilidad: endpoint no disponible aún');
             return;
@@ -933,15 +905,11 @@ async function verificarDisponibilidad() {
         if (agotados > 0) console.log(`⚠️ ${agotados} producto(s) agotado(s)`);
         else console.log('✅ Todos los productos disponibles');
     } catch (e) {
-        // Si el endpoint no existe, ignora silenciosamente
         tarjetas.forEach(c => { c.classList.remove('consultando'); c.classList.remove('agotado'); });
         console.log('ℹ️ Disponibilidad: no consultada (endpoint no disponible)');
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🛒 COMPRAR PRODUCTO
-// ═══════════════════════════════════════════════════════════
 function formatearPrecioProducto(precioUsd) {
     const bs = Math.round(precioUsd * tasa).toLocaleString('es-VE') + ' Bs';
     const usd = precioUsd.toFixed(2) + ' USD';
@@ -970,9 +938,6 @@ document.querySelectorAll('#gridNetflix .btn-buy').forEach((btn) => {
     });
 });
 
-// ═══════════════════════════════════════════════════════════
-// ➡️ IR AL PAGO
-// ═══════════════════════════════════════════════════════════
 function irAlPago() {
     if (!productoElegido) { avisar('Elige un producto primero'); volverAlCatalogo(); return; }
     const whatsapp = inputId.value.trim();
@@ -1006,9 +971,6 @@ function renderizarResumenPago() {
     document.getElementById('datoMontoTotal').innerHTML = `${precioUsdFinal.toFixed(2)} USD<br><small style="color:#cbd5e1">${precioBsFinal} Bs</small>`;
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🎁 CUPÓN
-// ═══════════════════════════════════════════════════════════
 function aplicarCupon() {
     const input = document.getElementById('cuponInput');
     const btn = document.getElementById('cuponBtn');
@@ -1039,9 +1001,6 @@ document.getElementById('cuponInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); aplicarCupon(); }
 });
 
-// ═══════════════════════════════════════════════════════════
-// 📋 COPIAR
-// ═══════════════════════════════════════════════════════════
 function copiarTexto(texto, boton) {
     navigator.clipboard.writeText(texto).then(() => {
         boton.classList.add('copiado');
@@ -1057,9 +1016,6 @@ function copiarTodosLosDatos(boton) {
     }).catch(() => { avisar('Copia manualmente los datos de pago'); });
 }
 
-// ═══════════════════════════════════════════════════════════
-// 📢 TELEGRAM
-// ═══════════════════════════════════════════════════════════
 function enviarTelegram(mensaje) {
     fetch(URL_TELEGRAM, {
         method: 'POST',
@@ -1099,9 +1055,6 @@ function notificarAdmin(tipo, datos = {}) {
     enviarTelegram(mensaje);
 }
 
-// ═══════════════════════════════════════════════════════════
-// 📱 WHATSAPP AL CLIENTE (streaming)
-// ═══════════════════════════════════════════════════════════
 function construirMensajeStreaming(pedido) {
     const nombre = pedido.nombre_jugador || 'Cliente';
     const productoP = pedido.producto || '';
@@ -1161,9 +1114,6 @@ async function enviarWhatsAppDesdePasarela(pedido, pedidoKey) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🚨 REFERENCIAS FALSAS
-// ═══════════════════════════════════════════════════════════
 async function guardarReferenciaFalsa(referencia, motivo) {
     try {
         const d = getDatosPedidoActuales();
@@ -1182,9 +1132,6 @@ async function guardarReferenciaFalsa(referencia, motivo) {
     } catch (e) { console.error('Error guardando ref falsa:', e); }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🔒 REFERENCIAS / CUPONES / MANUALES / TEST
-// ═══════════════════════════════════════════════════════════
 async function verificarReferenciaEnFirebase(ref) {
     try { const snap = await refReferencias.child(ref).once('value'); return snap.exists(); }
     catch (e) { return false; }
@@ -1263,9 +1210,6 @@ async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🔢 NÚMERO DE PEDIDO
-// ═══════════════════════════════════════════════════════════
 async function generarNumeroPedido() {
     try {
         const contadorRef = db.ref('configuracion/contador_pedidos');
@@ -1275,9 +1219,6 @@ async function generarNumeroPedido() {
     } catch (error) { return Date.now().toString().slice(-4); }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 💾 GUARDAR PEDIDO EN FIREBASE (idéntico a Free Fire)
-// ═══════════════════════════════════════════════════════════
 async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos, extras = {}) {
     const MAX_INTENTOS = 3;
     let ultimoError = null;
@@ -1330,7 +1271,7 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
                 user_agent: navigator.userAgent.substring(0, 200),
                 origen: 'netflix-unificado'
             };
-            // Campos de streaming
+            // Campos de streaming (solo si existen)
             if (extras.datos_streaming) {
                 pedidoData.es_streaming = true;
                 pedidoData.datos_streaming = extras.datos_streaming;
@@ -1338,11 +1279,22 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             if (extras.codigo_aprobacion) pedidoData.codigo_aprobacion = extras.codigo_aprobacion;
             if (extras.referencia_interna) pedidoData.referencia_interna = extras.referencia_interna;
             if (extras.es_renovacion) pedidoData.es_renovacion = true;
+
+            // 🔥 TEST: solo agregar si existen (evita undefined)
             if (extras.codigo_test) {
                 pedidoData.codigo_test = extras.codigo_test;
-                pedidoData.monto_test_usd = extras.monto_test_usd;
-                pedidoData.monto_test_bs = extras.monto_test_bs;
+                if (extras.monto_test_usd !== undefined && extras.monto_test_usd !== null) {
+                    pedidoData.monto_test_usd = extras.monto_test_usd;
+                }
+                if (extras.monto_test_bs !== undefined && extras.monto_test_bs !== null) {
+                    pedidoData.monto_test_bs = extras.monto_test_bs;
+                }
             }
+
+            // 🔥 LIMPIEZA FINAL: eliminar cualquier undefined (Firebase no los acepta)
+            Object.keys(pedidoData).forEach(k => {
+                if (pedidoData[k] === undefined) delete pedidoData[k];
+            });
 
             await nuevoPedido.set(pedidoData);
             console.log('✅ PEDIDO GUARDADO:', nuevoPedido.key, numeroMostrar);
@@ -1390,9 +1342,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
     return { id: null, numero: null, numeroMostrar: '#----', exito: false, error: ultimoError };
 }
 
-// ═══════════════════════════════════════════════════════════
-// ⚡ VERIFICAR PAGO EN PÁBILO
-// ═══════════════════════════════════════════════════════════
 async function verificarPagoPabilo(referencia) {
     const montoPago = Number(precioBsFinal) || 0;
     const fecha = fechaCaracas();
@@ -1410,9 +1359,6 @@ async function verificarPagoPabilo(referencia) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🎬 ASIGNAR PERFIL
-// ═══════════════════════════════════════════════════════════
 function generarReferenciaInterna(productoCodigo) {
     const ts = Date.now();
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -1482,9 +1428,6 @@ async function ejecutarRecarga(datosProducto = null) {
     return resultado;
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🧠 FLUJO PRINCIPAL DE VERIFICACIÓN
-// ═══════════════════════════════════════════════════════════
 async function iniciarVerificacion() {
     const referencia = document.getElementById('referenciaPago').value.trim().toUpperCase();
     const btn = document.getElementById('btnVerificar');
@@ -1510,7 +1453,7 @@ async function iniciarVerificacion() {
     marcarProgreso(3);
 
     try {
-        // 🧪 TEST LOCAL (aprueba al instante, guarda en Firebase)
+        // 🧪 TEST LOCAL
         if (esTestLocal) {
             await new Promise(res => setTimeout(res, 1500));
             mostrarSeccion('seccion-confirmado');
@@ -1531,6 +1474,7 @@ async function iniciarVerificacion() {
                     codigo_test: referencia
                 }
             );
+            console.log('✅ Pedido TEST guardado:', infoPedido);
             notificarAdmin('codigo_test', { referencia, mensaje_extra: `🧪 TEST LOCAL — Pedido ${infoPedido.numeroMostrar}` });
             if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, true, referencia, infoPedido.numeroMostrar, resultadoRecarga.referencia_interna);
             else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
@@ -1539,7 +1483,7 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // 🎮 TEST (Firebase codigos_test)
+        // 🎮 TEST (Firebase)
         if (esTest) {
             const r = await verificarCodigoTEST(referencia);
             if (!r.valido) {
@@ -1598,7 +1542,7 @@ async function iniciarVerificacion() {
             return;
         }
 
-        // 💳 NORMAL (Pago Móvil real)
+        // 💳 NORMAL
         const yaUsada = await verificarReferenciaEnFirebase(referencia);
         if (yaUsada) {
             notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ YA USADA' });
@@ -1664,9 +1608,6 @@ async function iniciarVerificacion() {
     }
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🎨 TARJETA DESCARGABLE
-// ═══════════════════════════════════════════════════════════
 function generarTarjetaHTML(datos, meta) {
     const dd = datos || {};
     const correo = dd.correo || dd.usuario || '—';
@@ -1771,9 +1712,6 @@ function copiarTodoElTexto() {
 }
 window.copiarTodoElTexto = copiarTodoElTexto;
 
-// ═══════════════════════════════════════════════════════════
-// 🎨 RESULTADOS
-// ═══════════════════════════════════════════════════════════
 function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
     const d = getDatosPedidoActuales();
     document.getElementById('resPedido').textContent = numeroPedido;
@@ -1831,9 +1769,6 @@ function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) 
     enviarTelegram(msgAdmin);
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🔄 REALIZAR OTRA COMPRA
-// ═══════════════════════════════════════════════════════════
 function realizarOtraRecarga() {
     productoElegido = null;
     whatsappOk = false;
@@ -1863,9 +1798,6 @@ function realizarOtraRecarga() {
     verificarDisponibilidad();
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🔄 RENOVAR
-// ═══════════════════════════════════════════════════════════
 window.prepararRenovacion = async function() {
     const tipo = document.getElementById('tipoRenovar').value;
     const codigo = document.getElementById('codigoRenovar').value.trim().toUpperCase();
@@ -1926,9 +1858,6 @@ window.prepararRenovacion = async function() {
     await mostrarMensaje('Renovación lista', 'Verifica tu WhatsApp y continúa al pago.', 'info');
 };
 
-// ═══════════════════════════════════════════════════════════
-// 🧑 MENÚS Y LOGIN
-// ═══════════════════════════════════════════════════════════
 window.alternarMenu = function() {
     const mf = document.getElementById('menuFlotante');
     const mp = document.getElementById('menuPerfil');
@@ -2054,9 +1983,6 @@ if (btnCerrarSesionEl) btnCerrarSesionEl.addEventListener('click', confirmarYSal
 const menuLogoutEl = document.getElementById('menuLogout');
 if (menuLogoutEl) menuLogoutEl.addEventListener('click', confirmarYSalir);
 
-// ═══════════════════════════════════════════════════════════
-// 🚀 INICIALIZACIÓN
-// ═══════════════════════════════════════════════════════════
 actualizarBotonContinuar();
 cargarTasa();
 verificarDisponibilidad();
@@ -2072,9 +1998,10 @@ window.addEventListener('scroll', () => {
 
 console.log('═══════════════════════════════════════════');
 console.log('🚀 NETFLIX UNIFICADO CARGADO');
-console.log('   Estructura: idéntica a Free Fire');
+console.log('   Estructura: Free Fire');
 console.log('   Endpoint: /api/asignar-perfil');
-console.log('   Tests locales: TEST-1234, TEST-0001, TEST-9999');
+console.log('   Tests: TEST-1234, TEST-0001, TEST-9999');
+console.log('   ✅ Fix: undefined limpiados antes de guardar');
 console.log('═══════════════════════════════════════════');
 </script>
 </body>
