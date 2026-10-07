@@ -118,6 +118,42 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .section-divider{margin:24px 0 18px;text-align:center}
 .section-divider span{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;padding:8px 22px;border-radius:30px;font-size:13px;font-weight:800;letter-spacing:1.5px;display:inline-block;text-transform:uppercase;box-shadow:0 0 20px rgba(212,175,55,0.4);}
 
+/* 🔥 NUEVO: Banner de disponibilidad */
+.stock-banner{
+    margin: 0 0 18px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid;
+    animation: stockIn 0.4s ease;
+}
+@keyframes stockIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.stock-banner.ok{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border-color:rgba(34,197,94,0.45);color:#86efac;}
+.stock-banner.poco{background:linear-gradient(135deg,rgba(245,158,11,0.18),rgba(245,158,11,0.05));border-color:rgba(245,158,11,0.5);color:#fbbf24;}
+.stock-banner.agotado{background:linear-gradient(135deg,rgba(239,68,68,0.18),rgba(239,68,68,0.05));border-color:rgba(239,68,68,0.5);color:#fca5a5;}
+.stock-banner .stock-icono{font-size:20px;flex-shrink:0;}
+.stock-banner .stock-texto{flex:1;line-height:1.4;}
+.stock-banner .stock-puntos{display:flex;gap:4px;flex-shrink:0;}
+.stock-banner .stock-punto{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:0.4;}
+.stock-banner .stock-punto.activo{opacity:1;box-shadow:0 0 8px currentColor;}
+
+.product-card.agotado{opacity:0.55;filter:grayscale(0.5);}
+.product-card.agotado::after{
+    content:'AGOTADO';
+    position:absolute;top:12px;right:-32px;
+    background:#ef4444;color:#fff;
+    padding:4px 40px;
+    font-size:10px;font-weight:900;letter-spacing:1.5px;
+    transform:rotate(35deg);
+    box-shadow:0 4px 12px rgba(239,68,68,0.5);
+    z-index:2;
+}
+.product-card.agotado .btn-buy{background:rgba(107,114,128,0.3);color:#9ca3af;cursor:not-allowed;box-shadow:none;pointer-events:none;}
+
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
 @media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
 .product-card{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.68));border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:16px;transition:transform 0.3s ease,box-shadow 0.3s ease;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.3);display:flex;flex-direction:column;}
@@ -399,6 +435,9 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
             <span class="chip-entrega">Entrega inmediata</span>
         </div>
 
+        <!-- 🔥 NUEVO: Banner de disponibilidad (se rellena por JS) -->
+        <div id="stockBanner" class="stock-banner" style="display:none;"></div>
+
         <div class="tabs-container">
             <button class="tab-btn activo" onclick="cambiarTab('comprar', this)">🎬 Comprar</button>
             <button class="tab-btn" onclick="cambiarTab('renovar', this)">🔄 Renovar</button>
@@ -407,13 +446,13 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
         <div class="tab-content activo" id="tab-comprar">
             <div class="section-divider" style="margin-top:10px;"><span>🎬 PLANES NETFLIX</span></div>
             <div class="products-grid">
-                <div class="product-card" data-codigo="netflix_perfil">
+                <div class="product-card" data-codigo="netflix_perfil" data-stock-tipo="perfil">
                     <div class="card-header"><div class="game-icon">👤</div><div class="product-title">Perfil Netflix</div></div>
                     <div class="product-desc">1 perfil • 30 días • HD</div>
                     <div class="product-price-wrap"><span class="product-price" data-usd="3.50">$3.50</span><div class="product-ref"></div></div>
                     <button class="btn-buy" data-producto="Perfil Netflix" data-usd="3.50" data-codigo="netflix_perfil">COMPRAR</button>
                 </div>
-                <div class="product-card" data-codigo="netflix_cuenta">
+                <div class="product-card" data-codigo="netflix_cuenta" data-stock-tipo="cuenta">
                     <div class="card-header"><div class="game-icon">🎬</div><div class="product-title">Cuenta Netflix</div></div>
                     <div class="product-desc">Cuenta completa • 30 días</div>
                     <div class="product-price-wrap"><span class="product-price" data-usd="13.00">$13.00</span><div class="product-ref"></div></div>
@@ -642,6 +681,107 @@ const URL_ASIGNAR_PERFIL = '/api/asignar-perfil';
 
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
+// 🔥 NUEVO: estado de stock
+let stockNetflix = { perfil: null, cuenta: null, cargado: false };
+
+// 🔥 NUEVO: consulta disponibilidad al backend (dry_run)
+async function consultarStockNetflix(silencioso = false) {
+    try {
+        const [resPerfil, resCuenta] = await Promise.all([
+            fetch(URL_ASIGNAR_PERFIL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dry_run: true, servicio: 'netflix', tipo: 'perfil' })
+            }).then(r => r.json()).catch(() => null),
+            fetch(URL_ASIGNAR_PERFIL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dry_run: true, servicio: 'netflix', tipo: 'cuenta' })
+            }).then(r => r.json()).catch(() => null)
+        ]);
+
+        stockNetflix.perfil = resPerfil?.disponibles ?? 0;
+        stockNetflix.cuenta = resCuenta?.disponibles ?? 0;
+        stockNetflix.cargado = true;
+
+        renderizarStock();
+        if (!silencioso) console.log('📊 Stock Netflix:', stockNetflix);
+    } catch (e) {
+        console.warn('No se pudo consultar stock:', e);
+        stockNetflix.cargado = false;
+        // Si falla, no bloqueamos nada
+    }
+}
+
+// 🔥 NUEVO: pinta el banner y bloquea botones sin stock
+function renderizarStock() {
+    const banner = document.getElementById('stockBanner');
+    const tarjetaPerfil = document.querySelector('.product-card[data-stock-tipo="perfil"]');
+    const tarjetaCuenta = document.querySelector('.product-card[data-stock-tipo="cuenta"]');
+
+    if (!banner) return;
+
+    // Si no se pudo cargar el stock, no mostramos banner y dejamos todo libre
+    if (!stockNetflix.cargado) {
+        banner.style.display = 'none';
+        if (tarjetaPerfil) tarjetaPerfil.classList.remove('agotado');
+        if (tarjetaCuenta) tarjetaCuenta.classList.remove('agotado');
+        return;
+    }
+
+    const p = stockNetflix.perfil || 0;
+    const c = stockNetflix.cuenta || 0;
+    const totalPerfil = p + (c * 5); // aprox: cada cuenta tiene ~5 perfiles
+
+    // 🔥 Determinar estado global
+    let clase, icono, texto;
+
+    if (p === 0 && c === 0) {
+        clase = 'agotado';
+        icono = '❌';
+        texto = 'Sin stock temporalmente. Vuelve pronto.';
+    } else if (p > 0 && p <= 2 && c === 0) {
+        clase = 'poco';
+        icono = '⚠️';
+        texto = `¡Últimos ${p} perfil${p === 1 ? '' : 'es'} disponibles!`;
+    } else {
+        clase = 'ok';
+        icono = '✅';
+        const partes = [];
+        if (p > 0) partes.push(`${p} perfil${p === 1 ? '' : 'es'}`);
+        if (c > 0) partes.push(`${c} cuenta${c === 1 ? '' : 's'} completa${c === 1 ? '' : 's'}`);
+        texto = `Disponibles: ${partes.join(' + ')}`;
+    }
+
+    banner.className = 'stock-banner ' + clase;
+    banner.style.display = 'flex';
+    banner.innerHTML = `
+        <span class="stock-icono">${icono}</span>
+        <div class="stock-texto">${texto}</div>
+        <div class="stock-puntos">
+            ${[1,2,3,4,5].map(i => `<span class="stock-punto ${i <= Math.min(5, p + c*5) ? 'activo' : ''}"></span>`).join('')}
+        </div>
+    `;
+
+    // 🔥 Bloquear tarjetas sin stock
+    if (tarjetaPerfil) {
+        const sinStock = p === 0;
+        tarjetaPerfil.classList.toggle('agotado', sinStock);
+        const btn = tarjetaPerfil.querySelector('.btn-buy');
+        if (btn) {
+            btn.textContent = sinStock ? 'AGOTADO' : 'COMPRAR';
+        }
+    }
+    if (tarjetaCuenta) {
+        const sinStock = c === 0;
+        tarjetaCuenta.classList.toggle('agotado', sinStock);
+        const btn = tarjetaCuenta.querySelector('.btn-buy');
+        if (btn) {
+            btn.textContent = sinStock ? 'AGOTADO' : 'COMPRAR';
+        }
+    }
+}
+
 function esCodigoTestLocal(ref) {
     const r = String(ref || '').trim().toUpperCase();
     return ['TEST-1234', 'TEST-0001', 'TEST-9999', 'TEST-ABC'].includes(r);
@@ -813,7 +953,22 @@ function formatearPrecioProducto(precioUsd) {
     const usd = precioUsd.toFixed(2) + ' USD';
     return metodo === 'PAGO MOVIL' ? `${bs} · ≈ ${usd}` : `${usd} · ≈ ${bs}`;
 }
+
+// 🔥 MODIFICADO: comprarProducto verifica stock antes de avanzar
 function comprarProducto(producto, precioUsd, paqueteCodigo) {
+    // 🔥 Verificar stock específico
+    const esCuenta = String(paqueteCodigo || '').includes('cuenta') || String(producto || '').toLowerCase().includes('cuenta');
+    const stockDisponible = esCuenta ? (stockNetflix.cuenta ?? 999) : (stockNetflix.perfil ?? 999);
+
+    if (stockNetflix.cargado && stockDisponible <= 0) {
+        mostrarMensaje(
+            'Producto agotado',
+            `${producto} no tiene stock en este momento.\n\nVuelve a intentarlo más tarde o elige otra opción.`,
+            'advertencia'
+        );
+        return;
+    }
+
     productoElegido = { producto, precioUsd: parseFloat(precioUsd), paqueteCodigo, precioBs: Math.round(parseFloat(precioUsd) * tasa), modoRenovacion: false };
     localStorage.removeItem('modo_renovacion');
     localStorage.removeItem('codigo_renovacion_usado');
@@ -904,6 +1059,21 @@ function irAlPago() {
     renderizarResumenPago();
     mostrarSeccion('seccion-pago');
     marcarProgreso(3);
+
+    // 🔥 NUEVO: re-verificar stock al llegar al pago
+    consultarStockNetflix(true).then(() => {
+        const esCuenta = String(productoElegido.paqueteCodigo || '').includes('cuenta') ||
+                         String(productoElegido.producto || '').toLowerCase().includes('cuenta');
+        const stock = esCuenta ? stockNetflix.cuenta : stockNetflix.perfil;
+
+        if (stockNetflix.cargado && stock <= 0) {
+            mostrarMensaje(
+                'Producto agotado',
+                `Lo sentimos, ${productoElegido.producto} se agotó justo ahora.\n\nTe devolvemos al catálogo.`,
+                'advertencia'
+            ).then(() => volverAlCatalogo());
+        }
+    });
 }
 function renderizarResumenPago() {
     document.getElementById('datoJuego').textContent = juegoActual;
@@ -1737,6 +1907,8 @@ function realizarOtraRecarga() {
     actualizarBotonContinuar();
     mostrarSeccion('seccion-catalogo');
     marcarProgreso(1);
+    // 🔥 Refrescar stock al volver
+    consultarStockNetflix(true);
 }
 
 // Menú
@@ -1856,7 +2028,12 @@ window.addEventListener('scroll', () => {
     if (b) b.classList.toggle('show', window.scrollY > 300);
 }, { passive: true });
 
-console.log('🚀 NETFLIX CARGADO — Con validación de códigos RG');
+// 🔥 NUEVO: Consultar stock al cargar
+consultarStockNetflix();
+// 🔥 NUEVO: refrescar stock cada 2 minutos
+setInterval(() => consultarStockNetflix(true), 120000);
+
+console.log('🚀 NETFLIX CARGADO — Con validación de códigos RG + stock dinámico');
 </script>
 </body>
 </html>
