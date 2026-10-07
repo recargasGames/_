@@ -297,6 +297,23 @@
             margin-bottom:24px;position:relative;z-index:1;
             white-space:pre-line;
         }
+
+        /* 🔢 Estilo para el ID cliente en el mensaje */
+        .id-cliente-mensaje {
+            display: inline-block;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 24px;
+            font-weight: 900;
+            color: #f5d76e;
+            background: rgba(212, 175, 55, 0.15);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            letter-spacing: 6px;
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
         .mensaje-botones{
             display:flex;gap:12px;justify-content:center;
             position:relative;z-index:1;
@@ -326,14 +343,9 @@
             background:rgba(71,85,105,0.5);color:white;
             transform:translateY(-2px);
         }
-        .mensaje-btn.secundario:active{transform:translateY(0) scale(0.98)}
         .mensaje-btn.peligro{
             background:linear-gradient(135deg,#ef4444,#dc2626);
             color:white;box-shadow:0 4px 15px rgba(239,68,68,0.4);
-        }
-        .mensaje-btn.peligro:hover{
-            transform:translateY(-2px);
-            box-shadow:0 8px 25px rgba(239,68,68,0.6);
         }
 
         @media(max-width:500px){
@@ -345,6 +357,7 @@
             .mensaje-titulo{font-size:17px}
             .mensaje-texto{font-size:14px}
             .mensaje-btn{font-size:13px;padding:12px 14px}
+            .id-cliente-mensaje { font-size: 20px; letter-spacing: 4px; padding: 8px 16px; }
             .video-fondo {
                 opacity: 0.85;
                 filter: brightness(1.05);
@@ -412,7 +425,7 @@
     <script type="module">
         import { auth, db } from './firebase-config.js';
         import { createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { ref, set } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+        import { ref, set, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
         let _mensajeCallback = null;
         let _mensajeCerrado = false;
@@ -425,7 +438,39 @@
             confirmacion: '❓'
         };
 
-        function mostrarMensaje(titulo, mensaje, tipo = 'info', textoBoton = 'Entendido') {
+        // ═══════════════════════════════════════════════
+        // 🔢 GENERAR ID DE CLIENTE ÚNICO DE 6 DÍGITOS
+        // ═══════════════════════════════════════════════
+        async function generarIdClienteUnico() {
+            const MAX_INTENTOS = 30;
+            for (let i = 0; i < MAX_INTENTOS; i++) {
+                // Genera número aleatorio entre 100000 y 999999
+                const codigo = String(Math.floor(100000 + Math.random() * 900000));
+                
+                try {
+                    // Buscar si ya existe ese id_cliente en cualquier usuario
+                    const usuariosRef = ref(db, 'usuarios');
+                    const consulta = query(usuariosRef, orderByChild('id_cliente'), equalTo(codigo));
+                    const snapshot = await get(consulta);
+                    
+                    if (!snapshot.exists()) {
+                        console.log('✅ ID Cliente generado:', codigo);
+                        return codigo;
+                    } else {
+                        console.log('⚠️ ID Cliente ya existe, reintentando...', codigo);
+                    }
+                } catch (err) {
+                    console.warn('Error verificando ID, asumiendo único:', err.message);
+                    return codigo;
+                }
+            }
+            // Fallback: usar timestamp si fallan los 30 intentos
+            const fallback = String(Date.now()).slice(-6);
+            console.log('⚠️ Usando fallback:', fallback);
+            return fallback;
+        }
+
+        function mostrarMensaje(titulo, mensaje, tipo = 'info', textoBoton = 'Entendido', htmlPersonalizado = null) {
             return new Promise((resolve) => {
                 const overlay = document.getElementById('mensajeOverlay');
                 const icono = document.getElementById('mensajeIcono');
@@ -436,7 +481,13 @@
                 icono.className = 'mensaje-icono ' + tipo;
                 icono.textContent = ICONOS[tipo] || ICONOS.info;
                 tituloEl.textContent = titulo;
-                textoEl.textContent = mensaje;
+                
+                // Permitir HTML personalizado para mostrar el ID de forma destacada
+                if (htmlPersonalizado) {
+                    textoEl.innerHTML = htmlPersonalizado;
+                } else {
+                    textoEl.textContent = mensaje;
+                }
 
                 botones.innerHTML = `
                     <button class="mensaje-btn principal" id="mensajeBtnPrincipal">${textoBoton}</button>
@@ -503,32 +554,50 @@
             btn.textContent = 'Registrando...';
 
             try {
+                // 1️⃣ Crear el usuario en Firebase Auth
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
+                // 2️⃣ Actualizar el perfil con el nombre
                 await updateProfile(user, {
                     displayName: fullName
                 });
 
-                // ✅ GUARDAR USUARIO EN LA BASE DE DATOS
+                // 3️⃣ 🔢 GENERAR ID DE CLIENTE ÚNICO
+                const idCliente = await generarIdClienteUnico();
+
+                // 4️⃣ Guardar usuario en la base de datos con el ID
                 try {
                     await set(ref(db, 'usuarios/' + user.uid), {
                         uid: user.uid,
                         nombre: fullName,
                         correo: email,
+                        id_cliente: idCliente,                    // 🔢 ID de 6 dígitos
                         fechaRegistro: new Date().toISOString(),
                         fechaRegistroLegible: new Date().toLocaleString('es-VE'),
+                        fechaAsignacionId: new Date().toISOString(),
                         ultimaActividad: new Date().toISOString(),
                         ultimaActividadLegible: new Date().toLocaleString('es-VE'),
                         totalPedidos: 0,
+                        bloqueado: false,
                         id_jugador: localStorage.getItem('id_jugador') || ''
                     });
-                    console.log('✅ Usuario guardado en BD');
+                    console.log('✅ Usuario guardado con ID Cliente:', idCliente);
                 } catch (errGuardar) {
                     console.error('Error guardando usuario:', errGuardar);
                 }
 
-                await mostrarMensaje('¡Cuenta creada!', 'Tu cuenta se creó exitosamente. Redirigiendo a tu panel...', 'exito');
+                // 5️⃣ Mostrar mensaje de éxito con el ID destacado
+                const mensajeHTML = `
+                    ¡Tu cuenta se creó exitosamente!
+                    
+                    <div style="margin-top:16px; margin-bottom:8px; font-size:13px; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">🆔 Tu ID de Cliente</div>
+                    <div class="id-cliente-mensaje">${idCliente}</div>
+                    <div style="margin-top:14px; font-size:13px; color:#cbd5e1; line-height:1.5;">Guárdalo. Lo usarás para identificarte con soporte.<br>Redirigiendo a tu panel...</div>
+                `;
+
+                await mostrarMensaje('🎉 ¡Cuenta creada!', '', 'exito', 'Ir a mi panel', mensajeHTML);
+
                 window.location.href = 'dashboard.html';
 
             } catch (error) {
