@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+<title>RECARGASGAMES - Netflix</title>
+<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+:root{
+    --color-principal:#3b82f6;--color-hover:#2563eb;--color-azul:#3b82f6;
+    --color-blanco:#ffffff;--color-dorado:#d4af37;--color-dorado-claro:#f5d76e;
+    --color-negro:#0a0e1a;--color-error:#ef4444;--color-exito:#22c55e;
+    --color-netflix:#E50914;
+    --alto-nav:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#000;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));overflow-x:hidden;min-height:100vh;position:relative;}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,.pay-box:focus-visible{outline:2px solid var(--color-dorado-claro);outline-offset:2px;}
+.video-fondo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;opacity:1;filter:brightness(1.15);will-change:transform;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,14,26,0.15) 0%,rgba(10,14,26,0.35) 60%,rgba(10,14,26,0.6) 100%);z-index:-1;pointer-events:none;transform:translateZ(0);}
+body::before{content:'';position:fixed;top:-30%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(229,9,20,0.1),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+.main{position:relative;z-index:1}
+.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(5,8,16,0.85);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.header{padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);}
+.brand img{height:55px;width:auto;border-radius:12px;filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));}
+.header-right{display:flex;align-items:center;gap:12px}
+.btn-perfil{background:transparent;border:none;color:white;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;transition:all 0.3s;position:relative;margin-top:8px;}
+.btn-perfil .avatar-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;color:white;transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);position:relative;overflow:hidden;}
+.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
+.btn-perfil .avatar-circle .online-dot{position:absolute;bottom:0;right:0;width:12px;height:12px;background:#22c55e;border-radius:50%;border:2px solid #0b1220;}
+.btn-perfil .perfil-nombre{font-size:14px;font-weight:500;color:white;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+.menu-perfil{position:absolute;top:75px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:260px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;z-index:1000;overflow:hidden;}
+.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.menu-perfil-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));}
+.menu-perfil-header .avatar-grande{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(212,175,55,0.4);}
+.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
+.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
+.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-opcion{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#e5e7eb;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.menu-perfil-opcion:last-child{border-bottom:none}
+.menu-perfil-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:26px;border-left:3px solid var(--color-dorado);}
+.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
+.menu-perfil-opcion.danger{color:#ef4444}
+.menu-perfil-opcion.danger:hover{background:rgba(239,68,68,0.12);color:#ef4444;border-left-color:#ef4444;}
+.menu-hamburguesa{background:transparent;border:none;color:white;font-size:28px;cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;margin-top:8px;}
+.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-dorado);}
+.menu-flotante{position:absolute;top:80px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:240px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.25s ease;z-index:999;overflow:hidden;}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
+.menu-opcion{display:flex;align-items:center;gap:10px;padding:14px 20px;color:white;text-decoration:none;font-size:15px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.menu-opcion:last-child{border-bottom:none}
+.menu-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:24px;}
+.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
+.games-menu{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:12px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(255,255,255,0.04);}
+.games-menu::-webkit-scrollbar{display:none}
+.games-menu a{text-decoration:none;color:#cbd5e1;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;white-space:nowrap;transition:all 0.3s;border:1px solid transparent;}
+.games-menu a:hover{color:var(--color-dorado-claro);background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.3);}
+.games-menu a.active{color:var(--color-dorado-claro);background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));border-color:rgba(212,175,55,0.5);}
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
+
+.progreso{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:8px 0 24px;padding:14px 16px;background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.65));border:1px solid rgba(212,175,55,0.2);border-radius:16px;position:relative;overflow:hidden;}
+.progreso-paso{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.4;transition:opacity 0.3s;}
+.progreso-paso.activo,.progreso-paso.completado{opacity:1}
+.progreso-bola{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#cbd5e1;transition:all 0.3s;}
+.progreso-paso.activo .progreso-bola{background:linear-gradient(135deg,#d4af37,#f5d76e);border-color:var(--color-dorado);color:#0a0e1a;box-shadow:0 0 20px rgba(212,175,55,0.5);}
+.progreso-paso.completado .progreso-bola{background:linear-gradient(135deg,#22c55e,#16a34a);border-color:#22c55e;color:#fff;}
+.progreso-label{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#cbd5e1}
+.progreso-paso.activo .progreso-label{color:var(--color-dorado-claro)}
+.progreso-paso.completado .progreso-label{color:#86efac}
+.progreso-linea{flex:0 0 14px;height:2px;background:rgba(255,255,255,0.15);border-radius:2px;}
+
+.seccion{display:none;animation:seccionIn 0.35s ease}
+.seccion.activa{display:block}
+@keyframes seccionIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.pagina-titulo{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:24px 0 18px;}
+.pagina-titulo h1{font-size:22px;font-weight:900;background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.chip-entrega{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:14px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#86efac;font-size:12px;font-weight:700;}
+.chip-entrega::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.8);}
+
+.tabs-container{display:flex;gap:10px;margin-bottom:24px;overflow-x:auto;padding:5px 0;scrollbar-width:none;}
+.tabs-container::-webkit-scrollbar{display:none}
+.tab-btn{flex:1;min-width:140px;padding:14px 18px;background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));border:1px solid rgba(212,175,55,0.2);border-radius:14px;color:#cbd5e1;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:0.5px;font-family:inherit;white-space:nowrap;}
+.tab-btn:hover{border-color:rgba(212,175,55,0.4);color:var(--color-dorado-claro);}
+.tab-btn.activo{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);color:#0a0e1a;border-color:#d4af37;box-shadow:0 4px 20px rgba(212,175,55,0.4);}
+.tab-content{display:none;animation:fadeInTab 0.3s ease}
+.tab-content.activo{display:block}
+@keyframes fadeInTab{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.card-panel{background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));border:1px solid rgba(212,175,55,0.25);border-radius:20px;padding:22px 18px 20px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.panel-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800;margin:0 0 16px;color:var(--color-dorado-claro);position:relative;z-index:1;letter-spacing:0.5px;text-transform:uppercase;}
+.paso-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;font-size:13px;font-weight:800;}
+.paso-titulo{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800;margin:30px 0 10px;color:var(--color-dorado-claro);letter-spacing:0.5px;text-transform:uppercase;}
+.aviso-inline{background:rgba(212,175,55,0.08);border-left:4px solid var(--color-dorado);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;color:#e5e7eb;margin-bottom:6px;}
+.aviso-inline strong{color:var(--color-dorado-claro)}
+.form-input{width:100%;height:50px;border-radius:14px;background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;border:1px solid rgba(255,255,255,0.18);font-size:16px;position:relative;z-index:1;transition:border-color 0.3s;font-family:inherit;}
+.form-input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+.form-input.resaltar{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.25);}
+.form-group{margin-bottom:16px;position:relative;z-index:1}
+.form-group:last-child{margin-bottom:0}
+.form-group label{display:block;margin-bottom:8px;color:#cbd5e1;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.ayuda-id{margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.4;position:relative;z-index:1;}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1}
+.pay-box{background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.15);border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700;transition:all 0.3s;font-size:14px;}
+.pay-box.active{border-color:var(--color-dorado);background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.2));color:var(--color-dorado-claro);}
+.tasa-info{font-size:12px;color:#94a3b8;margin-top:10px;text-align:right;font-weight:600;position:relative;z-index:1;}
+.id-status{margin-top:14px;padding:14px 18px;border-radius:14px;font-size:15px;display:none;font-weight:700;animation:statusAparecer 0.3s ease;}
+@keyframes statusAparecer{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.id-status.valido{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(34,197,94,0.3),rgba(34,197,94,0.1));color:#4ade80;border:1px solid rgba(34,197,94,0.6);}
+.id-status.valido .check-icono{width:28px;height:28px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:white;flex-shrink:0;}
+.id-status.valido .nombre-jugador{color:#fff;font-weight:800;}
+.id-status.error{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));color:#f87171;border:1px solid rgba(239,68,68,0.5);}
+.section-divider{margin:24px 0 18px;text-align:center}
+.section-divider span{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;padding:8px 22px;border-radius:30px;font-size:13px;font-weight:800;letter-spacing:1.5px;display:inline-block;text-transform:uppercase;box-shadow:0 0 20px rgba(212,175,55,0.4);}
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
+@media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+.product-card{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.68));border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:16px;transition:transform 0.3s ease,box-shadow 0.3s ease;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.3);will-change:transform;transform:translateZ(0);display:flex;flex-direction:column;}
+.product-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#d4af37,#3b82f6,#d4af37);background-size:300% 300%;border-radius:18px;z-index:-1;opacity:0;transition:opacity 0.3s;}
+.product-card:hover::before{opacity:1}
+.product-card:hover{transform:translateY(-6px) translateZ(0);box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.3);}
+.card-header{display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(212,175,55,0.15);padding-bottom:10px;margin-bottom:10px;}
+.game-icon{background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.25));padding:10px;border-radius:12px;font-size:20px;border:1px solid rgba(212,175,55,0.4);}
+.product-title{font-size:15px;font-weight:800;background:linear-gradient(135deg,#fff,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.product-desc{color:#9ca3af;font-size:11px;margin-bottom:12px;}
+.product-price-wrap{margin-top:auto;margin-bottom:14px}
+.product-price{font-size:22px;font-weight:800;color:var(--color-dorado-claro);text-shadow:0 0 15px rgba(212,175,55,0.4);display:block;}
+.product-ref{font-size:12px;color:#94a3b8;margin-top:2px;min-height:16px}
+.btn-buy{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;width:100%;height:44px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;letter-spacing:1px;box-shadow:0 4px 15px rgba(212,175,55,0.4);text-transform:uppercase;font-family:inherit;}
+.btn-buy:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.6);}
+
+.btn-accion{width:100%;padding:16px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;transition:.3s;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(212,175,55,0.4);font-family:inherit;}
+.btn-accion:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,175,55,0.6);}
+.btn-accion:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.btn-volver-flujo{background:transparent;border:none;color:#94a3b8;font-size:14px;font-weight:600;cursor:pointer;padding:8px 0;margin-bottom:12px;transition:.2s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;}
+.btn-volver-flujo:hover{color:var(--color-dorado-claro);}
+
+.resumen-box{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:20px;text-align:left;margin:15px 0;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(212,175,55,0.12);font-size:15px;gap:10px;}
+.resumen-fila:last-child{border-bottom:none}
+.resumen-etiqueta{color:#cbd5e1;flex-shrink:0;}
+.resumen-valor{font-weight:700;color:#fff;text-align:right;word-break:break-word;}
+.resumen-valor.verde{color:var(--color-dorado-claro);}
+.resumen-valor.tachado{color:#6b7280;text-decoration:line-through;font-weight:500;}
+
+.datos-pago-box{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:20px;margin:15px 0;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.titulo-seccion{font-size:16px;font-weight:800;margin-bottom:18px;text-align:center;color:var(--color-dorado-claro);letter-spacing:0.5px;text-transform:uppercase;}
+.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,0.3);border-radius:12px;margin-bottom:10px;border:1px solid rgba(212,175,55,0.1);gap:10px;}
+.dato-line:last-child{margin-bottom:0}
+.dato-texto{flex:1;min-width:0;}
+.dato-texto strong{color:#cbd5e1;display:inline-block;width:82px;font-size:14px;}
+.dato-texto span{color:#fff;font-weight:600;word-break:break-all;font-size:14px;}
+.copiar-btn{width:44px;height:44px;border-radius:10px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);color:var(--color-dorado-claro);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;padding:0;}
+.copiar-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;opacity:0.9;}
+.copiar-btn:hover{background:rgba(212,175,55,0.25);transform:scale(1.05);box-shadow:0 0 15px rgba(212,175,55,0.4);}
+.copiar-btn.copiado{background:rgba(34,197,94,0.2);color:#4ade80;border-color:rgba(34,197,94,0.5);}
+.copiar-btn.copiado svg{display:none}
+.copiar-btn.copiado::after{content:'✓';font-size:20px;font-weight:bold;}
+.copiar-todo-btn{width:100%;padding:13px;margin-top:14px;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));border:1px solid rgba(212,175,55,0.4);border-radius:12px;color:var(--color-dorado-claro);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;letter-spacing:0.5px;font-family:inherit;}
+.copiar-todo-btn:hover{background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.15));box-shadow:0 0 20px rgba(212,175,55,0.3);}
+
+.input-ref{width:100%;padding:14px;border-radius:12px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:16px;margin-top:10px;margin-bottom:15px;transition:.3s;font-family:inherit;}
+.input-ref:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+
+.cupon-box{margin-top:16px;padding:16px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));border:1px dashed rgba(212,175,55,0.4);border-radius:14px;}
+.cupon-label{display:block;margin-bottom:10px;color:var(--color-dorado-claro);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:left;}
+.cupon-input-wrap{display:flex;gap:8px;}
+.cupon-input{flex:1;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,0.35);border:1px solid rgba(212,175,55,0.3);color:#fff;font-size:15px;text-transform:uppercase;letter-spacing:1px;font-weight:700;transition:.3s;font-family:inherit;min-width:0;}
+.cupon-input::placeholder{color:#6b7280;text-transform:none;letter-spacing:0;font-weight:400;}
+.cupon-input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+.cupon-btn{padding:12px 18px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:.3s;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(212,175,55,0.3);font-family:inherit;white-space:nowrap;}
+.cupon-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.5);}
+.cupon-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.cupon-msg{margin-top:10px;font-size:13px;font-weight:700;min-height:18px;text-align:left;}
+.cupon-msg.ok{color:#4ade80}
+.cupon-msg.err{color:#f87171}
+.cupon-aplicado{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border-color:rgba(34,197,94,0.5);border-style:solid;}
+.aviso-box{background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:14px;margin-top:14px;font-size:13px;color:#f5d76e;}
+
+.estado-box{text-align:center;padding:40px 10px 30px;}
+.spinner-circle{width:80px;height:80px;border:3px solid rgba(212,175,55,0.2);border-top-color:var(--color-dorado);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 25px;box-shadow:0 0 30px rgba(212,175,55,0.2);}
+@keyframes spin{to{transform:rotate(360deg)}}
+.icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold;}
+.icono-exito{border-color:var(--color-exito);color:var(--color-exito);box-shadow:0 0 40px rgba(34,197,94,0.5);animation:iconoPulse 2s ease-in-out infinite;}
+.icono-amarillo{border-color:var(--color-dorado-claro);color:var(--color-dorado-claro);box-shadow:0 0 40px rgba(245,215,110,0.4);}
+.icono-error{border-color:var(--color-error);color:var(--color-error);box-shadow:0 0 40px rgba(239,68,68,0.4);}
+@keyframes iconoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.texto-principal{font-size:24px;font-weight:800;margin-bottom:10px;background:linear-gradient(135deg,#fff,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.texto-secundario{font-size:15px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto;white-space:pre-line;}
+
+.pin-box{margin-top:20px;padding:24px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.6);border-radius:16px;text-align:center;box-shadow:0 0 40px rgba(34,197,94,0.3);animation:pinPulse 2s ease-in-out infinite;}
+@keyframes pinPulse{0%,100%{box-shadow:0 0 40px rgba(34,197,94,0.3)}50%{box-shadow:0 0 60px rgba(34,197,94,0.5)}}
+.pin-box .pin-label{font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:2px;font-weight:700;}
+.pin-box .pin-value{font-size:26px;font-weight:800;color:#22c55e;letter-spacing:3px;margin:10px 0;word-break:break-all;text-shadow:0 0 15px rgba(34,197,94,0.5);}
+.pin-box .btn-copiar-pin{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(34,197,94,0.4);transition:.3s;font-family:inherit;}
+.pin-box .btn-copiar-pin:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(34,197,94,0.6);}
+.vencimiento-box{margin-top:20px;padding:22px;background:linear-gradient(135deg,rgba(212,175,55,0.18),rgba(212,175,55,0.06));border:2px solid rgba(212,175,55,0.6);border-radius:16px;text-align:center;box-shadow:0 0 40px rgba(212,175,55,0.3);animation:pinPulse 2s ease-in-out infinite;}
+.vencimiento-box .vencimiento-label{font-size:11px;color:var(--color-dorado-claro);text-transform:uppercase;letter-spacing:2px;font-weight:800;margin-bottom:10px;}
+.vencimiento-box .vencimiento-value{font-size:30px;font-weight:900;color:#fff;letter-spacing:2px;margin:12px 0;word-break:break-all;text-shadow:0 0 20px rgba(212,175,55,0.6);}
+.vencimiento-box .vencimiento-sub{font-size:13px;color:#cbd5e1;margin-top:8px;line-height:1.5;}
+
+.steps-info{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03));border:1px solid rgba(59,130,246,0.3);border-radius:16px;padding:18px;margin-bottom:20px;position:relative;z-index:1;}
+.steps-info h4{color:#93c5fd;font-size:15px;font-weight:800;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:8px;}
+.steps-info ol{margin-left:20px;padding:0;color:#cbd5e1;font-size:14px;line-height:1.9;}
+.steps-info ol li{padding-left:6px}
+.steps-info strong{color:#fff}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));transform:translate(-50%,20px);max-width:calc(100% - 32px);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;line-height:1.4;background:rgba(10,14,26,0.97);border:1px solid rgba(212,175,55,0.5);color:#fff;box-shadow:0 12px 35px rgba(0,0,0,0.6);opacity:0;visibility:hidden;transition:all 0.3s ease;z-index:3000;text-align:center;}
+.toast.visible{opacity:1;visibility:visible;transform:translate(-50%,0);}
+.toast.error{border-color:rgba(239,68,68,0.6);color:#fecaca;}
+
+.nav-inferior{position:fixed;left:0;right:0;bottom:0;z-index:999;background:rgba(5,8,16,0.96);border-top:1px solid rgba(212,175,55,0.25);box-shadow:0 -4px 20px rgba(0,0,0,0.5);padding-bottom:env(safe-area-inset-bottom);transform:translateZ(0);}
+.nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#9ca3af;text-decoration:none;font-size:12px;font-weight:600;transition:color 0.2s;}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
+.nav-item.soporte{color:#4ade80}
+
+.back-to-top{position:fixed;bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));right:20px;background:linear-gradient(135deg,#d4af37,#3b82f6);color:#fff;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;visibility:hidden;z-index:998;transition:.3s;text-decoration:none;font-size:18px;box-shadow:0 8px 25px rgba(0,0,0,0.4);}
+.back-to-top.show{opacity:1;visibility:visible}
+
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:2000;justify-content:center;align-items:center;padding:20px;}
+.modal-overlay.activo{display:flex}
+.modal-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.3);border-radius:24px;max-width:420px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,0.7);animation:modalSlide 0.3s ease;}
+@keyframes modalSlide{from{transform:translateY(-40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:22px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));}
+.modal-header .icono-grande{font-size:44px;margin-bottom:8px}
+.modal-header h2{font-size:20px;font-weight:800;color:var(--color-dorado-claro);letter-spacing:1px;text-transform:uppercase;}
+.modal-body{padding:22px 20px}
+.modal-footer{padding:0 20px 20px;display:flex;gap:10px}
+.modal-btn{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;border:none;transition:0.3s;text-transform:uppercase;font-family:inherit;}
+.modal-btn.cancelar{background:rgba(71,85,105,0.3);color:#94a3b8;border:1px solid rgba(71,85,105,0.5);}
+.modal-btn.cancelar:hover{background:rgba(71,85,105,0.5);color:white;}
+.modal-btn.continuar{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;}
+
+.mensaje-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:4000;justify-content:center;align-items:center;padding:20px;}
+.mensaje-overlay.activo{display:flex;animation:fadeInOverlay 0.25s ease}
+@keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+.mensaje-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.35);border-radius:24px;padding:32px 26px 24px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 60px rgba(212,175,55,0.2);animation:mensajeSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);text-align:center;position:relative;overflow:hidden;}
+@keyframes mensajeSlide{from{transform:translateY(30px) scale(0.9);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.mensaje-cerrar{position:absolute;top:14px;right:18px;background:none;border:none;color:#9ca3af;font-size:24px;cursor:pointer;padding:4px 8px;line-height:1;transition:all 0.3s;z-index:2;}
+.mensaje-cerrar:hover{color:var(--color-dorado);transform:rotate(90deg);}
+.mensaje-icono{width:80px;height:80px;margin:0 auto 18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:bold;position:relative;z-index:1;}
+.mensaje-icono.exito{background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));border:2px solid rgba(34,197,94,0.7);color:#4ade80;box-shadow:0 0 40px rgba(34,197,94,0.5);}
+.mensaje-icono.error{background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));border:2px solid rgba(239,68,68,0.7);color:#f87171;box-shadow:0 0 40px rgba(239,68,68,0.5);}
+.mensaje-icono.advertencia{background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(212,175,55,0.08));border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);box-shadow:0 0 40px rgba(212,175,55,0.5);}
+.mensaje-icono.info{background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(59,130,246,0.08));border:2px solid rgba(59,130,246,0.7);color:#93c5fd;box-shadow:0 0 40px rgba(59,130,246,0.5);}
+.mensaje-icono.confirmacion{background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.15));border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);box-shadow:0 0 40px rgba(212,175,55,0.5);}
+.mensaje-titulo{font-size:19px;font-weight:800;color:var(--color-dorado-claro);margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase;position:relative;z-index:1;}
+.mensaje-texto{font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:22px;position:relative;z-index:1;white-space:pre-line;}
+.mensaje-botones{display:flex;gap:12px;justify-content:center;position:relative;z-index:1;}
+.mensaje-btn{flex:1;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px;border:none;font-family:inherit;min-height:48px;}
+.mensaje-btn.principal{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;box-shadow:0 4px 15px rgba(212,175,55,0.4);}
+.mensaje-btn.principal:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.6);}
+.mensaje-btn.secundario{background:rgba(71,85,105,0.3);color:#cbd5e1;border:1px solid rgba(71,85,105,0.6);}
+.mensaje-btn.secundario:hover{background:rgba(71,85,105,0.5);color:white;transform:translateY(-2px);}
+.mensaje-btn.peligro{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;box-shadow:0 4px 15px rgba(239,68,68,0.4);}
+.mensaje-btn.peligro:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(239,68,68,0.6);}
+
+@media(max-width:500px){
+    body{padding-top:100px}
+    .main{padding-top:20px}
+    .brand img{height:45px}
+    .header{padding:10px 16px}
+    .games-menu{padding:10px 15px}
+    .menu-flotante{right:10px;min-width:220px}
+    .btn-perfil .perfil-nombre{display:none}
+    .btn-perfil .perfil-flecha{display:none}
+    .menu-perfil{right:0;min-width:230px}
+    .product-price{font-size:19px}
+    .product-title{font-size:14px}
+    .tab-btn{font-size:12px;padding:12px 14px;min-width:120px}
+    .progreso-label{font-size:9px;}
+    .progreso-bola{width:26px;height:26px;font-size:12px;}
+    .dato-texto strong{width:76px;font-size:13px;}
+    .dato-texto span{font-size:13px;}
+    .cupon-input-wrap{flex-direction:column;}
+    .cupon-btn{width:100%;}
+    .texto-principal{font-size:20px;}
+    .video-fondo{opacity:0.85;filter:brightness(1.05)}
+}
+@media(max-width:400px){.mensaje-botones{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}
+}
+</style>
+</head>
+<body onclick="cerrarTodosLosMenus(event)">
+
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
+        <div class="header-right">
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="logo.png" alt="Logo" id="avatarLogo">
+                        <span class="online-dot"></span>
+                    </div>
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+                </button>
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                    <div class="menu-perfil-header">
+                        <div class="avatar-grande" id="avatarGrande"><img src="logo.png" alt="Logo"></div>
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
+                        </div>
+                    </div>
+                    <a href="dashboard.html" class="menu-perfil-opcion"><span class="icono">📊</span> Mi Panel</a>
+                    <a href="perfil.html" class="menu-perfil-opcion"><span class="icono">👤</span> Editar Perfil</a>
+                    <a href="pedidos.html" class="menu-perfil-opcion"><span class="icono">📦</span> Mis Pedidos</a>
+                    <a href="favoritos.html" class="menu-perfil-opcion"><span class="icono">❤️</span> Favoritos</a>
+                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
+                </div>
+            </div>
+            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        </div>
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuRegister">📝 Crear Cuenta</a>
+            <div id="menuConSesion" style="display:none;">
+                <a href="dashboard.html" class="menu-opcion">📊 Mi Panel</a>
+                <a href="pedidos.html" class="menu-opcion">📦 Mis Pedidos</a>
+                <a href="perfil.html" class="menu-opcion">👤 Editar Perfil</a>
+                <div class="menu-divider"></div>
+                <a href="#" class="menu-opcion" id="menuLogout" style="color:#ef4444;">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+    <nav class="games-menu" aria-label="Juegos">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html">Free Fire</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="delta.html">Delta Force</a>
+        <a href="bigo.html">Bigo Live</a>
+        <a href="gift-cards.html">Gift Cards</a>
+        <a href="netflix.html" class="active" aria-current="page">Netflix</a>
+        <a href="disney.html">Disney+</a>
+    </nav>
+</div>
+
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🔑</div>
+            <h2>Iniciar Sesión</h2>
+        </div>
+        <div class="modal-body">
+            <form id="loginForm">
+                <div style="margin-bottom:20px;">
+                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
+            </form>
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
+                <p style="margin-top:8px;"><a href="#" id="resetPasswordLink" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="mensaje-overlay" id="mensajeOverlay">
+    <div class="mensaje-box" id="mensajeBox">
+        <button class="mensaje-cerrar" id="mensajeCerrar" aria-label="Cerrar" onclick="cerrarMensajePersonalizado()">✕</button>
+        <div class="mensaje-icono" id="mensajeIcono">ℹ</div>
+        <div class="mensaje-titulo" id="mensajeTitulo">Título</div>
+        <div class="mensaje-texto" id="mensajeTexto">Mensaje</div>
+        <div class="mensaje-botones" id="mensajeBotones">
+            <button class="mensaje-btn principal" id="mensajeBtnPrincipal" onclick="cerrarMensajePersonalizado()">Entendido</button>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="progreso" id="progresoFlujo">
+        <div class="progreso-paso activo" data-paso="1">
+            <div class="progreso-bola">1</div>
+            <div class="progreso-label">Producto</div>
+        </div>
+        <div class="progreso-linea"></div>
+        <div class="progreso-paso" data-paso="2">
+            <div class="progreso-bola">2</div>
+            <div class="progreso-label">WhatsApp</div>
+        </div>
+        <div class="progreso-linea"></div>
+        <div class="progreso-paso" data-paso="3">
+            <div class="progreso-bola">3</div>
+            <div class="progreso-label">Pago</div>
+        </div>
+        <div class="progreso-linea"></div>
+        <div class="progreso-paso" data-paso="4">
+            <div class="progreso-bola">4</div>
+            <div class="progreso-label">Listo</div>
+        </div>
+    </div>
+
+    <!-- ══════════ SECCIÓN 1: CATÁLOGO ══════════ -->
+    <section class="seccion activa" id="seccion-catalogo">
+        <div class="pagina-titulo">
+            <h1>Recarga Netflix</h1>
+            <span class="chip-entrega">Entrega inmediata</span>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-btn activo" id="btnTabComprar" onclick="cambiarTab('comprar', this)">🎬 Comprar</button>
+            <button class="tab-btn" id="btnTabRenovar" onclick="cambiarTab('renovar', this)">🔄 Renovar</button>
+        </div>
+
+        <div class="tab-content activo" id="tab-comprar">
+            <div class="section-divider" style="margin-top:10px;"><span>🎬 PLANES NETFLIX</span></div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">👤</div><div class="product-title">Perfil Netflix</div></div>
+                    <div class="product-desc">1 perfil • 30 días • HD</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="3.80">$3.80</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Perfil Netflix" data-usd="3.80" data-codigo="netflix_perfil">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🎬</div><div class="product-title">Cuenta Netflix</div></div>
+                    <div class="product-desc">Cuenta completa • 30 días</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="13.00">$13.00</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Cuenta Netflix" data-usd="13.00" data-codigo="netflix_cuenta">COMPRAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-renovar">
+            <div class="steps-info">
+                <h4>🔄 Renovar tu Netflix</h4>
+                <ol>
+                    <li>Busca tu <strong>código de renovación</strong> (te lo dimos al comprar)</li>
+                    <li>También lo puedes ver en <strong>Mis Pedidos</strong></li>
+                    <li>Ingresa el código abajo</li>
+                    <li>Presiona <strong>"Renovar"</strong></li>
+                    <li>Renueva <strong>ANTES o el MISMO DÍA del corte</strong></li>
+                </ol>
+            </div>
+
+            <div class="card-panel">
+                <div class="panel-title">🔄 Renovar Netflix</div>
+                <div class="form-group">
+                    <label for="tipoRenovar">📦 Tipo de cuenta</label>
+                    <select class="form-input" id="tipoRenovar" style="padding:12px 16px;">
+                        <option value="netflix_perfil">👤 Perfil Netflix</option>
+                        <option value="netflix_cuenta">🎬 Cuenta Netflix</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="codigoRenovar">🎟️ Código de Renovación</label>
+                    <input type="text" class="form-input" id="codigoRenovar" placeholder="Ej: 123456789" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px;font-weight:700;">
+                </div>
+                <div class="form-group">
+                    <label for="whatsappRenovar">📲 Tu WhatsApp</label>
+                    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="whatsappRenovar" placeholder="Ej: 04241234567" autocomplete="off">
+                </div>
+                <button class="btn-accion" onclick="prepararRenovacion()">🔄 Renovar Ahora</button>
+                <div class="aviso-inline" style="margin-top:14px;">
+                    <strong>⚠️ Antes del corte:</strong> Solo puedes renovar hasta el día del vencimiento. Después NO se puede renovar.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECCIÓN 2: WHATSAPP ══════════ -->
+    <section class="seccion" id="seccion-jugador">
+        <button class="btn-volver-flujo" onclick="volverAlCatalogo()">← Volver al catálogo</button>
+
+        <div class="pagina-titulo">
+            <h1>Tu WhatsApp</h1>
+            <span class="chip-entrega">Paso 2 de 4</span>
+        </div>
+
+        <div class="card-panel" id="productoElegido" style="background:linear-gradient(135deg,rgba(212,175,55,0.12),rgba(59,130,246,0.05));border-color:rgba(212,175,55,0.4);">
+            <div style="display:flex;align-items:center;gap:14px;">
+                <div class="game-icon" style="font-size:22px;padding:12px;">🎬</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:11px;color:#cbd5e1;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Producto seleccionado</div>
+                    <div style="font-size:17px;font-weight:800;color:var(--color-dorado-claro);margin-top:2px;" id="prodElegidoNombre">—</div>
+                    <div style="font-size:13px;color:#fff;font-weight:700;margin-top:2px;" id="prodElegidoPrecio">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-panel" id="panelId">
+            <div class="panel-title"><span class="paso-num">1</span> Tu WhatsApp</div>
+            <div class="form-group">
+                <label for="jugadorId">Número de WhatsApp</label>
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="jugadorId" placeholder="Ej: 04241234567" autocomplete="off">
+                <p class="ayuda-id">Te enviaremos los datos de acceso a este número.</p>
+            </div>
+            <div class="id-status" id="idStatus" role="status" aria-live="polite"></div>
+        </div>
+
+        <button class="btn-accion" id="btnContinuarPago" onclick="irAlPago()" disabled style="opacity:0.5;">CONTINUAR AL PAGO →</button>
+    </section>
+
+    <!-- ══════════ SECCIÓN 3: PAGO ══════════ -->
+    <section class="seccion" id="seccion-pago">
+        <button class="btn-volver-flujo" onclick="volverAJugador()">← Volver a datos</button>
+
+        <div class="pagina-titulo">
+            <h1>Confirmar Pago</h1>
+            <span class="chip-entrega">Paso 3 de 4</span>
+        </div>
+
+        <div class="resumen-box">
+            <div class="resumen-fila"><span class="resumen-etiqueta">🎬 Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">📱 WhatsApp</span><span class="resumen-valor" id="datoId">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">📦 Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
+            <div class="resumen-fila" id="filaSubtotal" style="display:none;"><span class="resumen-etiqueta">💵 Subtotal</span><span class="resumen-valor tachado" id="datoSubtotal">-</span></div>
+            <div class="resumen-fila" id="filaDescuento" style="display:none;"><span class="resumen-etiqueta">🎁 Descuento</span><span class="resumen-valor verde" id="datoDescuento">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">💰 Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
+        </div>
+
+        <div class="card-panel">
+            <div class="panel-title"><span class="paso-num">2</span> Método de pago</div>
+            <div class="payment-methods" role="radiogroup" aria-label="Método de pago">
+                <div class="pay-box active" role="radio" aria-checked="true" tabindex="0" data-metodo="PAGO MOVIL">🏦 PAGO MOVIL</div>
+                <div class="pay-box" role="radio" aria-checked="false" tabindex="0" data-metodo="BINANCE" aria-disabled="true" style="opacity:.55;cursor:not-allowed;">🟡 BINANCE · Próx.</div>
+            </div>
+            <div class="tasa-info" id="tasaInfo">Cargando tasa...</div>
+        </div>
+
+        <div class="datos-pago-box" id="bloqueDatosPago">
+            <h3 class="titulo-seccion" style="margin-top:0;">🏦 Datos de Pago Móvil</h3>
+            <div class="dato-line"><div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div><button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <div class="dato-line"><div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div><button class="copiar-btn" onclick="copiarTexto('32824869', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <div class="dato-line"><div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div><button class="copiar-btn" onclick="copiarTexto('04228242411', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <div class="dato-line"><div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">-</span></div><button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <button class="copiar-todo-btn" onclick="copiarTodosLosDatos(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar todos los datos de pago</button>
+        </div>
+
+        <div class="cupon-box" id="cuponBox">
+            <label class="cupon-label">🎁 ¿Tienes un código de descuento?</label>
+            <div class="cupon-input-wrap"><input type="text" class="cupon-input" id="cuponInput" placeholder="Ingresa tu código" maxlength="20" autocomplete="off"><button class="cupon-btn" id="cuponBtn" onclick="aplicarCupon()">Aplicar</button></div>
+            <div class="cupon-msg" id="cuponMsg"></div>
+        </div>
+
+        <div class="datos-pago-box">
+            <label style="display:block;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
+            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" autocomplete="off">
+        </div>
+
+        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
+        <button class="btn-accion" id="btnVerificar" onclick="iniciarVerificacion()" style="margin-top:14px;">✅ VERIFICAR PAGO</button>
+    </section>
+
+    <!-- ══════════ SECCIÓN 4: ESTADOS ══════════ -->
+    <section class="seccion" id="seccion-verificando">
+        <div class="estado-box">
+            <div class="spinner-circle"></div>
+            <div class="texto-principal">Verificando pago...</div>
+            <div class="texto-secundario" id="subtituloVerificando">Estamos buscando tu pago en el sistema bancario...</div>
+        </div>
+    </section>
+
+    <section class="seccion" id="seccion-confirmado">
+        <div class="estado-box">
+            <div class="icono-circle icono-exito">✓</div>
+            <div class="texto-principal">¡Pago Confirmado!</div>
+            <div class="texto-secundario">Tu pago fue verificado. Procesando...</div>
+        </div>
+    </section>
+
+    <section class="seccion" id="seccion-procesando">
+        <div class="estado-box">
+            <div class="spinner-circle"></div>
+            <div class="texto-principal">Asignando tu cuenta...</div>
+            <div class="texto-secundario">Conectando con el proveedor. No cierres esta ventana.</div>
+        </div>
+    </section>
+
+    <!-- ══════════ SECCIÓN 5: ÉXITO ══════════ -->
+    <section class="seccion" id="seccion-exito">
+        <div class="estado-box">
+            <div class="icono-circle icono-exito">✓</div>
+            <div class="texto-principal" id="tituloExito">¡Compra Exitosa!</div>
+            <div class="texto-secundario" id="subtituloExito">Aquí están tus datos de acceso.</div>
+        </div>
+
+        <div class="resumen-box">
+            <div class="resumen-fila"><span class="resumen-etiqueta">📋 Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">📦 Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">📱 WhatsApp</span><span class="resumen-valor verde" id="resNombre">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">🔢 Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">💰 Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
+        </div>
+
+        <div id="pinContainer"></div>
+
+        <button class="btn-accion" onclick="realizarOtraRecarga()" style="margin-top:20px;">🔄 REALIZAR OTRA COMPRA</button>
+        <a href="pedidos.html" style="display:block;text-align:center;color:#94a3b8;text-decoration:none;margin-top:14px;font-size:14px;">📋 Ver mis pedidos</a>
+    </section>
+
+    <section class="seccion" id="seccion-error">
+        <div class="estado-box">
+            <div class="icono-circle icono-error">✕</div>
+            <div class="texto-principal" id="tituloError">Pago No Encontrado</div>
+            <div class="texto-secundario" id="msgError">Verifica tu referencia e inténtalo de nuevo.</div>
+        </div>
+        <button class="btn-accion" onclick="volverAlPago()" style="margin-top:20px;">← VOLVER A INTENTAR</button>
+    </section>
+
+    <section class="seccion" id="seccion-ref-usada">
+        <div class="estado-box">
+            <div class="icono-circle icono-amarillo">⚠</div>
+            <div class="texto-principal">Referencia Ya Utilizada</div>
+            <div class="texto-secundario">Esta referencia ya fue usada. Usa una nueva.</div>
+        </div>
+        <button class="btn-accion" onclick="volverAlPago()" style="margin-top:20px;">← VOLVER A INTENTAR</button>
+    </section>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<nav class="nav-inferior" aria-label="Navegación principal">
+    <div class="nav-inferior-inner">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="index.html#juegos" class="nav-item active">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item" id="navPedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
+</nav>
+
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
+
+<!-- SCRIPT 1: MÓDULO login/perfil -->
+<script type="module">
+import { auth } from './firebase-config.js';
+import {
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut,
+    sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+let _mensajeCallback = null;
+let _mensajeCerrado = false;
+let usuarioActual = null;
+const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ', confirmacion:'❓' };
+
+function mostrarMensaje(titulo, mensaje, tipo = 'info', textoBoton = 'Entendido') {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('mensajeOverlay');
+        const icono = document.getElementById('mensajeIcono');
+        const tituloEl = document.getElementById('mensajeTitulo');
+        const textoEl = document.getElementById('mensajeTexto');
+        const botones = document.getElementById('mensajeBotones');
+        icono.className = 'mensaje-icono ' + tipo;
+        icono.textContent = ICONOS[tipo] || ICONOS.info;
+        tituloEl.textContent = titulo;
+        textoEl.textContent = mensaje;
+        botones.innerHTML = `<button class="mensaje-btn principal" id="mensajeBtnPrincipal">${textoBoton}</button>`;
+        document.getElementById('mensajeBtnPrincipal').onclick = () => {
+            if (_mensajeCerrado) return;
+            _mensajeCerrado = true;
+            cerrarMensajePersonalizado();
+            resolve(true);
+        };
+        _mensajeCallback = resolve;
+        _mensajeCerrado = false;
+        overlay.classList.add('activo');
+    });
+}
+function mostrarConfirmacion(titulo, mensaje, callback, opciones = {}) {
+    const overlay = document.getElementById('mensajeOverlay');
+    const icono = document.getElementById('mensajeIcono');
+    const tituloEl = document.getElementById('mensajeTitulo');
+    const textoEl = document.getElementById('mensajeTexto');
+    const botones = document.getElementById('mensajeBotones');
+    const tipo = opciones.tipo || 'confirmacion';
+    const textoAceptar = opciones.textoAceptar || 'Aceptar';
+    const textoCancelar = opciones.textoCancelar || 'Cancelar';
+    const claseAceptar = opciones.peligro ? 'peligro' : 'principal';
+    icono.className = 'mensaje-icono ' + tipo;
+    icono.textContent = ICONOS[tipo] || ICONOS.confirmacion;
+    tituloEl.textContent = titulo;
+    textoEl.textContent = mensaje;
+    botones.innerHTML = `
+        <button class="mensaje-btn secundario" id="mensajeBtnCancelar">${textoCancelar}</button>
+        <button class="mensaje-btn ${claseAceptar}" id="mensajeBtnAceptar">${textoAceptar}</button>
+    `;
+    document.getElementById('mensajeBtnCancelar').onclick = () => { cerrarMensajePersonalizado(); if (typeof callback === 'function') callback(false); };
+    document.getElementById('mensajeBtnAceptar').onclick = () => { cerrarMensajePersonalizado(); if (typeof callback === 'function') callback(true); };
+    _mensajeCerrado = false;
+    overlay.classList.add('activo');
+}
+function cerrarMensajePersonalizado() {
+    const overlay = document.getElementById('mensajeOverlay');
+    overlay.classList.remove('activo');
+    if (_mensajeCallback) { _mensajeCallback(false); _mensajeCallback = null; }
+}
+document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'mensajeOverlay') cerrarMensajePersonalizado();
+});
+window.mostrarMensaje = mostrarMensaje;
+window.mostrarConfirmacion = mostrarConfirmacion;
+window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
+
+window.alternarMenu = function() {
+    document.getElementById('menuFlotante').classList.toggle('activo');
+    document.getElementById('menuPerfil').classList.remove('activo');
+    document.getElementById('perfilFlecha').classList.remove('abierta');
+};
+window.toggleMenuPerfil = function() {
+    document.getElementById('menuPerfil').classList.toggle('activo');
+    document.getElementById('perfilFlecha').classList.toggle('abierta');
+    document.getElementById('menuFlotante').classList.remove('activo');
+};
+window.cerrarTodosLosMenus = function(e) {
+    const menuFlotante = document.getElementById('menuFlotante');
+    const menuPerfil = document.getElementById('menuPerfil');
+    const btnMenu = document.getElementById('btnMenu');
+    const btnPerfil = document.getElementById('btnPerfil');
+    if (btnMenu && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) {
+        menuFlotante.classList.remove('activo');
+    }
+    if (btnPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+        menuPerfil.classList.remove('activo');
+        document.getElementById('perfilFlecha').classList.remove('abierta');
+    }
+};
+
+const perfilContainer = document.getElementById('perfilContainer');
+const menuLogin = document.getElementById('menuLogin');
+const menuRegister = document.getElementById('menuRegister');
+const menuConSesion = document.getElementById('menuConSesion');
+const perfilNombre = document.getElementById('perfilNombre');
+const nombreCompleto = document.getElementById('nombreCompleto');
+const emailUsuario = document.getElementById('emailUsuario');
+const modalLogin = document.getElementById('modalLogin');
+const loginForm = document.getElementById('loginForm');
+
+onAuthStateChanged(auth, (user) => {
+    usuarioActual = user;
+    window.__usuarioActual = user;
+    if (user) {
+        const nombre = user.displayName || 'Usuario';
+        const email = user.email || 'usuario@email.com';
+        perfilContainer.style.display = 'block';
+        perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+        nombreCompleto.textContent = nombre;
+        emailUsuario.textContent = email;
+        menuLogin.style.display = 'none';
+        menuRegister.style.display = 'none';
+        menuConSesion.style.display = 'block';
+    } else {
+        perfilContainer.style.display = 'none';
+        menuLogin.style.display = 'flex';
+        menuRegister.style.display = 'flex';
+        menuConSesion.style.display = 'none';
+    }
+});
+
+document.getElementById('navPedidos').addEventListener('click', (e) => {
+    if (!usuarioActual) { e.preventDefault(); abrirModalLogin(); }
+});
+
+window.abrirModalLogin = function() {
+    modalLogin.classList.add('activo');
+    document.getElementById('loginMessage').style.display = 'none';
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('menuFlotante').classList.remove('activo');
+};
+window.cerrarModalLogin = function() { modalLogin.classList.remove('activo'); };
+modalLogin.addEventListener('click', (e) => { if (e.target === modalLogin) cerrarModalLogin(); });
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('loginMessage');
+    btn.disabled = true;
+    btn.textContent = 'Ingresando...';
+    msg.style.display = 'none';
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        msg.style.background = 'rgba(34,197,94,0.15)';
+        msg.style.color = '#86efac';
+        msg.textContent = '✅ ¡Bienvenido!';
+        msg.style.display = 'block';
+        setTimeout(() => { cerrarModalLogin(); window.location.reload(); }, 1000);
+    } catch (error) {
+        let errorMsg = '❌ ';
+        switch (error.code) {
+            case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
+            case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
+            case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
+            default: errorMsg += error.message;
+        }
+        msg.style.background = 'rgba(239,68,68,0.15)';
+        msg.style.color = '#fca5a5';
+        msg.textContent = errorMsg;
+        msg.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Ingresar';
+    }
+});
+
+function pedirCierreSesion(e) {
+    e.preventDefault();
+    mostrarConfirmacion('Cerrar Sesión', '¿Seguro que quieres cerrar sesión?', async (confirmado) => {
+        if (confirmado) { await signOut(auth); window.location.reload(); }
+    }, { tipo: 'confirmacion', textoAceptar: 'Cerrar sesión', textoCancelar: 'Cancelar', peligro: true });
+}
+document.getElementById('btnCerrarSesion').addEventListener('click', pedirCierreSesion);
+document.getElementById('menuLogout').addEventListener('click', pedirCierreSesion);
+
+document.getElementById('resetPasswordLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    if (!email) { mostrarMensaje('Correo requerido', 'Escribe tu correo electrónico.', 'advertencia'); return; }
+    try {
+        await sendPasswordResetEmail(auth, email);
+        mostrarMensaje('Correo enviado', 'Revisa tu bandeja de entrada.', 'exito');
+    } catch (error) {
+        mostrarMensaje('Error', 'No se pudo enviar el correo: ' + error.message, 'error');
+    }
+});
+</script>
+
+<!-- SCRIPT 2: LÓGICA COMPLETA (compat + asignar-perfil embebido) -->
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+    authDomain: "free-52119.firebaseapp.com",
+    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "free-52119",
+    storageBucket: "free-52119.firebasestorage.app",
+    messagingSenderId: "632240144599",
+    appId: "1:632240144599:web:e31c25665ffe19c194b092"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const fbAuth = firebase.auth();
+const db = firebase.database();
+const refReferencias = db.ref("referencias_usadas");
+const refReferenciasFalsas = db.ref("referencias_falsas");
+const refPedidos = db.ref("pedidos");
+const refCupones = db.ref("cupones_usados");
+const refManuales = db.ref("referencias_manuales");
+const refCodigosRG = db.ref("codigos_rg");
+const refCodigosTEST = db.ref("codigos_test");
+
+const URL_VERIFICAR_PAGO = '/api/verificar-pago';
+const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
+const URL_TELEGRAM = '/api/notificar-telegram';
+const URL_ASIGNAR_PERFIL = '/api/asignar-perfil'; // 🔥 proveedor propio Netflix
+
+const CUPONES_VALIDOS = { 'GAMES': 4 };
+
+const MODO_RENOVACION = localStorage.getItem('modo_renovacion') === 'true';
+const CODIGO_RENOVACION = localStorage.getItem('codigo_aprobacion') || '';
+
+function fechaCaracas() {
+    const ahora = new Date();
+    const caracas = new Date(ahora.getTime() - (4 * 60 * 60 * 1000));
+    return caracas.toISOString().split('T')[0];
+}
+
+function mostrarSeccion(id) {
+    document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('activa');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function marcarProgreso(numero) {
+    document.querySelectorAll('.progreso-paso').forEach(p => {
+        const n = parseInt(p.dataset.paso);
+        p.classList.remove('activo','completado');
+        if (n < numero) p.classList.add('completado');
+        else if (n === numero) p.classList.add('activo');
+    });
+}
+function volverAlCatalogo() { mostrarSeccion('seccion-catalogo'); marcarProgreso(1); }
+function volverAJugador()   { mostrarSeccion('seccion-jugador');  marcarProgreso(2); }
+function volverAlPago()     {
+    document.getElementById('btnVerificar').disabled = false;
+    document.getElementById('btnVerificar').innerHTML = '✅ VERIFICAR PAGO';
+    mostrarSeccion('seccion-pago'); marcarProgreso(3);
+}
+
+const juegoActual = "NETFLIX";
+let metodo = "PAGO MOVIL";
+let tasa = 930;
+let whatsappOk = false;
+let productoElegido = null;
+let descuentoAplicado = 0;
+let cuponAplicado = "";
+let precioUsdFinal = 0;
+let precioBsFinal = 0;
+
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function avisar(mensaje, tipo = 'info') {
+    toastEl.textContent = mensaje;
+    toastEl.className = 'toast visible' + (tipo === 'error' ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3800);
+}
+
+window.cambiarTab = function(tabId, boton) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('activo'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+    document.getElementById('tab-' + tabId).classList.add('activo');
+    boton.classList.add('activo');
+};
+
+const inputId = document.getElementById('jugadorId');
+const statusDiv = document.getElementById('idStatus');
+const btnContinuar = document.getElementById('btnContinuarPago');
+
+function actualizarBotonContinuar() {
+    if (!btnContinuar) return;
+    btnContinuar.disabled = !whatsappOk;
+    btnContinuar.style.opacity = whatsappOk ? '1' : '0.5';
+}
+function formatearNumero(digitos) {
+    if (digitos.startsWith('0') && digitos.length === 11) return '+58 ' + digitos.slice(1, 4) + ' ' + digitos.slice(4);
+    if (digitos.startsWith('58') && digitos.length === 12) return '+58 ' + digitos.slice(2, 5) + ' ' + digitos.slice(5);
+    return '+58 ' + digitos;
+}
+function mostrarEstado(mensaje, tipo, numero) {
+    if (!statusDiv) return;
+    statusDiv.className = `id-status ${tipo}`;
+    if (tipo === 'valido' && numero) {
+        statusDiv.innerHTML = `
+            <div class="check-icono">✓</div>
+            <div>
+                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">WhatsApp válido</div>
+                <div class="nombre-jugador"></div>
+            </div>
+        `;
+        statusDiv.querySelector('.nombre-jugador').textContent = numero;
+    } else {
+        statusDiv.textContent = mensaje;
+    }
+}
+if (inputId) {
+    inputId.addEventListener('keypress', function(e) { if (!/[0-9]/.test(e.key)) e.preventDefault(); });
+    inputId.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        this.classList.remove('resaltar');
+        const num = this.value.trim();
+        whatsappOk = false;
+        if (num.length === 0) {
+            statusDiv.className = 'id-status';
+            statusDiv.style.display = 'none';
+            actualizarBotonContinuar();
+            return;
+        }
+        statusDiv.style.display = '';
+        if (num.length < 10) mostrarEstado('Escribe al menos 10 dígitos', 'error');
+        else if (num.length > 12) mostrarEstado('Máximo 12 dígitos', 'error');
+        else { whatsappOk = true; mostrarEstado('', 'valido', formatearNumero(num)); }
+        actualizarBotonContinuar();
+    });
+}
+
+async function cargarTasa() {
+    const tasaGuardada = localStorage.getItem('tasa_usd_ves');
+    tasa = tasaGuardada ? parseFloat(tasaGuardada) : 930;
+    actualizarPrecios();
+    try {
+        const respuesta = await fetch('/api/tasa');
+        const datos = await respuesta.json();
+        if (datos.ok && datos.tasa_usdt) {
+            tasa = Math.round(datos.tasa_usdt);
+            localStorage.setItem('tasa_usd_ves', tasa);
+            actualizarPrecios();
+        }
+    } catch (error) { console.warn('Tasa no actualizada:', error.message); }
+}
+function actualizarPrecios() {
+    document.querySelectorAll('.product-price').forEach((el) => {
+        const u = parseFloat(el.dataset.usd);
+        const ref = el.parentElement.querySelector('.product-ref');
+        const bs = Math.round(u * tasa).toLocaleString('es-VE') + ' Bs';
+        const usdt = u.toFixed(2) + ' USDT';
+        if (metodo === 'PAGO MOVIL') { el.textContent = bs; ref.textContent = '≈ ' + usdt; }
+        else { el.textContent = usdt; ref.textContent = '≈ ' + bs; }
+    });
+    const tasaInfoEl = document.getElementById('tasaInfo');
+    if (tasaInfoEl) {
+        tasaInfoEl.textContent = metodo === 'PAGO MOVIL'
+            ? `Tasa: ${tasa} Bs por USD`
+            : `Precios en USDT · Referencia: ${tasa} Bs por USD`;
+    }
+}
+window.seleccionarPago = function(m, el) {
+    if (m === 'BINANCE') { avisar('Binance Pay estará disponible próximamente.', 'error'); return; }
+    document.querySelectorAll('.pay-box').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-checked', 'false'); });
+    el.classList.add('active'); el.setAttribute('aria-checked', 'true');
+    metodo = m; actualizarPrecios();
+};
+document.querySelectorAll('.pay-box').forEach((box) => {
+    box.addEventListener('click', () => seleccionarPago(box.dataset.metodo, box));
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionarPago(box.dataset.metodo, box); }
+    });
+});
+
+function copiarTexto(texto, boton) {
+    navigator.clipboard.writeText(texto).then(() => {
+        boton.classList.add('copiado');
+        setTimeout(() => boton.classList.remove('copiado'), 2000);
+    }).catch(() => { avisar('Copia manualmente: ' + texto); });
+}
+function copiarTodosLosDatos(boton) {
+    const datos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBsFinal} Bs`;
+    navigator.clipboard.writeText(datos).then(() => {
+        const orig = boton.innerHTML;
+        boton.innerHTML = `✓ Datos copiados`;
+        setTimeout(() => { boton.innerHTML = orig; }, 2500);
+    }).catch(() => { avisar('Copia manualmente los datos de pago'); });
+}
+
+document.querySelectorAll('.btn-buy').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        comprarProducto(btn.dataset.producto, btn.dataset.usd, btn.dataset.codigo);
+    });
+});
+function comprarProducto(producto, precioUsd, paqueteCodigo) {
+    productoElegido = {
+        producto, precioUsd: parseFloat(precioUsd), paqueteCodigo,
+        precioBs: Math.round(parseFloat(precioUsd) * tasa),
+        modoRenovacion: false
+    };
+    document.getElementById('prodElegidoNombre').textContent = producto;
+    document.getElementById('prodElegidoPrecio').textContent = metodo === 'PAGO MOVIL'
+        ? Math.round(productoElegido.precioUsd * tasa).toLocaleString('es-VE') + ' Bs'
+        : productoElegido.precioUsd.toFixed(2) + ' USDT';
+    whatsappOk = false;
+    if (inputId) inputId.value = '';
+    if (statusDiv) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; }
+    actualizarBotonContinuar();
+    mostrarSeccion('seccion-jugador');
+    marcarProgreso(2);
+    setTimeout(() => { if (inputId) inputId.focus({ preventScroll: true }); }, 400);
+}
+
+function irAlPago() {
+    if (!productoElegido) { avisar('Elige un producto primero'); volverAlCatalogo(); return; }
+    const whatsapp = inputId.value.trim();
+    if (!whatsapp) { avisar('Escribe tu WhatsApp', 'error'); return; }
+    if (!whatsappOk) { avisar('Revisa tu número: 10-12 dígitos', 'error'); return; }
+
+    localStorage.setItem('whatsapp', whatsapp);
+    localStorage.setItem('id_jugador', whatsapp);
+    localStorage.setItem('nombre_jugador', formatearNumero(whatsapp));
+    localStorage.setItem('juego_seleccionado', juegoActual);
+    localStorage.setItem('producto_seleccionado', productoElegido.producto);
+    localStorage.setItem('paquete_codigo', productoElegido.paqueteCodigo);
+    localStorage.setItem('paquete', productoElegido.paqueteCodigo);
+    localStorage.setItem('precio_usd', productoElegido.precioUsd);
+    localStorage.setItem('precio_en_bs', productoElegido.precioBs);
+    localStorage.setItem('metodo_pago', metodo);
+    localStorage.setItem('proveedor', 'cuentas_propias');
+    localStorage.setItem('servicio_streaming', 'netflix');
+
+    precioUsdFinal = productoElegido.precioUsd;
+    precioBsFinal = productoElegido.precioBs;
+    renderizarResumenPago();
+    mostrarSeccion('seccion-pago');
+    marcarProgreso(3);
+}
+function renderizarResumenPago() {
+    document.getElementById('datoJuego').textContent = juegoActual;
+    document.getElementById('datoId').textContent = localStorage.getItem('nombre_jugador') || '';
+    document.getElementById('datoProducto').textContent = productoElegido.producto;
+    document.getElementById('montoBsMostrar').textContent = precioBsFinal + ' Bs';
+    document.getElementById('datoMontoTotal').innerHTML = `${precioUsdFinal.toFixed(2)} USD<br><small style="color:#cbd5e1">${precioBsFinal} Bs</small>`;
+}
+
+function aplicarCupon() {
+    const input = document.getElementById('cuponInput');
+    const btn = document.getElementById('cuponBtn');
+    const msg = document.getElementById('cuponMsg');
+    const box = document.getElementById('cuponBox');
+    const codigo = input.value.trim().toUpperCase();
+    msg.className = 'cupon-msg'; msg.textContent = '';
+    if (!codigo) { msg.classList.add('err'); msg.textContent = '❌ Ingresa un código'; return; }
+    if (!CUPONES_VALIDOS[codigo]) { msg.classList.add('err'); msg.textContent = '❌ Código inválido o expirado'; return; }
+    const porcentaje = CUPONES_VALIDOS[codigo];
+    descuentoAplicado = porcentaje; cuponAplicado = codigo;
+    precioUsdFinal = +(productoElegido.precioUsd * (1 - porcentaje / 100)).toFixed(2);
+    precioBsFinal = Math.round(productoElegido.precioBs * (1 - porcentaje / 100));
+    msg.classList.add('ok'); msg.textContent = `✅ ¡Código aplicado! -${porcentaje}% de descuento`;
+    input.disabled = true; btn.disabled = true; btn.textContent = '✓'; box.classList.add('cupon-aplicado');
+    document.getElementById('filaSubtotal').style.display = 'flex';
+    document.getElementById('datoSubtotal').textContent = `${productoElegido.precioUsd.toFixed(2)} USD`;
+    document.getElementById('filaDescuento').style.display = 'flex';
+    document.getElementById('datoDescuento').textContent = `-${porcentaje}% (-${(productoElegido.precioUsd - precioUsdFinal).toFixed(2)} USD)`;
+    document.getElementById('datoMontoTotal').innerHTML = `${precioUsdFinal.toFixed(2)} USD<br><small style="color:#cbd5e1">${precioBsFinal} Bs</small>`;
+    document.getElementById('montoBsMostrar').textContent = precioBsFinal + " Bs";
+    localStorage.setItem('cupon_aplicado', cuponAplicado);
+    localStorage.setItem('descuento_porcentaje', descuentoAplicado);
+    localStorage.setItem('precio_usd_final', precioUsdFinal);
+    localStorage.setItem('precio_bs_final', precioBsFinal);
+}
+document.getElementById('cuponInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); aplicarCupon(); }
+});
+
+function enviarTelegram(mensaje) {
+    fetch(URL_TELEGRAM, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje }) })
+    .then(r => r.json()).then(data => { if (!data.ok) console.warn('⚠️ Telegram no enviado:', data); })
+    .catch(err => console.log("Error Telegram:", err));
+}
+function getDatosPedidoActuales() {
+    return {
+        juego: localStorage.getItem('juego_seleccionado') || '',
+        producto: localStorage.getItem('producto_seleccionado') || '',
+        idJugador: localStorage.getItem('id_jugador') || '',
+        nombreJugador: localStorage.getItem('nombre_jugador') || '',
+        paquete: localStorage.getItem('paquete_codigo') || '',
+        whatsapp: (localStorage.getItem('whatsapp') || localStorage.getItem('whatsapp_comprador') || '').trim(),
+        metodo: localStorage.getItem('metodo_pago') || metodo,
+        proveedor: (localStorage.getItem('proveedor') || '').toLowerCase().trim()
+    };
+}
+function notificarAdmin(tipo, datos = {}) {
+    const d = getDatosPedidoActuales();
+    const emojis = { exito:'🎉',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',atencion:'🚨',manual:'🛠️',codigo_test:'🎮',codigo_rg:'🎬' };
+    const titulos = { exito:'EXITOSO',falso:'NO ENCONTRADO',duplicado:'REFERENCIA USADA',cupon_usado:'CUPÓN USADO',error:'ERROR',atencion:'ATENCIÓN',manual:'MANUAL',codigo_test:'CÓDIGO TEST',codigo_rg:'CÓDIGO RG' };
+    const emoji = emojis[tipo] || 'ℹ️';
+    const titulo = titulos[tipo] || tipo.toUpperCase();
+    const esc = (txt) => String(txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let mensaje = `${emoji} <b>${titulo}</b>\n\n`;
+    mensaje += `<b>🎬</b> ${esc(d.juego)}\n<b>📦</b> ${esc(d.producto)}\n<b>📱</b> <code>${esc(d.whatsapp)}</code>\n<b>💰</b> $${precioUsdFinal.toFixed(2)} · ${precioBsFinal} Bs\n`;
+    if (datos.referencia) mensaje += `<b>🔢</b> <code>${esc(datos.referencia)}</code>\n`;
+    if (datos.mensaje_extra) mensaje += `<b>⚠️</b> ${esc(datos.mensaje_extra)}\n`;
+    mensaje += `\n<i>${new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' })}</i>`;
+    enviarTelegram(mensaje);
+}
+
+// 📱 WhatsApp al cliente
+function construirMensajeStreaming(pedido) {
+    const nombre = pedido.nombre_jugador || 'Cliente';
+    const productoP = pedido.producto || '';
+    const numeroPedido = pedido.numero_pedido || pedido.pedido_key || '';
+    const montoUsd = Number(pedido.monto_usd || 0).toFixed(2);
+    const montoBs = Number(pedido.monto_bs || 0).toLocaleString('es-VE');
+    const referencia = pedido.referencia_pago || '';
+    const datos = pedido.datos_streaming || {};
+    let msg = `🎬 *RECARGAS GAMES*\n\n¡Hola ${nombre}! 👋\nTu compra fue exitosa ✅\n\n`;
+    msg += `📦 *Producto:* ${productoP}\n📋 *Pedido:* #${numeroPedido}\n💰 *Total:* $${montoUsd} · ${montoBs} Bs\n🔢 *Referencia:* ${referencia}\n\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━\n🔐 *DATOS DE ACCESO*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+    if (datos.correo || datos.usuario) msg += `📧 *Correo:* ${datos.correo || datos.usuario}\n`;
+    if (datos.clave || datos.password) msg += `🔑 *Clave:* ${datos.clave || datos.password}\n`;
+    if (datos.perfil) msg += `👤 *Perfil:* ${datos.perfil}\n`;
+    if (datos.pin_perfil) msg += `🔢 *PIN:* ${datos.pin_perfil}\n`;
+    if (datos.fecha_vencimiento) msg += `📅 *Vence:* ${datos.fecha_vencimiento}\n`;
+    msg += `\n━━━━━━━━━━━━━━━━━━━━\n⚠️ *No compartas estos datos con nadie.*\n\n¿Problemas?\n📱 +58 422-8242411\n\n¡Gracias por tu compra! 🙌`;
+    return msg;
+}
+async function enviarWhatsAppDesdePasarela(pedido, pedidoKey) {
+    try {
+        const d = getDatosPedidoActuales();
+        const telRaw = pedido.whatsapp_cliente || d.whatsapp || '';
+        let tel = String(telRaw).replace(/\D/g, '');
+        if (tel.startsWith('0')) tel = tel.substring(1);
+        if (!tel.startsWith('58')) tel = '58' + tel;
+        if (tel.length < 11) return { ok: false, motivo: 'sin_telefono' };
+        const mensajeCompleto = construirMensajeStreaming(pedido);
+        const datos = pedido.datos_streaming || {};
+        const datosCuenta = (datos.correo || datos.usuario) ? `Correo: ${datos.correo || datos.usuario}\nClave: ${datos.clave || datos.password || ''}\nPerfil: ${datos.perfil || ''}\nPIN: ${datos.pin_perfil || ''}` : '';
+        const res = await fetch(URL_WHATSAPP_PASARELA, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                telefono: '+' + tel,
+                nombre: pedido.nombre_jugador || 'Cliente',
+                servicio: pedido.juego || '',
+                producto: pedido.producto || '',
+                monto: `$${Number(pedido.monto_usd || 0).toFixed(2)} USD · ${Number(pedido.monto_bs || 0).toLocaleString('es-VE')} Bs`,
+                referencia: pedido.referencia_pago || '',
+                datosCuenta: datosCuenta,
+                tipoProducto: 'streaming',
+                mensajeCompleto: mensajeCompleto,
+                pedidoKey: pedidoKey
+            })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return { ok: false, motivo: 'error_endpoint', status: res.status, data };
+        return { ok: true, data };
+    } catch (error) {
+        return { ok: false, motivo: 'excepcion', error: error.message };
+    }
+}
+
+async function guardarReferenciaFalsa(referencia, motivo) {
+    try {
+        const d = getDatosPedidoActuales();
+        const nueva = refReferenciasFalsas.push();
+        await nueva.set({
+            fecha: new Date().toISOString(),
+            fecha_legible: new Date().toLocaleString('es-VE'),
+            juego: d.juego, id_jugador: d.idJugador, nombre_jugador: d.nombreJugador,
+            producto: d.producto, monto_usd: precioUsdFinal, monto_bs: precioBsFinal,
+            referencia, metodo_pago: d.metodo, motivo: motivo || 'No encontrada en Pábilo',
+            whatsapp_cliente: d.whatsapp || null, user_agent: navigator.userAgent
+        });
+    } catch (e) { console.error('Error guardando ref falsa:', e); }
+}
+
+async function verificarReferenciaEnFirebase(ref) { try { const snap = await refReferencias.child(ref).once('value'); return snap.exists(); } catch (e) { return false; } }
+async function marcarReferenciaComoUsada(ref) {
+    try {
+        const d = getDatosPedidoActuales();
+        await refReferencias.child(ref).set({
+            fecha_uso: new Date().toISOString(),
+            juego: d.juego, id_jugador: d.idJugador, producto: d.producto,
+            monto_usd: precioUsdFinal, monto_bs: precioBsFinal,
+            paquete: d.paquete, metodo_pago: d.metodo,
+            cupon: cuponAplicado || null, descuento: descuentoAplicado || 0,
+            whatsapp_cliente: d.whatsapp || null
+        });
+        return true;
+    } catch (e) { return false; }
+}
+async function verificarCuponUsado(codigo) { try { const snap = await refCupones.child(codigo).once('value'); return snap.exists(); } catch (e) { return false; } }
+async function marcarCuponComoUsado(codigo) {
+    try {
+        const d = getDatosPedidoActuales();
+        await refCupones.child(codigo).set({ fecha_uso: new Date().toISOString(), id_jugador: d.idJugador, producto: d.producto, descuento: descuentoAplicado });
+        return true;
+    } catch (e) { return false; }
+}
+async function verificarReferenciaManual(codigo) {
+    try {
+        const snap = await refManuales.child(codigo).once('value');
+        if (!snap.exists()) return { valida: false, motivo: 'no_existe' };
+        const data = snap.val();
+        if (data.activa === false) return { valida: false, motivo: 'inactiva', data };
+        if (data.usada === true && data.uso_unico !== false) return { valida: false, motivo: 'usada', data };
+        return { valida: true, data };
+    } catch (error) { return { valida: false, motivo: 'error' }; }
+}
+async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
+    try {
+        const snap = await refManuales.child(codigo).once('value');
+        const data = snap.val() || {};
+        const d = getDatosPedidoActuales();
+        const actualizacion = {
+            veces_usada: (data.veces_usada || 0) + 1,
+            fecha_uso: new Date().toISOString(),
+            usado_por_juego: d.juego, usado_por_id: d.idJugador,
+            usado_por_producto: d.producto, usado_por_pedido: numeroPedido || null,
+            whatsapp_cliente: d.whatsapp || null
+        };
+        if (data.uso_unico !== false) actualizacion.usada = true;
+        await refManuales.child(codigo).update(actualizacion);
+        return true;
+    } catch (e) { return false; }
+}
+async function verificarCodigoTEST(codigo) {
+    try {
+        const snap = await refCodigosTEST.child(codigo).once('value');
+        if (!snap.exists()) return { valido: false, motivo: 'no_existe' };
+        const data = snap.val();
+        if (data.activa === false) return { valido: false, motivo: 'inactivo', data };
+        if (data.usada === true && data.uso_unico !== false) return { valido: false, motivo: 'usado', data };
+        return { valido: true, data, tipo: 'streaming' };
+    } catch (error) { return { valido: false, motivo: 'error' }; }
+}
+async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
+    try {
+        const snap = await refCodigosTEST.child(codigo).once('value');
+        const data = snap.val() || {};
+        const d = getDatosPedidoActuales();
+        const actualizacion = { veces_usada: (data.veces_usada || 0) + 1, fecha_uso: new Date().toISOString(), usado_por_juego: d.juego, usado_por_id: d.idJugador, usado_por_producto: d.producto, usado_por_pedido: numeroPedido || null, whatsapp_cliente: d.whatsapp || null };
+        if (data.uso_unico !== false) actualizacion.usada = true;
+        await refCodigosTEST.child(codigo).update(actualizacion);
+        return true;
+    } catch (e) { return false; }
+}
+
+async function generarNumeroPedido() {
+    try {
+        const contadorRef = db.ref('configuracion/contador_pedidos');
+        const resultado = await contadorRef.transaction((valorActual) => (valorActual || 0) + 1);
+        const numero = resultado.snapshot.val() || 1;
+        return String(numero).padStart(4, '0');
+    } catch (error) { return Date.now().toString().slice(-4); }
+}
+
+async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos, extras = {}) {
+    const MAX_INTENTOS = 3;
+    let ultimoError = null;
+    for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
+        try {
+            const d = getDatosPedidoActuales();
+            const user = fbAuth.currentUser;
+            let uid = 'anonimo';
+            if (user && user.uid) uid = user.uid;
+            else if (d.whatsapp && d.whatsapp.length >= 8) uid = 'anon_' + d.whatsapp.replace(/\D/g, '');
+            const numeroPedido = await generarNumeroPedido();
+            const numeroMostrar = `#${numeroPedido}`;
+            const nuevoPedido = refPedidos.push();
+            const pedidoData = {
+                uid, es_anonimo: !user || !user.uid,
+                numero_pedido: numeroPedido, numero_pedido_mostrar: numeroMostrar,
+                pedido_key: nuevoPedido.key, referencia,
+                juego: d.juego || 'Desconocido',
+                id_jugador: d.idJugador || '',
+                nombre_jugador: d.nombreJugador || d.idJugador || 'Sin nombre',
+                producto: d.producto || 'Sin producto',
+                monto_usd: precioUsdFinal, monto_bs: precioBsFinal,
+                monto_usd_original: productoElegido ? productoElegido.precioUsd : precioUsdFinal,
+                monto_bs_original: productoElegido ? productoElegido.precioBs : precioBsFinal,
+                cupon: cuponAplicado || null,
+                descuento_porcentaje: descuentoAplicado || 0,
+                descuento_usd: productoElegido ? +(productoElegido.precioUsd - precioUsdFinal).toFixed(2) : 0,
+                paquete: d.paquete, estado,
+                id_solicitud: idSolicitud || '', proveedor: proveedor || '',
+                fecha: new Date().toISOString(),
+                fecha_legible: new Date().toLocaleString('es-VE'),
+                metodo: d.metodo, referencia_pago: referencia,
+                whatsapp_cliente: d.whatsapp || null,
+                pin: codigos && codigos.length > 0 ? codigos[0] : null,
+                codigos: codigos || [],
+                tipo_producto: 'streaming',
+                es_manual: referencia.startsWith('MANUAL-') || false,
+                es_test: referencia.startsWith('TEST-') || false,
+                es_streaming: true,
+                codigo_aprobacion: extras.codigo_aprobacion || null,
+                datos_streaming: extras.datos_streaming || null,
+                referencia_interna: extras.referencia_interna || null,
+                tipo_streaming: d.paquete,
+                es_renovacion: extras.es_renovacion || false,
+                user_agent: navigator.userAgent.substring(0, 200),
+                origen: 'netflix-unificado'
+            };
+            if (MODO_RENOVACION) {
+                pedidoData.codigo_aprobacion_original = CODIGO_RENOVACION;
+            }
+            if (extras.codigo_test) { pedidoData.codigo_test = extras.codigo_test; pedidoData.monto_test_usd = extras.monto_test_usd; pedidoData.monto_test_bs = extras.monto_test_bs; }
+            await nuevoPedido.set(pedidoData);
+            if (user && user.uid) {
+                try {
+                    const userRef = db.ref('usuarios/' + user.uid);
+                    const snap = await userRef.once('value');
+                    const datosActuales = snap.val() || {};
+                    await userRef.update({
+                        ultimaActividad: new Date().toISOString(),
+                        ultimaActividadLegible: new Date().toLocaleString('es-VE'),
+                        totalPedidos: (datosActuales.totalPedidos || 0) + 1,
+                        whatsapp: datosActuales.whatsapp || d.whatsapp || '',
+                        nombre: datosActuales.nombre || user.displayName || d.nombreJugador,
+                        correo: datosActuales.correo || user.email || ''
+                    });
+                } catch (errUser) { console.warn('⚠️ No se pudo actualizar usuario:', errUser.message); }
+            }
+            const debeEnviarWhatsApp = (estado === "COMPLETADA") && d.whatsapp && d.whatsapp.length >= 8;
+            if (debeEnviarWhatsApp) {
+                try {
+                    const pedidoCompleto = { ...pedidoData, datos_streaming: extras.datos_streaming || null, pin: codigos && codigos.length > 0 ? codigos[0] : null, codigos: codigos || [] };
+                    enviarWhatsAppDesdePasarela(pedidoCompleto, nuevoPedido.key)
+                        .then(r => { if (r.ok) console.log('✅ WhatsApp enviado'); else console.warn('⚠️ WhatsApp no enviado:', r.motivo); })
+                        .catch(err => console.warn('Error WhatsApp:', err));
+                } catch (e) { console.warn('Error preparando WhatsApp:', e); }
+            }
+            return { id: nuevoPedido.key, numero: numeroPedido, numeroMostrar, exito: true };
+        } catch (error) {
+            ultimoError = error;
+            console.error(`❌ Error guardando pedido (intento ${intento}):`, error);
+            if (intento < MAX_INTENTOS) await new Promise(r => setTimeout(r, 1000 * intento));
+        }
+    }
+    const d = getDatosPedidoActuales();
+    enviarTelegram(`🚨 <b>PEDIDO NO GUARDADO</b>\n\n<b>🎬</b> ${d.juego}\n<b>📦</b> ${d.producto}\n<b>📱</b> <code>${d.whatsapp}</code>\n<b>🔢</b> <code>${referencia}</code>\n<b>⚠️</b> ${ultimoError?.message || 'Desconocido'}`);
+    return { id: null, numero: null, numeroMostrar: '#----', exito: false, error: ultimoError };
+}
+
+async function verificarPagoPabilo(referencia) {
+    const montoPago = Number(precioBsFinal) || 0;
+    const fecha = fechaCaracas();
+    try {
+        const res = await fetch(URL_VERIFICAR_PAGO, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ referencia, monto: montoPago, fecha })
+        });
+        const data = await res.json();
+        if (!data.ok) return { confirmado: false, es_nuevo: null };
+        return { confirmado: data.confirmado === true, es_nuevo: data.es_nuevo, pago: data.pago || null, mensaje: data.mensaje || '' };
+    } catch (error) {
+        return { confirmado: false, es_nuevo: null };
+    }
+}
+
+function generarReferenciaInterna(productoCodigo) {
+    const ts = Date.now();
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const partes = String(productoCodigo || 'GEN').toUpperCase().split('_');
+    return `RG-${partes.join('-')}-${ts}-${rand}`;
+}
+
+// 🔥 PROVEEDOR PROPIO — asignar-perfil
+async function enviarAsignarPerfil(productoCodigo, referenciaInterna, datosExtra = {}) {
+    try {
+        const d = getDatosPedidoActuales();
+        const tipoRenovar = localStorage.getItem('tipo_renovar') || productoCodigo;
+        const codigoAprobacion = localStorage.getItem('codigo_aprobacion') || '';
+        const esRenovacion = MODO_RENOVACION;
+
+        const payload = {
+            producto: tipoRenovar,
+            referencia: referenciaInterna,
+            whatsapp: d.whatsapp || d.idJugador,
+            es_renovacion: esRenovacion,
+            juego: 'NETFLIX'
+        };
+        if (esRenovacion && codigoAprobacion) payload.codigo_aprobacion = codigoAprobacion;
+        if (datosExtra?.juego) payload.juego = datosExtra.juego;
+        if (datosExtra?.producto) payload.producto = datosExtra.producto;
+
+        console.log('🎬 ASIGNAR-PERFIL →', payload);
+
+        const res = await fetch(URL_ASIGNAR_PERFIL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        console.log('📥 Respuesta asignar-perfil:', data);
+
+        if (data.ok === true && data.datos) {
+            return {
+                exito: true,
+                estado: 'Aprobado',
+                id_solicitud: data.id_solicitud || '',
+                codigo_aprobacion: data.codigo_aprobacion || '',
+                datos: data.datos || {},
+                mensaje: data.mensaje || 'Cuenta asignada correctamente',
+                es_renovacion: esRenovacion,
+                es_streaming: true
+            };
+        }
+        if (data.pendiente === true || data.estado === 'Pendiente') {
+            return {
+                exito: false, silencioso: true, pendiente: true,
+                id_solicitud: data.id_solicitud || '',
+                motivo_admin: `Asignar-perfil PENDIENTE — ${data.mensaje || ''}`,
+                mensaje: 'Tu pedido está en proceso, te contactaremos pronto'
+            };
+        }
+        const mensajeErr = data.mensaje || data.error || 'Error desconocido';
+        enviarTelegram(`🚨 <b>ASIGNAR-PERFIL ERROR</b>\n📦 ${producto}\n❌ ${mensajeErr}`);
+        return {
+            exito: false, silencioso: true,
+            motivo_admin: `Error asignar-perfil: ${mensajeErr}`,
+            mensaje: 'Tu pedido está siendo procesado. Te contactaremos por WhatsApp.'
+        };
+    } catch (error) {
+        console.error('❌ Error asignar-perfil:', error);
+        return {
+            exito: false, silencioso: true,
+            motivo_admin: 'Error de conexión con asignar-perfil: ' + error.message,
+            mensaje: 'Tu pedido está siendo procesado, te contactaremos pronto'
+        };
+    }
+}
+
+async function ejecutarRecarga(datosProducto = null) {
+    const d = getDatosPedidoActuales();
+    const paqueteUsar = datosProducto?.paquete || d.paquete;
+    const referenciaInterna = generarReferenciaInterna(paqueteUsar);
+    const resultado = await enviarAsignarPerfil(paqueteUsar, referenciaInterna, datosProducto);
+    resultado.referencia_interna = referenciaInterna;
+    resultado.es_streaming = true;
+    return resultado;
+}
+
+async function iniciarVerificacion() {
+    const referencia = document.getElementById('referenciaPago').value.trim().toUpperCase();
+    const btn = document.getElementById('btnVerificar');
+    if (!referencia || referencia.length < 6) {
+        mostrarMensaje('Referencia inválida', 'Escribe la referencia completa del pago (mínimo 6 dígitos).', 'advertencia');
+        return;
+    }
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Verificando...';
+
+    const esManual = referencia.startsWith('MANUAL-');
+    const esTest = referencia.startsWith('TEST-');
+
+    let subtitulo = 'Estamos buscando tu pago en el sistema bancario...';
+    if (MODO_RENOVACION) subtitulo = '🔄 Procesando renovación...';
+    if (esTest) subtitulo = '🎬 Verificando tu código de prueba...';
+    else if (esManual) subtitulo = 'Verificando tu código manual...';
+    document.getElementById('subtituloVerificando').textContent = subtitulo;
+    mostrarSeccion('seccion-verificando');
+    marcarProgreso(3);
+
+    try {
+        // TEST
+        if (esTest) {
+            const r = await verificarCodigoTEST(referencia);
+            if (!r.valido) {
+                const motivos = { no_existe:'Este código no existe.', inactivo:'Este código está desactivado.', usado:'Este código ya fue utilizado.', error:'Error consultando.' };
+                notificarAdmin('codigo_test', { referencia, mensaje_extra: `❌ TEST RECHAZADO: ${r.motivo}` });
+                document.getElementById('msgError').textContent = motivos[r.motivo] || 'Código inválido.';
+                document.getElementById('tituloError').textContent = 'Código inválido';
+                setTimeout(() => { mostrarSeccion('seccion-error'); btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO'; }, 600);
+                return;
+            }
+            notificarAdmin('codigo_test', { referencia, mensaje_extra: `🎬 TEST ACEPTADO` });
+            mostrarSeccion('seccion-confirmado');
+            await new Promise(res => setTimeout(res, 1000));
+            mostrarSeccion('seccion-procesando');
+            const resultadoRecarga = await ejecutarRecarga({
+                juego: r.data.juego, producto: r.data.producto, paquete: r.data.paquete,
+                id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador,
+                tipo: r.data.tipo, tipo_producto: r.data.tipo_producto
+            });
+            await new Promise(res => setTimeout(res, 1000));
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Asignar-perfil (TEST)', resultadoRecarga.codigos || [], { datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna, codigo_test: referencia, monto_test_usd: r.data.monto_usd, monto_test_bs: r.data.monto_bs });
+            await marcarCodigoTESTComoUsado(referencia, infoPedido.numeroMostrar);
+            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, true, referencia, infoPedido.numeroMostrar, resultadoRecarga.referencia_interna);
+            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            else { document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.'; mostrarSeccion('seccion-error'); }
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+        // MANUAL
+        if (esManual) {
+            const r = await verificarReferenciaManual(referencia);
+            if (!r.valida) {
+                const motivos = { no_existe:'No existe.', inactiva:'Desactivada.', usada:'Ya usada.', error:'Error.' };
+                notificarAdmin('manual', { referencia, mensaje_extra: `❌ MANUAL RECHAZADA: ${r.motivo}` });
+                document.getElementById('msgError').textContent = motivos[r.motivo] || 'Inválida.';
+                document.getElementById('tituloError').textContent = 'Código inválido';
+                setTimeout(() => { mostrarSeccion('seccion-error'); btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO'; }, 600);
+                return;
+            }
+            notificarAdmin('manual', { referencia, mensaje_extra: `🛠️ MANUAL ACEPTADA` });
+            mostrarSeccion('seccion-confirmado');
+            await new Promise(res => setTimeout(res, 1000));
+            mostrarSeccion('seccion-procesando');
+            const resultadoRecarga = await ejecutarRecarga({
+                tipo: r.data.tipo, tipo_producto: r.data.tipo_producto,
+                juego: r.data.juego, producto: r.data.producto,
+                paquete: r.data.paquete, id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador
+            });
+            await new Promise(res => setTimeout(res, 1000));
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Asignar-perfil (MANUAL)', resultadoRecarga.codigos || [], { datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna });
+            await marcarReferenciaManualComoUsada(referencia, infoPedido.numeroMostrar);
+            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, true, referencia, infoPedido.numeroMostrar, resultadoRecarga.referencia_interna);
+            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            else { document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.'; mostrarSeccion('seccion-error'); }
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+        // NORMAL
+        const yaUsada = await verificarReferenciaEnFirebase(referencia);
+        if (yaUsada) {
+            notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ YA USADA' });
+            await guardarReferenciaFalsa(referencia, 'Duplicada');
+            mostrarSeccion('seccion-ref-usada');
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+        if (cuponAplicado) {
+            const cuponYaUsado = await verificarCuponUsado(cuponAplicado);
+            if (cuponYaUsado) {
+                notificarAdmin('cupon_usado', { referencia });
+                mostrarMensaje('Cupón usado', 'Este cupón ya fue utilizado.', 'advertencia');
+                descuentoAplicado = 0; cuponAplicado = "";
+                precioUsdFinal = productoElegido.precioUsd;
+                precioBsFinal = productoElegido.precioBs;
+                renderizarResumenPago();
+                mostrarSeccion('seccion-pago');
+                btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+                return;
+            }
+        }
+        const resultadoVerif = await verificarPagoPabilo(referencia);
+        if (!resultadoVerif.confirmado) {
+            notificarAdmin('falso', { referencia, mensaje_extra: '⚠️ NO ENCONTRADA' });
+            await guardarReferenciaFalsa(referencia, 'No en Pábilo');
+            document.getElementById('msgError').textContent = 'Verifica tu referencia.';
+            document.getElementById('tituloError').textContent = 'Pago No Encontrado';
+            setTimeout(() => { mostrarSeccion('seccion-error'); btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO'; }, 800);
+            return;
+        }
+        if (resultadoVerif.es_nuevo === false) {
+            notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ Ya usado según Pábilo' });
+            await guardarReferenciaFalsa(referencia, 'Ya usada en Pábilo');
+            mostrarSeccion('seccion-ref-usada');
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+        await marcarReferenciaComoUsada(referencia);
+        if (cuponAplicado) await marcarCuponComoUsado(cuponAplicado);
+        mostrarSeccion('seccion-confirmado');
+        await new Promise(res => setTimeout(res, 1200));
+        mostrarSeccion('seccion-procesando');
+        const resultadoRecarga = await ejecutarRecarga();
+        await new Promise(res => setTimeout(res, 1000));
+        const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Asignar-perfil', resultadoRecarga.codigos || [], { datos_streaming: resultadoRecarga.datos || null, referencia_interna: resultadoRecarga.referencia_interna, es_renovacion: resultadoRecarga.es_renovacion || false });
+        if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, true, referencia, infoPedido.numeroMostrar, resultadoRecarga.referencia_interna);
+        else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+        else {
+            document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.';
+            document.getElementById('tituloError').textContent = 'Error';
+            mostrarSeccion('seccion-error');
+            notificarAdmin('error', { referencia, mensaje_extra: `❌ ${resultadoRecarga.mensaje}` });
+        }
+    } catch (error) {
+        console.error('❌ Error:', error);
+        mostrarMensaje('Error', 'Ocurrió un error inesperado.', 'error');
+        mostrarSeccion('seccion-pago');
+        notificarAdmin('error', { referencia, mensaje_extra: `❌ ${error.message}` });
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✅ VERIFICAR PAGO';
+    }
+}
+
+// 🎨 ÉXITO
+function mostrarResultadoExitoso(resultadoRecarga, esStreaming, referencia, numeroPedido, referenciaInterna) {
+    const d = getDatosPedidoActuales();
+    document.getElementById('resPedido').textContent = numeroPedido;
+    document.getElementById('resProducto').textContent = d.producto;
+    document.getElementById('resNombre').textContent = d.whatsapp || d.nombreJugador;
+    document.getElementById('resReferencia').textContent = referencia;
+    document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
+
+    const esRenovacion = resultadoRecarga.es_renovacion || MODO_RENOVACION;
+    document.getElementById('tituloExito').textContent = esRenovacion ? '¡Renovación Exitosa!' : '¡Compra Exitosa!';
+    document.getElementById('subtituloExito').textContent = esRenovacion ? 'Tu cuenta ha sido renovada por 30 días más.' : 'Aquí están tus datos de acceso. Guárdalos bien.';
+
+    const dd = resultadoRecarga.datos || {};
+    let htmlDatos = `<div class="datos-pago-box" style="margin-top:20px;"><h3 class="titulo-seccion" style="margin-top:0;">🎬 Datos de tu Cuenta</h3>`;
+    const campos = [
+        { label:'📧 Correo', valor: dd.correo || dd.usuario },
+        { label:'🔑 Contraseña', valor: dd.clave || dd.password },
+        { label:'👤 Perfil', valor: dd.perfil },
+        { label:'🔢 PIN Perfil', valor: dd.pin_perfil }
+    ];
+    campos.forEach(c => {
+        if (c.valor && c.valor.toString().trim() !== '') {
+            const valorSeguro = String(c.valor).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            htmlDatos += `<div class="dato-line"><div class="dato-texto"><strong>${c.label}:</strong> <span>${c.valor}</span></div><button class="copiar-btn" onclick="navigator.clipboard.writeText('${valorSeguro}'); this.classList.add('copiado'); setTimeout(()=>this.classList.remove('copiado'), 1500);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>`;
+        }
+    });
+    htmlDatos += `</div>`;
+    if (dd.fecha_vencimiento) {
+        htmlDatos += `<div class="vencimiento-box"><div class="vencimiento-label">📅 ${esRenovacion ? 'NUEVA FECHA' : 'FECHA DE VENCIMIENTO'}</div><div class="vencimiento-value">${dd.fecha_vencimiento}</div><div class="vencimiento-sub">${esRenovacion ? '✅ Extendida 30 días más' : '⏰ Guarda esta fecha'}</div></div>`;
+    }
+    if (resultadoRecarga.codigo_aprobacion) {
+        htmlDatos += `<div class="datos-pago-box" style="margin-top:20px;"><h3 class="titulo-seccion" style="margin-top:0;">🔑 Código de Renovación</h3>
+            <div style="text-align:center;font-size:20px;font-weight:900;color:var(--color-dorado-claro);letter-spacing:3px;padding:14px;background:rgba(0,0,0,0.3);border-radius:10px;word-break:break-all;">${resultadoRecarga.codigo_aprobacion}</div>
+            <p style="font-size:12px;color:#94a3b8;text-align:center;margin-top:10px;line-height:1.5;">Guárdalo para renovar en la próxima fecha de corte.</p>
+        </div>`;
+    }
+    document.getElementById('pinContainer').innerHTML = htmlDatos;
+    mostrarSeccion('seccion-exito');
+    marcarProgreso(4);
+    notificarAdmin('exito', { referencia, mensaje_extra: `🎬 Streaming ${esRenovacion ? 'RENOVADO' : 'entregado'}` });
+
+    if (esRenovacion) {
+        setTimeout(() => {
+            localStorage.removeItem('modo_renovacion');
+            localStorage.removeItem('codigo_aprobacion');
+            localStorage.removeItem('tipo_renovar');
+        }, 3000);
+    }
+}
+function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) {
+    const d = getDatosPedidoActuales();
+    document.getElementById('tituloExito').textContent = '¡Pago Verificado!';
+    document.getElementById('subtituloExito').textContent = 'Tu pedido llegará muy pronto. Te notificaremos por WhatsApp cuando esté listo.';
+    document.getElementById('resPedido').textContent = numeroPedido;
+    document.getElementById('resProducto').textContent = d.producto;
+    document.getElementById('resNombre').textContent = d.whatsapp || d.nombreJugador;
+    document.getElementById('resReferencia').textContent = referencia;
+    document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
+    document.getElementById('pinContainer').innerHTML = '';
+    mostrarSeccion('seccion-exito');
+    marcarProgreso(4);
+    let msgAdmin = `<b>🚨 PAGO VERIFICADO - ATENCIÓN</b>\n\n`;
+    msgAdmin += `<b>🎬</b> ${d.juego}\n<b>📦</b> ${d.producto}\n<b>📱</b> <code>${d.whatsapp}</code>\n`;
+    msgAdmin += `<b>💰</b> $${precioUsdFinal.toFixed(2)}\n<b>🔢</b> <code>${referencia}</code>\n\n`;
+    msgAdmin += `<b>⚠️ Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar'}\n<b>📋 Pedido:</b> ${numeroPedido}\n`;
+    enviarTelegram(msgAdmin);
+}
+
+function realizarOtraRecarga() {
+    productoElegido = null;
+    whatsappOk = false;
+    descuentoAplicado = 0; cuponAplicado = "";
+    precioUsdFinal = 0; precioBsFinal = 0;
+    if (inputId) inputId.value = "";
+    if (statusDiv) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; }
+    document.getElementById('referenciaPago').value = "";
+    document.getElementById('cuponInput').value = "";
+    document.getElementById('cuponInput').disabled = false;
+    document.getElementById('cuponBtn').disabled = false;
+    document.getElementById('cuponBtn').textContent = 'Aplicar';
+    document.getElementById('cuponBox').classList.remove('cupon-aplicado');
+    document.getElementById('cuponMsg').textContent = '';
+    document.getElementById('cuponMsg').className = 'cupon-msg';
+    document.getElementById('filaSubtotal').style.display = 'none';
+    document.getElementById('filaDescuento').style.display = 'none';
+    document.getElementById('pinContainer').innerHTML = '';
+    ['juego_seleccionado','producto_seleccionado','paquete_codigo','paquete',
+     'precio_usd','precio_en_bs','metodo_pago','proveedor','servicio_streaming',
+     'cupon_aplicado','descuento_porcentaje','precio_usd_final','precio_bs_final']
+        .forEach(k => localStorage.removeItem(k));
+    actualizarBotonContinuar();
+    mostrarSeccion('seccion-catalogo');
+    marcarProgreso(1);
+}
+
+// 🔄 Renovar
+window.prepararRenovacion = async function() {
+    const user = window.__usuarioActual;
+    if (!user) {
+        await mostrarMensaje('Inicia Sesión', 'Debes iniciar sesión para renovar.', 'advertencia');
+        abrirModalLogin();
+        return;
+    }
+    const tipo = document.getElementById('tipoRenovar').value;
+    const codigo = document.getElementById('codigoRenovar').value.trim();
+    const whatsapp = document.getElementById('whatsappRenovar').value.trim();
+
+    if (!codigo) { await mostrarMensaje('Código Requerido', 'Ingresa el código de aprobación.', 'advertencia'); return; }
+    if (!/^[A-Za-z0-9._-]{1,120}$/.test(codigo)) { await mostrarMensaje('Código inválido', 'El código contiene caracteres no permitidos.', 'advertencia'); return; }
+    if (!whatsapp || !/^\d{10,12}$/.test(whatsapp)) { await mostrarMensaje('WhatsApp Requerido', 'Ingresa un WhatsApp válido (10-12 dígitos).', 'advertencia'); return; }
+
+    const mapa = {
+        netflix_perfil: { nombre: 'Perfil Netflix', precio: 3.80 },
+        netflix_cuenta: { nombre: 'Cuenta Netflix', precio: 13.00 }
+    };
+    const producto = mapa[tipo];
+    if (!producto) { await mostrarMensaje('Tipo inválido', 'Selecciona un tipo válido.', 'error'); return; }
+
+    const precioBs = Math.round(producto.precio * tasa);
+
+    productoElegido = {
+        producto: producto.nombre + ' (Renovación)',
+        precioUsd: producto.precio,
+        paqueteCodigo: tipo,
+        precioBs,
+        modoRenovacion: true
+    };
+
+    // Guardamos todo y saltamos a la sección de WhatsApp
+    localStorage.setItem('whatsapp', whatsapp);
+    localStorage.setItem('id_jugador', whatsapp);
+    localStorage.setItem('nombre_jugador', formatearNumero(whatsapp));
+    localStorage.setItem('juego_seleccionado', juegoActual);
+    localStorage.setItem('producto_seleccionado', productoElegido.producto);
+    localStorage.setItem('paquete_codigo', tipo);
+    localStorage.setItem('paquete', tipo);
+    localStorage.setItem('precio_usd', producto.precio);
+    localStorage.setItem('precio_en_bs', precioBs);
+    localStorage.setItem('metodo_pago', metodo);
+    localStorage.setItem('proveedor', 'cuentas_propias');
+    localStorage.setItem('servicio_streaming', 'netflix');
+    localStorage.setItem('modo_renovacion', 'true');
+    localStorage.setItem('codigo_aprobacion', codigo);
+    localStorage.setItem('tipo_renovar', tipo);
+
+    precioUsdFinal = producto.precio;
+    precioBsFinal = precioBs;
+
+    // Pintamos producto elegido y saltamos a la sección de WhatsApp ya verificada
+    document.getElementById('prodElegidoNombre').textContent = productoElegido.producto;
+    document.getElementById('prodElegidoPrecio').textContent = metodo === 'PAGO MOVIL'
+        ? Math.round(producto.precio * tasa).toLocaleString('es-VE') + ' Bs'
+        : producto.precio.toFixed(2) + ' USDT';
+
+    if (inputId) inputId.value = whatsapp;
+    whatsappOk = true;
+    mostrarEstado('', 'valido', formatearNumero(whatsapp));
+    actualizarBotonContinuar();
+
+    mostrarSeccion('seccion-jugador');
+    marcarProgreso(2);
+    await mostrarMensaje('Renovación lista', 'Verifica tu WhatsApp y continúa al pago.', 'info');
+};
+
+actualizarBotonContinuar();
+cargarTasa();
+setInterval(cargarTasa, 60000);
+
+const chipActivo = document.querySelector('.games-menu a.active');
+if (chipActivo) chipActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
+
+window.addEventListener('scroll', () => {
+    const b = document.getElementById('backToTop');
+    if (b) b.classList.toggle('show', window.scrollY > 300);
+}, { passive: true });
+
+console.log('═══════════════════════════════════════════');
+console.log('🚀 NETFLIX UNIFICADO CARGADO');
+console.log('   Endpoint: /api/asignar-perfil');
+console.log('═══════════════════════════════════════════');
+</script>
+</body>
+</html>
