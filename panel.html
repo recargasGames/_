@@ -113,7 +113,6 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .pedido-jugador-box { background: rgba(22, 34, 59, 0.8); border: 1px solid rgba(37, 50, 77, 0.8); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; color: #cbd5e1; }
 .pedido-jugador-box strong { color: #fff; }
 
-/* 🆔 CAJA DE CLIENTE REGISTRADO */
 .pedido-cliente-box {
     background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.04));
     border: 1px solid rgba(212, 175, 55, 0.4);
@@ -200,6 +199,30 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .pedido-accion-btn.eliminar { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
 .pedido-accion-btn.eliminar:hover { background: rgba(239,68,68,0.3); color: #fff; transform: translateY(-2px); }
 
+/* 🪄 BOTÓN MÁGICO */
+.pedido-accion-btn.enviar-datos {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    animation: btnMagicoPulse 2.2s infinite;
+}
+.pedido-accion-btn.enviar-datos:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.65);
+}
+@keyframes btnMagicoPulse {
+    0%, 100% { box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
+    50% { box-shadow: 0 4px 25px rgba(37, 211, 102, 0.85); }
+}
+.pedido-accion-btn.enviado {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    cursor: default;
+    animation: none;
+}
+.pedido-accion-btn.enviado:hover { transform: none; box-shadow: none; }
+
 .entrega-manual-box { margin-top: 16px; padding: 18px 16px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); border: 2px solid rgba(245, 158, 11, 0.6); border-radius: 14px; cursor: default; }
 .entrega-manual-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(245, 158, 11, 0.3); }
 .entrega-manual-header .icono-alerta { font-size: 24px; }
@@ -242,7 +265,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .usuario-acciones { display: flex; gap: 8px; margin-top: 12px; }
 .usuario-btn { flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; border: none; font-family: inherit; text-transform: uppercase; }
 .usuario-btn.bloquear { background: rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); }
-.usuario-btn.activar { background: rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); }
+.usuario-btn.activar { background: rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.5); }
 
 .info-panel-codigos{background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03));border:1px solid rgba(59,130,246,0.35);border-radius:14px;padding:16px;margin-bottom:20px;font-size:13px;color:#cbd5e1;line-height:1.6}
 .info-panel-codigos strong{color:#93c5fd}
@@ -585,6 +608,7 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
                     <option value="completado">✅ Completados</option>
                     <option value="pendiente">⏳ Pendientes</option>
                     <option value="pendiente_manual">🚨 Entrega Manual</option>
+                    <option value="sin_enviar">📤 Sin enviar datos</option>
                     <option value="procesando">🔄 Procesando</option>
                     <option value="cancelado">❌ Cancelados</option>
                 </select>
@@ -772,12 +796,8 @@ let pedidosPorPagina = 10;
 let cuentasStreamingCache = {};
 let tasaCodigosActual = 940;
 
-// 🔥 CACHÉ de usuarios para no consultar repetido
 let cacheUsuarios = {};
 
-// ═══════════════════════════════════════════════
-// PRODUCTOS
-// ═══════════════════════════════════════════════
 const PRODUCTOS_JUEGOS = {
     'ff_110':  { producto: '110 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '110',  usd: 0.81,  tipo: 'central_one' },
     'ff_341':  { producto: '341 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '341',  usd: 2.60,  tipo: 'central_one' },
@@ -865,9 +885,6 @@ const PRODUCTOS_STREAMING = {
     'hbo_cuenta': { producto: 'Cuenta HBO Max', juego: 'HBO', paquete: 'hbo_cuenta', usd: 8.00, tipo: 'pagonorte' }
 };
 
-// ═══════════════════════════════════════════════
-// GENERADOR DE CÓDIGOS
-// ═══════════════════════════════════════════════
 const CHARS_CODIGO = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 
 function generarParteAleatoria(longitud = 6) {
@@ -1487,9 +1504,6 @@ function esPedidoDeStreaming(p) {
     return false;
 }
 
-// ═══════════════════════════════════════════════
-// 🔥 Detecta si un pedido viene de un usuario registrado
-// ═══════════════════════════════════════════════
 function esUsuarioRegistrado(uid) {
     if (!uid) return false;
     const uidStr = String(uid);
@@ -1499,7 +1513,6 @@ function esUsuarioRegistrado(uid) {
     return uidStr.length >= 20;
 }
 
-// 🔥 Obtiene datos del usuario (id_cliente y correo) con caché
 async function obtenerDatosUsuario(uid) {
     if (!uid || !esUsuarioRegistrado(uid)) return null;
     if (cacheUsuarios[uid] !== undefined) return cacheUsuarios[uid];
@@ -1520,7 +1533,6 @@ async function obtenerDatosUsuario(uid) {
     }
 }
 
-// 🔥 Precarga datos de usuarios únicos en los pedidos
 async function precargarDatosUsuarios() {
     const uidsUnicos = new Set();
     todosLosPedidos.forEach(p => {
@@ -1549,7 +1561,9 @@ function renderizarPedidos() {
     const filtro = document.getElementById('filtroPedidos').value;
     const buscar = document.getElementById('buscarPedidos').value.trim().toLowerCase();
     let lista = [...todosLosPedidos];
+
     if (filtro === 'pendiente_manual') lista = lista.filter(p => esPedidoDeStreaming(p) && !tieneDatosEntrega(p));
+    else if (filtro === 'sin_enviar') lista = lista.filter(p => esPedidoDeStreaming(p) && tieneDatosEntrega(p) && p.datos_enviados_al_cliente !== true);
     else if (filtro) lista = lista.filter(p => {
         const e = String(p.estado || '').toLowerCase();
         if (filtro === 'completado') return ['completada','completado','completed'].includes(e);
@@ -1558,6 +1572,7 @@ function renderizarPedidos() {
         if (filtro === 'cancelado') return ['cancelado','cancelada','cancelled'].includes(e);
         return true;
     });
+
     if (buscar) lista = lista.filter(p => {
         const nro = String(p.numero_pedido || p.order_id || '').toLowerCase();
         const ref = String(p.referencia_pago || p.referencia || '').toLowerCase();
@@ -1565,7 +1580,8 @@ function renderizarPedidos() {
         const prod = String(p.producto || p.juego || '').toLowerCase();
         const idCli = String(p.id_cliente || '').toLowerCase();
         const correo = String(p.email_cliente || p.correo_cliente || '').toLowerCase();
-        return nro.includes(buscar) || ref.includes(buscar) || jug.includes(buscar) || prod.includes(buscar) || idCli.includes(buscar) || correo.includes(buscar);
+        const wpp = String(p.whatsapp_cliente || '').toLowerCase();
+        return nro.includes(buscar) || ref.includes(buscar) || jug.includes(buscar) || prod.includes(buscar) || idCli.includes(buscar) || correo.includes(buscar) || wpp.includes(buscar);
     });
     lista.sort((a, b) => new Date(b.fecha || 0).getTime() - new Date(a.fecha || 0).getTime());
     const totalPedidos = lista.length;
@@ -1618,29 +1634,21 @@ function calcularPaginas(total, actual) {
 
 function cambiarPagina(numero) { paginaPedidosActual = numero; renderizarPedidos(); }
 function cambiarPorPagina(valor) { pedidosPorPagina = parseInt(valor) || 10; paginaPedidosActual = 1; renderizarPedidos(); }
-function tieneDatosEntrega(p) { const d = p.datos_streaming; return d && (d.correo || d.clave || d.usuario || d.password); }
+function tieneDatosEntrega(p) { const d = p.datos_streaming; return d && (d.correo || d.clave || d.usuario || d.password || (Array.isArray(d.pines) && d.pines.length > 0)); }
 
-// ═══════════════════════════════════════════════
-// 🔥 NUEVO PASO 1: Helper para resolver nombre e ID del cliente
-// ═══════════════════════════════════════════════
 function obtenerNombreCliente(p) {
-    // 1. Si es registrado y tenemos su nombre real en caché
     if (esUsuarioRegistrado(p.uid)) {
         const u = cacheUsuarios[p.uid];
         if (u && u.nombre) return u.nombre;
     }
-    // 2. Si el pedido trae un nombre de jugador "de verdad" (no un WhatsApp)
     const nj = String(p.nombre_jugador || '').trim();
-    const esWpp = /^\+?\d[\d\s\-]{6,}$/.test(nj); // si parece un número, NO es nombre
+    const esWpp = /^\+?\d[\d\s\-]{6,}$/.test(nj);
     if (nj && !esWpp) return nj;
-    // 3. Fallback: WhatsApp del pedido
     if (p.whatsapp_cliente) return p.whatsapp_cliente;
-    // 4. Fallback final
     return esUsuarioRegistrado(p.uid) ? 'Cliente registrado' : 'Cliente anónimo';
 }
 
 function obtenerIdMostrar(p) {
-    // Streaming → ID Cliente si es registrado
     if (esPedidoDeStreaming(p)) {
         if (esUsuarioRegistrado(p.uid)) {
             const u = cacheUsuarios[p.uid];
@@ -1648,10 +1656,93 @@ function obtenerIdMostrar(p) {
         }
         return { label: 'ID', valor: '—', vacio: true };
     }
-    // Juego / Giftcard → ID Jugador
     const idj = String(p.id_jugador || p.player_id || '').trim();
     if (idj) return { label: 'ID Jugador', valor: idj, vacio: false };
     return { label: 'ID Jugador', valor: '—', vacio: true };
+}
+
+// 🪄 Construye el mensaje de WhatsApp para el cliente (mismo formato que netflix.html)
+function construirMensajeCliente(pedido) {
+    const nombre = pedido.nombre_jugador || 'Cliente';
+    const productoP = pedido.producto || '';
+    const numeroPedido = pedido.numero_pedido || pedido.pedido_key || '';
+    const montoUsd = Number(pedido.monto_usd || 0).toFixed(2);
+    const montoBs = Number(pedido.monto_bs || 0).toLocaleString('es-VE');
+    const referencia = pedido.referencia_pago || '';
+    const datos = pedido.datos_streaming || {};
+    const codigoRenov = pedido.codigo_renovacion || '';
+    const esRenov = pedido.es_renovacion === true;
+
+    let msg = `🎬 *RECARGAS GAMES*\n\n¡Hola ${nombre}! 👋\n`;
+    msg += esRenov ? `Tu renovación fue exitosa ✅\n\n` : `Tu compra fue exitosa ✅\n\n`;
+    msg += `📦 *Producto:* ${productoP}\n📋 *Pedido:* #${numeroPedido}\n💰 *Total:* $${montoUsd} · ${montoBs} Bs\n🔢 *Referencia:* ${referencia}\n\n`;
+
+    if (!esRenov && (datos.correo || datos.clave)) {
+        msg += `━━━━━━━━━━━━━━━━━━━━\n🔐 *DATOS DE ACCESO*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+        if (datos.correo) msg += `📧 *Correo:* ${datos.correo}\n`;
+        if (datos.clave) msg += `🔑 *Clave:* ${datos.clave}\n`;
+
+        if (Array.isArray(datos.pines) && datos.pines.length > 1) {
+            msg += `\n🎟️ *PINs de cada perfil:*\n`;
+            datos.pines.forEach(p => {
+                msg += `   • Perfil ${p.numero}: *${p.pin || '—'}*\n`;
+            });
+        } else {
+            if (datos.perfil) msg += `👤 *Perfil:* ${datos.perfil}\n`;
+            if (datos.pin_perfil) msg += `🔢 *PIN:* ${datos.pin_perfil}\n`;
+        }
+
+        if (datos.fecha_vencimiento) msg += `📅 *Vence:* ${datos.fecha_vencimiento}\n`;
+    }
+    if (codigoRenov) {
+        msg += `\n━━━━━━━━━━━━━━━━━━━━\n🔢 *CÓDIGO DE RENOVACIÓN*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `\`${codigoRenov}\`\n\n⚠️ *GUÁRDALO.*\n`;
+    }
+    msg += `\n⚠️ *No compartas estos datos con nadie.*\n📱 +58 422-8242411\n\n¡Gracias! 🙌`;
+    return msg;
+}
+
+// 🪄 ENVIAR DATOS POR WHATSAPP (botón mágico)
+async function enviarDatosPorWhatsApp(pedidoKey) {
+    const p = todosLosPedidos.find(x => x.key === pedidoKey);
+    if (!p) { mostrarMensaje('Error', 'No se encontró el pedido', 'error'); return; }
+
+    // Validar WhatsApp
+    let tel = String(p.whatsapp_cliente || '').replace(/\D/g, '');
+    if (!tel || tel.length < 10) {
+        mostrarMensaje('Sin WhatsApp', 'Este pedido no tiene WhatsApp del cliente.\n\nNo se puede enviar automáticamente.', 'advertencia');
+        return;
+    }
+    if (tel.startsWith('0')) tel = tel.substring(1);
+    if (!tel.startsWith('58')) tel = '58' + tel;
+
+    // Construir mensaje
+    const mensaje = construirMensajeCliente(p);
+
+    // Abrir WhatsApp Web con el mensaje pre-armado
+    const url = `https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
+
+    // Marcar como enviado en Firebase
+    try {
+        await db.ref('pedidos/' + pedidoKey).update({
+            datos_enviados_al_cliente: true,
+            fecha_envio_datos: new Date().toISOString(),
+            enviado_por: auth.currentUser ? auth.currentUser.email : 'admin'
+        });
+        // Actualizar cache local
+        p.datos_enviados_al_cliente = true;
+        p.fecha_envio_datos = new Date().toISOString();
+        renderizarPedidos();
+        mostrarMensaje(
+            '✅ Datos enviados',
+            `Se abrió WhatsApp con el mensaje pre-armado.\n\nSolo dale ENVIAR en WhatsApp.\n\nAl confirmar, el pedido queda marcado como "Datos enviados".`,
+            'exito'
+        );
+    } catch (e) {
+        console.error('Error marcando como enviado:', e);
+        mostrarMensaje('Error', 'No se pudo marcar el pedido como enviado: ' + e.message, 'error');
+    }
 }
 
 function renderizarTarjetaPedido(p) {
@@ -1670,9 +1761,12 @@ function renderizarTarjetaPedido(p) {
     const idCliente = datosUsuario?.id_cliente || null;
     const correoCliente = datosUsuario?.correo || null;
 
-    // 🔥 NUEVO: nombre e ID resueltos correctamente
     const nombreMostrar = obtenerNombreCliente(p);
     const idInfo = obtenerIdMostrar(p);
+
+    // 🪄 Estado del envío
+    const datosEnviados = p.datos_enviados_al_cliente === true;
+    const puedeEnviar = esStreaming && tieneDatos && !requiereEntregaManual;
 
     let stepRecibido = 'recibido', stepVerificando = '', stepCompletado = '', line1 = 'active', line2 = '';
     if (estado === 'completado') { stepVerificando = 'verificando'; stepCompletado = 'completado'; line1 = 'completed'; line2 = 'completed'; }
@@ -1706,6 +1800,7 @@ function renderizarTarjetaPedido(p) {
             ${correoCliente ? `<div class="detalle-fila"><span class="label">📧 Correo Cliente:</span><span class="valor">${esc(correoCliente)}</span></div>` : ''}
             <div class="detalle-fila"><span class="label">Tipo:</span><span class="valor">${esRegistrado ? '⭐ Registrado' : '👤 Anónimo'}</span></div>
             <div class="detalle-fila"><span class="label">Estado:</span><span class="valor"><span class="badge-estado ${estado}">${TEXTO_ESTADO[estado]}</span></span></div>
+            ${datosEnviados ? `<div class="detalle-fila"><span class="label">📤 Datos enviados:</span><span class="valor" style="color:#6ee7b7;">SÍ · ${esc(formatearFecha(p.fecha_envio_datos))}</span></div>` : ''}
         </div>`;
 
     const formularioEntrega = requiereEntregaManual ? `
@@ -1722,8 +1817,19 @@ function renderizarTarjetaPedido(p) {
             <button class="entrega-btn-guardar" onclick="entregarStreamingManual('${esc(p.key)}')">💾 Guardar y enviar por WhatsApp</button>
         </div>` : '';
 
+    // 🪄 Botón mágico
+    let botonEnviar = '';
+    if (puedeEnviar) {
+        if (datosEnviados) {
+            botonEnviar = `<button class="pedido-accion-btn enviado" onclick="event.stopPropagation()" disabled>✅ Datos ya enviados</button>`;
+        } else {
+            botonEnviar = `<button class="pedido-accion-btn enviar-datos" onclick="event.stopPropagation(); enviarDatosPorWhatsApp('${esc(p.key)}')">📤 Enviar datos por WhatsApp</button>`;
+        }
+    }
+
     const acciones = `
         <div class="pedido-acciones" onclick="event.stopPropagation()">
+            ${botonEnviar}
             ${estado !== 'completado' ? `<button class="pedido-accion-btn completar" onclick="completarPedido('${esc(p.key)}')">✅ Marcar Completado</button>` : ''}
             <button class="pedido-accion-btn eliminar" onclick="eliminarPedido('${esc(p.key)}', '${esc(idPedido)}')">🗑️ Eliminar</button>
         </div>`;
@@ -1836,7 +1942,7 @@ async function entregarStreamingManual(pedidoKey) {
     try {
         const datosStreaming = { correo, usuario: correo, clave, password: clave, perfil: perfil || '', pin_perfil: pin || '', fecha_vencimiento: vence || '', entregado_manual: true, entregado_por: auth.currentUser ? auth.currentUser.email : 'admin', fecha_entrega: new Date().toISOString() };
         await db.ref('pedidos/' + pedidoKey).update({ datos_streaming: datosStreaming, estado: 'completada', entrega_manual: true, fecha_entrega_manual: new Date().toISOString() });
-        mostrarMensaje('✅ Guardado', 'Los datos se guardaron', 'exito');
+        mostrarMensaje('✅ Guardado', 'Los datos se guardaron. Ya puedes usar el botón "📤 Enviar datos por WhatsApp".', 'exito');
         await cargarPedidosAdmin();
     } catch (e) { mostrarMensaje('Error', e.message, 'error'); }
 }
@@ -1844,7 +1950,7 @@ async function entregarStreamingManual(pedidoKey) {
 function actualizarBadgePendientes() {
     const badge = document.getElementById('badgePendientes');
     if (!badge) return;
-    const pendientes = todosLosPedidos.filter(p => esPedidoDeStreaming(p) && !tieneDatosEntrega(p)).length;
+    const pendientes = todosLosPedidos.filter(p => esPedidoDeStreaming(p) && tieneDatosEntrega(p) && p.datos_enviados_al_cliente !== true).length;
     if (pendientes > 0) { badge.textContent = pendientes; badge.style.display = 'inline-block'; }
     else badge.style.display = 'none';
 }
