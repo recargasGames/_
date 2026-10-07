@@ -1,5 +1,5 @@
 // api/netflix-hogar.js
-// Lee correos de Netflix desde múltiples cuentas IMAP
+// Lee correos de Netflix desde múltiples cuentas IMAP con VALIDACIÓN
 
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
@@ -11,22 +11,20 @@ const MINUTOS_VALIDOS = 15;
 function obtenerConfiguraciones() {
     const configs = [];
     
-    // Correo 1
     if (process.env.NETFLIX_IMAP_1_USER && process.env.NETFLIX_IMAP_1_PASSWORD) {
         configs.push({
             id: 1,
-            user: process.env.NETFLIX_IMAP_1_USER,
+            user: process.env.NETFLIX_IMAP_1_USER.toLowerCase().trim(),
             password: process.env.NETFLIX_IMAP_1_PASSWORD,
             host: process.env.NETFLIX_IMAP_1_HOST || 'imap.gmail.com',
             port: parseInt(process.env.NETFLIX_IMAP_1_PORT) || 993
         });
     }
     
-    // Correo 2
     if (process.env.NETFLIX_IMAP_2_USER && process.env.NETFLIX_IMAP_2_PASSWORD) {
         configs.push({
             id: 2,
-            user: process.env.NETFLIX_IMAP_2_USER,
+            user: process.env.NETFLIX_IMAP_2_USER.toLowerCase().trim(),
             password: process.env.NETFLIX_IMAP_2_PASSWORD,
             host: process.env.NETFLIX_IMAP_2_HOST || 'imap.gmail.com',
             port: parseInt(process.env.NETFLIX_IMAP_2_PORT) || 993
@@ -34,6 +32,29 @@ function obtenerConfiguraciones() {
     }
     
     return configs;
+}
+
+// 🆕 VALIDAR: ¿el correo del cliente coincide con alguno configurado?
+function validarCorreo(correoCliente, configs) {
+    const c = String(correoCliente).toLowerCase().trim();
+    
+    // Extraer base y alias (ej: "user+netflix1@gmail.com" → base: "user@gmail.com")
+    const match = c.match(/^([^+@]+)(\+[^@]+)?@(.+)$/);
+    if (!match) return null;
+    
+    const base = match[1] + '@' + match[3]; // "user@gmail.com"
+    const completo = c;                      // "user+netflix1@gmail.com"
+    
+    // Buscar en las configuraciones
+    for (const cfg of configs) {
+        const userCfg = cfg.user.toLowerCase();
+        // Coincide exacto O coincide la base con alias
+        if (userCfg === completo || userCfg === base) {
+            return cfg;
+        }
+    }
+    
+    return null;
 }
 
 function conectarIMAP(config) {
@@ -67,7 +88,6 @@ function extraerDatos(texto, html) {
     return { codigo, linkHogar };
 }
 
-// Buscar código en UN correo específico
 function buscarEnCorreo(config) {
     return new Promise((resolve) => {
         const imap = conectarIMAP(config);
@@ -159,6 +179,7 @@ function buscarEnCorreo(config) {
                                             linkHogar: util.linkHogar,
                                             asunto: util.asunto,
                                             destinatario: util.destinatario,
+                                            fechaMs: util.fechaMs,
                                             desdeCorreo: config.user
                                         });
                                     } else {
@@ -196,7 +217,7 @@ module.exports = async function handler(req, res) {
     const { correo } = req.body || {};
     
     if (!correo) {
-        return res.status(400).json({ ok: false, error: 'Falta: correo' });
+        return res.status(400).json({ ok: false, error: 'FALTA_CORREO', mensaje: 'Escribe el correo de la cuenta.' });
     }
     
     const configs = obtenerConfiguraciones();
@@ -209,51 +230,61 @@ module.exports = async function handler(req, res) {
         });
     }
     
-    console.log(`🔍 Buscando código para: ${correo}`);
-    console.log(`📧 Correos configurados: ${configs.length}`);
+    // 🆕 VALIDAR que el correo del cliente sea uno de los permitidos
+    const configValida = validarCorreo(correo, configs);
     
-    // Buscar en TODOS los correos en paralelo
-    const resultados = await Promise.all(configs.map(c => buscarEnCorreo(c)));
-    
-    // Buscar el correo con código más reciente
-    const validos = resultados.filter(r => r.ok && (r.codigo || r.linkHogar));
-    
-    if (validos.length === 0) {
-        // Ver qué pasó
-        const errores = resultados.map(r => ({
-            correo: r.desdeCorreo || r.config,
-            error: r.error,
-            mensaje: r.mensaje || ''
-        }));
-        
+    if (!configValida) {
+        console.warn(`❌ Correo no autorizado: ${correo}`);
         return res.status(200).json({
             ok: false,
-            error: 'SIN_CODIGO',
-            mensaje: 'No encontramos código reciente. Verifica haber solicitado el código en la TV.',
-            detalles: errores
+            error: 'CORREO_NO_AUTORIZADO',
+            mensaje: 'Este correo no está registrado. Verifica con soporte el correo correcto de tu cuenta.'
         });
     }
     
-    // Ordenar por fecha (más reciente)
-    validos.sort((a, b) => {
-        const fa = a.fechaMs || 0;
-        const fb = b.fechaMs || 0;
-        return fb - fa;
-    });
+    console.log(`✅ Correo autorizado: ${correo} → usando ${configValida.user}`);
     
-    const mejor = validos[0];
+    // Buscar en el correo específico que corresponde
+    const resultado = await buscarEnCorreo(configValida);
     
-    console.log('✅ Código encontrado en:', mejor.desdeCorreo);
+    if (!resultado.ok) {
+        if (resultado.error === 'SIN_CORREOS') {
+            return res.status(200).json({
+                ok: false,
+                error: 'SIN_CORREOS',
+                mensaje: 'No hay correos recientes de Netflix. Verifica haber solicitado el código en la TV e intenta de nuevo en 10 segundos.'
+            });
+        }
+        if (resultado.error === 'SIN_CODIGO') {
+            return res.status(200).json({
+                ok: false,
+                error: 'SIN_CODIGO',
+                mensaje: 'No encontramos código reciente. Solicita uno nuevo en la TV.'
+            });
+        }
+        if (resultado.error === 'IMAP_ERROR') {
+            return res.status(200).json({
+                ok: false,
+                error: 'IMAP_ERROR',
+                mensaje: 'Error de conexión con el correo: ' + resultado.mensaje
+            });
+        }
+        return res.status(200).json({
+            ok: false,
+            error: resultado.error,
+            mensaje: resultado.mensaje || 'Error desconocido.'
+        });
+    }
     
+    // Devolver código encontrado
     return res.status(200).json({
         ok: true,
-        codigo: mejor.codigo || null,
-        linkHogar: mejor.linkHogar || null,
-        asunto: mejor.asunto,
-        destinatario: mejor.destinatario,
-        encontradoEn: mejor.desdeCorreo,
+        codigo: resultado.codigo || null,
+        linkHogar: resultado.linkHogar || null,
+        asunto: resultado.asunto,
+        destinatario: resultado.destinatario,
         expira_minutos: MINUTOS_VALIDOS,
-        mensaje: mejor.codigo 
+        mensaje: resultado.codigo 
             ? 'Código encontrado. Escríbelo en tu TV.' 
             : 'Enlace encontrado. Ábrelo para autorizar tu dispositivo.'
     });
