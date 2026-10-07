@@ -1488,7 +1488,7 @@ function esPedidoDeStreaming(p) {
 }
 
 // ═══════════════════════════════════════════════
-// 🔥 NUEVO: Detecta si un pedido viene de un usuario registrado
+// 🔥 Detecta si un pedido viene de un usuario registrado
 // ═══════════════════════════════════════════════
 function esUsuarioRegistrado(uid) {
     if (!uid) return false;
@@ -1496,18 +1496,13 @@ function esUsuarioRegistrado(uid) {
     if (uidStr.startsWith('anon_')) return false;
     if (uidStr.startsWith('anon-')) return false;
     if (uidStr === 'anonimo') return false;
-    return uidStr.length >= 20; // Firebase UIDs tienen ~28 caracteres
+    return uidStr.length >= 20;
 }
 
-// 🔥 NUEVO: Obtiene datos del usuario (id_cliente y correo) con caché
+// 🔥 Obtiene datos del usuario (id_cliente y correo) con caché
 async function obtenerDatosUsuario(uid) {
     if (!uid || !esUsuarioRegistrado(uid)) return null;
-    
-    // Revisar caché
-    if (cacheUsuarios[uid] !== undefined) {
-        return cacheUsuarios[uid];
-    }
-    
+    if (cacheUsuarios[uid] !== undefined) return cacheUsuarios[uid];
     try {
         const snap = await db.ref('usuarios/' + uid).once('value');
         const datos = snap.val() || {};
@@ -1533,7 +1528,6 @@ async function precargarDatosUsuarios() {
             uidsUnicos.add(p.uid);
         }
     });
-    
     const promesas = Array.from(uidsUnicos).map(uid => obtenerDatosUsuario(uid));
     await Promise.all(promesas);
 }
@@ -1543,10 +1537,7 @@ async function cargarPedidosAdmin() {
         const snap = await db.ref('pedidos').limitToLast(1000).once('value');
         const datos = snap.val() || {};
         todosLosPedidos = Object.entries(datos).map(([key, p]) => ({ ...p, key }));
-        
-        // 🔥 Precarga los datos de usuarios
         await precargarDatosUsuarios();
-        
         renderizarPedidos();
         actualizarBadgePendientes();
     } catch (e) { document.getElementById('listaPedidosAdmin').innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>'; }
@@ -1629,6 +1620,40 @@ function cambiarPagina(numero) { paginaPedidosActual = numero; renderizarPedidos
 function cambiarPorPagina(valor) { pedidosPorPagina = parseInt(valor) || 10; paginaPedidosActual = 1; renderizarPedidos(); }
 function tieneDatosEntrega(p) { const d = p.datos_streaming; return d && (d.correo || d.clave || d.usuario || d.password); }
 
+// ═══════════════════════════════════════════════
+// 🔥 NUEVO PASO 1: Helper para resolver nombre e ID del cliente
+// ═══════════════════════════════════════════════
+function obtenerNombreCliente(p) {
+    // 1. Si es registrado y tenemos su nombre real en caché
+    if (esUsuarioRegistrado(p.uid)) {
+        const u = cacheUsuarios[p.uid];
+        if (u && u.nombre) return u.nombre;
+    }
+    // 2. Si el pedido trae un nombre de jugador "de verdad" (no un WhatsApp)
+    const nj = String(p.nombre_jugador || '').trim();
+    const esWpp = /^\+?\d[\d\s\-]{6,}$/.test(nj); // si parece un número, NO es nombre
+    if (nj && !esWpp) return nj;
+    // 3. Fallback: WhatsApp del pedido
+    if (p.whatsapp_cliente) return p.whatsapp_cliente;
+    // 4. Fallback final
+    return esUsuarioRegistrado(p.uid) ? 'Cliente registrado' : 'Cliente anónimo';
+}
+
+function obtenerIdMostrar(p) {
+    // Streaming → ID Cliente si es registrado
+    if (esPedidoDeStreaming(p)) {
+        if (esUsuarioRegistrado(p.uid)) {
+            const u = cacheUsuarios[p.uid];
+            if (u && u.id_cliente) return { label: 'ID Cliente', valor: u.id_cliente, vacio: false };
+        }
+        return { label: 'ID', valor: '—', vacio: true };
+    }
+    // Juego / Giftcard → ID Jugador
+    const idj = String(p.id_jugador || p.player_id || '').trim();
+    if (idj) return { label: 'ID Jugador', valor: idj, vacio: false };
+    return { label: 'ID Jugador', valor: '—', vacio: true };
+}
+
 function renderizarTarjetaPedido(p) {
     const estado = normalizarEstado(p.estado);
     const idPedido = p.numero_pedido || p.order_id || p.referencia || p.key || 'N/A';
@@ -1636,18 +1661,19 @@ function renderizarTarjetaPedido(p) {
     const producto = p.producto || '';
     const monto = formatearMontoAdmin(p.monto_usd || p.monto);
     const metodo = p.metodo || 'Pago Móvil';
-    const idJugador = p.id_jugador || p.player_id || 'No especificado';
-    const nombreJugador = p.nombre_jugador || p.player_name || 'No especificado';
     const esStreaming = esPedidoDeStreaming(p);
     const tieneDatos = tieneDatosEntrega(p);
     const requiereEntregaManual = esStreaming && !tieneDatos;
-    
-    // 🔥 NUEVO: datos del cliente registrado
+
     const esRegistrado = esUsuarioRegistrado(p.uid);
     const datosUsuario = esRegistrado ? (cacheUsuarios[p.uid] || null) : null;
     const idCliente = datosUsuario?.id_cliente || null;
     const correoCliente = datosUsuario?.correo || null;
-    
+
+    // 🔥 NUEVO: nombre e ID resueltos correctamente
+    const nombreMostrar = obtenerNombreCliente(p);
+    const idInfo = obtenerIdMostrar(p);
+
     let stepRecibido = 'recibido', stepVerificando = '', stepCompletado = '', line1 = 'active', line2 = '';
     if (estado === 'completado') { stepVerificando = 'verificando'; stepCompletado = 'completado'; line1 = 'completed'; line2 = 'completed'; }
     else if (estado === 'procesando') { stepVerificando = 'verificando'; line1 = 'active'; }
@@ -1656,15 +1682,14 @@ function renderizarTarjetaPedido(p) {
     const iconRef = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
     const iconCheck = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
     const iconSearch = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
-    
-    // 🔥 NUEVA caja de cliente registrado
+
     const cajaCliente = (esRegistrado && (idCliente || correoCliente)) ? `
         <div class="pedido-cliente-box">
             <div class="titulo-cliente">⭐ CLIENTE REGISTRADO</div>
             ${idCliente ? `<div>🆔 <strong>ID Cliente:</strong> <span class="id-cliente-valor">${esc(idCliente)}</span> <button class="btn-copiar-id-cliente" onclick="event.stopPropagation(); copiarIdCliente('${esc(idCliente)}')">📋</button></div>` : ''}
             ${correoCliente ? `<div>📧 <strong>Correo:</strong> ${esc(correoCliente)}</div>` : ''}
         </div>` : '';
-    
+
     const detalleExpandido = `
         <div class="detalle-expandido">
             <h4>📋 Detalles del Pedido</h4>
@@ -1674,14 +1699,15 @@ function renderizarTarjetaPedido(p) {
             <div class="detalle-fila"><span class="label">Monto:</span><span class="valor">$${esc(monto)}</span></div>
             <div class="detalle-fila"><span class="label">Método:</span><span class="valor">${esc(metodo)}</span></div>
             <div class="detalle-fila"><span class="label">Referencia:</span><span class="valor">${esc(p.referencia_pago || p.referencia || 'N/A')}</span></div>
-            <div class="detalle-fila"><span class="label">ID Jugador:</span><span class="valor">${esc(idJugador)}</span></div>
-            <div class="detalle-fila"><span class="label">Nombre:</span><span class="valor">${esc(nombreJugador)}</span></div>
+            <div class="detalle-fila"><span class="label">${esc(idInfo.label)}:</span><span class="valor">${esc(idInfo.valor)}</span></div>
+            <div class="detalle-fila"><span class="label">Cliente:</span><span class="valor">${esc(nombreMostrar)}</span></div>
             <div class="detalle-fila"><span class="label">WhatsApp:</span><span class="valor">${esc(p.whatsapp_cliente || '—')}</span></div>
             ${idCliente ? `<div class="detalle-fila"><span class="label">🆔 ID Cliente:</span><span class="valor">${esc(idCliente)}</span></div>` : ''}
             ${correoCliente ? `<div class="detalle-fila"><span class="label">📧 Correo Cliente:</span><span class="valor">${esc(correoCliente)}</span></div>` : ''}
             <div class="detalle-fila"><span class="label">Tipo:</span><span class="valor">${esRegistrado ? '⭐ Registrado' : '👤 Anónimo'}</span></div>
             <div class="detalle-fila"><span class="label">Estado:</span><span class="valor"><span class="badge-estado ${estado}">${TEXTO_ESTADO[estado]}</span></span></div>
         </div>`;
+
     const formularioEntrega = requiereEntregaManual ? `
         <div class="entrega-manual-box" onclick="event.stopPropagation()">
             <div class="entrega-manual-header">
@@ -1695,11 +1721,13 @@ function renderizarTarjetaPedido(p) {
             <div class="entrega-form-group"><label>📅 Vencimiento</label><input type="text" id="entrega-vence-${esc(p.key)}" placeholder="DD-MM-AAAA"></div>
             <button class="entrega-btn-guardar" onclick="entregarStreamingManual('${esc(p.key)}')">💾 Guardar y enviar por WhatsApp</button>
         </div>` : '';
+
     const acciones = `
         <div class="pedido-acciones" onclick="event.stopPropagation()">
             ${estado !== 'completado' ? `<button class="pedido-accion-btn completar" onclick="completarPedido('${esc(p.key)}')">✅ Marcar Completado</button>` : ''}
             <button class="pedido-accion-btn eliminar" onclick="eliminarPedido('${esc(p.key)}', '${esc(idPedido)}')">🗑️ Eliminar</button>
         </div>`;
+
     return `
         <div class="pedido-card ${requiereEntregaManual ? 'pendiente-manual' : ''}" onclick="toggleDetalle(this)">
             <div class="pedido-header">
@@ -1717,8 +1745,8 @@ function renderizarTarjetaPedido(p) {
                 <div class="pedido-referencia">${iconRef} Ref: ${esc(p.referencia_pago || p.referencia || 'N/A')}</div>
             </div>
             <div class="pedido-jugador-box">
-                <div><strong>ID:</strong> ${esc(idJugador)}</div>
-                <div><strong>Nombre:</strong> ${esc(nombreJugador)}</div>
+                <div><strong>${esc(idInfo.label)}:</strong> ${esc(idInfo.valor)}</div>
+                <div><strong>Cliente:</strong> ${esc(nombreMostrar)}</div>
                 <div><strong>📱 WhatsApp:</strong> ${esc(p.whatsapp_cliente || '—')}</div>
             </div>
             ${cajaCliente}
