@@ -71,7 +71,6 @@ async function contarDisponibilidad(servicio = 'netflix') {
     let perfilesLibres = 0;
     let cuentasCompletasLibres = 0;
     let cuentasActivas = 0;
-    const detalleCuentas = [];
 
     for (const cuentaId of Object.keys(cuentas)) {
         const cuenta = cuentas[cuentaId];
@@ -84,18 +83,9 @@ async function contarDisponibilidad(servicio = 'netflix') {
             String(perfiles[n].estado || '').toLowerCase().trim() === 'libre'
         ).length;
         perfilesLibres += libresCuenta;
-        const esCompletaLibre = libresCuenta === nums.length;
-        if (esCompletaLibre) cuentasCompletasLibres++;
-        detalleCuentas.push({
-            cuenta_id: cuentaId,
-            correo: cuenta.correo || '—',
-            total_perfiles: nums.length,
-            libres: libresCuenta,
-            ocupados: nums.length - libresCuenta,
-            es_completa_libre: esCompletaLibre
-        });
+        if (libresCuenta === nums.length) cuentasCompletasLibres++;
     }
-    return { perfilesLibres, cuentasCompletasLibres, cuentasActivas, detalleCuentas };
+    return { perfilesLibres, cuentasCompletasLibres, cuentasActivas };
 }
 
 export default async function handler(req, res) {
@@ -109,20 +99,16 @@ export default async function handler(req, res) {
     try {
         const { producto, referencia, whatsapp, es_renovacion, codigo_aprobacion } = req.body || {};
 
-        // ═══════════════════════════════════════════════════
-        // 🧪 MODO CONSULTA (dry_run): solo dice cuántos hay
-        // ═══════════════════════════════════════════════════
+        // 🧪 MODO CONSULTA (dry_run)
         if (req.body?.dry_run === true || req.body?.solo_consultar === true) {
             const servicioKey = req.body?.servicio || 'netflix';
             const stock = await contarDisponibilidad(servicioKey);
-            const tipo = req.body?.tipo || 'perfil'; // 'perfil' o 'cuenta'
+            const tipo = req.body?.tipo || 'perfil';
             const esCuentaCompleta = tipo === 'cuenta';
-
             const cantidad = esCuentaCompleta ? stock.cuentasCompletasLibres : stock.perfilesLibres;
             const hay = cantidad > 0;
             const etiqueta = esCuentaCompleta ? 'cuenta' : 'perfil';
             const plural = cantidad === 1 ? etiqueta : (esCuentaCompleta ? 'cuentas' : 'perfiles');
-
             return res.status(200).json({
                 ok: true,
                 dry_run: true,
@@ -154,8 +140,7 @@ export default async function handler(req, res) {
 
             if (codData.activo === false) {
                 return res.status(200).json({
-                    ok: false,
-                    error: 'CODIGO_INACTIVO',
+                    ok: false, error: 'CODIGO_INACTIVO',
                     mensaje: 'Este código de renovación está desactivado.'
                 });
             }
@@ -163,59 +148,86 @@ export default async function handler(req, res) {
             const encontrado = await buscarCuentaPorCodigo(codigoLimpio);
             if (!encontrado) {
                 return res.status(200).json({
-                    ok: false,
-                    error: 'CODIGO_NO_EXISTE',
+                    ok: false, error: 'CODIGO_NO_EXISTE',
                     mensaje: 'El código de renovación no existe o no está asociado a ninguna cuenta.'
                 });
             }
 
             const { cuentaId, cuenta } = encontrado;
-            const perfilEnc = buscarPerfilPorWhatsapp(cuenta, whatsapp);
+            const ahora = new Date().toISOString();
 
-            if (!perfilEnc) {
+            // Detectar cuántos perfiles tiene este WhatsApp en la cuenta
+            const perfiles = cuenta.perfiles || {};
+            const wppLimpio = String(whatsapp || '').replace(/\D/g, '');
+            const perfilesDelCliente = [];
+            const perfilesTotales = Object.keys(perfiles).sort((a,b) => parseInt(a) - parseInt(b));
+
+            for (const num of perfilesTotales) {
+                const p = perfiles[num];
+                const wppPerfil = String(p.cliente || '').replace(/\D/g, '');
+                if (wppPerfil && wppLimpio && wppPerfil === wppLimpio) {
+                    perfilesDelCliente.push(num);
+                }
+            }
+
+            if (perfilesDelCliente.length === 0) {
                 return res.status(200).json({
-                    ok: false,
-                    error: 'PERFIL_NO_ENCONTRADO',
+                    ok: false, error: 'PERFIL_NO_ENCONTRADO',
                     mensaje: `No encontramos un perfil con el WhatsApp ${whatsapp} en esta cuenta.`
                 });
             }
 
-            const { numero: perfilNumero, data: perfilData } = perfilEnc;
-            const nuevaFechaStr = sumar30Dias(perfilData.fecha_vencimiento);
-            const ahora = new Date().toISOString();
+            const esRenovacionCompleta = perfilesDelCliente.length === perfilesTotales.length && perfilesTotales.length >= 4;
 
-            await db.ref(`cuentas_streaming/${servicioKey}/${cuentaId}/perfiles/${perfilNumero}`).update({
-                estado: 'ocupado',
-                fecha_ultima_renovacion: ahora,
-                fecha_vencimiento: nuevaFechaStr,
-                ultima_referencia: referencia,
-                renovado_por: whatsapp || ''
-            });
+            // Extender todos los perfiles del cliente
+            const updateGlobal = {};
+            let fechaFinalRef = null;
+            for (const num of perfilesDelCliente) {
+                const fechaActual = perfiles[num].fecha_vencimiento || null;
+                const nuevaFecha = sumar30Dias(fechaActual);
+                if (!fechaFinalRef) fechaFinalRef = nuevaFecha;
+                updateGlobal[`perfiles/${num}/estado`] = 'ocupado';
+                updateGlobal[`perfiles/${num}/fecha_ultima_renovacion`] = ahora;
+                updateGlobal[`perfiles/${num}/fecha_vencimiento`] = nuevaFecha;
+                updateGlobal[`perfiles/${num}/ultima_referencia`] = referencia;
+                updateGlobal[`perfiles/${num}/renovado_por`] = whatsapp || '';
+            }
+            await db.ref(`cuentas_streaming/${servicioKey}/${cuentaId}`).update(updateGlobal);
 
             await db.ref('codigos_renovacion').child(codigoLimpio).update({
                 veces_usado: (codData.veces_usado || 0) + 1,
                 ultima_renovacion: ahora,
                 ultima_renovacion_whatsapp: whatsapp || '',
-                ultima_renovacion_perfil: parseInt(perfilNumero),
+                ultima_renovacion_perfiles: perfilesDelCliente.map(n => parseInt(n)),
                 ultima_renovacion_referencia: referencia
             });
+
+            const pinesData = perfilesDelCliente.map(num => ({
+                numero: parseInt(num),
+                pin: String(perfiles[num].pin || '')
+            }));
 
             return res.status(200).json({
                 ok: true,
                 estado: 'Aprobado',
                 es_renovacion: true,
+                es_renovacion_completa: esRenovacionCompleta,
                 codigo_aprobacion: codigoLimpio,
                 id_solicitud: referencia,
-                perfil_renovado: perfilNumero,
+                perfil_renovado: perfilesDelCliente[0],
+                perfiles_renovados: perfilesDelCliente.map(n => parseInt(n)),
                 datos: {
                     correo: cuenta.correo || '',
                     clave: cuenta.clave || '',
-                    perfil: 'Perfil ' + perfilNumero,
-                    numero_perfil: parseInt(perfilNumero),
-                    pin_perfil: perfilData.pin || '',
-                    fecha_vencimiento: nuevaFechaStr
+                    perfil: esRenovacionCompleta ? 'Cuenta completa (5 perfiles)' : ('Perfil ' + perfilesDelCliente[0]),
+                    numero_perfil: esRenovacionCompleta ? 0 : parseInt(perfilesDelCliente[0]),
+                    pines: pinesData,
+                    pin_perfil: pinesData[0]?.pin || '',
+                    fecha_vencimiento: fechaFinalRef
                 },
-                mensaje: '¡Renovación exitosa! Se extendió 30 días el perfil existente.'
+                mensaje: esRenovacionCompleta
+                    ? '¡Renovación exitosa! Se extendió 30 días a los 5 perfiles.'
+                    : '¡Renovación exitosa! Se extendió 30 días el perfil existente.'
             });
         }
 
@@ -226,8 +238,7 @@ export default async function handler(req, res) {
 
         if (esCuentaCompleta && stock.cuentasCompletasLibres === 0) {
             return res.status(200).json({
-                ok: false,
-                error: 'NO_HAY_CUENTAS',
+                ok: false, error: 'NO_HAY_CUENTAS',
                 mensaje: `❌ NO hay cuentas disponibles en este momento`,
                 perfiles_libres: stock.perfilesLibres,
                 cuentas_completas_libres: 0
@@ -236,14 +247,14 @@ export default async function handler(req, res) {
 
         if (!esCuentaCompleta && stock.perfilesLibres === 0) {
             return res.status(200).json({
-                ok: false,
-                error: 'NO_HAY_PERFILES',
+                ok: false, error: 'NO_HAY_PERFILES',
                 mensaje: `❌ NO hay perfiles disponibles en este momento`,
                 perfiles_libres: 0,
                 cuentas_completas_libres: stock.cuentasCompletasLibres
             });
         }
 
+        // Renovación automática por WhatsApp (opcional, deshabilitada por defecto)
         const permitirRenovacionAuto = req.body?.permitir_renovacion_automatica === true;
         if (permitirRenovacionAuto && whatsapp) {
             const cuentasSnap = await db.ref(`cuentas_streaming/${servicioKey}`).once('value');
@@ -260,9 +271,7 @@ export default async function handler(req, res) {
                         ultima_referencia: referencia
                     });
                     return res.status(200).json({
-                        ok: true,
-                        estado: 'Aprobado',
-                        es_renovacion: true,
+                        ok: true, estado: 'Aprobado', es_renovacion: true,
                         es_renovacion_automatica: true,
                         codigo_aprobacion: cuenta.codigo_renovacion || '',
                         id_solicitud: referencia,
@@ -271,6 +280,7 @@ export default async function handler(req, res) {
                             clave: cuenta.clave || '',
                             perfil: 'Perfil ' + perfilEnc.numero,
                             numero_perfil: parseInt(perfilEnc.numero),
+                            pines: [{ numero: parseInt(perfilEnc.numero), pin: perfilEnc.data.pin || '' }],
                             pin_perfil: perfilEnc.data.pin || '',
                             fecha_vencimiento: nuevaFechaStr
                         },
@@ -280,6 +290,7 @@ export default async function handler(req, res) {
             }
         }
 
+        // 🔒 Asignación con transacción
         const cuentasSnap = await db.ref(`cuentas_streaming/${servicioKey}`).once('value');
         const cuentas = cuentasSnap.val() || {};
         const cuentaIds = Object.keys(cuentas);
@@ -345,9 +356,12 @@ export default async function handler(req, res) {
 
         const fechaVencimientoStr = sumar30Dias(null);
 
+        let pinesRespuesta = [];
+
         if (esCuentaCompleta) {
             const perfiles = cuentaAsignada.perfiles || {};
-            for (const num of Object.keys(perfiles)) {
+            const numsOrden = Object.keys(perfiles).sort((a,b) => parseInt(a) - parseInt(b));
+            for (const num of numsOrden) {
                 await cuentaRef.child('perfiles').child(num).update({
                     estado: 'ocupado',
                     cliente: whatsapp || 'Cliente',
@@ -355,6 +369,10 @@ export default async function handler(req, res) {
                     fecha: ahora,
                     fecha_vencimiento: fechaVencimientoStr,
                     codigo_renovacion: codigoCuenta
+                });
+                pinesRespuesta.push({
+                    numero: parseInt(num),
+                    pin: String(perfiles[num].pin || '')
                 });
             }
         } else {
@@ -366,7 +384,14 @@ export default async function handler(req, res) {
                 fecha_vencimiento: fechaVencimientoStr,
                 codigo_renovacion: codigoCuenta
             });
+            const perfiles = cuentaAsignada.perfiles || {};
+            pinesRespuesta.push({
+                numero: parseInt(asignado.perfilNumero),
+                pin: String(perfiles[asignado.perfilNumero]?.pin || '')
+            });
         }
+
+        console.log('✅ Asignado | Cuenta:', asignado.cuentaId, '| Perfil:', asignado.perfilNumero, '| Código:', codigoCuenta, '| Pines:', pinesRespuesta.length);
 
         return res.status(200).json({
             ok: true,
@@ -377,21 +402,20 @@ export default async function handler(req, res) {
             datos: {
                 correo: cuentaAsignada.correo || '',
                 clave: cuentaAsignada.clave || '',
-                perfil: esCuentaCompleta ? 'Cuenta completa' : ('Perfil ' + asignado.perfilNumero),
+                perfil: esCuentaCompleta ? 'Cuenta completa (5 perfiles)' : ('Perfil ' + asignado.perfilNumero),
                 numero_perfil: esCuentaCompleta ? 0 : parseInt(asignado.perfilNumero),
-                pin_perfil: asignado.pin || '',
+                pines: pinesRespuesta,
+                pin_perfil: pinesRespuesta[0]?.pin || '',
                 fecha_vencimiento: fechaVencimientoStr
             },
-            mensaje: '¡Compra exitosa! Guarda tu código de renovación.'
+            mensaje: esCuentaCompleta
+                ? '¡Compra exitosa! Recibes los 5 perfiles de la cuenta.'
+                : '¡Compra exitosa! Guarda tu código de renovación.'
         });
 
     } catch (error) {
         console.error('❌ Error asignar-perfil:', error);
-        return res.status(500).json({
-            ok: false,
-            error: 'Error interno',
-            detalle: error.message
-        });
+        return res.status(500).json({ ok: false, error: 'Error interno', detalle: error.message });
     }
 }
 
@@ -409,12 +433,7 @@ async function reservarPerfil(cuentaId, perfilNumero, servicioKey, referencia, w
             return perfil;
         });
         if (!resultado.committed) return { ok: false };
-        return {
-            ok: true,
-            cuentaId,
-            perfilNumero,
-            pin: resultado.snapshot.val()?.pin || ''
-        };
+        return { ok: true, cuentaId, perfilNumero, pin: resultado.snapshot.val()?.pin || '' };
     } catch (e) {
         console.error('Error transacción perfil:', e.message);
         return { ok: false };
@@ -443,12 +462,13 @@ async function reservarCuentaCompleta(cuentaId, servicioKey, referencia, whatsap
             return cuenta;
         });
         if (!resultado.committed) return { ok: false };
-        const primerNum = Object.keys(resultado.snapshot.val()?.perfiles || {})[0];
+        const val = resultado.snapshot.val() || {};
+        const nums = Object.keys(val.perfiles || {}).sort((a,b) => parseInt(a) - parseInt(b));
         return {
             ok: true,
             cuentaId,
-            perfilNumero: primerNum,
-            pin: resultado.snapshot.val()?.perfiles?.[primerNum]?.pin || ''
+            perfilNumero: nums[0],
+            pin: val.perfiles?.[nums[0]]?.pin || ''
         };
     } catch (e) {
         console.error('Error transacción cuenta:', e.message);
