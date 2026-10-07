@@ -16,7 +16,7 @@
             --color-dorado:#d4af37;
             --color-dorado-claro:#f5d76e;
             --color-azul:#3b82f6;
-            --card-bg: rgba(13, 22, 39, 0.85); /* Fondo semi-transparente ligero */
+            --card-bg: rgba(13, 22, 39, 0.85);
             --card-border: rgba(212, 175, 55, 0.2);
             --azul-brillante: #4a7aff;
             --verde-brillante: #00d26a;
@@ -34,7 +34,6 @@
             overflow-x:hidden;
         }
 
-        /* 🎬 VIDEO DE FONDO */
         .video-fondo{
             position:fixed; top:0; left:0;
             width:100%; height:100%;
@@ -131,6 +130,53 @@
         }
         .welcome-card h2 span{-webkit-text-fill-color:initial;background:none;color:#fff}
         .welcome-card p{color:#cbd5e1;font-size:15px}
+
+        /* 🆔 ID CLIENTE EN WELCOME */
+        .welcome-card .id-cliente-box{
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+            border: 1px solid rgba(212,175,55,0.5);
+            border-radius: 12px;
+        }
+        .welcome-card .id-cliente-box .id-label{
+            font-size: 11px;
+            color: var(--color-dorado-claro);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 800;
+        }
+        .welcome-card .id-cliente-box .id-valor{
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 3px;
+        }
+        .welcome-card .id-cliente-box .btn-copiar-id{
+            background: rgba(212,175,55,0.2);
+            border: 1px solid rgba(212,175,55,0.5);
+            color: var(--color-dorado-claro);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+        .welcome-card .id-cliente-box .btn-copiar-id:hover{
+            background: rgba(212,175,55,0.35);
+        }
+        .welcome-card .id-cliente-box .btn-copiar-id.copiado{
+            background: rgba(34,197,94,0.3);
+            border-color: rgba(34,197,94,0.6);
+            color: #4ade80;
+        }
+
         .welcome-card .actions{
             display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;
         }
@@ -217,7 +263,6 @@
         }
         .pedidos-section .header .ver-todos:hover{ color:#fff; }
 
-        /* ====== TARJETAS DE PEDIDO (Estilo captura) ====== */
         .pedido-card {
             background: rgba(13, 22, 39, 0.85);
             border-radius: 12px;
@@ -372,7 +417,6 @@
         .timeline-line.active { background: var(--azul-brillante); }
         .timeline-line.completed { background: var(--verde-brillante); }
 
-        /* ====== PANEL EXPANDIBLE ====== */
         .detalle-expandido {
             max-height: 0;
             overflow: hidden;
@@ -384,7 +428,7 @@
             border: 1px solid transparent;
         }
         .pedido-card.expandido .detalle-expandido {
-            max-height: 1000px;
+            max-height: 1500px;
             margin-top: 16px;
             padding: 16px;
             border-color: rgba(212, 175, 55, 0.3);
@@ -478,12 +522,34 @@
         .dato-entrega .btn-copiar-dato.copiado svg { display: none; }
         .dato-entrega .btn-copiar-dato.copiado::after { content: '✓'; font-size: 16px; font-weight: bold; }
 
+        .dato-entrega.codigo-renovacion {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.55);
+            border-width: 1.5px;
+        }
+        .dato-entrega.codigo-renovacion .dato-label {
+            color: var(--color-dorado-claro);
+        }
+        .dato-entrega.codigo-renovacion .dato-valor {
+            color: var(--color-dorado-claro);
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: 3px;
+        }
+
+        .aviso-renovacion {
+            margin-top: 6px;
+            font-size: 10px;
+            color: #fcd34d;
+            text-align: center;
+            line-height: 1.3;
+        }
+
         .sin-pedidos{
             text-align:center;padding:40px;color:#94a3b8;
         }
         .sin-pedidos .icono-grande{font-size:48px;margin-bottom:10px}
 
-        /* ====== INFO ADICIONAL (Barra inferior) ====== */
         .info-bar{
             margin-top:25px;padding:18px 22px;
             background:var(--card-bg);
@@ -500,6 +566,17 @@
         .info-bar .info-item strong{
             color:var(--color-dorado-claro);
             font-weight:700;
+        }
+        .info-bar .info-item .id-cliente-info {
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            background: rgba(212, 175, 55, 0.15);
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
         }
         .btn-tienda{
             background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
@@ -526,7 +603,30 @@
         }
         @keyframes spin{to{transform:rotate(360deg)}}
 
-        /* ====== RESPONSIVE ====== */
+        /* ====== TOAST ====== */
+        .toast{
+            position:fixed;
+            bottom:30px;
+            left:50%;
+            transform:translateX(-50%) translateY(80px);
+            background:rgba(10,14,26,0.98);
+            border:1px solid rgba(212,175,55,0.5);
+            color:#fff;
+            padding:12px 22px;
+            border-radius:12px;
+            font-size:14px;
+            font-weight:600;
+            z-index:9999;
+            box-shadow:0 10px 30px rgba(0,0,0,0.5);
+            opacity:0;
+            transition:all 0.3s;
+            pointer-events:none;
+        }
+        .toast.visible{
+            opacity:1;
+            transform:translateX(-50%) translateY(0);
+        }
+
         @media (max-width:768px){
             body{padding-top:90px}
             .topbar{padding:10px 16px}
@@ -548,6 +648,14 @@
             .stat-card .label{font-size:11px}
             .welcome-card{padding:20px}
             .welcome-card .actions a{padding:9px 16px;font-size:13px}
+            .welcome-card .id-cliente-box{
+                width: 100%;
+                justify-content: center;
+            }
+            .welcome-card .id-cliente-box .id-valor{
+                font-size: 16px;
+                letter-spacing: 2px;
+            }
             .pedido-card { padding: 12px; margin: 8px 10px; }
             .pedido-id { font-size: 16px; }
             .pedido-precio { font-size: 16px; }
@@ -586,6 +694,14 @@
         <div class="greeting">👋 Hola,</div>
         <h2 id="bienvenidaNombre">Usuario <span>👋</span></h2>
         <p>Bienvenido a tu panel de cliente</p>
+
+        <!-- 🆔 ID DE CLIENTE -->
+        <div class="id-cliente-box" id="idClienteBox" style="display:none;">
+            <span class="id-label">🆔 Tu ID:</span>
+            <span class="id-valor" id="idClienteValor">-</span>
+            <button class="btn-copiar-id" id="btnCopiarId" onclick="copiarIdCliente()">📋</button>
+        </div>
+
         <div class="actions">
             <a href="perfil.html" class="btn-primary">✏️ Editar Perfil</a>
             <a href="index.html" class="btn-secondary">📦 Ver Productos</a>
@@ -627,7 +743,7 @@
 
     <div class="info-bar">
         <div class="info-item">
-            🎮 <strong>ID Jugador:</strong> <span id="infoIdJugador">-</span>
+            🆔 <strong>ID Cliente:</strong> <span id="infoIdJugador" class="id-cliente-info">-</span>
         </div>
         <div class="info-item">
             👤 <strong>Nombre:</strong> <span id="infoNombreJugador">-</span>
@@ -638,6 +754,8 @@
     </div>
 
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
     const firebaseConfig = {
@@ -656,11 +774,29 @@
     const db = firebase.database();
 
     let uidActual = null;
+    let idClienteActual = null;
 
     function esc(valor) {
         return String(valor ?? '').replace(/[&<>"']/g, (c) => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    function mostrarToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('visible');
+        setTimeout(() => t.classList.remove('visible'), 2500);
+    }
+
+    // 🔢 Genera un ID único de 6 dígitos
+    async function generarIdClienteUnico() {
+        for (let i = 0; i < 30; i++) {
+            const codigo = String(Math.floor(100000 + Math.random() * 900000));
+            const snap = await db.ref('usuarios').orderByChild('id_cliente').equalTo(codigo).once('value');
+            if (!snap.exists()) return codigo;
+        }
+        return String(Date.now()).slice(-6);
     }
 
     function formatearFecha(valor) {
@@ -687,7 +823,34 @@
         return 'pendiente';
     }
 
-    auth.onAuthStateChanged((user) => {
+    // 🔢 Asegura que el cliente tenga un ID asignado
+    async function asegurarIdCliente(uid) {
+        try {
+            const userRef = db.ref('usuarios/' + uid);
+            const snap = await userRef.once('value');
+            const datos = snap.val() || {};
+
+            if (datos.id_cliente) {
+                // Ya tiene ID
+                return datos.id_cliente;
+            }
+
+            // No tiene: generar uno nuevo
+            const nuevoId = await generarIdClienteUnico();
+            await userRef.update({
+                id_cliente: nuevoId,
+                fecha_asignacion_id: new Date().toISOString()
+            });
+            console.log('✅ ID de cliente generado:', nuevoId);
+            return nuevoId;
+
+        } catch (e) {
+            console.error('Error con ID cliente:', e);
+            return null;
+        }
+    }
+
+    auth.onAuthStateChanged(async (user) => {
         if (user) {
             uidActual = user.uid;
             const nombre = user.displayName || 'Usuario';
@@ -698,14 +861,39 @@
             document.getElementById('avatarInicial').textContent = inicial;
             document.getElementById('infoNombreJugador').textContent = nombre;
 
-            cargarPedidos(uidActual);
+            // 🔢 Asegurar ID de cliente
+            const idCliente = await asegurarIdCliente(uidActual);
+            if (idCliente) {
+                idClienteActual = idCliente;
+                document.getElementById('idClienteValor').textContent = idCliente;
+                document.getElementById('idClienteBox').style.display = 'inline-flex';
+                document.getElementById('infoIdJugador').textContent = idCliente;
+            } else {
+                document.getElementById('infoIdJugador').textContent = 'Error';
+            }
 
-            const idJugador = localStorage.getItem('id_jugador') || 'No registrado';
-            document.getElementById('infoIdJugador').textContent = idJugador;
+            cargarPedidos(uidActual);
         } else {
             window.location.href = 'login.html';
         }
     });
+
+    function copiarIdCliente() {
+        if (!idClienteActual) return;
+        navigator.clipboard.writeText(idClienteActual).then(() => {
+            const btn = document.getElementById('btnCopiarId');
+            btn.textContent = '✓';
+            btn.classList.add('copiado');
+            setTimeout(() => {
+                btn.textContent = '📋';
+                btn.classList.remove('copiado');
+            }, 1500);
+            mostrarToast('🆔 ID copiado al portapapeles');
+        }).catch(() => {
+            mostrarToast('No se pudo copiar');
+        });
+    }
+    window.copiarIdCliente = copiarIdCliente;
 
     function cargarPedidos(uid) {
         const pedidosRef = db.ref('pedidos');
@@ -779,7 +967,6 @@
             const idJugador = pedido.id_jugador || pedido.player_id || 'No especificado';
             const nombreJugador = pedido.nombre_jugador || pedido.player_name || 'No especificado';
 
-            // Timeline
             let stepRecibido = 'recibido';
             let stepVerificando = '';
             let stepCompletado = '';
@@ -805,11 +992,9 @@
             const iconVerificando = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
             const iconCompletado = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
 
-            // Detectar streaming
             const esStreaming = pedido.es_streaming === true ||
                                 (pedido.datos_streaming && (pedido.datos_streaming.correo || pedido.datos_streaming.clave));
 
-            // PIN
             let pinHtml = '';
             if (!esStreaming && (pedido.pin || (pedido.codigos && pedido.codigos.length > 0))) {
                 const pinValue = pedido.pin || pedido.codigos[0];
@@ -823,18 +1008,21 @@
                 `;
             }
 
-            // Streaming
+            // 🔥 FIX: Código de renovación
             let streamingHtml = '';
-            if (esStreaming && pedido.datos_streaming) {
-                const d = pedido.datos_streaming;
-                const codAprob = pedido.codigo_aprobacion || '';
-                let camposHtml = '';
+            if (esStreaming && estado !== 'cancelado') {
+                const d = pedido.datos_streaming || {};
+                const codRenov = pedido.codigo_renovacion || pedido.codigo_aprobacion || '';
+                const esRenovacion = pedido.es_renovacion === true;
+                const tieneValor = (v) => v !== undefined && v !== null && String(v).trim() !== '';
+                const tieneDatosCuenta = tieneValor(d.correo) || tieneValor(d.clave) || tieneValor(d.perfil);
 
-                const agregarDato = (label, valor) => {
-                    if (!valor) return '';
+                let camposHtml = '';
+                const agregarDato = (label, valor, clase = '') => {
+                    if (!tieneValor(valor)) return '';
                     const v = esc(valor);
                     return `
-                        <div class="dato-entrega">
+                        <div class="dato-entrega ${clase}">
                             <div class="dato-label">${label}</div>
                             <div class="dato-contenido">
                                 <div class="dato-valor">${v}</div>
@@ -846,17 +1034,32 @@
                     `;
                 };
 
-                camposHtml += agregarDato('📧 CORREO', d.correo);
-                camposHtml += agregarDato('🔑 CONTRASEÑA', d.clave);
-                camposHtml += agregarDato('👤 PERFIL', d.perfil);
-                camposHtml += agregarDato('🔢 PIN DEL PERFIL', d.pin_perfil);
-                camposHtml += agregarDato('📅 VENCE', d.fecha_vencimiento);
-                if (codAprob) {
-                    camposHtml += agregarDato('🎟️ CÓDIGO DE RENOVACIÓN', codAprob);
+                if (esRenovacion || !tieneDatosCuenta) {
+                    // Solo renovación
+                    if (tieneValor(codRenov)) {
+                        const titulo = esRenovacion ? '🔄 RENOVACIÓN' : '🎟️ CÓDIGO DE RENOVACIÓN';
+                        camposHtml += agregarDato(titulo, codRenov, 'codigo-renovacion');
+                        if (esRenovacion) {
+                            camposHtml += `<div class="aviso-renovacion">⚠️ Tu cuenta será renovada. Guarda este código.</div>`;
+                        } else {
+                            camposHtml += `<div class="aviso-renovacion">⚠️ Guarda este código para renovar.</div>`;
+                        }
+                    }
+                } else {
+                    // Compra nueva
+                    camposHtml += agregarDato('📧 CORREO', d.correo);
+                    camposHtml += agregarDato('🔑 CONTRASEÑA', d.clave);
+                    camposHtml += agregarDato('👤 PERFIL', d.perfil);
+                    camposHtml += agregarDato('🔢 PIN DEL PERFIL', d.pin_perfil);
+                    camposHtml += agregarDato('📅 VENCE', d.fecha_vencimiento);
+                    if (tieneValor(codRenov)) {
+                        camposHtml += agregarDato('🎟️ CÓDIGO DE RENOVACIÓN', codRenov, 'codigo-renovacion');
+                        camposHtml += `<div class="aviso-renovacion">⚠️ Guarda este código para renovar.</div>`;
+                    }
                 }
 
                 if (camposHtml) {
-                    const titulo = d.perfil ? '🎬 DATOS DE TU PERFIL' : '🎬 DATOS DE TU CUENTA';
+                    const titulo = esRenovacion ? '🔄 DATOS DE LA RENOVACIÓN' : (d.perfil ? '🎬 DATOS DE TU PERFIL' : '🎬 DATOS DE TU CUENTA');
                     streamingHtml = `
                         <div class="streaming-box">
                             <div class="streaming-titulo">${titulo}</div>
@@ -866,7 +1069,6 @@
                 }
             }
 
-            // Panel expandible
             let detalleExpandido = `
                 <div class="detalle-expandido">
                     <h4>📋 Detalles del Pedido</h4>
@@ -964,12 +1166,11 @@
         contenedor.innerHTML = html;
     }
 
-    // Expandir/contraer detalle
     function toggleDetalle(card) {
         card.classList.toggle('expandido');
     }
+    window.toggleDetalle = toggleDetalle;
 
-    // Copiar
     document.addEventListener('click', (e) => {
         const btnPin = e.target.closest('.btn-copiar');
         if (btnPin) {
@@ -977,7 +1178,7 @@
             const pin = btnPin.dataset.pin;
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(pin).then(() => {
-                    alert('✓ PIN copiado al portapapeles');
+                    mostrarToast('✓ PIN copiado al portapapeles');
                 });
             }
         }
@@ -990,12 +1191,13 @@
                 navigator.clipboard.writeText(texto).then(() => {
                     btnDato.classList.add('copiado');
                     setTimeout(() => btnDato.classList.remove('copiado'), 1500);
+                    mostrarToast('✓ Copiado');
                 });
             }
         }
     });
 
-    console.log('📋 Dashboard cargado correctamente');
+    console.log('📋 Dashboard cargado correctamente con ID de cliente');
 </script>
 
 </body>
