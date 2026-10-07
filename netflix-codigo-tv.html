@@ -6,6 +6,10 @@
 <meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
 <title>RECARGASGAMES - Código TV Netflix</title>
 <link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
 <style>
 :root{
     --color-principal:#3b82f6;
@@ -15,6 +19,7 @@
     --color-dorado-claro:#f5d76e;
     --color-negro:#0a0e1a;
     --color-netflix:#E50914;
+    --color-verde:#22c55e;
     --alto-nav:64px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -22,367 +27,446 @@ html{scroll-behavior:smooth}
 body{
     background:#000;
     color:#fff;
-    font-family:'Segoe UI',sans-serif;
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
     padding-top:110px;
     padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));
     overflow-x:hidden;
     min-height:100vh;
     position:relative;
+    -webkit-tap-highlight-color:transparent;
 }
 a:focus-visible,button:focus-visible,input:focus-visible{
     outline:2px solid var(--color-dorado-claro);
     outline-offset:2px;
 }
+
+/* ═══ VIDEO DE FONDO OPTIMIZADO ═══ */
 .video-fondo{
     position:fixed;top:0;left:0;width:100%;height:100%;
-    object-fit:cover;z-index:-2;pointer-events:none;
-    opacity:1;filter:brightness(1.15);
-    will-change:transform;transform:translateZ(0);
-    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    object-fit:cover;z-index:-3;pointer-events:none;
+    opacity:.5;
 }
 .video-overlay{
     position:fixed;inset:0;
-    background:linear-gradient(180deg,
-        rgba(10,14,26,0.15) 0%,
-        rgba(10,14,26,0.35) 60%,
-        rgba(10,14,26,0.6) 100%);
-    z-index:-1;pointer-events:none;transform:translateZ(0);
+    background:
+        radial-gradient(ellipse at 20% 0%,rgba(0,60,140,.35),transparent 55%),
+        radial-gradient(ellipse at 80% 100%,rgba(180,20,30,.2),transparent 55%),
+        linear-gradient(180deg,
+            rgba(4,6,10,.6) 0%,
+            rgba(4,6,10,.78) 45%,
+            rgba(4,6,10,.92) 100%);
+    z-index:-2;pointer-events:none;
 }
-body::before{
-    content:'';position:fixed;top:-30%;right:-20%;
-    width:600px;height:600px;
-    background:radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%);
-    border-radius:50%;pointer-events:none;z-index:0;
-}
-body::after{
-    content:'';position:fixed;bottom:-30%;left:-20%;
-    width:600px;height:600px;
-    background:radial-gradient(circle,rgba(229,9,20,0.1),transparent 70%);
-    border-radius:50%;pointer-events:none;z-index:0;
-}
+
 .main{position:relative;z-index:1}
+
+/* ═══ HEADER ═══ */
 .barra-superior{
     position:fixed;top:0;left:0;right:0;z-index:999;
-    background:rgba(5,8,16,0.85);
-    border-bottom:1px solid transparent;
-    border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;
-    box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    background:rgba(4,7,12,.92);
+    border-bottom:1px solid rgba(255,255,255,.07);
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
 }
 .header{
-    padding:14px 24px;display:flex;justify-content:space-between;align-items:center;
-    border-bottom:1px solid rgba(255,255,255,0.05);
+    height:62px;padding:0 18px;
+    display:flex;justify-content:space-between;align-items:center;
+    max-width:1350px;margin:auto;
 }
 .brand img{
-    height:55px;width:auto;border-radius:12px;
-    filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));
+    height:44px;width:auto;border-radius:12px;
+    filter:drop-shadow(0 0 10px rgba(212,175,55,.35));
 }
 .header-right{display:flex;align-items:center;gap:12px}
 .btn-perfil{
     background:transparent;border:none;color:white;cursor:pointer;
-    padding:0;display:flex;align-items:center;gap:8px;
-    transition:all 0.3s;position:relative;margin-top:8px;
+    padding:4px 10px 4px 4px;border-radius:30px;
+    display:flex;align-items:center;gap:8px;transition:.2s;
+    border:1px solid rgba(255,255,255,.1);
 }
-.btn-perfil:hover .avatar-circle{
-    transform:scale(1.05);
-    box-shadow:0 0 25px rgba(212,175,55,0.6);
-    border-color:var(--color-dorado);
-}
+.btn-perfil:hover{border-color:rgba(212,175,55,.4);background:rgba(212,175,55,.06)}
 .btn-perfil .avatar-circle{
-    width:40px;height:40px;border-radius:50%;
+    width:34px;height:34px;border-radius:50%;
     background:linear-gradient(135deg,#d4af37,#3b82f6);
     display:flex;align-items:center;justify-content:center;
-    font-weight:bold;font-size:16px;color:white;
-    transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);
+    font-weight:bold;font-size:14px;color:white;
+    transition:.2s;border:2px solid rgba(212,175,55,.5);
     position:relative;overflow:hidden;
+    flex-shrink:0;
 }
 .btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
 .btn-perfil .avatar-circle .online-dot{
-    position:absolute;bottom:0;right:0;width:12px;height:12px;
+    position:absolute;bottom:0;right:0;width:10px;height:10px;
     background:#22c55e;border-radius:50%;border:2px solid #0b1220;
 }
 .btn-perfil .perfil-nombre{
-    font-size:14px;font-weight:500;color:white;
+    font-size:12px;font-weight:600;color:white;
     max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha{font-size:10px;color:#9ca3af;transition:transform .3s}
 .btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+
 .menu-perfil{
-    position:absolute;top:75px;right:0;
-    background:rgba(10,14,26,0.98);
-    border:1px solid rgba(212,175,55,0.3);
+    position:absolute;top:60px;right:16px;
+    background:#0a0f1a;
+    border:1px solid rgba(212,175,55,.25);
     border-radius:16px;min-width:260px;
-    box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);
-    opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);
-    transition:all 0.25s ease;z-index:1000;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.8);
+    opacity:0;visibility:hidden;transform:translateY(-8px) scale(.97);
+    transform-origin:top right;
+    transition:opacity .2s,transform .2s,visibility .2s;
+    z-index:1000;overflow:hidden;
 }
 .menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 .menu-perfil-header{
-    padding:16px 20px;
-    border-bottom:1px solid rgba(255,255,255,0.06);
+    padding:16px;border-bottom:1px solid rgba(255,255,255,.06);
     display:flex;align-items:center;gap:12px;
-    background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));
+    background:linear-gradient(135deg,rgba(212,175,55,.08),rgba(37,135,255,.05));
 }
 .menu-perfil-header .avatar-grande{
-    width:48px;height:48px;border-radius:50%;
+    width:44px;height:44px;border-radius:50%;
     background:linear-gradient(135deg,#d4af37,#3b82f6);
     display:flex;align-items:center;justify-content:center;
-    overflow:hidden;border:2px solid rgba(212,175,55,0.4);
+    overflow:hidden;border:2px solid rgba(212,175,55,.5);
 }
 .menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
-.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
-.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-header .info h4{color:white;font-size:13px;font-weight:700}
+.menu-perfil-header .info p{color:#9ca3af;font-size:11px;margin-top:2px}
 .menu-perfil-opcion{
     display:flex;align-items:center;gap:12px;
-    padding:12px 20px;color:#e5e7eb;text-decoration:none;
-    font-size:14px;font-weight:500;transition:all 0.2s;
-    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+    padding:13px 18px;color:#e5e7eb;text-decoration:none;
+    font-size:13.5px;font-weight:500;transition:.2s;
+    border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;
 }
 .menu-perfil-opcion:last-child{border-bottom:none}
 .menu-perfil-opcion:hover{
-    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
-    color:var(--color-dorado-claro);padding-left:26px;
-    border-left:3px solid var(--color-dorado);
+    background:linear-gradient(90deg,rgba(37,135,255,.12),transparent);
+    color:var(--color-dorado-claro);padding-left:23px;
 }
-.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
+.menu-perfil-opcion .icono{font-size:17px;width:22px;text-align:center}
 .menu-perfil-opcion.danger{color:#ef4444}
-.menu-perfil-opcion.danger:hover{
-    background:rgba(239,68,68,0.12);color:#ef4444;border-left-color:#ef4444;
-}
+.menu-perfil-opcion.danger:hover{background:rgba(239,68,68,.12)}
 .menu-hamburguesa{
-    background:transparent;border:none;color:white;font-size:28px;
-    cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;margin-top:8px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:11px;color:white;
+    width:40px;height:40px;font-size:18px;
+    cursor:pointer;transition:.2s;
+    display:flex;align-items:center;justify-content:center;
 }
-.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-dorado)}
+.menu-hamburguesa:hover{
+    color:var(--color-dorado-claro);
+    border-color:rgba(212,175,55,.4);
+    background:rgba(212,175,55,.08);
+}
 .menu-flotante{
-    position:absolute;top:80px;right:0;
-    background:rgba(10,14,26,0.98);
-    border:1px solid rgba(212,175,55,0.3);
+    position:absolute;top:60px;right:16px;
+    background:#0a0f1a;
+    border:1px solid rgba(212,175,55,.25);
     border-radius:16px;min-width:240px;
-    box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);
-    opacity:0;visibility:hidden;transform:translateY(-10px);
-    transition:all 0.25s ease;z-index:999;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.8);
+    opacity:0;visibility:hidden;transform:translateY(-8px) scale(.97);
+    transform-origin:top right;
+    transition:opacity .2s,transform .2s,visibility .2s;
+    z-index:999;overflow:hidden;
 }
-.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 .menu-opcion{
-    display:flex;align-items:center;gap:10px;
-    padding:14px 20px;color:white;text-decoration:none;
-    font-size:15px;font-weight:500;transition:all 0.2s;
-    border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;
+    display:flex;align-items:center;gap:11px;
+    padding:13px 18px;color:white;text-decoration:none;
+    font-size:13.5px;font-weight:500;transition:.2s;
+    border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;
 }
 .menu-opcion:last-child{border-bottom:none}
 .menu-opcion:hover{
-    background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);
-    color:var(--color-dorado-claro);padding-left:24px;
+    background:linear-gradient(90deg,rgba(37,135,255,.12),transparent);
+    color:var(--color-dorado-claro);padding-left:22px;
 }
-.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
+.menu-divider{border-top:1px solid rgba(212,175,55,.15);margin:4px 0}
+
+/* ═══ CATEGORÍAS ═══ */
 .games-menu{
-    display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
-    padding:12px 20px;scrollbar-width:none;
+    display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;
+    padding:8px 18px 10px;scrollbar-width:none;
     -webkit-overflow-scrolling:touch;
-    border-top:1px solid rgba(255,255,255,0.04);
+    max-width:1350px;margin:auto;
 }
 .games-menu::-webkit-scrollbar{display:none}
 .games-menu a{
-    text-decoration:none;color:#cbd5e1;padding:8px 16px;
-    border-radius:20px;font-size:14px;font-weight:600;
-    white-space:nowrap;transition:all 0.3s;border:1px solid transparent;
+    text-decoration:none;color:#8994a7;padding:7px 15px;
+    border-radius:30px;font-size:12.5px;font-weight:700;
+    white-space:nowrap;transition:.2s;border:1px solid transparent;
 }
 .games-menu a:hover{
-    color:var(--color-dorado-claro);
-    background:rgba(212,175,55,0.08);
-    border-color:rgba(212,175,55,0.3);
+    color:#fff;background:rgba(255,255,255,.05);
+    border-color:rgba(255,255,255,.12);
 }
 .games-menu a.active{
-    color:var(--color-dorado-claro);
-    background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));
-    border-color:rgba(212,175,55,0.5);
+    color:#fff;
+    background:linear-gradient(135deg,rgba(229,9,20,.2),rgba(212,175,55,.12));
+    border-color:rgba(229,9,20,.5);
 }
-.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
+
+/* ═══ MAIN ═══ */
+.main{
+    padding:20px;padding-top:24px;
+    max-width:800px;margin:0 auto;
+    position:relative;
+}
 
 .pagina-titulo{
     display:flex;align-items:center;justify-content:space-between;
-    flex-wrap:wrap;gap:10px;margin:24px 0 18px;
+    flex-wrap:wrap;gap:10px;margin:12px 0 22px;
 }
 .pagina-titulo h1{
-    font-size:22px;font-weight:900;
+    font-size:24px;font-weight:900;letter-spacing:-.5px;
     background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);
     -webkit-background-clip:text;-webkit-text-fill-color:transparent;
     background-clip:text;
 }
 .chip-entrega{
     display:inline-flex;align-items:center;gap:6px;
-    padding:6px 12px;border-radius:14px;
-    background:rgba(229,9,20,0.12);
-    border:1px solid rgba(229,9,20,0.5);
-    color:#fca5a5;font-size:12px;font-weight:700;
+    padding:7px 13px;border-radius:20px;
+    background:rgba(34,197,94,.12);
+    border:1px solid rgba(34,197,94,.5);
+    color:#86efac;font-size:11.5px;font-weight:800;
+    letter-spacing:.3px;
+    text-transform:uppercase;
 }
 .chip-entrega::before{
-    content:'';width:7px;height:7px;border-radius:50%;
-    background:#E50914;box-shadow:0 0 8px rgba(229,9,20,0.8);
+    content:'';width:6px;height:6px;border-radius:50%;
+    background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.9);
+    animation:pulsoPunto 2s ease-in-out infinite;
+}
+@keyframes pulsoPunto{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:.5;transform:scale(1.3)}
 }
 
-.card-panel{
-    background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));
-    border:1px solid rgba(212,175,55,0.25);
-    border-radius:20px;padding:22px 18px 20px;margin-bottom:20px;
-    position:relative;overflow:hidden;
-    box-shadow:0 15px 40px rgba(0,0,0,0.35);
-}
-.panel-title{
-    display:flex;align-items:center;gap:10px;
-    font-size:15px;font-weight:800;margin:0 0 16px;
-    color:var(--color-dorado-claro);position:relative;z-index:1;
-    letter-spacing:0.5px;text-transform:uppercase;
-}
-.paso-num{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:26px;height:26px;border-radius:50%;flex-shrink:0;
-    background:linear-gradient(135deg,#d4af37,#f5d76e);
-    color:#0a0e1a;font-size:13px;font-weight:800;
-}
-.form-input{
-    width:100%;height:50px;border-radius:14px;
-    background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;
-    border:1px solid rgba(255,255,255,0.18);font-size:16px;
-    position:relative;z-index:1;transition:border-color 0.3s;
-    font-family:inherit;
-}
-.form-input:focus{
-    outline:none;border-color:var(--color-dorado);
-    box-shadow:0 0 0 3px rgba(212,175,55,0.15);
-}
-.form-input.resaltar{
-    border-color:#ef4444;
-    box-shadow:0 0 0 3px rgba(239,68,68,0.25);
-}
-.form-group{margin-bottom:16px;position:relative;z-index:1}
-.form-group:last-child{margin-bottom:0}
-.form-group label{
-    display:block;margin-bottom:8px;
-    color:#cbd5e1;font-size:13px;font-weight:600;
-    text-transform:uppercase;letter-spacing:0.5px;
-}
-.ayuda-id{
-    margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.4;
-    position:relative;z-index:1;
-}
-
-.btn-action{
-    width:100%;padding:18px;
-    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
-    background-size:200% 200%;
-    color:#0a0e1a;border:none;border-radius:14px;
-    font-size:16px;font-weight:800;cursor:pointer;
-    transition:all 0.3s;letter-spacing:1px;
-    text-transform:uppercase;font-family:inherit;
-    box-shadow:0 6px 20px rgba(212,175,55,0.4);
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    position:relative;z-index:1;
-}
-.btn-action:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(212,175,55,0.6)}
-.btn-action:disabled{opacity:0.5;cursor:not-allowed;transform:none}
-.btn-action.azul{
-    background:linear-gradient(135deg,#3b82f6,#60a5fa);
-    color:#fff;
-    box-shadow:0 6px 20px rgba(59,130,246,0.4);
-}
-.btn-action.azul:hover{box-shadow:0 10px 30px rgba(59,130,246,0.6)}
-
+/* ═══ STEPS INFO ═══ */
 .steps-info{
-    background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(59,130,246,0.03));
-    border:1px solid rgba(59,130,246,0.3);
-    border-radius:16px;padding:18px;margin-bottom:20px;
-    position:relative;z-index:1;
+    background:linear-gradient(135deg,rgba(37,135,255,.1),rgba(37,135,255,.03));
+    border:1px solid rgba(37,135,255,.3);
+    border-radius:18px;padding:20px 22px;margin-bottom:22px;
 }
 .steps-info h4{
-    color:#93c5fd;font-size:15px;font-weight:800;
-    margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;
-    display:flex;align-items:center;gap:8px;
+    color:#93c5fd;font-size:14.5px;font-weight:800;
+    margin-bottom:14px;text-transform:uppercase;letter-spacing:.6px;
+    display:flex;align-items:center;gap:9px;
 }
 .steps-info ol{
     margin-left:20px;padding:0;
     color:#cbd5e1;font-size:14px;line-height:1.9;
 }
 .steps-info ol li{padding-left:6px}
-.steps-info strong{color:#fff}
+.steps-info ol li strong{color:#fff}
 
+/* ═══ CARD PANEL ═══ */
+.card-panel{
+    background:rgba(8,12,20,.85);
+    border:1px solid rgba(212,175,55,.25);
+    border-radius:20px;padding:24px 20px 22px;margin-bottom:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,.4);
+}
+.panel-title{
+    display:flex;align-items:center;gap:10px;
+    font-size:14.5px;font-weight:800;margin:0 0 18px;
+    color:var(--color-dorado-claro);
+    letter-spacing:.6px;text-transform:uppercase;
+}
+.paso-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;font-size:13px;font-weight:900;
+}
+
+.form-group{margin-bottom:16px}
+.form-group:last-child{margin-bottom:0}
+.form-group label{
+    display:block;margin-bottom:9px;
+    color:#cbd5e1;font-size:12.5px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.5px;
+}
+.form-input{
+    width:100%;height:52px;border-radius:14px;
+    background:rgba(0,0,0,.4);color:#fff;padding:12px 16px;
+    border:1px solid rgba(255,255,255,.12);font-size:15.5px;
+    transition:border-color .2s,box-shadow .2s;
+    font-family:inherit;
+}
+.form-input:focus{
+    outline:none;border-color:var(--color-dorado);
+    box-shadow:0 0 0 3px rgba(212,175,55,.15);
+}
+.form-input.resaltar{
+    border-color:#ef4444;
+    box-shadow:0 0 0 3px rgba(239,68,68,.25);
+    animation:shake .4s ease;
+}
+@keyframes shake{
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-6px)}
+    75%{transform:translateX(6px)}
+}
+.ayuda-id{
+    margin-top:9px;font-size:12px;color:#94a3b8;line-height:1.5;
+}
+
+/* ═══ BOTONES ═══ */
+.btn-action{
+    width:100%;padding:16px;
+    background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);
+    background-size:200% 200%;
+    color:#0a0e1a;border:none;border-radius:14px;
+    font-size:15px;font-weight:900;cursor:pointer;
+    transition:transform .2s,box-shadow .2s,opacity .2s;
+    letter-spacing:.8px;
+    text-transform:uppercase;font-family:inherit;
+    box-shadow:0 6px 20px rgba(212,175,55,.4);
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    min-height:54px;
+}
+.btn-action:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 10px 30px rgba(212,175,55,.6);
+}
+.btn-action:disabled{
+    opacity:.6;cursor:not-allowed;transform:none;
+}
+.btn-action.azul{
+    background:linear-gradient(135deg,#3b82f6,#60a5fa);
+    color:#fff;
+    box-shadow:0 6px 20px rgba(59,130,246,.4);
+}
+.btn-action.azul:hover:not(:disabled){
+    box-shadow:0 10px 30px rgba(59,130,246,.6);
+}
+
+/* Spinner dentro del botón */
+.spinner-btn{
+    display:inline-block;
+    width:18px;height:18px;
+    border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spinBtn .8s linear infinite;
+}
+@keyframes spinBtn{to{transform:rotate(360deg)}}
+
+/* ═══ CÓDIGO RESULTADO ═══ */
 .codigo-resultado{
-    margin-top:20px;padding:28px 20px;
-    background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));
-    border:2px solid rgba(34,197,94,0.6);
-    border-radius:18px;text-align:center;
-    box-shadow:0 0 40px rgba(34,197,94,0.3);
-    animation:codigoPulse 2s ease-in-out infinite;
-    display:none;position:relative;z-index:1;
+    margin-top:22px;padding:30px 22px 24px;
+    background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(34,197,94,.04));
+    border:2px solid rgba(34,197,94,.6);
+    border-radius:20px;text-align:center;
+    box-shadow:0 0 45px rgba(34,197,94,.3);
+    display:none;
+    position:relative;
+    overflow:hidden;
 }
-.codigo-resultado.activo{display:block}
-@keyframes codigoPulse{
-    0%,100%{box-shadow:0 0 40px rgba(34,197,94,0.3)}
-    50%{box-shadow:0 0 60px rgba(34,197,94,0.5)}
+.codigo-resultado.activo{
+    display:block;
+    animation:codigoEntrada .5s cubic-bezier(.34,1.56,.64,1);
 }
+@keyframes codigoEntrada{
+    from{opacity:0;transform:scale(.9) translateY(20px)}
+    to{opacity:1;transform:scale(1) translateY(0)}
+}
+
+/* Efecto de brillo que recorre */
+.codigo-resultado::before{
+    content:'';
+    position:absolute;top:0;left:-100%;
+    width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(34,197,94,.15),transparent);
+    animation:brilloCodigo 3s ease-in-out infinite;
+    pointer-events:none;
+}
+@keyframes brilloCodigo{
+    0%{left:-100%}
+    50%,100%{left:100%}
+}
+
 .codigo-resultado .codigo-label{
-    font-size:12px;color:#9ca3af;
-    text-transform:uppercase;letter-spacing:2px;
-    font-weight:700;margin-bottom:8px;
+    font-size:11px;color:#9ca3af;
+    text-transform:uppercase;letter-spacing:2.5px;
+    font-weight:800;margin-bottom:12px;
 }
 .codigo-resultado .codigo-value{
-    font-size:48px;font-weight:900;
-    color:#22c55e;letter-spacing:10px;
-    margin:16px 0;word-break:break-all;
-    text-shadow:0 0 30px rgba(34,197,94,0.7);
+    font-size:52px;font-weight:900;
+    color:#22c55e;letter-spacing:12px;
+    margin:14px 0;
+    word-break:break-all;
+    text-shadow:0 0 35px rgba(34,197,94,.75),
+                0 0 15px rgba(34,197,94,.5);
     font-family:'Courier New',monospace;
-    line-height:1.2;
+    line-height:1.15;
+    padding-left:12px; /* compensa letter-spacing */
 }
 .codigo-resultado .codigo-tiempo{
     font-size:13px;color:#94a3b8;
-    margin-bottom:16px;
+    margin-bottom:18px;font-weight:600;
+    display:inline-flex;align-items:center;gap:7px;
+}
+.codigo-resultado .codigo-tiempo.critico{
+    color:#f87171;
+    animation:pulsoCritico 1s ease-in-out infinite;
+}
+@keyframes pulsoCritico{
+    0%,100%{opacity:1}
+    50%{opacity:.55}
 }
 .codigo-resultado .btn-copiar-codigo{
     background:linear-gradient(135deg,#22c55e,#16a34a);
     color:#fff;border:none;
-    padding:14px 28px;border-radius:12px;
-    font-weight:800;cursor:pointer;font-size:14px;
+    padding:14px 30px;border-radius:12px;
+    font-weight:900;cursor:pointer;font-size:13.5px;
     text-transform:uppercase;letter-spacing:1px;
-    box-shadow:0 4px 15px rgba(34,197,94,0.4);
-    transition:.3s;font-family:inherit;
+    box-shadow:0 4px 18px rgba(34,197,94,.45);
+    transition:.25s;font-family:inherit;
+    min-height:50px;
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
 }
 .codigo-resultado .btn-copiar-codigo:hover{
-    transform:scale(1.05);
-    box-shadow:0 8px 25px rgba(34,197,94,0.6);
+    transform:translateY(-2px);
+    box-shadow:0 10px 28px rgba(34,197,94,.6);
+}
+.codigo-resultado .btn-copiar-codigo.copiado{
+    background:linear-gradient(135deg,#16a34a,#15803d);
 }
 
+/* ═══ AVISO ═══ */
 .aviso-info{
-    margin-top:16px;padding:14px 16px;
-    background:rgba(212,175,55,0.08);
+    margin-top:18px;padding:15px 18px;
+    background:rgba(212,175,55,.08);
     border-left:4px solid var(--color-dorado);
-    border-radius:10px;
-    font-size:13px;color:#cbd5e1;line-height:1.6;
-    position:relative;z-index:1;
+    border-radius:12px;
+    font-size:13px;color:#cbd5e1;line-height:1.65;
 }
 .aviso-info strong{color:var(--color-dorado-claro)}
 
+/* ═══ SOPORTE CARD ═══ */
 .soporte-card{
-    background:linear-gradient(135deg,rgba(37,211,102,0.12),rgba(37,211,102,0.03));
-    border:1px solid rgba(37,211,102,0.35);
-    border-radius:16px;
-    padding:20px;
+    background:linear-gradient(135deg,rgba(37,211,102,.12),rgba(37,211,102,.03));
+    border:1px solid rgba(37,211,102,.35);
+    border-radius:18px;
+    padding:22px;
     margin-top:20px;
     text-align:center;
-    position:relative;z-index:1;
 }
 .soporte-card h4{
     color:#86efac;
-    font-size:15px;
+    font-size:14.5px;
     font-weight:800;
     margin-bottom:10px;
     text-transform:uppercase;
-    letter-spacing:0.5px;
+    letter-spacing:.5px;
 }
 .soporte-card p{
-    font-size:13px;
+    font-size:13.5px;
     color:#cbd5e1;
-    margin-bottom:16px;
-    line-height:1.5;
+    margin-bottom:18px;
+    line-height:1.55;
 }
 .btn-whatsapp-soporte{
     display:inline-flex;
@@ -395,137 +479,269 @@ body::after{
     padding:14px 28px;
     border-radius:12px;
     font-weight:800;
-    font-size:14px;
-    letter-spacing:1px;
+    font-size:13.5px;
+    letter-spacing:.8px;
     text-transform:uppercase;
-    box-shadow:0 6px 20px rgba(37,211,102,0.4);
-    transition:all 0.3s;
-    font-family:inherit;
+    box-shadow:0 6px 20px rgba(37,211,102,.4);
+    transition:transform .2s,box-shadow .2s;
+    min-height:50px;
 }
 .btn-whatsapp-soporte:hover{
     transform:translateY(-2px);
-    box-shadow:0 10px 30px rgba(37,211,102,0.6);
+    box-shadow:0 10px 30px rgba(37,211,102,.6);
 }
 
+/* ═══ NAV INFERIOR ═══ */
 .nav-inferior{
     position:fixed;left:0;right:0;bottom:0;z-index:999;
-    background:rgba(5,8,16,0.96);
-    border-top:1px solid rgba(212,175,55,0.25);
-    box-shadow:0 -4px 20px rgba(0,0,0,0.5);
+    background:rgba(4,7,12,.96);
+    border-top:1px solid rgba(255,255,255,.08);
+    box-shadow:0 -6px 25px rgba(0,0,0,.5);
     padding-bottom:env(safe-area-inset-bottom);
-    transform:translateZ(0);
 }
 .nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
 .nav-item{
     flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:4px;color:#9ca3af;text-decoration:none;
-    font-size:12px;font-weight:600;transition:color 0.2s;
+    gap:4px;color:#667287;text-decoration:none;
+    font-size:10.5px;font-weight:700;transition:color .2s;
 }
 .nav-item svg{
     width:22px;height:22px;stroke:currentColor;fill:none;
     stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    transition:.2s;
 }
 .nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
 .nav-item.soporte{color:#4ade80}
 
+/* ═══ BOTONES FLOTANTES ═══ */
 .back-to-top{
     position:fixed;
     bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));
     right:20px;
     background:linear-gradient(135deg,#d4af37,#3b82f6);
-    color:#fff;width:45px;height:45px;border-radius:50%;
+    color:#fff;width:46px;height:46px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;opacity:0;visibility:hidden;
-    z-index:998;transition:.3s;text-decoration:none;
-    font-size:18px;box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    z-index:998;
+    transition:opacity .25s,transform .25s,visibility .25s;
+    text-decoration:none;
+    font-size:19px;font-weight:900;
+    box-shadow:0 8px 25px rgba(0,0,0,.4);
 }
-.back-to-top.show{opacity:1;visibility:visible}
+.back-to-top.show{opacity:1;visibility:visible;transform:translateY(0)}
+.back-to-top:hover{transform:translateY(-3px)}
 
 .whatsapp-float{
     position:fixed;
-    bottom:calc(var(--alto-nav) + 80px + env(safe-area-inset-bottom));
+    bottom:calc(var(--alto-nav) + 78px + env(safe-area-inset-bottom));
     right:20px;
     background:linear-gradient(135deg,#25D366,#128C7E);
-    width:55px;height:55px;border-radius:50%;
+    width:54px;height:54px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    text-decoration:none;font-size:28px;z-index:998;
-    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+    text-decoration:none;font-size:26px;z-index:998;
+    box-shadow:0 8px 25px rgba(37,211,102,.4);
+    transition:transform .2s;
 }
+.whatsapp-float:hover{transform:scale(1.08)}
 
+/* ═══ MODALES ═══ */
 .modal-overlay{
-    display:none;position:fixed;top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.85);z-index:2000;
-    justify-content:center;align-items:center;padding:20px;
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,.9);z-index:2000;
+    justify-content:center;align-items:center;padding:18px;
 }
 .modal-overlay.activo{display:flex}
 .modal-box{
-    background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));
-    border:1px solid rgba(212,175,55,0.3);
-    border-radius:24px;max-width:420px;width:100%;
-    box-shadow:0 30px 80px rgba(0,0,0,0.7);
-    animation:modalSlide 0.3s ease;overflow:hidden;
+    background:linear-gradient(145deg,#0f1727,#070b13);
+    border:1px solid rgba(212,175,55,.3);
+    border-radius:22px;max-width:430px;width:100%;
+    box-shadow:0 30px 90px rgba(0,0,0,.85);
+    animation:modalSlide .3s cubic-bezier(.34,1.56,.64,1);
+    overflow:hidden;
 }
 @keyframes modalSlide{
-    from{transform:translateY(-40px);opacity:0}
-    to{transform:translateY(0);opacity:1}
+    from{transform:translateY(-30px) scale(.95);opacity:0}
+    to{transform:translateY(0) scale(1);opacity:1}
 }
 .modal-header{
-    padding:24px 20px;text-align:center;
-    border-bottom:1px solid rgba(255,255,255,0.06);
-    background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));
+    padding:26px 20px;text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    background:linear-gradient(135deg,rgba(212,175,55,.1),rgba(37,135,255,.05));
 }
-.modal-header .icono-grande{font-size:50px;margin-bottom:10px}
+.modal-header .icono-grande{font-size:48px;margin-bottom:10px}
 .modal-header h2{
-    font-size:20px;font-weight:800;color:var(--color-dorado-claro);
-    letter-spacing:1px;text-transform:uppercase;
+    font-size:19px;font-weight:900;color:var(--color-dorado-claro);
+    letter-spacing:.5px;text-transform:uppercase;
 }
 .modal-body{padding:24px 20px}
 .modal-footer{padding:0 20px 20px;display:flex;gap:10px}
 .modal-btn{
-    flex:1;padding:14px;border-radius:12px;font-size:15px;
-    font-weight:800;cursor:pointer;border:none;transition:0.3s;
+    flex:1;padding:14px;border-radius:12px;font-size:13.5px;
+    font-weight:900;cursor:pointer;border:none;transition:.2s;
     text-transform:uppercase;font-family:inherit;
+    letter-spacing:.4px;
+    min-height:48px;
 }
 .modal-btn.cancelar{
-    background:rgba(71,85,105,0.3);color:#94a3b8;
-    border:1px solid rgba(71,85,105,0.5);
+    background:rgba(71,85,105,.35);color:#94a3b8;
+    border:1px solid rgba(71,85,105,.5);
 }
-.modal-btn.cancelar:hover{background:rgba(71,85,105,0.5);color:white}
+.modal-btn.cancelar:hover{background:rgba(71,85,105,.55);color:white}
 .modal-btn.continuar{
     background:linear-gradient(135deg,#d4af37,#f5d76e);
     color:#0a0e1a;
 }
+.modal-btn.continuar:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 25px rgba(212,175,55,.4);
+}
+
+/* ═══ MENSAJE PERSONALIZADO ═══ */
+.mensaje-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,.9);
+    z-index:9999;justify-content:center;align-items:center;padding:18px;
+}
+.mensaje-overlay.activo{display:flex;animation:fadeInOverlay .25s ease}
+@keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+.mensaje-box{
+    background:linear-gradient(145deg,#0f1727,#070b13);
+    border:1px solid rgba(212,175,55,.35);
+    border-radius:22px;padding:32px 26px 24px;
+    max-width:430px;width:100%;
+    box-shadow:0 30px 90px rgba(0,0,0,.9);
+    animation:modalSlide .35s cubic-bezier(.34,1.56,.64,1);
+    text-align:center;position:relative;overflow:hidden;
+}
+.mensaje-cerrar{
+    position:absolute;top:14px;right:17px;
+    background:none;border:none;color:#9ca3af;
+    font-size:22px;cursor:pointer;padding:4px 8px;
+    line-height:1;transition:.2s;z-index:2;
+}
+.mensaje-cerrar:hover{color:var(--color-dorado);transform:rotate(90deg)}
+.mensaje-icono{
+    width:72px;height:72px;margin:0 auto 18px;
+    border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:34px;font-weight:bold;
+}
+.mensaje-icono.exito{
+    background:linear-gradient(135deg,rgba(34,197,94,.25),rgba(34,197,94,.08));
+    border:2px solid rgba(34,197,94,.7);color:#4ade80;
+    box-shadow:0 0 40px rgba(34,197,94,.5);
+}
+.mensaje-icono.error{
+    background:linear-gradient(135deg,rgba(239,68,68,.25),rgba(239,68,68,.08));
+    border:2px solid rgba(239,68,68,.7);color:#f87171;
+    box-shadow:0 0 40px rgba(239,68,68,.5);
+}
+.mensaje-icono.advertencia{
+    background:linear-gradient(135deg,rgba(212,175,55,.25),rgba(212,175,55,.08));
+    border:2px solid rgba(212,175,55,.7);color:var(--color-dorado-claro);
+    box-shadow:0 0 40px rgba(212,175,55,.5);
+}
+.mensaje-icono.info{
+    background:linear-gradient(135deg,rgba(59,130,246,.25),rgba(59,130,246,.08));
+    border:2px solid rgba(59,130,246,.7);color:#93c5fd;
+    box-shadow:0 0 40px rgba(59,130,246,.5);
+}
+.mensaje-icono.confirmacion{
+    background:linear-gradient(135deg,rgba(212,175,55,.25),rgba(59,130,246,.15));
+    border:2px solid rgba(212,175,55,.7);color:var(--color-dorado-claro);
+    box-shadow:0 0 40px rgba(212,175,55,.5);
+}
+.mensaje-titulo{
+    font-size:19px;font-weight:900;color:var(--color-dorado-claro);
+    margin-bottom:12px;letter-spacing:.4px;text-transform:uppercase;
+}
+.mensaje-texto{
+    font-size:14.5px;color:#cbd5e1;line-height:1.6;
+    margin-bottom:22px;white-space:pre-line;
+}
+.mensaje-botones{display:flex;gap:10px;justify-content:center}
+.mensaje-btn{
+    flex:1;padding:14px 20px;border-radius:12px;
+    font-size:13px;font-weight:900;cursor:pointer;
+    transition:transform .2s,box-shadow .2s;
+    text-transform:uppercase;letter-spacing:.6px;
+    border:none;font-family:inherit;min-height:48px;
+}
+.mensaje-btn.principal{
+    background:linear-gradient(135deg,#d4af37,#f5d76e);
+    color:#0a0e1a;
+    box-shadow:0 4px 15px rgba(212,175,55,.4);
+}
+.mensaje-btn.principal:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 25px rgba(212,175,55,.6);
+}
+.mensaje-btn.secundario{
+    background:rgba(71,85,105,.35);color:#cbd5e1;
+    border:1px solid rgba(71,85,105,.6);
+}
+.mensaje-btn.secundario:hover{
+    background:rgba(71,85,105,.55);color:white;
+    transform:translateY(-2px);
+}
+.mensaje-btn.peligro{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;box-shadow:0 4px 15px rgba(239,68,68,.4);
+}
+.mensaje-btn.peligro:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 25px rgba(239,68,68,.6);
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media(min-width:900px){
+    body{padding-bottom:30px}
+    .nav-inferior{display:none}
+    .back-to-top,
+    .whatsapp-float{bottom:20px}
+    .whatsapp-float{bottom:82px}
+}
 
 @media(max-width:500px){
     body{padding-top:100px}
-    .main{padding-top:20px}
-    .brand img{height:45px}
-    .header{padding:10px 16px}
-    .games-menu{padding:10px 15px}
-    .menu-flotante{right:10px;min-width:220px}
+    .main{padding:16px;padding-top:20px}
+    .brand img{height:40px}
+    .header{padding:0 14px;height:58px}
+    .games-menu{padding:6px 14px 9px}
+    .menu-flotante,.menu-perfil{right:10px;top:56px;min-width:230px}
     .btn-perfil .perfil-nombre{display:none}
     .btn-perfil .perfil-flecha{display:none}
-    .menu-perfil{right:0;min-width:230px}
-    .codigo-resultado .codigo-value{font-size:34px;letter-spacing:6px}
-    .video-fondo{opacity:0.85;filter:brightness(1.05)}
+    .pagina-titulo h1{font-size:20px}
+    .steps-info ol{font-size:13px;line-height:1.8}
+    .codigo-resultado .codigo-value{font-size:38px;letter-spacing:7px;padding-left:7px}
+    .card-panel{padding:20px 16px 18px}
+    .form-input{height:50px;font-size:15px}
+    .btn-action{font-size:14px;padding:15px}
+    .video-fondo{opacity:.4}
 }
+
+@media(max-width:400px){
+    .mensaje-botones{flex-direction:column}
+    .codigo-resultado .codigo-value{font-size:32px;letter-spacing:5px;padding-left:5px}
+}
+
 @media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     *,*::before,*::after{
-        animation-duration:0.01ms !important;
+        animation-duration:.01ms !important;
         animation-iteration-count:1 !important;
-        transition-duration:0.01ms !important;
+        transition-duration:.01ms !important;
     }
 }
 </style>
 </head>
 <body onclick="cerrarTodosLosMenus(event)">
 
-<video autoplay muted loop playsinline class="video-fondo">
+<video autoplay muted loop playsinline class="video-fondo" preload="metadata">
     <source src="fondo.mp4" type="video/mp4">
 </video>
 <div class="video-overlay"></div>
 
+<!-- ═══ HEADER ═══ -->
 <div class="barra-superior">
     <div class="header">
         <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
@@ -569,7 +785,7 @@ body::after{
             </div>
         </div>
     </div>
-    <nav class="games-menu" aria-label="Juegos">
+    <nav class="games-menu" aria-label="Categorías">
         <a href="index.html">Inicio</a>
         <a href="freefire.html">Free Fire</a>
         <a href="bloodstrike.html">Blood Strike</a>
@@ -587,6 +803,7 @@ body::after{
     </nav>
 </div>
 
+<!-- ═══ MODAL LOGIN ═══ -->
 <div class="modal-overlay" id="modalLogin">
     <div class="modal-box">
         <div class="modal-header">
@@ -595,18 +812,18 @@ body::after{
         </div>
         <div class="modal-body">
             <form id="loginForm">
-                <div style="margin-bottom:20px;">
-                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
-                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                <div style="margin-bottom:18px;">
+                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.35);color:white;font-size:14.5px;">
                 </div>
-                <div style="margin-bottom:20px;">
-                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
-                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                <div style="margin-bottom:18px;">
+                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.35);color:white;font-size:14.5px;">
                 </div>
                 <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
             </form>
-            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
-            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:13.5px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:13px;color:#9ca3af;">
                 <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
                 <p style="margin-top:8px;"><a href="#" id="resetPasswordLink" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
             </div>
@@ -617,10 +834,24 @@ body::after{
     </div>
 </div>
 
+<!-- ═══ MENSAJE PERSONALIZADO ═══ -->
+<div class="mensaje-overlay" id="mensajeOverlay">
+    <div class="mensaje-box">
+        <button class="mensaje-cerrar" onclick="cerrarMensajePersonalizado()">✕</button>
+        <div class="mensaje-icono" id="mensajeIcono">ℹ</div>
+        <div class="mensaje-titulo" id="mensajeTitulo">Título</div>
+        <div class="mensaje-texto" id="mensajeTexto">Mensaje</div>
+        <div class="mensaje-botones" id="mensajeBotones">
+            <button class="mensaje-btn principal" onclick="cerrarMensajePersonalizado()">Entendido</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
 <div class="main">
 
     <div class="pagina-titulo">
-        <h1>📺 Código para TV Netflix</h1>
+        <h1>📺 Código para TV</h1>
         <span class="chip-entrega">Instantáneo</span>
     </div>
 
@@ -651,8 +882,8 @@ body::after{
         <div class="codigo-resultado" id="codigoResultado">
             <div class="codigo-label">🎬 Tu código es</div>
             <div class="codigo-value" id="codigoValue">------</div>
-            <div class="codigo-tiempo" id="codigoTiempo">⏰ Expira en 15 minutos</div>
-            <button class="btn-copiar-codigo" onclick="copiarCodigo()">
+            <div class="codigo-tiempo" id="codigoTiempo">⏰ Expira pronto</div>
+            <button class="btn-copiar-codigo" id="btnCopiarCodigo" onclick="copiarCodigo()">
                 📋 Copiar Código
             </button>
         </div>
@@ -673,6 +904,7 @@ body::after{
 
 </div>
 
+<!-- ═══ NAV INFERIOR ═══ -->
 <nav class="nav-inferior" aria-label="Navegación principal">
     <div class="nav-inferior-inner">
         <a href="index.html" class="nav-item">
@@ -697,21 +929,110 @@ body::after{
 <a href="https://wa.me/584228242411" class="whatsapp-float" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
 <a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
 
-<script type="module">
-import { auth } from './firebase-config.js';
-import {
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    signOut,
-    sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+<script>
+/* ═══════════════════════════════════════
+   RECARGASGAMES — CÓDIGO TV NETFLIX
+   ═══════════════════════════════════════ */
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+    authDomain: "free-52119.firebaseapp.com",
+    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "free-52119",
+    storageBucket: "free-52119.firebasestorage.app",
+    messagingSenderId: "632240144599",
+    appId: "1:632240144599:web:e31c25665ffe19c194b092"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+const URL_NETFLIX_HOGAR = '/api/netflix-hogar';
 
 let usuarioActual = null;
 let codigoActual = "";
+let intervaloCountdown = null;
+let timestampExpiracion = 0;
 
-// ============================================
-// 🔑 OBTENER CÓDIGO NETFLIX HOGAR
-// ============================================
+/* ═══ SISTEMA DE MENSAJES PERSONALIZADOS ═══ */
+const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ', confirmacion:'❓' };
+let _mensajeCallback = null;
+
+function mostrarMensaje(titulo, mensaje, tipo='info', textoBoton='Entendido') {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('mensajeOverlay');
+        const icono = document.getElementById('mensajeIcono');
+        const tituloEl = document.getElementById('mensajeTitulo');
+        const textoEl = document.getElementById('mensajeTexto');
+        const botones = document.getElementById('mensajeBotones');
+
+        icono.className = 'mensaje-icono ' + tipo;
+        icono.textContent = ICONOS[tipo] || ICONOS.info;
+        tituloEl.textContent = titulo;
+        textoEl.textContent = mensaje;
+
+        botones.innerHTML = `<button class="mensaje-btn principal" id="btnOkMsg">${textoBoton}</button>`;
+        document.getElementById('btnOkMsg').onclick = () => {
+            cerrarMensajePersonalizado();
+            resolve(true);
+        };
+
+        _mensajeCallback = resolve;
+        overlay.classList.add('activo');
+    });
+}
+
+function mostrarConfirmacion(titulo, mensaje, callback, opciones = {}) {
+    const overlay = document.getElementById('mensajeOverlay');
+    const icono = document.getElementById('mensajeIcono');
+    const tituloEl = document.getElementById('mensajeTitulo');
+    const textoEl = document.getElementById('mensajeTexto');
+    const botones = document.getElementById('mensajeBotones');
+
+    const tipo = opciones.tipo || 'confirmacion';
+    const textoAceptar = opciones.textoAceptar || 'Aceptar';
+    const textoCancelar = opciones.textoCancelar || 'Cancelar';
+    const claseAceptar = opciones.peligro ? 'peligro' : 'principal';
+
+    icono.className = 'mensaje-icono ' + tipo;
+    icono.textContent = ICONOS[tipo] || ICONOS.confirmacion;
+    tituloEl.textContent = titulo;
+    textoEl.textContent = mensaje;
+
+    botones.innerHTML = `
+        <button class="mensaje-btn secundario" id="btnMsgCancelar">${textoCancelar}</button>
+        <button class="mensaje-btn ${claseAceptar}" id="btnMsgAceptar">${textoAceptar}</button>
+    `;
+
+    document.getElementById('btnMsgCancelar').onclick = () => {
+        cerrarMensajePersonalizado();
+        if (typeof callback === 'function') callback(false);
+    };
+    document.getElementById('btnMsgAceptar').onclick = () => {
+        cerrarMensajePersonalizado();
+        if (typeof callback === 'function') callback(true);
+    };
+
+    overlay.classList.add('activo');
+}
+
+function cerrarMensajePersonalizado() {
+    document.getElementById('mensajeOverlay').classList.remove('activo');
+    if (_mensajeCallback) {
+        _mensajeCallback(false);
+        _mensajeCallback = null;
+    }
+}
+
+document.getElementById('mensajeOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'mensajeOverlay') cerrarMensajePersonalizado();
+});
+
+window.mostrarMensaje = mostrarMensaje;
+window.mostrarConfirmacion = mostrarConfirmacion;
+window.cerrarMensajePersonalizado = cerrarMensajePersonalizado;
+
+/* ═══ OBTENER CÓDIGO ═══ */
 window.obtenerCodigoHogar = async function() {
     const correoInput = document.getElementById('correoHogar');
     const correo = correoInput.value.trim();
@@ -722,15 +1043,22 @@ window.obtenerCodigoHogar = async function() {
         correoInput.classList.add('resaltar');
         setTimeout(() => correoInput.classList.remove('resaltar'), 2500);
         correoInput.focus();
+        mostrarMensaje('Correo inválido', 'Escribe el correo completo de tu cuenta Netflix.', 'advertencia');
         return;
     }
 
+    // Detener countdown previo
+    if (intervaloCountdown) {
+        clearInterval(intervaloCountdown);
+        intervaloCountdown = null;
+    }
+
     btn.disabled = true;
-    btn.innerHTML = '⏳ Consultando...';
+    btn.innerHTML = '<span class="spinner-btn"></span> Consultando...';
     resultado.classList.remove('activo');
 
     try {
-        const res = await fetch('/api/netflix-hogar', {
+        const res = await fetch(URL_NETFLIX_HOGAR, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -745,39 +1073,91 @@ window.obtenerCodigoHogar = async function() {
         if (data.ok && data.codigo) {
             codigoActual = data.codigo;
             document.getElementById('codigoValue').textContent = data.codigo;
-            document.getElementById('codigoTiempo').textContent = `⏰ Expira en ${data.expira_minutos || 15} minutos`;
+
+            // Iniciar countdown de expiración
+            const expiraMinutos = data.expira_minutos || 15;
+            timestampExpiracion = Date.now() + (expiraMinutos * 60 * 1000);
+            iniciarCountdown();
+
             resultado.classList.add('activo');
             setTimeout(() => {
                 resultado.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 200);
         } else if (data.codigo_respuesta === 'codigo_netflix_no_disponible') {
-            alert('⚠️ Aún no hay código disponible.\n\nAsegúrate de:\n1. Abrir Netflix en la TV\n2. Seleccionar "Esta es mi cuenta" → "Estoy de viaje"\n3. Presionar "Enviar email"\n4. Esperar 10 segundos\n\nLuego presiona "Obtener código" otra vez.');
+            await mostrarMensaje(
+                'Código no disponible aún',
+                'Asegúrate de haber hecho esto en tu TV:\n\n' +
+                '1️⃣ Abrir Netflix en la TV\n' +
+                '2️⃣ Seleccionar "Esta es mi cuenta" → "Estoy de viaje"\n' +
+                '3️⃣ Presionar "Enviar email"\n' +
+                '4️⃣ Esperar 10 segundos\n\n' +
+                'Luego presiona "Obtener Código" otra vez.',
+                'advertencia'
+            );
         } else {
-            alert('❌ ' + (data.mensaje || 'No se pudo obtener el código. Intenta de nuevo en unos segundos.'));
+            await mostrarMensaje(
+                'No se pudo obtener el código',
+                data.mensaje || 'Intenta de nuevo en unos segundos. Si persiste, contáctanos por WhatsApp.',
+                'error'
+            );
         }
 
     } catch (error) {
         console.error('❌ Error código hogar:', error);
-        alert('❌ No se pudo conectar con el servidor. Intenta de nuevo.');
+        await mostrarMensaje(
+            'Error de conexión',
+            'No pudimos conectar con el servidor. Revisa tu conexión e intenta de nuevo.',
+            'error'
+        );
     } finally {
         btn.disabled = false;
         btn.innerHTML = '🔍 Obtener Código';
     }
 };
 
+/* ═══ COUNTDOWN DE EXPIRACIÓN ═══ */
+function iniciarCountdown() {
+    const tiempoEl = document.getElementById('codigoTiempo');
+
+    function actualizar() {
+        const restante = timestampExpiracion - Date.now();
+
+        if (restante <= 0) {
+            clearInterval(intervaloCountdown);
+            intervaloCountdown = null;
+            tiempoEl.textContent = '⏰ Código expirado — solicita uno nuevo';
+            tiempoEl.classList.add('critico');
+            return;
+        }
+
+        const minutos = Math.floor(restante / 60000);
+        const segundos = Math.floor((restante % 60000) / 1000);
+        tiempoEl.textContent = `⏰ Expira en ${minutos}:${String(segundos).padStart(2, '0')}`;
+        tiempoEl.classList.toggle('critico', restante < 120000); // crítico si <2 min
+    }
+
+    actualizar();
+    intervaloCountdown = setInterval(actualizar, 1000);
+}
+
+/* ═══ COPIAR CÓDIGO ═══ */
 window.copiarCodigo = function() {
     if (!codigoActual) return;
     navigator.clipboard.writeText(codigoActual).then(() => {
-        const btn = document.querySelector('.btn-copiar-codigo');
+        const btn = document.getElementById('btnCopiarCodigo');
         const original = btn.innerHTML;
+        btn.classList.add('copiado');
         btn.innerHTML = '✓ ¡Copiado!';
-        setTimeout(() => btn.innerHTML = original, 2000);
+        setTimeout(() => {
+            btn.classList.remove('copiado');
+            btn.innerHTML = original;
+        }, 2000);
+    }).catch(() => {
+        mostrarMensaje('Copiar', 'Copia manualmente: ' + codigoActual, 'info');
     });
 };
 
-// ============================================
-// 🍔 MENÚS
-// ============================================
+/* ═══ MENÚS ═══ */
 window.alternarMenu = function() {
     document.getElementById('menuFlotante').classList.toggle('activo');
     document.getElementById('menuPerfil').classList.remove('activo');
@@ -804,9 +1184,7 @@ window.cerrarTodosLosMenus = function(e) {
     }
 };
 
-// ============================================
-// 🔐 FIREBASE AUTH
-// ============================================
+/* ═══ FIREBASE AUTH ═══ */
 const perfilContainer = document.getElementById('perfilContainer');
 const menuLogin = document.getElementById('menuLogin');
 const menuRegister = document.getElementById('menuRegister');
@@ -817,7 +1195,7 @@ const emailUsuario = document.getElementById('emailUsuario');
 const modalLogin = document.getElementById('modalLogin');
 const loginForm = document.getElementById('loginForm');
 
-onAuthStateChanged(auth, (user) => {
+auth.onAuthStateChanged((user) => {
     usuarioActual = user;
     if (user) {
         const nombre = user.displayName || 'Usuario';
@@ -866,8 +1244,8 @@ loginForm.addEventListener('submit', async (e) => {
     msg.style.display = 'none';
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
-        msg.style.background = 'rgba(34,197,94,0.15)';
+        await auth.signInWithEmailAndPassword(email, password);
+        msg.style.background = 'rgba(34,197,94,.15)';
         msg.style.color = '#86efac';
         msg.textContent = '✅ ¡Bienvenido!';
         msg.style.display = 'block';
@@ -881,9 +1259,10 @@ loginForm.addEventListener('submit', async (e) => {
             case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
             case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
             case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
+            case 'auth/invalid-credential': errorMsg += 'Correo o contraseña incorrectos'; break;
             default: errorMsg += error.message;
         }
-        msg.style.background = 'rgba(239,68,68,0.15)';
+        msg.style.background = 'rgba(239,68,68,.15)';
         msg.style.color = '#fca5a5';
         msg.textContent = errorMsg;
         msg.style.display = 'block';
@@ -892,55 +1271,60 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
-if (btnCerrarSesionEl) {
-    btnCerrarSesionEl.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (confirm('¿Seguro que quieres cerrar sesión?')) {
-            await signOut(auth);
-            window.location.reload();
-        }
-    });
+/* ═══ CIERRE DE SESIÓN CON MODAL ═══ */
+function pedirCierreSesion(e) {
+    e.preventDefault();
+    mostrarConfirmacion(
+        'Cerrar Sesión',
+        '¿Seguro que quieres cerrar sesión?',
+        async (confirmado) => {
+            if (confirmado) {
+                await auth.signOut();
+                window.location.reload();
+            }
+        },
+        { tipo: 'confirmacion', textoAceptar: 'Cerrar sesión', textoCancelar: 'Cancelar', peligro: true }
+    );
 }
+
+const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
+if (btnCerrarSesionEl) btnCerrarSesionEl.addEventListener('click', pedirCierreSesion);
 
 const menuLogoutEl = document.getElementById('menuLogout');
-if (menuLogoutEl) {
-    menuLogoutEl.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (confirm('¿Seguro que quieres cerrar sesión?')) {
-            await signOut(auth);
-            window.location.reload();
-        }
-    });
-}
+if (menuLogoutEl) menuLogoutEl.addEventListener('click', pedirCierreSesion);
 
+/* ═══ RESET PASSWORD ═══ */
 const resetLinkEl = document.getElementById('resetPasswordLink');
 if (resetLinkEl) {
     resetLinkEl.addEventListener('click', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value.trim();
         if (!email) {
-            alert('❌ Ingresa tu correo primero');
+            mostrarMensaje('Correo requerido', 'Escribe tu correo electrónico para restablecer la contraseña.', 'advertencia');
             return;
         }
         try {
-            await sendPasswordResetEmail(auth, email);
-            alert('✅ Correo enviado. Revisa tu bandeja.');
+            await auth.sendPasswordResetEmail(email);
+            mostrarMensaje('Correo enviado', 'Revisa tu bandeja de entrada para restablecer tu contraseña.', 'exito');
         } catch (error) {
-            alert('❌ ' + error.message);
+            mostrarMensaje('Error', 'No se pudo enviar el correo: ' + error.message, 'error');
         }
     });
 }
 
-// ============================================
-// 🚀 INICIALIZACIÓN
-// ============================================
+/* ═══ SCROLL ═══ */
 const chipActivo = document.querySelector('.games-menu a.active');
 if (chipActivo) chipActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
 
 window.addEventListener('scroll', () => {
     document.getElementById('backToTop').classList.toggle('show', window.scrollY > 300);
 }, { passive: true });
+
+console.log('═══════════════════════════════════════════');
+console.log('📺 CÓDIGO TV NETFLIX CARGADO');
+console.log('   Endpoint: /api/netflix-hogar');
+console.log('   Countdown de expiración: activo');
+console.log('═══════════════════════════════════════════');
 </script>
 </body>
 </html>
