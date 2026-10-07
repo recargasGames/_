@@ -112,6 +112,58 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .pedido-referencia svg { width: 14px; height: 14px; fill: #8899b0; flex-shrink: 0; }
 .pedido-jugador-box { background: rgba(22, 34, 59, 0.8); border: 1px solid rgba(37, 50, 77, 0.8); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; color: #cbd5e1; }
 .pedido-jugador-box strong { color: #fff; }
+
+/* 🆔 CAJA DE CLIENTE REGISTRADO */
+.pedido-cliente-box {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.04));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+.pedido-cliente-box .titulo-cliente {
+    font-size: 10px;
+    color: var(--color-dorado-claro);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.pedido-cliente-box strong { color: #fff; }
+.pedido-cliente-box .id-cliente-valor {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--color-dorado-claro);
+    background: rgba(212, 175, 55, 0.15);
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 2px;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+}
+.pedido-cliente-box .btn-copiar-id-cliente {
+    background: rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    color: var(--color-dorado-claro);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-left: 6px;
+    font-weight: 700;
+}
+.pedido-cliente-box .btn-copiar-id-cliente:hover {
+    background: rgba(212, 175, 55, 0.35);
+}
+
 .pedido-timeline { display: flex; align-items: center; justify-content: space-between; position: relative; padding-top: 10px; border-top: 1px solid rgba(30, 42, 69, 0.8); }
 .timeline-step { display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 2; width: 80px; text-align: center; }
 .timeline-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #1e2a45; color: #8899b0; transition: all 0.3s; }
@@ -176,6 +228,16 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .usuario-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(30, 42, 69, 0.8); }
 .usuario-meta span { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.25); padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 12px; color: #cbd5e1; }
 .usuario-meta strong { color: var(--color-dorado-claro); }
+.usuario-meta .id-cliente-admin {
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    color: #f5d76e;
+    letter-spacing: 2px;
+    background: rgba(212, 175, 55, 0.15);
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+}
 .usuario-meta .pedidos-count { color: var(--azul-brillante); font-weight: 800; }
 .usuario-acciones { display: flex; gap: 8px; margin-top: 12px; }
 .usuario-btn { flex: 1; padding: 10px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; border: none; font-family: inherit; text-transform: uppercase; }
@@ -695,7 +757,6 @@ const db = firebase.database();
 const refCodigosRG = db.ref("codigos_rg");
 const refCodigosTEST = db.ref("codigos_test");
 const refCuentasStreaming = db.ref("cuentas_streaming");
-// 🔥 CAMBIO 1: nueva referencia para códigos de renovación de 6 dígitos
 const refCodigosRenovacion = db.ref("codigos_renovacion");
 
 let sesionActiva = false;
@@ -710,6 +771,9 @@ let paginaPedidosActual = 1;
 let pedidosPorPagina = 10;
 let cuentasStreamingCache = {};
 let tasaCodigosActual = 940;
+
+// 🔥 CACHÉ de usuarios para no consultar repetido
+let cacheUsuarios = {};
 
 // ═══════════════════════════════════════════════
 // PRODUCTOS
@@ -824,15 +888,12 @@ async function generarCodigoUnico(prefijo, refNodo) {
     return prefijo + generarParteAleatoria(8);
 }
 
-// 🔥 CAMBIO 2: nueva función — genera código único de 6 dígitos para cuentas streaming
 async function generarCodigo6DigitosUnico() {
     for (let i = 0; i < 50; i++) {
-        // 6 dígitos entre 100000 y 999999
         const codigo = String(Math.floor(100000 + Math.random() * 900000));
         const snap = await refCodigosRenovacion.child(codigo).once('value');
         if (!snap.exists()) return codigo;
     }
-    // Fallback raro: últimos 6 dígitos del timestamp
     return String(Date.now()).slice(-6);
 }
 
@@ -945,7 +1006,6 @@ function renderPinesInputs() {
 document.getElementById('nuevosPerfiles').addEventListener('input', renderPinesInputs);
 renderPinesInputs();
 
-// 🔥 CAMBIO 3: agregarCuentaStreaming() — genera código automáticamente al crear la cuenta
 async function agregarCuentaStreaming() {
     const servicio = document.getElementById('nuevoServicio').value;
     const correo = document.getElementById('nuevoCorreo').value.trim();
@@ -967,25 +1027,22 @@ async function agregarCuentaStreaming() {
     const id = `${servicio}_${Date.now()}`;
 
     try {
-        // 🔥 GENERAR CÓDIGO DE RENOVACIÓN DE 6 DÍGITOS AUTOMÁTICAMENTE
         const codigoRenovacion = await generarCodigo6DigitosUnico();
         console.log('🔢 Código de renovación generado:', codigoRenovacion);
 
-        // 1. Guardar la cuenta CON el código
         await refCuentasStreaming.child(servicio).child(id).set({
             id,
             servicio,
             correo,
             clave,
             precio_perfil: precio,
-            codigo_renovacion: codigoRenovacion, // 🔑 CÓDIGO ASIGNADO A LA CUENTA
+            codigo_renovacion: codigoRenovacion,
             fecha_compra: ahora.toISOString().split('T')[0],
             fecha_vencimiento: vencimiento.toISOString().split('T')[0],
             estado: 'activa',
             perfiles
         });
 
-        // 2. Guardar índice del código en codigos_renovacion
         await refCodigosRenovacion.child(codigoRenovacion).set({
             codigo: codigoRenovacion,
             servicio: servicio,
@@ -1000,7 +1057,6 @@ async function agregarCuentaStreaming() {
 
         console.log('✅ Cuenta + código guardados');
 
-        // 3. Mostrar confirmación con el código visible
         mostrarMensaje(
             '✅ Cuenta agregada',
             `📧 ${correo}\n` +
@@ -1010,7 +1066,6 @@ async function agregarCuentaStreaming() {
             'exito'
         );
 
-        // 4. Limpiar formulario
         document.getElementById('nuevoCorreo').value = '';
         document.getElementById('nuevaClave').value = '';
         document.querySelectorAll('.pin-input-admin').forEach(inp => inp.value = '');
@@ -1049,7 +1104,6 @@ function actualizarStatsCuentas() {
     document.getElementById('csIngresoMensual').textContent = '$' + ingreso.toFixed(2);
 }
 
-// 🔥 CAMBIO 4: renderizarCuentasStreaming() — muestra el código en la tarjeta
 function renderizarCuentasStreaming() {
     const container = document.getElementById('listaCuentasStreaming');
     container.innerHTML = '';
@@ -1130,7 +1184,6 @@ async function eliminarCuentaStreaming(servicio, cuentaId) {
     if (!confirm('⚠️ ¿Eliminar esta cuenta y TODOS sus perfiles?\n\nEsta acción no se puede deshacer.')) return;
     try {
         const cuenta = cuentasStreamingCache[servicio]?.[cuentaId];
-        // También borrar el código de renovación si existe
         if (cuenta && cuenta.codigo_renovacion) {
             await refCodigosRenovacion.child(cuenta.codigo_renovacion).remove();
         }
@@ -1139,7 +1192,6 @@ async function eliminarCuentaStreaming(servicio, cuentaId) {
     } catch (e) { mostrarMensaje('Error', e.message, 'error'); }
 }
 
-// 🔥 NUEVAS FUNCIONES DE UTILIDAD
 function copiarCodigoCuenta(codigo) {
     navigator.clipboard.writeText(codigo).then(() => {
         mostrarMensaje('✅ Copiado', 'Código ' + codigo + ' copiado al portapapeles', 'exito');
@@ -1153,23 +1205,20 @@ async function regenerarCodigoRenovacion(servicio, cuentaId) {
     if (!cuenta) return;
     const codigoAnterior = cuenta.codigo_renovacion || '—';
 
-    if (!confirm(`¿Regenerar el código de renovación?\n\nCódigo actual: ${codigoAnterior}\n\n⚠️ El código anterior dejará de funcionar. Los clientes con el código viejo NO podrán renovar hasta que les des el nuevo.`)) return;
+    if (!confirm(`¿Regenerar el código de renovación?\n\nCódigo actual: ${codigoAnterior}\n\n⚠️ El código anterior dejará de funcionar.`)) return;
 
     try {
         const nuevoCodigo = await generarCodigo6DigitosUnico();
         console.log('🔄 Nuevo código generado:', nuevoCodigo);
 
-        // Borrar el código anterior
         if (codigoAnterior && codigoAnterior !== '—') {
             await refCodigosRenovacion.child(codigoAnterior).remove();
         }
 
-        // Actualizar la cuenta con el nuevo código
         await refCuentasStreaming.child(servicio).child(cuentaId).update({
             codigo_renovacion: nuevoCodigo
         });
 
-        // Guardar el nuevo código en el índice
         await refCodigosRenovacion.child(nuevoCodigo).set({
             codigo: nuevoCodigo,
             servicio: servicio,
@@ -1186,7 +1235,7 @@ async function regenerarCodigoRenovacion(servicio, cuentaId) {
 
         mostrarMensaje(
             '🔄 Código regenerado',
-            `Nuevo código: ${nuevoCodigo}\n\nAnterior: ${codigoAnterior}\n\nActualiza a los clientes activos si lo necesitas.`,
+            `Nuevo código: ${nuevoCodigo}\n\nAnterior: ${codigoAnterior}`,
             'exito'
         );
     } catch (e) {
@@ -1438,11 +1487,66 @@ function esPedidoDeStreaming(p) {
     return false;
 }
 
+// ═══════════════════════════════════════════════
+// 🔥 NUEVO: Detecta si un pedido viene de un usuario registrado
+// ═══════════════════════════════════════════════
+function esUsuarioRegistrado(uid) {
+    if (!uid) return false;
+    const uidStr = String(uid);
+    if (uidStr.startsWith('anon_')) return false;
+    if (uidStr.startsWith('anon-')) return false;
+    if (uidStr === 'anonimo') return false;
+    return uidStr.length >= 20; // Firebase UIDs tienen ~28 caracteres
+}
+
+// 🔥 NUEVO: Obtiene datos del usuario (id_cliente y correo) con caché
+async function obtenerDatosUsuario(uid) {
+    if (!uid || !esUsuarioRegistrado(uid)) return null;
+    
+    // Revisar caché
+    if (cacheUsuarios[uid] !== undefined) {
+        return cacheUsuarios[uid];
+    }
+    
+    try {
+        const snap = await db.ref('usuarios/' + uid).once('value');
+        const datos = snap.val() || {};
+        const resultado = {
+            id_cliente: datos.id_cliente || null,
+            correo: datos.correo || datos.email || null,
+            nombre: datos.nombre || null
+        };
+        cacheUsuarios[uid] = resultado;
+        return resultado;
+    } catch (e) {
+        console.warn('Error obteniendo usuario:', uid, e.message);
+        cacheUsuarios[uid] = null;
+        return null;
+    }
+}
+
+// 🔥 Precarga datos de usuarios únicos en los pedidos
+async function precargarDatosUsuarios() {
+    const uidsUnicos = new Set();
+    todosLosPedidos.forEach(p => {
+        if (esUsuarioRegistrado(p.uid) && !cacheUsuarios[p.uid]) {
+            uidsUnicos.add(p.uid);
+        }
+    });
+    
+    const promesas = Array.from(uidsUnicos).map(uid => obtenerDatosUsuario(uid));
+    await Promise.all(promesas);
+}
+
 async function cargarPedidosAdmin() {
     try {
         const snap = await db.ref('pedidos').limitToLast(1000).once('value');
         const datos = snap.val() || {};
         todosLosPedidos = Object.entries(datos).map(([key, p]) => ({ ...p, key }));
+        
+        // 🔥 Precarga los datos de usuarios
+        await precargarDatosUsuarios();
+        
         renderizarPedidos();
         actualizarBadgePendientes();
     } catch (e) { document.getElementById('listaPedidosAdmin').innerHTML = '<div class="lista-vacia">Error: ' + e.message + '</div>'; }
@@ -1468,7 +1572,9 @@ function renderizarPedidos() {
         const ref = String(p.referencia_pago || p.referencia || '').toLowerCase();
         const jug = String(p.nombre_jugador || p.id_jugador || '').toLowerCase();
         const prod = String(p.producto || p.juego || '').toLowerCase();
-        return nro.includes(buscar) || ref.includes(buscar) || jug.includes(buscar) || prod.includes(buscar);
+        const idCli = String(p.id_cliente || '').toLowerCase();
+        const correo = String(p.email_cliente || p.correo_cliente || '').toLowerCase();
+        return nro.includes(buscar) || ref.includes(buscar) || jug.includes(buscar) || prod.includes(buscar) || idCli.includes(buscar) || correo.includes(buscar);
     });
     lista.sort((a, b) => new Date(b.fecha || 0).getTime() - new Date(a.fecha || 0).getTime());
     const totalPedidos = lista.length;
@@ -1535,6 +1641,13 @@ function renderizarTarjetaPedido(p) {
     const esStreaming = esPedidoDeStreaming(p);
     const tieneDatos = tieneDatosEntrega(p);
     const requiereEntregaManual = esStreaming && !tieneDatos;
+    
+    // 🔥 NUEVO: datos del cliente registrado
+    const esRegistrado = esUsuarioRegistrado(p.uid);
+    const datosUsuario = esRegistrado ? (cacheUsuarios[p.uid] || null) : null;
+    const idCliente = datosUsuario?.id_cliente || null;
+    const correoCliente = datosUsuario?.correo || null;
+    
     let stepRecibido = 'recibido', stepVerificando = '', stepCompletado = '', line1 = 'active', line2 = '';
     if (estado === 'completado') { stepVerificando = 'verificando'; stepCompletado = 'completado'; line1 = 'completed'; line2 = 'completed'; }
     else if (estado === 'procesando') { stepVerificando = 'verificando'; line1 = 'active'; }
@@ -1543,6 +1656,15 @@ function renderizarTarjetaPedido(p) {
     const iconRef = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
     const iconCheck = `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
     const iconSearch = `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
+    
+    // 🔥 NUEVA caja de cliente registrado
+    const cajaCliente = (esRegistrado && (idCliente || correoCliente)) ? `
+        <div class="pedido-cliente-box">
+            <div class="titulo-cliente">⭐ CLIENTE REGISTRADO</div>
+            ${idCliente ? `<div>🆔 <strong>ID Cliente:</strong> <span class="id-cliente-valor">${esc(idCliente)}</span> <button class="btn-copiar-id-cliente" onclick="event.stopPropagation(); copiarIdCliente('${esc(idCliente)}')">📋</button></div>` : ''}
+            ${correoCliente ? `<div>📧 <strong>Correo:</strong> ${esc(correoCliente)}</div>` : ''}
+        </div>` : '';
+    
     const detalleExpandido = `
         <div class="detalle-expandido">
             <h4>📋 Detalles del Pedido</h4>
@@ -1555,6 +1677,9 @@ function renderizarTarjetaPedido(p) {
             <div class="detalle-fila"><span class="label">ID Jugador:</span><span class="valor">${esc(idJugador)}</span></div>
             <div class="detalle-fila"><span class="label">Nombre:</span><span class="valor">${esc(nombreJugador)}</span></div>
             <div class="detalle-fila"><span class="label">WhatsApp:</span><span class="valor">${esc(p.whatsapp_cliente || '—')}</span></div>
+            ${idCliente ? `<div class="detalle-fila"><span class="label">🆔 ID Cliente:</span><span class="valor">${esc(idCliente)}</span></div>` : ''}
+            ${correoCliente ? `<div class="detalle-fila"><span class="label">📧 Correo Cliente:</span><span class="valor">${esc(correoCliente)}</span></div>` : ''}
+            <div class="detalle-fila"><span class="label">Tipo:</span><span class="valor">${esRegistrado ? '⭐ Registrado' : '👤 Anónimo'}</span></div>
             <div class="detalle-fila"><span class="label">Estado:</span><span class="valor"><span class="badge-estado ${estado}">${TEXTO_ESTADO[estado]}</span></span></div>
         </div>`;
     const formularioEntrega = requiereEntregaManual ? `
@@ -1579,7 +1704,7 @@ function renderizarTarjetaPedido(p) {
         <div class="pedido-card ${requiereEntregaManual ? 'pendiente-manual' : ''}" onclick="toggleDetalle(this)">
             <div class="pedido-header">
                 <div class="pedido-header-left">
-                    <div class="pedido-id">#${esc(idPedido)}${requiereEntregaManual ? ' 🚨' : ''}</div>
+                    <div class="pedido-id">#${esc(idPedido)}${requiereEntregaManual ? ' 🚨' : ''}${esRegistrado ? ' ⭐' : ''}</div>
                     <div class="pedido-fecha"><svg width="12" height="12" viewBox="0 0 24 24" fill="#8899b0"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>${esc(formatearFecha(p.fecha))}</div>
                 </div>
                 <div class="pedido-header-right">
@@ -1596,6 +1721,7 @@ function renderizarTarjetaPedido(p) {
                 <div><strong>Nombre:</strong> ${esc(nombreJugador)}</div>
                 <div><strong>📱 WhatsApp:</strong> ${esc(p.whatsapp_cliente || '—')}</div>
             </div>
+            ${cajaCliente}
             <div class="pedido-timeline">
                 <div class="timeline-step ${stepRecibido}"><div class="timeline-icon">${iconCheck}</div><div class="timeline-label">Recibido</div></div>
                 <div class="timeline-line ${line1}"></div>
@@ -1607,6 +1733,15 @@ function renderizarTarjetaPedido(p) {
             ${formularioEntrega}
             ${acciones}
         </div>`;
+}
+
+function copiarIdCliente(idCliente) {
+    if (!idCliente) return;
+    navigator.clipboard.writeText(idCliente).then(() => {
+        mostrarMensaje('✅ Copiado', 'ID Cliente ' + idCliente + ' copiado', 'exito');
+    }).catch(() => {
+        mostrarMensaje('Copia manual', 'Copia este ID: ' + idCliente, 'info');
+    });
 }
 
 function toggleDetalle(card) { card.classList.toggle('expandido'); }
@@ -1721,7 +1856,8 @@ function renderizarUsuarios() {
     if (buscar) lista = lista.filter(u =>
         (u.correo || '').toLowerCase().includes(buscar) ||
         (u.nombre || '').toLowerCase().includes(buscar) ||
-        (u.id_jugador || '').toLowerCase().includes(buscar));
+        (u.id_jugador || '').toLowerCase().includes(buscar) ||
+        (u.id_cliente || '').toLowerCase().includes(buscar));
     if (lista.length === 0) { contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">📭</div>No hay usuarios</div>'; return; }
     contenedor.innerHTML = lista.map(u => renderizarTarjetaUsuario(u)).join('');
 }
@@ -1733,6 +1869,7 @@ function renderizarTarjetaUsuario(u) {
     const correo = u.correo || u.email || 'Sin correo';
     const inicial = String(nombre).charAt(0).toUpperCase() || '?';
     const idJugador = u.id_jugador || u.whatsapp || '—';
+    const idCliente = u.id_cliente || null;
     const totalPedidos = u.totalPedidos || 0;
     return `
         <div class="usuario-card">
@@ -1747,7 +1884,8 @@ function renderizarTarjetaUsuario(u) {
                 ${badge}
             </div>
             <div class="usuario-meta">
-                <span>🆔 <strong>${esc(idJugador)}</strong></span>
+                ${idCliente ? `<span>⭐ ID Cliente: <strong class="id-cliente-admin">${esc(idCliente)}</strong></span>` : ''}
+                <span>🆔 <strong>ID Jugador:</strong> ${esc(idJugador)}</span>
                 <span>📦 Pedidos: <span class="pedidos-count">${totalPedidos}</span></span>
             </div>
             <div class="usuario-acciones">
