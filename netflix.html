@@ -118,19 +118,7 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .section-divider{margin:24px 0 18px;text-align:center}
 .section-divider span{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;padding:8px 22px;border-radius:30px;font-size:13px;font-weight:800;letter-spacing:1.5px;display:inline-block;text-transform:uppercase;box-shadow:0 0 20px rgba(212,175,55,0.4);}
 
-/* 🔥 Banner de stock */
-.stock-banner{
-    margin: 0 0 18px;
-    padding: 14px 18px;
-    border-radius: 14px;
-    font-size: 14px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid;
-    animation: stockIn 0.4s ease;
-}
+.stock-banner{margin:0 0 18px;padding:14px 18px;border-radius:14px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:12px;border:1px solid;animation:stockIn 0.4s ease;}
 @keyframes stockIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .stock-banner.ok{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border-color:rgba(34,197,94,0.45);color:#86efac;}
 .stock-banner.poco{background:linear-gradient(135deg,rgba(245,158,11,0.18),rgba(245,158,11,0.05));border-color:rgba(245,158,11,0.5);color:#fbbf24;}
@@ -142,16 +130,7 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .stock-banner .stock-punto.activo{opacity:1;box-shadow:0 0 8px currentColor;}
 
 .product-card.agotado{opacity:0.55;filter:grayscale(0.5);}
-.product-card.agotado::after{
-    content:'AGOTADO';
-    position:absolute;top:12px;right:-32px;
-    background:#ef4444;color:#fff;
-    padding:4px 40px;
-    font-size:10px;font-weight:900;letter-spacing:1.5px;
-    transform:rotate(35deg);
-    box-shadow:0 4px 12px rgba(239,68,68,0.5);
-    z-index:2;
-}
+.product-card.agotado::after{content:'AGOTADO';position:absolute;top:12px;right:-32px;background:#ef4444;color:#fff;padding:4px 40px;font-size:10px;font-weight:900;letter-spacing:1.5px;transform:rotate(35deg);box-shadow:0 4px 12px rgba(239,68,68,0.5);z-index:2;}
 .product-card.agotado .btn-buy{background:rgba(107,114,128,0.3);color:#9ca3af;cursor:not-allowed;box-shadow:none;pointer-events:none;}
 
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
@@ -677,6 +656,7 @@ const URL_VERIFICAR_PAGO = '/api/verificar-pago';
 const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
 const URL_TELEGRAM = '/api/notificar-telegram';
 const URL_ASIGNAR_PERFIL = '/api/asignar-perfil';
+const URL_NOTIFICAR_BOT = '/api/notificar-bot';
 
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
@@ -1188,7 +1168,6 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
             es_renovacion: leerModoRenovacion(),
             codigo_renovacion: localStorage.getItem('codigo_renovacion_usado') || null,
             origen: 'netflix-unificado',
-            // 🔥 NUEVO: marcamos que el admin debe enviar los datos manualmente
             datos_enviados_al_cliente: false
         };
 
@@ -1229,7 +1208,6 @@ async function verificarPagoPabilo(referencia) {
     }
 }
 
-// 🎟️ VERIFICAR CÓDIGO RG DEL ADMIN
 async function verificarCodigoRG(codigoOriginal) {
     try {
         const codigo = String(codigoOriginal || '').trim().toUpperCase();
@@ -1294,7 +1272,6 @@ async function marcarCodigoRGComoUsado(codigoOriginal, numeroPedido) {
     } catch (e) { return false; }
 }
 
-// TEST
 async function verificarCodigoTEST(codigo) {
     try {
         const snap = await refCodigosTEST.child(codigo).once('value');
@@ -1317,7 +1294,6 @@ async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
-// Referencias
 async function verificarReferenciaEnFirebase(ref) {
     try { const snap = await refReferencias.child(ref).once('value'); return snap.exists(); }
     catch (e) { return false; }
@@ -1379,9 +1355,6 @@ async function marcarCuponComoUsado(codigo) {
     } catch (e) {}
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🔥 WhatsApp: construir mensaje (para uso MANUAL desde admin)
-// ═══════════════════════════════════════════════════════════
 function construirMensajeStreaming(pedido) {
     const nombre = pedido.nombre_jugador || 'Cliente';
     const productoP = pedido.producto || '';
@@ -1402,7 +1375,6 @@ function construirMensajeStreaming(pedido) {
         if (datos.correo) msg += `📧 *Correo:* ${datos.correo}\n`;
         if (datos.clave) msg += `🔑 *Clave:* ${datos.clave}\n`;
 
-        // 🔥 Cuenta completa: listar los N PINs
         if (Array.isArray(datos.pines) && datos.pines.length > 1) {
             msg += `\n🎟️ *PINs de cada perfil:*\n`;
             datos.pines.forEach(p => {
@@ -1423,10 +1395,48 @@ function construirMensajeStreaming(pedido) {
     return msg;
 }
 
-// 🔥 DESACTIVADO: el admin lo envía manualmente desde el panel
-async function enviarWhatsAppDesdePasarela(pedido, pedidoKey) {
-    console.log('📵 Envío automático DESACTIVADO — el admin lo envía manual desde el panel');
-    return;
+// 🚀 ENVÍO AUTOMÁTICO al cliente vía bot de WhatsApp
+async function enviarWhatsAppDesdePasarela(datosStreaming, numeroPedido, referencia) {
+    try {
+        const d = getDatosPedidoActuales();
+        let tel = String(d.whatsapp || '').replace(/\D/g, '');
+        if (!tel || tel.length < 10) {
+            console.warn('📵 Sin WhatsApp válido, no se envía');
+            return;
+        }
+
+        const pedidoFake = {
+            nombre_jugador: d.nombreJugador || 'Cliente',
+            producto: d.producto,
+            numero_pedido: numeroPedido,
+            monto_usd: precioUsdFinal,
+            monto_bs: precioBsFinal,
+            referencia_pago: referencia,
+            datos_streaming: datosStreaming || {},
+            codigo_renovacion: (datosStreaming && datosStreaming.codigo_renovacion_guardar) || localStorage.getItem('codigo_renovacion_usado') || '',
+            es_renovacion: leerModoRenovacion()
+        };
+
+        const mensaje = construirMensajeStreaming(pedidoFake);
+
+        const res = await fetch(URL_NOTIFICAR_BOT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                telefono: tel,
+                mensajeCliente: mensaje
+            })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+            console.log('✅ WhatsApp enviado al cliente vía bot');
+        } else {
+            console.warn('⚠️ No se pudo enviar WhatsApp:', data.error);
+        }
+    } catch (e) {
+        console.warn('⚠️ Error enviando WhatsApp:', e.message);
+    }
 }
 
 // 🔥 FLUJO PRINCIPAL DE VERIFICACIÓN
@@ -1816,7 +1826,6 @@ function mostrarResultadoExitoso(dataAsignar, referencia, numeroPedido) {
 
     tarjetaDatosActuales = { datos, codigo_renovacion: codigoRenov, producto: d.producto, numeroPedido };
 
-    // 🔥 ¿Es cuenta completa? (tiene array de pines con más de 1)
     const esCuentaCompleta = Array.isArray(datos.pines) && datos.pines.length > 1;
 
     let html = `<div id="tarjetaDescarga">
@@ -1853,6 +1862,10 @@ function mostrarResultadoExitoso(dataAsignar, referencia, numeroPedido) {
     <button class="btn-imagen" onclick="descargarTarjeta()">📥 GUARDAR IMAGEN</button>`;
 
     document.getElementById('tarjetaContenedor').innerHTML = html;
+
+    // 🚀 ENVÍO AUTOMÁTICO de WhatsApp al cliente
+    enviarWhatsAppDesdePasarela(datos, numeroPedido, referencia).catch(e => console.warn('Auto-send WhatsApp:', e));
+
     mostrarSeccion('seccion-exito');
     marcarProgreso(4);
 }
@@ -1902,7 +1915,6 @@ function realizarOtraRecarga() {
     consultarStockNetflix(true);
 }
 
-// Menú
 window.alternarMenu = function() {
     const mf = document.getElementById('menuFlotante');
     const mp = document.getElementById('menuPerfil');
@@ -1932,7 +1944,6 @@ window.cerrarTodosLosMenus = function(e) {
     }
 };
 
-// Auth
 const modalLogin = document.getElementById('modalLogin');
 const loginForm = document.getElementById('loginForm');
 const perfilContainer = document.getElementById('perfilContainer');
@@ -2022,7 +2033,7 @@ window.addEventListener('scroll', () => {
 consultarStockNetflix();
 setInterval(() => consultarStockNetflix(true), 120000);
 
-console.log('🚀 NETFLIX CARGADO — Con stock dinámico + 5 PINs + envío manual por admin');
+console.log('🚀 NETFLIX CARGADO — Stock dinámico + 5 PINs + envío AUTOMÁTICO por bot');
 </script>
 </body>
 </html>
