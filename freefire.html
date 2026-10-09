@@ -110,6 +110,7 @@ body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:6
 .id-status.valido .check-icono{width:28px;height:28px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:white;flex-shrink:0;}
 .id-status.valido .nombre-jugador{color:#fff;font-weight:800;}
 .id-status.error{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));color:#f87171;border:1px solid rgba(239,68,68,0.5);}
+.id-status.advertencia{display:flex;align-items:flex-start;gap:10px;background:linear-gradient(135deg,rgba(212,175,55,0.22),rgba(212,175,55,0.08));color:#f5d76e;border:1px solid rgba(212,175,55,0.55);font-size:13px;line-height:1.45;font-weight:600;}
 .section-divider{margin:24px 0 18px;text-align:center}
 .section-divider span{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;padding:8px 22px;border-radius:30px;font-size:13px;font-weight:800;letter-spacing:1.5px;display:inline-block;text-transform:uppercase;box-shadow:0 0 20px rgba(212,175,55,0.4);}
 
@@ -651,7 +652,6 @@ body.con-nav .back-to-top{bottom:calc(var(--alto-nav) + 20px + env(safe-area-ins
 <script>
 /* ═══════════════════════════════════════════════════════════════
    RECARGASGAMES — FREE FIRE — FLUJO UNIFICADO
-   Idéntico a Delta Force y Bigo Live en estructura y funcionamiento.
    ═══════════════════════════════════════════════════════════════ */
 
 const firebaseConfig = {
@@ -701,7 +701,6 @@ function mostrarMensaje(titulo, mensaje, tipo='info', textoBoton='Entendido') {
 function cerrarMensaje() { document.getElementById('mensajeOverlay').classList.remove('activo'); }
 document.getElementById('mensajeOverlay').addEventListener('click', (e) => { if (e.target.id === 'mensajeOverlay') cerrarMensaje(); });
 
-// 🔥 CONTROL DE BARRA INFERIOR — oculta en pasos internos
 function mostrarSeccion(id) {
     document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
     const el = document.getElementById(id);
@@ -856,17 +855,18 @@ if (inputId) {
             verificandoId = false;
 
             if (resultado && resultado.ok && resultado.valido === true) {
+                // ✅ ID verificado correctamente
                 idVerificado = true;
                 nicknameVerificado = resultado.nickname || `ID: ${id}`;
                 mostrarEstado('', 'valido', nicknameVerificado);
-            } else if (resultado && resultado.valido === false) {
-                idVerificado = false;
-                mostrarEstado(resultado.mensaje || '❌ ID no encontrado en Free Fire', 'error');
             } else {
-                console.warn('⚠️ Backend no respondió, modo tolerante');
+                // ⚠️ No se pudo verificar el ID — permitimos continuar con advertencia
                 idVerificado = true;
                 nicknameVerificado = `ID: ${id}`;
-                mostrarEstado('', 'valido', `ID: ${id} (sin verificar)`);
+                mostrarEstado(
+                    '⚠️ No pudimos verificar este ID. Puedes continuar con la compra, pero revisa bien tus datos: NO se realizan reembolsos.',
+                    'advertencia'
+                );
             }
             actualizarBotonContinuar();
         }, 500);
@@ -1073,7 +1073,7 @@ async function guardarReferenciaFalsa(referencia, motivo) {
             fecha_legible: new Date().toLocaleString('es-VE'),
             juego: d.juego, id_jugador: d.idJugador, nombre_jugador: d.nombreJugador,
             producto: d.producto, monto_usd: precioUsdFinal, monto_bs: precioBsFinal,
-            referencia, metodo_pago: d.metodo, motivo: motivo || 'No encontrada en Pábilo',
+            referencia, metodo_pago: d.metodo, motivo: motivo || 'No encontrada',
             whatsapp_cliente: d.whatsapp || null, user_agent: navigator.userAgent
         });
     } catch (e) { console.error('Error guardando ref falsa:', e); }
@@ -1298,7 +1298,7 @@ async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugador
             codigo: data.codigo || null
         };
     } catch (error) {
-        return { exito: false, silencioso: true, motivo_admin: 'Error de conexión con Central One', mensaje: 'Tu pedido está siendo procesado' };
+        return { exito: false, silencioso: true, motivo_admin: 'Error de conexión', mensaje: 'Tu pedido está siendo procesado' };
     }
 }
 
@@ -1415,15 +1415,15 @@ async function iniciarVerificacion() {
         const resultadoVerif = await verificarPagoPabilo(referencia);
         if (!resultadoVerif.confirmado) {
             notificarAdmin('falso', { referencia, mensaje_extra: '⚠️ NO ENCONTRADA' });
-            await guardarReferenciaFalsa(referencia, 'No en Pábilo');
+            await guardarReferenciaFalsa(referencia, 'No encontrada');
             document.getElementById('msgError').textContent = 'Verifica tu referencia.';
             document.getElementById('tituloError').textContent = 'Pago No Encontrado';
             setTimeout(() => { mostrarSeccion('seccion-error'); btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO'; }, 800);
             return;
         }
         if (resultadoVerif.es_nuevo === false) {
-            notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ Ya usado según Pábilo' });
-            await guardarReferenciaFalsa(referencia, 'Ya usada en Pábilo');
+            notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ Ya usado previamente' });
+            await guardarReferenciaFalsa(referencia, 'Ya usada');
             mostrarSeccion('seccion-ref-usada');
             btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
             return;
@@ -1673,8 +1673,8 @@ window.addEventListener('scroll', () => {
 
 console.log('═══════════════════════════════════════════');
 console.log('🚀 FREEFIRE UNIFICADO CARGADO');
-console.log('   Idéntico a Delta Force y Bigo Live');
-console.log('   Barra inferior: oculta en pasos internos');
+console.log('   ID no verificado → permite continuar con aviso');
+console.log('   Sin mención al proveedor externo');
 console.log('═══════════════════════════════════════════');
 </script>
 </body>
