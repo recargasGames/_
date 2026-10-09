@@ -1,7 +1,5 @@
-// ============================================
-// 📱 /api/notificar-bot.js
-// Puente entre la web (Vercel) y el bot (Railway)
-// ============================================
+// api/notificar-bot.js
+// Puente entre la web (Vercel) y el bot de WhatsApp (Render)
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,54 +9,40 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
-    const BOT_URL = process.env.BOT_URL;
-    const BOT_TOKEN = process.env.BOT_TOKEN;
-
-    if (!BOT_URL || !BOT_TOKEN) {
-        return res.status(500).json({
-            ok: false,
-            error: 'Bot no configurado (faltan BOT_URL o BOT_TOKEN en Vercel)'
-        });
-    }
+    const BOT_URL = process.env.BOT_URL || 'https://bot-whatsaapp-recargas.onrender.com';
+    const BOT_TOKEN = process.env.BOT_TOKEN || 'recargasgames-bot-2026-secreta';
 
     try {
-        const { telefono, mensajeCliente, mensajeAdmin } = req.body || {};
+        const { telefono, mensajeCliente } = req.body || {};
 
-        if (!telefono || !mensajeCliente) {
-            return res.status(400).json({
-                ok: false,
-                error: 'Falta telefono o mensajeCliente'
-            });
+        if (!telefono) {
+            return res.status(400).json({ ok: false, error: 'Falta telefono' });
+        }
+        if (!mensajeCliente) {
+            return res.status(400).json({ ok: false, error: 'Falta mensajeCliente' });
         }
 
-        const respuesta = await fetch(`${BOT_URL}/api/notificar-pedido`, {
+        const respuesta = await fetch(`${BOT_URL}/enviar-mensaje-libre`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-token': BOT_TOKEN
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                telefono,
-                mensajeCliente,
-                mensajeAdmin
+                numero_whatsapp: telefono,
+                mensaje: mensajeCliente,
+                clave_secreta: BOT_TOKEN
             })
         });
 
         const data = await respuesta.json();
 
-        if (!respuesta.ok) {
+        if (!respuesta.ok || !data.ok) {
             console.error('❌ Bot respondió con error:', data);
-            return res.status(respuesta.status).json({
+            return res.status(respuesta.status || 500).json({
                 ok: false,
                 error: data.error || 'Error desde el bot'
             });
         }
 
-        return res.json({
-            ok: true,
-            enviadoCliente: data.enviadoCliente,
-            enviadoAdmin: data.enviadoAdmin
-        });
+        return res.json({ ok: true, mensaje: data.mensaje });
 
     } catch (error) {
         console.error('❌ Error conectando al bot:', error.message);
