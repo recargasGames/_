@@ -1,15 +1,8 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.6
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.7
 // ============================================
-// v3.6: NINTENDO corregido (5, 10, 20, 35, 50, 70 - eliminado 100 que no existe)
-//       Mapeo robusto: catalog_item_id + product_id + in_stock + available_stock
-//       Lee 'price' (no reseller_price)
-// v3.5.1: FIX disponibilidad - Central One usa 'product_id' y 'status: active'
-// v3.5: ROBLOX actualizado + endpoint disponibilidad
-// v3.4: AGREGADO PlayStation $1, $2, $3, $4
-// v3.3: FF Weekly al FREE FIRE
-// v3.2: Mobile Legends
-// v3.1: PUBG Mobile
+// v3.7: AGREGADOS PAQUETES DE NIVEL (LEVEL UP) FREE FIRE
+// v3.6: NINTENDO corregido + Mapeo robusto
 // ============================================
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
@@ -28,6 +21,14 @@ const SKU_MAP = {
     'FF-WEEKLY-SEMANAL':  '47bba141-8980-47f7-b4bd-2e264c2d9930',
     'FF-WEEKLY-MENSUAL':  '6f98867c-a84e-418e-ab54-83f1da1fdee2',
     'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
+    
+    // 🔥 FREE FIRE - LEVEL UP (NUEVOS)
+    'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757',
+    'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be',
+    'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328',
+    'FF-NIVEL-20':        '549739d0-f988-4d5d-9b18-5357bd8de9fa',
+    'FF-NIVEL-21':        'a9093b52-a726-4e9d-be8d-994df6ccd870',
+    'FF-NIVEL-22':        '5d18dc6d-98be-45c4-a472-68266f6a3c9d',
 
     // ⚔️ BLOOD STRIKE
     'BS-105':  'e4efc583-fcc4-4544-9547-8c687d663ba5',
@@ -143,9 +144,7 @@ const SKU_MAP = {
     'XBOX-50':  'b48fbf26-1812-4d5e-9c9b-42d0bfecb5ad',
     'XBOX-100': 'd60be4c3-fb96-4876-9f65-baeaf402b74f',
 
-    // ============================================
-    // 🎁 GIFT CARDS - NINTENDO US - v3.6 CORREGIDO
-    // ============================================
+    // 🎁 NINTENDO
     'NINTENDO-5':  '434fffe4-bcf0-4201-b770-c1533bafa5d1',
     'NINTENDO-10': 'f28a4f1b-617c-4b6a-814e-1263a91da6f5',
     'NINTENDO-20': '28d38620-68fc-4720-8e2f-586718f68e2b',
@@ -172,7 +171,6 @@ const SKU_MAP = {
 
 const MARGEN_JUEGOS = 1.20;
 const MARGEN_GIFTCARDS = 1.10;
-const MARGEN_STREAMING = 1.15;
 
 // ============================================
 // 📋 CONFIGURACIÓN DE PRODUCTOS
@@ -181,7 +179,9 @@ const PRODUCTOS_CONFIG = {
     'FREE FIRE': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,12}$/, paquetes:{
         '110':'FF-110-DIAMONDS','341':'FF-341-DIAMONDS','572':'FF-572-DIAMONDS',
         '1166':'FF-1166-DIAMONDS','2398':'FF-2398-DIAMONDS','6160':'FF-6160-DIAMONDS',
-        'weekly_semanal':'FF-WEEKLY-SEMANAL','weekly_mensual':'FF-WEEKLY-MENSUAL','weekly_booyah':'FF-WEEKLY-BOOYAH'
+        'weekly_semanal':'FF-WEEKLY-SEMANAL','weekly_mensual':'FF-WEEKLY-MENSUAL','weekly_booyah':'FF-WEEKLY-BOOYAH',
+        'nivel_6':'FF-NIVEL-17', 'nivel_10':'FF-NIVEL-18', 'nivel_15':'FF-NIVEL-19',
+        'nivel_20':'FF-NIVEL-20', 'nivel_25':'FF-NIVEL-21', 'nivel_30':'FF-NIVEL-22'
     }},
     'BLOOD STRIKE': { tipo:'juego', input:['id_jugador'], validar:/^\d{8,12}$/, paquetes:{
         '105':'BS-105','320':'BS-320','540':'BS-540','1100':'BS-1100','2260':'BS-2260','5800':'BS-5800'
@@ -221,9 +221,6 @@ const PRODUCTOS_CONFIG = {
         '1':'XBOX-1','5':'XBOX-5','10':'XBOX-10','15':'XBOX-15',
         '20':'XBOX-20','25':'XBOX-25','50':'XBOX-50','100':'XBOX-100'
     }},
-    // ============================================
-    // 🎁 NINTENDO - v3.6 CORREGIDO
-    // ============================================
     'NINTENDO': { tipo:'giftcard', input:['id_jugador'], paquetes:{
         '5':  'NINTENDO-5',
         '10': 'NINTENDO-10',
@@ -371,9 +368,6 @@ export default async function handler(req, res) {
                 return res.status(r.status).json(data);
             }
 
-            // ============================================
-            // 🔍 DISPONIBILIDAD - v3.6 CON MAPEO ROBUSTO
-            // ============================================
             if (accion === 'disponibilidad') {
                 const { juego } = req.query;
                 if (!juego) return res.status(400).json({ error: 'Falta parámetro juego' });
@@ -389,19 +383,11 @@ export default async function handler(req, res) {
                 const data = await r.json();
                 const items = data.items || data.catalog || data.data || data.products || data.productos || [];
 
-                // ✅ Mapeo robusto: acepta TODAS las variantes que devuelve Central One
                 const catalogoMap = {};
                 for (const it of items) {
-                    const uuid = it.catalog_item_id
-                              || it.product_id
-                              || it.id
-                              || it.uuid;
+                    const uuid = it.catalog_item_id || it.product_id || it.id || it.uuid;
                     if (!uuid) continue;
-
-                    const disponible =
-                        it.in_stock === true
-                        || (it.status === 'active' && it.available !== false && it.stock !== 0);
-
+                    const disponible = it.in_stock === true || (it.status === 'active' && it.available !== false && it.stock !== 0);
                     catalogoMap[uuid] = {
                         disponible,
                         stock: it.available_stock ?? it.stock ?? it.quantity ?? null,
@@ -421,27 +407,16 @@ export default async function handler(req, res) {
                     if (!info) {
                         paquetes[codigo] = { disponible: false, motivo: 'No existe en Central One' };
                     } else {
-                        paquetes[codigo] = {
-                            disponible: info.disponible,
-                            stock: info.stock,
-                            nombre: info.nombre,
-                            precio_costo: info.precio_costo
-                        };
+                        paquetes[codigo] = { disponible: info.disponible, stock: info.stock, nombre: info.nombre, precio_costo: info.precio_costo };
                     }
                 }
 
-                return res.status(200).json({
-                    ok: true,
-                    juego: juego.toUpperCase(),
-                    tipo: config.tipo,
-                    paquetes,
-                    consultado_en: new Date().toISOString()
-                });
+                return res.status(200).json({ ok: true, juego: juego.toUpperCase(), tipo: config.tipo, paquetes, consultado_en: new Date().toISOString() });
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.6 funcionando',
-                version: '3.6',
+                mensaje: '✅ API Central One v3.7 funcionando',
+                version: '3.7',
                 acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
@@ -460,9 +435,7 @@ export default async function handler(req, res) {
                 const config = PRODUCTOS_CONFIG[juego.toUpperCase()];
                 if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
-                const inputRequerido = config.tipo === 'giftcard' && config.input.includes('email')
-                    ? email
-                    : id_jugador;
+                const inputRequerido = config.tipo === 'giftcard' && config.input.includes('email') ? email : id_jugador;
 
                 if (!inputRequerido) {
                     return res.status(400).json({ error: 'Falta input requerido (id_jugador o email)' });
@@ -485,10 +458,7 @@ export default async function handler(req, res) {
                 };
 
                 if (juegoUpper === 'MOBILE LEGENDS') {
-                    payload.items[0].target_payload = {
-                        player_id: id_jugador,
-                        server: zona_id || servidor || '1'
-                    };
+                    payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
                 } else if (config.tipo === 'giftcard' && config.input.includes('email')) {
                     payload.items[0].target_payload = { email: email };
                 } else {
