@@ -800,6 +800,7 @@ let cacheUsuarios = {};
 
 const PRODUCTOS_JUEGOS = {
     'ff_110':  { producto: '110 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '110',  usd: 0.81,  tipo: 'central_one' },
+    'ff_220':  { producto: '220 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '110_x2', usd: 1.62,  tipo: 'central_one' },
     'ff_341':  { producto: '341 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '341',  usd: 2.60,  tipo: 'central_one' },
     'ff_572':  { producto: '572 Diamantes Free Fire',  juego: 'FREE FIRE', paquete: '572',  usd: 4.20,  tipo: 'central_one' },
     'ff_1166': { producto: '1166 Diamantes Free Fire', juego: 'FREE FIRE', paquete: '1166', usd: 7.80,  tipo: 'central_one' },
@@ -1661,7 +1662,6 @@ function obtenerIdMostrar(p) {
     return { label: 'ID Jugador', valor: '—', vacio: true };
 }
 
-// 🪄 Construye el mensaje de WhatsApp para el cliente (mismo formato que netflix.html)
 function construirMensajeCliente(pedido) {
     const nombre = pedido.nombre_jugador || 'Cliente';
     const productoP = pedido.producto || '';
@@ -1702,12 +1702,10 @@ function construirMensajeCliente(pedido) {
     return msg;
 }
 
-// 🪄 ENVIAR DATOS POR WHATSAPP (botón mágico)
 async function enviarDatosPorWhatsApp(pedidoKey) {
     const p = todosLosPedidos.find(x => x.key === pedidoKey);
     if (!p) { mostrarMensaje('Error', 'No se encontró el pedido', 'error'); return; }
 
-    // Validar WhatsApp
     let tel = String(p.whatsapp_cliente || '').replace(/\D/g, '');
     if (!tel || tel.length < 10) {
         mostrarMensaje('Sin WhatsApp', 'Este pedido no tiene WhatsApp del cliente.\n\nNo se puede enviar automáticamente.', 'advertencia');
@@ -1716,21 +1714,16 @@ async function enviarDatosPorWhatsApp(pedidoKey) {
     if (tel.startsWith('0')) tel = tel.substring(1);
     if (!tel.startsWith('58')) tel = '58' + tel;
 
-    // Construir mensaje
     const mensaje = construirMensajeCliente(p);
-
-    // Abrir WhatsApp Web con el mensaje pre-armado
     const url = `https://wa.me/${tel}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 
-    // Marcar como enviado en Firebase
     try {
         await db.ref('pedidos/' + pedidoKey).update({
             datos_enviados_al_cliente: true,
             fecha_envio_datos: new Date().toISOString(),
             enviado_por: auth.currentUser ? auth.currentUser.email : 'admin'
         });
-        // Actualizar cache local
         p.datos_enviados_al_cliente = true;
         p.fecha_envio_datos = new Date().toISOString();
         renderizarPedidos();
@@ -1764,7 +1757,6 @@ function renderizarTarjetaPedido(p) {
     const nombreMostrar = obtenerNombreCliente(p);
     const idInfo = obtenerIdMostrar(p);
 
-    // 🪄 Estado del envío
     const datosEnviados = p.datos_enviados_al_cliente === true;
     const puedeEnviar = esStreaming && tieneDatos && !requiereEntregaManual;
 
@@ -1817,7 +1809,6 @@ function renderizarTarjetaPedido(p) {
             <button class="entrega-btn-guardar" onclick="entregarStreamingManual('${esc(p.key)}')">💾 Guardar y enviar por WhatsApp</button>
         </div>` : '';
 
-    // 🪄 Botón mágico
     let botonEnviar = '';
     if (puedeEnviar) {
         if (datosEnviados) {
