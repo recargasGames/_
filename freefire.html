@@ -439,6 +439,12 @@ body.con-nav .back-to-top{bottom:calc(var(--alto-nav) + 20px + env(safe-area-ins
                     <button class="btn-buy" data-producto="110 Diamantes" data-usd="0.78" data-codigo="110">COMPRAR</button>
                 </div>
                 <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">220 Diamantes</div></div>
+                    <div class="product-desc">2 recargas de 110</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="1.48">$1.48</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="220 Diamantes (2x110)" data-usd="1.48" data-codigo="110_x2">COMPRAR</button>
+                </div>
+                <div class="product-card">
                     <div class="card-header"><div class="game-icon">💎</div><div class="product-title">341 Diamantes</div></div>
                     <div class="product-price-wrap"><span class="product-price" data-usd="2.30">$2.30</span><div class="product-ref"></div></div>
                     <button class="btn-buy" data-producto="341 Diamantes" data-usd="2.30" data-codigo="341">COMPRAR</button>
@@ -1342,11 +1348,67 @@ async function verificarPagoPabilo(referencia) {
     }
 }
 
+// 🔥 LÓGICA BLINDADA CONTRA BUCLE INFINITO Y DOBLE RECARGA
 async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugadorOverride) {
     const d = getDatosPedidoActuales();
     const juegoEnviar = (juegoOverride || d.juego).toUpperCase();
     const paqueteEnviar = paqueteOverride || d.paquete;
     const idEnviar = idJugadorOverride || d.idJugador;
+
+    // 🚨 CANDADO DE SEGURIDAD
+    if (window.procesandoRecarga && window.procesandoRecarga === idEnviar + paqueteEnviar) {
+        console.warn('⚠️ Intento de recarga duplicada bloqueado por seguridad.');
+        return { exito: false, silencioso: true, motivo_admin: 'BUCLE DETECTADO', mensaje: 'Pedido en revisión' };
+    }
+
+    // 🔥 LÓGICA ESPECIAL PARA 220 DIAMANTES (2x110)
+    if (paqueteEnviar === '110_x2') {
+        window.procesandoRecarga = idEnviar + paqueteEnviar;
+        console.log(`🔄 Iniciando recarga doble (2x110) para ID: ${idEnviar}`);
+        
+        try {
+            const res1 = await fetch(URL_CENTRAL_ONE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accion: 'recarga', datos: { juego: juegoEnviar, id_jugador: idEnviar, paquete: '110', email: idEnviar } })
+            });
+            const data1 = await res1.json();
+
+            if (!res1.ok || data1.exito === false) {
+                window.procesandoRecarga = null; 
+                return { exito: false, silencioso: true, motivo_admin: `FALLÓ 1RA RECARGA: ${data1.error || 'Error'}`, mensaje: 'Tu pedido está siendo procesado (1/2)' };
+            }
+
+            await new Promise(r => setTimeout(r, 2000)); // Pausa de seguridad
+
+            const res2 = await fetch(URL_CENTRAL_ONE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accion: 'recarga', datos: { juego: juegoEnviar, id_jugador: idEnviar, paquete: '110', email: idEnviar } })
+            });
+            const data2 = await res2.json();
+
+            window.procesandoRecarga = null; 
+
+            if (!res2.ok || data2.exito === false) {
+                return { exito: false, silencioso: true, motivo_admin: `FALLÓ 2DA RECARGA: ${data2.error || 'Error'}`, mensaje: 'Tu pedido está siendo procesado (2/2)' };
+            }
+
+            return {
+                exito: true,
+                mensaje: '¡220 Diamantes entregados con éxito! ✅',
+                id_solicitud: `${data1.id_solicitud} / ${data2.id_solicitud}`,
+                referencia: `${data1.referencia} / ${data2.referencia}`,
+                codigos: [],
+                codigo: null
+            };
+        } catch (error) {
+            window.procesandoRecarga = null; 
+            return { exito: false, silencioso: true, motivo_admin: 'ERROR DE RED EN DOBLE RECARGA', mensaje: 'Tu pedido está siendo procesado' };
+        }
+    }
+
+    // 🔄 FLUJO NORMAL PARA EL RESTO DE PAQUETES
     try {
         const res = await fetch(URL_CENTRAL_ONE, {
             method: 'POST',
@@ -1744,6 +1806,7 @@ window.addEventListener('scroll', () => {
 console.log('═══════════════════════════════════════════');
 console.log('🚀 FREEFIRE UNIFICADO CARGADO');
 console.log('   Estructura: Diamantes + Tarjetas | Pases de Nivel');
+console.log('   Doble recarga: 220 Diamantes (2x110) blindada contra bucles');
 console.log('═══════════════════════════════════════════');
 </script>
 </body>
