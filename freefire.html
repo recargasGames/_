@@ -898,9 +898,22 @@ function mostrarEstado(mensaje, tipo, nombre) {
 }
 async function verificarJugadorEnBackend(id) {
     try {
-        const res = await fetch(`/api/verificar-jugador?juego=FREE%20FIRE&id=${encodeURIComponent(id)}`);
+        // 🔥 AHORA APUNTA AL NUEVO ENDPOINT DE CENTRAL ONE
+        const res = await fetch(`/api/central-one?accion=verificar_jugador&juego=FREE%20FIRE&id_jugador=${encodeURIComponent(id)}`);
+        
         if (!res.ok) return { ok: false, motivo: 'http_' + res.status };
-        return await res.json();
+        
+        const data = await res.json();
+        
+        // Adaptamos la respuesta para que el frontend la entienda igual que antes
+        if (data.ok && data.valido) {
+            return { ok: true, valido: true, nickname: data.nickname };
+        } else if (data.ok && !data.valido && data.status === 'invalid') {
+            return { ok: true, valido: false, motivo: 'El ID no existe en el juego' };
+        } else {
+            // Si es 'unverified' o error, permitimos continuar con advertencia
+            return { ok: false, motivo: data.mensaje || 'No se pudo verificar' };
+        }
     } catch (e) {
         return { ok: false, motivo: 'network' };
     }
@@ -1510,8 +1523,7 @@ async function iniciarVerificacion() {
             const resultadoRecarga = await ejecutarRecarga({
                 tipo: r.data.tipo, tipo_producto: r.data.tipo_producto,
                 juego: r.data.juego, producto: r.data.producto,
-                paquete: r.data.paquete, id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador
-            });
+                paquete: r.data.paquete, id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador            });
             await new Promise(res => setTimeout(res, 1000));
             const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (MANUAL)', resultadoRecarga.codigos || [], {});
             await marcarReferenciaManualComoUsada(referencia, infoPedido.numeroMostrar);
