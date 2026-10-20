@@ -1,6 +1,7 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.7
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.8
 // ============================================
+// v3.8: AGREGADA VALIDACIÓN DE ID DE JUGADOR (/player/validate)
 // v3.7: AGREGADOS PAQUETES DE NIVEL (LEVEL UP) FREE FIRE
 // v3.6: NINTENDO corregido + Mapeo robusto
 // ============================================
@@ -368,6 +369,63 @@ export default async function handler(req, res) {
                 return res.status(r.status).json(data);
             }
 
+            // ============================================
+            // 🆕 VALIDACIÓN DE JUGADOR (API Central One)
+            // ============================================
+            if (accion === 'verificar_jugador') {
+                const { juego, id_jugador, zona_id } = req.query;
+                if (!juego || !id_jugador) {
+                    return res.status(400).json({ error: 'Faltan parámetros: juego o id_jugador' });
+                }
+
+                const juegoUpper = juego.toUpperCase();
+                const config = PRODUCTOS_CONFIG[juegoUpper];
+                if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
+
+                // Obtenemos el product_id de cualquier paquete del juego
+                const primerPaquete = Object.keys(config.paquetes)[0];
+                const sku = config.paquetes[primerPaquete];
+                const productId = SKU_MAP[sku];
+
+                if (!productId) return res.status(400).json({ error: 'No se encontró un product_id válido para este juego.' });
+
+                // Preparamos el target_payload
+                const targetPayload = { player_id: String(id_jugador) };
+                if (juegoUpper === 'MOBILE LEGENDS') {
+                    targetPayload.server = zona_id || '1';
+                }
+
+                try {
+                    const respuesta = await fetch(`${BASE_URL}/player/validate`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${API_KEY}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            target_payload: targetPayload
+                        })
+                    });
+
+                    const data = await respuesta.json();
+                    
+                    // Devolvemos la respuesta al frontend
+                    return res.status(200).json({
+                        ok: true,
+                        valido: data.status === 'valid',
+                        status: data.status,
+                        nickname: data.player?.name || null,
+                        reason: data.reason || null,
+                        mensaje: data.status === 'valid' ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
+                    });
+
+                } catch (error) {
+                    console.error('❌ Error validando jugador:', error);
+                    return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión con Central One' });
+                }
+            }
+
             if (accion === 'disponibilidad') {
                 const { juego } = req.query;
                 if (!juego) return res.status(400).json({ error: 'Falta parámetro juego' });
@@ -415,9 +473,9 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.7 funcionando',
-                version: '3.7',
-                acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'disponibilidad'],
+                mensaje: '✅ API Central One v3.8 funcionando',
+                version: '3.8',
+                acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'verificar_jugador', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
         }
