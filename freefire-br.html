@@ -425,7 +425,7 @@ body.con-nav .back-to-top{bottom:calc(var(--alto-nav) + 20px + env(safe-area-ins
 
         <!-- PESTAÑAS (TABS) -->
         <div class="tabs-container">
-            <button class="tab-btn activo" onclick="cambiarTab('diamantes', this)">💎 Diamantes </button>
+            <button class="tab-btn activo" onclick="cambiarTab('diamantes', this)">💎 Diamantes</button>
             <button class="tab-btn" onclick="cambiarTab('niveles', this)">🚀 Pases de Nivel</button>
         </div>
 
@@ -632,6 +632,7 @@ body.con-nav .back-to-top{bottom:calc(var(--alto-nav) + 20px + env(safe-area-ins
             <div class="resumen-fila"><span class="resumen-etiqueta">💰 Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
         </div>
 
+        <!-- BLOQUE PAGO MÓVIL (visible por defecto) -->
         <div class="datos-pago-box" id="bloqueDatosPago">
             <h3 class="titulo-seccion" style="margin-top:0;">🏦 Datos de Pago Móvil</h3>
             <div class="dato-line"><div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div><button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
@@ -641,18 +642,33 @@ body.con-nav .back-to-top{bottom:calc(var(--alto-nav) + 20px + env(safe-area-ins
             <button class="copiar-todo-btn" onclick="copiarTodosLosDatos(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar todos los datos de pago</button>
         </div>
 
+        <!-- BLOQUE BINANCE (oculto por defecto, se muestra al elegir Binance) -->
+        <div class="datos-pago-box" id="bloqueDatosBinance" style="display:none; text-align:center;">
+            <h3 class="titulo-seccion" style="margin-top:0;">🟡 Pago con Binance Pay</h3>
+            <p style="color:#cbd5e1; font-size:14px; margin-bottom:20px; line-height:1.5;">
+                Serás redirigido a la pasarela segura de Binance.<br>
+                Tu pedido se procesará automáticamente al confirmar el pago.
+            </p>
+            <div style="background:rgba(212,175,55,0.1); padding:15px; border-radius:12px; border:1px solid rgba(212,175,55,0.3); display:inline-block;">
+                <span style="font-weight:800; font-size:24px; color:#f5d76e;">$${precioUsdFinal ? precioUsdFinal.toFixed(2) : '0.00'} USD</span>
+            </div>
+        </div>
+
         <div class="cupon-box" id="cuponBox">
             <label class="cupon-label">🎁 ¿Tienes un código de descuento?</label>
             <div class="cupon-input-wrap"><input type="text" class="cupon-input" id="cuponInput" placeholder="Ingresa tu código" maxlength="20" autocomplete="off"><button class="cupon-btn" id="cuponBtn" onclick="aplicarCupon()">Aplicar</button></div>
             <div class="cupon-msg" id="cuponMsg"></div>
         </div>
 
-        <div class="datos-pago-box">
-            <label style="display:block;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
-            <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" autocomplete="off">
+        <!-- Solo para Pago Móvil -->
+        <div id="contenedorReferencia" style="display:block;">
+            <div class="datos-pago-box">
+                <label style="display:block;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
+                <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" autocomplete="off">
+            </div>
+            <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
         </div>
 
-        <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
         <button class="btn-accion" id="btnVerificar" onclick="iniciarVerificacion()" style="margin-top:14px;">✅ VERIFICAR PAGO</button>
     </section>
 
@@ -777,6 +793,7 @@ const URL_VERIFICAR_PAGO = '/api/verificar-pago';
 const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
 const URL_TELEGRAM = '/api/notificar-telegram';
 const URL_CENTRAL_ONE = '/api/central-one';
+const URL_BINANCE = '/api/verificar-binance'; // Endpoint fusionado de Binance/ZenoBank
 
 const CUPONES_VALIDOS = { 'GAMES': 4 };
 
@@ -929,7 +946,7 @@ function mostrarEstado(mensaje, tipo, nombre) {
 }
 async function verificarJugadorEnBackend(id) {
     try {
-        // 🔥 APUNTA AL NUEVO ENDPOINT DE CENTRAL ONE
+        // 🔥 VERIFICA CON CENTRAL ONE PARA FREE FIRE BR
         const res = await fetch(`/api/central-one?accion=verificar_jugador&juego=FREE%20FIRE%20BR&id_jugador=${encodeURIComponent(id)}`);
         
         if (!res.ok) return { ok: false, motivo: 'http_' + res.status };
@@ -973,12 +990,10 @@ if (inputId) {
             verificandoId = false;
 
             if (resultado && resultado.ok && resultado.valido === true) {
-                // ✅ ID verificado correctamente
                 idVerificado = true;
                 nicknameVerificado = resultado.nickname || `ID: ${id}`;
                 mostrarEstado('', 'valido', nicknameVerificado);
             } else {
-                // ⚠️ No se pudo verificar el ID — permitimos continuar con advertencia
                 idVerificado = true;
                 nicknameVerificado = `ID: ${id}`;
                 mostrarEstado(
@@ -1036,6 +1051,20 @@ function irAlPago() {
 
     precioUsdFinal = productoElegido.precioUsd;
     precioBsFinal = productoElegido.precioBs;
+
+    // 🔥 MOSTRAR EL BLOQUE DE PAGO CORRECTO SEGÚN EL MÉTODO ELEGIDO
+    if (metodo === 'BINANCE') {
+        document.getElementById('bloqueDatosPago').style.display = 'none';
+        document.getElementById('bloqueDatosBinance').style.display = 'block';
+        document.getElementById('contenedorReferencia').style.display = 'none';
+        document.getElementById('btnVerificar').innerHTML = '🟡 PAGAR CON BINANCE';
+    } else {
+        document.getElementById('bloqueDatosPago').style.display = 'block';
+        document.getElementById('bloqueDatosBinance').style.display = 'none';
+        document.getElementById('contenedorReferencia').style.display = 'block';
+        document.getElementById('btnVerificar').innerHTML = '✅ VERIFICAR PAGO';
+    }
+
     renderizarResumenPago();
     mostrarSeccion('seccion-pago');
     marcarProgreso(3);
@@ -1079,6 +1108,9 @@ function aplicarCupon() {
     document.getElementById('datoDescuento').textContent = `-${porcentaje}% (-${(productoElegido.precioUsd - precioUsdFinal).toFixed(2)} USD)`;
     document.getElementById('datoMontoTotal').innerHTML = `${precioUsdFinal.toFixed(2)} USD<br><small style="color:#cbd5e1">${precioBsFinal} Bs</small>`;
     document.getElementById('montoBsMostrar').textContent = precioBsFinal + " Bs";
+    // Actualizar visual del precio en el bloque Binance si está visible
+    const spanBinance = document.querySelector('#bloqueDatosBinance span');
+    if (spanBinance) spanBinance.textContent = `$${precioUsdFinal.toFixed(2)} USD`;
 }
 document.getElementById('cuponInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); aplicarCupon(); }
@@ -1118,8 +1150,8 @@ function getDatosPedidoActuales() {
 }
 function notificarAdmin(tipo, datos = {}) {
     const d = getDatosPedidoActuales();
-    const emojis = { exito:'🎉',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮' };
-    const titulos = { exito:'EXITOSO',falso:'NO ENCONTRADO',duplicado:'REFERENCIA USADA',cupon_usado:'CUPÓN USADO',error:'ERROR',manual:'MANUAL',codigo_test:'CÓDIGO TEST' };
+    const emojis = { exito:'🎉',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
+    const titulos = { exito:'EXITOSO',falso:'NO ENCONTRADO',duplicado:'REFERENCIA USADA',cupon_usado:'CUPÓN USADO',error:'ERROR',manual:'MANUAL',codigo_test:'CÓDIGO TEST',binance:'PAGO BINANCE' };
     const emoji = emojis[tipo] || 'ℹ️';
     const titulo = titulos[tipo] || tipo.toUpperCase();
     const esc = (txt) => String(txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -1351,7 +1383,8 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
                 } catch (errUser) { console.warn('⚠️ No se pudo actualizar usuario:', errUser.message); }
             }
 
-            const debeEnviarWhatsApp = (estado === "COMPLETADA") && d.whatsapp && d.whatsapp.length >= 8;
+            // Si es Binance, NO enviamos WhatsApp aquí, el webhook lo hará cuando se pague
+            const debeEnviarWhatsApp = (estado === "COMPLETADA" || estado === "PENDIENTE") && d.whatsapp && d.whatsapp.length >= 8 && d.metodo !== 'BINANCE';
             if (debeEnviarWhatsApp) {
                 try {
                     const pedidoCompleto = { ...pedidoData };
@@ -1437,7 +1470,54 @@ async function ejecutarRecarga(datosProducto = null) {
     return resultado;
 }
 
+// 🔥 NUEVA FUNCIÓN PARA PROCESAR PAGO CON BINANCE
+async function iniciarPagoBinance() {
+    const btn = document.getElementById('btnVerificar');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Generando pago...';
+
+    const d = getDatosPedidoActuales();
+    const refGenerada = 'BIN-' + Date.now(); // Referencia única para Binance
+
+    try {
+        // 1. Guardar pedido como pendiente en Firebase antes de redirigir
+        const infoPedido = await guardarPedidoEnFirebase(refGenerada, "PENDIENTE", '', 'ZenoBank', [], {});
+
+        // 2. Llamar a nuestro endpoint fusionado en Vercel
+        const res = await fetch(URL_BINANCE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                accion: 'crear',
+                orderId: refGenerada,
+                monto: precioUsdFinal.toFixed(2)
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success && data.checkoutUrl) {
+            // 3. Redirigir al cliente a ZenoBank
+            window.location.href = data.checkoutUrl;
+        } else {
+            throw new Error(data.error || 'No se pudo generar el link de pago');
+        }
+
+    } catch (error) {
+        console.error('Error Binance:', error);
+        notificarAdmin('error', { referencia: refGenerada, mensaje_extra: `❌ FALLÓ BINANCE: ${error.message}` });
+        mostrarMensaje('Error de Pago', 'No pudimos generar tu link de Binance. Intenta de nuevo o usa Pago Móvil.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '🟡 PAGAR CON BINANCE';
+    }
+}
+
 async function iniciarVerificacion() {
+    // 🔥 SI EL MÉTODO ES BINANCE, LLAMAMOS A LA NUEVA FUNCIÓN
+    if (metodo === 'BINANCE') {
+        return iniciarPagoBinance();
+    }
+
     const referencia = document.getElementById('referenciaPago').value.trim().toUpperCase();
     const btn = document.getElementById('btnVerificar');
     if (!referencia || referencia.length < 6) {
