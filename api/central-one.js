@@ -1,9 +1,9 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.8
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.9
 // ============================================
-// v3.8: AGREGADA VALIDACIÓN DE ID DE JUGADOR (/player/validate)
-// v3.7: AGREGADOS PAQUETES DE NIVEL (LEVEL UP) FREE FIRE
-// v3.6: NINTENDO corregido + Mapeo robusto
+// v3.9: AGREGADO FREE FIRE BRASIL (con precios y UUIDs reales)
+// v3.8: VALIDACIÓN DE ID DE JUGADOR (/player/validate)
+// v3.7: PAQUETES DE NIVEL (LEVEL UP) FREE FIRE LATAM
 // ============================================
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
@@ -12,7 +12,7 @@ const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 // 📦 MAPA MAESTRO DE SKUs → UUIDs
 // ============================================
 const SKU_MAP = {
-    // 🔥 FREE FIRE
+    // 🔥 FREE FIRE LATAM
     'FF-110-DIAMONDS':    'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
     'FF-341-DIAMONDS':    'bb0a8212-916e-4c9a-ad22-170fa9732734',
     'FF-572-DIAMONDS':    '0cbc02a5-2e65-41d3-899e-917abd1a2dd1',
@@ -23,13 +23,36 @@ const SKU_MAP = {
     'FF-WEEKLY-MENSUAL':  '6f98867c-a84e-418e-ab54-83f1da1fdee2',
     'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
     
-    // 🔥 FREE FIRE - LEVEL UP (NUEVOS)
-    'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757',
-    'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be',
-    'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328',
-    'FF-NIVEL-20':        '549739d0-f988-4d5d-9b18-5357bd8de9fa',
-    'FF-NIVEL-21':        'a9093b52-a726-4e9d-be8d-994df6ccd870',
-    'FF-NIVEL-22':        '5d18dc6d-98be-45c4-a472-68266f6a3c9d',
+    // 🔥 FREE FIRE LATAM - LEVEL UP
+    'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757', // Nivel 6
+    'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be', // Nivel 10
+    'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328', // Nivel 15
+    'FF-NIVEL-20':        '549739d0-f988-4d5d-9b18-5357bd8de9fa', // Nivel 20
+    'FF-NIVEL-21':        'a9093b52-a726-4e9d-be8d-994df6ccd870', // Nivel 25
+    'FF-NIVEL-22':        '5d18dc6d-98be-45c4-a472-68266f6a3c9d', // Nivel 30
+
+    // 🇧🇷 FREE FIRE BRASIL (NUEVOS)
+    'FF-BR-110':          '89fec3da-b07a-4966-b322-2564967fa1eb',
+    'FF-BR-341':          '949b4c7e-c37c-4b6f-836e-6760ab4c0121',
+    'FF-BR-572':          'c290219c-30d8-44d3-981f-779422554f65',
+    'FF-BR-1166':         '12ad5a47-2619-4624-84ee-ed1ab5cc9ab8',
+    'FF-BR-2398':         '57e67fe2-abfd-4533-8037-c81b5799854d',
+    'FF-BR-6160':         'a1f7abf0-91ed-4089-8174-db84c82ba6dc',
+    'FF-BR-22640':        '2766a9db-01d0-4b14-8140-a88b055015b7',
+    'FF-BR-SEMANAL':      '9c637ffc-d52a-4c8e-ba12-d3366d3ecef8',
+    'FF-BR-MENSUAL':      '600bf5a0-1f20-482a-b50e-5acab1a14e9f',
+    'FF-BR-SEMANAL-BAS':  '7badf2ad-fc46-41cb-9ea8-8a3c73d3c49a',
+    'FF-BR-BOOYAH':       '7e7643a6-d1c2-40e0-a5ef-9dea06a9863b',
+    'FF-BR-BOOYAH-PREM':  '7de9a2ec-3c07-4a45-abc2-4c5ced4065e7',
+    'FF-BR-EVO-3D':       '9f101883-1262-4c12-914f-76b5b270ba43',
+    'FF-BR-EVO-7D':       '6b9bfb24-6dc1-43cd-ad0a-e39513bbfdfc',
+    'FF-BR-EVO-30D':      'd7c97e88-acdf-4721-b56f-90c76a80be24',
+    'FF-BR-NIVEL-6':      '4c5b5a5c-d1dd-4225-9cba-0d595d8d1a34',
+    'FF-BR-NIVEL-10':     '2ca9ed79-5a2c-4143-98f3-4bd09b62f449',
+    'FF-BR-NIVEL-15':     '19b1e947-410e-4b7c-872c-a948535ce944',
+    'FF-BR-NIVEL-20':     '301289dc-35bc-4102-bd56-1f8629567eb4',
+    'FF-BR-NIVEL-25':     '66fda745-2421-4e7a-bbf7-1d063c10a181',
+    'FF-BR-NIVEL-30':     'd32612d6-b1bf-43be-827b-c021d3eed2a6',
 
     // ⚔️ BLOOD STRIKE
     'BS-105':  'e4efc583-fcc4-4544-9547-8c687d663ba5',
@@ -183,6 +206,15 @@ const PRODUCTOS_CONFIG = {
         'weekly_semanal':'FF-WEEKLY-SEMANAL','weekly_mensual':'FF-WEEKLY-MENSUAL','weekly_booyah':'FF-WEEKLY-BOOYAH',
         'nivel_6':'FF-NIVEL-17', 'nivel_10':'FF-NIVEL-18', 'nivel_15':'FF-NIVEL-19',
         'nivel_20':'FF-NIVEL-20', 'nivel_25':'FF-NIVEL-21', 'nivel_30':'FF-NIVEL-22'
+    }},
+    'FREE FIRE BR': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,12}$/, paquetes:{
+        '110':'FF-BR-110', '341':'FF-BR-341', '572':'FF-BR-572', 
+        '1166':'FF-BR-1166', '2398':'FF-BR-2398', '6160':'FF-BR-6160', '22640':'FF-BR-22640',
+        'weekly_semanal':'FF-BR-SEMANAL', 'weekly_mensual':'FF-BR-MENSUAL', 'weekly_basica':'FF-BR-SEMANAL-BAS',
+        'weekly_booyah':'FF-BR-BOOYAH', 'weekly_booyah_prem':'FF-BR-BOOYAH-PREM',
+        'evo_3d':'FF-BR-EVO-3D', 'evo_7d':'FF-BR-EVO-7D', 'evo_30d':'FF-BR-EVO-30D',
+        'nivel_6':'FF-BR-NIVEL-6', 'nivel_10':'FF-BR-NIVEL-10', 'nivel_15':'FF-BR-NIVEL-15',
+        'nivel_20':'FF-BR-NIVEL-20', 'nivel_25':'FF-BR-NIVEL-25', 'nivel_30':'FF-BR-NIVEL-30'
     }},
     'BLOOD STRIKE': { tipo:'juego', input:['id_jugador'], validar:/^\d{8,12}$/, paquetes:{
         '105':'BS-105','320':'BS-320','540':'BS-540','1100':'BS-1100','2260':'BS-2260','5800':'BS-5800'
@@ -382,14 +414,12 @@ export default async function handler(req, res) {
                 const config = PRODUCTOS_CONFIG[juegoUpper];
                 if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
-                // Obtenemos el product_id de cualquier paquete del juego
                 const primerPaquete = Object.keys(config.paquetes)[0];
                 const sku = config.paquetes[primerPaquete];
                 const productId = SKU_MAP[sku];
 
                 if (!productId) return res.status(400).json({ error: 'No se encontró un product_id válido para este juego.' });
 
-                // Preparamos el target_payload
                 const targetPayload = { player_id: String(id_jugador) };
                 if (juegoUpper === 'MOBILE LEGENDS') {
                     targetPayload.server = zona_id || '1';
@@ -410,7 +440,6 @@ export default async function handler(req, res) {
 
                     const data = await respuesta.json();
                     
-                    // Devolvemos la respuesta al frontend
                     return res.status(200).json({
                         ok: true,
                         valido: data.status === 'valid',
@@ -473,8 +502,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.8 funcionando',
-                version: '3.8',
+                mensaje: '✅ API Central One v3.9 funcionando',
+                version: '3.9',
                 acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'verificar_jugador', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
