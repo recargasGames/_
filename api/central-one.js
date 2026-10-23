@@ -1,10 +1,8 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.9.1
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.9.2
 // ============================================
-// v3.9.1: MODO DEBUG ACTIVADO EN VALIDACIÓN DE JUGADOR
+// v3.9.2: FIX VALIDACIÓN FREE FIRE BR (usa game_user_id en lugar de player_id)
 // v3.9: AGREGADO FREE FIRE BRASIL (con precios y UUIDs reales)
-// v3.8: VALIDACIÓN DE ID DE JUGADOR (/player/validate)
-// v3.7: PAQUETES DE NIVEL (LEVEL UP) FREE FIRE LATAM
 // ============================================
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
@@ -403,7 +401,7 @@ export default async function handler(req, res) {
             }
 
             // ============================================
-            // 🆕 VALIDACIÓN DE JUGADOR (API Central One) - CON DEBUG
+            // 🆕 VALIDACIÓN DE JUGADOR (API Central One)
             // ============================================
             if (accion === 'verificar_jugador') {
                 const { juego, id_jugador, zona_id } = req.query;
@@ -431,9 +429,19 @@ export default async function handler(req, res) {
 
                 if (!productId) return res.status(400).json({ error: 'No se encontró un product_id válido para este juego.' });
 
-                const targetPayload = { player_id: String(id_jugador) };
-                if (juegoUpper === 'MOBILE LEGENDS') {
+                // 🔥 CONSTRUIR EL TARGET PAYLOAD SEGÚN EL JUEGO
+                const targetPayload = {};
+                
+                if (juegoUpper === 'FREE FIRE BR') {
+                    // Brasil requiere game_user_id
+                    targetPayload.game_user_id = String(id_jugador);
+                } else if (juegoUpper === 'MOBILE LEGENDS') {
+                    // Mobile Legends requiere player_id y server
+                    targetPayload.player_id = String(id_jugador);
                     targetPayload.server = zona_id || '1';
+                } else {
+                    // El resto (incluyendo LATAM) usa player_id
+                    targetPayload.player_id = String(id_jugador);
                 }
 
                 try {
@@ -451,27 +459,18 @@ export default async function handler(req, res) {
 
                     const data = await respuesta.json();
                     
-                    // 🔥 DEBUG: Si falla, que nos diga exactamente qué dijo Central One
-                    if (!respuesta.ok || data.status !== 'valid') {
-                        return res.status(200).json({ 
-                            ok: false, 
-                            valido: false, 
-                            debug_central_one: data, // Aquí veremos el error real
-                            status_http: respuesta.status 
-                        });
-                    }
-                    
                     return res.status(200).json({
                         ok: true,
-                        valido: true,
+                        valido: data.status === 'valid',
                         status: data.status,
                         nickname: data.player?.name || null,
-                        mensaje: 'ID verificado'
+                        reason: data.reason || null,
+                        mensaje: data.status === 'valid' ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
                     });
 
                 } catch (error) {
                     console.error('❌ Error validando jugador:', error);
-                    return res.status(200).json({ ok: false, valido: false, error_red: error.message });
+                    return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión con Central One' });
                 }
             }
 
@@ -522,8 +521,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.9.1 funcionando (MODO DEBUG)',
-                version: '3.9.1',
+                mensaje: '✅ API Central One v3.9.2 funcionando',
+                version: '3.9.2',
                 acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'verificar_jugador', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
@@ -564,7 +563,12 @@ export default async function handler(req, res) {
                     note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
                 };
 
-                if (juegoUpper === 'MOBILE LEGENDS') {
+                // ⚠️ NOTA IMPORTANTE PARA LA RECARGA: 
+                // Central One también puede requerir game_user_id en el POST /orders para Brasil.
+                // Si al hacer la recarga te da error, tendremos que cambiar esto en el POST de 'recarga'.
+                if (juegoUpper === 'FREE FIRE BR') {
+                    payload.items[0].target_payload = { game_user_id: String(id_jugador) };
+                } else if (juegoUpper === 'MOBILE LEGENDS') {
                     payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
                 } else if (config.tipo === 'giftcard' && config.input.includes('email')) {
                     payload.items[0].target_payload = { email: email };
