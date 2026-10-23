@@ -1563,10 +1563,12 @@ async function iniciarVerificacion() {
                 id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador
             });
             await new Promise(res => setTimeout(res, 1000));
-            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (TEST)', resultadoRecarga.codigos || [], { codigo_test: referencia, monto_test_usd: r.data.monto_usd, monto_test_bs: r.data.monto_bs });
+            // 🔥 AQUI USAMOS LA REFERENCIA DE CENTRAL ONE SI EXISTE
+            const refFinalTest = (resultadoRecarga.referencia && resultadoRecarga.referencia !== 'N/A') ? resultadoRecarga.referencia : referencia;
+            const infoPedido = await guardarPedidoEnFirebase(refFinalTest, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (TEST)', resultadoRecarga.codigos || [], { codigo_test: referencia, monto_test_usd: r.data.monto_usd, monto_test_bs: r.data.monto_bs });
             await marcarCodigoTESTComoUsado(referencia, infoPedido.numeroMostrar);
-            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
-            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, refFinalTest, infoPedido.numeroMostrar);
+            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, refFinalTest, infoPedido.numeroMostrar);
             else { document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.'; mostrarSeccion('seccion-error'); }
             btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
             return;
@@ -1591,10 +1593,12 @@ async function iniciarVerificacion() {
                 juego: r.data.juego, producto: r.data.producto,
                 paquete: r.data.paquete, id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador            });
             await new Promise(res => setTimeout(res, 1000));
-            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (MANUAL)', resultadoRecarga.codigos || [], {});
+            // 🔥 AQUI USAMOS LA REFERENCIA DE CENTRAL ONE SI EXISTE
+            const refFinalManual = (resultadoRecarga.referencia && resultadoRecarga.referencia !== 'N/A') ? resultadoRecarga.referencia : referencia;
+            const infoPedido = await guardarPedidoEnFirebase(refFinalManual, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (MANUAL)', resultadoRecarga.codigos || [], {});
             await marcarReferenciaManualComoUsada(referencia, infoPedido.numeroMostrar);
-            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
-            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, refFinalManual, infoPedido.numeroMostrar);
+            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, refFinalManual, infoPedido.numeroMostrar);
             else { document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.'; mostrarSeccion('seccion-error'); }
             btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
             return;
@@ -1645,9 +1649,11 @@ async function iniciarVerificacion() {
         mostrarSeccion('seccion-procesando');
         const resultadoRecarga = await ejecutarRecarga();
         await new Promise(res => setTimeout(res, 1000));
-        const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One', resultadoRecarga.codigos || [], {});
-        if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
-        else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+        // 🔥 AQUI USAMOS LA REFERENCIA DE CENTRAL ONE SI EXISTE
+        const refFinalPago = (resultadoRecarga.referencia && resultadoRecarga.referencia !== 'N/A') ? resultadoRecarga.referencia : referencia;
+        const infoPedido = await guardarPedidoEnFirebase(refFinalPago, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One', resultadoRecarga.codigos || [], {});
+        if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, refFinalPago, infoPedido.numeroMostrar);
+        else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, refFinalPago, infoPedido.numeroMostrar);
         else {
             document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.';
             document.getElementById('tituloError').textContent = 'Error';
