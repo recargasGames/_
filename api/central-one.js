@@ -414,46 +414,15 @@ export default async function handler(req, res) {
                 const config = PRODUCTOS_CONFIG[juegoUpper];
                 if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
-                // 🔥 BUSCAR EL UUID CORRECTO SEGÚN LA REGIÓN
+                // 🔥 LÓGICA DE VALIDACIÓN BLINDADA
                 let productId = null;
 
-                if (juegoUpper === 'FREE FIRE' || juegoUpper === 'FREE FIRE BR') {
-                    // 1. Consultar el catálogo para obtener la lista real de productos
-                    try {
-                        const rCat = await fetch(`${BASE_URL}/catalog`, {
-                            headers: { 'Authorization': `Bearer ${API_KEY}` }
-                        });
-                        const dataCat = await rCat.json();
-                        const items = dataCat.items || dataCat.catalog || dataCat.data || dataCat.products || dataCat.productos || [];
-
-                        // 2. Definir la región que buscamos según el juego
-                        const regionBuscada = juegoUpper === 'FREE FIRE BR' ? 'BR' : 'LATAM';
-
-                        // 3. Buscar el primer producto de Free Fire que coincida con la región
-                        const productoRegional = items.find(it => {
-                            const nombre = (it.name || it.title || it.product_name || '').toUpperCase();
-                            const region = (it.region || '').toUpperCase();
-                            return nombre.includes('FREE FIRE') && region === regionBuscada;
-                        });
-
-                        if (productoRegional) {
-                            productId = productoRegional.catalog_item_id || productoRegional.product_id || productoRegional.id || productoRegional.uuid;
-                            console.log(`✅ UUID de validación encontrado para ${regionBuscada}: ${productId}`);
-                        }
-                    } catch (e) {
-                        console.warn('⚠️ No se pudo consultar el catálogo para buscar UUID regional. Usando fallback.');
-                    }
-
-                    // 4. Fallback: Si el catálogo falla, usamos los UUIDs que ya conocemos
-                    if (!productId) {
-                        if (juegoUpper === 'FREE FIRE BR') {
-                            productId = SKU_MAP['FF-BR-110']; // UUID de BR
-                        } else {
-                            productId = SKU_MAP['FF-110-DIAMONDS']; // UUID de LATAM
-                        }
-                    }
+                if (juegoUpper === 'FREE FIRE') {
+                    productId = SKU_MAP['FF-110-DIAMONDS']; // UUID oficial LATAM
+                } else if (juegoUpper === 'FREE FIRE BR') {
+                    productId = SKU_MAP['FF-BR-110']; // UUID oficial BRASIL
                 } else {
-                    // Para otros juegos, usar el primer UUID de su configuración
+                    // Para el resto de juegos, usar el primer paquete
                     const primerPaquete = Object.keys(config.paquetes)[0];
                     const sku = config.paquetes[primerPaquete];
                     productId = SKU_MAP[sku];
