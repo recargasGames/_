@@ -1,723 +1,1892 @@
-// ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.0
-// ============================================
-// v6.0: IMPLEMENTACIÓN TOTAL EN UN SOLO ARCHIVO
-// - Recargas (POST /orders) con 4 decimales e Idempotencia
-// - Consulta de estado (GET /orders)
-// - Webhooks de Central One integrados (order.delivered, order.failed)
-// - Actualización de Firebase y notificaciones
-// ============================================
+No te compliques este funciona solo no toques no de validar ID
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="google-site-verification" content="3A5udHt-1flbfBdKc7UC2d_KGz2yKlwOSfjRovfdPaY" />
+<title>RECARGASGAMES - Free Fire</title>
+<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
 
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getDatabase } from "firebase-admin/database";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-// ============================================
-// 🔥 FIREBASE ADMIN (Para Webhooks)
-// ============================================
-// Requiere configurar la variable de entorno FIREBASE_SERVICE_ACCOUNT en Vercel.
-// Si no está configurada, el Webhook fallará silenciosamente pero la recarga funcionará.
+<style>
+:root{
+    --color-principal:#3b82f6;--color-hover:#2563eb;--color-azul:#3b82f6;
+    --color-blanco:#ffffff;--color-dorado:#d4af37;--color-dorado-claro:#f5d76e;
+    --color-negro:#0a0e1a;--color-error:#ef4444;--color-exito:#22c55e;
+    --alto-nav:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#000;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;padding-bottom:30px;overflow-x:hidden;min-height:100vh;position:relative;}
+body.con-nav{padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));}
+a:focus-visible,button:focus-visible,input:focus-visible,.pay-box:focus-visible{outline:2px solid var(--color-dorado-claro);outline-offset:2px;}
+.video-fondo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;opacity:1;filter:brightness(1.15);will-change:transform;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,14,26,0.15) 0%,rgba(10,14,26,0.35) 60%,rgba(10,14,26,0.6) 100%);z-index:-1;pointer-events:none;transform:translateZ(0);}
+body::before{content:'';position:fixed;top:-30%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.1),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,175,55,0.08),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+.main{position:relative;z-index:1}
+.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(5,8,16,0.85);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.header{padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);}
+.brand img{height:55px;width:auto;border-radius:12px;filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));}
+.header-right{display:flex;align-items:center;gap:12px}
+.btn-perfil{background:transparent;border:none;color:white;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;transition:all 0.3s;position:relative;margin-top:8px;}
+.btn-perfil .avatar-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;color:white;transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);position:relative;overflow:hidden;}
+.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
+.btn-perfil .avatar-circle .online-dot{position:absolute;bottom:0;right:0;width:12px;height:12px;background:#22c55e;border-radius:50%;border:2px solid #0b1220;}
+.btn-perfil .perfil-nombre{font-size:14px;font-weight:500;color:white;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+.menu-perfil{position:absolute;top:75px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:260px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;z-index:1000;overflow:hidden;}
+.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.menu-perfil-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));}
+.menu-perfil-header .avatar-grande{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(212,175,55,0.4);}
+.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
+.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
+.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-opcion{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#e5e7eb;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.menu-perfil-opcion:last-child{border-bottom:none}
+.menu-perfil-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:26px;border-left:3px solid var(--color-dorado);}
+.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
+.menu-perfil-opcion.danger{color:#ef4444}
+.menu-perfil-opcion.danger:hover{background:rgba(239,68,68,0.12);color:#ef4444;border-left-color:#ef4444;}
+.menu-hamburguesa{background:transparent;border:none;color:white;font-size:28px;cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;margin-top:8px;}
+.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-dorado);}
+.menu-flotante{position:absolute;top:80px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:240px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.25s ease;z-index:999;overflow:hidden;}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
+.menu-opcion{display:flex;align-items:center;gap:10px;padding:14px 20px;color:white;text-decoration:none;font-size:15px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.menu-opcion:last-child{border-bottom:none}
+.menu-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:24px;}
+.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
+.games-menu{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:12px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(255,255,255,0.04);}
+.games-menu::-webkit-scrollbar{display:none}
+.games-menu a{text-decoration:none;color:#cbd5e1;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;white-space:nowrap;transition:all 0.3s;border:1px solid transparent;}
+.games-menu a:hover{color:var(--color-dorado-claro);background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.3);}
+.games-menu a.active{color:var(--color-dorado-claro);background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));border-color:rgba(212,175,55,0.5);}
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
 
-let dbAdmin = null;
-try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        if (!getApps().length) {
-            initializeApp({
-                credential: cert(serviceAccount),
-                databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app"
-            });
-        }
-        dbAdmin = getDatabase();
+.progreso{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:8px 0 24px;padding:14px 16px;background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.65));border:1px solid rgba(212,175,55,0.2);border-radius:16px;}
+.progreso-paso{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0.4;transition:opacity 0.3s;}
+.progreso-paso.activo,.progreso-paso.completado{opacity:1}
+.progreso-bola{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#cbd5e1;transition:all 0.3s;}
+.progreso-paso.activo .progreso-bola{background:linear-gradient(135deg,#d4af37,#f5d76e);border-color:var(--color-dorado);color:#0a0e1a;box-shadow:0 0 20px rgba(212,175,55,0.5);}
+.progreso-paso.completado .progreso-bola{background:linear-gradient(135deg,#22c55e,#16a34a);border-color:#22c55e;color:#fff;}
+.progreso-label{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#cbd5e1}
+.progreso-paso.activo .progreso-label{color:var(--color-dorado-claro)}
+.progreso-paso.completado .progreso-label{color:#86efac}
+.progreso-linea{flex:0 0 14px;height:2px;background:rgba(255,255,255,0.15);border-radius:2px;}
+
+.seccion{display:none;animation:seccionIn 0.35s ease}
+.seccion.activa{display:block}
+@keyframes seccionIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.pagina-titulo{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:24px 0 18px;}
+.pagina-titulo h1{font-size:22px;font-weight:900;background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.chip-entrega{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:14px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#86efac;font-size:12px;font-weight:700;}
+.chip-entrega::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.8);}
+
+/* ESTILOS PARA LAS PESTAÑAS (TABS) */
+.tabs-container{display:flex;gap:10px;margin-bottom:24px;overflow-x:auto;padding:5px 0;scrollbar-width:none;}
+.tabs-container::-webkit-scrollbar{display:none}
+.tab-btn{flex:1;min-width:140px;padding:14px 18px;background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));border:1px solid rgba(212,175,55,0.2);border-radius:14px;color:#cbd5e1;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:0.5px;font-family:inherit;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px;}
+.tab-btn:hover{border-color:rgba(212,175,55,0.4);color:var(--color-dorado-claro);}
+.tab-btn.activo{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);color:#0a0e1a;border-color:#d4af37;box-shadow:0 4px 20px rgba(212,175,55,0.4);}
+.tab-content{display:none;animation:fadeInTab 0.3s ease}
+.tab-content.activo{display:block}
+@keyframes fadeInTab{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.card-panel{background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));border:1px solid rgba(212,175,55,0.25);border-radius:20px;padding:22px 18px 20px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.panel-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800;margin:0 0 16px;color:var(--color-dorado-claro);position:relative;z-index:1;letter-spacing:0.5px;text-transform:uppercase;}
+.paso-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;font-size:13px;font-weight:800;}
+.form-input{width:100%;height:50px;border-radius:14px;background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;border:1px solid rgba(255,255,255,0.18);font-size:16px;position:relative;z-index:1;transition:border-color 0.3s;}
+.form-input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+.form-input.resaltar{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.25);}
+.form-group{margin-bottom:16px;position:relative;z-index:1}
+.form-group:last-child{margin-bottom:0}
+.form-group label{display:block;margin-bottom:8px;color:#cbd5e1;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.ayuda-id{margin-top:8px;font-size:12px;color:#94a3b8;line-height:1.4;position:relative;z-index:1;}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:15px;position:relative;z-index:1}
+.pay-box{background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.15);border-radius:16px;padding:12px;text-align:center;cursor:pointer;font-weight:700;transition:all 0.3s;font-size:14px;}
+.pay-box.active{border-color:var(--color-dorado);background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.2));color:var(--color-dorado-claro);}
+.tasa-info{font-size:12px;color:#94a3b8;margin-top:10px;text-align:right;font-weight:600;position:relative;z-index:1;}
+.id-status{margin-top:14px;padding:14px 18px;border-radius:14px;font-size:15px;display:none;font-weight:700;animation:statusAparecer 0.3s ease;}
+@keyframes statusAparecer{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.id-status.verificando{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(212,175,55,0.08));color:var(--color-dorado-claro);border:1px solid rgba(212,175,55,0.5);}
+.id-status.verificando::after{content:'';width:18px;height:18px;border:2px solid rgba(212,175,55,0.3);border-top-color:var(--color-dorado);border-radius:50%;animation:spinSmall 0.8s linear infinite;margin-left:auto;}
+@keyframes spinSmall{to{transform:rotate(360deg)}}
+.id-status.valido{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(34,197,94,0.3),rgba(34,197,94,0.1));color:#4ade80;border:1px solid rgba(34,197,94,0.6);}
+.id-status.valido .check-icono{width:28px;height:28px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:white;flex-shrink:0;}
+.id-status.valido .nombre-jugador{color:#fff;font-weight:800;}
+.id-status.error{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));color:#f87171;border:1px solid rgba(239,68,68,0.5);}
+.id-status.advertencia{display:flex;align-items:flex-start;gap:10px;background:linear-gradient(135deg,rgba(212,175,55,0.22),rgba(212,175,55,0.08));color:#f5d76e;border:1px solid rgba(212,175,55,0.55);font-size:13px;line-height:1.45;font-weight:600;}
+.section-divider{margin:24px 0 18px;text-align:center}
+.section-divider span{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;padding:8px 22px;border-radius:30px;font-size:13px;font-weight:800;letter-spacing:1.5px;display:inline-block;text-transform:uppercase;box-shadow:0 0 20px rgba(212,175,55,0.4);}
+
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:25px}
+@media(min-width:550px){.products-grid{grid-template-columns:repeat(3,1fr)}}
+.product-card{background:linear-gradient(135deg,rgba(14,26,58,0.92),rgba(6,12,32,0.96));border:1px solid rgba(59,130,246,0.25);border-radius:18px;padding:16px;transition:transform 0.3s ease,box-shadow 0.3s ease;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.3);will-change:transform;transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;}
+.product-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#d4af37,#3b82f6,#d4af37);background-size:300% 300%;border-radius:18px;z-index:-1;opacity:0;transition:opacity 0.3s;}
+.product-card:hover::before{opacity:1}
+.product-card:hover{transform:translateY(-6px) translateZ(0);box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.3);}
+.card-header{display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(212,175,55,0.15);padding-bottom:10px;margin-bottom:10px;}
+.game-icon{background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.25));padding:10px;border-radius:12px;font-size:20px;border:1px solid rgba(212,175,55,0.4);}
+.product-title{font-size:14px;font-weight:800;background:linear-gradient(135deg,#fff,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.product-desc{color:#fcd34d;font-size:12px;font-weight:600;margin-bottom:10px;}
+.product-price-wrap{margin-top:auto;margin-bottom:14px}
+.product-price{font-size:22px;font-weight:800;color:var(--color-dorado-claro);text-shadow:0 0 15px rgba(212,175,55,0.4);display:block;}
+.product-ref{font-size:12px;color:#94a3b8;margin-top:2px;min-height:16px}
+.btn-buy{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;width:100%;height:44px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;letter-spacing:1px;box-shadow:0 4px 15px rgba(212,175,55,0.4);text-transform:uppercase;font-family:inherit;}
+.btn-buy:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.6);}
+
+.btn-accion{width:100%;padding:16px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;transition:.3s;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(212,175,55,0.4);font-family:inherit;}
+.btn-accion:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,175,55,0.6);}
+.btn-accion:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.btn-volver-flujo{background:transparent;border:none;color:#94a3b8;font-size:14px;font-weight:600;cursor:pointer;padding:8px 0;margin-bottom:12px;transition:.2s;display:inline-flex;align-items:center;gap:6px;font-family:inherit;}
+.btn-volver-flujo:hover{color:var(--color-dorado-claro);}
+
+.resumen-box{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:20px;text-align:left;margin:15px 0;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.resumen-fila{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(212,175,55,0.12);font-size:15px;gap:10px;}
+.resumen-fila:last-child{border-bottom:none}
+.resumen-etiqueta{color:#cbd5e1;flex-shrink:0;}
+.resumen-valor{font-weight:700;color:#fff;text-align:right;word-break:break-word;}
+.resumen-valor.verde{color:var(--color-dorado-claro);}
+.resumen-valor.tachado{color:#6b7280;text-decoration:line-through;font-weight:500;}
+
+.datos-pago-box{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:20px;margin:15px 0;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.titulo-seccion{font-size:16px;font-weight:800;margin-bottom:18px;text-align:center;color:var(--color-dorado-claro);letter-spacing:0.5px;text-transform:uppercase;}
+.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,0.3);border-radius:12px;margin-bottom:10px;border:1px solid rgba(212,175,55,0.1);gap:10px;}
+.dato-line:last-child{margin-bottom:0}
+.dato-texto{flex:1;min-width:0;}
+.dato-texto strong{color:#cbd5e1;display:inline-block;width:82px;font-size:14px;}
+.dato-texto span{color:#fff;font-weight:600;word-break:break-all;font-size:14px;}
+.copiar-btn{width:44px;height:44px;border-radius:10px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);color:var(--color-dorado-claro);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;padding:0;}
+.copiar-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;opacity:0.9;}
+.copiar-btn:hover{background:rgba(212,175,55,0.25);transform:scale(1.05);box-shadow:0 0 15px rgba(212,175,55,0.4);}
+.copiar-btn.copiado{background:rgba(34,197,94,0.2);color:#4ade80;border-color:rgba(34,197,94,0.5);}
+.copiar-btn.copiado svg{display:none}
+.copiar-btn.copiado::after{content:'✓';font-size:20px;font-weight:bold;}
+.copiar-todo-btn{width:100%;padding:13px;margin-top:14px;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));border:1px solid rgba(212,175,55,0.4);border-radius:12px;color:var(--color-dorado-claro);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;letter-spacing:0.5px;font-family:inherit;}
+.copiar-todo-btn:hover{background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(59,130,246,0.15));box-shadow:0 0 20px rgba(212,175,55,0.3);}
+.input-ref{width:100%;padding:14px;border-radius:12px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:16px;margin-top:10px;margin-bottom:15px;transition:.3s;font-family:inherit;}
+.input-ref:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+.cupon-box{margin-top:16px;padding:16px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));border:1px dashed rgba(212,175,55,0.4);border-radius:14px;}
+.cupon-label{display:block;margin-bottom:10px;color:var(--color-dorado-claro);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;text-align:left;}
+.cupon-input-wrap{display:flex;gap:8px;}
+.cupon-input{flex:1;padding:12px 14px;border-radius:12px;background:rgba(0,0,0,0.35);border:1px solid rgba(212,175,55,0.3);color:#fff;font-size:15px;text-transform:uppercase;letter-spacing:1px;font-weight:700;transition:.3s;font-family:inherit;min-width:0;}
+.cupon-input::placeholder{color:#6b7280;text-transform:none;letter-spacing:0;font-weight:400;}
+.cupon-input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+.cupon-btn{padding:12px 18px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:.3s;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(212,175,55,0.3);font-family:inherit;white-space:nowrap;}
+.cupon-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.5);}
+.cupon-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.cupon-msg{margin-top:10px;font-size:13px;font-weight:700;min-height:18px;text-align:left;}
+.cupon-msg.ok{color:#4ade80}
+.cupon-msg.err{color:#f87171}
+.cupon-aplicado{background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.04));border-color:rgba(34,197,94,0.5);border-style:solid;}
+.aviso-box{background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.3);border-radius:12px;padding:14px;margin-top:14px;font-size:13px;color:#f5d76e;}
+
+.spinner-circle{width:80px;height:80px;border:3px solid rgba(212,175,55,0.2);border-top-color:#d4af37;border-right-color:#d4af37;border-radius:50%;animation:girarSpinner 1s linear infinite;-webkit-animation:girarSpinner 1s linear infinite;margin:0 auto 25px;box-shadow:0 0 30px rgba(212,175,55,0.3);will-change:transform;}
+@keyframes girarSpinner{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@-webkit-keyframes girarSpinner{from{-webkit-transform:rotate(0deg)}to{-webkit-transform:rotate(360deg)}}
+.estado-box{text-align:center;padding:40px 10px 30px;}
+.icono-circle{width:90px;height:90px;border:3px solid;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 25px;font-size:45px;font-weight:bold;}
+.icono-exito{border-color:#22c55e;color:#22c55e;box-shadow:0 0 40px rgba(34,197,94,0.5);animation:iconoPulse 2s ease-in-out infinite;}
+.icono-amarillo{border-color:#f5d76e;color:#f5d76e;box-shadow:0 0 40px rgba(245,215,110,0.4);}
+.icono-error{border-color:#ef4444;color:#ef4444;box-shadow:0 0 40px rgba(239,68,68,0.4);}
+@keyframes iconoPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.texto-principal{font-size:24px;font-weight:800;margin-bottom:10px;background:linear-gradient(135deg,#fff,#f5d76e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.texto-secundario{font-size:15px;color:#cbd5e1;line-height:1.6;max-width:340px;margin:0 auto;white-space:pre-line;}
+
+.pin-box{margin-top:20px;padding:24px;background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(34,197,94,0.05));border:2px solid rgba(34,197,94,0.6);border-radius:16px;text-align:center;box-shadow:0 0 40px rgba(34,197,94,0.3);}
+.pin-box .pin-label{font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:2px;font-weight:700;}
+.pin-box .pin-value{font-size:26px;font-weight:800;color:#22c55e;letter-spacing:3px;margin:10px 0;word-break:break-all;text-shadow:0 0 15px rgba(34,197,94,0.5);}
+.pin-box .btn-copiar-pin{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(34,197,94,0.4);transition:.3s;font-family:inherit;}
+.pin-box .btn-copiar-pin:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(34,197,94,0.6);}
+
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,20px);max-width:calc(100% - 32px);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;line-height:1.4;background:rgba(10,14,26,0.97);border:1px solid rgba(212,175,55,0.5);color:#fff;box-shadow:0 12px 35px rgba(0,0,0,0.6);opacity:0;visibility:hidden;transition:all 0.3s ease;z-index:3000;text-align:center;}
+body.con-nav .toast{bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));}
+.toast.visible{opacity:1;visibility:visible;transform:translate(-50%,0);}
+.toast.error{border-color:rgba(239,68,68,0.6);color:#fecaca;}
+
+.nav-inferior{position:fixed;left:0;right:0;bottom:0;z-index:999;background:rgba(5,8,16,0.96);border-top:1px solid rgba(212,175,55,0.25);box-shadow:0 -4px 20px rgba(0,0,0,0.5);padding-bottom:env(safe-area-inset-bottom);transform:translateZ(0);}
+.nav-inferior.oculto{display:none;}
+.nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#9ca3af;text-decoration:none;font-size:12px;font-weight:600;transition:color 0.2s;}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
+.nav-item.soporte{color:#4ade80}
+
+.back-to-top{position:fixed;bottom:30px;right:20px;background:linear-gradient(135deg,#d4af37,#3b82f6);color:#fff;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;visibility:hidden;z-index:998;transition:.3s;text-decoration:none;font-size:18px;box-shadow:0 8px 25px rgba(0,0,0,0.4);}
+body.con-nav .back-to-top{bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));}
+.back-to-top.show{opacity:1;visibility:visible}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;justify-content:center;align-items:center;padding:20px;}
+.modal-overlay.activo{display:flex}
+.modal-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.3);border-radius:24px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.7);animation:modalSlide 0.3s ease;overflow:hidden;}
+@keyframes modalSlide{from{transform:translateY(-40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:24px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));}
+.modal-header .icono-grande{font-size:50px;margin-bottom:10px}
+.modal-header h2{font-size:20px;font-weight:800;color:var(--color-dorado-claro);letter-spacing:1px;text-transform:uppercase;}
+.modal-body{padding:24px 20px}
+.modal-footer{padding:0 20px 20px;display:flex;gap:10px}
+.modal-btn{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;border:none;transition:0.3s;text-transform:uppercase;font-family:inherit;}
+.modal-btn.cancelar{background:rgba(71,85,105,0.3);color:#94a3b8;border:1px solid rgba(71,85,105,0.5);}
+.modal-btn.cancelar:hover{background:rgba(71,85,105,0.5);color:white}
+.modal-btn.continuar{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;}
+
+.mensaje-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:4000;justify-content:center;align-items:center;padding:20px;}
+.mensaje-overlay.activo{display:flex;animation:fadeInOverlay 0.25s ease}
+@keyframes fadeInOverlay{from{opacity:0}to{opacity:1}}
+.mensaje-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.35);border-radius:24px;padding:32px 26px 24px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 60px rgba(212,175,55,0.2);animation:mensajeSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);text-align:center;position:relative;overflow:hidden;}
+@keyframes mensajeSlide{from{transform:translateY(30px) scale(0.9);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.mensaje-cerrar{position:absolute;top:14px;right:18px;background:none;border:none;color:#9ca3af;font-size:24px;cursor:pointer;padding:4px 8px;line-height:1;transition:all 0.3s;z-index:2;}
+.mensaje-cerrar:hover{color:var(--color-dorado);transform:rotate(90deg);}
+.mensaje-icono{width:80px;height:80px;margin:0 auto 18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:bold;position:relative;z-index:1;}
+.mensaje-icono.exito{background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(34,197,94,0.08));border:2px solid rgba(34,197,94,0.7);color:#4ade80;box-shadow:0 0 40px rgba(34,197,94,0.5);}
+.mensaje-icono.error{background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));border:2px solid rgba(239,68,68,0.7);color:#f87171;box-shadow:0 0 40px rgba(239,68,68,0.5);}
+.mensaje-icono.advertencia{background:linear-gradient(135deg,rgba(212,175,55,0.25),rgba(212,175,55,0.08));border:2px solid rgba(212,175,55,0.7);color:var(--color-dorado-claro);box-shadow:0 0 40px rgba(212,175,55,0.5);}
+.mensaje-icono.info{background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(59,130,246,0.08));border:2px solid rgba(59,130,246,0.7);color:#93c5fd;box-shadow:0 0 40px rgba(59,130,246,0.5);}
+.mensaje-titulo{font-size:19px;font-weight:800;color:var(--color-dorado-claro);margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase;position:relative;z-index:1;}
+.mensaje-texto{font-size:15px;color:#cbd5e1;line-height:1.6;margin-bottom:22px;position:relative;z-index:1;white-space:pre-line;}
+.mensaje-botones{display:flex;gap:12px;justify-content:center;position:relative;z-index:1;}
+.mensaje-btn{flex:1;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.3s;text-transform:uppercase;letter-spacing:1px;border:none;font-family:inherit;min-height:48px;}
+.mensaje-btn.principal{background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;box-shadow:0 4px 15px rgba(212,175,55,0.4);}
+.mensaje-btn.secundario{background:rgba(71,85,105,0.3);color:#cbd5e1;border:1px solid rgba(71,85,105,0.6);}
+
+@media(max-width:500px){
+    body{padding-top:100px}
+    .main{padding-top:20px}
+    .brand img{height:45px}
+    .header{padding:10px 16px}
+    .games-menu{padding:10px 15px}
+    .menu-flotante{right:10px;min-width:220px}
+    .btn-perfil .perfil-nombre{display:none}
+    .btn-perfil .perfil-flecha{display:none}
+    .menu-perfil{right:0;min-width:230px}
+    .product-price{font-size:19px}
+    .product-title{font-size:12px}
+    .pagina-titulo h1{font-size:20px}
+    .back-to-top{right:15px}
+    .dato-texto strong{width:76px;font-size:13px;}
+    .dato-texto span{font-size:13px;}
+    .cupon-input-wrap{flex-direction:column;}
+    .cupon-btn{width:100%;}
+    .texto-principal{font-size:20px;}
+    .progreso-label{font-size:9px;}
+    .progreso-bola{width:26px;height:26px;font-size:12px;}
+    .video-fondo{opacity:0.85;filter:brightness(1.05);}
+    .tab-btn{font-size:12px;padding:12px 14px;min-width:120px;}
+}
+@media(max-width:400px){.mensaje-botones{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .icono-exito,.icono-amarillo,.icono-error,.progreso-bola,.progreso-paso,.btn-buy,.btn-accion,.toast,.seccion{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}
+}
+</style>
+</head>
+<body class="con-nav" onclick="cerrarTodosLosMenus(event)">
+
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
+        <div class="header-right">
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="logo.png" alt="Logo" id="avatarLogo">
+                        <span class="online-dot"></span>
+                    </div>
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+                </button>
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                    <div class="menu-perfil-header">
+                        <div class="avatar-grande" id="avatarGrande"><img src="logo.png" alt="Logo"></div>
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
+                        </div>
+                    </div>
+                    <a href="dashboard.html" class="menu-perfil-opcion"><span class="icono">📊</span> Mi Panel</a>
+                    <a href="perfil.html" class="menu-perfil-opcion"><span class="icono">👤</span> Editar Perfil</a>
+                    <a href="pedidos.html" class="menu-perfil-opcion"><span class="icono">📦</span> Mis Pedidos</a>
+                    <a href="favoritos.html" class="menu-perfil-opcion"><span class="icono">❤️</span> Favoritos</a>
+                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
+                </div>
+            </div>
+            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        </div>
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuRegister">📝 Crear Cuenta</a>
+            <div id="menuConSesion" style="display:none;">
+                <a href="dashboard.html" class="menu-opcion">📊 Mi Panel</a>
+                <a href="pedidos.html" class="menu-opcion">📦 Mis Pedidos</a>
+                <a href="perfil.html" class="menu-opcion">👤 Editar Perfil</a>
+                <div class="menu-divider"></div>
+                <a href="#" class="menu-opcion" id="menuLogout" style="color:#ef4444;">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+    <nav class="games-menu" aria-label="Juegos">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html" class="active" aria-current="page">Free Fire (LATAM)</a>
+         <a href="freefire-br.html">Free Fire (BRASIL)</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="delta.html">Delta Force</a>
+        <a href="bigo.html">Bigo Live</a>
+        <a href="gift-cards.html">Gift Cards</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
+    </nav>
+</div>
+
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🔑</div>
+            <h2>Iniciar Sesión</h2>
+        </div>
+        <div class="modal-body">
+            <form id="loginForm">
+                <div style="margin-bottom:20px;">
+                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
+            </form>
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
+                <p style="margin-top:8px;"><a href="recuperar.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="mensaje-overlay" id="mensajeOverlay">
+    <div class="mensaje-box">
+        <button class="mensaje-cerrar" onclick="cerrarMensaje()">✕</button>
+        <div class="mensaje-icono" id="mensajeIcono">ℹ</div>
+        <div class="mensaje-titulo" id="mensajeTitulo">Título</div>
+        <div class="mensaje-texto" id="mensajeTexto">Mensaje</div>
+        <div class="mensaje-botones" id="mensajeBotones"><button class="mensaje-btn principal" onclick="cerrarMensaje()">Entendido</button></div>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="progreso" id="progresoFlujo">
+        <div class="progreso-paso activo" data-paso="1">
+            <div class="progreso-bola">1</div>
+            <div class="progreso-label">Producto</div>
+        </div>
+        <div class="progreso-linea"></div>
+        <div class="progreso-paso" data-paso="2">
+            <div class="progreso-bola">2</div>
+            <div class="progreso-label">Jugador</div>
+        </div>
+        <div class="progreso-linea"></div>
+        <div class="progreso-paso" data-paso="3">
+            <div class="progreso-bola">3</div>
+            <div class="progreso-label">Pago</div>
+        </div>
+        <div class="progreso-linea"></div>
+        <div class="progreso-paso" data-paso="4">
+            <div class="progreso-bola">4</div>
+            <div class="progreso-label">Listo</div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN 1: CATÁLOGO -->
+    <section class="seccion activa" id="seccion-catalogo">
+        <div class="pagina-titulo">
+            <h1>Recarga Free Fire</h1>
+            <span class="chip-entrega">Entrega inmediata</span>
+        </div>
+
+        <!-- PESTAÑAS (TABS) -->
+        <div class="tabs-container">
+            <button class="tab-btn activo" onclick="cambiarTab('diamantes', this)">💎 Diamantes</button>
+            <button class="tab-btn" onclick="cambiarTab('niveles', this)">🚀 Pases de Nivel</button>
+        </div>
+
+        <!-- TAB 1: DIAMANTES Y TARJETAS -->
+        <div class="tab-content activo" id="tab-diamantes">
+            <div class="section-divider"><span>💎 DIAMANTES</span></div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">110 Diamantes</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="0.78">$0.78</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="110 Diamantes" data-usd="0.78" data-codigo="110">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">220 Diamantes</div></div>
+                    <div class="product-desc">2 recargas de 110</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="1.48">$1.48</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="220 Diamantes (2x110)" data-usd="1.48" data-codigo="110_x2">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">341 Diamantes</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="2.30">$2.30</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="341 Diamantes" data-usd="2.30" data-codigo="341">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">572 Diamantes</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="4.00">$4.00</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="572 Diamantes" data-usd="4.00" data-codigo="572">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">1166 Diamantes</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="7.20">$7.20</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="1166 Diamantes" data-usd="7.20" data-codigo="1166">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">2398 Diamantes</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="14.00">$14.00</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="2398 Diamantes" data-usd="14.00" data-codigo="2398">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">💎</div><div class="product-title">6160 Diamantes</div></div>
+                    <div class="product-desc">🔥 Mega oferta</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="36.00">$36.00</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="6160 Diamantes" data-usd="36.00" data-codigo="6160">COMPRAR</button>
+                </div>
+            </div>
+
+            <div class="section-divider"><span>🎫 TARJETAS Y PASES</span></div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Semanal</div></div>
+                    <div class="product-desc">7 días de beneficios</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="2.00">$2.00</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Tarjeta Semanal" data-usd="2.00" data-codigo="weekly_semanal">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Tarjeta Mensual</div></div>
+                    <div class="product-desc">30 días de beneficios</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="8.80">$8.80</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Tarjeta Mensual" data-usd="8.80" data-codigo="weekly_mensual">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🎫</div><div class="product-title">Pase Booyah</div></div>
+                    <div class="product-desc">🔥 Pase de evento exclusivo</div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="2.15">$2.15</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Pase Booyah" data-usd="2.15" data-codigo="weekly_booyah">COMPRAR</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: PASES DE NIVEL -->
+        <div class="tab-content" id="tab-niveles">
+            <div class="section-divider"><span>🚀 PASES DE NIVEL</span></div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🚀</div><div class="product-title">Paquete Nivel 6</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="0.50">$0.50</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Subida al Nivel 6" data-usd="0.50" data-codigo="nivel_6">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🚀</div><div class="product-title">Paquete Nivel 10</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="0.80">$0.80</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Subida al Nivel 10" data-usd="0.80" data-codigo="nivel_10">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🚀</div><div class="product-title">Paquete Nivel 15</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="0.80">$0.80</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Subida al Nivel 15" data-usd="0.80" data-codigo="nivel_15">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🚀</div><div class="product-title">Paquete Nivel 20</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="0.80">$0.80</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Subida al Nivel 20" data-usd="0.80" data-codigo="nivel_20">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game-icon">🚀</div><div class="product-title">Paquete Nivel 25</div></div>
+                    <div class="product-price-wrap"><span class="product-price" data-usd="0.80">$0.80</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Subida al Nivel 25" data-usd="8.80" data-codigo="nivel_25">COMPRAR</button>
+                </div>
+                <div class="product-card">
+                    <div class="card-header"><div class="game.png">🚀</div><div class="product-title">Paquete Nivel 30</div></div>
+                    
+                    <div class="product-price-wrap"><span class="product-price" data-usd="1.20">$1.20</span><div class="product-ref"></div></div>
+                    <button class="btn-buy" data-producto="Subida al Nivel 30" data-usd="1.20" data-codigo="nivel_30">COMPRAR</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 2: ID + MÉTODO DE PAGO -->
+    <section class="seccion" id="seccion-jugador">
+        <button class="btn-volver-flujo" onclick="volverAlCatalogo()">← Volver al catálogo</button>
+
+        <div class="pagina-titulo">
+            <h1>Datos del jugador</h1>
+            <span class="chip-entrega">Paso 2 de 4</span>
+        </div>
+
+        <div class="card-panel" id="productoElegido" style="background:linear-gradient(135deg,rgba(212,175,55,0.12),rgba(59,130,246,0.05));border-color:rgba(212,175,55,0.4);">
+            <div style="display:flex;align-items:center;gap:14px;">
+                <div class="game-icon" style="font-size:22px;padding:12px;">💎</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:11px;color:#cbd5e1;text-transform:uppercase;letter-spacing:1px;font-weight:700;">Producto seleccionado</div>
+                    <div style="font-size:17px;font-weight:800;color:var(--color-dorado-claro);margin-top:2px;" id="prodElegidoNombre">—</div>
+                    <div style="font-size:13px;color:#fff;font-weight:700;margin-top:2px;" id="prodElegidoPrecio">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-panel" id="panelId">
+            <div class="panel-title"><span class="paso-num">1</span> ID del jugador</div>
+            <div class="form-group">
+                <label for="jugadorId">ID del jugador</label>
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="12" class="form-input" id="jugadorId" placeholder="Ej: 4664719056" autocomplete="off">
+                <p class="ayuda-id">Lo encuentras en tu perfil dentro del juego. Confirmaremos tu nombre antes de comprar.</p>
+            </div>
+            <div class="id-status" id="idStatus" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="card-panel">
+            <div class="panel-title"><span class="paso-num">2</span> Método de pago</div>
+            <div class="payment-methods" role="radiogroup" aria-label="Método de pago">
+                <div class="pay-box active" role="radio" aria-checked="true" tabindex="0" data-metodo="PAGO MOVIL">🏦 PAGO MOVIL</div>
+                <div class="pay-box" role="radio" aria-checked="false" tabindex="0" data-metodo="BINANCE">🟡 BINANCE</div>
+            </div>
+            <div class="tasa-info" id="tasaInfo">Cargando tasa...</div>
+        </div>
+
+        <button class="btn-accion" id="btnContinuarPago" onclick="irAlPago()" disabled style="opacity:0.5;">CONTINUAR AL PAGO →</button>
+        <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:10px;">Verificaremos tu ID automáticamente.</p>
+    </section>
+
+    <!-- SECCIÓN 3: PAGO -->
+    <section class="seccion" id="seccion-pago">
+        <button class="btn-volver-flujo" onclick="volverAJugador()">← Volver a datos del jugador</button>
+
+        <div class="pagina-titulo">
+            <h1>Confirmar Pago</h1>
+            <span class="chip-entrega">Paso 3 de 4</span>
+        </div>
+
+        <div class="resumen-box">
+            <div class="resumen-fila"><span class="resumen-etiqueta">🎮 Juego</span><span class="resumen-valor" id="datoJuego">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">🆔 ID Jugador</span><span class="resumen-valor" id="datoId">-</span></div>
+            <div class="resumen-fila" id="filaNombre" style="display:none;"><span class="resumen-etiqueta">👤 Jugador</span><span class="resumen-valor verde" id="datoNombreJugador">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">📦 Producto</span><span class="resumen-valor" id="datoProducto">-</span></div>
+            <div class="resumen-fila" id="filaSubtotal" style="display:none;"><span class="resumen-etiqueta">💵 Subtotal</span><span class="resumen-valor tachado" id="datoSubtotal">-</span></div>
+            <div class="resumen-fila" id="filaDescuento" style="display:none;"><span class="resumen-etiqueta">🎁 Descuento</span><span class="resumen-valor verde" id="datoDescuento">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">💰 Total</span><span class="resumen-valor verde" id="datoMontoTotal">-</span></div>
+        </div>
+
+        <!-- BLOQUE PAGO MÓVIL (visible por defecto) -->
+        <div class="datos-pago-box" id="bloqueDatosPago">
+            <h3 class="titulo-seccion" style="margin-top:0;">🏦 Datos de Pago Móvil</h3>
+            <div class="dato-line"><div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div><button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <div class="dato-line"><div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div><button class="copiar-btn" onclick="copiarTexto('32824869', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <div class="dato-line"><div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div><button class="copiar-btn" onclick="copiarTexto('04228242411', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <div class="dato-line"><div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">-</span></div><button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div>
+            <button class="copiar-todo-btn" onclick="copiarTodosLosDatos(this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copiar todos los datos de pago</button>
+        </div>
+
+        <!-- BLOQUE BINANCE (oculto por defecto, se muestra al elegir Binance) -->
+        <div class="datos-pago-box" id="bloqueDatosBinance" style="display:none; text-align:center;">
+            <h3 class="titulo-seccion" style="margin-top:0;">🟡 Pago con Binance Pay</h3>
+            <p style="color:#cbd5e1; font-size:14px; margin-bottom:20px; line-height:1.5;">
+                Serás redirigido a la pasarela segura de Binance.<br>
+                Tu pedido se procesará automáticamente al confirmar el pago.
+            </p>
+            <div style="background:rgba(212,175,55,0.1); padding:15px; border-radius:12px; border:1px solid rgba(212,175,55,0.3); display:inline-block;">
+                <span style="font-weight:800; font-size:24px; color:#f5d76e;">$${precioUsdFinal ? precioUsdFinal.toFixed(2) : '0.00'} USD</span>
+            </div>
+        </div>
+
+        <div class="cupon-box" id="cuponBox">
+            <label class="cupon-label">🎁 ¿Tienes un código de descuento?</label>
+            <div class="cupon-input-wrap"><input type="text" class="cupon-input" id="cuponInput" placeholder="Ingresa tu código" maxlength="20" autocomplete="off"><button class="cupon-btn" id="cuponBtn" onclick="aplicarCupon()">Aplicar</button></div>
+            <div class="cupon-msg" id="cuponMsg"></div>
+        </div>
+
+        <!-- Solo para Pago Móvil -->
+        <div id="contenedorReferencia" style="display:block;">
+            <div class="datos-pago-box">
+                <label style="display:block;margin-bottom:8px;font-weight:700;text-align:left;color:#cbd5e1;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Referencia completa del pago:</label>
+                <input type="text" class="input-ref" id="referenciaPago" placeholder="Ej: 0050943851750" maxlength="30" autocomplete="off">
+            </div>
+            <div class="aviso-box">⚠️ Cada referencia solo se puede usar <strong>UNA VEZ</strong> por seguridad.</div>
+        </div>
+
+        <button class="btn-accion" id="btnVerificar" onclick="iniciarVerificacion()" style="margin-top:14px;">✅ VERIFICAR PAGO</button>
+    </section>
+
+    <!-- SECCIÓN 4: ESTADOS -->
+    <section class="seccion" id="seccion-verificando">
+        <div class="estado-box">
+            <div class="spinner-circle"></div>
+            <div class="texto-principal">Verificando pago...</div>
+            <div class="texto-secundario" id="subtituloVerificando">Estamos buscando tu pago en el sistema bancario...</div>
+        </div>
+    </section>
+
+    <section class="seccion" id="seccion-confirmado">
+        <div class="estado-box">
+            <div class="icono-circle icono-exito">✓</div>
+            <div class="texto-principal">¡Pago Confirmado!</div>
+            <div class="texto-secundario">Tu pago fue verificado. Procesando...</div>
+        </div>
+    </section>
+
+    <section class="seccion" id="seccion-procesando">
+        <div class="estado-box">
+            <div class="spinner-circle"></div>
+            <div class="texto-principal">Procesando tu compra...</div>
+            <div class="texto-secundario">Conectando con el proveedor. No cierres esta ventana.</div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 5: ÉXITO -->
+    <section class="seccion" id="seccion-exito">
+        <div class="estado-box">
+            <div class="icono-circle icono-exito">✓</div>
+            <div class="texto-principal" id="tituloExito">¡Recarga Exitosa!</div>
+            <div class="texto-secundario" id="subtituloExito">Tu recarga se procesó correctamente.</div>
+        </div>
+
+        <div class="resumen-box">
+            <div class="resumen-fila"><span class="resumen-etiqueta">📋 Pedido</span><span class="resumen-valor" id="resPedido">#0000</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">📦 Producto</span><span class="resumen-valor" id="resProducto">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">👤 Jugador</span><span class="resumen-valor verde" id="resNombre">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">🆔 ID</span><span class="resumen-valor" id="resIdResumen">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">🔢 Referencia</span><span class="resumen-valor verde" id="resReferencia">-</span></div>
+            <div class="resumen-fila"><span class="resumen-etiqueta">💰 Monto</span><span class="resumen-valor" id="resMonto">-</span></div>
+        </div>
+
+        <div id="pinContainer"></div>
+
+        <button class="btn-accion" onclick="realizarOtraRecarga()" style="margin-top:20px;">🔄 REALIZAR OTRA RECARGA</button>
+        <a href="pedidos.html" style="display:block;text-align:center;color:#94a3b8;text-decoration:none;margin-top:14px;font-size:14px;">📋 Ver mis pedidos</a>
+    </section>
+
+    <section class="seccion" id="seccion-error">
+        <div class="estado-box">
+            <div class="icono-circle icono-error">✕</div>
+            <div class="texto-principal" id="tituloError">Pago No Encontrado</div>
+            <div class="texto-secundario" id="msgError">Verifica tu referencia e inténtalo de nuevo.</div>
+        </div>
+        <button class="btn-accion" onclick="volverAlPago()" style="margin-top:20px;">← VOLVER A INTENTAR</button>
+    </section>
+
+    <section class="seccion" id="seccion-ref-usada">
+        <div class="estado-box">
+            <div class="icono-circle icono-amarillo">⚠</div>
+            <div class="texto-principal">Referencia Ya Utilizada</div>
+            <div class="texto-secundario">Esta referencia ya fue usada. Usa una nueva.</div>
+        </div>
+        <button class="btn-accion" onclick="volverAlPago()" style="margin-top:20px;">← VOLVER A INTENTAR</button>
+    </section>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<nav class="nav-inferior" id="navInferior" aria-label="Navegación principal">
+    <div class="nav-inferior-inner">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="index.html#juegos" class="nav-item active">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item" id="navPedidos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
+</nav>
+
+<a href="#" class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" aria-label="Volver arriba">↑</a>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   RECARGASGAMES — FREE FIRE — FLUJO UNIFICADO
+   ═══════════════════════════════════════════════════════════════ */
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+    authDomain: "free-52119.firebaseapp.com",
+    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "free-52119",
+    storageBucket: "free-52119.firebasestorage.app",
+    messagingSenderId: "632240144599",
+    appId: "1:632240144599:web:e31c25665ffe19c194b092"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const refReferencias = db.ref("referencias_usadas");
+const refReferenciasFalsas = db.ref("referencias_falsas");
+const refPedidos = db.ref("pedidos");
+const refCupones = db.ref("cupones_usados");
+const refManuales = db.ref("referencias_manuales");
+const refCodigosTEST = db.ref("codigos_test");
+
+const URL_VERIFICAR_PAGO = '/api/verificar-pago';
+const URL_WHATSAPP_PASARELA = '/api/enviar-whatsapp-pasarela';
+const URL_TELEGRAM = '/api/notificar-telegram';
+const URL_CENTRAL_ONE = '/api/central-one';
+const URL_BINANCE = '/api/verificar-binance'; // Endpoint que acabamos de crear
+
+const CUPONES_VALIDOS = { 'GAMES': 4 };
+
+function fechaCaracas() {
+    const ahora = new Date();
+    const caracas = new Date(ahora.getTime() - (4 * 60 * 60 * 1000));
+    return caracas.toISOString().split('T')[0];
+}
+
+const ICONOS = { exito:'✓', error:'✕', advertencia:'⚠', info:'ℹ' };
+function mostrarMensaje(titulo, mensaje, tipo='info', textoBoton='Entendido') {
+    return new Promise((resolve) => {
+        document.getElementById('mensajeIcono').className = 'mensaje-icono ' + tipo;
+        document.getElementById('mensajeIcono').textContent = ICONOS[tipo] || ICONOS.info;
+        document.getElementById('mensajeTitulo').textContent = titulo;
+        document.getElementById('mensajeTexto').textContent = mensaje;
+        document.getElementById('mensajeBotones').innerHTML = `<button class="mensaje-btn principal" id="btnOkMsg">${textoBoton}</button>`;
+        document.getElementById('btnOkMsg').onclick = () => { cerrarMensaje(); resolve(true); };
+        document.getElementById('mensajeOverlay').classList.add('activo');
+    });
+}
+function cerrarMensaje() { document.getElementById('mensajeOverlay').classList.remove('activo'); }
+document.getElementById('mensajeOverlay').addEventListener('click', (e) => { if (e.target.id === 'mensajeOverlay') cerrarMensaje(); });
+
+function mostrarSeccion(id) {
+    document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('activa');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const nav = document.getElementById('navInferior');
+    if (id === 'seccion-catalogo' || id === 'seccion-exito') {
+        nav.classList.remove('oculto');
+        document.body.classList.add('con-nav');
     } else {
-        console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT no configurado. Webhooks no actualizarán Firebase.");
+        nav.classList.add('oculto');
+        document.body.classList.remove('con-nav');
     }
-} catch (error) {
-    console.error("❌ Error inicializando Firebase Admin:", error.message);
+}
+function marcarProgreso(numero) {
+    document.querySelectorAll('.progreso-paso').forEach(p => {
+        const n = parseInt(p.dataset.paso);
+        p.classList.remove('activo','completado');
+        if (n < numero) p.classList.add('completado');
+        else if (n === numero) p.classList.add('activo');
+    });
+}
+function volverAlCatalogo() { mostrarSeccion('seccion-catalogo'); marcarProgreso(1); }
+function volverAJugador()   { mostrarSeccion('seccion-jugador');  marcarProgreso(2); }
+function volverAlPago()     {
+    document.getElementById('btnVerificar').disabled = false;
+    document.getElementById('btnVerificar').innerHTML = '✅ VERIFICAR PAGO';
+    mostrarSeccion('seccion-pago'); marcarProgreso(3);
 }
 
-const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
+const juegoActual = "FREE FIRE";
+let metodo = "PAGO MOVIL";
+let tasa = 940;
+let idVerificado = false;
+let verificandoId = false;
+let nicknameVerificado = "";
+let productoElegido = null;
+let descuentoAplicado = 0;
+let cuponAplicado = "";
+let precioUsdFinal = 0;
+let precioBsFinal = 0;
 
-// ============================================
-// 📦 MAPA MAESTRO DE SKUs → UUIDs
-// ============================================
-const SKU_MAP = {
-    // FREE FIRE LATAM
-    'FF-110-DIAMONDS':    'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
-    'FF-341-DIAMONDS':    'bb0a8212-916e-4c9a-ad22-170fa9732734',
-    'FF-572-DIAMONDS':    '0cbc02a5-2e65-41d3-899e-917abd1a2dd1',
-    'FF-1166-DIAMONDS':   'afad588d-54f9-4227-9c0b-9889a9135370',
-    'FF-2398-DIAMONDS':   '72b92180-b858-41fc-8e9d-bc402c16db80',
-    'FF-6160-DIAMONDS':   'e839259e-79e5-474e-b6e8-0c83f876ac6a',
-    'FF-WEEKLY-SEMANAL':  '47bba141-8980-47f7-b4bd-2e264c2d9930',
-    'FF-WEEKLY-MENSUAL':  '6f98867c-a84e-418e-ab54-83f1da1fdee2',
-    'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
-    // FREE FIRE LATAM - NIVELES
-    'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757',
-    'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be',
-    'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328',
-    'FF-NIVEL-20':        '549739d0-f988-4d5d-9b18-5357bd8de9fa',
-    'FF-NIVEL-21':        'a9093b52-a726-4e9d-be8d-994df6ccd870',
-    'FF-NIVEL-22':        '5d18dc6d-98be-45c4-a472-68266f6a3c9d',
-    // FREE FIRE BRASIL
-    'FF-BR-110':          '89fec3da-b07a-4966-b322-2564967fa1eb',
-    'FF-BR-341':          '949b4c7e-c37c-4b6f-836e-6760ab4c0121',
-    'FF-BR-572':          'c290219c-30d8-44d3-981f-779422554f65',
-    'FF-BR-1166':         '12ad5a47-2619-4624-84ee-ed1ab5cc9ab8',
-    'FF-BR-2398':         '57e67fe2-abfd-4533-8037-c81b5799854d',
-    'FF-BR-6160':         'a1f7abf0-91ed-4089-8174-db84c82ba6dc',
-    'FF-BR-22640':        '2766a9db-01d0-4b14-8140-a88b055015b7',
-    'FF-BR-SEMANAL':      '9c637ffc-d52a-4c8e-ba12-d3366d3ecef8',
-    'FF-BR-MENSUAL':      '600bf5a0-1f20-482a-b50e-5acab1a14e9f',
-    'FF-BR-SEMANAL-BAS':  '7badf2ad-fc46-41cb-9ea8-8a3c73d3c49a',
-    'FF-BR-BOOYAH':       '7e7643a6-d1c2-40e0-a5ef-9dea06a9863b',
-    'FF-BR-BOOYAH-PREM':  '7de9a2ec-3c07-4a45-abc2-4c5ced4065e7',
-    'FF-BR-EVO-3D':       '9f101883-1262-4c12-914f-76b5b270ba43',
-    'FF-BR-EVO-7D':       '6b9bfb24-6dc1-43cd-ad0a-e39513bbfdfc',
-    'FF-BR-EVO-30D':      'd7c97e88-acdf-4721-b56f-90c76a80be24',
-    'FF-BR-NIVEL-6':      '4c5b5a5c-d1dd-4225-9cba-0d595d8d1a34',
-    'FF-BR-NIVEL-10':     '2ca9ed79-5a2c-4143-98f3-4bd09b62f449',
-    'FF-BR-NIVEL-15':     '19b1e947-410e-4b7c-872c-a948535ce944',
-    'FF-BR-NIVEL-20':     '301289dc-35bc-4102-bd56-1f8629567eb4',
-    'FF-BR-NIVEL-25':     '66fda745-2421-4e7a-bbf7-1d063c10a181',
-    'FF-BR-NIVEL-30':     'd32612d6-b1bf-43be-827b-c021d3eed2a6',
-    // RACING MASTER
-    'RM-LATAM-NOVICE':    '3ef9bea0-4b05-4a21-a559-b760bde2f9d2',
-    'RM-LATAM-70':        'c531cdd1-b2ac-4822-8cd6-09ee3a4e2b95',
-    'RM-LATAM-OUTFIT':    '27859c97-0828-44d4-86c3-e5624a6913db',
-    'RM-LATAM-WEEKLY':    '838ce749-34e7-4014-b5e9-977651981187',
-    'RM-LATAM-140':       '5ca1c7d4-46dc-494d-a6a9-bb96db026f7c',
-    'RM-LATAM-MONTHLY':   '609249eb-c6d0-4059-b1dd-bb1e8fc4a290',
-    'RM-LATAM-210':       'fdf8b563-c6e5-4025-b605-e05361ad6676',
-    'RM-LATAM-350':       '9fc78e6c-cc6f-48a6-bb87-5dd8e8698578',
-    'RM-LATAM-UPG-PREM':  'c309da99-79e4-4c99-bb5e-fce077c67eea',
-    'RM-LATAM-DELUXE':    '7477edc6-2340-4fde-a4d8-2e4456b38834',
-    'RM-LATAM-GROWTH':    '0c7d791d-d40b-4e68-92d4-ccf4f50cfba9',
-    'RM-LATAM-700':       '0f462c23-4282-45bf-8271-acab79d24598',
-    'RM-LATAM-PREM':      '93740fac-7faf-4ed3-8d03-dd83c7729879',
-    'RM-LATAM-1000':      '1d55d833-d321-4285-bc51-9deaa29f9a12',
-    'RM-LATAM-1400':      'ade3921b-5b11-41c6-bc1a-6af31f4010c5',
-    'RM-LATAM-LEGEND':    '8f63dd15-9cbe-4ba0-b6a8-834f571210db',
-    'RM-LATAM-2100':      'f6dff6cc-c31a-4a61-ba8a-8c33e5b3af9b',
-    'RM-LATAM-UPG-MP':    'eef2bfb8-8c2c-4580-ab22-af2730a38891',
-    'RM-LATAM-MP-BUNDLE': 'c47f744f-0872-4b05-b02d-00e5cfcf95b3',
-    'RM-LATAM-3400':      'ba7e5654-f98c-4e95-aa4e-57f178130c47',
-    'RM-LATAM-6600':      'db4d09b6-deea-4240-ad2c-81a965b04200',
-    // SUPER SUS
-    'SS-100':           '47ed9e26-f618-4fe8-9886-c2615c4f1153',
-    'SS-128':           '6ea5a400-da18-40d3-957c-6bfbc12f8a00',
-    'SS-WEEKLY':        '2ab78fd4-2b85-4285-8bda-4740db314c99',
-    'SS-310':           'e0c5cf60-893a-4644-9194-9252bf2c4447',
-    'SS-395':           '853a76ba-f133-47ce-87ca-b06846890ad3',
-    'SS-1+1':           'ede0e118-b046-42a6-b7e4-74cde6a0b815',
-    'SS-520':           '95c5bcc3-9720-4f1a-b0d5-c84b3e91d197',
-    'SS-670':           '821a23b2-88ed-4c3d-bb62-751b6014e96f',
-    'SS-SUPERPASS':     '8630e6d5-e155-4f67-8eb8-ccae8ef9ea55',
-    'SS-1060':          'dc45a7b9-f703-4461-b0b0-8bddfe6327ed',
-    'SS-1360':          '269a9f2b-5142-454d-95d2-7553184b8fcc',
-    'SS-SUPERPASSB':    'e95a51a2-0976-4fef-b7a7-5fa7eab1b0f0',
-    'SS-MONTHLY':       'af30e4d2-c15d-49f5-8bf6-b694b6d17bde',
-    'SS-SUPERVIP':      '8fad2523-5bfd-45bd-8d4a-f45c90dafc95',
-    'SS-2180':          '487c85a1-a7f7-45a6-8b95-d723b2cd6742',
-    'SS-2760':          '8607efd3-5e94-48a8-b034-972c7be5e1b8',
-    'SS-7000':          '00a4ef9b-62f3-4153-9a35-dae30b0af702',
-    'SS-5600':          'b5632b1f-7e94-436b-a38d-0358efa11b99',
-    // MARVEL RIVALS
-    'MR-100':           'a25b3ea0-2ff9-4195-918a-162c734f0744',
-    'MR-PICKUP':        '122c594d-7baf-4747-9910-f2007a756de9',
-    'MR-500':           '34c0a4c4-5ae3-4daf-8d08-25625659d38f',
-    'MR-1000':          '8a00965e-f336-42a0-af08-5eaa43a77912',
-    'MR-2180':          '66e30ffb-8b1d-42c4-ade9-bf0ecff8c7b6',
-    'MR-5680':          '9c8290df-b4e5-4ced-8cb2-7088361f3eb5',
-    'MR-11680':         '751841ef-0e1e-4034-84a0-9899db5635e2',
-    // HONOR OF KINGS
-    'HOK-16':             '9f3817a2-a395-4324-b5c8-3c2aba407749',
-    'HOK-DOUBLE-LUCKY':   '4dc4ffe1-0f8a-44a3-a717-97c2c4b0cf99',
-    'HOK-80':             'c3aafd3f-f602-4e23-a015-1999c794cd79',
-    'HOK-WEEKLY':         '7fa8144c-3452-4d81-a291-2e4c39409620',
-    'HOK-400':            'b1a3edb1-dfc0-4e4c-a169-3156b1acf24f',
-    'HOK-STANDARD-PACK':  '18eab674-ecb0-406b-ab9a-ef7e55bb5bbc',
-    'HOK-HONOR-PACK':     'ead0c754-ca3c-4813-968d-a69328230f35',
-    'HOK-INFERNAL':       '60735234-46a5-421b-98e8-cc3a17b3d9d1',
-    'HOK-PREMIUM-PACK':   '553c7913-d234-4ab3-bea8-aa0c608d6b04',
-    'HOK-240':            'f64fc207-ecb4-49c0-9d6c-6deff9502e91',
-    'HOK-WEEKLY-PLUS':    '56883290-5ec5-4ee5-b207-7c6b4141cedc',
-    'HOK-560':            '40bf2360-f948-4b86-a74b-798c839038c2',
-    'HOK-830':            '37f5627c-d420-4870-89f3-7b7db358642a',
-    'HOK-1245':           'e7ef6d3b-4b3d-450f-a891-a23d29b56b7f',
-    'HOK-2508':           '1a04a619-71fd-4c9e-a883-b0ea8db37b1b',
-    'HOK-4180':           '22ed6ce1-bf1f-4a80-8404-1d95ed4b5c71',
-    'HOK-8360':           '3087b613-a926-4a39-8d73-804815d7cd51',
-    // BLOOD STRIKE
-    'BS-105':  'e4efc583-fcc4-4544-9547-8c687d663ba5',
-    'BS-320':  '6a1d92fb-365c-4a9d-84df-492b954bad95',
-    'BS-540':  '2c5dda92-ea2d-426c-b546-439ec433c8a7',
-    'BS-1100': '0b024948-132f-4834-8bcb-57ffa75f1403',
-    'BS-2260': 'b4671110-4eb6-421e-b428-26ea992f8f48',
-    'BS-5800': '53df3770-de7f-4902-b78b-d0647c956fcb',
-    // PUBG MOBILE
-    'PUBG-60-WOW':      'e3a5f720-8a66-4ce3-8dd6-88141d539f2d',
-    'PUBG-325-WOW':     '1b38e531-b2b7-4319-998b-4b6f4738f418',
-    'PUBG-660-WOW':     'a5197d82-5b5d-4f8b-9850-e6d65b44bc1a',
-    'PUBG-1800-WOW':    '85a09dd0-d45d-4a3c-a40f-e878d0f46cb2',
-    'PUBG-3850-WOW':    '12de1a93-363a-45d3-8582-11d052a93665',
-    'PUBG-8100-WOW':    '865240be-8624-4bfb-8cc9-a00402f859fd',
-    'PUBG-WEEKLY-DEAL': 'f9df0a3a-a46d-4d9b-9c8f-be1a76ff9bc2',
-    'PUBG-PRIME-1M':    '7171efcd-7ece-4f2a-b042-f27f8533a7dd',
-    'PUBG-PRIME-3M':    '25f4a66d-26ed-471d-9ce9-c154007cebef',
-    'PUBG-PRIME-6M':    'f6f6138f-07d0-40de-8ff7-745bb887aba6',
-    'PUBG-PRIME-12M':   '8912c69e-468b-4c9f-993d-43d6b28c413c',
-    'PUBG-ELITE-PASS':  '9f636584-3649-44ce-8d79-51260acccaa0',
-    // MOBILE LEGENDS
-    'ML-55':   '85e05010-7caa-4416-a8cf-8180f1cb8cf5',
-    'ML-86':   '46f6116c-7bce-4251-aae7-90405beed7f6',
-    'ML-112':  '0d0eac0a-a97d-4a93-9d42-1542d036dc61',
-    'ML-172':  '98f7e381-8697-4201-8cfb-ef8813225946',
-    'ML-257':  '45f573d5-6223-4bc0-9da6-eb6cf3bd64a8',
-    'ML-429':  'c5001e7e-4b91-4793-bbb4-f1f2038e4081',
-    'ML-706':  '4b4425c0-4525-496a-abdf-75708c9a503d',
-    'ML-1050': '608bf79a-acb1-4ff8-bd67-63906d92c480',
-    // ROBLOX
-    'RBX-50':    '81dfdc57-1feb-4e72-8be6-7e119a348c48',
-    'RBX-100':   'ea9298ae-944b-498b-9d82-a8128624cbbd',
-    'RBX-275':   '2ed3da74-e7e6-4c1b-a609-b630855303b6',
-    'RBX-360':   '5cafd861-3893-49a7-a9be-7815492c04c2',
-    'RBX-555':   '9defafba-f584-4378-ab8c-ce656d2a7c7e',
-    'RBX-1000':  '586763f0-6a06-4f5b-9eaf-cb7f66ae2ce2',
-    'RBX-2000':  '898ed399-6901-4582-9755-e5299f7dfb40',
-    'RBX-2400':  '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc',
-    // COD MOBILE
-    'COD-115':   '8b6451b5-b60d-4f3e-8f1c-916612696d48',
-    'COD-253':   '312e9583-3ed1-47bf-856a-60845ed56aea',
-    'COD-529':   '355e83d1-2655-4557-9433-5f6eeade0025',
-    'COD-794':   'd5bb6e8a-13fd-491c-9ef5-190a9c1293f0',
-    'COD-1053':  '6ea20c6b-01b9-40be-8a37-d2a36456b00e',
-    'COD-1323':  'c5646fb3-e35a-4b2e-81bc-84aa0431f701',
-    'COD-2760':  'e0fca6c5-8ec1-4b15-b522-03d11254faec',
-    'COD-6440':  'a50c16ac-335e-477a-bae2-38c686a8643f',
-    'COD-9200':  'a2525435-3708-4ced-8e44-a28fc21615aa',
-    'COD-12880': 'c9a8a960-dda8-4ba2-a58d-ba6f926c8373',
-    'COD-15640': 'c67b54fd-c882-4f20-902d-c75725f7eb12',
-    'COD-19320': '271dc36c-5e2e-4acd-83a1-3e2715f38c5a',
-    // ARENA BREAKOUT
-    'AB-66':          '4717ed5f-1a53-402d-b300-eca115c4b93a',
-    'AB-335':         'a320c66a-04f4-458f-aa09-9aed14959ee1',
-    'AB-675':         '27e6df12-f5b5-4804-acd6-cfe3f58bde8b',
-    'AB-1690':        '9022d6c6-c732-4288-a830-3c9fd6214abd',
-    'AB-3400':        'd2a86124-3342-4ba4-9623-642772628da4',
-    'AB-6820':        'a5b759a8-0ccc-4ca2-95b8-6326fea4eb9c',
-    'AB-BP-BEGINNER': '25637df5-abc5-4e71-96c6-5335141dae34',
-    'AB-BP-ADV':      '0c3e488e-3666-431d-9676-44bb6c1bc43b',
-    'AB-BP-PREM':     '1dc610a1-19a7-4cfd-abaf-79f1f7352a90',
-    'AB-BP-PREM3M':   'ae006899-d9a5-424f-b5c8-af965ee61362',
-    // DELTA FORCE
-    'DF-60':    'e0ff073e-4668-433c-b96e-8ce7c0df4be9',
-    'DF-320':   'a10c6c07-3baf-445a-ab68-6229a07b073b',
-    'DF-750':   'd92a09a6-d96d-42cd-a5c1-75ff56896730',
-    'DF-1480':  '85cf6d19-4589-4321-953b-c6a5758050c6',
-    'DF-1980':  '7f5c9c92-e88d-4609-997a-848103ab9d9b',
-    'DF-3950':  '881a5bb7-1e6f-4e5b-ba89-012b2ad55830',
-    'DF-8100':  'ee0eab5c-14aa-48ea-a8f9-0b9ab1dc8b98',
-    'DF-SP-OPS': '68861512-6043-4c50-bd1e-e77178ccb03f',
-    'DF-SP-WAR': '70a63345-0c33-4a24-a117-39cee4084c27',
-    'DF-SP-DLX': '6d273271-9d52-42c1-b6fc-d4a1eebefc02',
-    // BIGO LIVE
-    'BIGO-100':  '80f84262-372b-4e71-8df9-a3f9f75ad4da',
-    'BIGO-500':  'd5a22f8a-e039-4bc5-84a6-b2d74dcc6e61',
-    'BIGO-1000': '0357c579-a20b-4fe2-bbdd-35742c429c0c',
-    'BIGO-10000': '53bea902-d838-4c33-87f7-2dc637cc9820',
-    // GIFT CARDS
-    'PSN-1':   '39ad5eef-234d-463e-a851-78d21f8ae217',
-    'PSN-2':   '1f3ab10c-4a1c-4632-a883-f8989d251764',
-    'PSN-3':   '1341b21e-72b5-4624-952e-d72511b2ae23',
-    'PSN-4':   '869cdd6a-53e4-4c2c-93ab-6ba13534c318',
-    'PSN-5':   '15934f99-e566-4c30-887b-28a99f477b13',
-    'PSN-10':  'c30917c6-b1f2-49b1-926a-2a3eaa374e7c',
-    'PSN-15':  '5e0aa982-d972-41c5-830e-47d8b6b13a7e',
-    'PSN-20':  '9ee21c38-433e-4409-bc15-a2bedc730608',
-    'PSN-25':  'b11c9eb9-89fc-4335-b998-3a757038da76',
-    'PSN-30':  'b525c041-c560-4fa3-80e8-9aa4d4f01550',
-    'PSN-35':  'd39d8a6e-7f5e-48fc-baad-7ff62b4766f5',
-    'PSN-40':  '9857fc31-e797-4f00-94f7-e61b5d273f64',
-    'PSN-45':  'b8061a4f-f500-4da2-80d2-91b0a8d56eed',
-    'PSN-50':  '5f37d450-03a8-45fe-9c68-c2c9e226f1a7',
-    'PSN-75':  '7fa4c586-17e3-4c7d-9acd-a3b50e210fd4',
-    'PSN-100': '4150d5b1-014c-4019-98f0-ab1fcb1ea645',
-    'XBOX-1':   'e8cba797-a7ba-4c6c-8fbd-6a4b5b18b8ed',
-    'XBOX-5':   'dfb2f11c-0a37-4369-ad30-bbd05796ce48',
-    'XBOX-10':  '44bfddeb-e545-46ca-91ec-74eb58943cc7',
-    'XBOX-15':  '3dfe654b-f678-49bf-b928-c794c6509bb4',
-    'XBOX-20':  '29874d8d-a346-41a1-a19d-1a435f58e0cf',
-    'XBOX-25':  '555e8d30-e771-4b38-acc0-4eaa9043db68',
-    'XBOX-50':  'b48fbf26-1812-4d5e-9c9b-42d0bfecb5ad',
-    'XBOX-100': 'd60be4c3-fb96-4876-9f65-baeaf402b74f',
-    'NINTENDO-5':  '434fffe4-bcf0-4201-b770-c1533bafa5d1',
-    'NINTENDO-10': 'f28a4f1b-617c-4b6a-814e-1263a91da6f5',
-    'NINTENDO-20': '28d38620-68fc-4720-8e2f-586718f68e2b',
-    'NINTENDO-35': '0ffdd977-d634-4555-945a-c8e3c4e95228',
-    'NINTENDO-50': 'd9dfe5cb-3a64-45bf-a6e6-bf62a01165a3',
-    'NINTENDO-70': 'd8b6fac2-edca-4625-ad77-ba8cbba82276',
-    'NETFLIX-15':  '676095be-084e-483b-a1c4-9354d5e8c1cf',
-    'NETFLIX-20':  '576d3a32-2907-4785-85df-34c2cdfcbeca',
-    'NETFLIX-25':  '2cfba5f9-1249-4184-8e11-09c21be5eb8f',
-    'NETFLIX-30':  'f6e9891b-8f26-4a0f-a86d-8880791c749b',
-    'NETFLIX-50':  '5c2d037d-e60f-4419-9d9a-d98ca41a267a',
-    'NETFLIX-60':  'd30bf0cf-fdb0-4dee-adf2-1e7cb638206a',
-    'NETFLIX-75':  '37f2e499-708d-4679-b477-449dfff949f1',
-    'NETFLIX-100': '316183ea-7636-47e1-a323-14ccfce36edc',
-    'GPLAY-10-EUR-DE': '9a71fdad-c577-4363-9322-eb598c42ce21',
-    'GPLAY-15-EUR-ES': 'a49ce5ec-6d69-4fc9-a8a1-8d1bae63cdd4',
-    'GPLAY-10-GBP-UK': '289508d9-da39-4485-a7cf-a980abfd4d85',
-    'GPLAY-100-GBP-UK':'2f5615b1-3644-4488-b376-b68f04ac7bd7'
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function avisar(mensaje, tipo = 'info') {
+    toastEl.textContent = mensaje;
+    toastEl.className = 'toast visible' + (tipo === 'error' ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('visible'), 3800);
+}
+
+window.cambiarTab = function(tabId, boton) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('activo'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+    document.getElementById('tab-' + tabId).classList.add('activo');
+    boton.classList.add('activo');
 };
 
-const MARGEN_JUEGOS = 1.20;
-const MARGEN_GIFTCARDS = 1.10;
-
-const PRODUCTOS_CONFIG = {
-    'FREE FIRE': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,12}$/, paquetes:{
-        '110':'FF-110-DIAMONDS','341':'FF-341-DIAMONDS','572':'FF-572-DIAMONDS',
-        '1166':'FF-1166-DIAMONDS','2398':'FF-2398-DIAMONDS','6160':'FF-6160-DIAMONDS',
-        'weekly_semanal':'FF-WEEKLY-SEMANAL','weekly_mensual':'FF-WEEKLY-MENSUAL','weekly_booyah':'FF-WEEKLY-BOOYAH',
-        'nivel_6':'FF-NIVEL-17', 'nivel_10':'FF-NIVEL-18', 'nivel_15':'FF-NIVEL-19',
-        'nivel_20':'FF-NIVEL-20', 'nivel_25':'FF-NIVEL-21', 'nivel_30':'FF-NIVEL-22'
-    }},
-    'FREE FIRE BR': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,12}$/, paquetes:{
-        '110':'FF-BR-110', '341':'FF-BR-341', '572':'FF-BR-572', 
-        '1166':'FF-BR-1166', '2398':'FF-BR-2398', '6160':'FF-BR-6160', '22640':'FF-BR-22640',
-        'weekly_semanal':'FF-BR-SEMANAL', 'weekly_mensual':'FF-BR-MENSUAL', 'weekly_basica':'FF-BR-SEMANAL-BAS',
-        'weekly_booyah':'FF-BR-BOOYAH', 'weekly_booyah_prem':'FF-BR-BOOYAH-PREM',
-        'evo_3d':'FF-BR-EVO-3D', 'evo_7d':'FF-BR-EVO-7D', 'evo_30d':'FF-BR-EVO-30D',
-        'nivel_6':'FF-BR-NIVEL-6', 'nivel_10':'FF-BR-NIVEL-10', 'nivel_15':'FF-BR-NIVEL-15',
-        'nivel_20':'FF-BR-NIVEL-20', 'nivel_25':'FF-BR-NIVEL-25', 'nivel_30':'FF-BR-NIVEL-30'
-    }},
-    'RACING MASTER': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        'novice':'RM-LATAM-NOVICE', '70':'RM-LATAM-70', 'outfit':'RM-LATAM-OUTFIT', 'weekly':'RM-LATAM-WEEKLY',
-        '140':'RM-LATAM-140', 'monthly':'RM-LATAM-MONTHLY', '210':'RM-LATAM-210', '350':'RM-LATAM-350',
-        'upg_prem':'RM-LATAM-UPG-PREM', 'deluxe':'RM-LATAM-DELUXE', 'growth':'RM-LATAM-GROWTH', '700':'RM-LATAM-700',
-        'prem':'RM-LATAM-PREM', '1000':'RM-LATAM-1000', '1400':'RM-LATAM-1400', 'legend':'RM-LATAM-LEGEND',
-        '2100':'RM-LATAM-2100', 'upg_mp':'RM-LATAM-UPG-MP', 'mp_bundle':'RM-LATAM-MP-BUNDLE',
-        '3400':'RM-LATAM-3400', '6600':'RM-LATAM-6600'
-    }},
-    'SUPER SUS': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        '100':'SS-100', '128':'SS-128', 'weekly':'SS-WEEKLY', '310':'SS-310', '395':'SS-395',
-        '1+1':'SS-1+1', '520':'SS-520', '670':'SS-670', 'superpass':'SS-SUPERPASS', '1060':'SS-1060',
-        '1360':'SS-1360', 'superpassb':'SS-SUPERPASSB', 'monthly':'SS-MONTHLY', 'supervip':'SS-SUPERVIP',
-        '2180':'SS-2180', '2760':'SS-2760', '7000':'SS-7000', '5600':'SS-5600'
-    }},
-    'MARVEL RIVALS': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        '100':'MR-100', 'pickup':'MR-PICKUP', '500':'MR-500', '1000':'MR-1000',
-        '2180':'MR-2180', '5680':'MR-5680', '11680':'MR-11680'
-    }},
-    'HONOR OF KINGS': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        '16':'HOK-16', 'double_lucky':'HOK-DOUBLE-LUCKY', '80':'HOK-80', 'weekly':'HOK-WEEKLY', '400':'HOK-400',
-        'standard_pack':'HOK-STANDARD-PACK', 'honor_pack':'HOK-HONOR-PACK', 'infernal':'HOK-INFERNAL',
-        'premium_pack':'HOK-PREMIUM-PACK', '240':'HOK-240', 'weekly_plus':'HOK-WEEKLY-PLUS', '560':'HOK-560',
-        '830':'HOK-830', '1245':'HOK-1245', '2508':'HOK-2508', '4180':'HOK-4180', '8360':'HOK-8360'
-    }},
-    'BLOOD STRIKE': { tipo:'juego', input:['id_jugador'], validar:/^\d{8,12}$/, paquetes:{
-        '105':'BS-105','320':'BS-320','540':'BS-540','1100':'BS-1100','2260':'BS-2260','5800':'BS-5800'
-    }},
-    'PUBG MOBILE': { tipo:'juego', input:['id_jugador'], validar:/^\d{8,12}$/, paquetes:{
-        '60':'PUBG-60-WOW','325':'PUBG-325-WOW','660':'PUBG-660-WOW',
-        '1800':'PUBG-1800-WOW','3850':'PUBG-3850-WOW','8100':'PUBG-8100-WOW',
-        'prime_1m':'PUBG-PRIME-1M','prime_3m':'PUBG-PRIME-3M','prime_6m':'PUBG-PRIME-6M',
-        'prime_12m':'PUBG-PRIME-12M','elite_pass':'PUBG-ELITE-PASS'
-    }},
-    'MOBILE LEGENDS': { tipo:'juego', input:['id_jugador','zona_id'], validar:/^\d{8,15}$/, paquetes:{
-        '55':'ML-55','86':'ML-86','112':'ML-112','172':'ML-172',
-        '257':'ML-257','429':'ML-429','706':'ML-706','1050':'ML-1050'
-    }},
-    'COD': { tipo:'juego', input:['id_jugador'], validar:/^\d{8,15}$/, paquetes:{
-        '115':'COD-115','253':'COD-253','529':'COD-529','794':'COD-794','1053':'COD-1053',
-        '1323':'COD-1323','2760':'COD-2760','6440':'COD-6440','9200':'COD-9200',
-        '12880':'COD-12880','15640':'COD-15640','19320':'COD-19320'
-    }},
-    'ARENA BREAKOUT': { tipo:'juego', input:['id_jugador'], validar:/^\d{6,15}$/, paquetes:{
-        '66':'AB-66','335':'AB-335','675':'AB-675','1690':'AB-1690','3400':'AB-3400','6820':'AB-6820',
-        'bp_beginner':'AB-BP-BEGINNER','bp_adv':'AB-BP-ADV','bp_prem':'AB-BP-PREM','bp_prem3m':'AB-BP-PREM3M'
-    }},
-    'DELTA FORCE': { tipo:'juego', input:['id_jugador'], validar:/^\d{6,15}$/, paquetes:{
-        '60':'DF-60','320':'DF-320','750':'DF-750','1480':'DF-1480','1980':'DF-1980',
-        '3950':'DF-3950','8100':'DF-8100','sp_ops':'DF-SP-OPS','sp_war':'DF-SP-WAR','sp_dlx':'DF-SP-DLX'
-    }},
-    'BIGO LIVE': { tipo:'juego', input:['id_jugador'], validar:/^\d{6,15}$/, paquetes:{
-        '100':'BIGO-100','500':'BIGO-500','1000':'BIGO-1000','10000':'BIGO-10000'
-    }},
-    'PLAYSTATION': { tipo:'giftcard', input:['id_jugador'], paquetes:{
-        '1':'PSN-1','2':'PSN-2','3':'PSN-3','4':'PSN-4','5':'PSN-5','10':'PSN-10','15':'PSN-15',
-        '20':'PSN-20','25':'PSN-25','30':'PSN-30','35':'PSN-35','40':'PSN-40','45':'PSN-45',
-        '50':'PSN-50','75':'PSN-75','100':'PSN-100'
-    }},
-    'XBOX': { tipo:'giftcard', input:['id_jugador'], paquetes:{
-        '1':'XBOX-1','5':'XBOX-5','10':'XBOX-10','15':'XBOX-15',
-        '20':'XBOX-20','25':'XBOX-25','50':'XBOX-50','100':'XBOX-100'
-    }},
-    'NINTENDO': { tipo:'giftcard', input:['id_jugador'], paquetes:{
-        '5':  'NINTENDO-5','10': 'NINTENDO-10','20': 'NINTENDO-20',
-        '35': 'NINTENDO-35','50': 'NINTENDO-50','70': 'NINTENDO-70'
-    }},
-    'NETFLIX': { tipo:'giftcard', input:['email'], paquetes:{
-        '15':'NETFLIX-15','20':'NETFLIX-20','25':'NETFLIX-25','30':'NETFLIX-30',
-        '50':'NETFLIX-50','60':'NETFLIX-60','75':'NETFLIX-75','100':'NETFLIX-100'
-    }},
-    'GOOGLE PLAY': { tipo:'giftcard', input:['email'], paquetes:{
-        '10-eur-de':'GPLAY-10-EUR-DE','15-eur-es':'GPLAY-15-EUR-ES',
-        '10-gbp-uk':'GPLAY-10-GBP-UK','100-gbp-uk':'GPLAY-100-GBP-UK'
-    }},
-    'ROBLOX': { tipo:'giftcard', input:['id_jugador'], validar:/^\d{10,13}$/, paquetes:{
-        '50':'RBX-50','100':'RBX-100','275':'RBX-275','360':'RBX-360',
-        '555':'RBX-555','1000':'RBX-1000','2000':'RBX-2000','2400':'RBX-2400'
-    }}
-};
-
-// ============================================
-// 🎯 FUNCIONES AUXILIARES
-// ============================================
-function getUUID(juego, paquete) {
-    const j = String(juego).toUpperCase().trim();
-    const p = String(paquete);
-    const config = PRODUCTOS_CONFIG[j];
-    if (!config) return null;
-    const sku = config.paquetes[p];
-    if (!sku) return null;
-    return SKU_MAP[sku] || null;
-}
-
-function validarID(juego, id) {
-    const j = String(juego).toUpperCase().trim();
-    const config = PRODUCTOS_CONFIG[j];
-    if (!config || !config.validar) return true;
-    if (config.tipo === 'giftcard' && config.input.includes('email')) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(id).trim());
-    }
-    return config.validar.test(String(id).trim());
-}
-
-function calcularPrecio(costoUSD, tipo) {
-    const margen = tipo === 'giftcard' ? MARGEN_GIFTCARDS : MARGEN_JUEGOS;
-    // Redondeo a 4 decimales exactos para evitar pérdidas
-    return (costoUSD * margen).toFixed(4);
-}
-
-async function notificarTelegram(mensaje) {
+async function cargarTasa() {
+    const tasaGuardada = localStorage.getItem('tasa_usd_ves');
+    tasa = tasaGuardada ? parseFloat(tasaGuardada) : 940;
+    actualizarPrecios();
     try {
-        const TG_TOKEN = process.env.TELEGRAM_TOKEN;
-        const TG_CHAT = process.env.TELEGRAM_CHAT_ID;
-        if (!TG_TOKEN || !TG_CHAT) return;
-        await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        const respuesta = await fetch('/api/tasa');
+        const datos = await respuesta.json();
+        if (datos.ok && datos.tasa_usdt) {
+            tasa = Math.round(datos.tasa_usdt);
+            localStorage.setItem('tasa_usd_ves', tasa);
+            actualizarPrecios();
+        }
+    } catch (error) { console.warn('Tasa no actualizada:', error.message); }
+}
+function actualizarPrecios() {
+    document.querySelectorAll('.product-price').forEach((el) => {
+        const u = parseFloat(el.dataset.usd);
+        const ref = el.parentElement.querySelector('.product-ref');
+        const bs = Math.round(u * tasa).toLocaleString('es-VE') + ' Bs';
+        const usdt = u.toFixed(2) + ' USDT';
+        if (metodo === 'PAGO MOVIL') { el.textContent = bs; ref.textContent = '≈ ' + usdt; }
+        else { el.textContent = usdt; ref.textContent = '≈ ' + bs; }
+    });
+    const tasaInfoEl = document.getElementById('tasaInfo');
+    if (tasaInfoEl) {
+        tasaInfoEl.textContent = metodo === 'PAGO MOVIL'
+            ? `Tasa: ${tasa} Bs por USD`
+            : `Precios en USDT · Referencia: ${tasa} Bs por USD`;
+    }
+}
+function seleccionarPago(m, el) {
+    document.querySelectorAll('.pay-box').forEach((b) => { b.classList.remove('active'); b.setAttribute('aria-checked', 'false'); });
+    el.classList.add('active'); el.setAttribute('aria-checked', 'true');
+    metodo = m; actualizarPrecios();
+}
+document.querySelectorAll('.pay-box').forEach((box) => {
+    box.addEventListener('click', () => seleccionarPago(box.dataset.metodo, box));
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); seleccionarPago(box.dataset.metodo, box); }
+    });
+});
+
+const inputId = document.getElementById('jugadorId');
+const statusDiv = document.getElementById('idStatus');
+const btnContinuar = document.getElementById('btnContinuarPago');
+
+function actualizarBotonContinuar() {
+    if (!btnContinuar) return;
+    btnContinuar.disabled = !idVerificado;
+    btnContinuar.style.opacity = idVerificado ? '1' : '0.5';
+}
+function mostrarEstado(mensaje, tipo, nombre) {
+    if (!statusDiv) return;
+    statusDiv.className = `id-status ${tipo}`;
+    if (tipo === 'valido' && nombre) {
+        statusDiv.innerHTML = `
+            <div class="check-icono">✓</div>
+            <div>
+                <div style="font-size:11px;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:2px;">ID verificado</div>
+                <div class="nombre-jugador"></div>
+            </div>
+        `;
+        statusDiv.querySelector('.nombre-jugador').textContent = nombre;
+    } else {
+        statusDiv.textContent = mensaje;
+    }
+}
+async function verificarJugadorEnBackend(id) {
+    try {
+        const res = await fetch(`/api/central-one?accion=verificar_jugador&juego=FREE%20FIRE&id_jugador=${encodeURIComponent(id)}`);
+        if (!res.ok) return { ok: false, motivo: 'http_' + res.status };
+        const data = await res.json();
+        if (data.ok && data.valido) {
+            return { ok: true, valido: true, nickname: data.nickname };
+        } else if (data.ok && !data.valido && data.status === 'invalid') {
+            return { ok: true, valido: false, motivo: 'El ID no existe en el juego' };
+        } else {
+            return { ok: false, motivo: data.mensaje || 'No se pudo verificar' };
+        }
+    } catch (e) {
+        return { ok: false, motivo: 'network' };
+    }
+}
+
+let timeoutId = null;
+if (inputId) {
+    inputId.addEventListener('keypress', function(e) { if (!/[0-9]/.test(e.key)) e.preventDefault(); });
+    inputId.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '');
+        this.classList.remove('resaltar');
+        clearTimeout(timeoutId);
+        const id = this.value.trim();
+        idVerificado = false;
+        verificandoId = false;
+        nicknameVerificado = "";
+        actualizarBotonContinuar();
+
+        if (id.length === 0) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; return; }
+        statusDiv.style.display = '';
+        if (id.length < 5) { mostrarEstado('Escribe al menos 5 dígitos', 'error'); return; }
+
+        timeoutId = setTimeout(async () => {
+            verificandoId = true;
+            mostrarEstado('Verificando ID...', 'verificando');
+            const resultado = await verificarJugadorEnBackend(id);
+            if (inputId.value.trim() !== id) return;
+            verificandoId = false;
+
+            if (resultado && resultado.ok && resultado.valido === true) {
+                idVerificado = true;
+                nicknameVerificado = resultado.nickname || `ID: ${id}`;
+                mostrarEstado('', 'valido', nicknameVerificado);
+            } else {
+                idVerificado = true;
+                nicknameVerificado = `ID: ${id}`;
+                mostrarEstado(
+                    '⚠️ No pudimos verificar este ID. Puedes continuar con la compra, pero revisa bien tus datos: NO se realizan reembolsos.',
+                    'advertencia'
+                );
+            }
+            actualizarBotonContinuar();
+        }, 500);
+    });
+}
+
+function formatearPrecioProducto(precioUsd) {
+    const bs = Math.round(precioUsd * tasa).toLocaleString('es-VE') + ' Bs';
+    const usd = precioUsd.toFixed(2) + ' USD';
+    return metodo === 'PAGO MOVIL' ? `${bs} · ≈ ${usd}` : `${usd} · ≈ ${bs}`;
+}
+function comprarProducto(producto, precioUsd, paqueteCodigo) {
+    productoElegido = {
+        producto, precioUsd: parseFloat(precioUsd), paqueteCodigo,
+        precioBs: Math.round(parseFloat(precioUsd) * tasa)
+    };
+    document.getElementById('prodElegidoNombre').textContent = producto;
+    document.getElementById('prodElegidoPrecio').textContent = formatearPrecioProducto(productoElegido.precioUsd);
+    idVerificado = false; nicknameVerificado = "";
+    if (inputId) inputId.value = "";
+    if (statusDiv) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; }
+    actualizarBotonContinuar();
+    mostrarSeccion('seccion-jugador');
+    marcarProgreso(2);
+    setTimeout(() => { if (inputId) inputId.focus({ preventScroll: true }); }, 400);
+}
+document.querySelectorAll('.btn-buy').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        comprarProducto(btn.dataset.producto, btn.dataset.usd, btn.dataset.codigo);
+    });
+});
+
+function irAlPago() {
+    if (!productoElegido) { avisar('Elige un producto primero'); volverAlCatalogo(); return; }
+    const id = inputId.value.trim();
+    if (!id) { avisar('Escribe tu ID de jugador', 'error'); return; }
+    if (verificandoId) { avisar('Espera, estamos verificando tu ID'); return; }
+    if (!idVerificado) { avisar('Revisa tu ID: no pudimos verificarlo', 'error'); return; }
+
+    localStorage.setItem('id_jugador', id);
+    localStorage.setItem('nombre_jugador', nicknameVerificado);
+    localStorage.setItem('juego_seleccionado', juegoActual);
+    localStorage.setItem('producto_seleccionado', productoElegido.producto);
+    localStorage.setItem('paquete_codigo', productoElegido.paqueteCodigo);
+    localStorage.setItem('precio_usd', productoElegido.precioUsd);
+    localStorage.setItem('precio_en_bs', productoElegido.precioBs);
+    localStorage.setItem('metodo_pago', metodo);
+    localStorage.setItem('proveedor', 'central_one');
+
+    precioUsdFinal = productoElegido.precioUsd;
+    precioBsFinal = productoElegido.precioBs;
+
+    // 🔥 MOSTRAR EL BLOQUE DE PAGO CORRECTO SEGÚN EL MÉTODO ELEGIDO
+    if (metodo === 'BINANCE') {
+        document.getElementById('bloqueDatosPago').style.display = 'none';
+        document.getElementById('bloqueDatosBinance').style.display = 'block';
+        document.getElementById('contenedorReferencia').style.display = 'none';
+        document.getElementById('btnVerificar').innerHTML = '🟡 PAGAR CON BINANCE';
+    } else {
+        document.getElementById('bloqueDatosPago').style.display = 'block';
+        document.getElementById('bloqueDatosBinance').style.display = 'none';
+        document.getElementById('contenedorReferencia').style.display = 'block';
+        document.getElementById('btnVerificar').innerHTML = '✅ VERIFICAR PAGO';
+    }
+
+    renderizarResumenPago();
+    mostrarSeccion('seccion-pago');
+    marcarProgreso(3);
+}
+function renderizarResumenPago() {
+    document.getElementById('datoJuego').textContent = juegoActual;
+    document.getElementById('datoId').textContent = localStorage.getItem('id_jugador') || '';
+    document.getElementById('datoProducto').textContent = productoElegido.producto;
+    document.getElementById('montoBsMostrar').textContent = precioBsFinal + ' Bs';
+
+    const nombre = nicknameVerificado;
+    if (nombre && nombre !== 'Sin nombre') {
+        document.getElementById('datoNombreJugador').textContent = nombre;
+        document.getElementById('filaNombre').style.display = 'flex';
+    } else {
+        document.getElementById('filaNombre').style.display = 'none';
+    }
+
+    document.getElementById('datoMontoTotal').innerHTML =
+        `${precioUsdFinal.toFixed(2)} USD<br><small style="color:#cbd5e1">${precioBsFinal} Bs</small>`;
+}
+
+function aplicarCupon() {
+    const input = document.getElementById('cuponInput');
+    const btn = document.getElementById('cuponBtn');
+    const msg = document.getElementById('cuponMsg');
+    const box = document.getElementById('cuponBox');
+    const codigo = input.value.trim().toUpperCase();
+    msg.className = 'cupon-msg'; msg.textContent = '';
+    if (!codigo) { msg.classList.add('err'); msg.textContent = '❌ Ingresa un código'; return; }
+    if (!CUPONES_VALIDOS[codigo]) { msg.classList.add('err'); msg.textContent = '❌ Código inválido o expirado'; return; }
+    const porcentaje = CUPONES_VALIDOS[codigo];
+    descuentoAplicado = porcentaje; cuponAplicado = codigo;
+    precioUsdFinal = +(productoElegido.precioUsd * (1 - porcentaje / 100)).toFixed(2);
+    precioBsFinal = Math.round(productoElegido.precioBs * (1 - porcentaje / 100));
+    msg.classList.add('ok'); msg.textContent = `✅ ¡Código aplicado! -${porcentaje}%`;
+    input.disabled = true; btn.disabled = true; btn.textContent = '✓'; box.classList.add('cupon-aplicado');
+    document.getElementById('filaSubtotal').style.display = 'flex';
+    document.getElementById('datoSubtotal').textContent = `${productoElegido.precioUsd.toFixed(2)} USD`;
+    document.getElementById('filaDescuento').style.display = 'flex';
+    document.getElementById('datoDescuento').textContent = `-${porcentaje}% (-${(productoElegido.precioUsd - precioUsdFinal).toFixed(2)} USD)`;
+    document.getElementById('datoMontoTotal').innerHTML = `${precioUsdFinal.toFixed(2)} USD<br><small style="color:#cbd5e1">${precioBsFinal} Bs</small>`;
+    document.getElementById('montoBsMostrar').textContent = precioBsFinal + " Bs";
+    // Actualizar visual del precio en el bloque Binance si está visible
+    const spanBinance = document.querySelector('#bloqueDatosBinance span');
+    if (spanBinance) spanBinance.textContent = `$${precioUsdFinal.toFixed(2)} USD`;
+}
+document.getElementById('cuponInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); aplicarCupon(); }
+});
+
+function copiarTexto(texto, boton) {
+    navigator.clipboard.writeText(texto).then(() => {
+        boton.classList.add('copiado');
+        setTimeout(() => boton.classList.remove('copiado'), 2000);
+    }).catch(() => { avisar('Copia manualmente: ' + texto); });
+}
+function copiarTodosLosDatos(boton) {
+    const datos = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${precioBsFinal} Bs`;
+    navigator.clipboard.writeText(datos).then(() => {
+        const orig = boton.innerHTML;
+        boton.innerHTML = `✓ Datos copiados`;
+        setTimeout(() => { boton.innerHTML = orig; }, 2500);
+    }).catch(() => { avisar('Copia manualmente los datos'); });
+}
+
+function enviarTelegram(mensaje) {
+    fetch(URL_TELEGRAM, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensaje }) })
+    .then(r => r.json()).then(data => { if (!data.ok) console.warn('⚠️ Telegram no enviado:', data); })
+    .catch(err => console.log("Error Telegram:", err));
+}
+function getDatosPedidoActuales() {
+    return {
+        juego: localStorage.getItem('juego_seleccionado') || '',
+        producto: localStorage.getItem('producto_seleccionado') || '',
+        idJugador: localStorage.getItem('id_jugador') || '',
+        nombreJugador: localStorage.getItem('nombre_jugador') || '',
+        paquete: localStorage.getItem('paquete_codigo') || '',
+        whatsapp: (localStorage.getItem('whatsapp') || localStorage.getItem('whatsapp_comprador') || '').trim(),
+        metodo: localStorage.getItem('metodo_pago') || metodo,
+        proveedor: (localStorage.getItem('proveedor') || '').toLowerCase().trim()
+    };
+}
+function notificarAdmin(tipo, datos = {}) {
+    const d = getDatosPedidoActuales();
+    const emojis = { exito:'🎉',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
+    const titulos = { exito:'EXITOSO',falso:'NO ENCONTRADO',duplicado:'REFERENCIA USADA',cupon_usado:'CUPÓN USADO',error:'ERROR',manual:'MANUAL',codigo_test:'CÓDIGO TEST',binance:'PAGO BINANCE' };
+    const emoji = emojis[tipo] || 'ℹ️';
+    const titulo = titulos[tipo] || tipo.toUpperCase();
+    const esc = (txt) => String(txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let mensaje = `${emoji} <b>${titulo}</b>\n\n`;
+    mensaje += `<b>🎮</b> ${esc(d.juego)}\n<b>📦</b> ${esc(d.producto)}\n<b>🆔</b> <code>${esc(d.idJugador)}</code>\n<b>💰</b> $${precioUsdFinal.toFixed(2)} · ${precioBsFinal} Bs\n`;
+    if (datos.referencia) mensaje += `<b>🔢</b> <code>${esc(datos.referencia)}</code>\n`;
+    if (datos.mensaje_extra) mensaje += `<b>⚠️</b> ${esc(datos.mensaje_extra)}\n`;
+    if (d.whatsapp) mensaje += `<b>📱</b> ${esc(d.whatsapp)}\n`;
+    mensaje += `\n<i>${new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' })}</i>`;
+    enviarTelegram(mensaje);
+}
+
+function construirMensajeJuego(pedido) {
+    const nombre = pedido.nombre_jugador || 'Cliente';
+    const juegoP = pedido.juego || '';
+    const productoP = pedido.producto || '';
+    const numeroPedido = pedido.numero_pedido || pedido.pedido_key || '';
+    const montoUsd = Number(pedido.monto_usd || 0).toFixed(2);
+    const montoBs = Number(pedido.monto_bs || 0).toLocaleString('es-VE');
+    const idJugadorP = pedido.id_jugador || '';
+    const pin = pedido.pin || (pedido.codigos && pedido.codigos[0]) || '';
+    let msg = `🎮 *RECARGAS GAMES*\n\n¡Hola ${nombre}! 👋\nTu recarga fue exitosa ✅\n\n`;
+    msg += `🎯 *Juego:* ${juegoP}\n📦 *Producto:* ${productoP}\n`;
+    if (idJugadorP) msg += `🆔 *ID:* ${idJugadorP}\n`;
+    msg += `💰 *Total:* $${montoUsd} · ${montoBs} Bs\n📋 *Pedido:* #${numeroPedido}\n\n`;
+    if (pin) msg += `🎟️ *TU PIN:*\n\`${pin}\`\n\n`;
+    msg += `✅ Tu recarga ya fue procesada.\n📲 Si no ves el saldo, espera 5-10 min y reinicia el juego.\n\n¿Problemas?\n📱 +58 422-8242411\n\n¡Gracias por tu compra! 🙌`;
+    return msg;
+}
+async function enviarWhatsAppDesdePasarela(pedido, pedidoKey) {
+    try {
+        const d = getDatosPedidoActuales();
+        const telRaw = pedido.whatsapp_cliente || d.whatsapp || '';
+        let tel = String(telRaw).replace(/\D/g, '');
+        if (tel.startsWith('0')) tel = tel.substring(1);
+        if (!tel.startsWith('58')) tel = '58' + tel;
+        if (tel.length < 11) return { ok: false, motivo: 'sin_telefono' };
+        const mensajeCompleto = construirMensajeJuego(pedido);
+        const res = await fetch(URL_WHATSAPP_PASARELA, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: TG_CHAT, text: mensaje, parse_mode: 'HTML' })
+            body: JSON.stringify({
+                telefono: '+' + tel,
+                nombre: pedido.nombre_jugador || 'Cliente',
+                servicio: pedido.juego || '',
+                producto: pedido.producto || '',
+                monto: `$${Number(pedido.monto_usd || 0).toFixed(2)} USD · ${Number(pedido.monto_bs || 0).toLocaleString('es-VE')} Bs`,
+                referencia: pedido.referencia_pago || '',
+                datosCuenta: '',
+                tipoProducto: 'juego',
+                mensajeCompleto: mensajeCompleto,
+                pedidoKey: pedidoKey
+            })
         });
-    } catch (e) { console.error('⚠️ Error Telegram:', e.message); }
-}
-
-// ============================================
-// 🪝 VERIFICAR FIRMA DEL WEBHOOK
-// ============================================
-function verificarFirmaWebhook(req, rawBody) {
-    const secret = process.env.CENTRAL_ONE_WEBHOOK_SECRET;
-    if (!secret) return true; // Si no hay secreto configurado, confiamos (para pruebas)
-
-    const signature = req.headers['x-centralone-signature'];
-    const timestamp = req.headers['x-centralone-timestamp'];
-
-    if (!signature || !timestamp) return false;
-
-    const esperada = "sha256=" + createHmac("sha256", secret)
-        .update(`${timestamp}.${rawBody}`)
-        .digest("hex");
-
-    const a = Buffer.from(esperada);
-    const b = Buffer.from(signature);
-
-    return a.length === b.length && timingSafeEqual(a, b);
-}
-
-// ============================================
-// 🚀 HANDLER PRINCIPAL
-// ============================================
-export default async function handler(req, res) {
-    // CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CentralOne-Signature, X-CentralOne-Timestamp');
-
-    if (req.method === 'OPTIONS') return res.status(200).end();
-
-    const API_KEY = process.env.CENTRAL_ONE_API_KEY;
-    if (!API_KEY && req.method !== 'POST') {
-        return res.status(500).json({ error: 'API Key no configurada' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return { ok: false, motivo: 'error_endpoint' };
+        return { ok: true, data };
+    } catch (error) {
+        return { ok: false, motivo: 'excepcion', error: error.message };
     }
+}
 
-    // ============================================
-    // 🪝 PROCESAR WEBHOOK (Si viene de Central One)
-    // ============================================
-    if (req.method === 'POST' && req.headers['x-centralone-signature']) {
-        let rawBody = '';
-        // En Vercel, si bodyParser está activo, req.body ya es un objeto.
-        // Pero para verificar la firma necesitamos el string original.
-        // Vercel nos da req.body como objeto si es JSON, así que lo re-serializamos.
-        // (Nota: Para producción estricta, se debería desactivar el bodyParser en Vercel, 
-        // pero para este caso funciona porque Central One envía JSON estándar).
-        rawBody = JSON.stringify(req.body);
-        
-        if (!verificarFirmaWebhook(req, rawBody)) {
-            console.warn('⚠️ Firma de Webhook inválida');
-            return res.status(401).json({ error: 'Invalid signature' });
-        }
+async function guardarReferenciaFalsa(referencia, motivo) {
+    try {
+        const d = getDatosPedidoActuales();
+        const nueva = refReferenciasFalsas.push();
+        await nueva.set({
+            fecha: new Date().toISOString(),
+            fecha_legible: new Date().toLocaleString('es-VE'),
+            juego: d.juego, id_jugador: d.idJugador, nombre_jugador: d.nombreJugador,
+            producto: d.producto, monto_usd: precioUsdFinal, monto_bs: precioBsFinal,
+            referencia, metodo_pago: d.metodo, motivo: motivo || 'No encontrada',
+            whatsapp_cliente: d.whatsapp || null, user_agent: navigator.userAgent
+        });
+    } catch (e) { console.error('Error guardando ref falsa:', e); }
+}
 
-        const event = req.body;
-        console.log(`🔔 Webhook recibido: ${event.event} (Order: ${event.order_reference})`);
+async function verificarReferenciaEnFirebase(ref) { try { const snap = await refReferencias.child(ref).once('value'); return snap.exists(); } catch (e) { return false; } }
+async function marcarReferenciaComoUsada(ref) {
+    try {
+        const d = getDatosPedidoActuales();
+        await refReferencias.child(ref).set({
+            fecha_uso: new Date().toISOString(),
+            juego: d.juego, id_jugador: d.idJugador, producto: d.producto,
+            monto_usd: precioUsdFinal, monto_bs: precioBsFinal,
+            paquete: d.paquete, metodo_pago: d.metodo,
+            cupon: cuponAplicado || null, descuento: descuentoAplicado || 0,
+            whatsapp_cliente: d.whatsapp || null
+        });
+        return true;
+    } catch (e) { return false; }
+}
+async function verificarCuponUsado(codigo) { try { const snap = await refCupones.child(codigo).once('value'); return snap.exists(); } catch (e) { return false; } }
+async function marcarCuponComoUsado(codigo) {
+    try {
+        const d = getDatosPedidoActuales();
+        await refCupones.child(codigo).set({ fecha_uso: new Date().toISOString(), id_jugador: d.idJugador, producto: d.producto, descuento: descuentoAplicado });
+        return true;
+    } catch (e) { return false; }
+}
+async function verificarReferenciaManual(codigo) {
+    try {
+        const snap = await refManuales.child(codigo).once('value');
+        if (!snap.exists()) return { valida: false, motivo: 'no_existe' };
+        const data = snap.val();
+        if (data.activa === false) return { valida: false, motivo: 'inactiva', data };
+        if (data.usada === true && data.uso_unico !== false) return { valida: false, motivo: 'usada', data };
+        return { valida: true, data };
+    } catch (error) { return { valida: false, motivo: 'error' }; }
+}
+async function marcarReferenciaManualComoUsada(codigo, numeroPedido) {
+    try {
+        const snap = await refManuales.child(codigo).once('value');
+        const data = snap.val() || {};
+        const d = getDatosPedidoActuales();
+        const actualizacion = {
+            veces_usada: (data.veces_usada || 0) + 1,
+            fecha_uso: new Date().toISOString(),
+            usado_por_juego: d.juego, usado_por_id: d.idJugador,
+            usado_por_producto: d.producto, usado_por_pedido: numeroPedido || null,
+            whatsapp_cliente: d.whatsapp || null
+        };
+        if (data.uso_unico !== false) actualizacion.usada = true;
+        await refManuales.child(codigo).update(actualizacion);
+        return true;
+    } catch (e) { return false; }
+}
+async function verificarCodigoTEST(codigo) {
+    try {
+        const snap = await refCodigosTEST.child(codigo).once('value');
+        if (!snap.exists()) return { valido: false, motivo: 'no_existe' };
+        const data = snap.val();
+        if (data.activa === false) return { valido: false, motivo: 'inactivo', data };
+        if (data.usada === true && data.uso_unico !== false) return { valido: false, motivo: 'usado', data };
+        return { valido: true, data, tipo: 'juego' };
+    } catch (error) { return { valido: false, motivo: 'error' }; }
+}
+async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
+    try {
+        const snap = await refCodigosTEST.child(codigo).once('value');
+        const data = snap.val() || {};
+        const d = getDatosPedidoActuales();
+        const actualizacion = { veces_usada: (data.veces_usada || 0) + 1, fecha_uso: new Date().toISOString(), usado_por_juego: d.juego, usado_por_id: d.idJugador, usado_por_producto: d.producto, usado_por_pedido: numeroPedido || null, whatsapp_cliente: d.whatsapp || null };
+        if (data.uso_unico !== false) actualizacion.usada = true;
+        await refCodigosTEST.child(codigo).update(actualizacion);
+        return true;
+    } catch (e) { return false; }
+}
 
+async function generarNumeroPedido() {
+    try {
+        const contadorRef = db.ref('configuracion/contador_pedidos');
+        const resultado = await contadorRef.transaction((valorActual) => (valorActual || 0) + 1);
+        const numero = resultado.snapshot.val() || 1;
+        return String(numero).padStart(4, '0');
+    } catch (error) { return Date.now().toString().slice(-4); }
+}
+
+async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedor, codigos, extras = {}) {
+    const MAX_INTENTOS = 3;
+    let ultimoError = null;
+    for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
         try {
-            if (dbAdmin && event.order_reference) {
-                // Buscamos el pedido en Firebase usando el reference_code de Central One
-                // Nota: Necesitamos guardar el reference_code en Firebase al crear la orden.
-                // Como no lo estamos guardando directamente, buscaremos por el ID de la orden si es posible.
-                // O simplemente actualizamos si el pedido tiene un campo "id_solicitud" igual al ID de Central One.
-                
-                // Para este ejemplo, asumimos que guardamos el ID de orden de Central One en Firebase.
-                const orderId = event.order_reference; // O event.order.id si viene en el payload
+            const d = getDatosPedidoActuales();
+            const user = auth.currentUser;
+            let uid = 'anonimo';
+            if (user && user.uid) uid = user.uid;
+            else if (d.whatsapp && d.whatsapp.length >= 8) uid = 'anon_' + d.whatsapp.replace(/\D/g, '');
+            else if (d.idJugador && d.idJugador.length >= 4) uid = 'anon_jug_' + String(d.idJugador).replace(/\W/g, '').substring(0, 15);
 
-                if (event.event === 'order.delivered') {
-                    console.log(`✅ Pedido ${orderId} ENTREGADO.`);
-                    await notificarTelegram(`✅ <b>WEBHOOK: PEDIDO ENTREGADO</b>\nOrden: ${orderId}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'COMPLETADA' });
-                } 
-                else if (event.event === 'order.failed') {
-                    console.log(`❌ Pedido ${orderId} FALLIDO.`);
-                    await notificarTelegram(`❌ <b>WEBHOOK: PEDIDO FALLIDO</b>\nOrden: ${orderId}\nMotivo: ${event.failure?.message || 'Desconocido'}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'FALLIDO' });
-                }
-                else if (event.event === 'order.refunded') {
-                    console.log(`💰 Pedido ${orderId} REEMBOLSADO.`);
-                    await notificarTelegram(`💰 <b>WEBHOOK: PEDIDO REEMBOLSADO</b>\nOrden: ${orderId}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'REEMBOLSADO' });
-                }
-            }
-            return res.status(200).json({ received: true });
-        } catch (error) {
-            console.error('❌ Error procesando webhook:', error);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
-    }
+            const numeroPedido = await generarNumeroPedido();
+            const numeroMostrar = `#${numeroPedido}`;
+            const nuevoPedido = refPedidos.push();
 
-    // ============================================
-    // 📌 GET (Consultas)
-    // ============================================
-    if (req.method === 'GET') {
-        const accion = req.query?.accion;
-
-        if (accion === 'catalogo') {
-            const r = await fetch(`${BASE_URL}/catalog`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
-            const data = await r.json();
-            return res.status(r.status).json(data);
-        }
-
-        if (accion === 'juegos') {
-            const juegos = Object.keys(PRODUCTOS_CONFIG).map(j => ({
-                nombre: j, tipo: PRODUCTOS_CONFIG[j].tipo, paquetes: Object.keys(PRODUCTOS_CONFIG[j].paquetes)
-            }));
-            return res.status(200).json({ juegos, total: juegos.length });
-        }
-
-        if (accion === 'saldo') {
-            const r = await fetch(`${BASE_URL}/balance`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
-            const data = await r.json();
-            return res.status(r.status).json(data);
-        }
-
-        if (accion === 'verificar_jugador') {
-            const { juego, id_jugador, zona_id } = req.query;
-            if (!juego || !id_jugador) return res.status(400).json({ error: 'Faltan parámetros' });
-
-            const juegoUpper = juego.toUpperCase();
-            const config = PRODUCTOS_CONFIG[juegoUpper];
-            if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
-
-            let productId = null;
-            if (juegoUpper === 'FREE FIRE') productId = SKU_MAP['FF-110-DIAMONDS'];
-            else if (juegoUpper === 'FREE FIRE BR') productId = SKU_MAP['FF-BR-110'];
-            else {
-                const primerPaquete = Object.keys(config.paquetes)[0];
-                productId = SKU_MAP[config.paquetes[primerPaquete]];
-            }
-
-            if (!productId) return res.status(400).json({ error: 'No se encontró product_id válido.' });
-
-            const targetPayload = {};
-            const juegosConGameUserId = ['FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'];
-            
-            if (juegosConGameUserId.includes(juegoUpper)) {
-                targetPayload.game_user_id = String(id_jugador);
-            } else if (juegoUpper === 'MOBILE LEGENDS') {
-                targetPayload.player_id = String(id_jugador);
-                targetPayload.server = zona_id || '1';
-            } else {
-                targetPayload.player_id = String(id_jugador);
-            }
-
-            try {
-                const respuesta = await fetch(`${BASE_URL}/player/validate`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_id: productId, target_payload: targetPayload })
-                });
-                const data = await respuesta.json();
-                return res.status(200).json({
-                    ok: true, valido: data.status === 'valid', status: data.status,
-                    nickname: data.player?.name || null, reason: data.reason || null,
-                    mensaje: data.status === 'valid' ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
-                });
-            } catch (error) {
-                return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión' });
-            }
-        }
-
-        if (accion === 'estado_pedido') {
-            const { id } = req.query;
-            if (!id) return res.status(400).json({ error: 'Falta el ID del pedido' });
-            try {
-                const r = await fetch(`${BASE_URL}/orders/${id}`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
-                const data = await r.json();
-                return res.status(r.status).json(data);
-            } catch (e) {
-                return res.status(500).json({ error: 'Error consultando pedido' });
-            }
-        }
-
-        return res.status(200).json({
-            mensaje: '✅ API Central One v6.0 funcionando',
-            version: '6.0',
-            acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
-        });
-    }
-
-    // ============================================
-    // 📌 POST (Recargas)
-    // ============================================
-    if (req.method === 'POST') {
-        const { accion, datos } = req.body || {};
-
-        if (accion === 'recarga') {
-            const { juego, id_jugador, paquete, email, servidor, zona_id } = datos || {};
-            if (!juego || !paquete) return res.status(400).json({ error: 'Faltan datos (juego, paquete)' });
-
-            const config = PRODUCTOS_CONFIG[juego.toUpperCase()];
-            if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
-
-            const inputRequerido = config.tipo === 'giftcard' && config.input.includes('email') ? email : id_jugador;
-            if (!inputRequerido) return res.status(400).json({ error: 'Falta input requerido' });
-            if (!validarID(juego, inputRequerido)) return res.status(400).json({ error: `Formato inválido para ${juego}` });
-
-            const productId = getUUID(juego, paquete);
-            if (!productId) return res.status(400).json({ error: `Paquete no encontrado` });
-
-            const juegoUpper = juego.toUpperCase();
-            // Idempotencia: Generamos una llave única por intento (timestamp + random)
-            const idempotencyKey = `rec-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-
-            const payload = {
-                items: [{ catalog_item_id: productId, quantity: 1 }],
-                note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
+            const pedidoData = {
+                uid, es_anonimo: !user || !user.uid,
+                numero_pedido: numeroPedido, numero_pedido_mostrar: numeroMostrar,
+                pedido_key: nuevoPedido.key, referencia,
+                juego: d.juego || 'Desconocido',
+                id_jugador: d.idJugador || '',
+                nombre_jugador: d.nombreJugador || d.idJugador || 'Sin nombre',
+                producto: d.producto || 'Sin producto',
+                monto_usd: precioUsdFinal, monto_bs: precioBsFinal,
+                monto_usd_original: productoElegido ? productoElegido.precioUsd : precioUsdFinal,
+                monto_bs_original: productoElegido ? productoElegido.precioBs : precioBsFinal,
+                cupon: cuponAplicado || null,
+                descuento_porcentaje: descuentoAplicado || 0,
+                descuento_usd: productoElegido ? +(productoElegido.precioUsd - precioUsdFinal).toFixed(2) : 0,
+                paquete: d.paquete, estado,
+                id_solicitud: idSolicitud || '', proveedor: proveedor || '',
+                fecha: new Date().toISOString(),
+                fecha_legible: new Date().toLocaleString('es-VE'),
+                metodo: d.metodo, referencia_pago: referencia,
+                whatsapp_cliente: d.whatsapp || null,
+                pin: codigos && codigos.length > 0 ? codigos[0] : null,
+                codigos: codigos || [],
+                tipo_producto: 'juego',
+                es_manual: referencia.startsWith('MANUAL-') || false,
+                es_test: referencia.startsWith('TEST-') || false,
+                user_agent: navigator.userAgent.substring(0, 200),
+                origen: 'freefire-unificado'
             };
-
-            const juegosConGameUserId = ['FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'];
-            if (juegosConGameUserId.includes(juegoUpper)) {
-                payload.items[0].target_payload = { game_user_id: String(id_jugador) };
-            } else if (juegoUpper === 'MOBILE LEGENDS') {
-                payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
-            } else if (config.tipo === 'giftcard' && config.input.includes('email')) {
-                payload.items[0].target_payload = { email: email };
-            } else {
-                payload.items[0].target_payload = { player_id: id_jugador };
+            if (extras.codigo_test) {
+                pedidoData.codigo_test = extras.codigo_test;
+                if (extras.monto_test_usd !== undefined && extras.monto_test_usd !== null) pedidoData.monto_test_usd = extras.monto_test_usd;
+                if (extras.monto_test_bs !== undefined && extras.monto_test_bs !== null) pedidoData.monto_test_bs = extras.monto_test_bs;
             }
 
-            console.log(`🔄 Recarga ${juegoUpper} → ${inputRequerido} (${paquete})`);
-
-            const r = await fetch(`${BASE_URL}/orders`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Idempotency-Key': idempotencyKey
-                },
-                body: JSON.stringify(payload)
+            Object.keys(pedidoData).forEach(k => {
+                if (pedidoData[k] === undefined) delete pedidoData[k];
             });
 
-            const data = await r.json();
+            await nuevoPedido.set(pedidoData);
 
-            if (!r.ok) {
-                if (r.status === 409) {
-                    if (data.error?.code === 'insufficient_balance') {
-                        await notificarTelegram(`⚠️ <b>SALDO INSUFICIENTE</b>\n🎮 ${juegoUpper}\n📦 ${paquete}`);
-                        return res.status(409).json({ error: 'Saldo insuficiente', sinSaldo: true });
-                    }
-                    if (data.error?.code === 'insufficient_stock') {
-                        return res.status(409).json({ error: 'Producto agotado', sinStock: true });
-                    }
-                }
-                return res.status(r.status).json({ error: data.error?.message || 'Error en la recarga', detalle: data });
+            if (user && user.uid) {
+                try {
+                    const userRef = db.ref('usuarios/' + user.uid);
+                    const snap = await userRef.once('value');
+                    const datosActuales = snap.val() || {};
+                    await userRef.update({
+                        ultimaActividad: new Date().toISOString(),
+                        ultimaActividadLegible: new Date().toLocaleString('es-VE'),
+                        totalPedidos: (datosActuales.totalPedidos || 0) + 1,
+                        id_jugador: d.idJugador,
+                        nombre: datosActuales.nombre || user.displayName || d.nombreJugador,
+                        correo: datosActuales.correo || user.email || '',
+                        whatsapp: datosActuales.whatsapp || d.whatsapp || ''
+                    });
+                } catch (errUser) { console.warn('⚠️ No se pudo actualizar usuario:', errUser.message); }
             }
 
-            const orderId = data.order?.id;
-            const referenceCode = data.order?.reference_code;
-            let codigos = [];
-
-            if (config.tipo === 'giftcard' && orderId) {
-                const maxIntentos = 6;
-                let intento = 0;
-                while (intento < maxIntentos && codigos.length === 0) {
-                    intento++;
-                    await new Promise(r => setTimeout(r, 2500));
-                    try {
-                        const cr = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
-                            headers: { 'Authorization': `Bearer ${API_KEY}` }
-                        });
-                        if (!cr.ok) continue;
-                        const cd = await cr.json();
-                        if (cd.order?.items?.length > 0) {
-                            for (const it of cd.order.items) {
-                                if (it.codes?.length > 0) { codigos = it.codes; break; }
-                            }
-                        }
-                    } catch (e) { /* continuar */ }
-                }
+            // Si es Binance, NO enviamos WhatsApp aquí, el webhook lo hará cuando se pague
+            const debeEnviarWhatsApp = (estado === "COMPLETADA" || estado === "PENDIENTE") && d.whatsapp && d.whatsapp.length >= 8 && d.metodo !== 'BINANCE';
+            if (debeEnviarWhatsApp) {
+                try {
+                    const pedidoCompleto = { ...pedidoData };
+                    enviarWhatsAppDesdePasarela(pedidoCompleto, nuevoPedido.key)
+                        .then(r => { if (r.ok) console.log('✅ WhatsApp enviado'); else console.warn('⚠️ WhatsApp no enviado:', r.motivo); })
+                        .catch(err => console.warn('Error WhatsApp:', err));
+                } catch (e) { console.warn('Error preparando WhatsApp:', e); }
             }
 
-            const status = data.order?.status || 'confirmed';
-            const esExitosa = ['confirmed', 'completed', 'processing'].includes(status);
-            const costo = parseFloat(data.order?.total_sale_amount || 0);
-            const precioVenta = calcularPrecio(costo, config.tipo);
-
-            const mensajeTG =
-                `🆕 <b>NUEVO PEDIDO - ${config.tipo === 'giftcard' ? 'GIFT CARD' : 'JUEGO'}</b>\n\n` +
-                `🎮 ${juegoUpper}\n📦 Paquete: ${paquete}\n🆔 ${inputRequerido}\n` +
-                `📋 Orden: ${referenceCode || 'N/A'}\n✅ Estado: ${status}\n` +
-                `💰 Costo: $${costo.toFixed(4)} USD\n💵 Venta: $${precioVenta} USD` +
-                (codigos.length > 0 ? `\n🎟️ <b>PIN:</b> <code>${codigos[0]}</code>` : '');
-
-            await notificarTelegram(mensajeTG);
-
-            return res.status(201).json({
-                exito: esExitosa,
-                mensaje: esExitosa ? (config.tipo === 'giftcard' ? 'Gift Card generada ✅' : 'Recarga exitosa ✅') : 'Procesando ⏳',
-                id_solicitud: orderId,
-                referencia: referenceCode,
-                proveedor: 'Central One',
-                tipo: config.tipo,
-                monto: precioVenta,
-                moneda: 'USD',
-                estado: status,
-                codigos,
-                codigo: codigos.length > 0 ? codigos[0] : null
-            });
+            return { id: nuevoPedido.key, numero: numeroPedido, numeroMostrar, exito: true };
+        } catch (error) {
+            ultimoError = error;
+            console.error(`❌ Error guardando pedido (intento ${intento}):`, error);
+            if (intento < MAX_INTENTOS) await new Promise(r => setTimeout(r, 1000 * intento));
         }
+    }
+    const d = getDatosPedidoActuales();
+    enviarTelegram(`🚨 <b>PEDIDO NO GUARDADO</b>\n\n<b>🎮</b> ${d.juego}\n<b>📦</b> ${d.producto}\n<b>🆔</b> <code>${d.idJugador}</code>\n<b>🔢</b> <code>${referencia}</code>\n<b>⚠️</b> ${ultimoError?.message || 'Desconocido'}`);
+    return { id: null, numero: null, numeroMostrar: '#----', exito: false, error: ultimoError };
+}
 
-        return res.status(400).json({ error: 'Acción no válida' });
+async function verificarPagoPabilo(referencia) {
+    const montoPago = Number(precioBsFinal) || 0;
+    const fecha = fechaCaracas();
+    try {
+        const res = await fetch(URL_VERIFICAR_PAGO, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ referencia, monto: montoPago, fecha })
+        });
+        const data = await res.json();
+        if (!data.ok) return { confirmado: false, es_nuevo: null };
+        return { confirmado: data.confirmado === true, es_nuevo: data.es_nuevo, pago: data.pago || null, mensaje: data.mensaje || '' };
+    } catch (error) {
+        return { confirmado: false, es_nuevo: null };
+    }
+}
+
+async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugadorOverride) {
+    const d = getDatosPedidoActuales();
+    const juegoEnviar = (juegoOverride || d.juego).toUpperCase();
+    const paqueteEnviar = paqueteOverride || d.paquete;
+    const idEnviar = idJugadorOverride || d.idJugador;
+
+    if (window.procesandoRecarga && window.procesandoRecarga === idEnviar + paqueteEnviar) {
+        console.warn('⚠️ Intento de recarga duplicada bloqueado por seguridad.');
+        return { exito: false, silencioso: true, motivo_admin: 'BUCLE DETECTADO', mensaje: 'Pedido en revisión' };
     }
 
-    return res.status(405).json({ error: 'Método no permitido' });
+    if (paqueteEnviar === '110_x2') {
+        window.procesandoRecarga = idEnviar + paqueteEnviar;
+        console.log(`🔄 Iniciando recarga doble (2x110) para ID: ${idEnviar}`);
+        
+        try {
+            const res1 = await fetch(URL_CENTRAL_ONE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accion: 'recarga', datos: { juego: juegoEnviar, id_jugador: idEnviar, paquete: '110', email: idEnviar } })
+            });
+            const data1 = await res1.json();
+
+            if (!res1.ok || data1.exito === false) {
+                window.procesandoRecarga = null; 
+                return { exito: false, silencioso: true, motivo_admin: `FALLÓ 1RA RECARGA: ${data1.error || 'Error'}`, mensaje: 'Tu pedido está siendo procesado (1/2)' };
+            }
+
+            await new Promise(r => setTimeout(r, 2000));
+
+            const res2 = await fetch(URL_CENTRAL_ONE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accion: 'recarga', datos: { juego: juegoEnviar, id_jugador: idEnviar, paquete: '110', email: idEnviar } })
+            });
+            const data2 = await res2.json();
+
+            window.procesandoRecarga = null; 
+
+            if (!res2.ok || data2.exito === false) {
+                return { exito: false, silencioso: true, motivo_admin: `FALLÓ 2DA RECARGA: ${data2.error || 'Error'}`, mensaje: 'Tu pedido está siendo procesado (2/2)' };
+            }
+
+            return {
+                exito: true,
+                mensaje: '¡220 Diamantes entregados con éxito! ✅',
+                id_solicitud: `${data1.id_solicitud} / ${data2.id_solicitud}`,
+                referencia: `${data1.referencia} / ${data2.referencia}`,
+                codigos: [],
+                codigo: null
+            };
+        } catch (error) {
+            window.procesandoRecarga = null; 
+            return { exito: false, silencioso: true, motivo_admin: 'ERROR DE RED EN DOBLE RECARGA', mensaje: 'Tu pedido está siendo procesado' };
+        }
+    }
+
+    try {
+        const res = await fetch(URL_CENTRAL_ONE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accion: 'recarga', datos: { juego: juegoEnviar, id_jugador: idEnviar, paquete: paqueteEnviar, email: idEnviar } })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            if (data.sinSaldo) return { exito: false, silencioso: true, motivo_admin: 'SALDO INSUFICIENTE', mensaje: 'Tu recarga llegará muy pronto' };
+            if (data.sinStock) return { exito: false, silencioso: true, motivo_admin: 'PRODUCTO AGOTADO', mensaje: 'Estamos procesando tu pedido' };
+            return { exito: false, silencioso: true, motivo_admin: data.error || 'Error interno', mensaje: 'Tu pedido está siendo procesado' };
+        }
+        return {
+            exito: data.exito !== false,
+            mensaje: data.mensaje || 'Recarga exitosa ✅',
+            id_solicitud: data.id_solicitud || 'N/A',
+            referencia: data.referencia || 'N/A',
+            codigos: data.codigos || [],
+            codigo: data.codigo || null
+        };
+    } catch (error) {
+        return { exito: false, silencioso: true, motivo_admin: 'Error de conexión', mensaje: 'Tu pedido está siendo procesado' };
+    }
 }
+
+async function ejecutarRecarga(datosProducto = null) {
+    const d = getDatosPedidoActuales();
+    const juegoUsar = datosProducto?.juego || d.juego;
+    const paqueteUsar = datosProducto?.paquete || d.paquete;
+    const idUsar = datosProducto?.id_jugador || d.idJugador;
+    const resultado = await enviarRecargaCentralOne(juegoUsar, paqueteUsar, idUsar);
+    return resultado;
+}
+
+// 🔥 NUEVA FUNCIÓN PARA PROCESAR PAGO CON BINANCE
+async function iniciarPagoBinance() {
+    const btn = document.getElementById('btnVerificar');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Generando pago...';
+
+    const d = getDatosPedidoActuales();
+    const refGenerada = 'BIN-' + Date.now(); // Referencia única para Binance
+
+    try {
+        // 1. Guardar pedido como pendiente en Firebase antes de redirigir
+        const infoPedido = await guardarPedidoEnFirebase(refGenerada, "PENDIENTE", '', 'ZenoBank', [], {});
+
+        // 2. Llamar a nuestro endpoint fusionado en Vercel
+        const res = await fetch(URL_BINANCE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                accion: 'crear',
+                orderId: refGenerada,
+                monto: precioUsdFinal.toFixed(2)
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success && data.checkoutUrl) {
+            // 3. Redirigir al cliente a ZenoBank
+            window.location.href = data.checkoutUrl;
+        } else {
+            throw new Error(data.error || 'No se pudo generar el link de pago');
+        }
+
+    } catch (error) {
+        console.error('Error Binance:', error);
+        notificarAdmin('error', { referencia: refGenerada, mensaje_extra: `❌ FALLÓ BINANCE: ${error.message}` });
+        mostrarMensaje('Error de Pago', 'No pudimos generar tu link de Binance. Intenta de nuevo o usa Pago Móvil.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '🟡 PAGAR CON BINANCE';
+    }
+}
+
+async function iniciarVerificacion() {
+    // 🔥 SI EL MÉTODO ES BINANCE, LLAMAMOS A LA NUEVA FUNCIÓN
+    if (metodo === 'BINANCE') {
+        return iniciarPagoBinance();
+    }
+
+    const referencia = document.getElementById('referenciaPago').value.trim().toUpperCase();
+    const btn = document.getElementById('btnVerificar');
+    if (!referencia || referencia.length < 6) {
+        mostrarMensaje('Referencia inválida', 'Escribe la referencia completa del pago (mínimo 6 dígitos).', 'advertencia');
+        return;
+    }
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Verificando...';
+
+    const esManual = referencia.startsWith('MANUAL-');
+    const esTest = referencia.startsWith('TEST-');
+
+    let subtitulo = 'Estamos buscando tu pago en el sistema bancario...';
+    if (esTest) subtitulo = '🎮 Verificando tu código de juego...';
+    else if (esManual) subtitulo = 'Verificando tu código manual...';
+    document.getElementById('subtituloVerificando').textContent = subtitulo;
+
+    mostrarSeccion('seccion-verificando');
+    marcarProgreso(3);
+
+    try {
+        if (esTest) {
+            const r = await verificarCodigoTEST(referencia);
+            if (!r.valido) {
+                const motivos = { no_existe:'Este código no existe.', inactivo:'Desactivado.', usado:'Ya utilizado.', error:'Error consultando.' };
+                notificarAdmin('codigo_test', { referencia, mensaje_extra: `❌ TEST RECHAZADO: ${r.motivo}` });
+                document.getElementById('msgError').textContent = motivos[r.motivo] || 'Código inválido.';
+                document.getElementById('tituloError').textContent = 'Código inválido';
+                setTimeout(() => { mostrarSeccion('seccion-error'); btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO'; }, 600);
+                return;
+            }
+            notificarAdmin('codigo_test', { referencia, mensaje_extra: `🎮 TEST ACEPTADO` });
+            mostrarSeccion('seccion-confirmado');
+            await new Promise(res => setTimeout(res, 1000));
+            mostrarSeccion('seccion-procesando');
+            const resultadoRecarga = await ejecutarRecarga({
+                juego: r.data.juego, producto: r.data.producto, paquete: r.data.paquete,
+                id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador
+            });
+            await new Promise(res => setTimeout(res, 1000));
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (TEST)', resultadoRecarga.codigos || [], { codigo_test: referencia, monto_test_usd: r.data.monto_usd, monto_test_bs: r.data.monto_bs });
+            await marcarCodigoTESTComoUsado(referencia, infoPedido.numeroMostrar);
+            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            else { document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.'; mostrarSeccion('seccion-error'); }
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+
+        if (esManual) {
+            const r = await verificarReferenciaManual(referencia);
+            if (!r.valida) {
+                const motivos = { no_existe:'No existe.', inactiva:'Desactivada.', usada:'Ya usada.', error:'Error.' };
+                notificarAdmin('manual', { referencia, mensaje_extra: `❌ MANUAL RECHAZADA: ${r.motivo}` });
+                document.getElementById('msgError').textContent = motivos[r.motivo] || 'Inválida.';
+                document.getElementById('tituloError').textContent = 'Código inválido';
+                setTimeout(() => { mostrarSeccion('seccion-error'); btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO'; }, 600);
+                return;
+            }
+            notificarAdmin('manual', { referencia, mensaje_extra: `🛠️ MANUAL ACEPTADA` });
+            mostrarSeccion('seccion-confirmado');
+            await new Promise(res => setTimeout(res, 1000));
+            mostrarSeccion('seccion-procesando');
+            const resultadoRecarga = await ejecutarRecarga({
+                tipo: r.data.tipo, tipo_producto: r.data.tipo_producto,
+                juego: r.data.juego, producto: r.data.producto,
+                paquete: r.data.paquete, id_jugador: r.data.id_jugador || getDatosPedidoActuales().idJugador            });
+            await new Promise(res => setTimeout(res, 1000));
+            const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One (MANUAL)', resultadoRecarga.codigos || [], {});
+            await marcarReferenciaManualComoUsada(referencia, infoPedido.numeroMostrar);
+            if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+            else { document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.'; mostrarSeccion('seccion-error'); }
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+
+        const yaUsada = await verificarReferenciaEnFirebase(referencia);
+        if (yaUsada) {
+            notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ YA USADA' });
+            await guardarReferenciaFalsa(referencia, 'Duplicada');
+            mostrarSeccion('seccion-ref-usada');
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+        if (cuponAplicado) {
+            const cuponYaUsado = await verificarCuponUsado(cuponAplicado);
+            if (cuponYaUsado) {
+                notificarAdmin('cupon_usado', { referencia });
+                mostrarMensaje('Cupón usado', 'Este cupón ya fue utilizado.', 'advertencia');
+                descuentoAplicado = 0; cuponAplicado = "";
+                precioUsdFinal = productoElegido.precioUsd;
+                precioBsFinal = productoElegido.precioBs;
+                renderizarResumenPago();
+                mostrarSeccion('seccion-pago');
+                btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+                return;
+            }
+        }
+        const resultadoVerif = await verificarPagoPabilo(referencia);
+        if (!resultadoVerif.confirmado) {
+            notificarAdmin('falso', { referencia, mensaje_extra: '⚠️ NO ENCONTRADA' });
+            await guardarReferenciaFalsa(referencia, 'No encontrada');
+            document.getElementById('msgError').textContent = 'Verifica tu referencia.';
+            document.getElementById('tituloError').textContent = 'Pago No Encontrado';
+            setTimeout(() => { mostrarSeccion('seccion-error'); btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO'; }, 800);
+            return;
+        }
+        if (resultadoVerif.es_nuevo === false) {
+            notificarAdmin('duplicado', { referencia, mensaje_extra: '⚠️ Ya usado previamente' });
+            await guardarReferenciaFalsa(referencia, 'Ya usada');
+            mostrarSeccion('seccion-ref-usada');
+            btn.disabled = false; btn.innerHTML = '✅ VERIFICAR PAGO';
+            return;
+        }
+        await marcarReferenciaComoUsada(referencia);
+        if (cuponAplicado) await marcarCuponComoUsado(cuponAplicado);
+        mostrarSeccion('seccion-confirmado');
+        await new Promise(res => setTimeout(res, 1200));
+        mostrarSeccion('seccion-procesando');
+        const resultadoRecarga = await ejecutarRecarga();
+        await new Promise(res => setTimeout(res, 1000));
+        const infoPedido = await guardarPedidoEnFirebase(referencia, resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", resultadoRecarga.id_solicitud || '', 'Central One', resultadoRecarga.codigos || [], {});
+        if (resultadoRecarga.exito) mostrarResultadoExitoso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+        else if (resultadoRecarga.silencioso) mostrarResultadoSilencioso(resultadoRecarga, referencia, infoPedido.numeroMostrar);
+        else {
+            document.getElementById('msgError').textContent = resultadoRecarga.mensaje || 'Intenta de nuevo.';
+            document.getElementById('tituloError').textContent = 'Error';
+            mostrarSeccion('seccion-error');
+            notificarAdmin('error', { referencia, mensaje_extra: `❌ ${resultadoRecarga.mensaje}` });
+        }
+    } catch (error) {
+        console.error('❌ Error:', error);
+        mostrarMensaje('Error', 'Ocurrió un error inesperado.', 'error');
+        mostrarSeccion('seccion-pago');
+        notificarAdmin('error', { referencia, mensaje_extra: `❌ ${error.message}` });
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✅ VERIFICAR PAGO';
+    }
+}
+
+function mostrarResultadoExitoso(resultadoRecarga, referencia, numeroPedido) {
+    const d = getDatosPedidoActuales();
+    document.getElementById('resPedido').textContent = numeroPedido;
+    document.getElementById('resProducto').textContent = d.producto;
+    document.getElementById('resNombre').textContent = d.nombreJugador;
+    document.getElementById('resIdResumen').textContent = d.idJugador;
+    document.getElementById('resReferencia').textContent = referencia;
+    document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
+
+    document.getElementById('tituloExito').textContent = '¡Recarga Exitosa!';
+    document.getElementById('subtituloExito').textContent = 'Tu recarga se procesó correctamente.';
+
+    let pinCliente = null;
+    if (resultadoRecarga.codigos && resultadoRecarga.codigos.length > 0) pinCliente = resultadoRecarga.codigos[0];
+    if (pinCliente) {
+        document.getElementById('pinContainer').innerHTML = `<div class="pin-box"><div class="pin-label">🎮 TU PIN</div><div class="pin-value">${pinCliente}</div><button class="btn-copiar-pin" onclick="navigator.clipboard.writeText('${pinCliente}'); mostrarMensaje('Copiado', 'Código copiado.', 'exito')">📋 Copiar código</button></div>`;
+    } else {
+        document.getElementById('pinContainer').innerHTML = '';
+    }
+    mostrarSeccion('seccion-exito');
+    marcarProgreso(4);
+    notificarAdmin('exito', { referencia, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado}` : '' });
+}
+
+function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) {
+    const d = getDatosPedidoActuales();
+    document.getElementById('tituloExito').textContent = '¡Pago Verificado!';
+    document.getElementById('subtituloExito').textContent = 'Tu pedido llegará muy pronto. Te notificaremos por WhatsApp.';
+    document.getElementById('resPedido').textContent = numeroPedido;
+    document.getElementById('resProducto').textContent = d.producto;
+    document.getElementById('resNombre').textContent = d.nombreJugador;
+    document.getElementById('resIdResumen').textContent = d.idJugador;
+    document.getElementById('resReferencia').textContent = referencia;
+    document.getElementById('resMonto').textContent = `${precioUsdFinal.toFixed(2)} USD / ${precioBsFinal} Bs`;
+    document.getElementById('pinContainer').innerHTML = '';
+    mostrarSeccion('seccion-exito');
+    marcarProgreso(4);
+
+    let msgAdmin = `<b>🚨 PAGO VERIFICADO - ATENCIÓN</b>\n\n`;
+    msgAdmin += `<b>🎮</b> ${d.juego}\n<b>👤</b> ${d.nombreJugador}\n<b>🆔</b> <code>${d.idJugador}</code>\n<b>📦</b> ${d.producto}\n`;
+    msgAdmin += `<b>💰</b> $${precioUsdFinal.toFixed(2)}\n<b>🔢</b> <code>${referencia}</code>\n\n`;
+    msgAdmin += `<b>⚠️ Motivo:</b> ${resultadoRecarga.motivo_admin || 'Revisar'}\n<b>📋 Pedido:</b> ${numeroPedido}\n`;
+    enviarTelegram(msgAdmin);
+}
+
+function realizarOtraRecarga() {
+    productoElegido = null;
+    idVerificado = false;
+    verificandoId = false;
+    nicknameVerificado = "";
+    descuentoAplicado = 0;
+    cuponAplicado = "";
+    precioUsdFinal = 0;
+    precioBsFinal = 0;
+
+    if (inputId) inputId.value = "";
+    if (statusDiv) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; }
+    document.getElementById('referenciaPago').value = "";
+    document.getElementById('cuponInput').value = "";
+    document.getElementById('cuponInput').disabled = false;
+    document.getElementById('cuponBtn').disabled = false;
+    document.getElementById('cuponBtn').textContent = 'Aplicar';
+    document.getElementById('cuponBox').classList.remove('cupon-aplicado');
+    document.getElementById('cuponMsg').textContent = '';
+    document.getElementById('cuponMsg').className = 'cupon-msg';
+    document.getElementById('filaSubtotal').style.display = 'none';
+    document.getElementById('filaDescuento').style.display = 'none';
+    document.getElementById('pinContainer').innerHTML = '';
+
+    ['id_jugador','nombre_jugador','juego_seleccionado','producto_seleccionado',
+     'paquete_codigo','precio_usd','precio_en_bs','metodo_pago','proveedor',
+     'cupon_aplicado','descuento_porcentaje','precio_usd_final','precio_bs_final']
+        .forEach(k => localStorage.removeItem(k));
+
+    actualizarBotonContinuar();
+    mostrarSeccion('seccion-catalogo');
+    marcarProgreso(1);
+}
+
+window.alternarMenu = function() {
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mf) mf.classList.toggle('activo');
+    if (mp) mp.classList.remove('activo');
+    if (pf) pf.classList.remove('abierta');
+};
+window.toggleMenuPerfil = function() {
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    const pf = document.getElementById('perfilFlecha');
+    if (mp) mp.classList.toggle('activo');
+    if (pf) pf.classList.toggle('abierta');
+    if (mf) mf.classList.remove('activo');
+};
+window.cerrarTodosLosMenus = function(e) {
+    const menuFlotante = document.getElementById('menuFlotante');
+    const menuPerfil = document.getElementById('menuPerfil');
+    const btnMenu = document.getElementById('btnMenu');
+    const btnPerfil = document.getElementById('btnPerfil');
+    if (btnMenu && menuFlotante && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) menuFlotante.classList.remove('activo');
+    if (btnPerfil && menuPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) {
+        menuPerfil.classList.remove('activo');
+        const pf = document.getElementById('perfilFlecha');
+        if (pf) pf.classList.remove('abierta');
+    }
+};
+
+const perfilContainer = document.getElementById('perfilContainer');
+const menuLogin = document.getElementById('menuLogin');
+const menuRegister = document.getElementById('menuRegister');
+const menuConSesion = document.getElementById('menuConSesion');
+const perfilNombre = document.getElementById('perfilNombre');
+const nombreCompleto = document.getElementById('nombreCompleto');
+const emailUsuario = document.getElementById('emailUsuario');
+const modalLogin = document.getElementById('modalLogin');
+const loginForm = document.getElementById('loginForm');
+let usuarioActual = null;
+
+auth.onAuthStateChanged((user) => {
+    usuarioActual = user;
+    if (user) {
+        const nombre = user.displayName || 'Usuario';
+        const email = user.email || 'usuario@email.com';
+        if (perfilContainer) perfilContainer.style.display = 'block';
+        if (perfilNombre) perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+        if (nombreCompleto) nombreCompleto.textContent = nombre;
+        if (emailUsuario) emailUsuario.textContent = email;
+        if (menuLogin) menuLogin.style.display = 'none';
+        if (menuRegister) menuRegister.style.display = 'none';
+        if (menuConSesion) menuConSesion.style.display = 'block';
+    } else {
+        if (perfilContainer) perfilContainer.style.display = 'none';
+        if (menuLogin) menuLogin.style.display = 'flex';
+        if (menuRegister) menuRegister.style.display = 'flex';
+        if (menuConSesion) menuConSesion.style.display = 'none';
+    }
+});
+
+document.getElementById('navPedidos').addEventListener('click', (e) => {
+    if (!usuarioActual) { e.preventDefault(); abrirModalLogin(); }
+});
+
+window.abrirModalLogin = function() {
+    if (modalLogin) modalLogin.classList.add('activo');
+    const lm = document.getElementById('loginMessage');
+    if (lm) lm.style.display = 'none';
+    const le = document.getElementById('loginEmail');
+    const lp = document.getElementById('loginPassword');
+    if (le) le.value = '';
+    if (lp) lp.value = '';
+    const mf = document.getElementById('menuFlotante');
+    if (mf) mf.classList.remove('activo');
+};
+window.cerrarModalLogin = function() {
+    if (modalLogin) modalLogin.classList.remove('activo');
+};
+if (modalLogin) modalLogin.addEventListener('click', (e) => { if (e.target === modalLogin) cerrarModalLogin(); });
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+        const msg = document.getElementById('loginMessage');
+        btn.disabled = true;
+        btn.textContent = 'Ingresando...';
+        msg.style.display = 'none';
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            msg.style.background = 'rgba(34,197,94,0.15)';
+            msg.style.color = '#86efac';
+            msg.textContent = '✅ ¡Bienvenido!';
+            msg.style.display = 'block';
+            setTimeout(() => { cerrarModalLogin(); window.location.reload(); }, 1000);
+        } catch (error) {
+            let errorMsg = '❌ ';
+            switch (error.code) {
+                case 'auth/user-not-found': errorMsg += 'Usuario no encontrado'; break;
+                case 'auth/wrong-password': errorMsg += 'Contraseña incorrecta'; break;
+                case 'auth/invalid-email': errorMsg += 'Correo inválido'; break;
+                default: errorMsg += error.message;
+            }
+            msg.style.background = 'rgba(239,68,68,0.15)';
+            msg.style.color = '#fca5a5';
+            msg.textContent = errorMsg;
+            msg.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Ingresar';
+        }
+    });
+}
+async function confirmarYSalir(e) {
+    e.preventDefault();
+    if (confirm('¿Seguro que quieres cerrar sesión?')) {
+        await auth.signOut();
+        window.location.reload();
+    }
+}
+const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
+if (btnCerrarSesionEl) btnCerrarSesionEl.addEventListener('click', confirmarYSalir);
+const menuLogoutEl = document.getElementById('menuLogout');
+if (menuLogoutEl) menuLogoutEl.addEventListener('click', confirmarYSalir);
+
+actualizarBotonContinuar();
+cargarTasa();
+setInterval(cargarTasa, 60000);
+
+const chipActivo = document.querySelector('.games-menu a.active');
+if (chipActivo) chipActivo.scrollIntoView({ inline: 'center', block: 'nearest' });
+
+window.addEventListener('scroll', () => {
+    const b = document.getElementById('backToTop');
+    if (b) b.classList.toggle('show', window.scrollY > 300);
+}, { passive: true });
+
+console.log('═══════════════════════════════════════════');
+console.log('🚀 FREEFIRE UNIFICADO CARGADO');
+console.log('   Estructura: Diamantes + Tarjetas | Pases de Nivel');
+console.log('   Doble recarga: 220 Diamantes (2x110) blindada contra bucles');
+console.log('═══════════════════════════════════════════');
+</script>
+</body>
+</html>
