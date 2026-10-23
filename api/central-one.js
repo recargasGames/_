@@ -1,6 +1,7 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v3.9
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.9.1
 // ============================================
+// v3.9.1: MODO DEBUG ACTIVADO EN VALIDACIÓN DE JUGADOR
 // v3.9: AGREGADO FREE FIRE BRASIL (con precios y UUIDs reales)
 // v3.8: VALIDACIÓN DE ID DE JUGADOR (/player/validate)
 // v3.7: PAQUETES DE NIVEL (LEVEL UP) FREE FIRE LATAM
@@ -402,7 +403,7 @@ export default async function handler(req, res) {
             }
 
             // ============================================
-            // 🆕 VALIDACIÓN DE JUGADOR (API Central One)
+            // 🆕 VALIDACIÓN DE JUGADOR (API Central One) - CON DEBUG
             // ============================================
             if (accion === 'verificar_jugador') {
                 const { juego, id_jugador, zona_id } = req.query;
@@ -450,18 +451,27 @@ export default async function handler(req, res) {
 
                     const data = await respuesta.json();
                     
+                    // 🔥 DEBUG: Si falla, que nos diga exactamente qué dijo Central One
+                    if (!respuesta.ok || data.status !== 'valid') {
+                        return res.status(200).json({ 
+                            ok: false, 
+                            valido: false, 
+                            debug_central_one: data, // Aquí veremos el error real
+                            status_http: respuesta.status 
+                        });
+                    }
+                    
                     return res.status(200).json({
                         ok: true,
-                        valido: data.status === 'valid',
+                        valido: true,
                         status: data.status,
                         nickname: data.player?.name || null,
-                        reason: data.reason || null,
-                        mensaje: data.status === 'valid' ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
+                        mensaje: 'ID verificado'
                     });
 
                 } catch (error) {
                     console.error('❌ Error validando jugador:', error);
-                    return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión con Central One' });
+                    return res.status(200).json({ ok: false, valido: false, error_red: error.message });
                 }
             }
 
@@ -512,8 +522,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v3.9 funcionando',
-                version: '3.9',
+                mensaje: '✅ API Central One v3.9.1 funcionando (MODO DEBUG)',
+                version: '3.9.1',
                 acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'verificar_jugador', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
