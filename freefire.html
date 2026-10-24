@@ -950,6 +950,7 @@ function mostrarEstado(mensaje, tipo, nombre) {
         statusDiv.textContent = mensaje;
     }
 }
+
 async function verificarJugadorEnBackend(id) {
     try {
         const res = await fetch(`/api/central-one?accion=verificar_jugador&juego=FREE%20FIRE&id_jugador=${encodeURIComponent(id)}`);
@@ -1150,6 +1151,7 @@ function getDatosPedidoActuales() {
     };
 }
 
+// ✅ MENSAJE 2: Corto, directo, sin repetir datos del jugador
 function notificarAdmin(tipo, datos = {}) {
     const d = getDatosPedidoActuales();
     const emojis = { exito:'✅',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
@@ -1167,10 +1169,6 @@ function notificarAdmin(tipo, datos = {}) {
     mensaje += `<b>${titulo}</b>\n`;
     mensaje += `📦 ${esc(d.juego)} - ${esc(d.producto)}\n`;
     mensaje += `💰 $${precioUsdFinal.toFixed(2)} USD\n\n`;
-    
-    mensaje += `<b>Datos del Jugador:</b>\n`;
-    mensaje += `🆔 ID: <code>${esc(d.idJugador)}</code>\n`;
-    mensaje += `👤 Nombre: ${esc(d.nombreJugador)}\n`;
     
     if (datos.referencia_bancaria) mensaje += `🔢 Ref. Bancaria: <code>${esc(datos.referencia_bancaria)}</code>\n`;
     if (datos.id_central_one) mensaje += `🔗 ID Central One: <code>${esc(datos.id_central_one)}</code>\n`;
