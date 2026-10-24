@@ -1,8 +1,8 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.6
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.5
 // ============================================
-// v6.6: UNIFICADO TOTAL (LATAM = BR)
-// - Free Fire LATAM y BR usan game_user_id exactamente igual
+// v6.5: VALIDACIÓN CORREGIDA (LATAM = player_id + server | BR = game_user_id)
+// - Resuelve el error 400 en la validación de Free Fire LATAM
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -379,12 +379,19 @@ async function notificarTelegram(mensaje) {
 function verificarFirmaWebhook(req, rawBody) {
     const secret = process.env.CENTRAL_ONE_WEBHOOK_SECRET;
     if (!secret) return true;
+
     const signature = req.headers['x-centralone-signature'];
     const timestamp = req.headers['x-centralone-timestamp'];
+
     if (!signature || !timestamp) return false;
-    const esperada = "sha256=" + createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
+
+    const esperada = "sha256=" + createHmac("sha256", secret)
+        .update(`${timestamp}.${rawBody}`)
+        .digest("hex");
+
     const a = Buffer.from(esperada);
     const b = Buffer.from(signature);
+
     return a.length === b.length && timingSafeEqual(a, b);
 }
 
@@ -394,6 +401,7 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CentralOne-Signature, X-CentralOne-Timestamp');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
+
     const API_KEY = process.env.CENTRAL_ONE_API_KEY;
     if (!API_KEY && req.method !== 'POST') {
         return res.status(500).json({ error: 'API Key no configurada' });
@@ -404,6 +412,7 @@ export default async function handler(req, res) {
         if (!verificarFirmaWebhook(req, rawBody)) {
             return res.status(401).json({ error: 'Invalid signature' });
         }
+
         const event = req.body;
         try {
             if (dbAdmin && event.order_reference) {
@@ -456,6 +465,7 @@ export default async function handler(req, res) {
 
             let productId = null;
             
+            // Asignar producto según corresponda
             if (juegoUpper === 'FREE FIRE') {
                 productId = SKU_MAP['FF-110-DIAMONDS'];
             } else if (juegoUpper === 'FREE FIRE BR') {
@@ -467,10 +477,15 @@ export default async function handler(req, res) {
 
             if (!productId) return res.status(400).json({ error: 'No se encontró product_id válido.' });
 
-            // 🔥 AQUÍ ESTÁ LA MAGIA: Tratamos a LATAM EXACTAMENTE igual que a BR.
             const targetPayload = {};
             
-            if (['FREE FIRE', 'FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
+            // 🔥 AQUÍ ESTÁ EL TRUCO: LATAM usa player_id + server; BR usa game_user_id
+            if (juegoUpper === 'FREE FIRE') {
+                targetPayload.player_id = String(id_jugador);
+                targetPayload.server = zona_id || '1';
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                targetPayload.game_user_id = String(id_jugador);
+            } else if (['RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
                 targetPayload.game_user_id = String(id_jugador);
             } else if (juegoUpper === 'MOBILE LEGENDS') {
                 targetPayload.player_id = String(id_jugador);
@@ -488,6 +503,7 @@ export default async function handler(req, res) {
                 
                 const data = await respuesta.json();
                 
+                // Leer la respuesta según la nueva documentación
                 const esValido = data.success === true && data.status === 'valid';
                 
                 return res.status(200).json({
@@ -516,8 +532,8 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.6 funcionando',
-            version: '6.6',
+            mensaje: '✅ API Central One v6.5 funcionando',
+            version: '6.5',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
@@ -547,7 +563,12 @@ export default async function handler(req, res) {
                 note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
             };
 
-            if (['FREE FIRE', 'FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
+            // La misma lógica de target_payload para la recarga
+            if (juegoUpper === 'FREE FIRE') {
+                payload.items[0].target_payload = { player_id: String(id_jugador), server: zona_id || servidor || '1' };
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                payload.items[0].target_payload = { game_user_id: String(id_jugador) };
+            } else if (['RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
                 payload.items[0].target_payload = { game_user_id: String(id_jugador) };
             } else if (juegoUpper === 'MOBILE LEGENDS') {
                 payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
