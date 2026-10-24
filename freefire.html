@@ -960,6 +960,7 @@ async function verificarJugadorEnBackend(id) {
             return { 
                 ok: true, 
                 valido: true, 
+                // Si viene el nombre lo usa, si no, pone "Jugador Verificado"
                 nickname: data.nickname || 'Jugador Verificado' 
             };
         } else if (data.ok && !data.valido && data.status === 'invalid') {
@@ -1150,6 +1151,7 @@ function getDatosPedidoActuales() {
     };
 }
 
+// ✅ FUNCIÓN ACTUALIZADA PARA ENVIAR TELEGRAM COMO EN TU FOTO
 function notificarAdmin(tipo, datos = {}) {
     const d = getDatosPedidoActuales();
     const emojis = { exito:'✅',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
@@ -1320,12 +1322,13 @@ async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
+// 🔥 CORRECCIÓN 1: Lógica del contador de pedidos blindada
 async function generarNumeroPedido() {
     try {
         const contadorRef = db.ref('configuracion/contador_pedidos');
         const resultado = await contadorRef.transaction((valorActual) => {
             if (typeof valorActual !== 'number' || isNaN(valorActual)) {
-                return 130;
+                return 130; // Si está vacío, empieza en 131
             }
             return valorActual + 1;
         });
@@ -1387,6 +1390,8 @@ async function guardarPedidoEnFirebase(referencia, estado, idSolicitud, proveedo
                 if (extras.monto_test_usd !== undefined && extras.monto_test_usd !== null) pedidoData.monto_test_usd = extras.monto_test_usd;
                 if (extras.monto_test_bs !== undefined && extras.monto_test_bs !== null) pedidoData.monto_test_bs = extras.monto_test_bs;
             }
+
+            // 🔥 CORRECCIÓN 2: Guardar la referencia de Central One por separado
             if (extras.referencia_central_one) {
                 pedidoData.referencia_central_one = extras.referencia_central_one;
             }
@@ -1466,6 +1471,8 @@ async function enviarRecargaCentralOne(juegoOverride, paqueteOverride, idJugador
 
     if (paqueteEnviar === '110_x2') {
         window.procesandoRecarga = idEnviar + paqueteEnviar;
+        console.log(`🔄 Iniciando recarga doble (2x110) para ID: ${idEnviar}`);
+        
         try {
             const res1 = await fetch(URL_CENTRAL_ONE, {
                 method: 'POST',
