@@ -1,8 +1,12 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.6
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.1
 // ============================================
-// Basado en v6.0 (que funciona).
-// Solo se corrigió la validación de ID para LATAM, el contador y la referencia.
+// v6.1: VALIDACIÓN DINÁMICA BASADA EN TARGET_SCHEMA
+// - Recargas (POST /orders) con 4 decimales e Idempotencia
+// - Consulta de estado (GET /orders)
+// - Webhooks de Central One integrados (order.delivered, order.failed)
+// - Actualización de Firebase y notificaciones
+// - 🆕 Validación de jugadores basada en el catálogo real (target_schema)
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -406,9 +410,68 @@ async function notificarTelegram(mensaje) {
     } catch (e) { console.error('⚠️ Error Telegram:', e.message); }
 }
 
+// ============================================
+// 🆕 CACHÉ Y OBTENCIÓN DE TARGET_SCHEMA
+// ============================================
+let catalogCache = { data: null, timestamp: 0 };
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutos
+
+async function obtenerTargetSchema(productId, apiKey) {
+    const ahora = Date.now();
+    if (!catalogCache.data || (ahora - catalogCache.timestamp) > CACHE_TTL) {
+        const r = await fetch(`${BASE_URL}/catalog`, {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        if (!r.ok) throw new Error('No se pudo obtener el catálogo');
+        const data = await r.json();
+        catalogCache = { data: data.items, timestamp: ahora };
+    }
+    
+    const producto = catalogCache.data.find(p => p.product_id === productId);
+    if (!producto) throw new Error(`Producto ${productId} no encontrado en tu catálogo`);
+    
+    return {
+        requires_target: producto.requires_target,
+        target_schema: producto.target_schema || [],
+        target_fields: producto.target_fields || []
+    };
+}
+
+// ============================================
+// 🆕 CONSTRUCCIÓN DINÁMICA DEL TARGET_PAYLOAD
+// ============================================
+function construirTargetPayload(schemaInfo, datosLocales) {
+    const targetPayload = {};
+    
+    if (!schemaInfo.requires_target || schemaInfo.target_schema.length === 0) {
+        return targetPayload; // No requiere datos
+    }
+
+    for (const campo of schemaInfo.target_schema) {
+        const key = campo.key;
+        // 1. Buscar si tenemos el dato local con el nombre exacto de la clave
+        if (datosLocales[key] !== undefined && datosLocales[key] !== null && datosLocales[key] !== '') {
+            targetPayload[key] = String(datosLocales[key]);
+        } 
+        // 2. Si el campo es un select y no tenemos dato, usar la primera opción
+        else if (campo.type === 'select' && campo.options && campo.options.length > 0) {
+            targetPayload[key] = campo.options[0].value;
+        } 
+        // 3. Si falta un campo obligatorio, lanzar error
+        else {
+            throw new Error(`Falta el campo requerido: ${campo.label} (${key})`);
+        }
+    }
+    
+    return targetPayload;
+}
+
+// ============================================
+// 🪝 VERIFICAR FIRMA DEL WEBHOOK
+// ============================================
 function verificarFirmaWebhook(req, rawBody) {
     const secret = process.env.CENTRAL_ONE_WEBHOOK_SECRET;
-    if (!secret) return true;
+    if (!secret) return true; // Si no hay secreto configurado, confiamos (para pruebas)
 
     const signature = req.headers['x-centralone-signature'];
     const timestamp = req.headers['x-centralone-timestamp'];
@@ -425,7 +488,11 @@ function verificarFirmaWebhook(req, rawBody) {
     return a.length === b.length && timingSafeEqual(a, b);
 }
 
+// ============================================
+// 🚀 HANDLER PRINCIPAL
+// ============================================
 export default async function handler(req, res) {
+    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CentralOne-Signature, X-CentralOne-Timestamp');
@@ -437,32 +504,47 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'API Key no configurada' });
     }
 
+    // ============================================
+    // 🪝 PROCESAR WEBHOOK (Si viene de Central One)
+    // ============================================
     if (req.method === 'POST' && req.headers['x-centralone-signature']) {
         let rawBody = JSON.stringify(req.body);
+        
         if (!verificarFirmaWebhook(req, rawBody)) {
+            console.warn('⚠️ Firma de Webhook inválida');
             return res.status(401).json({ error: 'Invalid signature' });
         }
 
         const event = req.body;
+        console.log(`🔔 Webhook recibido: ${event.event} (Order: ${event.order_reference})`);
+
         try {
             if (dbAdmin && event.order_reference) {
                 const orderId = event.order_reference;
+
                 if (event.event === 'order.delivered') {
+                    console.log(`✅ Pedido ${orderId} ENTREGADO.`);
                     await notificarTelegram(`✅ <b>WEBHOOK: PEDIDO ENTREGADO</b>\nOrden: ${orderId}`);
                 } 
                 else if (event.event === 'order.failed') {
+                    console.log(`❌ Pedido ${orderId} FALLIDO.`);
                     await notificarTelegram(`❌ <b>WEBHOOK: PEDIDO FALLIDO</b>\nOrden: ${orderId}\nMotivo: ${event.failure?.message || 'Desconocido'}`);
                 }
                 else if (event.event === 'order.refunded') {
+                    console.log(`💰 Pedido ${orderId} REEMBOLSADO.`);
                     await notificarTelegram(`💰 <b>WEBHOOK: PEDIDO REEMBOLSADO</b>\nOrden: ${orderId}`);
                 }
             }
             return res.status(200).json({ received: true });
         } catch (error) {
+            console.error('❌ Error procesando webhook:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
+    // ============================================
+    // 📌 GET (Consultas)
+    // ============================================
     if (req.method === 'GET') {
         const accion = req.query?.accion;
 
@@ -486,7 +568,7 @@ export default async function handler(req, res) {
         }
 
         if (accion === 'verificar_jugador') {
-            const { juego, id_jugador, zona_id } = req.query;
+            const { juego, id_jugador, zona_id, email } = req.query;
             if (!juego || !id_jugador) return res.status(400).json({ error: 'Faltan parámetros' });
 
             const juegoUpper = juego.toUpperCase();
@@ -494,58 +576,57 @@ export default async function handler(req, res) {
             if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
             let productId = null;
-            
-            // Asignar el producto correcto para cada región
-            if (juegoUpper === 'FREE FIRE') {
-                productId = SKU_MAP['FF-110-DIAMONDS']; // LATAM
-            } else if (juegoUpper === 'FREE FIRE BR') {
-                productId = SKU_MAP['FF-BR-110']; // BRASIL
-            } else {
+            if (juegoUpper === 'FREE FIRE') productId = SKU_MAP['FF-110-DIAMONDS'];
+            else if (juegoUpper === 'FREE FIRE BR') productId = SKU_MAP['FF-BR-110'];
+            else {
                 const primerPaquete = Object.keys(config.paquetes)[0];
                 productId = SKU_MAP[config.paquetes[primerPaquete]];
             }
 
             if (!productId) return res.status(400).json({ error: 'No se encontró product_id válido.' });
 
-            // Construimos el payload para validar
-            const targetPayload = {};
-            
-            // LATAM usa player_id + server; BR usa game_user_id
-            if (juegoUpper === 'FREE FIRE') {
-                targetPayload.player_id = String(id_jugador);
-                targetPayload.server = zona_id || '1';
-            } else if (juegoUpper === 'FREE FIRE BR') {
-                targetPayload.game_user_id = String(id_jugador);
-            } else if (['RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
-                targetPayload.game_user_id = String(id_jugador);
-            } else if (juegoUpper === 'MOBILE LEGENDS') {
-                targetPayload.player_id = String(id_jugador);
-                targetPayload.server = zona_id || '1';
-            } else {
-                targetPayload.player_id = String(id_jugador);
-            }
-
             try {
+                // 🆕 Obtener esquema real del producto
+                const schemaInfo = await obtenerTargetSchema(productId, API_KEY);
+                
+                // 🆕 Mapeo de datos locales a claves posibles
+                const datosLocales = {
+                    player_id: id_jugador,
+                    game_user_id: id_jugador,
+                    id_jugador: id_jugador,
+                    server: zona_id || '1',
+                    server_id: zona_id || '1',
+                    zone_id: zona_id || '1',
+                    email: email,
+                    region: zona_id || '1'
+                };
+
+                // 🆕 Construir payload dinámico
+                const targetPayload = construirTargetPayload(schemaInfo, datosLocales);
+
                 const respuesta = await fetch(`${BASE_URL}/player/validate`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ product_id: productId, target_payload: targetPayload })
                 });
-                
                 const data = await respuesta.json();
                 
-                const esValido = data.success === true && data.status === 'valid';
-                
                 return res.status(200).json({
-                    ok: data.success === true, 
-                    valido: esValido, 
+                    ok: true, 
+                    valido: data.status === 'valid', 
                     status: data.status,
                     nickname: data.player?.name || null, 
                     reason: data.reason || null,
-                    mensaje: esValido ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
+                    mensaje: data.status === 'valid' ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
                 });
             } catch (error) {
-                return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión' });
+                console.error('Error validación:', error.message);
+                return res.status(200).json({ 
+                    ok: false, 
+                    valido: false, 
+                    status: 'unverified', 
+                    mensaje: error.message || 'Error de conexión' 
+                });
             }
         }
 
@@ -562,12 +643,15 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.6 funcionando',
-            version: '6.6',
+            mensaje: '✅ API Central One v6.1 funcionando',
+            version: '6.1',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
 
+    // ============================================
+    // 📌 POST (Recargas)
+    // ============================================
     if (req.method === 'POST') {
         const { accion, datos } = req.body || {};
 
@@ -588,102 +672,121 @@ export default async function handler(req, res) {
             const juegoUpper = juego.toUpperCase();
             const idempotencyKey = `rec-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-            const payload = {
-                items: [{ catalog_item_id: productId, quantity: 1 }],
-                note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
-            };
+            try {
+                // 🆕 Obtener esquema real del producto
+                const schemaInfo = await obtenerTargetSchema(productId, API_KEY);
+                
+                // 🆕 Mapeo de datos locales
+                const datosLocales = {
+                    player_id: id_jugador,
+                    game_user_id: id_jugador,
+                    id_jugador: id_jugador,
+                    server: zona_id || servidor || '1',
+                    server_id: zona_id || servidor || '1',
+                    zone_id: zona_id || servidor || '1',
+                    email: email,
+                    region: zona_id || servidor || '1'
+                };
 
-            if (juegoUpper === 'FREE FIRE') {
-                payload.items[0].target_payload = { player_id: String(id_jugador), server: zona_id || servidor || '1' };
-            } else if (juegoUpper === 'FREE FIRE BR') {
-                payload.items[0].target_payload = { game_user_id: String(id_jugador) };
-            } else if (['RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
-                payload.items[0].target_payload = { game_user_id: String(id_jugador) };
-            } else if (juegoUpper === 'MOBILE LEGENDS') {
-                payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
-            } else if (config.tipo === 'giftcard' && config.input.includes('email')) {
-                payload.items[0].target_payload = { email: email };
-            } else {
-                payload.items[0].target_payload = { player_id: id_jugador };
-            }
+                // 🆕 Construir target_payload dinámico
+                const targetPayload = construirTargetPayload(schemaInfo, datosLocales);
 
-            const r = await fetch(`${BASE_URL}/orders`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Idempotency-Key': idempotencyKey
-                },
-                body: JSON.stringify(payload)
-            });
+                const payload = {
+                    items: [{ 
+                        catalog_item_id: productId, 
+                        quantity: 1,
+                        target_payload: targetPayload 
+                    }],
+                    note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
+                };
 
-            const data = await r.json();
+                console.log(`🔄 Recarga ${juegoUpper} → ${inputRequerido} (${paquete})`);
 
-            if (!r.ok) {
-                if (r.status === 409) {
-                    if (data.error?.code === 'insufficient_balance') {
-                        await notificarTelegram(`⚠️ <b>SALDO INSUFICIENTE</b>\n🎮 ${juegoUpper}\n📦 ${paquete}`);
-                        return res.status(409).json({ error: 'Saldo insuficiente', sinSaldo: true });
-                    }
-                    if (data.error?.code === 'insufficient_stock') {
-                        return res.status(409).json({ error: 'Producto agotado', sinStock: true });
-                    }
-                }
-                return res.status(r.status).json({ error: data.error?.message || 'Error en la recarga', detalle: data });
-            }
+                const r = await fetch(`${BASE_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Idempotency-Key': idempotencyKey
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            const orderId = data.order?.id;
-            const referenceCode = data.order?.reference_code;
-            let codigos = [];
+                const data = await r.json();
 
-            if (config.tipo === 'giftcard' && orderId) {
-                const maxIntentos = 6;
-                let intento = 0;
-                while (intento < maxIntentos && codigos.length === 0) {
-                    intento++;
-                    await new Promise(r => setTimeout(r, 2500));
-                    try {
-                        const cr = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
-                            headers: { 'Authorization': `Bearer ${API_KEY}` }
-                        });
-                        if (!cr.ok) continue;
-                        const cd = await cr.json();
-                        if (cd.order?.items?.length > 0) {
-                            for (const it of cd.order.items) {
-                                if (it.codes?.length > 0) { codigos = it.codes; break; }
-                            }
+                if (!r.ok) {
+                    if (r.status === 409) {
+                        if (data.error?.code === 'insufficient_balance') {
+                            await notificarTelegram(`⚠️ <b>SALDO INSUFICIENTE</b>\n🎮 ${juegoUpper}\n📦 ${paquete}`);
+                            return res.status(409).json({ error: 'Saldo insuficiente', sinSaldo: true });
                         }
-                    } catch (e) { /* continuar */ }
+                        if (data.error?.code === 'insufficient_stock') {
+                            return res.status(409).json({ error: 'Producto agotado', sinStock: true });
+                        }
+                    }
+                    return res.status(r.status).json({ error: data.error?.message || 'Error en la recarga', detalle: data });
                 }
+
+                const orderId = data.order?.id;
+                const referenceCode = data.order?.reference_code;
+                let codigos = [];
+
+                if (config.tipo === 'giftcard' && orderId) {
+                    const maxIntentos = 6;
+                    let intento = 0;
+                    while (intento < maxIntentos && codigos.length === 0) {
+                        intento++;
+                        await new Promise(r => setTimeout(r, 2500));
+                        try {
+                            const cr = await fetch(`${BASE_URL}/orders/${orderId}/codes`, {
+                                headers: { 'Authorization': `Bearer ${API_KEY}` }
+                            });
+                            if (!cr.ok) continue;
+                            const cd = await cr.json();
+                            if (cd.order?.items?.length > 0) {
+                                for (const it of cd.order.items) {
+                                    if (it.codes?.length > 0) { codigos = it.codes; break; }
+                                }
+                            }
+                        } catch (e) { /* continuar */ }
+                    }
+                }
+
+                const status = data.order?.status || 'confirmed';
+                const esExitosa = ['confirmed', 'completed', 'processing'].includes(status);
+                const costo = parseFloat(data.order?.total_sale_amount || 0);
+                const precioVenta = calcularPrecio(costo, config.tipo);
+
+                const mensajeTG =
+                    `🆕 <b>NUEVO PEDIDO - ${config.tipo === 'giftcard' ? 'GIFT CARD' : 'JUEGO'}</b>\n\n` +
+                    `🎮 ${juegoUpper}\n📦 Paquete: ${paquete}\n🆔 ${inputRequerido}\n` +
+                    `📋 Orden: ${referenceCode || 'N/A'}\n✅ Estado: ${status}\n` +
+                    `💰 Costo: $${costo.toFixed(4)} USD\n💵 Venta: $${precioVenta} USD` +
+                    (codigos.length > 0 ? `\n🎟️ <b>PIN:</b> <code>${codigos[0]}</code>` : '');
+
+                await notificarTelegram(mensajeTG);
+
+                return res.status(201).json({
+                    exito: esExitosa,
+                    mensaje: esExitosa ? (config.tipo === 'giftcard' ? 'Gift Card generada ✅' : 'Recarga exitosa ✅') : 'Procesando ⏳',
+                    id_solicitud: orderId,
+                    referencia: referenceCode,
+                    proveedor: 'Central One',
+                    tipo: config.tipo,
+                    monto: precioVenta,
+                    moneda: 'USD',
+                    estado: status,
+                    codigos,
+                    codigo: codigos.length > 0 ? codigos[0] : null
+                });
+
+            } catch (error) {
+                console.error('❌ Error en recarga:', error.message);
+                return res.status(400).json({ 
+                    error: error.message || 'Error procesando la recarga',
+                    detalle: 'Verifica los datos del jugador y el paquete seleccionado'
+                });
             }
-
-            const status = data.order?.status || 'confirmed';
-            const esExitosa = ['confirmed', 'completed', 'processing'].includes(status);
-            const costo = parseFloat(data.order?.total_sale_amount || 0);
-            const precioVenta = calcularPrecio(costo, config.tipo);
-
-            const mensajeTG =
-                `🆕 <b>NUEVO PEDIDO - ${config.tipo === 'giftcard' ? 'GIFT CARD' : 'JUEGO'}</b>\n\n` +
-                `🎮 ${juegoUpper}\n📦 Paquete: ${paquete}\n🆔 ${inputRequerido}\n` +
-                `📋 Orden: ${referenceCode || 'N/A'}\n✅ Estado: ${status}\n` +
-                `💰 Costo: $${costo.toFixed(4)} USD\n💵 Venta: $${precioVenta} USD` +
-                (codigos.length > 0 ? `\n🎟️ <b>PIN:</b> <code>${codigos[0]}</code>` : '');
-
-            await notificarTelegram(mensajeTG);
-
-            return res.status(201).json({
-                exito: esExitosa,
-                mensaje: esExitosa ? (config.tipo === 'giftcard' ? 'Gift Card generada ✅' : 'Recarga exitosa ✅') : 'Procesando ⏳',
-                id_solicitud: orderId,
-                referencia: referenceCode,
-                proveedor: 'Central One',
-                tipo: config.tipo,
-                monto: precioVenta,
-                moneda: 'USD',
-                estado: status,
-                codigos,
-                codigo: codigos.length > 0 ? codigos[0] : null
-            });
         }
 
         return res.status(400).json({ error: 'Acción no válida' });
