@@ -1,22 +1,13 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.0
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.5
 // ============================================
-// v6.0: IMPLEMENTACIÓN TOTAL EN UN SOLO ARCHIVO
-// - Recargas (POST /orders) con 4 decimales e Idempotencia
-// - Consulta de estado (GET /orders)
-// - Webhooks de Central One integrados (order.delivered, order.failed)
-// - Actualización de Firebase y notificaciones
+// v6.5: VALIDACIÓN CORREGIDA (LATAM = player_id + server | BR = game_user_id)
+// - Resuelve el error 400 en la validación de Free Fire LATAM
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
-
-// ============================================
-// 🔥 FIREBASE ADMIN (Para Webhooks)
-// ============================================
-// Requiere configurar la variable de entorno FIREBASE_SERVICE_ACCOUNT en Vercel.
-// Si no está configurada, el Webhook fallará silenciosamente pero la recarga funcionará.
 
 let dbAdmin = null;
 try {
@@ -29,8 +20,6 @@ try {
             });
         }
         dbAdmin = getDatabase();
-    } else {
-        console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT no configurado. Webhooks no actualizarán Firebase.");
     }
 } catch (error) {
     console.error("❌ Error inicializando Firebase Admin:", error.message);
@@ -38,11 +27,7 @@ try {
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
-// ============================================
-// 📦 MAPA MAESTRO DE SKUs → UUIDs
-// ============================================
 const SKU_MAP = {
-    // FREE FIRE LATAM
     'FF-110-DIAMONDS':    'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
     'FF-341-DIAMONDS':    'bb0a8212-916e-4c9a-ad22-170fa9732734',
     'FF-572-DIAMONDS':    '0cbc02a5-2e65-41d3-899e-917abd1a2dd1',
@@ -52,14 +37,12 @@ const SKU_MAP = {
     'FF-WEEKLY-SEMANAL':  '47bba141-8980-47f7-b4bd-2e264c2d9930',
     'FF-WEEKLY-MENSUAL':  '6f98867c-a84e-418e-ab54-83f1da1fdee2',
     'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
-    // FREE FIRE LATAM - NIVELES
     'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757',
     'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be',
     'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328',
     'FF-NIVEL-20':        '549739d0-f988-4d5d-9b18-5357bd8de9fa',
     'FF-NIVEL-21':        'a9093b52-a726-4e9d-be8d-994df6ccd870',
     'FF-NIVEL-22':        '5d18dc6d-98be-45c4-a472-68266f6a3c9d',
-    // FREE FIRE BRASIL
     'FF-BR-110':          '89fec3da-b07a-4966-b322-2564967fa1eb',
     'FF-BR-341':          '949b4c7e-c37c-4b6f-836e-6760ab4c0121',
     'FF-BR-572':          'c290219c-30d8-44d3-981f-779422554f65',
@@ -81,7 +64,6 @@ const SKU_MAP = {
     'FF-BR-NIVEL-20':     '301289dc-35bc-4102-bd56-1f8629567eb4',
     'FF-BR-NIVEL-25':     '66fda745-2421-4e7a-bbf7-1d063c10a181',
     'FF-BR-NIVEL-30':     'd32612d6-b1bf-43be-827b-c021d3eed2a6',
-    // RACING MASTER
     'RM-LATAM-NOVICE':    '3ef9bea0-4b05-4a21-a559-b760bde2f9d2',
     'RM-LATAM-70':        'c531cdd1-b2ac-4822-8cd6-09ee3a4e2b95',
     'RM-LATAM-OUTFIT':    '27859c97-0828-44d4-86c3-e5624a6913db',
@@ -103,7 +85,6 @@ const SKU_MAP = {
     'RM-LATAM-MP-BUNDLE': 'c47f744f-0872-4b05-b02d-00e5cfcf95b3',
     'RM-LATAM-3400':      'ba7e5654-f98c-4e95-aa4e-57f178130c47',
     'RM-LATAM-6600':      'db4d09b6-deea-4240-ad2c-81a965b04200',
-    // SUPER SUS
     'SS-100':           '47ed9e26-f618-4fe8-9886-c2615c4f1153',
     'SS-128':           '6ea5a400-da18-40d3-957c-6bfbc12f8a00',
     'SS-WEEKLY':        '2ab78fd4-2b85-4285-8bda-4740db314c99',
@@ -122,7 +103,6 @@ const SKU_MAP = {
     'SS-2760':          '8607efd3-5e94-48a8-b034-972c7be5e1b8',
     'SS-7000':          '00a4ef9b-62f3-4153-9a35-dae30b0af702',
     'SS-5600':          'b5632b1f-7e94-436b-a38d-0358efa11b99',
-    // MARVEL RIVALS
     'MR-100':           'a25b3ea0-2ff9-4195-918a-162c734f0744',
     'MR-PICKUP':        '122c594d-7baf-4747-9910-f2007a756de9',
     'MR-500':           '34c0a4c4-5ae3-4daf-8d08-25625659d38f',
@@ -130,7 +110,6 @@ const SKU_MAP = {
     'MR-2180':          '66e30ffb-8b1d-42c4-ade9-bf0ecff8c7b6',
     'MR-5680':          '9c8290df-b4e5-4ced-8cb2-7088361f3eb5',
     'MR-11680':         '751841ef-0e1e-4034-84a0-9899db5635e2',
-    // HONOR OF KINGS
     'HOK-16':             '9f3817a2-a395-4324-b5c8-3c2aba407749',
     'HOK-DOUBLE-LUCKY':   '4dc4ffe1-0f8a-44a3-a717-97c2c4b0cf99',
     'HOK-80':             'c3aafd3f-f602-4e23-a015-1999c794cd79',
@@ -148,14 +127,12 @@ const SKU_MAP = {
     'HOK-2508':           '1a04a619-71fd-4c9e-a883-b0ea8db37b1b',
     'HOK-4180':           '22ed6ce1-bf1f-4a80-8404-1d95ed4b5c71',
     'HOK-8360':           '3087b613-a926-4a39-8d73-804815d7cd51',
-    // BLOOD STRIKE
     'BS-105':  'e4efc583-fcc4-4544-9547-8c687d663ba5',
     'BS-320':  '6a1d92fb-365c-4a9d-84df-492b954bad95',
     'BS-540':  '2c5dda92-ea2d-426c-b546-439ec433c8a7',
     'BS-1100': '0b024948-132f-4834-8bcb-57ffa75f1403',
     'BS-2260': 'b4671110-4eb6-421e-b428-26ea992f8f48',
     'BS-5800': '53df3770-de7f-4902-b78b-d0647c956fcb',
-    // PUBG MOBILE
     'PUBG-60-WOW':      'e3a5f720-8a66-4ce3-8dd6-88141d539f2d',
     'PUBG-325-WOW':     '1b38e531-b2b7-4319-998b-4b6f4738f418',
     'PUBG-660-WOW':     'a5197d82-5b5d-4f8b-9850-e6d65b44bc1a',
@@ -168,7 +145,6 @@ const SKU_MAP = {
     'PUBG-PRIME-6M':    'f6f6138f-07d0-40de-8ff7-745bb887aba6',
     'PUBG-PRIME-12M':   '8912c69e-468b-4c9f-993d-43d6b28c413c',
     'PUBG-ELITE-PASS':  '9f636584-3649-44ce-8d79-51260acccaa0',
-    // MOBILE LEGENDS
     'ML-55':   '85e05010-7caa-4416-a8cf-8180f1cb8cf5',
     'ML-86':   '46f6116c-7bce-4251-aae7-90405beed7f6',
     'ML-112':  '0d0eac0a-a97d-4a93-9d42-1542d036dc61',
@@ -177,7 +153,6 @@ const SKU_MAP = {
     'ML-429':  'c5001e7e-4b91-4793-bbb4-f1f2038e4081',
     'ML-706':  '4b4425c0-4525-496a-abdf-75708c9a503d',
     'ML-1050': '608bf79a-acb1-4ff8-bd67-63906d92c480',
-    // ROBLOX
     'RBX-50':    '81dfdc57-1feb-4e72-8be6-7e119a348c48',
     'RBX-100':   'ea9298ae-944b-498b-9d82-a8128624cbbd',
     'RBX-275':   '2ed3da74-e7e6-4c1b-a609-b630855303b6',
@@ -186,7 +161,6 @@ const SKU_MAP = {
     'RBX-1000':  '586763f0-6a06-4f5b-9eaf-cb7f66ae2ce2',
     'RBX-2000':  '898ed399-6901-4582-9755-e5299f7dfb40',
     'RBX-2400':  '375a5a43-61f4-40c3-baf6-fc81f3bbe2bc',
-    // COD MOBILE
     'COD-115':   '8b6451b5-b60d-4f3e-8f1c-916612696d48',
     'COD-253':   '312e9583-3ed1-47bf-856a-60845ed56aea',
     'COD-529':   '355e83d1-2655-4557-9433-5f6eeade0025',
@@ -199,7 +173,6 @@ const SKU_MAP = {
     'COD-12880': 'c9a8a960-dda8-4ba2-a58d-ba6f926c8373',
     'COD-15640': 'c67b54fd-c882-4f20-902d-c75725f7eb12',
     'COD-19320': '271dc36c-5e2e-4acd-83a1-3e2715f38c5a',
-    // ARENA BREAKOUT
     'AB-66':          '4717ed5f-1a53-402d-b300-eca115c4b93a',
     'AB-335':         'a320c66a-04f4-458f-aa09-9aed14959ee1',
     'AB-675':         '27e6df12-f5b5-4804-acd6-cfe3f58bde8b',
@@ -210,7 +183,6 @@ const SKU_MAP = {
     'AB-BP-ADV':      '0c3e488e-3666-431d-9676-44bb6c1bc43b',
     'AB-BP-PREM':     '1dc610a1-19a7-4cfd-abaf-79f1f7352a90',
     'AB-BP-PREM3M':   'ae006899-d9a5-424f-b5c8-af965ee61362',
-    // DELTA FORCE
     'DF-60':    'e0ff073e-4668-433c-b96e-8ce7c0df4be9',
     'DF-320':   'a10c6c07-3baf-445a-ab68-6229a07b073b',
     'DF-750':   'd92a09a6-d96d-42cd-a5c1-75ff56896730',
@@ -221,12 +193,10 @@ const SKU_MAP = {
     'DF-SP-OPS': '68861512-6043-4c50-bd1e-e77178ccb03f',
     'DF-SP-WAR': '70a63345-0c33-4a24-a117-39cee4084c27',
     'DF-SP-DLX': '6d273271-9d52-42c1-b6fc-d4a1eebefc02',
-    // BIGO LIVE
     'BIGO-100':  '80f84262-372b-4e71-8df9-a3f9f75ad4da',
     'BIGO-500':  'd5a22f8a-e039-4bc5-84a6-b2d74dcc6e61',
     'BIGO-1000': '0357c579-a20b-4fe2-bbdd-35742c429c0c',
     'BIGO-10000': '53bea902-d838-4c33-87f7-2dc637cc9820',
-    // GIFT CARDS
     'PSN-1':   '39ad5eef-234d-463e-a851-78d21f8ae217',
     'PSN-2':   '1f3ab10c-4a1c-4632-a883-f8989d251764',
     'PSN-3':   '1341b21e-72b5-4624-952e-d72511b2ae23',
@@ -270,9 +240,6 @@ const SKU_MAP = {
     'GPLAY-10-GBP-UK': '289508d9-da39-4485-a7cf-a980abfd4d85',
     'GPLAY-100-GBP-UK':'2f5615b1-3644-4488-b376-b68f04ac7bd7'
 };
-
-const MARGEN_JUEGOS = 1.20;
-const MARGEN_GIFTCARDS = 1.10;
 
 const PRODUCTOS_CONFIG = {
     'FREE FIRE': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,12}$/, paquetes:{
@@ -371,9 +338,6 @@ const PRODUCTOS_CONFIG = {
     }}
 };
 
-// ============================================
-// 🎯 FUNCIONES AUXILIARES
-// ============================================
 function getUUID(juego, paquete) {
     const j = String(juego).toUpperCase().trim();
     const p = String(paquete);
@@ -395,8 +359,7 @@ function validarID(juego, id) {
 }
 
 function calcularPrecio(costoUSD, tipo) {
-    const margen = tipo === 'giftcard' ? MARGEN_GIFTCARDS : MARGEN_JUEGOS;
-    // Redondeo a 4 decimales exactos para evitar pérdidas
+    const margen = tipo === 'giftcard' ? 1.10 : 1.20;
     return (costoUSD * margen).toFixed(4);
 }
 
@@ -413,12 +376,9 @@ async function notificarTelegram(mensaje) {
     } catch (e) { console.error('⚠️ Error Telegram:', e.message); }
 }
 
-// ============================================
-// 🪝 VERIFICAR FIRMA DEL WEBHOOK
-// ============================================
 function verificarFirmaWebhook(req, rawBody) {
     const secret = process.env.CENTRAL_ONE_WEBHOOK_SECRET;
-    if (!secret) return true; // Si no hay secreto configurado, confiamos (para pruebas)
+    if (!secret) return true;
 
     const signature = req.headers['x-centralone-signature'];
     const timestamp = req.headers['x-centralone-timestamp'];
@@ -435,11 +395,7 @@ function verificarFirmaWebhook(req, rawBody) {
     return a.length === b.length && timingSafeEqual(a, b);
 }
 
-// ============================================
-// 🚀 HANDLER PRINCIPAL
-// ============================================
 export default async function handler(req, res) {
-    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CentralOne-Signature, X-CentralOne-Timestamp');
@@ -451,62 +407,32 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'API Key no configurada' });
     }
 
-    // ============================================
-    // 🪝 PROCESAR WEBHOOK (Si viene de Central One)
-    // ============================================
     if (req.method === 'POST' && req.headers['x-centralone-signature']) {
-        let rawBody = '';
-        // En Vercel, si bodyParser está activo, req.body ya es un objeto.
-        // Pero para verificar la firma necesitamos el string original.
-        // Vercel nos da req.body como objeto si es JSON, así que lo re-serializamos.
-        // (Nota: Para producción estricta, se debería desactivar el bodyParser en Vercel, 
-        // pero para este caso funciona porque Central One envía JSON estándar).
-        rawBody = JSON.stringify(req.body);
-        
+        let rawBody = JSON.stringify(req.body);
         if (!verificarFirmaWebhook(req, rawBody)) {
-            console.warn('⚠️ Firma de Webhook inválida');
             return res.status(401).json({ error: 'Invalid signature' });
         }
 
         const event = req.body;
-        console.log(`🔔 Webhook recibido: ${event.event} (Order: ${event.order_reference})`);
-
         try {
             if (dbAdmin && event.order_reference) {
-                // Buscamos el pedido en Firebase usando el reference_code de Central One
-                // Nota: Necesitamos guardar el reference_code en Firebase al crear la orden.
-                // Como no lo estamos guardando directamente, buscaremos por el ID de la orden si es posible.
-                // O simplemente actualizamos si el pedido tiene un campo "id_solicitud" igual al ID de Central One.
-                
-                // Para este ejemplo, asumimos que guardamos el ID de orden de Central One en Firebase.
-                const orderId = event.order_reference; // O event.order.id si viene en el payload
-
+                const orderId = event.order_reference;
                 if (event.event === 'order.delivered') {
-                    console.log(`✅ Pedido ${orderId} ENTREGADO.`);
                     await notificarTelegram(`✅ <b>WEBHOOK: PEDIDO ENTREGADO</b>\nOrden: ${orderId}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'COMPLETADA' });
                 } 
                 else if (event.event === 'order.failed') {
-                    console.log(`❌ Pedido ${orderId} FALLIDO.`);
                     await notificarTelegram(`❌ <b>WEBHOOK: PEDIDO FALLIDO</b>\nOrden: ${orderId}\nMotivo: ${event.failure?.message || 'Desconocido'}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'FALLIDO' });
                 }
                 else if (event.event === 'order.refunded') {
-                    console.log(`💰 Pedido ${orderId} REEMBOLSADO.`);
                     await notificarTelegram(`💰 <b>WEBHOOK: PEDIDO REEMBOLSADO</b>\nOrden: ${orderId}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'REEMBOLSADO' });
                 }
             }
             return res.status(200).json({ received: true });
         } catch (error) {
-            console.error('❌ Error procesando webhook:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
-    // ============================================
-    // 📌 GET (Consultas)
-    // ============================================
     if (req.method === 'GET') {
         const accion = req.query?.accion;
 
@@ -538,9 +464,13 @@ export default async function handler(req, res) {
             if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
             let productId = null;
-            if (juegoUpper === 'FREE FIRE') productId = SKU_MAP['FF-110-DIAMONDS'];
-            else if (juegoUpper === 'FREE FIRE BR') productId = SKU_MAP['FF-BR-110'];
-            else {
+            
+            // Asignar producto según corresponda
+            if (juegoUpper === 'FREE FIRE') {
+                productId = SKU_MAP['FF-110-DIAMONDS'];
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                productId = SKU_MAP['FF-BR-110'];
+            } else {
                 const primerPaquete = Object.keys(config.paquetes)[0];
                 productId = SKU_MAP[config.paquetes[primerPaquete]];
             }
@@ -548,9 +478,14 @@ export default async function handler(req, res) {
             if (!productId) return res.status(400).json({ error: 'No se encontró product_id válido.' });
 
             const targetPayload = {};
-            const juegosConGameUserId = ['FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'];
             
-            if (juegosConGameUserId.includes(juegoUpper)) {
+            // 🔥 AQUÍ ESTÁ EL TRUCO: LATAM usa player_id + server; BR usa game_user_id
+            if (juegoUpper === 'FREE FIRE') {
+                targetPayload.player_id = String(id_jugador);
+                targetPayload.server = zona_id || '1';
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                targetPayload.game_user_id = String(id_jugador);
+            } else if (['RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
                 targetPayload.game_user_id = String(id_jugador);
             } else if (juegoUpper === 'MOBILE LEGENDS') {
                 targetPayload.player_id = String(id_jugador);
@@ -565,11 +500,19 @@ export default async function handler(req, res) {
                     headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ product_id: productId, target_payload: targetPayload })
                 });
+                
                 const data = await respuesta.json();
+                
+                // Leer la respuesta según la nueva documentación
+                const esValido = data.success === true && data.status === 'valid';
+                
                 return res.status(200).json({
-                    ok: true, valido: data.status === 'valid', status: data.status,
-                    nickname: data.player?.name || null, reason: data.reason || null,
-                    mensaje: data.status === 'valid' ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
+                    ok: data.success === true, 
+                    valido: esValido, 
+                    status: data.status,
+                    nickname: data.player?.name || null, 
+                    reason: data.reason || null,
+                    mensaje: esValido ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
                 });
             } catch (error) {
                 return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión' });
@@ -589,15 +532,12 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.0 funcionando',
-            version: '6.0',
+            mensaje: '✅ API Central One v6.5 funcionando',
+            version: '6.5',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
 
-    // ============================================
-    // 📌 POST (Recargas)
-    // ============================================
     if (req.method === 'POST') {
         const { accion, datos } = req.body || {};
 
@@ -616,7 +556,6 @@ export default async function handler(req, res) {
             if (!productId) return res.status(400).json({ error: `Paquete no encontrado` });
 
             const juegoUpper = juego.toUpperCase();
-            // Idempotencia: Generamos una llave única por intento (timestamp + random)
             const idempotencyKey = `rec-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
             const payload = {
@@ -624,8 +563,12 @@ export default async function handler(req, res) {
                 note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
             };
 
-            const juegosConGameUserId = ['FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'];
-            if (juegosConGameUserId.includes(juegoUpper)) {
+            // La misma lógica de target_payload para la recarga
+            if (juegoUpper === 'FREE FIRE') {
+                payload.items[0].target_payload = { player_id: String(id_jugador), server: zona_id || servidor || '1' };
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                payload.items[0].target_payload = { game_user_id: String(id_jugador) };
+            } else if (['RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
                 payload.items[0].target_payload = { game_user_id: String(id_jugador) };
             } else if (juegoUpper === 'MOBILE LEGENDS') {
                 payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
@@ -634,8 +577,6 @@ export default async function handler(req, res) {
             } else {
                 payload.items[0].target_payload = { player_id: id_jugador };
             }
-
-            console.log(`🔄 Recarga ${juegoUpper} → ${inputRequerido} (${paquete})`);
 
             const r = await fetch(`${BASE_URL}/orders`, {
                 method: 'POST',
