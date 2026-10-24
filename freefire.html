@@ -1144,19 +1144,38 @@ function getDatosPedidoActuales() {
         proveedor: (localStorage.getItem('proveedor') || '').toLowerCase().trim()
     };
 }
+
+// ✅ FUNCIÓN ACTUALIZADA PARA ENVIAR TELEGRAM COMO EN TU FOTO
 function notificarAdmin(tipo, datos = {}) {
     const d = getDatosPedidoActuales();
-    const emojis = { exito:'🎉',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
-    const titulos = { exito:'EXITOSO',falso:'NO ENCONTRADO',duplicado:'REFERENCIA USADA',cupon_usado:'CUPÓN USADO',error:'ERROR',manual:'MANUAL',codigo_test:'CÓDIGO TEST',binance:'PAGO BINANCE' };
+    const emojis = { exito:'✅',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
+    
+    let titulo = "COMPLETADA";
+    if (tipo === 'falso') titulo = "NO ENCONTRADO";
+    if (tipo === 'duplicado') titulo = "REFERENCIA USADA";
+    if (tipo === 'error') titulo = "ERROR";
+    if (tipo === 'codigo_test') titulo = "TEST";
+    
     const emoji = emojis[tipo] || 'ℹ️';
-    const titulo = titulos[tipo] || tipo.toUpperCase();
     const esc = (txt) => String(txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    let mensaje = `${emoji} <b>${titulo}</b>\n\n`;
-    mensaje += `<b>🎮</b> ${esc(d.juego)}\n<b>📦</b> ${esc(d.producto)}\n<b>🆔</b> <code>${esc(d.idJugador)}</code>\n<b>💰</b> $${precioUsdFinal.toFixed(2)} · ${precioBsFinal} Bs\n`;
-    if (datos.referencia) mensaje += `<b>🔢</b> <code>${esc(datos.referencia)}</code>\n`;
-    if (datos.mensaje_extra) mensaje += `<b>⚠️</b> ${esc(datos.mensaje_extra)}\n`;
-    if (d.whatsapp) mensaje += `<b>📱</b> ${esc(d.whatsapp)}\n`;
+    
+    let mensaje = `${emoji} Pedido ${datos.numero_pedido || '#----'} →\n`;
+    mensaje += `<b>${titulo}</b>\n`;
+    mensaje += `📦 ${esc(d.juego)} - ${esc(d.producto)}\n`;
+    mensaje += `💰 $${precioUsdFinal.toFixed(2)} USD\n\n`;
+    
+    mensaje += `<b>Datos del Jugador:</b>\n`;
+    mensaje += `🆔 ID: <code>${esc(d.idJugador)}</code>\n`;
+    mensaje += `👤 Nombre: ${esc(d.nombreJugador)}\n`;
+    
+    if (datos.referencia_bancaria) mensaje += `🔢 Ref. Bancaria: <code>${esc(datos.referencia_bancaria)}</code>\n`;
+    if (datos.id_central_one) mensaje += `🔗 ID Central One: <code>${esc(datos.id_central_one)}</code>\n`;
+    
+    if (d.whatsapp) mensaje += `📱 WhatsApp: ${esc(d.whatsapp)}\n`;
+    if (datos.mensaje_extra) mensaje += `⚠️ Nota: ${esc(datos.mensaje_extra)}\n`;
+    
     mensaje += `\n<i>${new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' })}</i>`;
+    
     enviarTelegram(mensaje);
 }
 
@@ -1297,22 +1316,21 @@ async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
-// 🔥 CORRECCIÓN 1: Lógica del contador de pedidos
+// 🔥 CORRECCIÓN 1: Lógica del contador de pedidos blindada
 async function generarNumeroPedido() {
     try {
         const contadorRef = db.ref('configuracion/contador_pedidos');
         const resultado = await contadorRef.transaction((valorActual) => {
-            // Si el valor actual es nulo o inválido, empezamos en 130
             if (typeof valorActual !== 'number' || isNaN(valorActual)) {
-                return 130;
+                return 130; // Si está vacío, empieza en 131
             }
             return valorActual + 1;
         });
+        if (!resultado.committed) throw new Error('No se pudo generar el número');
         const numero = resultado.snapshot.val() || 130;
         return String(numero).padStart(4, '0');
     } catch (error) {
         console.error('Error generando número de pedido:', error);
-        // Fallback: usar timestamp corto si falla Firebase
         return String(Date.now()).slice(-4);
     }
 }
@@ -1609,7 +1627,6 @@ async function iniciarVerificacion() {
             });
             await new Promise(res => setTimeout(res, 1000));
             
-            // 🔥 CORRECCIÓN: Referencia de Central One por separado
             const infoPedido = await guardarPedidoEnFirebase(
                 referencia, 
                 resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", 
@@ -1652,7 +1669,6 @@ async function iniciarVerificacion() {
             });
             await new Promise(res => setTimeout(res, 1000));
             
-            // 🔥 CORRECCIÓN: Referencia de Central One por separado
             const infoPedido = await guardarPedidoEnFirebase(
                 referencia, 
                 resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", 
@@ -1717,7 +1733,6 @@ async function iniciarVerificacion() {
         const resultadoRecarga = await ejecutarRecarga();
         await new Promise(res => setTimeout(res, 1000));
         
-        // 🔥 CORRECCIÓN: Referencia de Central One por separado
         const infoPedido = await guardarPedidoEnFirebase(
             referencia, 
             resultadoRecarga.exito ? "COMPLETADA" : "PENDIENTE", 
@@ -1768,7 +1783,13 @@ function mostrarResultadoExitoso(resultadoRecarga, referencia, numeroPedido) {
     }
     mostrarSeccion('seccion-exito');
     marcarProgreso(4);
-    notificarAdmin('exito', { referencia, mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado}` : '' });
+    notificarAdmin('exito', { 
+        referencia, 
+        mensaje_extra: cuponAplicado ? `🎁 Cupón: ${cuponAplicado}` : '',
+        numero_pedido: numeroPedido,
+        referencia_bancaria: referencia,
+        id_central_one: resultadoRecarga.referencia
+    });
 }
 
 function mostrarResultadoSilencioso(resultadoRecarga, referencia, numeroPedido) {
