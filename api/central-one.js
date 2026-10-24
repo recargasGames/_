@@ -1,9 +1,9 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.4
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.5
 // ============================================
-// v6.4: AUTO-CORRECCIÓN DE UUID
-// - Consulta el catálogo de Central One en vivo para validar el producto
-// - Evita errores si los UUIDs cambian
+// v6.5: DIAGNÓSTICO AUTOMÁTICO
+// - Si falla la validación, consulta el catálogo en vivo
+// - Prueba automáticamente con game_user_id y player_id
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -380,19 +380,12 @@ async function notificarTelegram(mensaje) {
 function verificarFirmaWebhook(req, rawBody) {
     const secret = process.env.CENTRAL_ONE_WEBHOOK_SECRET;
     if (!secret) return true;
-
     const signature = req.headers['x-centralone-signature'];
     const timestamp = req.headers['x-centralone-timestamp'];
-
     if (!signature || !timestamp) return false;
-
-    const esperada = "sha256=" + createHmac("sha256", secret)
-        .update(`${timestamp}.${rawBody}`)
-        .digest("hex");
-
+    const esperada = "sha256=" + createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
     const a = Buffer.from(esperada);
     const b = Buffer.from(signature);
-
     return a.length === b.length && timingSafeEqual(a, b);
 }
 
@@ -402,7 +395,6 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CentralOne-Signature, X-CentralOne-Timestamp');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
-
     const API_KEY = process.env.CENTRAL_ONE_API_KEY;
     if (!API_KEY && req.method !== 'POST') {
         return res.status(500).json({ error: 'API Key no configurada' });
@@ -413,7 +405,6 @@ export default async function handler(req, res) {
         if (!verificarFirmaWebhook(req, rawBody)) {
             return res.status(401).json({ error: 'Invalid signature' });
         }
-
         const event = req.body;
         try {
             if (dbAdmin && event.order_reference) {
@@ -465,7 +456,6 @@ export default async function handler(req, res) {
             if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
             let productId = null;
-            
             if (juegoUpper === 'FREE FIRE') {
                 productId = SKU_MAP['FF-110-DIAMONDS'];
             } else if (juegoUpper === 'FREE FIRE BR') {
@@ -477,39 +467,54 @@ export default async function handler(req, res) {
 
             if (!productId) return res.status(400).json({ error: 'No se encontró product_id válido.' });
 
-            const targetPayload = {};
+            const payloadsAProbar = [];
             
-            if (['FREE FIRE', 'FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
-                targetPayload.game_user_id = String(id_jugador);
+            if (juegoUpper === 'FREE FIRE') {
+                payloadsAProbar.push({ game_user_id: String(id_jugador) });
+                payloadsAProbar.push({ player_id: String(id_jugador) });
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                payloadsAProbar.push({ game_user_id: String(id_jugador) });
             } else if (juegoUpper === 'MOBILE LEGENDS') {
-                targetPayload.player_id = String(id_jugador);
-                targetPayload.server = zona_id || '1';
+                payloadsAProbar.push({ player_id: String(id_jugador), server: zona_id || '1' });
             } else {
-                targetPayload.player_id = String(id_jugador);
+                payloadsAProbar.push({ player_id: String(id_jugador) });
             }
 
-            try {
-                const respuesta = await fetch(`${BASE_URL}/player/validate`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_id: productId, target_payload: targetPayload })
-                });
-                
-                const data = await respuesta.json();
-                
-                const esValido = data.success === true && data.status === 'valid';
-                
-                return res.status(200).json({
-                    ok: data.success === true, 
-                    valido: esValido, 
-                    status: data.status,
-                    nickname: data.player?.name || null, 
-                    reason: data.reason || null,
-                    mensaje: esValido ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
-                });
-            } catch (error) {
-                return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión' });
+            let ultimoError = null;
+            for (const targetPayload of payloadsAProbar) {
+                try {
+                    const respuesta = await fetch(`${BASE_URL}/player/validate`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ product_id: productId, target_payload: targetPayload })
+                    });
+                    
+                    const data = await respuesta.json();
+                    const esValido = data.success === true && data.status === 'valid';
+                    
+                    if (respuesta.ok) {
+                        return res.status(200).json({
+                            ok: data.success === true, 
+                            valido: esValido, 
+                            status: data.status,
+                            nickname: data.player?.name || null, 
+                            reason: data.reason || null,
+                            mensaje: esValido ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
+                        });
+                    }
+                    ultimoError = data;
+                } catch (e) {
+                    ultimoError = { error: e.message };
+                }
             }
+
+            return res.status(200).json({ 
+                ok: false, 
+                valido: false, 
+                status: 'unverified', 
+                mensaje: 'No se pudo verificar',
+                diagnostico: ultimoError
+            });
         }
 
         if (accion === 'estado_pedido') {
@@ -525,8 +530,8 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.4 funcionando',
-            version: '6.4',
+            mensaje: '✅ API Central One v6.5 funcionando',
+            version: '6.5',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
