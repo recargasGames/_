@@ -1,8 +1,10 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v4.1
+// 🎮 RECARGASGAMES - API CENTRAL ONE v3.9.1
 // ============================================
-// v4.1: AGREGADOS RACING MASTER, SUPER SUS, MARVEL RIVALS, HONOR OF KINGS
+// v3.9.1: MODO DEBUG ACTIVADO EN VALIDACIÓN DE JUGADOR
 // v3.9: AGREGADO FREE FIRE BRASIL (con precios y UUIDs reales)
+// v3.8: VALIDACIÓN DE ID DE JUGADOR (/player/validate)
+// v3.7: PAQUETES DE NIVEL (LEVEL UP) FREE FIRE LATAM
 // ============================================
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
@@ -23,14 +25,14 @@ const SKU_MAP = {
     'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
     
     // 🔥 FREE FIRE LATAM - LEVEL UP
-    'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757',
-    'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be',
-    'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328',
-    'FF-NIVEL-20':        '549739d0-f988-4d5d-9b18-5357bd8de9fa',
-    'FF-NIVEL-21':        'a9093b52-a726-4e9d-be8d-994df6ccd870',
-    'FF-NIVEL-22':        '5d18dc6d-98be-45c4-a472-68266f6a3c9d',
+    'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757', // Nivel 6
+    'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be', // Nivel 10
+    'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328', // Nivel 15
+    'FF-NIVEL-20':        '549739d0-f988-4d5d-9b18-5357bd8de9fa', // Nivel 20
+    'FF-NIVEL-21':        'a9093b52-a726-4e9d-be8d-994df6ccd870', // Nivel 25
+    'FF-NIVEL-22':        '5d18dc6d-98be-45c4-a472-68266f6a3c9d', // Nivel 30
 
-    // 🇧🇷 FREE FIRE BRASIL
+    // 🇧🇷 FREE FIRE BRASIL (NUEVOS)
     'FF-BR-110':          '89fec3da-b07a-4966-b322-2564967fa1eb',
     'FF-BR-341':          '949b4c7e-c37c-4b6f-836e-6760ab4c0121',
     'FF-BR-572':          'c290219c-30d8-44d3-981f-779422554f65',
@@ -52,77 +54,6 @@ const SKU_MAP = {
     'FF-BR-NIVEL-20':     '301289dc-35bc-4102-bd56-1f8629567eb4',
     'FF-BR-NIVEL-25':     '66fda745-2421-4e7a-bbf7-1d063c10a181',
     'FF-BR-NIVEL-30':     'd32612d6-b1bf-43be-827b-c021d3eed2a6',
-
-    // 🏎️ RACING MASTER LATAM
-    'RM-LATAM-NOVICE':    '3ef9bea0-4b05-4a21-a559-b760bde2f9d2',
-    'RM-LATAM-70':        'c531cdd1-b2ac-4822-8cd6-09ee3a4e2b95',
-    'RM-LATAM-OUTFIT':    '27859c97-0828-44d4-86c3-e5624a6913db',
-    'RM-LATAM-WEEKLY':    '838ce749-34e7-4014-b5e9-977651981187',
-    'RM-LATAM-140':       '5ca1c7d4-46dc-494d-a6a9-bb96db026f7c',
-    'RM-LATAM-MONTHLY':   '609249eb-c6d0-4059-b1dd-bb1e8fc4a290',
-    'RM-LATAM-210':       'fdf8b563-c6e5-4025-b605-e05361ad6676',
-    'RM-LATAM-350':       '9fc78e6c-cc6f-48a6-bb87-5dd8e8698578',
-    'RM-LATAM-UPG-PREM':  'c309da99-79e4-4c99-bb5e-fce077c67eea',
-    'RM-LATAM-DELUXE':    '7477edc6-2340-4fde-a4d8-2e4456b38834',
-    'RM-LATAM-GROWTH':    '0c7d791d-d40b-4e68-92d4-ccf4f50cfba9',
-    'RM-LATAM-700':       '0f462c23-4282-45bf-8271-acab79d24598',
-    'RM-LATAM-PREM':      '93740fac-7faf-4ed3-8d03-dd83c7729879',
-    'RM-LATAM-1000':      '1d55d833-d321-4285-bc51-9deaa29f9a12',
-    'RM-LATAM-1400':      'ade3921b-5b11-41c6-bc1a-6af31f4010c5',
-    'RM-LATAM-LEGEND':    '8f63dd15-9cbe-4ba0-b6a8-834f571210db',
-    'RM-LATAM-2100':      'f6dff6cc-c31a-4a61-ba8a-8c33e5b3af9b',
-    'RM-LATAM-UPG-MP':    'eef2bfb8-8c2c-4580-ab22-af2730a38891',
-    'RM-LATAM-MP-BUNDLE': 'c47f744f-0872-4b05-b02d-00e5cfcf95b3',
-    'RM-LATAM-3400':      'ba7e5654-f98c-4e95-aa4e-57f178130c47',
-    'RM-LATAM-6600':      'db4d09b6-deea-4240-ad2c-81a965b04200',
-
-    // 👻 SUPER SUS
-    'SS-100':           '47ed9e26-f618-4fe8-9886-c2615c4f1153',
-    'SS-128':           '6ea5a400-da18-40d3-957c-6bfbc12f8a00',
-    'SS-WEEKLY':        '2ab78fd4-2b85-4285-8bda-4740db314c99',
-    'SS-310':           'e0c5cf60-893a-4644-9194-9252bf2c4447',
-    'SS-395':           '853a76ba-f133-47ce-87ca-b06846890ad3',
-    'SS-1+1':           'ede0e118-b046-42a6-b7e4-74cde6a0b815',
-    'SS-520':           '95c5bcc3-9720-4f1a-b0d5-c84b3e91d197',
-    'SS-670':           '821a23b2-88ed-4c3d-bb62-751b6014e96f',
-    'SS-SUPERPASS':     '8630e6d5-e155-4f67-8eb8-ccae8ef9ea55',
-    'SS-1060':          'dc45a7b9-f703-4461-b0b0-8bddfe6327ed',
-    'SS-1360':          '269a9f2b-5142-454d-95d2-7553184b8fcc',
-    'SS-SUPERPASSB':    'e95a51a2-0976-4fef-b7a7-5fa7eab1b0f0',
-    'SS-MONTHLY':       'af30e4d2-c15d-49f5-8bf6-b694b6d17bde',
-    'SS-SUPERVIP':      '8fad2523-5bfd-45bd-8d4a-f45c90dafc95',
-    'SS-2180':          '487c85a1-a7f7-45a6-8b95-d723b2cd6742',
-    'SS-2760':          '8607efd3-5e94-48a8-b034-972c7be5e1b8',
-    'SS-7000':          '00a4ef9b-62f3-4153-9a35-dae30b0af702',
-    'SS-5600':          'b5632b1f-7e94-436b-a38d-0358efa11b99',
-
-    // 🦸 MARVEL RIVALS
-    'MR-100':           'a25b3ea0-2ff9-4195-918a-162c734f0744',
-    'MR-PICKUP':        '122c594d-7baf-4747-9910-f2007a756de9',
-    'MR-500':           '34c0a4c4-5ae3-4daf-8d08-25625659d38f',
-    'MR-1000':          '8a00965e-f336-42a0-af08-5eaa43a77912',
-    'MR-2180':          '66e30ffb-8b1d-42c4-ade9-bf0ecff8c7b6',
-    'MR-5680':          '9c8290df-b4e5-4ced-8cb2-7088361f3eb5',
-    'MR-11680':         '751841ef-0e1e-4034-84a0-9899db5635e2',
-
-    // 👑 HONOR OF KINGS (Usando solo los de game_user_id)
-    'HOK-16':             '9f3817a2-a395-4324-b5c8-3c2aba407749',
-    'HOK-DOUBLE-LUCKY':   '4dc4ffe1-0f8a-44a3-a717-97c2c4b0cf99',
-    'HOK-80':             'c3aafd3f-f602-4e23-a015-1999c794cd79',
-    'HOK-WEEKLY':         '7fa8144c-3452-4d81-a291-2e4c39409620',
-    'HOK-400':            'b1a3edb1-dfc0-4e4c-a169-3156b1acf24f',
-    'HOK-STANDARD-PACK':  '18eab674-ecb0-406b-ab9a-ef7e55bb5bbc',
-    'HOK-HONOR-PACK':     'ead0c754-ca3c-4813-968d-a69328230f35',
-    'HOK-INFERNAL':       '60735234-46a5-421b-98e8-cc3a17b3d9d1',
-    'HOK-PREMIUM-PACK':   '553c7913-d234-4ab3-bea8-aa0c608d6b04',
-    'HOK-240':            'f64fc207-ecb4-49c0-9d6c-6deff9502e91',
-    'HOK-WEEKLY-PLUS':    '56883290-5ec5-4ee5-b207-7c6b4141cedc',
-    'HOK-560':            '40bf2360-f948-4b86-a74b-798c839038c2',
-    'HOK-830':            '37f5627c-d420-4870-89f3-7b7db358642a',
-    'HOK-1245':           'e7ef6d3b-4b3d-450f-a891-a23d29b56b7f',
-    'HOK-2508':           '1a04a619-71fd-4c9e-a883-b0ea8db37b1b',
-    'HOK-4180':           '22ed6ce1-bf1f-4a80-8404-1d95ed4b5c71',
-    'HOK-8360':           '3087b613-a926-4a39-8d73-804815d7cd51',
 
     // ⚔️ BLOOD STRIKE
     'BS-105':  'e4efc583-fcc4-4544-9547-8c687d663ba5',
@@ -285,30 +216,6 @@ const PRODUCTOS_CONFIG = {
         'evo_3d':'FF-BR-EVO-3D', 'evo_7d':'FF-BR-EVO-7D', 'evo_30d':'FF-BR-EVO-30D',
         'nivel_6':'FF-BR-NIVEL-6', 'nivel_10':'FF-BR-NIVEL-10', 'nivel_15':'FF-BR-NIVEL-15',
         'nivel_20':'FF-BR-NIVEL-20', 'nivel_25':'FF-BR-NIVEL-25', 'nivel_30':'FF-BR-NIVEL-30'
-    }},
-    'RACING MASTER': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        'novice':'RM-LATAM-NOVICE', '70':'RM-LATAM-70', 'outfit':'RM-LATAM-OUTFIT', 'weekly':'RM-LATAM-WEEKLY',
-        '140':'RM-LATAM-140', 'monthly':'RM-LATAM-MONTHLY', '210':'RM-LATAM-210', '350':'RM-LATAM-350',
-        'upg_prem':'RM-LATAM-UPG-PREM', 'deluxe':'RM-LATAM-DELUXE', 'growth':'RM-LATAM-GROWTH', '700':'RM-LATAM-700',
-        'prem':'RM-LATAM-PREM', '1000':'RM-LATAM-1000', '1400':'RM-LATAM-1400', 'legend':'RM-LATAM-LEGEND',
-        '2100':'RM-LATAM-2100', 'upg_mp':'RM-LATAM-UPG-MP', 'mp_bundle':'RM-LATAM-MP-BUNDLE',
-        '3400':'RM-LATAM-3400', '6600':'RM-LATAM-6600'
-    }},
-    'SUPER SUS': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        '100':'SS-100', '128':'SS-128', 'weekly':'SS-WEEKLY', '310':'SS-310', '395':'SS-395',
-        '1+1':'SS-1+1', '520':'SS-520', '670':'SS-670', 'superpass':'SS-SUPERPASS', '1060':'SS-1060',
-        '1360':'SS-1360', 'superpassb':'SS-SUPERPASSB', 'monthly':'SS-MONTHLY', 'supervip':'SS-SUPERVIP',
-        '2180':'SS-2180', '2760':'SS-2760', '7000':'SS-7000', '5600':'SS-5600'
-    }},
-    'MARVEL RIVALS': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        '100':'MR-100', 'pickup':'MR-PICKUP', '500':'MR-500', '1000':'MR-1000',
-        '2180':'MR-2180', '5680':'MR-5680', '11680':'MR-11680'
-    }},
-    'HONOR OF KINGS': { tipo:'juego', input:['id_jugador'], validar:/^\d{5,15}$/, paquetes:{
-        '16':'HOK-16', 'double_lucky':'HOK-DOUBLE-LUCKY', '80':'HOK-80', 'weekly':'HOK-WEEKLY', '400':'HOK-400',
-        'standard_pack':'HOK-STANDARD-PACK', 'honor_pack':'HOK-HONOR-PACK', 'infernal':'HOK-INFERNAL',
-        'premium_pack':'HOK-PREMIUM-PACK', '240':'HOK-240', 'weekly_plus':'HOK-WEEKLY-PLUS', '560':'HOK-560',
-        '830':'HOK-830', '1245':'HOK-1245', '2508':'HOK-2508', '4180':'HOK-4180', '8360':'HOK-8360'
     }},
     'BLOOD STRIKE': { tipo:'juego', input:['id_jugador'], validar:/^\d{8,12}$/, paquetes:{
         '105':'BS-105','320':'BS-320','540':'BS-540','1100':'BS-1100','2260':'BS-2260','5800':'BS-5800'
@@ -496,7 +403,7 @@ export default async function handler(req, res) {
             }
 
             // ============================================
-            // 🆕 VALIDACIÓN DE JUGADOR (API Central One)
+            // 🆕 VALIDACIÓN DE JUGADOR (API Central One) - CON DEBUG
             // ============================================
             if (accion === 'verificar_jugador') {
                 const { juego, id_jugador, zona_id } = req.query;
@@ -524,20 +431,9 @@ export default async function handler(req, res) {
 
                 if (!productId) return res.status(400).json({ error: 'No se encontró un product_id válido para este juego.' });
 
-                // 🔥 CONSTRUIR EL TARGET PAYLOAD SEGÚN EL JUEGO
-                const targetPayload = {};
-                
-                // Agregamos aquí todos los juegos que usan game_user_id
-                const juegosConGameUserId = ['FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'];
-                
-                if (juegosConGameUserId.includes(juegoUpper)) {
-                    targetPayload.game_user_id = String(id_jugador);
-                } else if (juegoUpper === 'MOBILE LEGENDS') {
-                    targetPayload.player_id = String(id_jugador);
+                const targetPayload = { player_id: String(id_jugador) };
+                if (juegoUpper === 'MOBILE LEGENDS') {
                     targetPayload.server = zona_id || '1';
-                } else {
-                    // El resto (incluyendo LATAM) usa player_id
-                    targetPayload.player_id = String(id_jugador);
                 }
 
                 try {
@@ -555,18 +451,27 @@ export default async function handler(req, res) {
 
                     const data = await respuesta.json();
                     
+                    // 🔥 DEBUG: Si falla, que nos diga exactamente qué dijo Central One
+                    if (!respuesta.ok || data.status !== 'valid') {
+                        return res.status(200).json({ 
+                            ok: false, 
+                            valido: false, 
+                            debug_central_one: data, // Aquí veremos el error real
+                            status_http: respuesta.status 
+                        });
+                    }
+                    
                     return res.status(200).json({
                         ok: true,
-                        valido: data.status === 'valid',
+                        valido: true,
                         status: data.status,
                         nickname: data.player?.name || null,
-                        reason: data.reason || null,
-                        mensaje: data.status === 'valid' ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
+                        mensaje: 'ID verificado'
                     });
 
                 } catch (error) {
                     console.error('❌ Error validando jugador:', error);
-                    return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión con Central One' });
+                    return res.status(200).json({ ok: false, valido: false, error_red: error.message });
                 }
             }
 
@@ -617,8 +522,8 @@ export default async function handler(req, res) {
             }
 
             return res.status(200).json({
-                mensaje: '✅ API Central One v4.1 funcionando',
-                version: '4.1',
+                mensaje: '✅ API Central One v3.9.1 funcionando (MODO DEBUG)',
+                version: '3.9.1',
                 acciones: ['catalogo', 'debug-catalogo', 'juegos', 'verificar', 'saldo', 'verificar_jugador', 'disponibilidad'],
                 total_productos: Object.keys(PRODUCTOS_CONFIG).length
             });
@@ -659,11 +564,7 @@ export default async function handler(req, res) {
                     note: `${juegoUpper} - ${inputRequerido} - Paquete: ${paquete}`
                 };
 
-                const juegosConGameUserId = ['FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'];
-                
-                if (juegosConGameUserId.includes(juegoUpper)) {
-                    payload.items[0].target_payload = { game_user_id: String(id_jugador) };
-                } else if (juegoUpper === 'MOBILE LEGENDS') {
+                if (juegoUpper === 'MOBILE LEGENDS') {
                     payload.items[0].target_payload = { player_id: id_jugador, server: zona_id || servidor || '1' };
                 } else if (config.tipo === 'giftcard' && config.input.includes('email')) {
                     payload.items[0].target_payload = { email: email };
