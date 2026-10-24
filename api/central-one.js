@@ -6,6 +6,7 @@
 // - Consulta de estado (GET /orders)
 // - Webhooks de Central One integrados (order.delivered, order.failed)
 // - Actualización de Firebase y notificaciones
+// - CORRECCIÓN: Validación de ID separada para LATAM (player_id) y BR (game_user_id)
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -538,9 +539,12 @@ export default async function handler(req, res) {
             if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
             let productId = null;
-            if (juegoUpper === 'FREE FIRE') productId = SKU_MAP['FF-110-DIAMONDS'];
-            else if (juegoUpper === 'FREE FIRE BR') productId = SKU_MAP['FF-BR-110'];
-            else {
+            // --- CORRECCIÓN: Asignar el producto correcto según la región ---
+            if (juegoUpper === 'FREE FIRE') {
+                productId = SKU_MAP['FF-110-DIAMONDS']; // Producto de LATAM
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                productId = SKU_MAP['FF-BR-110']; // Producto de BRASIL
+            } else {
                 const primerPaquete = Object.keys(config.paquetes)[0];
                 productId = SKU_MAP[config.paquetes[primerPaquete]];
             }
@@ -548,14 +552,22 @@ export default async function handler(req, res) {
             if (!productId) return res.status(400).json({ error: 'No se encontró product_id válido.' });
 
             const targetPayload = {};
-            const juegosConGameUserId = ['FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'];
             
-            if (juegosConGameUserId.includes(juegoUpper)) {
+            // --- CORRECCIÓN: Distinguir explícitamente LATAM de BRASIL ---
+            if (juegoUpper === 'FREE FIRE') {
+                // LATAM usa player_id
+                targetPayload.player_id = String(id_jugador);
+            } else if (juegoUpper === 'FREE FIRE BR') {
+                // BRASIL usa game_user_id
+                targetPayload.game_user_id = String(id_jugador);
+            } else if (['RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
+                // Estos juegos usan game_user_id
                 targetPayload.game_user_id = String(id_jugador);
             } else if (juegoUpper === 'MOBILE LEGENDS') {
                 targetPayload.player_id = String(id_jugador);
                 targetPayload.server = zona_id || '1';
             } else {
+                // Resto de juegos usan player_id
                 targetPayload.player_id = String(id_jugador);
             }
 
