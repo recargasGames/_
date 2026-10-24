@@ -955,8 +955,14 @@ async function verificarJugadorEnBackend(id) {
         const res = await fetch(`/api/central-one?accion=verificar_jugador&juego=FREE%20FIRE&id_jugador=${encodeURIComponent(id)}`);
         if (!res.ok) return { ok: false, motivo: 'http_' + res.status };
         const data = await res.json();
+        
         if (data.ok && data.valido) {
-            return { ok: true, valido: true, nickname: data.nickname };
+            return { 
+                ok: true, 
+                valido: true, 
+                // Si viene el nombre lo usa, si no, pone "Jugador Verificado"
+                nickname: data.nickname || 'Jugador Verificado' 
+            };
         } else if (data.ok && !data.valido && data.status === 'invalid') {
             return { ok: true, valido: false, motivo: 'El ID no existe en el juego' };
         } else {
@@ -990,11 +996,11 @@ if (inputId) {
             verificandoId = false;
             if (resultado && resultado.ok && resultado.valido === true) {
                 idVerificado = true;
-                nicknameVerificado = resultado.nickname || `ID: ${id}`;
+                nicknameVerificado = resultado.nickname || 'Jugador Verificado';
                 mostrarEstado('', 'valido', nicknameVerificado);
             } else {
                 idVerificado = true;
-                nicknameVerificado = `ID: ${id}`;
+                nicknameVerificado = `Jugador (ID: ${id})`;
                 mostrarEstado(
                     '⚠️ No pudimos verificar este ID. Puedes continuar con la compra, pero revisa bien tus datos: NO se realizan reembolsos.',
                     'advertencia'
