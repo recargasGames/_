@@ -1146,7 +1146,7 @@ function getDatosPedidoActuales() {
     };
 }
 
-// ✅ MENSAJE EXACTO COMO LA FOTO
+// ✅ FORMATO EXACTO DE TELEGRAM (FOTO)
 function notificarAdmin(tipo, datos = {}) {
     const d = getDatosPedidoActuales();
     const emojis = { exito:'🎉',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
@@ -1156,7 +1156,7 @@ function notificarAdmin(tipo, datos = {}) {
     const titulo = titulos[tipo] || tipo.toUpperCase();
     const esc = (txt) => String(txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     
-    // FORMATO EXACTO SOLICITADO
+    // Formato exacto solicitado
     let mensaje = `${emoji} ${titulo} ${datos.numero_pedido || ''}\n\n`;
     mensaje += `🎮 ${esc(d.juego)}\n`;
     mensaje += `📦 ${esc(d.producto)}\n`;
@@ -1304,20 +1304,25 @@ async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
+// 🔥 CORRECCIÓN CONTADOR: Asegura secuencia 0131, 0132...
 async function generarNumeroPedido() {
     try {
         const contadorRef = db.ref('configuracion/contador_pedidos');
         const resultado = await contadorRef.transaction((valorActual) => {
+            // Si el valor actual no es un número (está vacío o corrupto), empezamos en 130
             if (typeof valorActual !== 'number' || isNaN(valorActual)) {
                 return 130;
             }
             return valorActual + 1;
         });
+        
         if (!resultado.committed) throw new Error('No se pudo generar el número');
+        
         const numero = resultado.snapshot.val() || 130;
         return String(numero).padStart(4, '0');
     } catch (error) {
         console.error('Error generando número de pedido:', error);
+        // Si falla Firebase, usamos un fallback pero advertimos
         return String(Date.now()).slice(-4);
     }
 }
