@@ -1012,16 +1012,17 @@ if (inputId) {
             if (inputId.value.trim() !== id) return; // Si el usuario cambió el ID, abortamos
             verificandoId = false;
             
-            // SOLO SI HAY UN NOMBRE VÁLIDO PERMITIMOS CONTINUAR
-            if (resultado && resultado.ok && resultado.valido === true && resultado.nickname) {
+            // SI LA API DICE QUE ES VÁLIDO, PERO NO TRAE NOMBRE (POR FALLA DE ELLOS), DEJAMOS PASAR
+            if (resultado && resultado.ok && resultado.valido === true) {
                 idVerificado = true;
-                nicknameVerificado = resultado.nickname;
+                // Si hay nombre lo usa, si no, pone "Jugador Verificado"
+                nicknameVerificado = resultado.nickname || 'Jugador Verificado';
                 mostrarEstado('', 'valido', nicknameVerificado);
             } else {
                 idVerificado = false;
                 nicknameVerificado = "";
                 mostrarEstado(
-                    '❌ No se pudo verificar el ID con nombre. Revisa que sea correcto y escribe de nuevo para reintentar.', 
+                    '❌ No se pudo verificar el ID. Revisa que sea correcto e intenta de nuevo.', 
                     'error'
                 );
             }
@@ -1061,7 +1062,7 @@ function irAlPago() {
     const id = inputId.value.trim();
     if (!id) { avisar('Escribe tu ID de jugador', 'error'); return; }
     if (verificandoId) { avisar('Espera, estamos verificando tu ID'); return; }
-    if (!idVerificado) { avisar('Debes verificar un ID válido para continuar', 'error'); return; }
+    if (!idVerificado) { avisar('Revisa tu ID: no pudimos verificarlo', 'error'); return; }
 
     localStorage.setItem('id_jugador', id);
     localStorage.setItem('nombre_jugador', nicknameVerificado);
