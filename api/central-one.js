@@ -1,10 +1,10 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.1
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.2
 // ============================================
-// v6.1: CORRECCIÓN TOTAL DE VALIDACIÓN DE JUGADOR
-// - Unificado el target_payload para Free Fire (LATAM y BR usan game_user_id)
-// - Cumpliendo con la nueva documentación (POST /player/validate)
-// - Mantiene la lógica de recargas y webhooks intacta
+// v6.2: VALIDACIÓN UNIFICADA
+// - Free Fire LATAM y BR usan game_user_id (según nueva API Central One)
+// - Recargas con 4 decimales e Idempotencia
+// - Webhooks de Central One integrados
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -533,7 +533,6 @@ export default async function handler(req, res) {
             
             // Según la documentación nueva de Central One, TODOS los juegos (LATAM y BR) 
             // ahora usan el campo game_user_id o player_id según lo que pida el producto.
-            // En Free Fire y los demás juegos nuevos, unificaron a game_user_id.
             if (['FREE FIRE', 'FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
                 targetPayload.game_user_id = String(id_jugador);
             } else if (juegoUpper === 'MOBILE LEGENDS') {
@@ -581,8 +580,8 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.1 funcionando',
-            version: '6.1',
+            mensaje: '✅ API Central One v6.2 funcionando',
+            version: '6.2',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
