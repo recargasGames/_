@@ -1,10 +1,10 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.2
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.3
 // ============================================
-// v6.2: VALIDACIÓN UNIFICADA
-// - Free Fire LATAM y BR usan game_user_id (según nueva API Central One)
-// - Recargas con 4 decimales e Idempotencia
-// - Webhooks de Central One integrados
+// v6.3: VALIDACIÓN UNIFICADA (GAME_USER_ID)
+// - Free Fire LATAM y BR usan game_user_id (según API actual)
+// - Se eliminó player_id para Free Fire (la forma vieja ya no se acepta)
+// - Webhooks, recargas y binance intactos
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -531,8 +531,7 @@ export default async function handler(req, res) {
             // Construimos el payload para validar
             const targetPayload = {};
             
-            // Según la documentación nueva de Central One, TODOS los juegos (LATAM y BR) 
-            // ahora usan el campo game_user_id o player_id según lo que pida el producto.
+            // 🔥 AQUÍ ESTÁ EL TRUCO: Ambos (LATAM y BR) usan game_user_id ahora.
             if (['FREE FIRE', 'FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
                 targetPayload.game_user_id = String(id_jugador);
             } else if (juegoUpper === 'MOBILE LEGENDS') {
@@ -551,7 +550,7 @@ export default async function handler(req, res) {
                 
                 const data = await respuesta.json();
                 
-                // --- CORRECCIÓN CLAVE: Leer el éxito según la documentación nueva ---
+                // Leer la respuesta según la nueva documentación
                 const esValido = data.success === true && data.status === 'valid';
                 
                 return res.status(200).json({
@@ -580,8 +579,8 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.2 funcionando',
-            version: '6.2',
+            mensaje: '✅ API Central One v6.3 funcionando',
+            version: '6.3',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
