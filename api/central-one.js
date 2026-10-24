@@ -1,9 +1,8 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.5
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.6
 // ============================================
-// v6.5: DIAGNÓSTICO AUTOMÁTICO
-// - Si falla la validación, consulta el catálogo en vivo
-// - Prueba automáticamente con game_user_id y player_id
+// v6.6: UNIFICADO TOTAL (LATAM = BR)
+// - Free Fire LATAM y BR usan game_user_id exactamente igual
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -456,6 +455,7 @@ export default async function handler(req, res) {
             if (!config) return res.status(400).json({ error: `Juego no soportado: ${juego}` });
 
             let productId = null;
+            
             if (juegoUpper === 'FREE FIRE') {
                 productId = SKU_MAP['FF-110-DIAMONDS'];
             } else if (juegoUpper === 'FREE FIRE BR') {
@@ -467,54 +467,40 @@ export default async function handler(req, res) {
 
             if (!productId) return res.status(400).json({ error: 'No se encontró product_id válido.' });
 
-            const payloadsAProbar = [];
+            // 🔥 AQUÍ ESTÁ LA MAGIA: Tratamos a LATAM EXACTAMENTE igual que a BR.
+            const targetPayload = {};
             
-            if (juegoUpper === 'FREE FIRE') {
-                payloadsAProbar.push({ game_user_id: String(id_jugador) });
-                payloadsAProbar.push({ player_id: String(id_jugador) });
-            } else if (juegoUpper === 'FREE FIRE BR') {
-                payloadsAProbar.push({ game_user_id: String(id_jugador) });
+            if (['FREE FIRE', 'FREE FIRE BR', 'RACING MASTER', 'SUPER SUS', 'MARVEL RIVALS', 'HONOR OF KINGS'].includes(juegoUpper)) {
+                targetPayload.game_user_id = String(id_jugador);
             } else if (juegoUpper === 'MOBILE LEGENDS') {
-                payloadsAProbar.push({ player_id: String(id_jugador), server: zona_id || '1' });
+                targetPayload.player_id = String(id_jugador);
+                targetPayload.server = zona_id || '1';
             } else {
-                payloadsAProbar.push({ player_id: String(id_jugador) });
+                targetPayload.player_id = String(id_jugador);
             }
 
-            let ultimoError = null;
-            for (const targetPayload of payloadsAProbar) {
-                try {
-                    const respuesta = await fetch(`${BASE_URL}/player/validate`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ product_id: productId, target_payload: targetPayload })
-                    });
-                    
-                    const data = await respuesta.json();
-                    const esValido = data.success === true && data.status === 'valid';
-                    
-                    if (respuesta.ok) {
-                        return res.status(200).json({
-                            ok: data.success === true, 
-                            valido: esValido, 
-                            status: data.status,
-                            nickname: data.player?.name || null, 
-                            reason: data.reason || null,
-                            mensaje: esValido ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
-                        });
-                    }
-                    ultimoError = data;
-                } catch (e) {
-                    ultimoError = { error: e.message };
-                }
+            try {
+                const respuesta = await fetch(`${BASE_URL}/player/validate`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, target_payload: targetPayload })
+                });
+                
+                const data = await respuesta.json();
+                
+                const esValido = data.success === true && data.status === 'valid';
+                
+                return res.status(200).json({
+                    ok: data.success === true, 
+                    valido: esValido, 
+                    status: data.status,
+                    nickname: data.player?.name || null, 
+                    reason: data.reason || null,
+                    mensaje: esValido ? 'ID verificado' : (data.status === 'invalid' ? 'El ID no existe' : 'No se pudo verificar')
+                });
+            } catch (error) {
+                return res.status(200).json({ ok: false, valido: false, status: 'unverified', mensaje: 'Error de conexión' });
             }
-
-            return res.status(200).json({ 
-                ok: false, 
-                valido: false, 
-                status: 'unverified', 
-                mensaje: 'No se pudo verificar',
-                diagnostico: ultimoError
-            });
         }
 
         if (accion === 'estado_pedido') {
@@ -530,8 +516,8 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.5 funcionando',
-            version: '6.5',
+            mensaje: '✅ API Central One v6.6 funcionando',
+            version: '6.6',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
