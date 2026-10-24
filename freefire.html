@@ -1151,7 +1151,7 @@ function getDatosPedidoActuales() {
     };
 }
 
-// ✅ MENSAJE 2: Corto, directo, sin repetir datos del jugador
+// ✅ MENSAJE ÚNICO Y CORTO PARA TELEGRAM
 function notificarAdmin(tipo, datos = {}) {
     const d = getDatosPedidoActuales();
     const emojis = { exito:'✅',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
@@ -1165,16 +1165,15 @@ function notificarAdmin(tipo, datos = {}) {
     const emoji = emojis[tipo] || 'ℹ️';
     const esc = (txt) => String(txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     
+    // Formato exacto solicitado
     let mensaje = `${emoji} Pedido ${datos.numero_pedido || '#----'} →\n`;
     mensaje += `<b>${titulo}</b>\n`;
-    mensaje += `📦 ${esc(d.juego)} - ${esc(d.producto)}\n`;
-    mensaje += `💰 $${precioUsdFinal.toFixed(2)} USD\n\n`;
-    
-    if (datos.referencia_bancaria) mensaje += `🔢 Ref. Bancaria: <code>${esc(datos.referencia_bancaria)}</code>\n`;
-    if (datos.id_central_one) mensaje += `🔗 ID Central One: <code>${esc(datos.id_central_one)}</code>\n`;
+    mensaje += `💰 $${precioUsdFinal.toFixed(2)} USD\n`;
+    mensaje += `📦 ${esc(d.producto)}\n`;
+    mensaje += `🆔 ID: <code>${esc(d.idJugador)}</code>\n`;
     
     if (d.whatsapp) mensaje += `📱 WhatsApp: ${esc(d.whatsapp)}\n`;
-    if (datos.mensaje_extra) mensaje += `⚠️ Nota: ${esc(datos.mensaje_extra)}\n`;
+    if (datos.mensaje_extra) mensaje += `⚠️ ${esc(datos.mensaje_extra)}\n`;
     
     mensaje += `\n<i>${new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' })}</i>`;
     
