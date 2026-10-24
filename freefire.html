@@ -950,39 +950,26 @@ function mostrarEstado(mensaje, tipo, nombre) {
         statusDiv.textContent = mensaje;
     }
 }
-
-// 🔥 FUNCIÓN CLAVE: Intenta verificar el ID hasta 3 veces si falla o no trae nombre.
 async function verificarJugadorEnBackend(id) {
-    let intentos = 0;
-    const maxIntentos = 3;
-    
-    while (intentos < maxIntentos) {
-        intentos++;
-        try {
-            const res = await fetch(`/api/central-one?accion=verificar_jugador&juego=FREE%20FIRE&id_jugador=${encodeURIComponent(id)}`);
-            if (res.ok) {
-                const data = await res.json();
-                // Si la API dice que es válido y trae un nombre, lo devolvemos de inmediato
-                if (data.ok && data.valido && data.nickname) {
-                    return { ok: true, valido: true, nickname: data.nickname };
-                }
-                // Si dice que el ID no existe, no reintentamos
-                if (data.ok && !data.valido && data.status === 'invalid') {
-                    return { ok: true, valido: false, motivo: 'El ID no existe en el juego' };
-                }
-            }
-        } catch (e) {
-            console.warn(`Intento ${intentos} fallido por red`);
-        }
+    try {
+        const res = await fetch(`/api/central-one?accion=verificar_jugador&juego=FREE%20FIRE&id_jugador=${encodeURIComponent(id)}`);
+        if (!res.ok) return { ok: false, motivo: 'http_' + res.status };
+        const data = await res.json();
         
-        // Si falló (o no trajo nickname), esperamos 1 segundo antes de reintentar
-        if (intentos < maxIntentos) {
-            await new Promise(r => setTimeout(r, 1000));
+        if (data.ok && data.valido) {
+            return { 
+                ok: true, 
+                valido: true, 
+                nickname: data.nickname || 'Jugador Verificado' 
+            };
+        } else if (data.ok && !data.valido && data.status === 'invalid') {
+            return { ok: true, valido: false, motivo: 'El ID no existe en el juego' };
+        } else {
+            return { ok: false, motivo: data.mensaje || 'No se pudo verificar' };
         }
+    } catch (e) {
+        return { ok: false, motivo: 'network' };
     }
-    
-    // Si terminó los 3 intentos y no obtuvo nombre, retorna error
-    return { ok: false, motivo: 'No se pudo verificar el nombre. Intenta de nuevo.' };
 }
 
 let timeoutId = null;
@@ -997,32 +984,25 @@ if (inputId) {
         verificandoId = false;
         nicknameVerificado = "";
         actualizarBotonContinuar();
-        
         if (id.length === 0) { statusDiv.className = 'id-status'; statusDiv.style.display = 'none'; return; }
         statusDiv.style.display = '';
         if (id.length < 5) { mostrarEstado('Escribe al menos 5 dígitos', 'error'); return; }
-        
         timeoutId = setTimeout(async () => {
             verificandoId = true;
             mostrarEstado('Verificando ID...', 'verificando');
-            
-            // Llamamos a la función con reintentos
             const resultado = await verificarJugadorEnBackend(id);
-            
-            if (inputId.value.trim() !== id) return; // Si el usuario cambió el ID, abortamos
+            if (inputId.value.trim() !== id) return;
             verificandoId = false;
-            
-            // SOLO SI HAY UN NOMBRE VÁLIDO PERMITIMOS CONTINUAR
-            if (resultado && resultado.ok && resultado.valido === true && resultado.nickname) {
+            if (resultado && resultado.ok && resultado.valido === true) {
                 idVerificado = true;
-                nicknameVerificado = resultado.nickname;
+                nicknameVerificado = resultado.nickname || 'Jugador Verificado';
                 mostrarEstado('', 'valido', nicknameVerificado);
             } else {
-                idVerificado = false;
-                nicknameVerificado = "";
+                idVerificado = true;
+                nicknameVerificado = `Jugador (ID: ${id})`;
                 mostrarEstado(
-                    '❌ No se pudo verificar el ID con nombre. Revisa que sea correcto y escribe de nuevo para reintentar.', 
-                    'error'
+                    '⚠️ No pudimos verificar este ID. Puedes continuar con la compra, pero revisa bien tus datos: NO se realizan reembolsos.',
+                    'advertencia'
                 );
             }
             actualizarBotonContinuar();
@@ -1061,7 +1041,7 @@ function irAlPago() {
     const id = inputId.value.trim();
     if (!id) { avisar('Escribe tu ID de jugador', 'error'); return; }
     if (verificandoId) { avisar('Espera, estamos verificando tu ID'); return; }
-    if (!idVerificado) { avisar('Debes verificar un ID válido para continuar', 'error'); return; }
+    if (!idVerificado) { avisar('Revisa tu ID: no pudimos verificarlo', 'error'); return; }
 
     localStorage.setItem('id_jugador', id);
     localStorage.setItem('nombre_jugador', nicknameVerificado);
