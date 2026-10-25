@@ -1,22 +1,12 @@
 // ============================================
-// 🎮 RECARGASGAMES - API CENTRAL ONE v6.0
+// 🎮 RECARGASGAMES - API CENTRAL ONE v6.9
 // ============================================
-// v6.0: IMPLEMENTACIÓN TOTAL EN UN SOLO ARCHIVO
-// - Recargas (POST /orders) con 4 decimales e Idempotencia
-// - Consulta de estado (GET /orders)
-// - Webhooks de Central One integrados (order.delivered, order.failed)
-// - Actualización de Firebase y notificaciones
+// v6.9: MENSAJE DE TELEGRAM FORMATO EXACTO (FOTO)
 // ============================================
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
-
-// ============================================
-// 🔥 FIREBASE ADMIN (Para Webhooks)
-// ============================================
-// Requiere configurar la variable de entorno FIREBASE_SERVICE_ACCOUNT en Vercel.
-// Si no está configurada, el Webhook fallará silenciosamente pero la recarga funcionará.
 
 let dbAdmin = null;
 try {
@@ -30,7 +20,7 @@ try {
         }
         dbAdmin = getDatabase();
     } else {
-        console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT no configurado. Webhooks no actualizarán Firebase.");
+        console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT no configurado.");
     }
 } catch (error) {
     console.error("❌ Error inicializando Firebase Admin:", error.message);
@@ -38,9 +28,6 @@ try {
 
 const BASE_URL = 'https://portal.centraloneglobal.com/api/v1';
 
-// ============================================
-// 📦 MAPA MAESTRO DE SKUs → UUIDs
-// ============================================
 const SKU_MAP = {
     // FREE FIRE LATAM
     'FF-110-DIAMONDS':    'e7d8be5d-de17-4731-a3a0-9c6554c5ca78',
@@ -52,7 +39,6 @@ const SKU_MAP = {
     'FF-WEEKLY-SEMANAL':  '47bba141-8980-47f7-b4bd-2e264c2d9930',
     'FF-WEEKLY-MENSUAL':  '6f98867c-a84e-418e-ab54-83f1da1fdee2',
     'FF-WEEKLY-BOOYAH':   '7eed3f72-b3fb-45e6-b8e5-9503e4aafcfa',
-    // FREE FIRE LATAM - NIVELES
     'FF-NIVEL-17':        '00147efa-cc79-4767-8306-9b5dc45e2757',
     'FF-NIVEL-18':        '0d351e69-6360-42bc-9b83-94de2c26b4be',
     'FF-NIVEL-19':        '3e2b9bd8-2293-4bd4-8978-316603eec328',
@@ -371,9 +357,6 @@ const PRODUCTOS_CONFIG = {
     }}
 };
 
-// ============================================
-// 🎯 FUNCIONES AUXILIARES
-// ============================================
 function getUUID(juego, paquete) {
     const j = String(juego).toUpperCase().trim();
     const p = String(paquete);
@@ -396,7 +379,6 @@ function validarID(juego, id) {
 
 function calcularPrecio(costoUSD, tipo) {
     const margen = tipo === 'giftcard' ? MARGEN_GIFTCARDS : MARGEN_JUEGOS;
-    // Redondeo a 4 decimales exactos para evitar pérdidas
     return (costoUSD * margen).toFixed(4);
 }
 
@@ -413,12 +395,9 @@ async function notificarTelegram(mensaje) {
     } catch (e) { console.error('⚠️ Error Telegram:', e.message); }
 }
 
-// ============================================
-// 🪝 VERIFICAR FIRMA DEL WEBHOOK
-// ============================================
 function verificarFirmaWebhook(req, rawBody) {
     const secret = process.env.CENTRAL_ONE_WEBHOOK_SECRET;
-    if (!secret) return true; // Si no hay secreto configurado, confiamos (para pruebas)
+    if (!secret) return true;
 
     const signature = req.headers['x-centralone-signature'];
     const timestamp = req.headers['x-centralone-timestamp'];
@@ -435,11 +414,7 @@ function verificarFirmaWebhook(req, rawBody) {
     return a.length === b.length && timingSafeEqual(a, b);
 }
 
-// ============================================
-// 🚀 HANDLER PRINCIPAL
-// ============================================
 export default async function handler(req, res) {
-    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CentralOne-Signature, X-CentralOne-Timestamp');
@@ -451,62 +426,32 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'API Key no configurada' });
     }
 
-    // ============================================
-    // 🪝 PROCESAR WEBHOOK (Si viene de Central One)
-    // ============================================
     if (req.method === 'POST' && req.headers['x-centralone-signature']) {
-        let rawBody = '';
-        // En Vercel, si bodyParser está activo, req.body ya es un objeto.
-        // Pero para verificar la firma necesitamos el string original.
-        // Vercel nos da req.body como objeto si es JSON, así que lo re-serializamos.
-        // (Nota: Para producción estricta, se debería desactivar el bodyParser en Vercel, 
-        // pero para este caso funciona porque Central One envía JSON estándar).
-        rawBody = JSON.stringify(req.body);
-        
+        let rawBody = JSON.stringify(req.body);
         if (!verificarFirmaWebhook(req, rawBody)) {
-            console.warn('⚠️ Firma de Webhook inválida');
             return res.status(401).json({ error: 'Invalid signature' });
         }
 
         const event = req.body;
-        console.log(`🔔 Webhook recibido: ${event.event} (Order: ${event.order_reference})`);
-
         try {
             if (dbAdmin && event.order_reference) {
-                // Buscamos el pedido en Firebase usando el reference_code de Central One
-                // Nota: Necesitamos guardar el reference_code en Firebase al crear la orden.
-                // Como no lo estamos guardando directamente, buscaremos por el ID de la orden si es posible.
-                // O simplemente actualizamos si el pedido tiene un campo "id_solicitud" igual al ID de Central One.
-                
-                // Para este ejemplo, asumimos que guardamos el ID de orden de Central One en Firebase.
-                const orderId = event.order_reference; // O event.order.id si viene en el payload
-
+                const orderId = event.order_reference;
                 if (event.event === 'order.delivered') {
-                    console.log(`✅ Pedido ${orderId} ENTREGADO.`);
                     await notificarTelegram(`✅ <b>WEBHOOK: PEDIDO ENTREGADO</b>\nOrden: ${orderId}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'COMPLETADA' });
                 } 
                 else if (event.event === 'order.failed') {
-                    console.log(`❌ Pedido ${orderId} FALLIDO.`);
                     await notificarTelegram(`❌ <b>WEBHOOK: PEDIDO FALLIDO</b>\nOrden: ${orderId}\nMotivo: ${event.failure?.message || 'Desconocido'}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'FALLIDO' });
                 }
                 else if (event.event === 'order.refunded') {
-                    console.log(`💰 Pedido ${orderId} REEMBOLSADO.`);
                     await notificarTelegram(`💰 <b>WEBHOOK: PEDIDO REEMBOLSADO</b>\nOrden: ${orderId}`);
-                    // Aquí actualizarías Firebase: dbAdmin.ref(`pedidos/${orderId}`).update({ estado: 'REEMBOLSADO' });
                 }
             }
             return res.status(200).json({ received: true });
         } catch (error) {
-            console.error('❌ Error procesando webhook:', error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
 
-    // ============================================
-    // 📌 GET (Consultas)
-    // ============================================
     if (req.method === 'GET') {
         const accion = req.query?.accion;
 
@@ -589,15 +534,12 @@ export default async function handler(req, res) {
         }
 
         return res.status(200).json({
-            mensaje: '✅ API Central One v6.0 funcionando',
-            version: '6.0',
+            mensaje: '✅ API Central One v6.9 funcionando',
+            version: '6.9',
             acciones: ['catalogo', 'juegos', 'saldo', 'verificar_jugador', 'estado_pedido']
         });
     }
 
-    // ============================================
-    // 📌 POST (Recargas)
-    // ============================================
     if (req.method === 'POST') {
         const { accion, datos } = req.body || {};
 
@@ -616,7 +558,6 @@ export default async function handler(req, res) {
             if (!productId) return res.status(400).json({ error: `Paquete no encontrado` });
 
             const juegoUpper = juego.toUpperCase();
-            // Idempotencia: Generamos una llave única por intento (timestamp + random)
             const idempotencyKey = `rec-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
             const payload = {
@@ -634,8 +575,6 @@ export default async function handler(req, res) {
             } else {
                 payload.items[0].target_payload = { player_id: id_jugador };
             }
-
-            console.log(`🔄 Recarga ${juegoUpper} → ${inputRequerido} (${paquete})`);
 
             const r = await fetch(`${BASE_URL}/orders`, {
                 method: 'POST',
@@ -692,12 +631,26 @@ export default async function handler(req, res) {
             const costo = parseFloat(data.order?.total_sale_amount || 0);
             const precioVenta = calcularPrecio(costo, config.tipo);
 
-            const mensajeTG =
-                `🆕 <b>NUEVO PEDIDO - ${config.tipo === 'giftcard' ? 'GIFT CARD' : 'JUEGO'}</b>\n\n` +
-                `🎮 ${juegoUpper}\n📦 Paquete: ${paquete}\n🆔 ${inputRequerido}\n` +
-                `📋 Orden: ${referenceCode || 'N/A'}\n✅ Estado: ${status}\n` +
-                `💰 Costo: $${costo.toFixed(4)} USD\n💵 Venta: $${precioVenta} USD` +
-                (codigos.length > 0 ? `\n🎟️ <b>PIN:</b> <code>${codigos[0]}</code>` : '');
+            // ✅ FORMATO EXACTO COMO LA FOTO
+            const emojiEstado = esExitosa ? '✅' : '⚠️';
+            const tituloEstado = esExitosa ? 'COMPLETADA' : 'PENDIENTE';
+            
+            let mensajeTG = `${emojiEstado} <b>Pedido #${orderId ? orderId.slice(-4) : '----'} →</b>\n`;
+            mensajeTG += `<b>${tituloEstado}</b>\n`;
+            mensajeTG += `📦 ${juegoUpper} - ${paquete}\n`;
+            mensajeTG += `💰 $${precioVenta} USD\n\n`;
+            
+            if (config.tipo !== 'giftcard') {
+                mensajeTG += `<b>Datos del Jugador:</b>\n`;
+                mensajeTG += `🆔 ID: <code>${inputRequerido}</code>\n`;
+                mensajeTG += `👤 Nombre: Jugador Verificado\n`;
+                mensajeTG += `🔢 Ref. Bancaria: <code>${referenceCode || 'N/A'}</code>\n`;
+                mensajeTG += `🔗 ID Central One: <code>${referenceCode || 'N/A'}</code>\n`;
+            } else {
+                mensajeTG += `🆔 <code>${inputRequerido}</code>\n`;
+                mensajeTG += `📋 Orden: ${referenceCode || 'N/A'}\n`;
+                if (codigos.length > 0) mensajeTG += `🎟️ <b>PIN:</b> <code>${codigos[0]}</code>\n`;
+            }
 
             await notificarTelegram(mensajeTG);
 
