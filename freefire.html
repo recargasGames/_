@@ -957,11 +957,7 @@ async function verificarJugadorEnBackend(id) {
         const data = await res.json();
         
         if (data.ok && data.valido) {
-            return { 
-                ok: true, 
-                valido: true, 
-                nickname: data.nickname || 'Jugador Verificado' 
-            };
+            return { ok: true, valido: true, nickname: data.nickname || 'Jugador Verificado' };
         } else if (data.ok && !data.valido && data.status === 'invalid') {
             return { ok: true, valido: false, motivo: 'El ID no existe en el juego' };
         } else {
@@ -1150,35 +1146,23 @@ function getDatosPedidoActuales() {
     };
 }
 
+// ✅ FORMATO EXACTO DE TELEGRAM (FOTO)
 function notificarAdmin(tipo, datos = {}) {
     const d = getDatosPedidoActuales();
-    const emojis = { exito:'✅',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
-    
-    let titulo = "COMPLETADA";
-    if (tipo === 'falso') titulo = "NO ENCONTRADO";
-    if (tipo === 'duplicado') titulo = "REFERENCIA USADA";
-    if (tipo === 'error') titulo = "ERROR";
-    if (tipo === 'codigo_test') titulo = "TEST";
+    const emojis = { exito:'🎉',falso:'⚠️',duplicado:'🚨',cupon_usado:'🎁',error:'❌',manual:'🛠️',codigo_test:'🎮',binance:'🟡' };
+    const titulos = { exito:'EXITOSO',falso:'NO ENCONTRADO',duplicado:'REFERENCIA USADA',cupon_usado:'CUPÓN USADO',error:'ERROR',manual:'MANUAL',codigo_test:'TEST',binance:'PAGO BINANCE' };
     
     const emoji = emojis[tipo] || 'ℹ️';
+    const titulo = titulos[tipo] || tipo.toUpperCase();
     const esc = (txt) => String(txt || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     
-    let mensaje = `${emoji} Pedido ${datos.numero_pedido || '#----'} →\n`;
-    mensaje += `<b>${titulo}</b>\n`;
-    mensaje += `📦 ${esc(d.juego)} - ${esc(d.producto)}\n`;
-    mensaje += `💰 $${precioUsdFinal.toFixed(2)} USD\n\n`;
-    
-    mensaje += `<b>Datos del Jugador:</b>\n`;
-    mensaje += `🆔 ID: <code>${esc(d.idJugador)}</code>\n`;
-    mensaje += `👤 Nombre: ${esc(d.nombreJugador)}\n`;
-    
-    if (datos.referencia_bancaria) mensaje += `🔢 Ref. Bancaria: <code>${esc(datos.referencia_bancaria)}</code>\n`;
-    if (datos.id_central_one) mensaje += `🔗 ID Central One: <code>${esc(datos.id_central_one)}</code>\n`;
-    
-    if (d.whatsapp) mensaje += `📱 WhatsApp: ${esc(d.whatsapp)}\n`;
-    if (datos.mensaje_extra) mensaje += `⚠️ Nota: ${esc(datos.mensaje_extra)}\n`;
-    
-    mensaje += `\n<i>${new Date().toLocaleString('es-VE', { dateStyle: 'short', timeStyle: 'short' })}</i>`;
+    // Formato exacto solicitado
+    let mensaje = `${emoji} ${titulo} ${datos.numero_pedido || ''}\n\n`;
+    mensaje += `🎮 ${esc(d.juego)}\n`;
+    mensaje += `📦 ${esc(d.producto)}\n`;
+    mensaje += `🆔 ${esc(d.idJugador)}\n`;
+    mensaje += `💰 $${precioUsdFinal.toFixed(2)} · ${precioBsFinal} Bs\n`;
+    mensaje += `🔢 ${esc(datos.referencia || datos.referencia_bancaria || '')}\n`;
     
     enviarTelegram(mensaje);
 }
@@ -1320,20 +1304,25 @@ async function marcarCodigoTESTComoUsado(codigo, numeroPedido) {
     } catch (e) { return false; }
 }
 
+// 🔥 CORRECCIÓN CONTADOR: Asegura secuencia 0131, 0132...
 async function generarNumeroPedido() {
     try {
         const contadorRef = db.ref('configuracion/contador_pedidos');
         const resultado = await contadorRef.transaction((valorActual) => {
+            // Si el valor actual no es un número (está vacío o corrupto), empezamos en 130
             if (typeof valorActual !== 'number' || isNaN(valorActual)) {
                 return 130;
             }
             return valorActual + 1;
         });
+        
         if (!resultado.committed) throw new Error('No se pudo generar el número');
+        
         const numero = resultado.snapshot.val() || 130;
         return String(numero).padStart(4, '0');
     } catch (error) {
         console.error('Error generando número de pedido:', error);
+        // Si falla Firebase, usamos un fallback pero advertimos
         return String(Date.now()).slice(-4);
     }
 }
