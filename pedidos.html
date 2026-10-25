@@ -32,16 +32,9 @@
       --radius: 18px;
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    html {
-      min-height: 100%;
-      scroll-behavior: smooth;
-      background: var(--bg);
-    }
+    html { min-height: 100%; scroll-behavior: smooth; background: var(--bg); }
 
     body {
       margin: 0;
@@ -57,1072 +50,356 @@
       overflow-x: hidden;
     }
 
-    button,
-    input {
-      font: inherit;
-    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-    button {
-      cursor: pointer;
+    .ambient { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: -1; }
+    .ambient::before, .ambient::after {
+      content: ""; position: absolute; width: 240px; height: 240px; border-radius: 50%;
+      filter: blur(90px); opacity: .15; animation: floatGlow 12s ease-in-out infinite alternate;
     }
-
-    button:focus-visible,
-    input:focus-visible {
-      outline: 2px solid var(--cyan);
-      outline-offset: 3px;
-    }
-
-    .ambient {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: -1;
-    }
-
-    .ambient::before,
-    .ambient::after {
-      content: "";
-      position: absolute;
-      width: 240px;
-      height: 240px;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: .15;
-      animation: floatGlow 12s ease-in-out infinite alternate;
-    }
-
-    .ambient::before {
-      top: 18%;
-      left: -140px;
-      background: var(--blue);
-    }
-
-    .ambient::after {
-      top: 52%;
-      right: -150px;
-      background: var(--gold);
-      animation-delay: -5s;
-    }
-
-    @keyframes floatGlow {
-      from { transform: translateY(-20px) scale(.9); }
-      to { transform: translateY(45px) scale(1.15); }
-    }
+    .ambient::before { top: 18%; left: -140px; background: var(--blue); }
+    .ambient::after { top: 52%; right: -150px; background: var(--gold); animation-delay: -5s; }
+    @keyframes floatGlow { from { transform: translateY(-20px) scale(.9); } to { transform: translateY(45px) scale(1.15); } }
 
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      height: 62px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 17px;
-      background: rgba(5, 7, 13, .88);
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(20px);
+      position: sticky; top: 0; z-index: 50; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 17px; background: rgba(5, 7, 13, .88);
+      border-bottom: 1px solid var(--border); backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      color: var(--text);
-      text-decoration: none;
-    }
-
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); text-decoration: none; }
     .brand-logo {
-      width: 37px;
-      height: 37px;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      border-radius: 12px;
+      width: 37px; height: 37px; flex-shrink: 0; display: grid; place-items: center;
+      overflow: hidden; border-radius: 12px;
       background: linear-gradient(145deg, #172945, #0a101c);
       border: 1px solid rgba(37, 135, 255, .38);
       box-shadow: 0 0 20px rgba(37, 135, 255, .12);
     }
-
-    .brand-logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .brand-copy {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .brand-name {
-      font-size: 13px;
-      line-height: 1;
-      font-weight: 900;
-      letter-spacing: .5px;
-      white-space: nowrap;
-    }
-
-    .brand-name span {
-      color: var(--cyan);
-    }
-
-    .brand-subtitle {
-      font-size: 9px;
-      color: var(--muted);
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-    }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .brand-name { font-size: 13px; line-height: 1; font-weight: 900; letter-spacing: .5px; white-space: nowrap; }
+    .brand-name span { color: var(--cyan); }
+    .brand-subtitle { font-size: 9px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; }
 
     .secure-label {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 7px 9px;
-      color: #a7f7d5;
-      background: rgba(57, 230, 161, .07);
-      border: 1px solid rgba(57, 230, 161, .16);
-      border-radius: 999px;
-      font-size: 10px;
-      font-weight: 700;
-      white-space: nowrap;
+      display: flex; align-items: center; gap: 5px; padding: 7px 9px;
+      color: #a7f7d5; background: rgba(57, 230, 161, .07);
+      border: 1px solid rgba(57, 230, 161, .16); border-radius: 999px;
+      font-size: 10px; font-weight: 700; white-space: nowrap;
     }
+    .secure-label svg { width: 13px; height: 13px; }
 
-    .secure-label svg {
-      width: 13px;
-      height: 13px;
-    }
-
-    .main {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px 15px 30px;
-    }
+    .main { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px 15px 30px; }
 
     .welcome {
-      position: relative;
-      overflow: hidden;
-      padding: 21px 19px;
-      margin-bottom: 19px;
-      border-radius: 22px;
-      border: 1px solid rgba(37, 135, 255, .24);
-      background:
-        linear-gradient(115deg, rgba(15, 32, 57, .96), rgba(8, 13, 24, .97) 72%),
-        var(--surface);
+      position: relative; overflow: hidden; padding: 21px 19px; margin-bottom: 19px;
+      border-radius: 22px; border: 1px solid rgba(37, 135, 255, .24);
+      background: linear-gradient(115deg, rgba(15, 32, 57, .96), rgba(8, 13, 24, .97) 72%), var(--surface);
       box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
     }
-
     .welcome::before {
-      content: "";
-      position: absolute;
-      top: -75px;
-      right: -65px;
-      width: 190px;
-      height: 190px;
-      border: 1px solid rgba(0, 200, 255, .14);
+      content: ""; position: absolute; top: -75px; right: -65px;
+      width: 190px; height: 190px; border: 1px solid rgba(0, 200, 255, .14);
       border-radius: 50%;
-      box-shadow:
-        0 0 0 20px rgba(0, 200, 255, .025),
-        0 0 0 42px rgba(0, 200, 255, .02);
+      box-shadow: 0 0 0 20px rgba(0, 200, 255, .025), 0 0 0 42px rgba(0, 200, 255, .02);
       pointer-events: none;
     }
 
     .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      color: var(--cyan);
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1.6px;
+      display: inline-flex; align-items: center; gap: 7px; color: var(--cyan);
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.6px;
     }
-
-    .eyebrow-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 12px var(--cyan);
-    }
+    .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
 
     .welcome h1 {
-      position: relative;
-      z-index: 1;
-      margin: 10px 0 8px;
-      font-size: clamp(25px, 7vw, 32px);
-      line-height: 1.1;
-      font-weight: 900;
-      letter-spacing: -1.2px;
+      position: relative; z-index: 1; margin: 10px 0 8px;
+      font-size: clamp(25px, 7vw, 32px); line-height: 1.1;
+      font-weight: 900; letter-spacing: -1.2px;
     }
+    .welcome h1 span { color: var(--gold-light); }
+    .welcome p { position: relative; z-index: 1; max-width: 340px; margin: 0; color: #aab7ca; font-size: 12px; line-height: 1.7; }
 
-    .welcome h1 span {
-      color: var(--gold-light);
-    }
-
-    .welcome p {
-      position: relative;
-      z-index: 1;
-      max-width: 340px;
-      margin: 0;
-      color: #aab7ca;
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 9px;
-      margin-bottom: 23px;
-    }
-
+    .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-bottom: 23px; }
     .summary-card {
-      min-width: 0;
-      padding: 14px 10px 12px;
-      border-radius: 15px;
+      min-width: 0; padding: 14px 10px 12px; border-radius: 15px;
       background: linear-gradient(145deg, rgba(17, 27, 44, .96), rgba(9, 14, 24, .98));
       border: 1px solid var(--border);
     }
-
-    .summary-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 5px;
-      margin-bottom: 12px;
-    }
-
+    .summary-top { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 12px; }
     .summary-icon {
-      width: 28px;
-      height: 28px;
-      display: grid;
-      place-items: center;
-      border-radius: 9px;
-      color: var(--cyan);
-      background: rgba(0, 200, 255, .09);
+      width: 28px; height: 28px; display: grid; place-items: center;
+      border-radius: 9px; color: var(--cyan); background: rgba(0, 200, 255, .09);
     }
+    .summary-icon svg { width: 15px; height: 15px; }
+    .summary-card:nth-child(2) .summary-icon { color: var(--green); background: rgba(57, 230, 161, .09); }
+    .summary-card:nth-child(3) .summary-icon { color: var(--gold-light); background: rgba(212, 175, 55, .10); }
+    .summary-number { display: block; font-size: 25px; font-weight: 900; line-height: 1; letter-spacing: -.8px; }
+    .summary-label { display: block; margin-top: 7px; color: var(--muted); font-size: 10px; line-height: 1.4; }
 
-    .summary-icon svg {
-      width: 15px;
-      height: 15px;
-    }
-
-    .summary-card:nth-child(2) .summary-icon {
-      color: var(--green);
-      background: rgba(57, 230, 161, .09);
-    }
-
-    .summary-card:nth-child(3) .summary-icon {
-      color: var(--gold-light);
-      background: rgba(212, 175, 55, .10);
-    }
-
-    .summary-number {
-      display: block;
-      font-size: 25px;
-      font-weight: 900;
-      line-height: 1;
-      letter-spacing: -.8px;
-    }
-
-    .summary-label {
-      display: block;
-      margin-top: 7px;
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.4;
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 13px;
-    }
-
-    .section-heading h2 {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 800;
-      letter-spacing: -.4px;
-    }
-
-    .section-heading p {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 11px;
-    }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+    .section-heading h2 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
+    .section-heading p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
 
     .live-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(57, 230, 161, .16);
-      background: rgba(57, 230, 161, .055);
-      color: #a7f7d5;
-      font-size: 9px;
-      font-weight: 800;
-      white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px;
+      border-radius: 999px; border: 1px solid rgba(57, 230, 161, .16);
+      background: rgba(57, 230, 161, .055); color: #a7f7d5;
+      font-size: 9px; font-weight: 800; white-space: nowrap;
     }
-
     .live-indicator span {
-      width: 6px;
-      height: 6px;
-      background: var(--green);
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(57, 230, 161, .8);
-      animation: pulse 1.8s infinite;
+      width: 6px; height: 6px; background: var(--green); border-radius: 50%;
+      box-shadow: 0 0 10px rgba(57, 230, 161, .8); animation: pulse 1.8s infinite;
     }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .35; }
-    }
-
-    .search-box {
-      position: relative;
-      margin-bottom: 13px;
-    }
-
+    .search-box { position: relative; margin-bottom: 13px; }
     .search-box svg {
-      position: absolute;
-      top: 50%;
-      left: 14px;
-      width: 17px;
-      height: 17px;
-      color: #77869e;
-      transform: translateY(-50%);
-      pointer-events: none;
+      position: absolute; top: 50%; left: 14px; width: 17px; height: 17px;
+      color: #77869e; transform: translateY(-50%); pointer-events: none;
     }
-
     .search-box input {
-      width: 100%;
-      height: 47px;
-      padding: 0 43px;
-      color: var(--text);
-      background: rgba(12, 18, 30, .92);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      font-size: 12px;
-      outline: none;
+      width: 100%; height: 47px; padding: 0 43px; color: var(--text);
+      background: rgba(12, 18, 30, .92); border: 1px solid var(--border);
+      border-radius: 14px; font-size: 12px; outline: none;
       transition: border-color .2s, box-shadow .2s;
     }
-
-    .search-box input::placeholder {
-      color: #6e7b91;
-    }
-
-    .search-box input:focus {
-      border-color: rgba(37, 135, 255, .65);
-      box-shadow: 0 0 0 3px rgba(37, 135, 255, .08);
-    }
+    .search-box input::placeholder { color: #6e7b91; }
+    .search-box input:focus { border-color: rgba(37, 135, 255, .65); box-shadow: 0 0 0 3px rgba(37, 135, 255, .08); }
 
     .clear-search {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      width: 30px;
-      height: 30px;
-      display: none;
-      place-items: center;
-      color: var(--muted);
-      background: transparent;
-      border: 0;
-      transform: translateY(-50%);
+      position: absolute; right: 8px; top: 50%; width: 30px; height: 30px;
+      display: none; place-items: center; color: var(--muted);
+      background: transparent; border: 0; transform: translateY(-50%);
     }
-
-    .clear-search svg {
-      position: static;
-      width: 15px;
-      height: 15px;
-      transform: none;
-    }
+    .clear-search svg { position: static; width: 15px; height: 15px; transform: none; }
 
     .filters {
-      display: flex;
-      gap: 8px;
-      margin: 0 -1px 17px;
-      padding: 1px 1px 4px;
-      overflow-x: auto;
-      scrollbar-width: none;
+      display: flex; gap: 8px; margin: 0 -1px 17px; padding: 1px 1px 4px;
+      overflow-x: auto; scrollbar-width: none;
     }
-
-    .filters::-webkit-scrollbar {
-      display: none;
-    }
+    .filters::-webkit-scrollbar { display: none; }
 
     .filter-btn {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      min-height: 35px;
-      padding: 0 12px;
-      color: #9ba9bd;
-      background: rgba(14, 21, 34, .85);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 700;
-      transition: .2s ease;
+      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px;
+      min-height: 35px; padding: 0 12px; color: #9ba9bd;
+      background: rgba(14, 21, 34, .85); border: 1px solid var(--border);
+      border-radius: 10px; font-size: 10px; font-weight: 700; transition: .2s ease;
     }
-
     .filter-btn.active {
       color: #fff;
       background: linear-gradient(110deg, rgba(37, 135, 255, .22), rgba(0, 200, 255, .09));
       border-color: rgba(37, 135, 255, .5);
       box-shadow: inset 0 0 15px rgba(37, 135, 255, .04);
     }
-
     .filter-count {
-      min-width: 17px;
-      height: 17px;
-      padding: 0 4px;
-      display: inline-grid;
-      place-items: center;
-      color: #9ba9bd;
-      background: rgba(255, 255, 255, .06);
-      border-radius: 6px;
-      font-size: 9px;
+      min-width: 17px; height: 17px; padding: 0 4px; display: inline-grid;
+      place-items: center; color: #9ba9bd; background: rgba(255, 255, 255, .06);
+      border-radius: 6px; font-size: 9px;
     }
+    .filter-btn.active .filter-count { color: var(--cyan); background: rgba(0, 200, 255, .12); }
 
-    .filter-btn.active .filter-count {
-      color: var(--cyan);
-      background: rgba(0, 200, 255, .12);
-    }
-
-    .orders-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin: 0 1px 10px;
-      color: var(--muted);
-      font-size: 10px;
-    }
-
-    .orders-meta strong {
-      color: #dce7f8;
-      font-weight: 700;
-    }
-
+    .orders-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 1px 10px; color: var(--muted); font-size: 10px; }
+    .orders-meta strong { color: #dce7f8; font-weight: 700; }
     .refresh-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 5px 0 5px 8px;
-      color: #a7b8d0;
-      background: transparent;
-      border: 0;
-      font-size: 10px;
-      font-weight: 700;
+      display: inline-flex; align-items: center; gap: 5px; padding: 5px 0 5px 8px;
+      color: #a7b8d0; background: transparent; border: 0; font-size: 10px; font-weight: 700;
     }
+    .refresh-btn svg { width: 13px; height: 13px; }
+    .refresh-btn.loading svg { animation: rotate .7s linear infinite; }
+    @keyframes rotate { to { transform: rotate(360deg); } }
 
-    .refresh-btn svg {
-      width: 13px;
-      height: 13px;
-    }
-
-    .refresh-btn.loading svg {
-      animation: rotate .7s linear infinite;
-    }
-
-    @keyframes rotate {
-      to { transform: rotate(360deg); }
-    }
-
-    .orders-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .orders-list { display: flex; flex-direction: column; gap: 10px; }
 
     .order-card {
-      position: relative;
-      overflow: hidden;
-      padding: 14px 14px 12px;
+      position: relative; overflow: hidden; padding: 14px 14px 12px;
       background: linear-gradient(145deg, rgba(15, 23, 38, .98), rgba(9, 14, 24, .98));
-      border: 1px solid rgba(142, 168, 210, .13);
-      border-radius: 16px;
-      animation: cardEnter .28s ease both;
-      transition: border-color .2s, transform .2s;
+      border: 1px solid rgba(142, 168, 210, .13); border-radius: 16px;
+      animation: cardEnter .28s ease both; transition: border-color .2s, transform .2s;
     }
-
-    .order-card:active {
-      transform: scale(.994);
-    }
-
+    .order-card:active { transform: scale(.994); }
     .order-card::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 15px;
-      bottom: 15px;
-      width: 2px;
-      border-radius: 0 3px 3px 0;
-      background: linear-gradient(180deg, var(--blue), var(--cyan));
-      opacity: .85;
+      content: ""; position: absolute; left: 0; top: 15px; bottom: 15px;
+      width: 2px; border-radius: 0 3px 3px 0;
+      background: linear-gradient(180deg, var(--blue), var(--cyan)); opacity: .85;
     }
+    @keyframes cardEnter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-    @keyframes cardEnter {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .order-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 9px;
-      margin-bottom: 13px;
-    }
-
-    .order-number-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-
+    .order-top { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-bottom: 13px; }
+    .order-number-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .order-symbol {
-      width: 32px;
-      height: 32px;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      color: var(--cyan);
-      background: rgba(37, 135, 255, .11);
-      border: 1px solid rgba(37, 135, 255, .16);
-      border-radius: 10px;
+      width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center;
+      color: var(--cyan); background: rgba(37, 135, 255, .11);
+      border: 1px solid rgba(37, 135, 255, .16); border-radius: 10px;
     }
-
-    .order-symbol svg {
-      width: 17px;
-      height: 17px;
-    }
-
+    .order-symbol svg { width: 17px; height: 17px; }
     .order-number-label {
-      display: block;
-      margin-bottom: 4px;
-      color: #78879f;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: .8px;
-      text-transform: uppercase;
+      display: block; margin-bottom: 4px; color: #78879f; font-size: 9px;
+      font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
     }
-
     .order-number {
-      display: block;
-      overflow: hidden;
-      color: #f4f7ff;
-      font-size: 13px;
-      font-weight: 900;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      display: block; overflow: hidden; color: #f4f7ff; font-size: 13px;
+      font-weight: 900; text-overflow: ellipsis; white-space: nowrap;
     }
-
     .order-status {
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      max-width: 125px;
-      padding: 7px 9px;
-      border-radius: 8px;
-      font-size: 9px;
-      font-weight: 800;
-      line-height: 1.2;
-      text-align: center;
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+      max-width: 125px; padding: 7px 9px; border-radius: 8px;
+      font-size: 9px; font-weight: 800; line-height: 1.2; text-align: center;
     }
+    .order-status::before { content: ""; width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+    .status-success { color: var(--green); background: rgba(57, 230, 161, .09); border: 1px solid rgba(57, 230, 161, .13); }
+    .status-pending { color: var(--yellow); background: rgba(255, 200, 87, .08); border: 1px solid rgba(255, 200, 87, .14); }
+    .status-error { color: var(--red); background: rgba(255, 99, 123, .08); border: 1px solid rgba(255, 99, 123, .14); }
+    .status-neutral { color: #9fb2ce; background: rgba(143, 164, 195, .08); border: 1px solid rgba(143, 164, 195, .13); }
 
-    .order-status::before {
-      content: "";
-      width: 5px;
-      height: 5px;
-      flex-shrink: 0;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    .status-success {
-      color: var(--green);
-      background: rgba(57, 230, 161, .09);
-      border: 1px solid rgba(57, 230, 161, .13);
-    }
-
-    .status-pending {
-      color: var(--yellow);
-      background: rgba(255, 200, 87, .08);
-      border: 1px solid rgba(255, 200, 87, .14);
-    }
-
-    .status-error {
-      color: var(--red);
-      background: rgba(255, 99, 123, .08);
-      border: 1px solid rgba(255, 99, 123, .14);
-    }
-
-    .status-neutral {
-      color: #9fb2ce;
-      background: rgba(143, 164, 195, .08);
-      border: 1px solid rgba(143, 164, 195, .13);
-    }
-
-    .order-divider {
-      height: 1px;
-      margin: 0 0 12px;
-      background: rgba(142, 168, 210, .09);
-    }
-
-    .order-fields {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 13px 12px;
-    }
-
-    .order-field {
-      min-width: 0;
-    }
-
-    .order-field.product-field {
-      grid-column: 1 / -1;
-    }
-
+    .order-divider { height: 1px; margin: 0 0 12px; background: rgba(142, 168, 210, .09); }
+    .order-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 12px; }
+    .order-field { min-width: 0; }
+    .order-field.product-field { grid-column: 1 / -1; }
     .field-label {
-      display: block;
-      margin-bottom: 5px;
-      color: #75839a;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: .6px;
-      text-transform: uppercase;
+      display: block; margin-bottom: 5px; color: #75839a; font-size: 9px;
+      font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
     }
+    .field-value { display: block; overflow-wrap: anywhere; color: #e6edf9; font-size: 11px; font-weight: 700; line-height: 1.5; }
+    .field-value.nickname { color: #d6e8ff; }
+    .field-value.product { color: var(--gold-light); font-size: 12px; font-weight: 800; }
 
-    .field-value {
-      display: block;
-      overflow-wrap: anywhere;
-      color: #e6edf9;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1.5;
-    }
-
-    .field-value.nickname {
-      color: #d6e8ff;
-    }
-
-    .field-value.product {
-      color: var(--gold-light);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .reference-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      min-width: 0;
-    }
-
-    .reference-row .field-value {
-      min-width: 0;
-      flex: 1;
-    }
-
+    .reference-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .reference-row .field-value { min-width: 0; flex: 1; }
     .copy-btn {
-      width: 27px;
-      height: 27px;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      color: #9eb4d1;
-      background: rgba(255, 255, 255, .045);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      width: 27px; height: 27px; flex-shrink: 0; display: grid; place-items: center;
+      color: #9eb4d1; background: rgba(255, 255, 255, .045);
+      border: 1px solid var(--border); border-radius: 8px;
     }
-
-    .copy-btn svg {
-      width: 13px;
-      height: 13px;
-    }
-
-    .copy-btn.copied {
-      color: var(--green);
-      border-color: rgba(57, 230, 161, .3);
-    }
+    .copy-btn svg { width: 13px; height: 13px; }
+    .copy-btn.copied { color: var(--green); border-color: rgba(57, 230, 161, .3); }
 
     .order-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-top: 13px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(142, 168, 210, .08);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-top: 13px; padding-top: 10px; border-top: 1px solid rgba(142, 168, 210, .08);
     }
-
-    .order-date {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      min-width: 0;
-      color: #7f8da3;
-      font-size: 9px;
-    }
-
-    .order-date svg {
-      width: 12px;
-      height: 12px;
-      flex-shrink: 0;
-    }
-
-    .order-date span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
+    .order-date { display: flex; align-items: center; gap: 5px; min-width: 0; color: #7f8da3; font-size: 9px; }
+    .order-date svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .order-date span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .support-link {
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      color: #9adfff;
-      background: transparent;
-      border: 0;
-      font-size: 10px;
-      font-weight: 800;
-      text-decoration: none;
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+      color: #9adfff; background: transparent; border: 0;
+      font-size: 10px; font-weight: 800; text-decoration: none;
     }
+    .support-link svg { width: 13px; height: 13px; }
 
-    .support-link svg {
-      width: 13px;
-      height: 13px;
+    .empty-state, .loading-state, .error-state {
+      padding: 35px 20px; text-align: center; background: rgba(11, 16, 27, .8);
+      border: 1px dashed rgba(142, 168, 210, .18); border-radius: 17px;
     }
-
-    .empty-state,
-    .loading-state,
-    .error-state {
-      padding: 35px 20px;
-      text-align: center;
-      background: rgba(11, 16, 27, .8);
-      border: 1px dashed rgba(142, 168, 210, .18);
-      border-radius: 17px;
-    }
-
     .state-icon {
-      width: 58px;
-      height: 58px;
-      display: grid;
-      place-items: center;
-      margin: 0 auto 14px;
-      color: var(--cyan);
-      background: rgba(37, 135, 255, .09);
-      border: 1px solid rgba(37, 135, 255, .16);
-      border-radius: 18px;
+      width: 58px; height: 58px; display: grid; place-items: center;
+      margin: 0 auto 14px; color: var(--cyan); background: rgba(37, 135, 255, .09);
+      border: 1px solid rgba(37, 135, 255, .16); border-radius: 18px;
     }
-
-    .state-icon svg {
-      width: 26px;
-      height: 26px;
-    }
-
-    .empty-state h3,
-    .loading-state h3,
-    .error-state h3 {
-      margin: 0 0 8px;
-      font-size: 15px;
-      font-weight: 800;
-    }
-
-    .empty-state p,
-    .loading-state p,
-    .error-state p {
-      max-width: 280px;
-      margin: 0 auto;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.7;
-    }
+    .state-icon svg { width: 26px; height: 26px; }
+    .empty-state h3, .loading-state h3, .error-state h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+    .empty-state p, .loading-state p, .error-state p { max-width: 280px; margin: 0 auto; color: var(--muted); font-size: 11px; line-height: 1.7; }
 
     .state-action {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      min-height: 40px;
-      margin-top: 17px;
-      padding: 0 15px;
-      color: #fff;
-      background: linear-gradient(110deg, #1678ee, #087bd6);
-      border: 0;
-      border-radius: 11px;
-      font-size: 11px;
-      font-weight: 800;
-      text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 40px; margin-top: 17px; padding: 0 15px; color: #fff;
+      background: linear-gradient(110deg, #1678ee, #087bd6); border: 0;
+      border-radius: 11px; font-size: 11px; font-weight: 800; text-decoration: none;
       box-shadow: 0 5px 18px rgba(37, 135, 255, .17);
     }
-
-    .state-action svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .error-state .state-icon {
-      color: var(--red);
-      background: rgba(255, 99, 123, .08);
-      border-color: rgba(255, 99, 123, .15);
-    }
+    .state-action svg { width: 14px; height: 14px; }
+    .error-state .state-icon { color: var(--red); background: rgba(255, 99, 123, .08); border-color: rgba(255, 99, 123, .15); }
 
     .loading-spinner {
-      width: 24px;
-      height: 24px;
-      margin: 0 auto 15px;
-      border: 2px solid rgba(37, 135, 255, .15);
-      border-top-color: var(--cyan);
-      border-radius: 50%;
-      animation: rotate .8s linear infinite;
+      width: 24px; height: 24px; margin: 0 auto 15px;
+      border: 2px solid rgba(37, 135, 255, .15); border-top-color: var(--cyan);
+      border-radius: 50%; animation: rotate .8s linear infinite;
     }
 
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 13px;
-      margin-top: 19px;
-    }
-
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 13px; margin-top: 19px; }
     .page-btn {
-      width: 37px;
-      height: 37px;
-      display: grid;
-      place-items: center;
-      color: #b7c6da;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 11px;
+      width: 37px; height: 37px; display: grid; place-items: center;
+      color: #b7c6da; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 11px;
     }
-
-    .page-btn:disabled {
-      opacity: .3;
-      cursor: not-allowed;
-    }
-
-    .page-btn svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .page-info {
-      min-width: 74px;
-      color: #aab8cc;
-      font-size: 10px;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .page-info strong {
-      color: #fff;
-    }
+    .page-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .page-btn svg { width: 16px; height: 16px; }
+    .page-info { min-width: 74px; color: #aab8cc; font-size: 10px; font-weight: 700; text-align: center; }
+    .page-info strong { color: #fff; }
 
     .help-panel {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 25px;
-      padding: 15px;
+      display: flex; align-items: center; gap: 12px; margin-top: 25px; padding: 15px;
       background: linear-gradient(115deg, rgba(17, 32, 48, .9), rgba(10, 16, 27, .9));
-      border: 1px solid rgba(0, 200, 255, .13);
-      border-radius: 16px;
+      border: 1px solid rgba(0, 200, 255, .13); border-radius: 16px;
     }
-
     .help-icon {
-      width: 39px;
-      height: 39px;
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      color: var(--cyan);
-      background: rgba(0, 200, 255, .08);
-      border-radius: 12px;
+      width: 39px; height: 39px; flex-shrink: 0; display: grid; place-items: center;
+      color: var(--cyan); background: rgba(0, 200, 255, .08); border-radius: 12px;
     }
-
-    .help-icon svg {
-      width: 19px;
-      height: 19px;
-    }
-
-    .help-copy {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .help-copy strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .help-copy span {
-      display: block;
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.5;
-    }
-
+    .help-icon svg { width: 19px; height: 19px; }
+    .help-copy { min-width: 0; flex: 1; }
+    .help-copy strong { display: block; margin-bottom: 5px; font-size: 11px; font-weight: 800; }
+    .help-copy span { display: block; color: var(--muted); font-size: 10px; line-height: 1.5; }
     .help-button {
-      min-height: 34px;
-      flex-shrink: 0;
-      padding: 0 10px;
-      color: #b8eaff;
-      background: rgba(0, 200, 255, .07);
-      border: 1px solid rgba(0, 200, 255, .17);
-      border-radius: 9px;
-      font-size: 10px;
-      font-weight: 800;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
+      min-height: 34px; flex-shrink: 0; padding: 0 10px; color: #b8eaff;
+      background: rgba(0, 200, 255, .07); border: 1px solid rgba(0, 200, 255, .17);
+      border-radius: 9px; font-size: 10px; font-weight: 800; text-decoration: none;
+      display: inline-flex; align-items: center;
     }
 
-    .footer-note {
-      margin-top: 19px;
-      color: #526078;
-      font-size: 9px;
-      line-height: 1.7;
-      text-align: center;
-    }
+    .footer-note { margin-top: 19px; color: #526078; font-size: 9px; line-height: 1.7; text-align: center; }
 
     .bottom-nav {
-      position: fixed;
-      z-index: 100;
-      right: 0;
-      bottom: 0;
-      left: 0;
+      position: fixed; z-index: 100; right: 0; bottom: 0; left: 0;
       min-height: var(--nav-height);
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
       padding: 7px 7px calc(7px + env(safe-area-inset-bottom));
       background: rgba(7, 10, 17, .95);
       border-top: 1px solid rgba(142, 168, 210, .15);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
     }
-
     .nav-item {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      color: #68758b;
-      text-decoration: none;
-      font-size: 9px;
-      font-weight: 700;
-      transition: color .2s;
+      min-width: 0; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 5px; color: #68758b; text-decoration: none;
+      font-size: 9px; font-weight: 700; transition: color .2s;
     }
-
     .nav-icon {
-      position: relative;
-      width: 29px;
-      height: 27px;
-      display: grid;
-      place-items: center;
-      border-radius: 9px;
-      transition: background .2s;
+      position: relative; width: 29px; height: 27px; display: grid;
+      place-items: center; border-radius: 9px; transition: background .2s;
     }
-
-    .nav-icon svg {
-      width: 19px;
-      height: 19px;
-      stroke-width: 1.8;
-    }
-
-    .nav-item.active {
-      color: var(--cyan);
-    }
-
-    .nav-item.active .nav-icon {
-      color: var(--cyan);
-      background: rgba(37, 135, 255, .12);
-    }
-
+    .nav-icon svg { width: 19px; height: 19px; stroke-width: 1.8; }
+    .nav-item.active { color: var(--cyan); }
+    .nav-item.active .nav-icon { color: var(--cyan); background: rgba(37, 135, 255, .12); }
     .nav-item.active .nav-icon::before {
-      content: "";
-      position: absolute;
-      top: -7px;
-      width: 17px;
-      height: 2px;
-      border-radius: 3px;
-      background: var(--cyan);
-      box-shadow: 0 0 9px rgba(0, 200, 255, .65);
+      content: ""; position: absolute; top: -7px; width: 17px; height: 2px;
+      border-radius: 3px; background: var(--cyan); box-shadow: 0 0 9px rgba(0, 200, 255, .65);
     }
 
     .toast {
-      position: fixed;
-      z-index: 200;
+      position: fixed; z-index: 200;
       bottom: calc(var(--nav-height) + 18px + env(safe-area-inset-bottom));
-      left: 50%;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      max-width: calc(100% - 32px);
-      padding: 12px 15px;
-      color: #eafaf4;
-      background: #11271f;
-      border: 1px solid rgba(57, 230, 161, .25);
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
-      font-size: 11px;
-      font-weight: 700;
-      opacity: 0;
-      pointer-events: none;
-      transform: translate(-50%, 10px);
-      transition: opacity .2s, transform .2s;
+      left: 50%; display: flex; align-items: center; gap: 8px;
+      max-width: calc(100% - 32px); padding: 12px 15px; color: #eafaf4;
+      background: #11271f; border: 1px solid rgba(57, 230, 161, .25);
+      border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+      font-size: 11px; font-weight: 700; opacity: 0; pointer-events: none;
+      transform: translate(-50%, 10px); transition: opacity .2s, transform .2s;
     }
-
-    .toast.show {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    .toast svg {
-      width: 15px;
-      height: 15px;
-      flex-shrink: 0;
-      color: var(--green);
-    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--green); }
 
     @media (min-width: 520px) {
-      .main {
-        padding-top: 26px;
-      }
-
-      .welcome {
-        padding: 25px 23px;
-      }
-
-      .order-card {
-        padding: 16px;
-      }
+      .main { padding-top: 26px; }
+      .welcome { padding: 25px 23px; }
+      .order-card { padding: 16px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
+      *, *::before, *::after {
         scroll-behavior: auto !important;
         animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
@@ -1360,38 +637,23 @@
     <span id="toastMessage">Copiado correctamente</span>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
-  <script>
-    /*
-      IMPORTANTE:
-      Coloca aquí la misma configuración Firebase que ya utiliza
-      tu archivo original pedidos.html.
-    */
-    const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "free-52119.firebaseapp.com",
-      databaseURL: "https://free-52119-default-rtdb.firebaseio.com",
-      projectId: "free-52119",
-      storageBucket: "free-52119.appspot.com",
-      messagingSenderId: "TU_MESSAGING_SENDER_ID",
-      appId: "TU_APP_ID"
-    };
+  <!-- ===== Script principal como módulo ES ===== -->
+  <script type="module">
+    // ⚠️ Importamos auth y db desde tu archivo de configuración
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { ref, query, orderByChild, equalTo, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const WHATSAPP_SUPPORT = "584228242411";
     const PAGE_SIZE = 5;
 
-    let auth = null;
-    let database = null;
     let currentUser = null;
     let allOrders = [];
     let currentFilter = "todos";
     let currentPage = 1;
     let toastTimer = null;
-    let ordersListener = null;
-    let activeOrdersRef = null;
+    let ordersQueryRef = null;
+    let unsubscribeOrders = null;
     let loadingOrders = true;
 
     const $ = (selector) => document.querySelector(selector);
@@ -1403,254 +665,135 @@
     const refreshButton = $("#refreshButton");
 
     const icons = {
-      package: `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
-          <path d="m3 8 9 5 9-5M3 8v9l9 5 9-5V8M12 13v9"></path>
-        </svg>`,
-      search: `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"></circle>
-          <path d="m16 16 4 4"></path>
-        </svg>`,
-      calendar: `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-          <path d="M16 3v4M8 3v4M3 10h18"></path>
-        </svg>`,
-      copy: `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <rect x="8" y="8" width="13" height="13" rx="2"></rect>
-          <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path>
-        </svg>`,
-      check: `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m5 12 4 4L19 6"></path>
-        </svg>`,
-      whatsapp: `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"></path>
-        </svg>`
+      package: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
+        <path d="m3 8 9 5 9-5M3 8v9l9 5 9-5V8M12 13v9"></path>
+      </svg>`,
+      calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+        <path d="M16 3v4M8 3v4M3 10h18"></path>
+      </svg>`,
+      copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="8" y="8" width="13" height="13" rx="2"></rect>
+        <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path>
+      </svg>`,
+      check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m5 12 4 4L19 6"></path>
+      </svg>`,
+      whatsapp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"></path>
+      </svg>`
     };
 
     function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#039;"
-      })[character]);
+      return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      })[c]);
     }
 
     function firstValue(object, keys, fallback = "") {
       for (const key of keys) {
         const value = object && object[key];
-
-        if (value !== undefined && value !== null && String(value).trim() !== "") {
-          return value;
-        }
+        if (value !== undefined && value !== null && String(value).trim() !== "") return value;
       }
-
       return fallback;
     }
 
     function normalizeText(value) {
       return String(value ?? "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().trim();
     }
 
     function getOrderId(order, key) {
       return String(firstValue(order, [
-        "numeroPedido",
-        "numero_pedido",
-        "orderNumber",
-        "orderId",
-        "pedidoId",
-        "pedido",
-        "numero",
-        "idPedido",
-        "id_pedido",
-        "id"
+        "numeroPedido","numero_pedido","orderNumber","orderId","pedidoId",
+        "pedido","numero","idPedido","id_pedido","id"
       ], key));
     }
 
     function getPlayerId(order) {
       return String(firstValue(order, [
-        "id_jugador",
-        "idJugador",
-        "playerId",
-        "player_id",
-        "uid_jugador",
-        "uidJugador",
-        "idFreeFire",
-        "id_free_fire",
-        "id_usuario",
-        "idUsuario",
-        "gameId",
-        "game_id"
+        "id_jugador","idJugador","playerId","player_id","uid_jugador","uidJugador",
+        "idFreeFire","id_free_fire","id_usuario","idUsuario","gameId","game_id"
       ], "No indicado"));
     }
 
     function getNickname(order) {
       return String(firstValue(order, [
-        "nickname",
-        "nickName",
-        "nick",
-        "nombre_jugador",
-        "nombreJugador",
-        "playerName",
-        "player_name",
-        "nombre_usuario",
-        "nombreUsuario",
-        "usuario_juego",
-        "usuarioJuego"
+        "nickname","nickName","nick","nombre_jugador","nombreJugador",
+        "playerName","player_name","nombre_usuario","nombreUsuario",
+        "usuario_juego","usuarioJuego"
       ], "No indicado"));
     }
 
     function getProduct(order) {
       return String(firstValue(order, [
-        "producto",
-        "product",
-        "nombreProducto",
-        "nombre_producto",
-        "nombre",
-        "descripcion",
-        "description",
-        "paquete",
-        "item"
+        "producto","product","nombreProducto","nombre_producto","nombre",
+        "descripcion","description","paquete","item"
       ], "Producto no especificado"));
     }
 
     function getReference(order) {
       return String(firstValue(order, [
-        "referencia",
-        "reference",
-        "referenciaPago",
-        "referencia_pago",
-        "referencia_pago_movil",
-        "referenciaPagoMovil",
-        "ref",
-        "paymentReference",
-        "transactionReference",
-        "transaccion",
-        "transactionId"
+        "referencia","reference","referenciaPago","referencia_pago",
+        "referencia_pago_movil","referenciaPagoMovil","ref",
+        "paymentReference","transactionReference","transaccion","transactionId"
       ], "No indicada"));
     }
 
     function getStatus(order) {
       return String(firstValue(order, [
-        "estado",
-        "status",
-        "estadoPedido",
-        "estado_pedido",
-        "statusPedido",
-        "status_pedido"
+        "estado","status","estadoPedido","estado_pedido","statusPedido","status_pedido"
       ], "pendiente"));
     }
 
     function classifyStatus(rawStatus) {
       const status = normalizeText(rawStatus);
 
-      if (
-        status.includes("complet") ||
-        status.includes("exitos") ||
-        status.includes("entreg") ||
-        status.includes("finaliz") ||
-        status.includes("aprob") ||
-        status.includes("success") ||
-        status.includes("realizado")
-      ) {
-        return {
-          type: "completado",
-          label: "Completado",
-          css: "status-success"
-        };
+      if (status.includes("complet") || status.includes("exitos") || status.includes("entreg") ||
+          status.includes("finaliz") || status.includes("aprob") || status.includes("success") ||
+          status.includes("realizado")) {
+        return { type: "completado", label: "Completado", css: "status-success" };
       }
 
-      if (
-        status.includes("error") ||
-        status.includes("fall") ||
-        status.includes("rechaz") ||
-        status.includes("cancel") ||
-        status.includes("deneg") ||
-        status.includes("failed")
-      ) {
-        return {
-          type: "error",
-          label: "Con problemas",
-          css: "status-error"
-        };
+      if (status.includes("error") || status.includes("fall") || status.includes("rechaz") ||
+          status.includes("cancel") || status.includes("deneg") || status.includes("failed")) {
+        return { type: "error", label: "Con problemas", css: "status-error" };
       }
 
-      if (
-        status.includes("pendient") ||
-        status.includes("verific") ||
-        status.includes("proceso") ||
-        status.includes("espera") ||
-        status.includes("conectando") ||
-        status.includes("procesando") ||
-        status.includes("validando") ||
-        status.includes("iniciado") ||
-        status.includes("payment")
-      ) {
-        return {
-          type: "pendiente",
-          label: "En proceso",
-          css: "status-pending"
-        };
+      if (status.includes("pendient") || status.includes("verific") || status.includes("proceso") ||
+          status.includes("espera") || status.includes("conectando") || status.includes("procesando") ||
+          status.includes("validando") || status.includes("iniciado") || status.includes("payment")) {
+        return { type: "pendiente", label: "En proceso", css: "status-pending" };
       }
 
-      return {
-        type: "pendiente",
-        label: rawStatus || "En proceso",
-        css: "status-neutral"
-      };
+      return { type: "pendiente", label: rawStatus || "En proceso", css: "status-neutral" };
     }
 
     function getOrderTimestamp(order) {
       const raw = firstValue(order, [
-        "fecha",
-        "createdAt",
-        "created_at",
-        "fecha_creacion",
-        "fechaCreacion",
-        "timestamp",
-        "time",
-        "created",
-        "date"
+        "fecha","createdAt","created_at","fecha_creacion","fechaCreacion",
+        "timestamp","time","created","date"
       ], null);
 
       if (raw === null) return 0;
-
-      if (typeof raw === "number") {
-        return raw < 1000000000000 ? raw * 1000 : raw;
-      }
-
+      if (typeof raw === "number") return raw < 1000000000000 ? raw * 1000 : raw;
       if (typeof raw === "object") {
         if (typeof raw.seconds === "number") return raw.seconds * 1000;
         if (typeof raw._seconds === "number") return raw._seconds * 1000;
       }
-
       const parsed = Date.parse(raw);
       return Number.isNaN(parsed) ? 0 : parsed;
     }
 
     function formatDate(order) {
       const timestamp = getOrderTimestamp(order);
-
       if (!timestamp) return "Fecha no disponible";
-
       try {
         return new Intl.DateTimeFormat("es-VE", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit"
+          day: "2-digit", month: "short", year: "numeric",
+          hour: "2-digit", minute: "2-digit"
         }).format(new Date(timestamp));
       } catch {
         return "Fecha no disponible";
@@ -1669,34 +812,19 @@
     }
 
     function getVisibleOrders() {
-      const query = normalizeText(searchInput.value);
-
+      const queryText = normalizeText(searchInput.value);
       return allOrders.filter((order) => {
         const status = classifyStatus(getStatus(order));
-
-        const matchesFilter =
-          currentFilter === "todos" ||
-          status.type === currentFilter;
-
-        const matchesSearch =
-          !query || getOrderSearchText(order).includes(query);
-
+        const matchesFilter = currentFilter === "todos" || status.type === currentFilter;
+        const matchesSearch = !queryText || getOrderSearchText(order).includes(queryText);
         return matchesFilter && matchesSearch;
       });
     }
 
     function updateSummary() {
-      const completed = allOrders.filter(
-        order => classifyStatus(getStatus(order)).type === "completado"
-      ).length;
-
-      const pending = allOrders.filter(
-        order => classifyStatus(getStatus(order)).type === "pendiente"
-      ).length;
-
-      const errors = allOrders.filter(
-        order => classifyStatus(getStatus(order)).type === "error"
-      ).length;
+      const completed = allOrders.filter(o => classifyStatus(getStatus(o)).type === "completado").length;
+      const pending = allOrders.filter(o => classifyStatus(getStatus(o)).type === "pendiente").length;
+      const errors = allOrders.filter(o => classifyStatus(getStatus(o)).type === "error").length;
 
       $("#totalOrders").textContent = allOrders.length;
       $("#completedOrders").textContent = completed;
@@ -1741,7 +869,6 @@
               </svg>
             </a>` : ""}
         </div>`;
-
       pagination.hidden = true;
     }
 
@@ -1756,11 +883,8 @@
           </div>
           <h3>No pudimos cargar los pedidos</h3>
           <p>${escapeHTML(message)}</p>
-          <button class="state-action" id="retryButton" type="button">
-            Intentar de nuevo
-          </button>
+          <button class="state-action" id="retryButton" type="button">Intentar de nuevo</button>
         </div>`;
-
       $("#retryButton").addEventListener("click", subscribeToOrders);
       pagination.hidden = true;
     }
@@ -1797,9 +921,7 @@
               <strong class="order-number">#${safeOrderId}</strong>
             </div>
           </div>
-          <span class="order-status ${status.css}">
-            ${escapeHTML(status.label)}
-          </span>
+          <span class="order-status ${status.css}">${escapeHTML(status.label)}</span>
         </div>
 
         <div class="order-divider"></div>
@@ -1865,10 +987,7 @@
       if (currentPage < 1) currentPage = 1;
 
       const startIndex = (currentPage - 1) * PAGE_SIZE;
-      const pageOrders = filteredOrders.slice(
-        startIndex,
-        startIndex + PAGE_SIZE
-      );
+      const pageOrders = filteredOrders.slice(startIndex, startIndex + PAGE_SIZE);
 
       if (allOrders.length === 0) {
         renderEmpty(
@@ -1890,7 +1009,6 @@
       }
 
       ordersList.innerHTML = "";
-
       pageOrders.forEach((order, index) => {
         const card = createOrderCard(order);
         card.style.animationDelay = `${Math.min(index * 35, 140)}ms`;
@@ -1904,10 +1022,8 @@
         `Mostrando <strong>${first}–${last}</strong> de <strong>${total}</strong>`;
 
       pagination.hidden = totalPages <= 1;
-
       $("#pageInfo").innerHTML =
         `Página <strong>${currentPage}</strong> de <strong>${totalPages}</strong>`;
-
       $("#prevPage").disabled = currentPage <= 1;
       $("#nextPage").disabled = currentPage >= totalPages;
     }
@@ -1916,12 +1032,8 @@
       const toast = $("#toast");
       $("#toastMessage").textContent = message;
       toast.classList.add("show");
-
       clearTimeout(toastTimer);
-
-      toastTimer = setTimeout(() => {
-        toast.classList.remove("show");
-      }, 2300);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2300);
     }
 
     async function copyText(text, button) {
@@ -1935,136 +1047,98 @@
           textarea.style.opacity = "0";
           document.body.appendChild(textarea);
           textarea.select();
-
           const copied = document.execCommand("copy");
           textarea.remove();
-
           if (!copied) throw new Error("No se pudo copiar");
         }
 
         if (button) {
           button.classList.add("copied");
           button.innerHTML = icons.check;
-
           setTimeout(() => {
             button.classList.remove("copied");
             button.innerHTML = icons.copy;
           }, 1500);
         }
-
         showToast("Referencia copiada");
       } catch (error) {
         showToast("No se pudo copiar la referencia");
       }
     }
 
-    function normalizeOrder(order, key) {
-      return {
-        ...order,
-        _key: key
-      };
+    function unsubscribeCurrentListener() {
+      if (ordersQueryRef && unsubscribeOrders) {
+        off(ordersQueryRef, "value", unsubscribeOrders);
+        unsubscribeOrders = null;
+        ordersQueryRef = null;
+      }
     }
 
     function subscribeToOrders() {
-      if (!database || !currentUser) return;
+      if (!currentUser) return;
 
-      if (activeOrdersRef && ordersListener) {
-        activeOrdersRef.off("value", ordersListener);
-      }
+      unsubscribeCurrentListener();
 
       loadingOrders = true;
       renderLoading();
-
       refreshButton.classList.add("loading");
 
-      /*
-        Se consultan únicamente los pedidos vinculados al UID
-        de la sesión autenticada.
-      */
-      activeOrdersRef = database.ref("pedidos").orderByChild("uid").equalTo(currentUser.uid);
+      // Consulta: pedidos donde uid == usuario actual
+      const ordersRef = ref(db, "pedidos");
+      ordersQueryRef = query(ordersRef, orderByChild("uid"), equalTo(currentUser.uid));
 
-      ordersListener = (snapshot) => {
-        allOrders = [];
+      unsubscribeOrders = onValue(
+        ordersQueryRef,
+        (snapshot) => {
+          allOrders = [];
 
-        snapshot.forEach((childSnapshot) => {
-          const value = childSnapshot.val();
-
-          if (value && typeof value === "object") {
-            allOrders.push(normalizeOrder(value, childSnapshot.key));
-          }
-        });
-
-        allOrders.sort((a, b) => {
-          const dateDifference = getOrderTimestamp(b) - getOrderTimestamp(a);
-          if (dateDifference !== 0) return dateDifference;
-
-          return String(b._key).localeCompare(String(a._key), undefined, {
-            numeric: true
+          snapshot.forEach((childSnapshot) => {
+            const value = childSnapshot.val();
+            if (value && typeof value === "object") {
+              allOrders.push({ ...value, _key: childSnapshot.key });
+            }
           });
-        });
 
-        loadingOrders = false;
-        currentPage = 1;
-        refreshButton.classList.remove("loading");
-        renderOrders();
-      };
+          allOrders.sort((a, b) => {
+            const dateDifference = getOrderTimestamp(b) - getOrderTimestamp(a);
+            if (dateDifference !== 0) return dateDifference;
+            return String(b._key).localeCompare(String(a._key), undefined, { numeric: true });
+          });
 
-      activeOrdersRef.on("value", ordersListener, (error) => {
-        loadingOrders = false;
-        refreshButton.classList.remove("loading");
+          loadingOrders = false;
+          currentPage = 1;
+          refreshButton.classList.remove("loading");
+          renderOrders();
+        },
+        (error) => {
+          loadingOrders = false;
+          refreshButton.classList.remove("loading");
+          console.error("Error consultando pedidos:", error);
 
-        console.error("Error consultando pedidos:", error);
-
-        if (error && error.code === "PERMISSION_DENIED") {
-          renderError(
-            "No tienes permiso para consultar estos pedidos. Verifica las reglas de seguridad de Firebase."
-          );
-        } else {
-          renderError(
-            "Comprueba tu conexión e inténtalo nuevamente."
-          );
+          if (error && error.code === "PERMISSION_DENIED") {
+            renderError(
+              "No tienes permiso para consultar estos pedidos. Verifica las reglas de seguridad de Firebase Realtime Database."
+            );
+          } else {
+            renderError("Comprueba tu conexión e inténtalo nuevamente.");
+          }
         }
-      });
+      );
     }
 
-    function initializeFirebase() {
-      if (
-        !firebaseConfig.apiKey ||
-        firebaseConfig.apiKey === "TU_API_KEY" ||
-        !firebaseConfig.appId ||
-        firebaseConfig.appId === "TU_APP_ID"
-      ) {
-        loadingOrders = false;
-        renderError(
-          "Debes colocar la configuración Firebase original de tu tienda en este archivo."
-        );
+    // Escucha el estado de autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Redirigir a login si no está autenticado
+        window.location.replace("login.html");
         return;
       }
 
-      try {
-        if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
-        }
+      currentUser = user;
+      subscribeToOrders();
+    });
 
-        auth = firebase.auth();
-        database = firebase.database();
-
-        auth.onAuthStateChanged((user) => {
-          if (!user) {
-            window.location.replace("login.html");
-            return;
-          }
-
-          currentUser = user;
-          subscribeToOrders();
-        });
-      } catch (error) {
-        console.error("Error inicializando Firebase:", error);
-        loadingOrders = false;
-        renderError("No se pudo conectar con el sistema de pedidos.");
-      }
-    }
-
+    // ===== Eventos de UI =====
     searchInput.addEventListener("input", () => {
       currentPage = 1;
       clearSearch.style.display = searchInput.value ? "grid" : "none";
@@ -2091,23 +1165,16 @@
       if (currentPage > 1) {
         currentPage--;
         renderOrders();
-        $("#ordersHeading").scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
+        $("#ordersHeading").scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
 
     $("#nextPage").addEventListener("click", () => {
       const totalPages = Math.ceil(getVisibleOrders().length / PAGE_SIZE);
-
       if (currentPage < totalPages) {
         currentPage++;
         renderOrders();
-        $("#ordersHeading").scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
+        $("#ordersHeading").scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
 
@@ -2120,19 +1187,13 @@
 
     ordersList.addEventListener("click", (event) => {
       const button = event.target.closest("[data-copy]");
-
       if (!button) return;
-
       copyText(button.dataset.copy, button);
     });
 
     window.addEventListener("beforeunload", () => {
-      if (activeOrdersRef && ordersListener) {
-        activeOrdersRef.off("value", ordersListener);
-      }
+      unsubscribeCurrentListener();
     });
-
-    initializeFirebase();
   </script>
 </body>
 </html>
