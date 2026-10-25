@@ -100,7 +100,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .order-card{background:linear-gradient(180deg,rgba(16,24,39,0.95),rgba(11,16,27,0.98));border:1px solid rgba(37,135,255,0.15);border-radius:16px;overflow:hidden;transition:border-color .3s,box-shadow .3s;position:relative;}
 .order-card.expanded{border-color:rgba(212,175,55,0.6);box-shadow:0 0 20px rgba(212,175,55,0.1);}
 
-/* Cabecera del pedido (siempre visible) */
+/* Cabecera del pedido */
 .order-header{display:flex;align-items:center;padding:16px;cursor:pointer;user-select:none;}
 .order-num-wrap{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
 .order-num{color:var(--blue-light);font-size:20px;font-weight:900;letter-spacing:-0.5px;text-shadow:0 0 10px rgba(37,135,255,0.3);}
@@ -129,6 +129,15 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .order-field-left{display:flex;align-items:center;gap:10px;color:#94a3b8;font-size:13px;font-weight:600;min-width:100px;}
 .order-field-left svg{width:16px;height:16px;fill:none;stroke-width:2;}
 .order-field-right{display:flex;align-items:center;gap:8px;color:#e2e8f0;font-size:13px;font-weight:600;text-align:right;word-break:break-all;}
+
+/* BLOQUE DE CUENTAS (Netflix, etc) */
+.account-block{background:rgba(37,135,255,0.05);border:1px dashed rgba(37,135,255,0.3);border-radius:10px;padding:12px;margin-top:16px;}
+.account-title{font-size:11px;color:var(--blue-light);font-weight:800;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.account-row{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.3);padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:13px;color:#fff;}
+.account-row:last-child{margin-bottom:0;}
+.account-row strong{color:#94a3b8;font-weight:600;font-size:11px;text-transform:uppercase;}
+.account-row span{font-family:monospace;letter-spacing:0.5px;color:#e2e8f0;}
+
 .copy-btn{background:transparent;border:none;color:#93c5fd;cursor:pointer;padding:4px;display:grid;place-items:center;border-radius:4px;transition:.2s;}
 .copy-btn:hover{background:rgba(37,135,255,0.2);color:#fff;}
 .copy-btn svg{width:16px;height:16px;fill:none;stroke-width:2;}
@@ -208,7 +217,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
                 <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
             </div>
             <div class="stat-info">
-                <span class="stat-num" id="totalOrders">73</span>
+                <span class="stat-num" id="totalOrders">0</span>
                 <span class="stat-label">Total Pedidos</span>
             </div>
         </div>
@@ -217,7 +226,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
                 <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
             <div class="stat-info">
-                <span class="stat-num" id="pendingOrders">3</span>
+                <span class="stat-num" id="pendingOrders">0</span>
                 <span class="stat-label">Pendientes</span>
             </div>
         </div>
@@ -226,7 +235,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
                 <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             </div>
             <div class="stat-info">
-                <span class="stat-num" id="completedOrders">70</span>
+                <span class="stat-num" id="completedOrders">0</span>
                 <span class="stat-label">Completados</span>
             </div>
         </div>
@@ -242,9 +251,9 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 
     <!-- FILTROS PILLS -->
     <div class="filtros">
-        <button class="filtro-btn activo" data-filter="todos" type="button">Todos <span class="filtro-count" id="countAll">73</span></button>
-        <button class="filtro-btn" data-filter="completado" type="button">Completados <span class="filtro-count" id="countCompleted">70</span></button>
-        <button class="filtro-btn" data-filter="pendiente" type="button">Pendientes <span class="filtro-count" id="countPending">3</span></button>
+        <button class="filtro-btn activo" data-filter="todos" type="button">Todos <span class="filtro-count" id="countAll">0</span></button>
+        <button class="filtro-btn" data-filter="completado" type="button">Completados <span class="filtro-count" id="countCompleted">0</span></button>
+        <button class="filtro-btn" data-filter="pendiente" type="button">Pendientes <span class="filtro-count" id="countPending">0</span></button>
         <button class="filtro-btn" data-filter="error" type="button">Procesando <span class="filtro-count" id="countError">0</span></button>
     </div>
 
@@ -324,7 +333,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 let currentUser = null;
 let allOrders = [];
 let currentFilter = "todos";
@@ -352,7 +361,9 @@ const IC = {
     chevron: `<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>`,
     checkCircle: `<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
     clock: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`,
-    refresh: `<svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`
+    refresh: `<svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
+    key: `<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>`,
+    mail: `<svg viewBox="0 0 24 24" stroke="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`
 };
 
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]);}
@@ -366,6 +377,11 @@ function getProduct(o){return String(firstValue(o,["producto","product","nombreP
 function getReference(o){return String(firstValue(o,["referencia","reference","referenciaPago","referencia_pago","referencia_pago_movil","referenciaPagoMovil","ref","paymentReference","transactionReference","transaccion","transactionId"],"No indicada"));}
 function getStatus(o){return String(firstValue(o,["estado","status","estadoPedido","estado_pedido","statusPedido","status_pedido"],"pendiente"));}
 function getJuego(o){return String(firstValue(o,["juego","game","nombre_juego","nombreJuego"],"")).toUpperCase();}
+
+// Funciones para cuentas de streaming
+function getCorreoCuenta(o){return String(firstValue(o,["correo_cuenta","correo","email","usuario_cuenta","cuenta_correo","email_cuenta"],""));}
+function getPassCuenta(o){return String(firstValue(o,["clave_cuenta","clave","password","pass","contrasena","cuenta_clave","pin"],""));}
+function getPerfilCuenta(o){return String(firstValue(o,["perfil","perfil_cuenta","pin_perfil"],""));}
 
 function classifyStatus(raw){
     const s = normalizeText(raw);
@@ -385,7 +401,7 @@ function getOrderTimestamp(o){
     if(typeof raw==="object"){if(typeof raw.seconds==="number")return raw.seconds*1000;if(typeof raw._seconds==="number")return raw._seconds*1000;}
     const p = Date.parse(raw); return Number.isNaN(p)?0:p;
 }
-function getSearchText(o){return normalizeText([getOrderId(o,o._key),getPlayerId(o),getNickname(o),getProduct(o),getReference(o),getStatus(o)].join(" "));}
+function getSearchText(o){return normalizeText([getOrderId(o,o._key),getPlayerId(o),getNickname(o),getProduct(o),getReference(o),getStatus(o),getJuego(o),getCorreoCuenta(o)].join(" "));}
 
 function getVisibleOrders(){
     const q = normalizeText(searchInput.value);
@@ -468,6 +484,87 @@ function createOrderCard(o){
 
     const isExpanded = currentPage === 1 && ordersList.children.length === 0;
 
+    // Lógica para saber si es una cuenta (Netflix, Disney, etc)
+    const prodLower = product.toLowerCase();
+    const juegoLower = juego.toLowerCase();
+    const esCuenta = prodLower.includes("netflix") || prodLower.includes("disney") || prodLower.includes("spotify") || prodLower.includes("hbo") || prodLower.includes("prime") || juegoLower.includes("netflix") || juegoLower.includes("disney") || juegoLower.includes("spotify") || juegoLower.includes("hbo") || juegoLower.includes("prime");
+    
+    const correo = getCorreoCuenta(o);
+    const pass = getPassCuenta(o);
+    const perfil = getPerfilCuenta(o);
+
+    // Generar los campos según el tipo de producto
+    let fieldsHTML = '';
+
+    if (esCuenta) {
+        // Render para cuentas (Streaming)
+        fieldsHTML = `
+            <div class="account-block">
+                <div class="account-title">${IC.key} Datos de Acceso</div>
+                ${correo ? `
+                <div class="account-row">
+                    <div style="display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;">${IC.mail} Correo</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span>${escapeHTML(correo)}</span>
+                        <button class="copy-btn" type="button" data-copy="${escapeHTML(correo)}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>
+                    </div>
+                </div>` : ''}
+                
+                ${pass ? `
+                <div class="account-row">
+                    <div style="display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;">${IC.key} Contraseña</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span>${escapeHTML(pass)}</span>
+                        <button class="copy-btn" type="button" data-copy="${escapeHTML(pass)}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>
+                    </div>
+                </div>` : ''}
+
+                ${perfil ? `
+                <div class="account-row">
+                    <div style="display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;">Perfil</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span>${escapeHTML(perfil)}</span>
+                    </div>
+                </div>` : ''}
+
+                ${(!correo && !pass) ? `
+                <div style="font-size:12px;color:#f5d76e;text-align:center;padding:10px;">
+                    ⏳ Procesando asignación de cuenta...
+                </div>` : ''}
+            </div>
+            <div class="order-field" style="margin-top:12px;">
+                <div class="order-field-left">${IC.tag} Ref</div>
+                <div class="order-field-right">
+                    <span>${sRef}</span>
+                    ${reference!=="No indicada"?`<button class="copy-btn" type="button" data-copy="${escapeHTML(reference)}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>`:""}
+                </div>
+            </div>
+        `;
+    } else {
+        // Render para juegos (Free Fire, Roblox, etc)
+        fieldsHTML = `
+            <div class="order-field">
+                <div class="order-field-left">${IC.user} ID</div>
+                <div class="order-field-right">${sPlayer}</div>
+            </div>
+            <div class="order-field">
+                <div class="order-field-left">${IC.game} Nickname</div>
+                <div class="order-field-right">${sNick}</div>
+            </div>
+            <div class="order-field">
+                <div class="order-field-left">${IC.box} Producto</div>
+                <div class="order-field-right">${sJuego ? sJuego + ' - ' : ''}${sProd}</div>
+            </div>
+            <div class="order-field">
+                <div class="order-field-left">${IC.tag} Ref</div>
+                <div class="order-field-right">
+                    <span>${sRef}</span>
+                    ${reference!=="No indicada"?`<button class="copy-btn" type="button" data-copy="${escapeHTML(reference)}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>`:""}
+                </div>
+            </div>
+        `;
+    }
+
     const card = document.createElement("article");
     card.className = `order-card ${isExpanded ? 'expanded' : ''}`;
     
@@ -489,25 +586,7 @@ function createOrderCard(o){
 
         <div class="order-body">
             <div class="order-fields">
-                <div class="order-field">
-                    <div class="order-field-left">${IC.user} ID</div>
-                    <div class="order-field-right">${sPlayer}</div>
-                </div>
-                <div class="order-field">
-                    <div class="order-field-left">${IC.game} Nickname</div>
-                    <div class="order-field-right">${sNick}</div>
-                </div>
-                <div class="order-field">
-                    <div class="order-field-left">${IC.box} Producto</div>
-                    <div class="order-field-right">${sJuego ? sJuego + ' - ' : ''}${sProd}</div>
-                </div>
-                <div class="order-field">
-                    <div class="order-field-left">${IC.tag} Ref</div>
-                    <div class="order-field-right">
-                        <span>${sRef}</span>
-                        ${reference!=="No indicada"?`<button class="copy-btn" type="button" data-copy="${escapeHTML(reference)}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>`:""}
-                    </div>
-                </div>
+                ${fieldsHTML}
             </div>
         </div>
     `;
@@ -518,9 +597,6 @@ window.toggleCard = function(header) {
     const card = header.parentElement;
     const isExpanded = card.classList.contains("expanded");
     
-    // Opcional: Cerrar otros al abrir uno
-    // document.querySelectorAll('.order-card').forEach(c => c.classList.remove('expanded'));
-
     if (isExpanded) {
         card.classList.remove("expanded");
     } else {
