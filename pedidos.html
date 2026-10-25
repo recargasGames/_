@@ -40,7 +40,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .video-fondo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;opacity:1;filter:brightness(1.15);will-change:transform;transform:translateZ(0);}
 .video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(5,7,13,0.15) 0%,rgba(5,7,13,0.35) 60%,rgba(5,7,13,0.6) 100%);z-index:-1;pointer-events:none;}
 
-/* ===== BARRA SUPERIOR (Estilo imagen) ===== */
+/* ===== BARRA SUPERIOR ===== */
 .barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(5,7,13,0.95);border-bottom:1px solid rgba(37,135,255,0.2);box-shadow:0 4px 20px rgba(0,0,0,0.6);}
 .header{padding:12px 20px;display:flex;justify-content:space-between;align-items:center;}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
@@ -100,23 +100,6 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .order-card{background:linear-gradient(180deg,rgba(16,24,39,0.95),rgba(11,16,27,0.98));border:1px solid rgba(37,135,255,0.15);border-radius:16px;overflow:hidden;transition:border-color .3s,box-shadow .3s;position:relative;}
 .order-card.expanded{border-color:rgba(212,175,55,0.6);box-shadow:0 0 20px rgba(212,175,55,0.1);}
 
-/* Fondo dinámico por juego */
-.order-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.15; /* Ajusta la opacidad para que no opaque el texto */
-    z-index: 0;
-    pointer-events: none;
-}
-.order-card > * {
-    position: relative;
-    z-index: 1;
-}
-
 /* Cabecera del pedido */
 .order-header{display:flex;align-items:center;padding:16px;cursor:pointer;user-select:none;}
 .order-num-wrap{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
@@ -147,7 +130,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(-
 .order-field-left svg{width:16px;height:16px;fill:none;stroke-width:2;}
 .order-field-right{display:flex;align-items:center;gap:8px;color:#e2e8f0;font-size:13px;font-weight:600;text-align:right;word-break:break-all;}
 
-/* BLOQUE DE CUENTAS (Netflix, etc) */
+/* BLOQUE DE DATOS DE STREAMING / CUENTAS */
 .account-block{background:rgba(37,135,255,0.05);border:1px dashed rgba(37,135,255,0.3);border-radius:10px;padding:12px;margin-top:16px;}
 .account-title{font-size:11px;color:var(--blue-light);font-weight:800;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .account-row{display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.3);padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:13px;color:#fff;}
@@ -395,11 +378,6 @@ function getReference(o){return String(firstValue(o,["referencia","reference","r
 function getStatus(o){return String(firstValue(o,["estado","status","estadoPedido","estado_pedido","statusPedido","status_pedido"],"pendiente"));}
 function getJuego(o){return String(firstValue(o,["juego","game","nombre_juego","nombreJuego"],"")).toUpperCase();}
 
-// Funciones para cuentas de streaming
-function getCorreoCuenta(o){return String(firstValue(o,["correo_cuenta","correo","email","usuario_cuenta","cuenta_correo","email_cuenta"],""));}
-function getPassCuenta(o){return String(firstValue(o,["clave_cuenta","clave","password","pass","contrasena","cuenta_clave","pin"],""));}
-function getPerfilCuenta(o){return String(firstValue(o,["perfil","perfil_cuenta","pin_perfil"],""));}
-
 function classifyStatus(raw){
     const s = normalizeText(raw);
     if(s.includes("complet")||s.includes("exitos")||s.includes("entreg")||s.includes("finaliz")||s.includes("aprob")||s.includes("success")||s.includes("realizado"))
@@ -418,7 +396,7 @@ function getOrderTimestamp(o){
     if(typeof raw==="object"){if(typeof raw.seconds==="number")return raw.seconds*1000;if(typeof raw._seconds==="number")return raw._seconds*1000;}
     const p = Date.parse(raw); return Number.isNaN(p)?0:p;
 }
-function getSearchText(o){return normalizeText([getOrderId(o,o._key),getPlayerId(o),getNickname(o),getProduct(o),getReference(o),getStatus(o),getJuego(o),getCorreoCuenta(o)].join(" "));}
+function getSearchText(o){return normalizeText([getOrderId(o,o._key),getPlayerId(o),getNickname(o),getProduct(o),getReference(o),getStatus(o),getJuego(o)].join(" "));}
 
 function getVisibleOrders(){
     const q = normalizeText(searchInput.value);
@@ -483,41 +461,16 @@ function renderError(msg){
     pagination.hidden = true;
 }
 
-// 🎯 FUNCIÓN PARA LIMPIAR EL NOMBRE DEL PRODUCTO
 function limpiarProducto(juego, producto) {
     if (!producto) return '';
     let limpio = producto;
-    
-    // Quitar el nombre del juego si está al inicio (ej: "FREE FIRE - ", "NETFLIX - ")
     if (juego) {
         const regexJuego = new RegExp(juego + '\\s*-\\s*', 'i');
         limpio = limpio.replace(regexJuego, '');
     }
-
-    // Normalizaciones
     limpio = limpio.replace(/Diamantes/gi, '💎');
     limpio = limpio.replace(/Robux/gi, 'R$');
-    // Si dice "Perfil Netflix", lo dejamos tal cual
-
     return limpio.trim();
-}
-
-// 🎯 FUNCIÓN PARA OBTENER LA IMAGEN DE FONDO SEGÚN EL JUEGO
-function obtenerImagenFondo(juego) {
-    const j = juego.toLowerCase();
-    if (j.includes('free fire') || j.includes('freefire') || j.includes('ff')) return 'url("ff.png")';
-    if (j.includes('mobile legends') || j.includes('mlbb') || j.includes('ml')) return 'url("ml.png")';
-    if (j.includes('blood strike') || j.includes('bloodstrike')) return 'url("bloodstrike.png")';
-    if (j.includes('roblox')) return 'url("roblox.png")';
-    if (j.includes('netflix')) return 'url("netflix.png")';
-    if (j.includes('spotify')) return 'url("spotify.png")';
-    if (j.includes('disney')) return 'url("disney.png")';
-    if (j.includes('pubg')) return 'url("pubg.png")';
-    if (j.includes('cod') || j.includes('call of duty')) return 'url("cod.png")';
-    if (j.includes('arena breakout')) return 'url("arena.png")';
-    if (j.includes('delta force')) return 'url("delta.png")';
-    if (j.includes('bigo')) return 'url("bigo.png")';
-    return 'url("fondo-default.png")'; // Imagen por defecto si no coincide
 }
 
 function createOrderCard(o){
@@ -529,68 +482,81 @@ function createOrderCard(o){
     const status = classifyStatus(getStatus(o));
     const juego = getJuego(o);
 
-    // Limpiamos el producto y obtenemos la imagen
     const productoLimpiado = limpiarProducto(juego, product);
-    const bgImage = obtenerImagenFondo(juego);
-
     const sOrd = escapeHTML(orderId);
     const sPlayer = escapeHTML(playerId);
     const sNick = escapeHTML(nickname);
-    const sProd = escapeHTML(productoLimpiado); // Usamos el producto limpio aquí
+    const sProd = escapeHTML(productoLimpiado);
     const sRef = escapeHTML(reference);
     const sJuego = escapeHTML(juego);
 
     const isExpanded = currentPage === 1 && ordersList.children.length === 0;
 
-    // Lógica para saber si es una cuenta (Netflix, Disney, etc)
+    // 🔥 LÓGICA EXACTA DEL ARCHIVO ORIGINAL: Detectar si es cuenta/streaming
+    const esStreaming = o.es_streaming === true || (o.datos_streaming && (o.datos_streaming.correo || o.datos_streaming.clave));
     const prodLower = product.toLowerCase();
     const juegoLower = juego.toLowerCase();
-    const esCuenta = prodLower.includes("netflix") || prodLower.includes("disney") || prodLower.includes("spotify") || prodLower.includes("hbo") || prodLower.includes("prime") || juegoLower.includes("netflix") || juegoLower.includes("disney") || juegoLower.includes("spotify") || juegoLower.includes("hbo") || juegoLower.includes("prime");
-    
-    const correo = getCorreoCuenta(o);
-    const pass = getPassCuenta(o);
-    const perfil = getPerfilCuenta(o);
+    const esCuenta = esStreaming || prodLower.includes("netflix") || prodLower.includes("disney") || prodLower.includes("spotify") || prodLower.includes("hbo") || prodLower.includes("prime") || juegoLower.includes("netflix") || juegoLower.includes("disney") || juegoLower.includes("spotify") || juegoLower.includes("hbo") || juegoLower.includes("prime");
 
-    // Generar los campos según el tipo de producto
     let fieldsHTML = '';
 
     if (esCuenta) {
-        // Render para cuentas (Streaming)
-        fieldsHTML = `
-            <div class="account-block">
-                <div class="account-title">${IC.key} Datos de Acceso</div>
-                ${correo ? `
-                <div class="account-row">
-                    <div style="display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;">${IC.mail} Correo</div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span>${escapeHTML(correo)}</span>
-                        <button class="copy-btn" type="button" data-copy="${escapeHTML(correo)}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>
-                    </div>
-                </div>` : ''}
-                
-                ${pass ? `
-                <div class="account-row">
-                    <div style="display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;">${IC.key} Contraseña</div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <span>${escapeHTML(pass)}</span>
-                        <button class="copy-btn" type="button" data-copy="${escapeHTML(pass)}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>
-                    </div>
-                </div>` : ''}
+        // 🔥 LÓGICA EXACTA DEL ARCHIVO ORIGINAL PARA MOSTRAR DATOS DE STREAMING
+        const d = o.datos_streaming || {};
+        const codRenov = o.codigo_renovacion || o.codigo_aprobacion || '';
+        const esRenovacion = o.es_renovacion === true;
+        const tieneValor = (v) => v !== undefined && v !== null && String(v).trim() !== '';
 
-                ${perfil ? `
-                <div class="account-row">
-                    <div style="display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;">Perfil</div>
+        let camposHtml = '';
+        const agregarDato = (label, valor, clase = '') => {
+            if (!tieneValor(valor)) return '';
+            const v = escapeHTML(valor);
+            return `
+                <div class="account-row ${clase}">
+                    <div style="display:flex;align-items:center;gap:6px;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;">${label}</div>
                     <div style="display:flex;align-items:center;gap:8px;">
-                        <span>${escapeHTML(perfil)}</span>
+                        <span>${v}</span>
+                        <button class="copy-btn" type="button" data-copy="${v}" onclick="event.stopPropagation(); copyText(this.dataset.copy, this)">${IC.copy}</button>
                     </div>
-                </div>` : ''}
+                </div>
+            `;
+        };
 
-                ${(!correo && !pass) ? `
-                <div style="font-size:12px;color:#f5d76e;text-align:center;padding:10px;">
-                    ⏳ Procesando asignación de cuenta...
-                </div>` : ''}
-            </div>
-            <div class="order-field" style="margin-top:12px;">
+        camposHtml += agregarDato('📧 Correo', d.correo);
+        camposHtml += agregarDato('🔑 Contraseña', d.clave);
+        camposHtml += agregarDato('👤 Perfil', d.perfil);
+        camposHtml += agregarDato('🔢 PIN Perfil', d.pin_perfil);
+        camposHtml += agregarDato('📅 Vence', d.fecha_vencimiento);
+
+        if (tieneValor(codRenov)) {
+            const labelCodigo = esRenovacion ? '🔄 Código Renovación' : '🎟️ Código Renovación';
+            camposHtml += agregarDato(labelCodigo, codRenov, 'codigo-renovacion');
+        }
+
+        if (camposHtml) {
+            const titulo = esRenovacion ? '🔄 Datos de la Renovación' : (d.perfil ? '🎬 Datos de tu Perfil' : '🎬 Datos de tu Cuenta');
+            fieldsHTML = `
+                <div class="account-block">
+                    <div class="account-title">${IC.key} ${titulo}</div>
+                    ${camposHtml}
+                    <div style="font-size:10px;color:#fcd34d;text-align:center;margin-top:8px;line-height:1.3;">
+                        ${esRenovacion ? '⚠️ Tu cuenta fue renovada +30 días.' : '⚠️ Guarda estos datos y tu código.'}
+                    </div>
+                </div>
+            `;
+        } else {
+            fieldsHTML = `
+                <div class="account-block" style="text-align:center;padding:20px 10px;">
+                    <div style="font-size:24px;margin-bottom:8px;">⏳</div>
+                    <div style="font-size:13px;color:#f5d76e;font-weight:600;">Procesando asignación de cuenta...</div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:4px;">El administrador está preparando tus datos.</div>
+                </div>
+            `;
+        }
+
+        // Agregar la referencia abajo
+        fieldsHTML += `
+            <div class="order-field" style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;">
                 <div class="order-field-left">${IC.tag} Ref</div>
                 <div class="order-field-right">
                     <span>${sRef}</span>
@@ -598,8 +564,9 @@ function createOrderCard(o){
                 </div>
             </div>
         `;
+
     } else {
-        // Render para juegos (Free Fire, Roblox, etc)
+        // Render para juegos
         fieldsHTML = `
             <div class="order-field">
                 <div class="order-field-left">${IC.user} ID</div>
@@ -625,12 +592,6 @@ function createOrderCard(o){
 
     const card = document.createElement("article");
     card.className = `order-card ${isExpanded ? 'expanded' : ''}`;
-    
-    // 🎯 ASIGNAMOS LA IMAGEN DE FONDO DINÁMICAMENTE
-    card.style.setProperty('--bg-image', bgImage);
-    card.style.backgroundImage = `linear-gradient(180deg, rgba(16,24,39,0.95), rgba(11,16,27,0.98)), ${bgImage}`;
-    card.style.backgroundSize = 'cover';
-    card.style.backgroundPosition = 'center';
     
     card.innerHTML = `
         <div class="order-header" onclick="toggleCard(this)">
