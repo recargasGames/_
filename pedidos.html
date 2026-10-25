@@ -3,287 +3,873 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#050810">
-<title>Mis Pedidos - Recargas Games</title>
-<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<title>Mis Pedidos | RECARGASGAMES</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <style>
-:root{--alto-nav:64px;--dorado:#f5d76e;--azul:#4a7aff;--verde:#00d26a;--naranja:#f59e0b;--card:rgba(13,22,39,.82);--borde:rgba(55,75,112,.65)}
+:root{
+    --color-principal:#3b82f6;--color-hover:#2563eb;--color-azul:#3b82f6;
+    --color-blanco:#ffffff;--color-dorado:#d4af37;--color-dorado-claro:#f5d76e;
+    --color-negro:#0a0e1a;--color-error:#ef4444;--color-exito:#22c55e;
+    --alto-nav:64px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#000;color:#fff;min-height:100vh;padding:80px 0 calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom))}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--dorado);outline-offset:2px}
-.video-fondo{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;filter:brightness(1.05)}
-.video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,14,26,.25),rgba(10,14,26,.58));z-index:-1;pointer-events:none}
-.topbar{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(11,18,32,.94);border-bottom:2px solid #3b82f6;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}.logo img{height:45px;border-radius:10px}.logo h1{font-size:20px}.logo h1 span{color:#3b82f6}
-.btn-back{background:transparent;border:0;color:#cbd5e1;font:inherit;font-size:14px;cursor:pointer;padding:8px 12px;border-radius:8px}.btn-back:hover{background:#ffffff14;color:#fff}
-.container{max-width:900px;margin:auto;padding:20px;position:relative;z-index:1}
-.page-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.page-header h2{font-size:26px}.page-header h2 span{color:#3b82f6}
-.total{font-size:14px;color:#cbd5e1;background:rgba(14,26,58,.85);border:1px solid var(--borde);padding:6px 16px;border-radius:20px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:5px;margin-bottom:14px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.chips::-webkit-scrollbar{display:none}
-.chip{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;background:rgba(14,26,58,.82);border:1px solid var(--borde);color:#cbd5e1;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
-.chip .n{font-size:12px;color:#94a3b8;background:#ffffff14;padding:1px 8px;border-radius:10px}.chip:hover,.chip.activo{color:var(--dorado);border-color:#d4af3780}.chip.activo{background:linear-gradient(135deg,#d4af372e,#3b82f620)}
-.buscador{margin-bottom:20px}.buscador input{width:100%;padding:13px 16px;border-radius:12px;background:rgba(6,12,32,.85);border:1px solid var(--borde);color:#fff;font-size:15px;font-family:inherit}.buscador input::placeholder{color:#94a3b8}.buscador input:focus{outline:none;border-color:#3b82f6}
-.pedidos-list{display:flex;flex-direction:column;gap:12px}
-.pedido-card{background:var(--card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:12px;padding:16px;border:1px solid var(--borde);box-shadow:0 4px 6px #0003;transition:border-color .25s}
-.pedido-card:hover{border-color:#3b82f6;background:rgba(13,22,39,.9)}
-.pedido-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.pedido-header-left{display:flex;flex-direction:column;gap:4px}.pedido-id{font-size:18px;font-weight:700;color:var(--azul)}.pedido-fecha{font-size:12px;color:#8899b0;display:flex;align-items:center;gap:6px}.pedido-header-right{text-align:right}.pedido-precio{font-size:18px;font-weight:700;color:var(--verde);display:block}.pedido-metodo{font-size:11px;color:#8899b0;text-transform:uppercase;letter-spacing:.5px}
-.pedido-body{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}.pedido-producto{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}.pedido-producto svg{width:18px;height:18px;fill:var(--azul);flex-shrink:0}
-.pedido-referencia{display:flex;align-items:center;gap:8px;font-size:12px;color:#8899b0;background:rgba(17,28,50,.8);padding:7px 10px;border-radius:6px;word-break:break-all}.pedido-referencia svg{width:14px;height:14px;fill:#8899b0;flex-shrink:0}
-.pedido-jugador-box{background:rgba(22,34,59,.8);border:1px solid rgba(37,50,77,.8);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:13px;line-height:1.6;color:#cbd5e1}.pedido-jugador-box strong{color:#fff}
-.pedido-timeline{display:flex;align-items:center;justify-content:space-between;position:relative;padding-top:12px;border-top:1px solid var(--borde)}
-.timeline-step{display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;width:80px;text-align:center}.timeline-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#1e2a45;color:#8899b0}.timeline-icon svg{width:16px;height:16px;fill:currentColor}
-.timeline-step.recibido .timeline-icon{background:var(--azul);color:#fff}.timeline-step.verificando .timeline-icon{background:var(--naranja);color:#fff}.timeline-step.completado .timeline-icon{background:var(--verde);color:#fff}
-.timeline-label{font-size:11px;font-weight:600;color:#8899b0}.timeline-step.recibido .timeline-label,.timeline-step.verificando .timeline-label,.timeline-step.completado .timeline-label{color:#fff}
-.timeline-line{flex:1;height:3px;background:#1e2a45;margin-top:-22px;z-index:1;border-radius:2px}.timeline-line.active{background:var(--azul)}.timeline-line.completed{background:var(--verde)}
-.pin-box{margin-top:12px;padding:16px;background:#22c55e26;border:2px solid #22c55e;border-radius:12px;text-align:center}.pin-label{font-size:12px;color:#cbd5e1;text-transform:uppercase;letter-spacing:2px}.pin-value{font-size:24px;font-weight:700;color:#4ade80;letter-spacing:3px;margin:8px 0;overflow-wrap:anywhere;user-select:all}.btn-copiar{background:#22c55e33;color:#4ade80;border:0;padding:10px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit}
-.manual-box{margin-top:12px;padding:16px;background:#25d36626;border:2px solid #25d366;border-radius:12px;text-align:center}.manual-text{font-size:14px;color:#cbd5e1;margin-bottom:10px}.btn-whatsapp{background:#25d366;color:#06210f;padding:11px 24px;border-radius:8px;font-weight:800;text-decoration:none;display:inline-block}
-.streaming-box{margin-top:16px;padding:20px 18px;background:linear-gradient(135deg,#e509141f,#113ccf1a);border:2px solid #d4af3780;border-radius:16px;box-shadow:0 0 30px #d4af371f;backdrop-filter:blur(5px)}
-.streaming-titulo{font-size:17px;font-weight:900;color:var(--dorado);text-align:center;margin-bottom:6px;letter-spacing:1px}.streaming-subtitulo{font-size:12px;color:#94a3b8;text-align:center;margin-bottom:18px;line-height:1.5}
-.btn-revelar-datos{width:100%;padding:14px 18px;margin-top:14px;background:linear-gradient(135deg,#d4af3740,#d4af371f);border:2px solid #d4af3799;border-radius:12px;color:var(--dorado);font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:1px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:10px}
-.dato-entrega{display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:#0008;border:1px solid #d4af3726;border-radius:12px;margin-bottom:10px}.dato-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;font-weight:800}.dato-contenido{display:flex;align-items:center;gap:10px}.dato-valor{flex:1;font-size:16px;font-weight:700;color:#fff;overflow-wrap:anywhere;font-family:'Courier New',monospace;line-height:1.4}
-.dato-oculto .dato-valor{color:#94a3b8;letter-spacing:4px;font-size:18px;user-select:none}.dato-oculto .btn-copiar-dato{display:none}
-.btn-copiar-dato{width:40px;height:40px;background:#d4af372b;border:1px solid #d4af3780;border-radius:10px;color:var(--dorado);cursor:pointer;flex-shrink:0;font-size:17px}
-.codigo-renovacion{background:#d4af3726;border:2px solid #d4af3780}.codigo-renovacion .dato-label,.codigo-renovacion .dato-valor{color:var(--dorado)}
-.aviso-renovacion{margin-top:10px;padding:10px 14px;background:#f59e0b26;border-left:3px solid #fbbf24;border-radius:8px;font-size:12px;color:#fcd34d;text-align:center;line-height:1.5}
-.contenedor-datos-streaming{display:none;margin-top:14px}.contenedor-datos-streaming.visible{display:block}
-.contador-auto-ocultar{margin-top:10px;text-align:center;font-size:11px;color:#94a3b8;font-weight:600}.segundos{color:var(--dorado);font-weight:800}
-.pendiente-manual-box{margin-top:14px;padding:18px 16px;background:#f59e0b20;border:2px solid #f59e0b99;border-radius:14px;text-align:center}.icono-pendiente{font-size:32px;margin-bottom:8px}.titulo-pendiente{font-size:15px;font-weight:800;color:#fbbf24;margin-bottom:8px}.desc-pendiente{font-size:13px;color:#cbd5e1;line-height:1.5;margin-bottom:14px}.btn-whatsapp-pendiente{background:#25d366;color:#06210f;padding:12px 22px;border-radius:10px;font-weight:800;text-decoration:none;display:inline-flex;gap:8px}
-.sin-pedidos{text-align:center;padding:50px 20px;background:var(--card);border-radius:16px;border:1px solid var(--borde);backdrop-filter:blur(10px)}.sin-pedidos .icono{font-size:56px;margin-bottom:15px}.sin-pedidos h3{font-size:21px;margin-bottom:8px}.sin-pedidos p{color:#cbd5e1;font-size:15px;line-height:1.5}.btn-tienda{display:inline-block;margin-top:18px;padding:13px 30px;background:linear-gradient(135deg,#d4af37,var(--dorado));color:#0a0e1a;border-radius:12px;font-weight:800;text-decoration:none}
-.loading{text-align:center;padding:40px;color:#94a3b8}.spinner{width:40px;height:40px;border:3px solid #3b82f633;border-top-color:#3b82f6;border-radius:50%;animation:girar 1s linear infinite;margin:0 auto 15px}@keyframes girar{to{transform:rotate(360deg)}}
-.toast{position:fixed;left:50%;bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));transform:translate(-50%,20px);max-width:calc(100% - 32px);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;background:rgba(10,14,26,.98);border:1px solid #d4af3780;color:#fff;box-shadow:0 12px 35px #0009;opacity:0;visibility:hidden;transition:.3s;z-index:3000;text-align:center}.toast.visible{opacity:1;visibility:visible;transform:translate(-50%,0)}
-.nav-inferior{position:fixed;left:0;right:0;bottom:0;z-index:999;background:rgba(5,8,16,.97);border-top:1px solid #d4af3740;box-shadow:0 -4px 20px #0008;padding-bottom:env(safe-area-inset-bottom)}
-.nav-inferior-inner{display:flex;max-width:900px;margin:0 auto;height:var(--alto-nav)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#9ca3af;text-decoration:none;font-size:12px;font-weight:600;transition:color .2s}
-.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.nav-item:hover,.nav-item.active{color:var(--dorado)}.nav-item.soporte{color:#4ade80}
-@media(max-width:768px){.page-header{flex-direction:column;align-items:flex-start}}
-@media(max-width:500px){.logo h1{font-size:16px}.pedido-card{padding:12px}.pedido-id,.pedido-precio{font-size:16px}.pedido-jugador-box{font-size:12px;padding:8px 10px}.timeline-step{width:60px}.timeline-icon{width:28px;height:28px}.timeline-icon svg{width:14px;height:14px}.timeline-label{font-size:10px}.streaming-box{padding:16px 14px}.dato-valor{font-size:14px}.btn-copiar-dato{width:36px;height:36px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+body{background:#000;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;padding-bottom:30px;overflow-x:hidden;min-height:100vh;position:relative;}
+body.con-nav{padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--color-dorado-claro);outline-offset:2px;}
+.video-fondo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;opacity:1;filter:brightness(1.15);will-change:transform;transform:translateZ(0);}
+.video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,14,26,0.15) 0%,rgba(10,14,26,0.35) 60%,rgba(10,14,26,0.6) 100%);z-index:-1;pointer-events:none;}
+body::before{content:'';position:fixed;top:-30%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.1),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,175,55,0.08),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+.main{position:relative;z-index:1}
+.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(5,8,16,0.85);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.header{padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);}
+.brand img{height:55px;width:auto;border-radius:12px;filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));}
+.header-right{display:flex;align-items:center;gap:12px}
+.btn-perfil{background:transparent;border:none;color:white;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;transition:all 0.3s;position:relative;margin-top:8px;}
+.btn-perfil .avatar-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;color:white;transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);position:relative;overflow:hidden;}
+.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
+.btn-perfil .avatar-circle .online-dot{position:absolute;bottom:0;right:0;width:12px;height:12px;background:#22c55e;border-radius:50%;border:2px solid #0b1220;}
+.btn-perfil .perfil-nombre{font-size:14px;font-weight:500;color:white;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+.menu-perfil{position:absolute;top:75px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:260px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;z-index:1000;overflow:hidden;}
+.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.menu-perfil-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));}
+.menu-perfil-header .avatar-grande{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(212,175,55,0.4);}
+.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
+.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
+.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-opcion{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#e5e7eb;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.menu-perfil-opcion:last-child{border-bottom:none}
+.menu-perfil-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:26px;border-left:3px solid var(--color-dorado);}
+.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
+.menu-perfil-opcion.danger{color:#ef4444}
+.menu-hamburguesa{background:transparent;border:none;color:white;font-size:28px;cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;margin-top:8px;}
+.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-dorado);}
+.menu-flotante{position:absolute;top:80px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:240px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.25s ease;z-index:999;overflow:hidden;}
+.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
+.menu-opcion{display:flex;align-items:center;gap:10px;padding:14px 20px;color:white;text-decoration:none;font-size:15px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.menu-opcion:last-child{border-bottom:none}
+.menu-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:24px;}
+.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
+.games-menu{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:12px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(255,255,255,0.04);}
+.games-menu::-webkit-scrollbar{display:none}
+.games-menu a{text-decoration:none;color:#cbd5e1;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;white-space:nowrap;transition:all 0.3s;border:1px solid transparent;}
+.games-menu a:hover{color:var(--color-dorado-claro);background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.3);}
+.games-menu a.active{color:var(--color-dorado-claro);background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));border-color:rgba(212,175,55,0.5);}
 
-/* ===== REDISEÑO APP MÓVIL RECARGAS GAMES ===== */
-:root{--alto-nav:62px;--dorado:#d4af37;--azul:#2587ff;--verde:#20d98b;--naranja:#ffb547;--card:rgba(10,17,31,.94);--borde:rgba(74,113,177,.25);--texto:#f4f7ff;--muted:#8fa2bf}
-html{background:#05070d}
-body{font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:radial-gradient(ellipse at 50% -10%,#10284c 0%,#080d18 44%,#05070d 78%);color:var(--texto);padding:74px 0 calc(var(--alto-nav) + 22px + env(safe-area-inset-bottom));}
-.video-fondo{opacity:.15;filter:brightness(.55) saturate(1.15)}
-.video-overlay{background:linear-gradient(180deg,rgba(5,7,13,.64),rgba(5,7,13,.94) 62%,#05070d)}
-.topbar{height:58px;padding:0 16px;background:rgba(5,9,18,.92);border-bottom:1px solid rgba(37,135,255,.26);box-shadow:0 8px 28px #0003;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.logo{gap:9px}.logo img{width:34px;height:34px;object-fit:cover;border-radius:11px;border:1px solid #d4af374d}.logo h1{font-size:15px;font-weight:900;letter-spacing:.15px}.logo h1 span{color:#52a1ff}
-.btn-back{font-size:12px;font-weight:700;padding:8px 11px;border:1px solid #ffffff12;background:#ffffff08;border-radius:11px;color:#cbd8ed}
-.container{width:100%;max-width:560px;margin:0 auto;padding:14px 14px 22px}
-.page-header{align-items:center;justify-content:space-between;gap:8px;margin:4px 0 18px}.page-header h2{font-size:25px;font-weight:900;letter-spacing:-.7px}.page-header h2 span{color:#58a2ff}.total{font-size:11px;font-weight:800;color:#dbe8ff;background:linear-gradient(135deg,#142743,#0d1728);border:1px solid #3b82f633;border-radius:12px;padding:8px 11px;white-space:nowrap}
-.chips{gap:7px;margin:0 -14px 14px;padding:0 14px 7px;scrollbar-width:none}.chip{gap:6px;padding:9px 11px;border-radius:12px;background:#0d1422;border:1px solid #ffffff10;color:#9eb0cb;font-size:11px;font-weight:800}.chip .n{font-size:10px;color:#c9d7ed;background:#ffffff0d;padding:2px 6px;border-radius:7px}.chip.activo{color:#fff;border-color:#2587ff8c;background:linear-gradient(135deg,#1765c8 0%,#12396d 100%);box-shadow:0 5px 18px #1674e52b}.chip.activo .n{color:#fff;background:#ffffff20}
-.buscador{margin-bottom:16px;position:relative}.buscador:before{content:'⌕';position:absolute;left:14px;top:50%;transform:translateY(-52%);font-size:23px;color:#6e8bb4;pointer-events:none}.buscador input{width:100%;height:46px;padding:0 14px 0 42px;border-radius:14px;background:#0a111e;border:1px solid #ffffff12;color:#fff;font-size:13px;box-shadow:inset 0 1px 0 #ffffff04}.buscador input::placeholder{color:#6f819d}.buscador input:focus{border-color:#2587ff;box-shadow:0 0 0 3px #2587ff18;outline:none}
-.pedidos-list{gap:12px}.pedido-card{padding:15px;border-radius:18px;background:linear-gradient(155deg,rgba(16,27,46,.98),rgba(8,14,25,.98));border:1px solid rgba(103,137,190,.19);box-shadow:0 9px 28px #00025;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.pedido-card:hover{background:linear-gradient(155deg,#111e33,#0a111e);border-color:#2587ff55}
-.pedido-header{align-items:center;margin-bottom:13px;padding-bottom:12px;border-bottom:1px solid #ffffff0b}.pedido-id{font-size:14px;color:#69adff;font-weight:900;letter-spacing:.2px}.pedido-fecha{font-size:10px;color:#8092ad}.pedido-precio{font-size:17px;color:#55e7a1;font-weight:900}.pedido-metodo{font-size:9px;letter-spacing:.8px;color:#8fa2bf}
-.pedido-body{gap:8px;margin-bottom:12px}.pedido-producto{font-size:13px;line-height:1.45;font-weight:800;align-items:flex-start}.pedido-producto svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7}.pedido-referencia{font-size:10px;background:#080e19;border:1px solid #ffffff09;color:#8ea1bd;border-radius:10px;padding:9px 10px}.pedido-referencia svg{fill:none;stroke:currentColor;stroke-width:1.5}
-.pedido-jugador-box{margin-bottom:13px;padding:11px 12px;background:#0a1220;border:1px solid #ffffff0b;border-radius:12px;color:#a9bad2;font-size:11px;line-height:1.8}.pedido-jugador-box strong{color:#eaf1ff;font-weight:800}
-.pedido-timeline{padding-top:13px;border-top:1px solid #ffffff0c}.timeline-step{width:68px;gap:6px}.timeline-icon{width:29px;height:29px;background:#19253a;color:#7186a5;border:1px solid #ffffff0a}.timeline-icon svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.timeline-step.recibido .timeline-icon{background:#1768c9;color:#fff}.timeline-step.verificando .timeline-icon{background:#8c5b13;color:#fff}.timeline-step.completado .timeline-icon{background:#087e55;color:#fff}.timeline-label{font-size:9px;color:#70829e}.timeline-line{height:2px;background:#1b2940;margin-top:-22px}.timeline-line.active{background:#2587ff}.timeline-line.completed{background:#20d98b}
-.pin-box{margin-top:12px;padding:14px;background:#0b261f;border:1px solid #20d98b55;border-radius:14px}.pin-label{font-size:10px;letter-spacing:1.5px;color:#9abfb1}.pin-value{font-size:22px;color:#59edaa;margin:9px 0;letter-spacing:2px}.btn-copiar{padding:10px 18px;border-radius:10px;background:#20d98b;color:#052318;font-size:12px}
-.manual-box,.pendiente-manual-box{margin-top:12px;padding:15px;border:1px solid #25d36655;border-radius:15px;background:#0b241b}.manual-text,.desc-pendiente{font-size:12px;line-height:1.6;color:#c5d4e7}.btn-whatsapp,.btn-whatsapp-pendiente{padding:11px 15px;border-radius:11px;font-size:12px}
-.streaming-box{margin-top:13px;padding:15px 12px;border:1px solid #d4af3766;border-radius:16px;background:linear-gradient(145deg,#1c1720,#101522 65%,#0c1422);box-shadow:0 8px 28px #0002}.streaming-titulo{font-size:14px;color:#f0d36b;letter-spacing:.7px}.streaming-subtitulo{font-size:11px;line-height:1.6;margin:7px 0 13px}.btn-revelar-datos{margin-top:10px;padding:12px;border-radius:12px;border:1px solid #d4af3780;background:linear-gradient(135deg,#d4af3724,#2587ff12);font-size:11px;color:#f0d36b}.dato-entrega{padding:11px 10px;background:#070c14;border:1px solid #ffffff0b;border-radius:11px;margin-bottom:8px}.dato-label{font-size:9px;letter-spacing:1px}.dato-valor{font-size:13px}.btn-copiar-dato{width:35px;height:35px;border-radius:9px}.aviso-renovacion{font-size:11px;line-height:1.5}.contador-auto-ocultar{font-size:10px}
-.sin-pedidos{padding:34px 20px;background:linear-gradient(145deg,#101b2e,#0a111e);border:1px solid #ffffff12;border-radius:18px}.sin-pedidos .icono{font-size:42px}.sin-pedidos h3{font-size:17px;font-weight:900}.sin-pedidos p{font-size:12px;color:#9aacc5;line-height:1.7}.btn-tienda{padding:12px 20px;border-radius:12px;background:linear-gradient(135deg,#d4af37,#f3d96c);font-size:12px}
-.loading{padding:36px 16px;font-size:12px}.spinner{border-color:#2587ff30;border-top-color:#2587ff;width:34px;height:34px}
-.toast{bottom:calc(var(--alto-nav) + 15px + env(safe-area-inset-bottom));font-size:12px;padding:11px 15px;border-radius:12px;background:#101a2a;border-color:#d4af3780}
-.nav-inferior{background:rgba(5,8,15,.96);border-top:1px solid #ffffff12;box-shadow:0 -8px 26px #0005;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}.nav-inferior-inner{height:var(--alto-nav);max-width:560px}.nav-item{gap:5px;font-size:10px;color:#7e8da5}.nav-item svg{width:21px;height:21px;stroke-width:1.8}.nav-item.active{color:#5aa4ff}.nav-item.active svg{filter:drop-shadow(0 0 5px #2587ff55)}.nav-item.soporte{color:#43d99a}
-@media(min-width:700px){body{padding-top:82px}.container{max-width:650px;padding:22px 18px}.topbar{padding:0 max(18px,calc((100vw - 650px)/2))}.page-header h2{font-size:28px}.nav-inferior-inner{max-width:650px}.pedido-card{padding:18px}}
-@media(max-width:380px){.container{padding-left:10px;padding-right:10px}.chips{margin-left:-10px;margin-right:-10px;padding-left:10px;padding-right:10px}.page-header h2{font-size:23px}.chip{padding:8px 9px;font-size:10px}.timeline-step{width:57px}.pedido-card{padding:12px}}
-@media(prefers-reduced-motion:reduce){.pedido-card,.chip,.nav-item{transition:none}}
-/* ===== FIN DEL REDISEÑO ===== */
+.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
 
+.pagina-titulo{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:24px 0 18px;}
+.pagina-titulo h1{font-size:22px;font-weight:900;background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.chip-entrega{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:14px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#86efac;font-size:12px;font-weight:700;}
+.chip-entrega::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.8);}
 
-/* Diseño inspirado en la referencia: resumen superior, panel y pedidos desplegables. */
-:root{--alto-nav:76px;--dorado:#f5d76e;--azul:#2587ff;--verde:#00d99a;--naranja:#ffad35;--texto:#f4f7ff}
-body{padding-top:76px;background:radial-gradient(ellipse at 50% 5%,#10223e 0%,#050a14 48%,#03060d 100%)}
-.video-fondo{opacity:.11;filter:brightness(.45) saturate(1.2)}
-.video-overlay{background:linear-gradient(180deg,rgba(3,7,15,.68),rgba(3,7,15,.9) 60%,#03060d)}
-.topbar{height:76px;padding:0 20px;background:rgba(3,8,18,.94);border-bottom:2px solid #2587ff;box-shadow:0 8px 28px #0005;backdrop-filter:blur(16px)}
-.logo img{width:56px;height:56px;object-fit:contain;border:0;background:transparent}.logo h1{font-size:23px;font-weight:900}.logo h1 span{color:#2587ff}.btn-back{font-size:16px;color:#b7c4da}
-.container{max-width:760px;padding:16px 14px 24px}
-.resumen-pedidos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:4px 0 16px}
-.resumen-item{min-width:0;display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:20px;background:linear-gradient(145deg,rgba(12,22,39,.98),rgba(5,12,24,.98));border:1px solid rgba(110,143,190,.28);box-shadow:0 8px 20px #0004}
-.resumen-icono{width:46px;height:46px;flex-shrink:0;display:grid;place-items:center;border-radius:13px;font-size:29px;font-weight:900;color:white;background:linear-gradient(145deg,#368bff,#1454e8);box-shadow:0 5px 18px #2678ff30}
-.resumen-pendientes .resumen-icono{background:linear-gradient(145deg,#ffbd47,#ef830d);box-shadow:0 5px 18px #ff9d2030}.resumen-completados .resumen-icono{background:linear-gradient(145deg,#13e6a0,#00a86f);box-shadow:0 5px 18px #00d99a30}
-.resumen-item strong{display:block;font-size:25px;line-height:1.1;font-weight:900}.resumen-item small{display:block;margin-top:4px;color:#aebbd0;font-size:11px;line-height:1.2}
-.panel-pedidos{padding:20px 16px 18px;border-radius:28px;background:linear-gradient(155deg,rgba(5,13,27,.97),rgba(3,8,17,.97));border:1px solid rgba(97,130,180,.24);box-shadow:0 12px 36px #0005}
-.page-header{justify-content:flex-start;margin:0 0 18px;gap:10px}.page-header h2{display:flex;align-items:center;gap:10px;font-size:28px;letter-spacing:-.5px}.page-header h2 span:not(.titulo-icono){color:#f4f7ff}.titulo-icono{display:inline-grid;place-items:center;color:#2587ff;font-size:31px}.page-header .total{margin-left:auto}
-.chips{margin-bottom:15px;gap:8px}.chip{padding:10px 13px;border-radius:24px;font-size:13px;background:#0c1526;border-color:#ffffff14}.chip.activo{color:#fff;border-color:#f5d76e;background:linear-gradient(135deg,#f5d76e38,#d4af3717);box-shadow:0 0 16px #d4af371a}.chip.activo .n{background:#0007;color:#fff}
-.buscador input{height:52px;border-radius:18px;background:#0b1424;border-color:#ffffff12;font-size:15px}
-.pedidos-list{gap:11px}.pedido-card{position:relative;overflow:hidden;padding:17px 16px;border-radius:25px;background:linear-gradient(115deg,rgba(7,17,32,.98) 0%,rgba(7,17,32,.95) 70%,rgba(9,20,37,.9) 100%);border:1px solid rgba(37,135,255,.55);border-left:4px solid #2587ff;box-shadow:0 6px 20px #0004;transition:border-color .2s,box-shadow .2s,transform .2s}.pedido-card:hover{border-color:#53a1ff;box-shadow:0 0 18px #2587ff22}.pedido-card:has(.timeline-step.completado){border-left-color:#2587ff}.pedido-header{border:0;padding:0 0 4px;margin-bottom:9px}.pedido-id{font-size:26px;color:#54a2ff;text-shadow:0 0 14px #2587ff32}.pedido-precio{font-size:18px}.pedido-metodo{font-size:10px}.pedido-body{margin-bottom:12px}.pedido-producto{font-size:14px}.pedido-referencia{font-size:12px}.pedido-jugador-box{padding:12px 14px;border-radius:17px;font-size:13px;background:#081222;border-color:#ffffff10}.pedido-timeline{padding-top:12px}
-.nav-inferior{background:rgba(3,8,18,.97);border-top:1px solid #ffffff16;box-shadow:0 -8px 28px #0006}.nav-inferior-inner{height:var(--alto-nav);max-width:760px}.nav-item{gap:5px;font-size:12px;color:#8d9ab0}.nav-item svg{width:25px;height:25px;stroke-width:1.9}.nav-item.active{color:#f5d76e}.nav-item.active svg{filter:drop-shadow(0 0 6px #f5d76e55)}.nav-item.soporte{color:#00d99a}
-@media(max-width:520px){.topbar{height:70px;padding:0 13px}.logo img{width:45px;height:45px}.logo h1{font-size:19px}.btn-back{font-size:14px;padding:8px}.container{padding:12px 9px 18px}.resumen-pedidos{gap:7px;margin-bottom:12px}.resumen-item{padding:10px 8px;gap:7px;border-radius:17px}.resumen-icono{width:39px;height:39px;border-radius:12px;font-size:24px}.resumen-item strong{font-size:23px}.resumen-item small{font-size:10px}.panel-pedidos{padding:17px 10px 14px;border-radius:24px}.page-header h2{font-size:24px}.page-header .total{font-size:10px;padding:7px 8px}.chips{margin-left:-10px;margin-right:-10px;padding-left:10px;padding-right:10px}.chip{padding:9px 10px;font-size:12px}.pedido-card{padding:15px 12px;border-radius:22px}.pedido-id{font-size:24px}.nav-inferior-inner{height:70px}.nav-item{font-size:11px}.nav-item svg{width:24px;height:24px}body{padding-top:70px;padding-bottom:calc(70px + 20px + env(safe-area-inset-bottom))}}
-@media(max-width:370px){.resumen-item{flex-direction:column;align-items:flex-start}.resumen-icono{width:34px;height:34px;font-size:21px}.resumen-item strong{font-size:21px}.resumen-item small{font-size:9px}.page-header h2{font-size:21px}.chip{font-size:11px;padding:8px}.pedido-id{font-size:21px}}
+/* RESUMEN */
+.resumen-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px solid rgba(212,175,55,0.25);border-radius:16px;padding:16px 12px;text-align:center;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.3);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#d4af37,#f5d76e);}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,#22c55e,#86efac);}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,#f5d76e,#d4af37);}
+.stat-num{font-size:26px;font-weight:900;color:var(--color-dorado-claro);line-height:1;margin-bottom:6px;text-shadow:0 0 15px rgba(212,175,55,0.3);}
+.stat-label{font-size:10px;color:#cbd5e1;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
 
+/* BUSCADOR */
+.search-box{position:relative;margin-bottom:14px;}
+.search-box input{width:100%;height:48px;padding:0 44px 0 44px;border-radius:14px;background:rgba(0,0,0,0.35);border:1px solid rgba(212,175,55,0.25);color:#fff;font-size:14px;font-family:inherit;transition:.3s;}
+.search-box input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+.search-box input::placeholder{color:#6b7280;}
+.search-box .icon-search{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9ca3af;width:18px;height:18px;pointer-events:none;}
+.search-box .clear-search{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:none;place-items:center;background:transparent;border:none;color:#9ca3af;cursor:pointer;border-radius:8px;}
+.search-box .clear-search:hover{background:rgba(255,255,255,0.06);color:#fff;}
+
+/* FILTROS */
+.filtros{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;margin-bottom:14px;scrollbar-width:none;}
+.filtros::-webkit-scrollbar{display:none;}
+.filtro-btn{flex:0 0 auto;padding:9px 14px;border-radius:20px;background:rgba(20,30,55,0.55);border:1px solid rgba(212,175,55,0.2);color:#cbd5e1;font-size:12px;font-weight:700;cursor:pointer;transition:.3s;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
+.filtro-btn:hover{border-color:rgba(212,175,55,0.4);color:var(--color-dorado-claro);}
+.filtro-btn.activo{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;border-color:#d4af37;box-shadow:0 4px 15px rgba(212,175,55,0.3);}
+.filtro-count{min-width:18px;height:18px;padding:0 5px;border-radius:8px;background:rgba(255,255,255,0.1);display:inline-grid;place-items:center;font-size:10px;}
+.filtro-btn.activo .filtro-count{background:rgba(0,0,0,0.25);color:#0a0e1a;}
+
+/* META */
+.orders-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;color:#94a3b8;font-size:12px;}
+.orders-meta strong{color:var(--color-dorado-claro);font-weight:800;}
+.refresh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:var(--color-dorado-claro);border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
+.refresh-btn:hover{background:rgba(212,175,55,0.2);}
+.refresh-btn svg{width:13px;height:13px;}
+.refresh-btn.loading svg{animation:rotar .7s linear infinite;}
+@keyframes rotar{to{transform:rotate(360deg)}}
+
+/* TARJETAS DE PEDIDO */
+.orders-list{display:flex;flex-direction:column;gap:14px;}
+.order-card{position:relative;background:linear-gradient(135deg,rgba(14,26,58,0.92),rgba(6,12,32,0.96));border:1px solid rgba(59,130,246,0.25);border-radius:18px;padding:16px;transition:transform 0.3s ease,box-shadow 0.3s ease;box-shadow:0 8px 25px rgba(0,0,0,0.3);overflow:hidden;}
+.order-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#d4af37,#3b82f6,#d4af37);background-size:300% 300%;border-radius:18px;z-index:-1;opacity:0;transition:opacity 0.3s;}
+.order-card:hover::before{opacity:1;}
+.order-card:hover{transform:translateY(-4px);box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.2);}
+
+.order-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(212,175,55,0.15);}
+.order-num-wrap{display:flex;align-items:center;gap:10px;min-width:0;}
+.order-icon{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.25));border:1px solid rgba(212,175,55,0.4);border-radius:12px;font-size:18px;}
+.order-num-label{display:block;color:#94a3b8;font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:3px;}
+.order-num{display:block;color:#fff;font-size:15px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.order-status{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:10px;font-size:10px;font-weight:800;line-height:1.2;text-align:center;max-width:130px;}
+.order-status::before{content:'';width:6px;height:6px;flex-shrink:0;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;}
+.status-success{color:#4ade80;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);}
+.status-pending{color:#f5d76e;background:rgba(245,215,110,0.1);border:1px solid rgba(245,215,110,0.35);}
+.status-error{color:#f87171;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);}
+.status-neutral{color:#cbd5e1;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.3);}
+
+.order-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;}
+.order-field{min-width:0;}
+.order-field.full{grid-column:1 / -1;}
+.field-label{display:block;margin-bottom:4px;color:#94a3b8;font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.field-value{display:block;color:#e5e7eb;font-size:13px;font-weight:600;line-height:1.4;overflow-wrap:anywhere;}
+.field-value.nickname{color:#dbeafe;}
+.field-value.product{color:var(--color-dorado-claro);font-size:13px;font-weight:800;}
+
+.ref-row{display:flex;align-items:center;gap:8px;min-width:0;}
+.ref-row .field-value{flex:1;min-width:0;}
+.copy-btn{width:32px;height:32px;flex-shrink:0;display:grid;place-items:center;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);border-radius:8px;color:var(--color-dorado-claro);cursor:pointer;transition:.2s;}
+.copy-btn:hover{background:rgba(212,175,55,0.25);}
+.copy-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
+.copy-btn.copied{background:rgba(34,197,94,0.2);color:#4ade80;border-color:rgba(34,197,94,0.5);}
+
+.order-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(212,175,55,0.1);}
+.order-date{display:flex;align-items:center;gap:5px;color:#94a3b8;font-size:11px;min-width:0;}
+.order-date svg{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;}
+.order-date span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.support-link{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;color:#4ade80;font-size:11px;font-weight:800;text-decoration:none;padding:6px 10px;border-radius:8px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);transition:.2s;}
+.support-link:hover{background:rgba(34,197,94,0.15);}
+.support-link svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+
+/* ESTADOS */
+.state-box{padding:40px 20px;text-align:center;background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px dashed rgba(212,175,55,0.3);border-radius:18px;}
+.state-icon{width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(59,130,246,0.1));border:1px solid rgba(212,175,55,0.4);border-radius:50%;font-size:26px;color:var(--color-dorado-claro);}
+.state-box h3{margin:0 0 8px;font-size:16px;font-weight:800;color:var(--color-dorado-claro);}
+.state-box p{max-width:300px;margin:0 auto;color:#cbd5e1;font-size:13px;line-height:1.6;}
+.state-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;margin-top:18px;padding:0 20px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(212,175,55,0.4);transition:.3s;font-family:inherit;}
+.state-action:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.6);}
+.state-action svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+
+.error-state .state-icon{background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));border-color:rgba(239,68,68,0.5);color:#f87171;}
+
+.spinner{width:28px;height:28px;margin:0 auto 16px;border:3px solid rgba(212,175,55,0.2);border-top-color:#d4af37;border-radius:50%;animation:rotar .8s linear infinite;}
+
+/* PAGINACIÓN */
+.pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:22px;}
+.page-btn{width:40px;height:40px;display:grid;place-items:center;background:rgba(20,30,55,0.7);border:1px solid rgba(212,175,55,0.3);border-radius:12px;color:var(--color-dorado-claro);cursor:pointer;transition:.2s;}
+.page-btn:hover:not(:disabled){background:rgba(212,175,55,0.15);border-color:var(--color-dorado);}
+.page-btn:disabled{opacity:.3;cursor:not-allowed;}
+.page-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;}
+.page-info{min-width:80px;text-align:center;color:#cbd5e1;font-size:12px;font-weight:700;}
+.page-info strong{color:var(--color-dorado-claro);}
+
+/* TOAST */
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,20px);max-width:calc(100% - 32px);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;background:rgba(10,14,26,0.97);border:1px solid rgba(212,175,55,0.5);color:#fff;box-shadow:0 12px 35px rgba(0,0,0,0.6);opacity:0;visibility:hidden;transition:all 0.3s ease;z-index:3000;text-align:center;}
+body.con-nav .toast{bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));}
+.toast.visible{opacity:1;visibility:visible;transform:translate(-50%,0);}
+.toast.error{border-color:rgba(239,68,68,0.6);color:#fecaca;}
+
+/* NAV INFERIOR */
+.nav-inferior{position:fixed;left:0;right:0;bottom:0;z-index:999;background:rgba(5,8,16,0.96);border-top:1px solid rgba(212,175,55,0.25);box-shadow:0 -4px 20px rgba(0,0,0,0.5);padding-bottom:env(safe-area-inset-bottom);}
+.nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#9ca3af;text-decoration:none;font-size:12px;font-weight:600;transition:color 0.2s;}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
+.nav-item.soporte{color:#4ade80}
+
+/* MODAL LOGIN */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;justify-content:center;align-items:center;padding:20px;}
+.modal-overlay.activo{display:flex}
+.modal-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.3);border-radius:24px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.7);overflow:hidden;}
+.modal-header{padding:24px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));}
+.modal-header .icono-grande{font-size:50px;margin-bottom:10px}
+.modal-header h2{font-size:20px;font-weight:800;color:var(--color-dorado-claro);letter-spacing:1px;text-transform:uppercase;}
+.modal-body{padding:24px 20px}
+.modal-body label{color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;}
+.modal-body input{width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;font-family:inherit;}
+.modal-body input:focus{outline:none;border-color:var(--color-dorado);}
+.modal-btn{width:100%;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;border:none;text-transform:uppercase;font-family:inherit;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;}
+.modal-footer{padding:0 20px 20px;display:flex;gap:10px}
+.modal-btn.cancelar{background:rgba(71,85,105,0.3);color:#94a3b8;border:1px solid rgba(71,85,105,0.5);}
+
+@media(max-width:500px){
+    body{padding-top:100px}
+    .main{padding:15px}
+    .brand img{height:45px}
+    .header{padding:10px 16px}
+    .games-menu{padding:10px 15px}
+    .menu-flotante{right:10px;min-width:220px}
+    .btn-perfil .perfil-nombre,.btn-perfil .perfil-flecha{display:none}
+    .menu-perfil{right:0;min-width:230px}
+    .pagina-titulo h1{font-size:19px}
+    .stat-num{font-size:22px}
+    .order-card{padding:14px}
+    .order-num{font-size:14px}
+    .order-fields{gap:10px 12px}
+    .field-value{font-size:12px}
+}
 </style>
 </head>
-<body>
-<video autoplay muted loop playsinline class="video-fondo" aria-hidden="true"><source src="fondo.mp4" type="video/mp4"></video>
+<body class="con-nav">
+
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
 <div class="video-overlay"></div>
-<header class="topbar">
-  <a href="index.html" class="logo"><img src="logo.png" alt="Recargas Games"><h1>Recargas<span>Games</span></h1></a>
-  <button class="btn-back" id="btnVolver" type="button">← Volver</button>
-</header>
-<main class="container">
-  <section class="resumen-pedidos" aria-label="Resumen de pedidos">
-    <div class="resumen-item resumen-total"><span class="resumen-icono">▣</span><div><strong id="resumenTotal">0</strong><small>Total pedidos</small></div></div>
-    <div class="resumen-item resumen-pendientes"><span class="resumen-icono">◷</span><div><strong id="resumenPendientes">0</strong><small>Pendientes</small></div></div>
-    <div class="resumen-item resumen-completados"><span class="resumen-icono">✓</span><div><strong id="resumenCompletados">0</strong><small>Completados</small></div></div>
-  </section>
-  <section class="panel-pedidos">
-  <div class="page-header"><h2><span class="titulo-icono">▤</span> Mis <span>Pedidos</span></h2><span class="total" id="totalPedidos">0 pedidos</span></div>
-  <div class="chips" id="chips" role="group" aria-label="Filtrar por estado">
-    <button class="chip activo" data-estado="todos" type="button">Todos <span class="n" id="n-todos">0</span></button>
-    <button class="chip" data-estado="completado" type="button">Completados <span class="n" id="n-completado">0</span></button>
-    <button class="chip" data-estado="pendiente" type="button">Pendientes <span class="n" id="n-pendiente">0</span></button>
-    <button class="chip" data-estado="procesando" type="button">Procesando <span class="n" id="n-procesando">0</span></button>
-    <button class="chip" data-estado="cancelado" type="button">Cancelados <span class="n" id="n-cancelado">0</span></button>
-  </div>
-  <div class="buscador"><input type="search" id="buscarInput" placeholder="Buscar por número de pedido, referencia o juego" aria-label="Buscar pedidos" autocomplete="off"></div>
-  <div class="pedidos-list" id="listaPedidos" aria-live="polite"><div class="loading"><div class="spinner"></div><p>Cargando tus pedidos...</p></div></div>
-  </section>
-</main>
+
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
+        <div class="header-right">
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="logo.png" alt="Logo" id="avatarLogo">
+                        <span class="online-dot"></span>
+                    </div>
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+                </button>
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                    <div class="menu-perfil-header">
+                        <div class="avatar-grande" id="avatarGrande"><img src="logo.png" alt="Logo"></div>
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
+                        </div>
+                    </div>
+                    <a href="dashboard.html" class="menu-perfil-opcion"><span class="icono">📊</span> Mi Panel</a>
+                    <a href="perfil.html" class="menu-perfil-opcion"><span class="icono">👤</span> Editar Perfil</a>
+                    <a href="pedidos.html" class="menu-perfil-opcion"><span class="icono">📦</span> Mis Pedidos</a>
+                    <a href="favoritos.html" class="menu-perfil-opcion"><span class="icono">❤️</span> Favoritos</a>
+                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
+                </div>
+            </div>
+            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        </div>
+        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
+            <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">🔑 Iniciar Sesión</a>
+            <a href="register.html" class="menu-opcion" id="menuRegister">📝 Crear Cuenta</a>
+            <div id="menuConSesion" style="display:none;">
+                <a href="dashboard.html" class="menu-opcion">📊 Mi Panel</a>
+                <a href="pedidos.html" class="menu-opcion">📦 Mis Pedidos</a>
+                <a href="perfil.html" class="menu-opcion">👤 Editar Perfil</a>
+                <div class="menu-divider"></div>
+                <a href="#" class="menu-opcion" id="menuLogout" style="color:#ef4444;">🚪 Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+    <nav class="games-menu" aria-label="Juegos">
+        <a href="index.html">Inicio</a>
+        <a href="freefire.html">Free Fire (LATAM)</a>
+        <a href="freefire-br.html">Free Fire (BRASIL)</a>
+        <a href="bloodstrike.html">Blood Strike</a>
+        <a href="roblox.html">Roblox</a>
+        <a href="ml.html">Mobile Legends</a>
+        <a href="cod.html">COD Mobile</a>
+        <a href="pubg.html">PUBG Mobile</a>
+        <a href="arenabreakout.html">Arena Breakout</a>
+        <a href="delta.html">Delta Force</a>
+        <a href="bigo.html">Bigo Live</a>
+        <a href="gift-cards.html">Gift Cards</a>
+        <a href="netflix.html">Netflix</a>
+        <a href="disney.html">Disney+</a>
+    </nav>
+</div>
+
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🔑</div>
+            <h2>Iniciar Sesión</h2>
+        </div>
+        <div class="modal-body">
+            <form id="loginForm">
+                <div style="margin-bottom:20px;">
+                    <label for="loginEmail">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label for="loginPassword">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required>
+                </div>
+                <button type="submit" id="loginBtn" class="modal-btn">Ingresar</button>
+            </form>
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
+                <p style="margin-top:8px;"><a href="recuperar.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+
+    <div class="pagina-titulo">
+        <h1>📦 Mis Pedidos</h1>
+        <span class="chip-entrega">Historial completo</span>
+    </div>
+
+    <div class="resumen-stats">
+        <div class="stat-card">
+            <div class="stat-num" id="totalOrders">—</div>
+            <div class="stat-label">Pedidos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="completedOrders">—</div>
+            <div class="stat-label">Completados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="pendingOrders">—</div>
+            <div class="stat-label">En proceso</div>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m16 16 4 4"></path>
+        </svg>
+        <input id="searchInput" type="search" placeholder="Buscar por ID, producto, referencia..." autocomplete="off" aria-label="Buscar pedidos">
+        <button class="clear-search" id="clearSearch" type="button" aria-label="Limpiar búsqueda">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m18 6-12 12M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="filtros">
+        <button class="filtro-btn activo" data-filter="todos" type="button">Todos <span class="filtro-count" id="countAll">0</span></button>
+        <button class="filtro-btn" data-filter="completado" type="button">✅ Completados <span class="filtro-count" id="countCompleted">0</span></button>
+        <button class="filtro-btn" data-filter="pendiente" type="button">⏳ En proceso <span class="filtro-count" id="countPending">0</span></button>
+        <button class="filtro-btn" data-filter="error" type="button">⚠️ Con problemas <span class="filtro-count" id="countError">0</span></button>
+    </div>
+
+    <div class="orders-meta">
+        <span id="resultsText">Cargando pedidos...</span>
+        <button class="refresh-btn" id="refreshButton" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 7v5h-5"></path>
+                <path d="M4 17v-5h5"></path>
+                <path d="M5.6 9A7 7 0 0 1 17.5 6L20 12M4 12l2.5 6A7 7 0 0 0 18.4 15"></path>
+            </svg>
+            Actualizar
+        </button>
+    </div>
+
+    <div class="orders-list" id="ordersList" aria-live="polite">
+        <div class="state-box">
+            <div class="spinner"></div>
+            <h3>Cargando tus pedidos</h3>
+            <p>Estamos consultando la información de tu cuenta.</p>
+        </div>
+    </div>
+
+    <div class="pagination" id="pagination" hidden>
+        <button class="page-btn" id="prevPage" type="button" aria-label="Anterior">
+            <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
+        </button>
+        <span class="page-info" id="pageInfo">Página <strong>1</strong></span>
+        <button class="page-btn" id="nextPage" type="button" aria-label="Siguiente">
+            <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+    </div>
+
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <nav class="nav-inferior" aria-label="Navegación principal">
- <div class="nav-inferior-inner">
-  <a href="index.html" class="nav-item"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Inicio</span></a>
-  <a href="index.html#juegos" class="nav-item"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg><span>Juegos</span></a>
-  <a href="pedidos.html" class="nav-item active" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg><span>Pedidos</span></a>
-  <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg><span>Soporte</span></a>
- </div>
+    <div class="nav-inferior-inner">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            Inicio
+        </a>
+        <a href="index.html#juegos" class="nav-item">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
+            Juegos
+        </a>
+        <a href="pedidos.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
+            Pedidos
+        </a>
+        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
+            Soporte
+        </a>
+    </div>
 </nav>
+
 <script>
-'use strict';
-const firebaseConfig={
- apiKey:"AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
- authDomain:"free-52119.firebaseapp.com",
- databaseURL:"https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
- projectId:"free-52119",
- storageBucket:"free-52119.firebasestorage.app",
- messagingSenderId:"632240144599",
- appId:"1:632240144599:web:e31c25665ffe19c194b092",
- measurementId:"G-5NLLLEPWPK"
+const firebaseConfig = {
+    apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+    authDomain: "free-52119.firebaseapp.com",
+    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "free-52119",
+    storageBucket: "free-52119.firebasestorage.app",
+    messagingSenderId: "632240144599",
+    appId: "1:632240144599:web:e31c25665ffe19c194b092"
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth(),db=firebase.database();
-let todosPedidos=[],uidActual=null,consultaActual=null,estadoFiltro='todos',toastTimer=null;
-const timersAutoOcultar=new Map();
-const listaEl=document.getElementById('listaPedidos'),buscarEl=document.getElementById('buscarInput'),toastEl=document.getElementById('toast');
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function avisar(m){toastEl.textContent=m;toastEl.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('visible'),3000);}
-function normalizarEstado(raw){const e=String(raw||'pendiente').toLowerCase().trim();if(['completado','completada','completed','completada_ok'].includes(e))return'completado';if(['cancelado','cancelada','cancelled','canceled'].includes(e))return'cancelado';if(['procesando','processing'].includes(e))return'procesando';return'pendiente';}
-document.getElementById('btnVolver').addEventListener('click',()=>{if(window.history.length>1)window.history.back();else window.location.href='index.html';});
-auth.onAuthStateChanged(user=>{if(!user){window.location.href='login.html';return;}uidActual=user.uid;cargarPedidos();});
-function cargarPedidos(){
- if(consultaActual)consultaActual.off();
- consultaActual=db.ref('pedidos').orderByChild('uid').equalTo(uidActual);
- consultaActual.on('value',snapshot=>{
-  todosPedidos=[];
-  snapshot.forEach(child=>{const p=child.val()||{};p.key=child.key;p._estado=normalizarEstado(p.estado);todosPedidos.push(p);});
-  todosPedidos.sort((a,b)=>{const da=new Date(a.fecha||0).getTime(),dbb=new Date(b.fecha||0).getTime();return dbb-da;});
-  actualizarContadores();filtrarPedidos();
- },error=>{
-  console.error('Error cargando pedidos:',error);
-  listaEl.innerHTML='<div class="sin-pedidos"><div class="icono">⚠️</div><h3>No pudimos cargar tus pedidos</h3><p>Revisa tu conexión e intenta de nuevo. Si sigue igual, escríbenos por WhatsApp.</p><a href="https://wa.me/584228242411" target="_blank" rel="noopener" class="btn-tienda">Contactar soporte</a></div>';
- });
-}
-function actualizarContadores(){
- const c={todos:todosPedidos.length,completado:0,pendiente:0,procesando:0,cancelado:0};
- todosPedidos.forEach(p=>c[p._estado]++);
- Object.keys(c).forEach(k=>document.getElementById('n-'+k).textContent=c[k]);
- document.getElementById('totalPedidos').textContent=`${todosPedidos.length} ${todosPedidos.length===1?'pedido':'pedidos'}`;
- document.getElementById('resumenTotal').textContent=c.todos;
- document.getElementById('resumenPendientes').textContent=c.pendiente;
- document.getElementById('resumenCompletados').textContent=c.completado;
-}
-function filtrarPedidos(){
- const q=buscarEl.value.toLowerCase().trim();
- let arr=estadoFiltro==='todos'?todosPedidos:todosPedidos.filter(p=>p._estado===estadoFiltro);
- if(q)arr=arr.filter(p=>[p.numero_pedido,p.order_id,p.referencia,p.key,p.juego,p.producto,p.referencia_pago].some(v=>String(v||'').toLowerCase().includes(q)));
- mostrarPedidos(arr);
-}
-function formatearFecha(v){if(!v)return'Fecha no disponible';const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString('es-VE',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
-function montoUSD(v){const n=Number.parseFloat(v);return Number.isFinite(n)?n.toFixed(2):'0.00';}
-const iconos={
- caja:'<svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
- ref:'<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>',
- ok:'<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',
- buscar:'<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>'
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+const WHATSAPP_SUPPORT = "584228242411";
+const PAGE_SIZE = 5;
+
+let currentUser = null;
+let allOrders = [];
+let currentFilter = "todos";
+let currentPage = 1;
+let toastTimer = null;
+let ordersListener = null;
+let activeOrdersRef = null;
+let loadingOrders = true;
+
+const $ = (s) => document.querySelector(s);
+const ordersList = $("#ordersList");
+const searchInput = $("#searchInput");
+const clearSearch = $("#clearSearch");
+const pagination = $("#pagination");
+const refreshButton = $("#refreshButton");
+const toastEl = $("#toast");
+
+const ICONS = {
+    package: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 8 9 5 9-5M3 8v9l9 5 9-5V8M12 13v9"></path></svg>`,
+    calendar: `<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>`,
+    copy: `<svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></svg>`,
+    check: `<svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg>`,
+    whatsapp: `<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"></path></svg>`
 };
-function mostrarPedidos(pedidos){
- if(!pedidos.length){
-  const ninguno=todosPedidos.length===0;
-  listaEl.innerHTML=`<div class="sin-pedidos"><div class="icono">📭</div><h3>${ninguno?'Aún no tienes pedidos':'No encontramos pedidos'}</h3><p>${ninguno?'Cuando hagas tu primera recarga, aparecerá aquí.':'Prueba con otro estado o cambia lo que escribiste en el buscador.'}</p>${ninguno?'<a href="index.html" class="btn-tienda">Elegir un juego</a>':''}</div>`;
-  return;
- }
- let html='';
- pedidos.forEach(p=>{
-  const estado=p._estado,id=p.numero_pedido||p.order_id||p.referencia||p.key||'N/A',juego=p.juego||'Producto',producto=p.producto||'',monto=montoUSD(p.monto_usd??p.monto),metodo=p.metodo||p.metodo_pago||'Pago Móvil',idJugador=p.id_jugador||p.player_id||'No especificado',nombreJugador=p.nombre_jugador||p.player_name||'No especificado';
-  let sr='recibido',sv='',sc='',l1='active',l2='';
-  if(estado==='completado'){sv='verificando';sc='completado';l1='completed';l2='completed';}
-  else if(estado==='procesando'){sv='verificando';l1='active';}
-  else if(estado==='cancelado'){sr=sv=sc=l1=l2='';}
-  const esStreaming=p.es_streaming===true||!!(p.datos_streaming&&(p.datos_streaming.correo||p.datos_streaming.clave));
-  let pinHtml='';
-  const pin=(p.pin||(Array.isArray(p.codigos)?p.codigos[0]:''));
-  if(!esStreaming&&pin){pinHtml=`<div class="pin-box"><div class="pin-label">${juego.toUpperCase().includes('ROBLOX')?'Tu PIN de Roblox':'Tu código'}</div><div class="pin-value">${esc(pin)}</div><button type="button" class="btn-copiar" data-pin="${esc(pin)}">Copiar</button></div>`;}
-  let streamingHtml='';
-  const d=p.datos_streaming||{},tieneDatos=esStreaming&&(d.correo||d.clave);
-  if(tieneDatos){
-   const campos=[['📧 CORREO',d.correo,''],['🔑 CONTRASEÑA',d.clave,''],['👤 PERFIL',d.perfil,''],['🔢 PIN DEL PERFIL',d.pin_perfil,''],['📅 VENCE',d.fecha_vencimiento,''],['🎟️ CÓDIGO DE RENOVACIÓN',p.codigo_aprobacion,'codigo-renovacion']].filter(x=>x[1]);
-   const camposHtml=campos.map(([label,valor,clase])=>{const real=String(valor),dots='•'.repeat(Math.min(12,real.length));return `<div class="dato-entrega dato-oculto ${clase}" data-valor-real="${esc(real)}"><div class="dato-label">${label}</div><div class="dato-contenido"><div class="dato-valor">${dots}</div><button type="button" class="btn-copiar-dato" data-copiar="${esc(real)}" aria-label="Copiar ${esc(label)}">▢</button></div></div>`;}).join('');
-   const titulo=d.perfil?'🎬 DATOS DE TU PERFIL':'🎬 DATOS DE TU CUENTA',sub=d.perfil?'Usa estos datos para iniciar sesión en Netflix':'Usa estos datos para iniciar sesión. No cambies la contraseña ni el PIN.';
-   streamingHtml=`<div class="streaming-box"><div class="streaming-titulo">${titulo}</div><div class="streaming-subtitulo">${sub}</div><button type="button" class="btn-revelar-datos" data-accion="revelar" data-pedido="${esc(p.key)}">👁️ Ver datos de acceso</button><div class="contenedor-datos-streaming" id="datos-${esc(p.key)}">${camposHtml}${p.codigo_aprobacion?'<div class="aviso-renovacion">⚠️ Guarda este código. Lo necesitarás para renovar.</div>':''}<div class="contador-auto-ocultar">🙈 Se ocultará automáticamente en <span class="segundos" data-contador="${esc(p.key)}">60</span>s</div><button type="button" class="btn-revelar-datos" data-accion="ocultar" data-pedido="${esc(p.key)}">🙈 Ocultar datos</button></div></div>`;
-  }else if(esStreaming){
-   const msg=encodeURIComponent(`Hola, necesito los datos de acceso de mi pedido ${id} (${producto})`);
-   streamingHtml=`<div class="pendiente-manual-box"><div class="icono-pendiente">⏳</div><div class="titulo-pendiente">Pendiente de entrega</div><div class="desc-pendiente">Tu pedido está siendo procesado.<br><strong>Te enviaremos los datos de acceso por WhatsApp</strong> en los próximos minutos.</div><a href="https://wa.me/584228242411?text=${msg}" target="_blank" rel="noopener" class="btn-whatsapp-pendiente">💬 Consultar por WhatsApp</a></div>`;
-  }
-  let manualHtml='';
-  if(!esStreaming&&(p.metodo_pago==='MANUAL'||String(p.paquete||'').startsWith('manual_'))){
-   const msg=encodeURIComponent(`Hola, necesito mi entrega del pedido ${id}`);
-   manualHtml=`<div class="manual-box"><div class="manual-text">Este producto se entrega de forma manual.</div><a href="https://wa.me/584228242411?text=${msg}" target="_blank" rel="noopener" class="btn-whatsapp">Pedir mi entrega por WhatsApp</a></div>`;
-  }
-  html+=`<article class="pedido-card" data-pedido-key="${esc(p.key)}">
-   <div class="pedido-header"><div class="pedido-header-left"><div class="pedido-id">#${esc(id)}</div><div class="pedido-fecha">📅 ${esc(formatearFecha(p.fecha))}</div></div><div class="pedido-header-right"><span class="pedido-precio">$${esc(monto)}</span><span class="pedido-metodo">${esc(metodo)}</span></div></div>
-   <div class="pedido-body"><div class="pedido-producto">${iconos.caja}${esc(juego)} ${producto?' - '+esc(producto):''}</div><div class="pedido-referencia">${iconos.ref} Ref: ${esc(p.referencia_pago||'N/A')}</div></div>
-   <div class="pedido-jugador-box"><div><strong>ID de Jugador:</strong> ${esc(idJugador)}</div><div><strong>Nombre de Jugador:</strong> ${esc(nombreJugador)}</div></div>
-   <div class="pedido-timeline"><div class="timeline-step ${sr}"><div class="timeline-icon">${iconos.ok}</div><div class="timeline-label">Recibido</div></div><div class="timeline-line ${l1}"></div><div class="timeline-step ${sv}"><div class="timeline-icon">${iconos.buscar}</div><div class="timeline-label">Verificando</div></div><div class="timeline-line ${l2}"></div><div class="timeline-step ${sc}"><div class="timeline-icon">${iconos.ok}</div><div class="timeline-label">${estado==='cancelado'?'Cancelado':'Completado'}</div></div></div>
-   ${pinHtml}${streamingHtml}${manualHtml}</article>`;
- });
- // Al volver a dibujar las tarjetas, limpiar temporizadores cuyos paneles ya no existen.
- for(const [key,timer] of timersAutoOcultar){if(!document.getElementById('datos-'+CSS.escape(key))){clearInterval(timer);timersAutoOcultar.delete(key);}}
- listaEl.innerHTML=html;
+
+function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]);}
+function firstValue(o,keys,fb=""){for(const k of keys){const v=o&&o[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return v;}return fb;}
+function normalizeText(v){return String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();}
+
+function getOrderId(o,k){return String(firstValue(o,["numeroPedido","numero_pedido","orderNumber","orderId","pedidoId","pedido","numero","idPedido","id_pedido","id"],k));}
+function getPlayerId(o){return String(firstValue(o,["id_jugador","idJugador","playerId","player_id","uid_jugador","uidJugador","idFreeFire","id_free_fire","id_usuario","idUsuario","gameId","game_id"],"No indicado"));}
+function getNickname(o){return String(firstValue(o,["nombre_jugador","nombreJugador","nickname","nickName","nick","playerName","player_name","nombre_usuario","nombreUsuario","usuario_juego","usuarioJuego"],"No indicado"));}
+function getProduct(o){return String(firstValue(o,["producto","product","nombreProducto","nombre_producto","nombre","descripcion","description","paquete","item"],"Producto no especificado"));}
+function getReference(o){return String(firstValue(o,["referencia","reference","referenciaPago","referencia_pago","referencia_pago_movil","referenciaPagoMovil","ref","paymentReference","transactionReference","transaccion","transactionId"],"No indicada"));}
+function getStatus(o){return String(firstValue(o,["estado","status","estadoPedido","estado_pedido","statusPedido","status_pedido"],"pendiente"));}
+
+function classifyStatus(raw){
+    const s = normalizeText(raw);
+    if(s.includes("complet")||s.includes("exitos")||s.includes("entreg")||s.includes("finaliz")||s.includes("aprob")||s.includes("success")||s.includes("realizado"))
+        return {type:"completado",label:"Completado",css:"status-success"};
+    if(s.includes("error")||s.includes("fall")||s.includes("rechaz")||s.includes("cancel")||s.includes("deneg")||s.includes("failed"))
+        return {type:"error",label:"Con problemas",css:"status-error"};
+    if(s.includes("pendient")||s.includes("verific")||s.includes("proceso")||s.includes("espera")||s.includes("procesando")||s.includes("validando")||s.includes("iniciado")||s.includes("payment"))
+        return {type:"pendiente",label:"En proceso",css:"status-pending"};
+    return {type:"pendiente",label:raw||"En proceso",css:"status-neutral"};
 }
-listaEl.addEventListener('click',e=>{
- const reveal=e.target.closest('.btn-revelar-datos');
- if(reveal){const key=reveal.dataset.pedido,box=document.getElementById('datos-'+key);if(!box)return;if(reveal.dataset.accion==='revelar')revelarDatos(key,box);else ocultarDatos(key,box);return;}
- const pinBtn=e.target.closest('.btn-copiar');if(pinBtn){copiarTexto(pinBtn.dataset.pin,'✓ PIN copiado');return;}
- const copyBtn=e.target.closest('.btn-copiar-dato');if(copyBtn){copiarTexto(copyBtn.dataset.copiar,'✓ Dato copiado');copyBtn.classList.add('copiado');setTimeout(()=>copyBtn.classList.remove('copiado'),1500);}
+
+function getOrderTimestamp(o){
+    const raw = firstValue(o,["fecha","createdAt","created_at","fecha_creacion","fechaCreacion","timestamp","time","created","date"],null);
+    if(raw===null) return 0;
+    if(typeof raw==="number") return raw<1000000000000?raw*1000:raw;
+    if(typeof raw==="object"){if(typeof raw.seconds==="number")return raw.seconds*1000;if(typeof raw._seconds==="number")return raw._seconds*1000;}
+    const p = Date.parse(raw); return Number.isNaN(p)?0:p;
+}
+function formatDate(o){
+    const t = getOrderTimestamp(o); if(!t) return "Fecha no disponible";
+    try{return new Intl.DateTimeFormat("es-VE",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(t));}
+    catch{return "Fecha no disponible";}
+}
+function getSearchText(o){return normalizeText([getOrderId(o,o._key),getPlayerId(o),getNickname(o),getProduct(o),getReference(o),getStatus(o)].join(" "));}
+
+function getVisibleOrders(){
+    const q = normalizeText(searchInput.value);
+    return allOrders.filter(o=>{
+        const st = classifyStatus(getStatus(o));
+        const okF = currentFilter==="todos" || st.type===currentFilter;
+        const okS = !q || getSearchText(o).includes(q);
+        return okF && okS;
+    });
+}
+
+function updateSummary(){
+    const c = allOrders.filter(o=>classifyStatus(getStatus(o)).type==="completado").length;
+    const p = allOrders.filter(o=>classifyStatus(getStatus(o)).type==="pendiente").length;
+    const e = allOrders.filter(o=>classifyStatus(getStatus(o)).type==="error").length;
+    $("#totalOrders").textContent = allOrders.length;
+    $("#completedOrders").textContent = c;
+    $("#pendingOrders").textContent = p;
+    $("#countAll").textContent = allOrders.length;
+    $("#countCompleted").textContent = c;
+    $("#countPending").textContent = p;
+    $("#countError").textContent = e;
+}
+
+function updateFilterButtons(){
+    document.querySelectorAll(".filtro-btn").forEach(b=>{
+        const a = b.dataset.filter===currentFilter;
+        b.classList.toggle("activo",a);
+    });
+}
+
+function renderLoading(){
+    ordersList.innerHTML = `
+        <div class="state-box">
+            <div class="spinner"></div>
+            <h3>Cargando tus pedidos</h3>
+            <p>Estamos consultando la información de tu cuenta.</p>
+        </div>`;
+    $("#resultsText").textContent = "Cargando pedidos...";
+    pagination.hidden = true;
+}
+
+function renderEmpty(title,desc,showBtn=false){
+    ordersList.innerHTML = `
+        <div class="state-box">
+            <div class="state-icon">${ICONS.package}</div>
+            <h3>${escapeHTML(title)}</h3>
+            <p>${escapeHTML(desc)}</p>
+            ${showBtn?`<a class="state-action" href="index.html">Explorar productos <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>`:""}
+        </div>`;
+    pagination.hidden = true;
+}
+
+function renderError(msg){
+    ordersList.innerHTML = `
+        <div class="state-box error-state">
+            <div class="state-icon">⚠</div>
+            <h3>No pudimos cargar los pedidos</h3>
+            <p>${escapeHTML(msg)}</p>
+            <button class="state-action" id="retryBtn" type="button">Intentar de nuevo</button>
+        </div>`;
+    $("#retryBtn").addEventListener("click", subscribeToOrders);
+    pagination.hidden = true;
+}
+
+function createOrderCard(o){
+    const orderId = getOrderId(o,o._key);
+    const playerId = getPlayerId(o);
+    const nickname = getNickname(o);
+    const product = getProduct(o);
+    const reference = getReference(o);
+    const status = classifyStatus(getStatus(o));
+    const date = formatDate(o);
+    const sOrd = escapeHTML(orderId);
+    const sPlayer = escapeHTML(playerId);
+    const sNick = escapeHTML(nickname);
+    const sProd = escapeHTML(product);
+    const sRef = escapeHTML(reference);
+    const sDate = escapeHTML(date);
+    const supportMsg = encodeURIComponent(`Hola, necesito ayuda con mi pedido ${orderId}. Producto: ${product}. Referencia: ${reference}.`);
+
+    const card = document.createElement("article");
+    card.className = "order-card";
+    card.innerHTML = `
+        <div class="order-top">
+            <div class="order-num-wrap">
+                <div class="order-icon">💎</div>
+                <div>
+                    <span class="order-num-label">Número de pedido</span>
+                    <strong class="order-num">#${sOrd}</strong>
+                </div>
+            </div>
+            <span class="order-status ${status.css}">${escapeHTML(status.label)}</span>
+        </div>
+
+        <div class="order-fields">
+            <div class="order-field">
+                <span class="field-label">ID Jugador</span>
+                <span class="field-value">${sPlayer}</span>
+            </div>
+            <div class="order-field">
+                <span class="field-label">Nickname</span>
+                <span class="field-value nickname">${sNick}</span>
+            </div>
+            <div class="order-field full">
+                <span class="field-label">Producto</span>
+                <span class="field-value product">${sProd}</span>
+            </div>
+            <div class="order-field full">
+                <span class="field-label">Referencia</span>
+                <div class="ref-row">
+                    <span class="field-value">${sRef}</span>
+                    ${reference!=="No indicada"?`<button class="copy-btn" type="button" data-copy="${escapeHTML(reference)}" aria-label="Copiar referencia">${ICONS.copy}</button>`:""}
+                </div>
+            </div>
+        </div>
+
+        <div class="order-bottom">
+            <div class="order-date">${ICONS.calendar}<span>${sDate}</span></div>
+            <a class="support-link" href="https://wa.me/${WHATSAPP_SUPPORT}?text=${supportMsg}" target="_blank" rel="noopener noreferrer">${ICONS.whatsapp} Ayuda</a>
+        </div>`;
+    return card;
+}
+
+function renderOrders(){
+    if(loadingOrders) return;
+    updateSummary();
+    updateFilterButtons();
+    const filtered = getVisibleOrders();
+    const total = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(total/PAGE_SIZE));
+    if(currentPage>totalPages) currentPage = totalPages;
+    if(currentPage<1) currentPage = 1;
+    const start = (currentPage-1)*PAGE_SIZE;
+    const pageOrders = filtered.slice(start, start+PAGE_SIZE);
+
+    if(allOrders.length===0){
+        renderEmpty("Todavía no tienes pedidos","Cuando realices una compra en Recargas Games, aparecerá aquí.",true);
+        $("#resultsText").textContent = "0 pedidos";
+        return;
+    }
+    if(total===0){
+        renderEmpty("No encontramos resultados","Prueba con otra búsqueda o un filtro diferente.");
+        $("#resultsText").textContent = "0 resultados";
+        return;
+    }
+
+    ordersList.innerHTML = "";
+    pageOrders.forEach((o,i)=>{
+        const c = createOrderCard(o);
+        c.style.animation = `fadeInCard .3s ease ${Math.min(i*40,150)}ms both`;
+        ordersList.appendChild(c);
+    });
+
+    const first = start+1;
+    const last = Math.min(start+PAGE_SIZE,total);
+    $("#resultsText").innerHTML = `Mostrando <strong>${first}–${last}</strong> de <strong>${total}</strong>`;
+    pagination.hidden = totalPages<=1;
+    $("#pageInfo").innerHTML = `Página <strong>${currentPage}</strong> de <strong>${totalPages}</strong>`;
+    $("#prevPage").disabled = currentPage<=1;
+    $("#nextPage").disabled = currentPage>=totalPages;
+}
+
+const styleAnim = document.createElement("style");
+styleAnim.textContent = `@keyframes fadeInCard{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`;
+document.head.appendChild(styleAnim);
+
+function showToast(msg,isError=false){
+    toastEl.textContent = msg;
+    toastEl.className = "toast visible" + (isError?" error":"");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toastEl.classList.remove("visible"), 3000);
+}
+
+async function copyText(text,btn){
+    try{
+        if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+        else{
+            const ta = document.createElement("textarea");
+            ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+            document.body.appendChild(ta); ta.select();
+            const ok = document.execCommand("copy");
+            ta.remove(); if(!ok) throw new Error();
+        }
+        if(btn){btn.classList.add("copied");btn.innerHTML=ICONS.check;setTimeout(()=>{btn.classList.remove("copied");btn.innerHTML=ICONS.copy;},1500);}
+        showToast("Referencia copiada ✓");
+    }catch{showToast("No se pudo copiar", true);}
+}
+
+function subscribeToOrders(){
+    if(!currentUser) return;
+    if(activeOrdersRef && ordersListener){ activeOrdersRef.off("value", ordersListener); }
+    loadingOrders = true;
+    renderLoading();
+    refreshButton.classList.add("loading");
+    activeOrdersRef = db.ref("pedidos").orderByChild("uid").equalTo(currentUser.uid);
+    ordersListener = (snapshot)=>{
+        allOrders = [];
+        snapshot.forEach(child=>{
+            const v = child.val();
+            if(v && typeof v==="object") allOrders.push({...v, _key: child.key});
+        });
+        allOrders.sort((a,b)=>{
+            const d = getOrderTimestamp(b)-getOrderTimestamp(a);
+            if(d!==0) return d;
+            return String(b._key).localeCompare(String(a._key),undefined,{numeric:true});
+        });
+        loadingOrders = false;
+        currentPage = 1;
+        refreshButton.classList.remove("loading");
+        renderOrders();
+    };
+    activeOrdersRef.on("value", ordersListener, (error)=>{
+        loadingOrders = false;
+        refreshButton.classList.remove("loading");
+        console.error("Error consultando pedidos:",error);
+        if(error && error.code==="PERMISSION_DENIED") renderError("No tienes permiso para consultar estos pedidos. Verifica las reglas de seguridad de Firebase.");
+        else renderError("Comprueba tu conexión e inténtalo nuevamente.");
+    });
+}
+
+// ===== EVENTOS UI =====
+searchInput.addEventListener("input",()=>{
+    currentPage = 1;
+    clearSearch.style.display = searchInput.value ? "grid" : "none";
+    renderOrders();
 });
-function revelarDatos(key,box){
- box.querySelectorAll('.dato-entrega').forEach(el=>{const value=el.dataset.valorReal||'';el.querySelector('.dato-valor').textContent=value;el.classList.remove('dato-oculto');});
- box.classList.add('visible');iniciarContador(key,box);avisar('👁️ Datos visibles por 60 segundos');
+clearSearch.addEventListener("click",()=>{
+    searchInput.value = ""; clearSearch.style.display = "none";
+    currentPage = 1; searchInput.focus(); renderOrders();
+});
+document.querySelectorAll(".filtro-btn").forEach(b=>{
+    b.addEventListener("click",()=>{ currentFilter = b.dataset.filter; currentPage = 1; renderOrders(); });
+});
+$("#prevPage").addEventListener("click",()=>{ if(currentPage>1){currentPage--;renderOrders();window.scrollTo({top:0,behavior:"smooth"});} });
+$("#nextPage").addEventListener("click",()=>{ const tp = Math.ceil(getVisibleOrders().length/PAGE_SIZE); if(currentPage<tp){currentPage++;renderOrders();window.scrollTo({top:0,behavior:"smooth"});} });
+refreshButton.addEventListener("click",()=>{ if(currentUser){ subscribeToOrders(); showToast("Actualizando pedidos..."); } });
+ordersList.addEventListener("click",(e)=>{
+    const btn = e.target.closest("[data-copy]");
+    if(!btn) return;
+    copyText(btn.dataset.copy, btn);
+});
+
+// ===== MENÚS / AUTH =====
+const perfilContainer = document.getElementById("perfilContainer");
+const menuLogin = document.getElementById("menuLogin");
+const menuRegister = document.getElementById("menuRegister");
+const menuConSesion = document.getElementById("menuConSesion");
+const perfilNombre = document.getElementById("perfilNombre");
+const nombreCompleto = document.getElementById("nombreCompleto");
+const emailUsuario = document.getElementById("emailUsuario");
+const modalLogin = document.getElementById("modalLogin");
+const loginForm = document.getElementById("loginForm");
+let usuarioActual = null;
+
+window.alternarMenu = function(){
+    const mf = document.getElementById("menuFlotante");
+    const mp = document.getElementById("menuPerfil");
+    const pf = document.getElementById("perfilFlecha");
+    if(mf) mf.classList.toggle("activo");
+    if(mp) mp.classList.remove("activo");
+    if(pf) pf.classList.remove("abierta");
+};
+window.toggleMenuPerfil = function(){
+    const mf = document.getElementById("menuFlotante");
+    const mp = document.getElementById("menuPerfil");
+    const pf = document.getElementById("perfilFlecha");
+    if(mp) mp.classList.toggle("activo");
+    if(pf) pf.classList.toggle("abierta");
+    if(mf) mf.classList.remove("activo");
+};
+document.body.addEventListener("click",(e)=>{
+    const mf = document.getElementById("menuFlotante");
+    const mp = document.getElementById("menuPerfil");
+    const bm = document.getElementById("btnMenu");
+    const bp = document.getElementById("btnPerfil");
+    if(bm && mf && !mf.contains(e.target) && !bm.contains(e.target)) mf.classList.remove("activo");
+    if(bp && mp && !mp.contains(e.target) && !bp.contains(e.target)){
+        mp.classList.remove("activo");
+        const pf = document.getElementById("perfilFlecha");
+        if(pf) pf.classList.remove("abierta");
+    }
+});
+
+window.abrirModalLogin = function(){
+    if(modalLogin) modalLogin.classList.add("activo");
+    const lm = document.getElementById("loginMessage");
+    if(lm) lm.style.display = "none";
+    document.getElementById("loginEmail").value = "";
+    document.getElementById("loginPassword").value = "";
+    const mf = document.getElementById("menuFlotante");
+    if(mf) mf.classList.remove("activo");
+};
+window.cerrarModalLogin = function(){ if(modalLogin) modalLogin.classList.remove("activo"); };
+if(modalLogin) modalLogin.addEventListener("click",(e)=>{ if(e.target===modalLogin) cerrarModalLogin(); });
+
+if(loginForm){
+    loginForm.addEventListener("submit",async(e)=>{
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value.trim();
+        const pass = document.getElementById("loginPassword").value;
+        const btn = document.getElementById("loginBtn");
+        const msg = document.getElementById("loginMessage");
+        btn.disabled = true; btn.textContent = "Ingresando...";
+        msg.style.display = "none";
+        try{
+            await auth.signInWithEmailAndPassword(email,pass);
+            msg.style.background = "rgba(34,197,94,0.15)";
+            msg.style.color = "#86efac";
+            msg.textContent = "✅ ¡Bienvenido!";
+            msg.style.display = "block";
+            setTimeout(()=>{ cerrarModalLogin(); window.location.reload(); },1000);
+        }catch(error){
+            let m = "❌ ";
+            switch(error.code){
+                case "auth/user-not-found": m+="Usuario no encontrado"; break;
+                case "auth/wrong-password": m+="Contraseña incorrecta"; break;
+                case "auth/invalid-email": m+="Correo inválido"; break;
+                default: m+=error.message;
+            }
+            msg.style.background = "rgba(239,68,68,0.15)";
+            msg.style.color = "#fca5a5";
+            msg.textContent = m;
+            msg.style.display = "block";
+            btn.disabled = false; btn.textContent = "Ingresar";
+        }
+    });
 }
-function ocultarDatos(key,box){
- box.querySelectorAll('.dato-entrega').forEach(el=>{const value=el.dataset.valorReal||'';el.querySelector('.dato-valor').textContent='•'.repeat(Math.min(12,value.length));el.classList.add('dato-oculto');});
- box.classList.remove('visible');cancelarContador(key);
+
+async function confirmarYSalir(e){
+    e.preventDefault();
+    if(confirm("¿Seguro que quieres cerrar sesión?")){
+        await auth.signOut();
+        window.location.reload();
+    }
 }
-function iniciarContador(key,box){
- cancelarContador(key);let seconds=60;const el=box.querySelector('[data-contador]');
- if(el)el.textContent=seconds;
- const timer=setInterval(()=>{seconds--;if(el)el.textContent=seconds;if(seconds<=0){ocultarDatos(key,box);avisar('🔒 Datos ocultados por seguridad');}},1000);
- timersAutoOcultar.set(key,timer);
-}
-function cancelarContador(key){if(timersAutoOcultar.has(key)){clearInterval(timersAutoOcultar.get(key));timersAutoOcultar.delete(key);}}
-async function copiarTexto(texto,mensaje){
- try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(String(texto||''));avisar(mensaje);}else{const area=document.createElement('textarea');area.value=String(texto||'');area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();const ok=document.execCommand('copy');area.remove();avisar(ok?mensaje:'Mantén presionado el dato para copiarlo.');}}
- catch(err){avisar('No se pudo copiar. Mantén presionado el dato.');}
-}
-document.getElementById('chips').addEventListener('click',e=>{const chip=e.target.closest('.chip');if(!chip)return;estadoFiltro=chip.dataset.estado;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('activo',c===chip));filtrarPedidos();});
-buscarEl.addEventListener('input',filtrarPedidos);
-window.addEventListener('beforeunload',()=>{if(consultaActual)consultaActual.off();for(const timer of timersAutoOcultar.values())clearInterval(timer);});
+const btnCerrarSesionEl = document.getElementById("btnCerrarSesion");
+if(btnCerrarSesionEl) btnCerrarSesionEl.addEventListener("click",confirmarYSalir);
+const menuLogoutEl = document.getElementById("menuLogout");
+if(menuLogoutEl) menuLogoutEl.addEventListener("click",confirmarYSalir);
+
+auth.onAuthStateChanged((user)=>{
+    usuarioActual = user;
+    if(user){
+        currentUser = user;
+        const nombre = user.displayName || "Usuario";
+        const email = user.email || "usuario@email.com";
+        if(perfilContainer) perfilContainer.style.display = "block";
+        if(perfilNombre) perfilNombre.textContent = nombre.length>12?nombre.substring(0,12)+"...":nombre;
+        if(nombreCompleto) nombreCompleto.textContent = nombre;
+        if(emailUsuario) emailUsuario.textContent = email;
+        if(menuLogin) menuLogin.style.display = "none";
+        if(menuRegister) menuRegister.style.display = "none";
+        if(menuConSesion) menuConSesion.style.display = "block";
+        subscribeToOrders();
+    }else{
+        if(perfilContainer) perfilContainer.style.display = "none";
+        if(menuLogin) menuLogin.style.display = "flex";
+        if(menuRegister) menuRegister.style.display = "flex";
+        if(menuConSesion) menuConSesion.style.display = "none";
+        // Sin sesión: mostrar estado de "inicia sesión"
+        loadingOrders = false;
+        ordersList.innerHTML = `
+            <div class="state-box">
+                <div class="state-icon">🔒</div>
+                <h3>Inicia sesión</h3>
+                <p>Necesitas iniciar sesión para ver tus pedidos.</p>
+                <button class="state-action" onclick="abrirModalLogin()">Iniciar Sesión</button>
+            </div>`;
+        $("#resultsText").textContent = "Sin sesión activa";
+        pagination.hidden = true;
+    }
+});
+
+const chipActivo = document.querySelector(".games-menu a.active");
+if(chipActivo) chipActivo.scrollIntoView({inline:"center",block:"nearest"});
 </script>
 </body>
 </html>
