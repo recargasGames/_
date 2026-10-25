@@ -1,875 +1,1199 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Mis Pedidos | RECARGASGAMES</title>
-<link rel="icon" href="logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070d">
+  <meta name="description" content="Consulta tus pedidos en Recargas Games.">
+  <title>Mis pedidos | Recargas Games</title>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <link rel="icon" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<style>
-:root{
-    --color-principal:#3b82f6;--color-hover:#2563eb;--color-azul:#3b82f6;
-    --color-blanco:#ffffff;--color-dorado:#d4af37;--color-dorado-claro:#f5d76e;
-    --color-negro:#0a0e1a;--color-error:#ef4444;--color-exito:#22c55e;
-    --alto-nav:64px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:#000;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;padding-bottom:30px;overflow-x:hidden;min-height:100vh;position:relative;}
-body.con-nav{padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));}
-a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--color-dorado-claro);outline-offset:2px;}
-.video-fondo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;opacity:1;filter:brightness(1.15);will-change:transform;transform:translateZ(0);}
-.video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,14,26,0.15) 0%,rgba(10,14,26,0.35) 60%,rgba(10,14,26,0.6) 100%);z-index:-1;pointer-events:none;}
-body::before{content:'';position:fixed;top:-30%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.1),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
-body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,175,55,0.08),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
-.main{position:relative;z-index:1}
-.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(5,8,16,0.85);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
-.header{padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);}
-.brand img{height:55px;width:auto;border-radius:12px;filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));}
-.header-right{display:flex;align-items:center;gap:12px}
-.btn-perfil{background:transparent;border:none;color:white;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;transition:all 0.3s;position:relative;margin-top:8px;}
-.btn-perfil .avatar-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;color:white;transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);position:relative;overflow:hidden;}
-.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
-.btn-perfil .avatar-circle .online-dot{position:absolute;bottom:0;right:0;width:12px;height:12px;background:#22c55e;border-radius:50%;border:2px solid #0b1220;}
-.btn-perfil .perfil-nombre{font-size:14px;font-weight:500;color:white;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
-.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
-.menu-perfil{position:absolute;top:75px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:260px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;z-index:1000;overflow:hidden;}
-.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
-.menu-perfil-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));}
-.menu-perfil-header .avatar-grande{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(212,175,55,0.4);}
-.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
-.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
-.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
-.menu-perfil-opcion{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#e5e7eb;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
-.menu-perfil-opcion:last-child{border-bottom:none}
-.menu-perfil-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:26px;border-left:3px solid var(--color-dorado);}
-.menu-perfil-opcion .icono{font-size:18px;width:24px;text-align:center}
-.menu-perfil-opcion.danger{color:#ef4444}
-.menu-hamburguesa{background:transparent;border:none;color:white;font-size:28px;cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;margin-top:8px;}
-.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-dorado);}
-.menu-flotante{position:absolute;top:80px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:240px;box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 30px rgba(212,175,55,0.12);opacity:0;visibility:hidden;transform:translateY(-10px);transition:all 0.25s ease;z-index:999;overflow:hidden;}
-.menu-flotante.activo{opacity:1;visibility:visible;transform:translateY(0)}
-.menu-opcion{display:flex;align-items:center;gap:10px;padding:14px 20px;color:white;text-decoration:none;font-size:15px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
-.menu-opcion:last-child{border-bottom:none}
-.menu-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:24px;}
-.menu-divider{border-top:1px solid rgba(212,175,55,0.15);margin:5px 0}
-.games-menu{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:12px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;border-top:1px solid rgba(255,255,255,0.04);}
-.games-menu::-webkit-scrollbar{display:none}
-.games-menu a{text-decoration:none;color:#cbd5e1;padding:8px 16px;border-radius:20px;font-size:14px;font-weight:600;white-space:nowrap;transition:all 0.3s;border:1px solid transparent;}
-.games-menu a:hover{color:var(--color-dorado-claro);background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.3);}
-.games-menu a.active{color:var(--color-dorado-claro);background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));border-color:rgba(212,175,55,0.5);}
+  <style>
+    :root {
+      --bg: #05070d;
+      --surface: #0b101b;
+      --surface-2: #101827;
+      --surface-3: #151f30;
+      --blue: #2587ff;
+      --cyan: #00c8ff;
+      --gold: #d4af37;
+      --gold-light: #ffe27a;
+      --text: #f4f7ff;
+      --muted: #8995aa;
+      --border: rgba(142, 168, 210, .12);
+      --green: #39e6a1;
+      --red: #ff637b;
+      --yellow: #ffc857;
+      --nav-height: 67px;
+      --radius: 18px;
+    }
 
-.main{padding:20px;padding-top:30px;max-width:800px;margin:0 auto}
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-.pagina-titulo{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:24px 0 18px;}
-.pagina-titulo h1{font-size:22px;font-weight:900;background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.chip-entrega{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:14px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#86efac;font-size:12px;font-weight:700;}
-.chip-entrega::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.8);}
+    html { min-height: 100%; scroll-behavior: smooth; background: var(--bg); }
 
-/* RESUMEN */
-.resumen-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.stat-card{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px solid rgba(212,175,55,0.25);border-radius:16px;padding:16px 12px;text-align:center;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.3);}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#d4af37,#f5d76e);}
-.stat-card:nth-child(2)::before{background:linear-gradient(90deg,#22c55e,#86efac);}
-.stat-card:nth-child(3)::before{background:linear-gradient(90deg,#f5d76e,#d4af37);}
-.stat-num{font-size:26px;font-weight:900;color:var(--color-dorado-claro);line-height:1;margin-bottom:6px;text-shadow:0 0 15px rgba(212,175,55,0.3);}
-.stat-label{font-size:10px;color:#cbd5e1;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 28px + env(safe-area-inset-bottom));
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(ellipse at 0% 0%, rgba(37, 135, 255, .15), transparent 36%),
+        radial-gradient(ellipse at 100% 22%, rgba(0, 200, 255, .07), transparent 30%),
+        radial-gradient(ellipse at 70% 100%, rgba(212, 175, 55, .045), transparent 32%),
+        var(--bg);
+      overflow-x: hidden;
+    }
 
-/* BUSCADOR */
-.search-box{position:relative;margin-bottom:14px;}
-.search-box input{width:100%;height:48px;padding:0 44px 0 44px;border-radius:14px;background:rgba(0,0,0,0.35);border:1px solid rgba(212,175,55,0.25);color:#fff;font-size:14px;font-family:inherit;transition:.3s;}
-.search-box input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
-.search-box input::placeholder{color:#6b7280;}
-.search-box .icon-search{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9ca3af;width:18px;height:18px;pointer-events:none;}
-.search-box .clear-search{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:none;place-items:center;background:transparent;border:none;color:#9ca3af;cursor:pointer;border-radius:8px;}
-.search-box .clear-search:hover{background:rgba(255,255,255,0.06);color:#fff;}
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 
-/* FILTROS */
-.filtros{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px;margin-bottom:14px;scrollbar-width:none;}
-.filtros::-webkit-scrollbar{display:none;}
-.filtro-btn{flex:0 0 auto;padding:9px 14px;border-radius:20px;background:rgba(20,30,55,0.55);border:1px solid rgba(212,175,55,0.2);color:#cbd5e1;font-size:12px;font-weight:700;cursor:pointer;transition:.3s;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
-.filtro-btn:hover{border-color:rgba(212,175,55,0.4);color:var(--color-dorado-claro);}
-.filtro-btn.activo{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;border-color:#d4af37;box-shadow:0 4px 15px rgba(212,175,55,0.3);}
-.filtro-count{min-width:18px;height:18px;padding:0 5px;border-radius:8px;background:rgba(255,255,255,0.1);display:inline-grid;place-items:center;font-size:10px;}
-.filtro-btn.activo .filtro-count{background:rgba(0,0,0,0.25);color:#0a0e1a;}
+    .ambient { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: -1; }
+    .ambient::before, .ambient::after {
+      content: ""; position: absolute; width: 240px; height: 240px; border-radius: 50%;
+      filter: blur(90px); opacity: .15; animation: floatGlow 12s ease-in-out infinite alternate;
+    }
+    .ambient::before { top: 18%; left: -140px; background: var(--blue); }
+    .ambient::after { top: 52%; right: -150px; background: var(--gold); animation-delay: -5s; }
+    @keyframes floatGlow { from { transform: translateY(-20px) scale(.9); } to { transform: translateY(45px) scale(1.15); } }
 
-/* META */
-.orders-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;color:#94a3b8;font-size:12px;}
-.orders-meta strong{color:var(--color-dorado-claro);font-weight:800;}
-.refresh-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);color:var(--color-dorado-claro);border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;}
-.refresh-btn:hover{background:rgba(212,175,55,0.2);}
-.refresh-btn svg{width:13px;height:13px;}
-.refresh-btn.loading svg{animation:rotar .7s linear infinite;}
-@keyframes rotar{to{transform:rotate(360deg)}}
+    .topbar {
+      position: sticky; top: 0; z-index: 50; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 17px; background: rgba(5, 7, 13, .88);
+      border-bottom: 1px solid var(--border); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
 
-/* TARJETAS DE PEDIDO */
-.orders-list{display:flex;flex-direction:column;gap:14px;}
-.order-card{position:relative;background:linear-gradient(135deg,rgba(14,26,58,0.92),rgba(6,12,32,0.96));border:1px solid rgba(59,130,246,0.25);border-radius:18px;padding:16px;transition:transform 0.3s ease,box-shadow 0.3s ease;box-shadow:0 8px 25px rgba(0,0,0,0.3);overflow:hidden;}
-.order-card::before{content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;background:linear-gradient(135deg,#d4af37,#3b82f6,#d4af37);background-size:300% 300%;border-radius:18px;z-index:-1;opacity:0;transition:opacity 0.3s;}
-.order-card:hover::before{opacity:1;}
-.order-card:hover{transform:translateY(-4px);box-shadow:0 20px 45px rgba(0,0,0,0.5),0 0 30px rgba(212,175,55,0.2);}
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); text-decoration: none; }
+    .brand-logo {
+      width: 37px; height: 37px; flex-shrink: 0; display: grid; place-items: center;
+      overflow: hidden; border-radius: 12px;
+      background: linear-gradient(145deg, #172945, #0a101c);
+      border: 1px solid rgba(37, 135, 255, .38);
+      box-shadow: 0 0 20px rgba(37, 135, 255, .12);
+    }
+    .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .brand-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .brand-name { font-size: 13px; line-height: 1; font-weight: 900; letter-spacing: .5px; white-space: nowrap; }
+    .brand-name span { color: var(--cyan); }
+    .brand-subtitle { font-size: 9px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; }
 
-.order-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(212,175,55,0.15);}
-.order-num-wrap{display:flex;align-items:center;gap:10px;min-width:0;}
-.order-icon{width:40px;height:40px;flex-shrink:0;display:grid;place-items:center;background:linear-gradient(135deg,rgba(212,175,55,0.3),rgba(59,130,246,0.25));border:1px solid rgba(212,175,55,0.4);border-radius:12px;font-size:18px;}
-.order-num-label{display:block;color:#94a3b8;font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:3px;}
-.order-num{display:block;color:#fff;font-size:15px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .secure-label {
+      display: flex; align-items: center; gap: 5px; padding: 7px 9px;
+      color: #a7f7d5; background: rgba(57, 230, 161, .07);
+      border: 1px solid rgba(57, 230, 161, .16); border-radius: 999px;
+      font-size: 10px; font-weight: 700; white-space: nowrap;
+    }
+    .secure-label svg { width: 13px; height: 13px; }
 
-.order-status{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:6px 10px;border-radius:10px;font-size:10px;font-weight:800;line-height:1.2;text-align:center;max-width:130px;}
-.order-status::before{content:'';width:6px;height:6px;flex-shrink:0;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;}
-.status-success{color:#4ade80;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);}
-.status-pending{color:#f5d76e;background:rgba(245,215,110,0.1);border:1px solid rgba(245,215,110,0.35);}
-.status-error{color:#f87171;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);}
-.status-neutral{color:#cbd5e1;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.3);}
+    .main { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px 15px 30px; }
 
-.order-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;}
-.order-field{min-width:0;}
-.order-field.full{grid-column:1 / -1;}
-.field-label{display:block;margin-bottom:4px;color:#94a3b8;font-size:9px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
-.field-value{display:block;color:#e5e7eb;font-size:13px;font-weight:600;line-height:1.4;overflow-wrap:anywhere;}
-.field-value.nickname{color:#dbeafe;}
-.field-value.product{color:var(--color-dorado-claro);font-size:13px;font-weight:800;}
+    .welcome {
+      position: relative; overflow: hidden; padding: 21px 19px; margin-bottom: 19px;
+      border-radius: 22px; border: 1px solid rgba(37, 135, 255, .24);
+      background: linear-gradient(115deg, rgba(15, 32, 57, .96), rgba(8, 13, 24, .97) 72%), var(--surface);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
+    }
+    .welcome::before {
+      content: ""; position: absolute; top: -75px; right: -65px;
+      width: 190px; height: 190px; border: 1px solid rgba(0, 200, 255, .14);
+      border-radius: 50%;
+      box-shadow: 0 0 0 20px rgba(0, 200, 255, .025), 0 0 0 42px rgba(0, 200, 255, .02);
+      pointer-events: none;
+    }
 
-.ref-row{display:flex;align-items:center;gap:8px;min-width:0;}
-.ref-row .field-value{flex:1;min-width:0;}
-.copy-btn{width:32px;height:32px;flex-shrink:0;display:grid;place-items:center;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);border-radius:8px;color:var(--color-dorado-claro);cursor:pointer;transition:.2s;}
-.copy-btn:hover{background:rgba(212,175,55,0.25);}
-.copy-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
-.copy-btn.copied{background:rgba(34,197,94,0.2);color:#4ade80;border-color:rgba(34,197,94,0.5);}
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 7px; color: var(--cyan);
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.6px;
+    }
+    .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
 
-.order-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(212,175,55,0.1);}
-.order-date{display:flex;align-items:center;gap:5px;color:#94a3b8;font-size:11px;min-width:0;}
-.order-date svg{width:13px;height:13px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;}
-.order-date span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.support-link{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;color:#4ade80;font-size:11px;font-weight:800;text-decoration:none;padding:6px 10px;border-radius:8px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);transition:.2s;}
-.support-link:hover{background:rgba(34,197,94,0.15);}
-.support-link svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+    .welcome h1 {
+      position: relative; z-index: 1; margin: 10px 0 8px;
+      font-size: clamp(25px, 7vw, 32px); line-height: 1.1;
+      font-weight: 900; letter-spacing: -1.2px;
+    }
+    .welcome h1 span { color: var(--gold-light); }
+    .welcome p { position: relative; z-index: 1; max-width: 340px; margin: 0; color: #aab7ca; font-size: 12px; line-height: 1.7; }
 
-/* ESTADOS */
-.state-box{padding:40px 20px;text-align:center;background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px dashed rgba(212,175,55,0.3);border-radius:18px;}
-.state-icon{width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(212,175,55,0.2),rgba(59,130,246,0.1));border:1px solid rgba(212,175,55,0.4);border-radius:50%;font-size:26px;color:var(--color-dorado-claro);}
-.state-box h3{margin:0 0 8px;font-size:16px;font-weight:800;color:var(--color-dorado-claro);}
-.state-box p{max-width:300px;margin:0 auto;color:#cbd5e1;font-size:13px;line-height:1.6;}
-.state-action{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;margin-top:18px;padding:0 20px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 15px rgba(212,175,55,0.4);transition:.3s;font-family:inherit;}
-.state-action:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.6);}
-.state-action svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+    .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-bottom: 23px; }
+    .summary-card {
+      min-width: 0; padding: 14px 10px 12px; border-radius: 15px;
+      background: linear-gradient(145deg, rgba(17, 27, 44, .96), rgba(9, 14, 24, .98));
+      border: 1px solid var(--border);
+    }
+    .summary-top { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 12px; }
+    .summary-icon {
+      width: 28px; height: 28px; display: grid; place-items: center;
+      border-radius: 9px; color: var(--cyan); background: rgba(0, 200, 255, .09);
+    }
+    .summary-icon svg { width: 15px; height: 15px; }
+    .summary-card:nth-child(2) .summary-icon { color: var(--green); background: rgba(57, 230, 161, .09); }
+    .summary-card:nth-child(3) .summary-icon { color: var(--gold-light); background: rgba(212, 175, 55, .10); }
+    .summary-number { display: block; font-size: 25px; font-weight: 900; line-height: 1; letter-spacing: -.8px; }
+    .summary-label { display: block; margin-top: 7px; color: var(--muted); font-size: 10px; line-height: 1.4; }
 
-.error-state .state-icon{background:linear-gradient(135deg,rgba(239,68,68,0.25),rgba(239,68,68,0.08));border-color:rgba(239,68,68,0.5);color:#f87171;}
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+    .section-heading h2 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
+    .section-heading p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
 
-.spinner{width:28px;height:28px;margin:0 auto 16px;border:3px solid rgba(212,175,55,0.2);border-top-color:#d4af37;border-radius:50%;animation:rotar .8s linear infinite;}
+    .live-indicator {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px;
+      border-radius: 999px; border: 1px solid rgba(57, 230, 161, .16);
+      background: rgba(57, 230, 161, .055); color: #a7f7d5;
+      font-size: 9px; font-weight: 800; white-space: nowrap;
+    }
+    .live-indicator span {
+      width: 6px; height: 6px; background: var(--green); border-radius: 50%;
+      box-shadow: 0 0 10px rgba(57, 230, 161, .8); animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 
-/* PAGINACIÓN */
-.pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:22px;}
-.page-btn{width:40px;height:40px;display:grid;place-items:center;background:rgba(20,30,55,0.7);border:1px solid rgba(212,175,55,0.3);border-radius:12px;color:var(--color-dorado-claro);cursor:pointer;transition:.2s;}
-.page-btn:hover:not(:disabled){background:rgba(212,175,55,0.15);border-color:var(--color-dorado);}
-.page-btn:disabled{opacity:.3;cursor:not-allowed;}
-.page-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;}
-.page-info{min-width:80px;text-align:center;color:#cbd5e1;font-size:12px;font-weight:700;}
-.page-info strong{color:var(--color-dorado-claro);}
+    .search-box { position: relative; margin-bottom: 13px; }
+    .search-box svg {
+      position: absolute; top: 50%; left: 14px; width: 17px; height: 17px;
+      color: #77869e; transform: translateY(-50%); pointer-events: none;
+    }
+    .search-box input {
+      width: 100%; height: 47px; padding: 0 43px; color: var(--text);
+      background: rgba(12, 18, 30, .92); border: 1px solid var(--border);
+      border-radius: 14px; font-size: 12px; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-box input::placeholder { color: #6e7b91; }
+    .search-box input:focus { border-color: rgba(37, 135, 255, .65); box-shadow: 0 0 0 3px rgba(37, 135, 255, .08); }
 
-/* TOAST */
-.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,20px);max-width:calc(100% - 32px);padding:12px 18px;border-radius:14px;font-size:14px;font-weight:600;background:rgba(10,14,26,0.97);border:1px solid rgba(212,175,55,0.5);color:#fff;box-shadow:0 12px 35px rgba(0,0,0,0.6);opacity:0;visibility:hidden;transition:all 0.3s ease;z-index:3000;text-align:center;}
-body.con-nav .toast{bottom:calc(var(--alto-nav) + 20px + env(safe-area-inset-bottom));}
-.toast.visible{opacity:1;visibility:visible;transform:translate(-50%,0);}
-.toast.error{border-color:rgba(239,68,68,0.6);color:#fecaca;}
+    .clear-search {
+      position: absolute; right: 8px; top: 50%; width: 30px; height: 30px;
+      display: none; place-items: center; color: var(--muted);
+      background: transparent; border: 0; transform: translateY(-50%);
+    }
+    .clear-search svg { position: static; width: 15px; height: 15px; transform: none; }
 
-/* NAV INFERIOR */
-.nav-inferior{position:fixed;left:0;right:0;bottom:0;z-index:999;background:rgba(5,8,16,0.96);border-top:1px solid rgba(212,175,55,0.25);box-shadow:0 -4px 20px rgba(0,0,0,0.5);padding-bottom:env(safe-area-inset-bottom);}
-.nav-inferior-inner{display:flex;max-width:800px;margin:0 auto;height:var(--alto-nav)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#9ca3af;text-decoration:none;font-size:12px;font-weight:600;transition:color 0.2s;}
-.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-.nav-item:hover,.nav-item.active{color:var(--color-dorado-claro)}
-.nav-item.soporte{color:#4ade80}
+    .filters {
+      display: flex; gap: 8px; margin: 0 -1px 17px; padding: 1px 1px 4px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .filters::-webkit-scrollbar { display: none; }
 
-/* MODAL LOGIN */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;justify-content:center;align-items:center;padding:20px;}
-.modal-overlay.activo{display:flex}
-.modal-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.3);border-radius:24px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.7);overflow:hidden;}
-.modal-header{padding:24px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));}
-.modal-header .icono-grande{font-size:50px;margin-bottom:10px}
-.modal-header h2{font-size:20px;font-weight:800;color:var(--color-dorado-claro);letter-spacing:1px;text-transform:uppercase;}
-.modal-body{padding:24px 20px}
-.modal-body label{color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;}
-.modal-body input{width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;font-family:inherit;}
-.modal-body input:focus{outline:none;border-color:var(--color-dorado);}
-.modal-btn{width:100%;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;border:none;text-transform:uppercase;font-family:inherit;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;}
-.modal-footer{padding:0 20px 20px;display:flex;gap:10px}
-.modal-btn.cancelar{background:rgba(71,85,105,0.3);color:#94a3b8;border:1px solid rgba(71,85,105,0.5);}
+    .filter-btn {
+      flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px;
+      min-height: 35px; padding: 0 12px; color: #9ba9bd;
+      background: rgba(14, 21, 34, .85); border: 1px solid var(--border);
+      border-radius: 10px; font-size: 10px; font-weight: 700; transition: .2s ease;
+    }
+    .filter-btn.active {
+      color: #fff;
+      background: linear-gradient(110deg, rgba(37, 135, 255, .22), rgba(0, 200, 255, .09));
+      border-color: rgba(37, 135, 255, .5);
+      box-shadow: inset 0 0 15px rgba(37, 135, 255, .04);
+    }
+    .filter-count {
+      min-width: 17px; height: 17px; padding: 0 4px; display: inline-grid;
+      place-items: center; color: #9ba9bd; background: rgba(255, 255, 255, .06);
+      border-radius: 6px; font-size: 9px;
+    }
+    .filter-btn.active .filter-count { color: var(--cyan); background: rgba(0, 200, 255, .12); }
 
-@media(max-width:500px){
-    body{padding-top:100px}
-    .main{padding:15px}
-    .brand img{height:45px}
-    .header{padding:10px 16px}
-    .games-menu{padding:10px 15px}
-    .menu-flotante{right:10px;min-width:220px}
-    .btn-perfil .perfil-nombre,.btn-perfil .perfil-flecha{display:none}
-    .menu-perfil{right:0;min-width:230px}
-    .pagina-titulo h1{font-size:19px}
-    .stat-num{font-size:22px}
-    .order-card{padding:14px}
-    .order-num{font-size:14px}
-    .order-fields{gap:10px 12px}
-    .field-value{font-size:12px}
-}
-</style>
+    .orders-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 1px 10px; color: var(--muted); font-size: 10px; }
+    .orders-meta strong { color: #dce7f8; font-weight: 700; }
+    .refresh-btn {
+      display: inline-flex; align-items: center; gap: 5px; padding: 5px 0 5px 8px;
+      color: #a7b8d0; background: transparent; border: 0; font-size: 10px; font-weight: 700;
+    }
+    .refresh-btn svg { width: 13px; height: 13px; }
+    .refresh-btn.loading svg { animation: rotate .7s linear infinite; }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+
+    .orders-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .order-card {
+      position: relative; overflow: hidden; padding: 14px 14px 12px;
+      background: linear-gradient(145deg, rgba(15, 23, 38, .98), rgba(9, 14, 24, .98));
+      border: 1px solid rgba(142, 168, 210, .13); border-radius: 16px;
+      animation: cardEnter .28s ease both; transition: border-color .2s, transform .2s;
+    }
+    .order-card:active { transform: scale(.994); }
+    .order-card::before {
+      content: ""; position: absolute; left: 0; top: 15px; bottom: 15px;
+      width: 2px; border-radius: 0 3px 3px 0;
+      background: linear-gradient(180deg, var(--blue), var(--cyan)); opacity: .85;
+    }
+    @keyframes cardEnter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .order-top { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-bottom: 13px; }
+    .order-number-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .order-symbol {
+      width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center;
+      color: var(--cyan); background: rgba(37, 135, 255, .11);
+      border: 1px solid rgba(37, 135, 255, .16); border-radius: 10px;
+    }
+    .order-symbol svg { width: 17px; height: 17px; }
+    .order-number-label {
+      display: block; margin-bottom: 4px; color: #78879f; font-size: 9px;
+      font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+    }
+    .order-number {
+      display: block; overflow: hidden; color: #f4f7ff; font-size: 13px;
+      font-weight: 900; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .order-status {
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+      max-width: 125px; padding: 7px 9px; border-radius: 8px;
+      font-size: 9px; font-weight: 800; line-height: 1.2; text-align: center;
+    }
+    .order-status::before { content: ""; width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+    .status-success { color: var(--green); background: rgba(57, 230, 161, .09); border: 1px solid rgba(57, 230, 161, .13); }
+    .status-pending { color: var(--yellow); background: rgba(255, 200, 87, .08); border: 1px solid rgba(255, 200, 87, .14); }
+    .status-error { color: var(--red); background: rgba(255, 99, 123, .08); border: 1px solid rgba(255, 99, 123, .14); }
+    .status-neutral { color: #9fb2ce; background: rgba(143, 164, 195, .08); border: 1px solid rgba(143, 164, 195, .13); }
+
+    .order-divider { height: 1px; margin: 0 0 12px; background: rgba(142, 168, 210, .09); }
+    .order-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 12px; }
+    .order-field { min-width: 0; }
+    .order-field.product-field { grid-column: 1 / -1; }
+    .field-label {
+      display: block; margin-bottom: 5px; color: #75839a; font-size: 9px;
+      font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+    }
+    .field-value { display: block; overflow-wrap: anywhere; color: #e6edf9; font-size: 11px; font-weight: 700; line-height: 1.5; }
+    .field-value.nickname { color: #d6e8ff; }
+    .field-value.product { color: var(--gold-light); font-size: 12px; font-weight: 800; }
+
+    .reference-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .reference-row .field-value { min-width: 0; flex: 1; }
+    .copy-btn {
+      width: 27px; height: 27px; flex-shrink: 0; display: grid; place-items: center;
+      color: #9eb4d1; background: rgba(255, 255, 255, .045);
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .copy-btn svg { width: 13px; height: 13px; }
+    .copy-btn.copied { color: var(--green); border-color: rgba(57, 230, 161, .3); }
+
+    .order-bottom {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-top: 13px; padding-top: 10px; border-top: 1px solid rgba(142, 168, 210, .08);
+    }
+    .order-date { display: flex; align-items: center; gap: 5px; min-width: 0; color: #7f8da3; font-size: 9px; }
+    .order-date svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .order-date span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .support-link {
+      flex-shrink: 0; display: inline-flex; align-items: center; gap: 5px;
+      color: #9adfff; background: transparent; border: 0;
+      font-size: 10px; font-weight: 800; text-decoration: none;
+    }
+    .support-link svg { width: 13px; height: 13px; }
+
+    .empty-state, .loading-state, .error-state {
+      padding: 35px 20px; text-align: center; background: rgba(11, 16, 27, .8);
+      border: 1px dashed rgba(142, 168, 210, .18); border-radius: 17px;
+    }
+    .state-icon {
+      width: 58px; height: 58px; display: grid; place-items: center;
+      margin: 0 auto 14px; color: var(--cyan); background: rgba(37, 135, 255, .09);
+      border: 1px solid rgba(37, 135, 255, .16); border-radius: 18px;
+    }
+    .state-icon svg { width: 26px; height: 26px; }
+    .empty-state h3, .loading-state h3, .error-state h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+    .empty-state p, .loading-state p, .error-state p { max-width: 280px; margin: 0 auto; color: var(--muted); font-size: 11px; line-height: 1.7; }
+
+    .state-action {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 40px; margin-top: 17px; padding: 0 15px; color: #fff;
+      background: linear-gradient(110deg, #1678ee, #087bd6); border: 0;
+      border-radius: 11px; font-size: 11px; font-weight: 800; text-decoration: none;
+      box-shadow: 0 5px 18px rgba(37, 135, 255, .17);
+    }
+    .state-action svg { width: 14px; height: 14px; }
+    .error-state .state-icon { color: var(--red); background: rgba(255, 99, 123, .08); border-color: rgba(255, 99, 123, .15); }
+
+    .loading-spinner {
+      width: 24px; height: 24px; margin: 0 auto 15px;
+      border: 2px solid rgba(37, 135, 255, .15); border-top-color: var(--cyan);
+      border-radius: 50%; animation: rotate .8s linear infinite;
+    }
+
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 13px; margin-top: 19px; }
+    .page-btn {
+      width: 37px; height: 37px; display: grid; place-items: center;
+      color: #b7c6da; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 11px;
+    }
+    .page-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .page-btn svg { width: 16px; height: 16px; }
+    .page-info { min-width: 74px; color: #aab8cc; font-size: 10px; font-weight: 700; text-align: center; }
+    .page-info strong { color: #fff; }
+
+    .help-panel {
+      display: flex; align-items: center; gap: 12px; margin-top: 25px; padding: 15px;
+      background: linear-gradient(115deg, rgba(17, 32, 48, .9), rgba(10, 16, 27, .9));
+      border: 1px solid rgba(0, 200, 255, .13); border-radius: 16px;
+    }
+    .help-icon {
+      width: 39px; height: 39px; flex-shrink: 0; display: grid; place-items: center;
+      color: var(--cyan); background: rgba(0, 200, 255, .08); border-radius: 12px;
+    }
+    .help-icon svg { width: 19px; height: 19px; }
+    .help-copy { min-width: 0; flex: 1; }
+    .help-copy strong { display: block; margin-bottom: 5px; font-size: 11px; font-weight: 800; }
+    .help-copy span { display: block; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .help-button {
+      min-height: 34px; flex-shrink: 0; padding: 0 10px; color: #b8eaff;
+      background: rgba(0, 200, 255, .07); border: 1px solid rgba(0, 200, 255, .17);
+      border-radius: 9px; font-size: 10px; font-weight: 800; text-decoration: none;
+      display: inline-flex; align-items: center;
+    }
+
+    .footer-note { margin-top: 19px; color: #526078; font-size: 9px; line-height: 1.7; text-align: center; }
+
+    .bottom-nav {
+      position: fixed; z-index: 100; right: 0; bottom: 0; left: 0;
+      min-height: var(--nav-height);
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      padding: 7px 7px calc(7px + env(safe-area-inset-bottom));
+      background: rgba(7, 10, 17, .95);
+      border-top: 1px solid rgba(142, 168, 210, .15);
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+    }
+    .nav-item {
+      min-width: 0; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 5px; color: #68758b; text-decoration: none;
+      font-size: 9px; font-weight: 700; transition: color .2s;
+    }
+    .nav-icon {
+      position: relative; width: 29px; height: 27px; display: grid;
+      place-items: center; border-radius: 9px; transition: background .2s;
+    }
+    .nav-icon svg { width: 19px; height: 19px; stroke-width: 1.8; }
+    .nav-item.active { color: var(--cyan); }
+    .nav-item.active .nav-icon { color: var(--cyan); background: rgba(37, 135, 255, .12); }
+    .nav-item.active .nav-icon::before {
+      content: ""; position: absolute; top: -7px; width: 17px; height: 2px;
+      border-radius: 3px; background: var(--cyan); box-shadow: 0 0 9px rgba(0, 200, 255, .65);
+    }
+
+    .toast {
+      position: fixed; z-index: 200;
+      bottom: calc(var(--nav-height) + 18px + env(safe-area-inset-bottom));
+      left: 50%; display: flex; align-items: center; gap: 8px;
+      max-width: calc(100% - 32px); padding: 12px 15px; color: #eafaf4;
+      background: #11271f; border: 1px solid rgba(57, 230, 161, .25);
+      border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+      font-size: 11px; font-weight: 700; opacity: 0; pointer-events: none;
+      transform: translate(-50%, 10px); transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .toast svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--green); }
+
+    @media (min-width: 520px) {
+      .main { padding-top: 26px; }
+      .welcome { padding: 25px 23px; }
+      .order-card { padding: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
 </head>
-<body class="con-nav">
 
-<video autoplay muted loop playsinline class="video-fondo">
-    <source src="fondo.mp4" type="video/mp4">
-</video>
-<div class="video-overlay"></div>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
 
-<div class="barra-superior">
-    <div class="header">
-        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
-        <div class="header-right">
-            <div id="perfilContainer" style="position:relative;display:none;">
-                <button class="btn-perfil" id="btnPerfil" aria-label="Abrir menú de perfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
-                    <div class="avatar-circle" id="avatarCircle">
-                        <img src="logo.png" alt="Logo" id="avatarLogo">
-                        <span class="online-dot"></span>
-                    </div>
-                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
-                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
-                </button>
-                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
-                    <div class="menu-perfil-header">
-                        <div class="avatar-grande" id="avatarGrande"><img src="logo.png" alt="Logo"></div>
-                        <div class="info">
-                            <h4 id="nombreCompleto">Usuario</h4>
-                            <p id="emailUsuario">usuario@email.com</p>
-                        </div>
-                    </div>
-                    <a href="dashboard.html" class="menu-perfil-opcion"><span class="icono">📊</span> Mi Panel</a>
-                    <a href="perfil.html" class="menu-perfil-opcion"><span class="icono">👤</span> Editar Perfil</a>
-                    <a href="pedidos.html" class="menu-perfil-opcion"><span class="icono">📦</span> Mis Pedidos</a>
-                    <a href="favoritos.html" class="menu-perfil-opcion"><span class="icono">❤️</span> Favoritos</a>
-                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
-                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
-                </div>
-            </div>
-            <button class="menu-hamburguesa" id="btnMenu" aria-label="Abrir menú" onclick="event.stopPropagation(); alternarMenu()">☰</button>
-        </div>
-        <div class="menu-flotante" id="menuFlotante" onclick="event.stopPropagation()">
-            <a href="#" class="menu-opcion" id="menuLogin" onclick="abrirModalLogin(); return false;" style="color:#d4af37;">🔑 Iniciar Sesión</a>
-            <a href="register.html" class="menu-opcion" id="menuRegister">📝 Crear Cuenta</a>
-            <div id="menuConSesion" style="display:none;">
-                <a href="dashboard.html" class="menu-opcion">📊 Mi Panel</a>
-                <a href="pedidos.html" class="menu-opcion">📦 Mis Pedidos</a>
-                <a href="perfil.html" class="menu-opcion">👤 Editar Perfil</a>
-                <div class="menu-divider"></div>
-                <a href="#" class="menu-opcion" id="menuLogout" style="color:#ef4444;">🚪 Cerrar Sesión</a>
-            </div>
-        </div>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Recargas Games, inicio">
+      <div class="brand-logo">
+        <img src="logo.png" alt="Logo Recargas Games" onerror="this.style.display='none'">
+      </div>
+      <div class="brand-copy">
+        <span class="brand-name">RECARGAS<span>GAMES</span></span>
+        <span class="brand-subtitle">Tu mundo gamer</span>
+      </div>
+    </a>
+
+    <div class="secure-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+        <path d="m9 15 2 2 4-4"></path>
+      </svg>
+      <span>Zona segura</span>
     </div>
-    <nav class="games-menu" aria-label="Juegos">
-        <a href="index.html">Inicio</a>
-        <a href="freefire.html">Free Fire (LATAM)</a>
-        <a href="freefire-br.html">Free Fire (BRASIL)</a>
-        <a href="bloodstrike.html">Blood Strike</a>
-        <a href="roblox.html">Roblox</a>
-        <a href="ml.html">Mobile Legends</a>
-        <a href="cod.html">COD Mobile</a>
-        <a href="pubg.html">PUBG Mobile</a>
-        <a href="arenabreakout.html">Arena Breakout</a>
-        <a href="delta.html">Delta Force</a>
-        <a href="bigo.html">Bigo Live</a>
-        <a href="gift-cards.html">Gift Cards</a>
-        <a href="netflix.html">Netflix</a>
-        <a href="disney.html">Disney+</a>
-    </nav>
-</div>
+  </header>
 
-<div class="modal-overlay" id="modalLogin">
-    <div class="modal-box">
-        <div class="modal-header">
-            <div class="icono-grande">🔑</div>
-            <h2>Iniciar Sesión</h2>
-        </div>
-        <div class="modal-body">
-            <form id="loginForm">
-                <div style="margin-bottom:20px;">
-                    <label for="loginEmail">📧 Correo</label>
-                    <input type="email" id="loginEmail" placeholder="tu@email.com" required>
-                </div>
-                <div style="margin-bottom:20px;">
-                    <label for="loginPassword">🔑 Contraseña</label>
-                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required>
-                </div>
-                <button type="submit" id="loginBtn" class="modal-btn">Ingresar</button>
-            </form>
-            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
-            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
-                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
-                <p style="margin-top:8px;"><a href="recuperar.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">¿Olvidaste tu contraseña?</a></p>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
-        </div>
-    </div>
-</div>
+  <main class="main">
+    <section class="welcome">
+      <div class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Panel de usuario
+      </div>
+      <h1>Mis <span>pedidos</span></h1>
+      <p>Consulta tus compras, encuentra tus referencias y revisa la información de tus pedidos desde un solo lugar.</p>
+    </section>
 
-<div class="main">
-
-    <div class="pagina-titulo">
-        <h1>📦 Mis Pedidos</h1>
-        <span class="chip-entrega">Historial completo</span>
-    </div>
-
-    <div class="resumen-stats">
-        <div class="stat-card">
-            <div class="stat-num" id="totalOrders">—</div>
-            <div class="stat-label">Pedidos</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-num" id="completedOrders">—</div>
-            <div class="stat-label">Completados</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-num" id="pendingOrders">—</div>
-            <div class="stat-label">En proceso</div>
-        </div>
-    </div>
-
-    <div class="search-box">
-        <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m16 16 4 4"></path>
-        </svg>
-        <input id="searchInput" type="search" placeholder="Buscar por ID, producto, referencia..." autocomplete="off" aria-label="Buscar pedidos">
-        <button class="clear-search" id="clearSearch" type="button" aria-label="Limpiar búsqueda">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m18 6-12 12M6 6l12 12"></path>
+    <section class="summary" aria-label="Resumen de pedidos">
+      <article class="summary-card">
+        <div class="summary-top">
+          <span class="summary-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 3h12l3 5-9 13L3 8l3-5Z"></path>
+              <path d="M3 8h18M9 3l-2 5 5 13 5-13-2-5"></path>
             </svg>
+          </span>
+        </div>
+        <strong class="summary-number" id="totalOrders">—</strong>
+        <span class="summary-label">Pedidos totales</span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-top">
+          <span class="summary-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="m8 12 2.5 2.5L16 9"></path>
+            </svg>
+          </span>
+        </div>
+        <strong class="summary-number" id="completedOrders">—</strong>
+        <span class="summary-label">Completados</span>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-top">
+          <span class="summary-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 7v5l3 2"></path>
+            </svg>
+          </span>
+        </div>
+        <strong class="summary-number" id="pendingOrders">—</strong>
+        <span class="summary-label">En proceso</span>
+      </article>
+    </section>
+
+    <section aria-labelledby="ordersHeading">
+      <div class="section-heading">
+        <div>
+          <h2 id="ordersHeading">Historial de compras</h2>
+          <p>Tus pedidos vinculados a tu cuenta</p>
+        </div>
+        <div class="live-indicator">
+          <span></span>
+          En vivo
+        </div>
+      </div>
+
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m16 16 4 4"></path>
+        </svg>
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Buscar por ID, nickname, producto o ref..."
+          autocomplete="off"
+          aria-label="Buscar pedidos"
+        >
+        <button class="clear-search" id="clearSearch" type="button" aria-label="Limpiar búsqueda">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m18 6-12 12M6 6l12 12"></path>
+          </svg>
         </button>
-    </div>
+      </div>
 
-    <div class="filtros">
-        <button class="filtro-btn activo" data-filter="todos" type="button">Todos <span class="filtro-count" id="countAll">0</span></button>
-        <button class="filtro-btn" data-filter="completado" type="button">✅ Completados <span class="filtro-count" id="countCompleted">0</span></button>
-        <button class="filtro-btn" data-filter="pendiente" type="button">⏳ En proceso <span class="filtro-count" id="countPending">0</span></button>
-        <button class="filtro-btn" data-filter="error" type="button">⚠️ Con problemas <span class="filtro-count" id="countError">0</span></button>
-    </div>
+      <div class="filters" role="group" aria-label="Filtrar pedidos">
+        <button class="filter-btn active" type="button" data-filter="todos">
+          Todos <span class="filter-count" id="countAll">0</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="completado">
+          Completados <span class="filter-count" id="countCompleted">0</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="pendiente">
+          En proceso <span class="filter-count" id="countPending">0</span>
+        </button>
+        <button class="filter-btn" type="button" data-filter="error">
+          Con problemas <span class="filter-count" id="countError">0</span>
+        </button>
+      </div>
 
-    <div class="orders-meta">
+      <div class="orders-meta">
         <span id="resultsText">Cargando pedidos...</span>
         <button class="refresh-btn" id="refreshButton" type="button">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 7v5h-5"></path>
-                <path d="M4 17v-5h5"></path>
-                <path d="M5.6 9A7 7 0 0 1 17.5 6L20 12M4 12l2.5 6A7 7 0 0 0 18.4 15"></path>
-            </svg>
-            Actualizar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 7v5h-5"></path>
+            <path d="M4 17v-5h5"></path>
+            <path d="M5.6 9A7 7 0 0 1 17.5 6L20 12M4 12l2.5 6A7 7 0 0 0 18.4 15"></path>
+          </svg>
+          Actualizar
         </button>
-    </div>
+      </div>
 
-    <div class="orders-list" id="ordersList" aria-live="polite">
-        <div class="state-box">
-            <div class="spinner"></div>
-            <h3>Cargando tus pedidos</h3>
-            <p>Estamos consultando la información de tu cuenta.</p>
+      <div class="orders-list" id="ordersList" aria-live="polite">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <h3>Cargando tus pedidos</h3>
+          <p>Estamos consultando la información de tu cuenta.</p>
         </div>
-    </div>
+      </div>
 
-    <div class="pagination" id="pagination" hidden>
-        <button class="page-btn" id="prevPage" type="button" aria-label="Anterior">
-            <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"></path></svg>
+      <div class="pagination" id="pagination" hidden>
+        <button class="page-btn" id="prevPage" type="button" aria-label="Página anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
         </button>
         <span class="page-info" id="pageInfo">Página <strong>1</strong></span>
-        <button class="page-btn" id="nextPage" type="button" aria-label="Siguiente">
-            <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
+        <button class="page-btn" id="nextPage" type="button" aria-label="Página siguiente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
         </button>
+      </div>
+    </section>
+
+    <section class="help-panel">
+      <div class="help-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"></path>
+        </svg>
+      </div>
+      <div class="help-copy">
+        <strong>¿Necesitas ayuda?</strong>
+        <span>Estamos disponibles para ayudarte con tu pedido.</span>
+      </div>
+      <a class="help-button" href="https://wa.me/584228242411" target="_blank" rel="noopener noreferrer">
+        Contactar
+      </a>
+    </section>
+
+    <div class="footer-note">
+      RECARGAS GAMES · Tu mundo gamer<br>
+      Protege tus datos y no compartas información de acceso con terceros.
     </div>
+  </main>
 
-</div>
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <a class="nav-item" href="index.html">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="m3 10 9-7 9 7"></path>
+          <path d="M5 9v12h14V9M9 21v-7h6v7"></path>
+        </svg>
+      </span>
+      <span>Inicio</span>
+    </a>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <a class="nav-item" href="juegos.html">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M6 12h4m-2-2v4"></path>
+          <path d="M15 11h.01M18 14h.01"></path>
+          <path d="M7 7h10a4 4 0 0 1 3.8 5.3l-1.2 3.8a2.5 2.5 0 0 1-4.1 1.1l-1.6-1.4h-3.8l-1.6 1.4a2.5 2.5 0 0 1-4.1-1.1l-1.2-3.8A4 4 0 0 1 7 7Z"></path>
+        </svg>
+      </span>
+      <span>Juegos</span>
+    </a>
 
-<nav class="nav-inferior" aria-label="Navegación principal">
-    <div class="nav-inferior-inner">
-        <a href="index.html" class="nav-item">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
-            Inicio
-        </a>
-        <a href="index.html#juegos" class="nav-item">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4M8 10v4M15 13h.01M18 11h.01"/></svg>
-            Juegos
-        </a>
-        <a href="pedidos.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v17l-3-2-3 2-2-2-2 2-3-2-3 2z"/><path d="M8 9h8M8 13h5"/></svg>
-            Pedidos
-        </a>
-        <a href="https://wa.me/584228242411" class="nav-item soporte" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z"/></svg>
-            Soporte
-        </a>
-    </div>
-</nav>
+    <a class="nav-item active" href="pedidos.html" aria-current="page">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M7 3h10l4 4v14H3V3h4Z"></path>
+          <path d="M7 3v5h10V3M7 13h10M7 17h7"></path>
+        </svg>
+      </span>
+      <span>Pedidos</span>
+    </a>
 
-<script>
-const firebaseConfig = {
-    apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
-    authDomain: "free-52119.firebaseapp.com",
-    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "free-52119",
-    storageBucket: "free-52119.firebasestorage.app",
-    messagingSenderId: "632240144599",
-    appId: "1:632240144599:web:e31c25665ffe19c194b092"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+    <a class="nav-item" href="soporte.html">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M4 12a8 8 0 0 1 16 0"></path>
+          <path d="M4 12v5a2 2 0 0 0 2 2h2v-6H6a2 2 0 0 0-2 2ZM20 12v5a2 2 0 0 1-2 2h-2v-6h2a2 2 0 0 1 2 2Z"></path>
+          <path d="M16 20h-4"></path>
+        </svg>
+      </span>
+      <span>Soporte</span>
+    </a>
+  </nav>
 
-const WHATSAPP_SUPPORT = "584228242411";
-const PAGE_SIZE = 5;
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="m5 12 4 4L19 6"></path>
+    </svg>
+    <span id="toastMessage">Copiado correctamente</span>
+  </div>
 
-let currentUser = null;
-let allOrders = [];
-let currentFilter = "todos";
-let currentPage = 1;
-let toastTimer = null;
-let ordersListener = null;
-let activeOrdersRef = null;
-let loadingOrders = true;
+  <!-- ===== Script principal como módulo ES ===== -->
+  <script type="module">
+    // ⚠️ Importamos auth y db desde tu archivo de configuración
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { ref, query, orderByChild, equalTo, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-const $ = (s) => document.querySelector(s);
-const ordersList = $("#ordersList");
-const searchInput = $("#searchInput");
-const clearSearch = $("#clearSearch");
-const pagination = $("#pagination");
-const refreshButton = $("#refreshButton");
-const toastEl = $("#toast");
+    const WHATSAPP_SUPPORT = "584228242411";
+    const PAGE_SIZE = 5;
 
-const ICONS = {
-    package: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 9 5-9 5-9-5 9-5Z"></path><path d="m3 8 9 5 9-5M3 8v9l9 5 9-5V8M12 13v9"></path></svg>`,
-    calendar: `<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg>`,
-    copy: `<svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"></rect><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path></svg>`,
-    check: `<svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg>`,
-    whatsapp: `<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"></path></svg>`
-};
+    let currentUser = null;
+    let allOrders = [];
+    let currentFilter = "todos";
+    let currentPage = 1;
+    let toastTimer = null;
+    let ordersQueryRef = null;
+    let unsubscribeOrders = null;
+    let loadingOrders = true;
 
-function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]);}
-function firstValue(o,keys,fb=""){for(const k of keys){const v=o&&o[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return v;}return fb;}
-function normalizeText(v){return String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();}
+    const $ = (selector) => document.querySelector(selector);
 
-function getOrderId(o,k){return String(firstValue(o,["numeroPedido","numero_pedido","orderNumber","orderId","pedidoId","pedido","numero","idPedido","id_pedido","id"],k));}
-function getPlayerId(o){return String(firstValue(o,["id_jugador","idJugador","playerId","player_id","uid_jugador","uidJugador","idFreeFire","id_free_fire","id_usuario","idUsuario","gameId","game_id"],"No indicado"));}
-function getNickname(o){return String(firstValue(o,["nombre_jugador","nombreJugador","nickname","nickName","nick","playerName","player_name","nombre_usuario","nombreUsuario","usuario_juego","usuarioJuego"],"No indicado"));}
-function getProduct(o){return String(firstValue(o,["producto","product","nombreProducto","nombre_producto","nombre","descripcion","description","paquete","item"],"Producto no especificado"));}
-function getReference(o){return String(firstValue(o,["referencia","reference","referenciaPago","referencia_pago","referencia_pago_movil","referenciaPagoMovil","ref","paymentReference","transactionReference","transaccion","transactionId"],"No indicada"));}
-function getStatus(o){return String(firstValue(o,["estado","status","estadoPedido","estado_pedido","statusPedido","status_pedido"],"pendiente"));}
+    const ordersList = $("#ordersList");
+    const searchInput = $("#searchInput");
+    const clearSearch = $("#clearSearch");
+    const pagination = $("#pagination");
+    const refreshButton = $("#refreshButton");
 
-function classifyStatus(raw){
-    const s = normalizeText(raw);
-    if(s.includes("complet")||s.includes("exitos")||s.includes("entreg")||s.includes("finaliz")||s.includes("aprob")||s.includes("success")||s.includes("realizado"))
-        return {type:"completado",label:"Completado",css:"status-success"};
-    if(s.includes("error")||s.includes("fall")||s.includes("rechaz")||s.includes("cancel")||s.includes("deneg")||s.includes("failed"))
-        return {type:"error",label:"Con problemas",css:"status-error"};
-    if(s.includes("pendient")||s.includes("verific")||s.includes("proceso")||s.includes("espera")||s.includes("procesando")||s.includes("validando")||s.includes("iniciado")||s.includes("payment"))
-        return {type:"pendiente",label:"En proceso",css:"status-pending"};
-    return {type:"pendiente",label:raw||"En proceso",css:"status-neutral"};
-}
+    const icons = {
+      package: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
+        <path d="m3 8 9 5 9-5M3 8v9l9 5 9-5V8M12 13v9"></path>
+      </svg>`,
+      calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+        <path d="M16 3v4M8 3v4M3 10h18"></path>
+      </svg>`,
+      copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="8" y="8" width="13" height="13" rx="2"></rect>
+        <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path>
+      </svg>`,
+      check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m5 12 4 4L19 6"></path>
+      </svg>`,
+      whatsapp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"></path>
+      </svg>`
+    };
 
-function getOrderTimestamp(o){
-    const raw = firstValue(o,["fecha","createdAt","created_at","fecha_creacion","fechaCreacion","timestamp","time","created","date"],null);
-    if(raw===null) return 0;
-    if(typeof raw==="number") return raw<1000000000000?raw*1000:raw;
-    if(typeof raw==="object"){if(typeof raw.seconds==="number")return raw.seconds*1000;if(typeof raw._seconds==="number")return raw._seconds*1000;}
-    const p = Date.parse(raw); return Number.isNaN(p)?0:p;
-}
-function formatDate(o){
-    const t = getOrderTimestamp(o); if(!t) return "Fecha no disponible";
-    try{return new Intl.DateTimeFormat("es-VE",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(t));}
-    catch{return "Fecha no disponible";}
-}
-function getSearchText(o){return normalizeText([getOrderId(o,o._key),getPlayerId(o),getNickname(o),getProduct(o),getReference(o),getStatus(o)].join(" "));}
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      })[c]);
+    }
 
-function getVisibleOrders(){
-    const q = normalizeText(searchInput.value);
-    return allOrders.filter(o=>{
-        const st = classifyStatus(getStatus(o));
-        const okF = currentFilter==="todos" || st.type===currentFilter;
-        const okS = !q || getSearchText(o).includes(q);
-        return okF && okS;
-    });
-}
+    function firstValue(object, keys, fallback = "") {
+      for (const key of keys) {
+        const value = object && object[key];
+        if (value !== undefined && value !== null && String(value).trim() !== "") return value;
+      }
+      return fallback;
+    }
 
-function updateSummary(){
-    const c = allOrders.filter(o=>classifyStatus(getStatus(o)).type==="completado").length;
-    const p = allOrders.filter(o=>classifyStatus(getStatus(o)).type==="pendiente").length;
-    const e = allOrders.filter(o=>classifyStatus(getStatus(o)).type==="error").length;
-    $("#totalOrders").textContent = allOrders.length;
-    $("#completedOrders").textContent = c;
-    $("#pendingOrders").textContent = p;
-    $("#countAll").textContent = allOrders.length;
-    $("#countCompleted").textContent = c;
-    $("#countPending").textContent = p;
-    $("#countError").textContent = e;
-}
+    function normalizeText(value) {
+      return String(value ?? "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase().trim();
+    }
 
-function updateFilterButtons(){
-    document.querySelectorAll(".filtro-btn").forEach(b=>{
-        const a = b.dataset.filter===currentFilter;
-        b.classList.toggle("activo",a);
-    });
-}
+    function getOrderId(order, key) {
+      return String(firstValue(order, [
+        "numeroPedido","numero_pedido","orderNumber","orderId","pedidoId",
+        "pedido","numero","idPedido","id_pedido","id"
+      ], key));
+    }
 
-function renderLoading(){
-    ordersList.innerHTML = `
-        <div class="state-box">
-            <div class="spinner"></div>
-            <h3>Cargando tus pedidos</h3>
-            <p>Estamos consultando la información de tu cuenta.</p>
+    function getPlayerId(order) {
+      return String(firstValue(order, [
+        "id_jugador","idJugador","playerId","player_id","uid_jugador","uidJugador",
+        "idFreeFire","id_free_fire","id_usuario","idUsuario","gameId","game_id"
+      ], "No indicado"));
+    }
+
+    function getNickname(order) {
+      return String(firstValue(order, [
+        "nickname","nickName","nick","nombre_jugador","nombreJugador",
+        "playerName","player_name","nombre_usuario","nombreUsuario",
+        "usuario_juego","usuarioJuego"
+      ], "No indicado"));
+    }
+
+    function getProduct(order) {
+      return String(firstValue(order, [
+        "producto","product","nombreProducto","nombre_producto","nombre",
+        "descripcion","description","paquete","item"
+      ], "Producto no especificado"));
+    }
+
+    function getReference(order) {
+      return String(firstValue(order, [
+        "referencia","reference","referenciaPago","referencia_pago",
+        "referencia_pago_movil","referenciaPagoMovil","ref",
+        "paymentReference","transactionReference","transaccion","transactionId"
+      ], "No indicada"));
+    }
+
+    function getStatus(order) {
+      return String(firstValue(order, [
+        "estado","status","estadoPedido","estado_pedido","statusPedido","status_pedido"
+      ], "pendiente"));
+    }
+
+    function classifyStatus(rawStatus) {
+      const status = normalizeText(rawStatus);
+
+      if (status.includes("complet") || status.includes("exitos") || status.includes("entreg") ||
+          status.includes("finaliz") || status.includes("aprob") || status.includes("success") ||
+          status.includes("realizado")) {
+        return { type: "completado", label: "Completado", css: "status-success" };
+      }
+
+      if (status.includes("error") || status.includes("fall") || status.includes("rechaz") ||
+          status.includes("cancel") || status.includes("deneg") || status.includes("failed")) {
+        return { type: "error", label: "Con problemas", css: "status-error" };
+      }
+
+      if (status.includes("pendient") || status.includes("verific") || status.includes("proceso") ||
+          status.includes("espera") || status.includes("conectando") || status.includes("procesando") ||
+          status.includes("validando") || status.includes("iniciado") || status.includes("payment")) {
+        return { type: "pendiente", label: "En proceso", css: "status-pending" };
+      }
+
+      return { type: "pendiente", label: rawStatus || "En proceso", css: "status-neutral" };
+    }
+
+    function getOrderTimestamp(order) {
+      const raw = firstValue(order, [
+        "fecha","createdAt","created_at","fecha_creacion","fechaCreacion",
+        "timestamp","time","created","date"
+      ], null);
+
+      if (raw === null) return 0;
+      if (typeof raw === "number") return raw < 1000000000000 ? raw * 1000 : raw;
+      if (typeof raw === "object") {
+        if (typeof raw.seconds === "number") return raw.seconds * 1000;
+        if (typeof raw._seconds === "number") return raw._seconds * 1000;
+      }
+      const parsed = Date.parse(raw);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    function formatDate(order) {
+      const timestamp = getOrderTimestamp(order);
+      if (!timestamp) return "Fecha no disponible";
+      try {
+        return new Intl.DateTimeFormat("es-VE", {
+          day: "2-digit", month: "short", year: "numeric",
+          hour: "2-digit", minute: "2-digit"
+        }).format(new Date(timestamp));
+      } catch {
+        return "Fecha no disponible";
+      }
+    }
+
+    function getOrderSearchText(order) {
+      return normalizeText([
+        getOrderId(order, order._key),
+        getPlayerId(order),
+        getNickname(order),
+        getProduct(order),
+        getReference(order),
+        getStatus(order)
+      ].join(" "));
+    }
+
+    function getVisibleOrders() {
+      const queryText = normalizeText(searchInput.value);
+      return allOrders.filter((order) => {
+        const status = classifyStatus(getStatus(order));
+        const matchesFilter = currentFilter === "todos" || status.type === currentFilter;
+        const matchesSearch = !queryText || getOrderSearchText(order).includes(queryText);
+        return matchesFilter && matchesSearch;
+      });
+    }
+
+    function updateSummary() {
+      const completed = allOrders.filter(o => classifyStatus(getStatus(o)).type === "completado").length;
+      const pending = allOrders.filter(o => classifyStatus(getStatus(o)).type === "pendiente").length;
+      const errors = allOrders.filter(o => classifyStatus(getStatus(o)).type === "error").length;
+
+      $("#totalOrders").textContent = allOrders.length;
+      $("#completedOrders").textContent = completed;
+      $("#pendingOrders").textContent = pending;
+
+      $("#countAll").textContent = allOrders.length;
+      $("#countCompleted").textContent = completed;
+      $("#countPending").textContent = pending;
+      $("#countError").textContent = errors;
+    }
+
+    function updateFilterButtons() {
+      document.querySelectorAll(".filter-btn").forEach(button => {
+        const active = button.dataset.filter === currentFilter;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    function renderLoading() {
+      ordersList.innerHTML = `
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <h3>Cargando tus pedidos</h3>
+          <p>Estamos consultando la información de tu cuenta.</p>
         </div>`;
-    $("#resultsText").textContent = "Cargando pedidos...";
-    pagination.hidden = true;
-}
+      $("#resultsText").textContent = "Cargando pedidos...";
+      pagination.hidden = true;
+    }
 
-function renderEmpty(title,desc,showBtn=false){
-    ordersList.innerHTML = `
-        <div class="state-box">
-            <div class="state-icon">${ICONS.package}</div>
-            <h3>${escapeHTML(title)}</h3>
-            <p>${escapeHTML(desc)}</p>
-            ${showBtn?`<a class="state-action" href="index.html">Explorar productos <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>`:""}
+    function renderEmpty(title, description, showShopButton = false) {
+      ordersList.innerHTML = `
+        <div class="empty-state">
+          <div class="state-icon">${icons.package}</div>
+          <h3>${escapeHTML(title)}</h3>
+          <p>${escapeHTML(description)}</p>
+          ${showShopButton ? `
+            <a class="state-action" href="index.html">
+              Explorar productos
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M13 6l6 6-6 6"></path>
+              </svg>
+            </a>` : ""}
         </div>`;
-    pagination.hidden = true;
-}
+      pagination.hidden = true;
+    }
 
-function renderError(msg){
-    ordersList.innerHTML = `
-        <div class="state-box error-state">
-            <div class="state-icon">⚠</div>
-            <h3>No pudimos cargar los pedidos</h3>
-            <p>${escapeHTML(msg)}</p>
-            <button class="state-action" id="retryBtn" type="button">Intentar de nuevo</button>
+    function renderError(message) {
+      ordersList.innerHTML = `
+        <div class="error-state">
+          <div class="state-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 9v4M12 17h.01"></path>
+              <path d="M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.6L13.7 3.9a2 2 0 0 0-3.4 0Z"></path>
+            </svg>
+          </div>
+          <h3>No pudimos cargar los pedidos</h3>
+          <p>${escapeHTML(message)}</p>
+          <button class="state-action" id="retryButton" type="button">Intentar de nuevo</button>
         </div>`;
-    $("#retryBtn").addEventListener("click", subscribeToOrders);
-    pagination.hidden = true;
-}
+      $("#retryButton").addEventListener("click", subscribeToOrders);
+      pagination.hidden = true;
+    }
 
-function createOrderCard(o){
-    const orderId = getOrderId(o,o._key);
-    const playerId = getPlayerId(o);
-    const nickname = getNickname(o);
-    const product = getProduct(o);
-    const reference = getReference(o);
-    const status = classifyStatus(getStatus(o));
-    const date = formatDate(o);
-    const sOrd = escapeHTML(orderId);
-    const sPlayer = escapeHTML(playerId);
-    const sNick = escapeHTML(nickname);
-    const sProd = escapeHTML(product);
-    const sRef = escapeHTML(reference);
-    const sDate = escapeHTML(date);
-    const supportMsg = encodeURIComponent(`Hola, necesito ayuda con mi pedido ${orderId}. Producto: ${product}. Referencia: ${reference}.`);
+    function createOrderCard(order) {
+      const orderId = getOrderId(order, order._key);
+      const playerId = getPlayerId(order);
+      const nickname = getNickname(order);
+      const product = getProduct(order);
+      const reference = getReference(order);
+      const status = classifyStatus(getStatus(order));
+      const date = formatDate(order);
 
-    const card = document.createElement("article");
-    card.className = "order-card";
-    card.innerHTML = `
+      const safeOrderId = escapeHTML(orderId);
+      const safePlayerId = escapeHTML(playerId);
+      const safeNickname = escapeHTML(nickname);
+      const safeProduct = escapeHTML(product);
+      const safeReference = escapeHTML(reference);
+      const safeDate = escapeHTML(date);
+
+      const supportMessage = encodeURIComponent(
+        `Hola, necesito ayuda con mi pedido ${orderId}. Producto: ${product}. Referencia: ${reference}.`
+      );
+
+      const card = document.createElement("article");
+      card.className = "order-card";
+
+      card.innerHTML = `
         <div class="order-top">
-            <div class="order-num-wrap">
-                <div class="order-icon">💎</div>
-                <div>
-                    <span class="order-num-label">Número de pedido</span>
-                    <strong class="order-num">#${sOrd}</strong>
-                </div>
+          <div class="order-number-wrap">
+            <div class="order-symbol">${icons.package}</div>
+            <div>
+              <span class="order-number-label">Número de pedido</span>
+              <strong class="order-number">#${safeOrderId}</strong>
             </div>
-            <span class="order-status ${status.css}">${escapeHTML(status.label)}</span>
+          </div>
+          <span class="order-status ${status.css}">${escapeHTML(status.label)}</span>
         </div>
 
+        <div class="order-divider"></div>
+
         <div class="order-fields">
-            <div class="order-field">
-                <span class="field-label">ID Jugador</span>
-                <span class="field-value">${sPlayer}</span>
+          <div class="order-field">
+            <span class="field-label">ID</span>
+            <span class="field-value">${safePlayerId}</span>
+          </div>
+
+          <div class="order-field">
+            <span class="field-label">Nickname</span>
+            <span class="field-value nickname">${safeNickname}</span>
+          </div>
+
+          <div class="order-field product-field">
+            <span class="field-label">Producto</span>
+            <span class="field-value product">${safeProduct}</span>
+          </div>
+
+          <div class="order-field product-field">
+            <span class="field-label">Ref</span>
+            <div class="reference-row">
+              <span class="field-value">${safeReference}</span>
+              ${reference !== "No indicada" ? `
+                <button class="copy-btn" type="button" aria-label="Copiar referencia" data-copy="${escapeHTML(reference)}">
+                  ${icons.copy}
+                </button>` : ""}
             </div>
-            <div class="order-field">
-                <span class="field-label">Nickname</span>
-                <span class="field-value nickname">${sNick}</span>
-            </div>
-            <div class="order-field full">
-                <span class="field-label">Producto</span>
-                <span class="field-value product">${sProd}</span>
-            </div>
-            <div class="order-field full">
-                <span class="field-label">Referencia</span>
-                <div class="ref-row">
-                    <span class="field-value">${sRef}</span>
-                    ${reference!=="No indicada"?`<button class="copy-btn" type="button" data-copy="${escapeHTML(reference)}" aria-label="Copiar referencia">${ICONS.copy}</button>`:""}
-                </div>
-            </div>
+          </div>
         </div>
 
         <div class="order-bottom">
-            <div class="order-date">${ICONS.calendar}<span>${sDate}</span></div>
-            <a class="support-link" href="https://wa.me/${WHATSAPP_SUPPORT}?text=${supportMsg}" target="_blank" rel="noopener noreferrer">${ICONS.whatsapp} Ayuda</a>
+          <div class="order-date">
+            ${icons.calendar}
+            <span>${safeDate}</span>
+          </div>
+          <a
+            class="support-link"
+            href="https://wa.me/${WHATSAPP_SUPPORT}?text=${supportMessage}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ${icons.whatsapp}
+            Ayuda
+          </a>
         </div>`;
-    return card;
-}
 
-function renderOrders(){
-    if(loadingOrders) return;
-    updateSummary();
-    updateFilterButtons();
-    const filtered = getVisibleOrders();
-    const total = filtered.length;
-    const totalPages = Math.max(1, Math.ceil(total/PAGE_SIZE));
-    if(currentPage>totalPages) currentPage = totalPages;
-    if(currentPage<1) currentPage = 1;
-    const start = (currentPage-1)*PAGE_SIZE;
-    const pageOrders = filtered.slice(start, start+PAGE_SIZE);
+      return card;
+    }
 
-    if(allOrders.length===0){
-        renderEmpty("Todavía no tienes pedidos","Cuando realices una compra en Recargas Games, aparecerá aquí.",true);
+    function renderOrders() {
+      if (loadingOrders) return;
+
+      updateSummary();
+      updateFilterButtons();
+
+      const filteredOrders = getVisibleOrders();
+      const total = filteredOrders.length;
+      const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIndex = (currentPage - 1) * PAGE_SIZE;
+      const pageOrders = filteredOrders.slice(startIndex, startIndex + PAGE_SIZE);
+
+      if (allOrders.length === 0) {
+        renderEmpty(
+          "Todavía no tienes pedidos",
+          "Cuando realices una compra en Recargas Games, aparecerá aquí.",
+          true
+        );
         $("#resultsText").textContent = "0 pedidos";
         return;
-    }
-    if(total===0){
-        renderEmpty("No encontramos resultados","Prueba con otra búsqueda o un filtro diferente.");
+      }
+
+      if (total === 0) {
+        renderEmpty(
+          "No encontramos resultados",
+          "Prueba con otra búsqueda o selecciona un filtro diferente."
+        );
         $("#resultsText").textContent = "0 resultados";
         return;
+      }
+
+      ordersList.innerHTML = "";
+      pageOrders.forEach((order, index) => {
+        const card = createOrderCard(order);
+        card.style.animationDelay = `${Math.min(index * 35, 140)}ms`;
+        ordersList.appendChild(card);
+      });
+
+      const first = startIndex + 1;
+      const last = Math.min(startIndex + PAGE_SIZE, total);
+
+      $("#resultsText").innerHTML =
+        `Mostrando <strong>${first}–${last}</strong> de <strong>${total}</strong>`;
+
+      pagination.hidden = totalPages <= 1;
+      $("#pageInfo").innerHTML =
+        `Página <strong>${currentPage}</strong> de <strong>${totalPages}</strong>`;
+      $("#prevPage").disabled = currentPage <= 1;
+      $("#nextPage").disabled = currentPage >= totalPages;
     }
 
-    ordersList.innerHTML = "";
-    pageOrders.forEach((o,i)=>{
-        const c = createOrderCard(o);
-        c.style.animation = `fadeInCard .3s ease ${Math.min(i*40,150)}ms both`;
-        ordersList.appendChild(c);
-    });
+    function showToast(message) {
+      const toast = $("#toast");
+      $("#toastMessage").textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2300);
+    }
 
-    const first = start+1;
-    const last = Math.min(start+PAGE_SIZE,total);
-    $("#resultsText").innerHTML = `Mostrando <strong>${first}–${last}</strong> de <strong>${total}</strong>`;
-    pagination.hidden = totalPages<=1;
-    $("#pageInfo").innerHTML = `Página <strong>${currentPage}</strong> de <strong>${totalPages}</strong>`;
-    $("#prevPage").disabled = currentPage<=1;
-    $("#nextPage").disabled = currentPage>=totalPages;
-}
-
-const styleAnim = document.createElement("style");
-styleAnim.textContent = `@keyframes fadeInCard{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`;
-document.head.appendChild(styleAnim);
-
-function showToast(msg,isError=false){
-    toastEl.textContent = msg;
-    toastEl.className = "toast visible" + (isError?" error":"");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=>toastEl.classList.remove("visible"), 3000);
-}
-
-async function copyText(text,btn){
-    try{
-        if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
-        else{
-            const ta = document.createElement("textarea");
-            ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
-            document.body.appendChild(ta); ta.select();
-            const ok = document.execCommand("copy");
-            ta.remove(); if(!ok) throw new Error();
+    async function copyText(text, button) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          const copied = document.execCommand("copy");
+          textarea.remove();
+          if (!copied) throw new Error("No se pudo copiar");
         }
-        if(btn){btn.classList.add("copied");btn.innerHTML=ICONS.check;setTimeout(()=>{btn.classList.remove("copied");btn.innerHTML=ICONS.copy;},1500);}
-        showToast("Referencia copiada ✓");
-    }catch{showToast("No se pudo copiar", true);}
-}
 
-function subscribeToOrders(){
-    if(!currentUser) return;
-    if(activeOrdersRef && ordersListener){ activeOrdersRef.off("value", ordersListener); }
-    loadingOrders = true;
-    renderLoading();
-    refreshButton.classList.add("loading");
-    activeOrdersRef = db.ref("pedidos").orderByChild("uid").equalTo(currentUser.uid);
-    ordersListener = (snapshot)=>{
-        allOrders = [];
-        snapshot.forEach(child=>{
-            const v = child.val();
-            if(v && typeof v==="object") allOrders.push({...v, _key: child.key});
-        });
-        allOrders.sort((a,b)=>{
-            const d = getOrderTimestamp(b)-getOrderTimestamp(a);
-            if(d!==0) return d;
-            return String(b._key).localeCompare(String(a._key),undefined,{numeric:true});
-        });
-        loadingOrders = false;
-        currentPage = 1;
-        refreshButton.classList.remove("loading");
-        renderOrders();
-    };
-    activeOrdersRef.on("value", ordersListener, (error)=>{
-        loadingOrders = false;
-        refreshButton.classList.remove("loading");
-        console.error("Error consultando pedidos:",error);
-        if(error && error.code==="PERMISSION_DENIED") renderError("No tienes permiso para consultar estos pedidos. Verifica las reglas de seguridad de Firebase.");
-        else renderError("Comprueba tu conexión e inténtalo nuevamente.");
-    });
-}
-
-// ===== EVENTOS UI =====
-searchInput.addEventListener("input",()=>{
-    currentPage = 1;
-    clearSearch.style.display = searchInput.value ? "grid" : "none";
-    renderOrders();
-});
-clearSearch.addEventListener("click",()=>{
-    searchInput.value = ""; clearSearch.style.display = "none";
-    currentPage = 1; searchInput.focus(); renderOrders();
-});
-document.querySelectorAll(".filtro-btn").forEach(b=>{
-    b.addEventListener("click",()=>{ currentFilter = b.dataset.filter; currentPage = 1; renderOrders(); });
-});
-$("#prevPage").addEventListener("click",()=>{ if(currentPage>1){currentPage--;renderOrders();window.scrollTo({top:0,behavior:"smooth"});} });
-$("#nextPage").addEventListener("click",()=>{ const tp = Math.ceil(getVisibleOrders().length/PAGE_SIZE); if(currentPage<tp){currentPage++;renderOrders();window.scrollTo({top:0,behavior:"smooth"});} });
-refreshButton.addEventListener("click",()=>{ if(currentUser){ subscribeToOrders(); showToast("Actualizando pedidos..."); } });
-ordersList.addEventListener("click",(e)=>{
-    const btn = e.target.closest("[data-copy]");
-    if(!btn) return;
-    copyText(btn.dataset.copy, btn);
-});
-
-// ===== MENÚS / AUTH =====
-const perfilContainer = document.getElementById("perfilContainer");
-const menuLogin = document.getElementById("menuLogin");
-const menuRegister = document.getElementById("menuRegister");
-const menuConSesion = document.getElementById("menuConSesion");
-const perfilNombre = document.getElementById("perfilNombre");
-const nombreCompleto = document.getElementById("nombreCompleto");
-const emailUsuario = document.getElementById("emailUsuario");
-const modalLogin = document.getElementById("modalLogin");
-const loginForm = document.getElementById("loginForm");
-let usuarioActual = null;
-
-window.alternarMenu = function(){
-    const mf = document.getElementById("menuFlotante");
-    const mp = document.getElementById("menuPerfil");
-    const pf = document.getElementById("perfilFlecha");
-    if(mf) mf.classList.toggle("activo");
-    if(mp) mp.classList.remove("activo");
-    if(pf) pf.classList.remove("abierta");
-};
-window.toggleMenuPerfil = function(){
-    const mf = document.getElementById("menuFlotante");
-    const mp = document.getElementById("menuPerfil");
-    const pf = document.getElementById("perfilFlecha");
-    if(mp) mp.classList.toggle("activo");
-    if(pf) pf.classList.toggle("abierta");
-    if(mf) mf.classList.remove("activo");
-};
-document.body.addEventListener("click",(e)=>{
-    const mf = document.getElementById("menuFlotante");
-    const mp = document.getElementById("menuPerfil");
-    const bm = document.getElementById("btnMenu");
-    const bp = document.getElementById("btnPerfil");
-    if(bm && mf && !mf.contains(e.target) && !bm.contains(e.target)) mf.classList.remove("activo");
-    if(bp && mp && !mp.contains(e.target) && !bp.contains(e.target)){
-        mp.classList.remove("activo");
-        const pf = document.getElementById("perfilFlecha");
-        if(pf) pf.classList.remove("abierta");
+        if (button) {
+          button.classList.add("copied");
+          button.innerHTML = icons.check;
+          setTimeout(() => {
+            button.classList.remove("copied");
+            button.innerHTML = icons.copy;
+          }, 1500);
+        }
+        showToast("Referencia copiada");
+      } catch (error) {
+        showToast("No se pudo copiar la referencia");
+      }
     }
-});
 
-window.abrirModalLogin = function(){
-    if(modalLogin) modalLogin.classList.add("activo");
-    const lm = document.getElementById("loginMessage");
-    if(lm) lm.style.display = "none";
-    document.getElementById("loginEmail").value = "";
-    document.getElementById("loginPassword").value = "";
-    const mf = document.getElementById("menuFlotante");
-    if(mf) mf.classList.remove("activo");
-};
-window.cerrarModalLogin = function(){ if(modalLogin) modalLogin.classList.remove("activo"); };
-if(modalLogin) modalLogin.addEventListener("click",(e)=>{ if(e.target===modalLogin) cerrarModalLogin(); });
+    function unsubscribeCurrentListener() {
+      if (ordersQueryRef && unsubscribeOrders) {
+        off(ordersQueryRef, "value", unsubscribeOrders);
+        unsubscribeOrders = null;
+        ordersQueryRef = null;
+      }
+    }
 
-if(loginForm){
-    loginForm.addEventListener("submit",async(e)=>{
-        e.preventDefault();
-        const email = document.getElementById("loginEmail").value.trim();
-        const pass = document.getElementById("loginPassword").value;
-        const btn = document.getElementById("loginBtn");
-        const msg = document.getElementById("loginMessage");
-        btn.disabled = true; btn.textContent = "Ingresando...";
-        msg.style.display = "none";
-        try{
-            await auth.signInWithEmailAndPassword(email,pass);
-            msg.style.background = "rgba(34,197,94,0.15)";
-            msg.style.color = "#86efac";
-            msg.textContent = "✅ ¡Bienvenido!";
-            msg.style.display = "block";
-            setTimeout(()=>{ cerrarModalLogin(); window.location.reload(); },1000);
-        }catch(error){
-            let m = "❌ ";
-            switch(error.code){
-                case "auth/user-not-found": m+="Usuario no encontrado"; break;
-                case "auth/wrong-password": m+="Contraseña incorrecta"; break;
-                case "auth/invalid-email": m+="Correo inválido"; break;
-                default: m+=error.message;
+    function subscribeToOrders() {
+      if (!currentUser) return;
+
+      unsubscribeCurrentListener();
+
+      loadingOrders = true;
+      renderLoading();
+      refreshButton.classList.add("loading");
+
+      // Consulta: pedidos donde uid == usuario actual
+      const ordersRef = ref(db, "pedidos");
+      ordersQueryRef = query(ordersRef, orderByChild("uid"), equalTo(currentUser.uid));
+
+      unsubscribeOrders = onValue(
+        ordersQueryRef,
+        (snapshot) => {
+          allOrders = [];
+
+          snapshot.forEach((childSnapshot) => {
+            const value = childSnapshot.val();
+            if (value && typeof value === "object") {
+              allOrders.push({ ...value, _key: childSnapshot.key });
             }
-            msg.style.background = "rgba(239,68,68,0.15)";
-            msg.style.color = "#fca5a5";
-            msg.textContent = m;
-            msg.style.display = "block";
-            btn.disabled = false; btn.textContent = "Ingresar";
+          });
+
+          allOrders.sort((a, b) => {
+            const dateDifference = getOrderTimestamp(b) - getOrderTimestamp(a);
+            if (dateDifference !== 0) return dateDifference;
+            return String(b._key).localeCompare(String(a._key), undefined, { numeric: true });
+          });
+
+          loadingOrders = false;
+          currentPage = 1;
+          refreshButton.classList.remove("loading");
+          renderOrders();
+        },
+        (error) => {
+          loadingOrders = false;
+          refreshButton.classList.remove("loading");
+          console.error("Error consultando pedidos:", error);
+
+          if (error && error.code === "PERMISSION_DENIED") {
+            renderError(
+              "No tienes permiso para consultar estos pedidos. Verifica las reglas de seguridad de Firebase Realtime Database."
+            );
+          } else {
+            renderError("Comprueba tu conexión e inténtalo nuevamente.");
+          }
         }
+      );
+    }
+
+    // Escucha el estado de autenticación
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        // Redirigir a login si no está autenticado
+        window.location.replace("login.html");
+        return;
+      }
+
+      currentUser = user;
+      subscribeToOrders();
     });
-}
 
-async function confirmarYSalir(e){
-    e.preventDefault();
-    if(confirm("¿Seguro que quieres cerrar sesión?")){
-        await auth.signOut();
-        window.location.reload();
-    }
-}
-const btnCerrarSesionEl = document.getElementById("btnCerrarSesion");
-if(btnCerrarSesionEl) btnCerrarSesionEl.addEventListener("click",confirmarYSalir);
-const menuLogoutEl = document.getElementById("menuLogout");
-if(menuLogoutEl) menuLogoutEl.addEventListener("click",confirmarYSalir);
+    // ===== Eventos de UI =====
+    searchInput.addEventListener("input", () => {
+      currentPage = 1;
+      clearSearch.style.display = searchInput.value ? "grid" : "none";
+      renderOrders();
+    });
 
-auth.onAuthStateChanged((user)=>{
-    usuarioActual = user;
-    if(user){
-        currentUser = user;
-        const nombre = user.displayName || "Usuario";
-        const email = user.email || "usuario@email.com";
-        if(perfilContainer) perfilContainer.style.display = "block";
-        if(perfilNombre) perfilNombre.textContent = nombre.length>12?nombre.substring(0,12)+"...":nombre;
-        if(nombreCompleto) nombreCompleto.textContent = nombre;
-        if(emailUsuario) emailUsuario.textContent = email;
-        if(menuLogin) menuLogin.style.display = "none";
-        if(menuRegister) menuRegister.style.display = "none";
-        if(menuConSesion) menuConSesion.style.display = "block";
+    clearSearch.addEventListener("click", () => {
+      searchInput.value = "";
+      clearSearch.style.display = "none";
+      currentPage = 1;
+      searchInput.focus();
+      renderOrders();
+    });
+
+    document.querySelectorAll(".filter-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        currentFilter = button.dataset.filter;
+        currentPage = 1;
+        renderOrders();
+      });
+    });
+
+    $("#prevPage").addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderOrders();
+        $("#ordersHeading").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+
+    $("#nextPage").addEventListener("click", () => {
+      const totalPages = Math.ceil(getVisibleOrders().length / PAGE_SIZE);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderOrders();
+        $("#ordersHeading").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+
+    refreshButton.addEventListener("click", () => {
+      if (currentUser) {
         subscribeToOrders();
-    }else{
-        if(perfilContainer) perfilContainer.style.display = "none";
-        if(menuLogin) menuLogin.style.display = "flex";
-        if(menuRegister) menuRegister.style.display = "flex";
-        if(menuConSesion) menuConSesion.style.display = "none";
-        // Sin sesión: mostrar estado de "inicia sesión"
-        loadingOrders = false;
-        ordersList.innerHTML = `
-            <div class="state-box">
-                <div class="state-icon">🔒</div>
-                <h3>Inicia sesión</h3>
-                <p>Necesitas iniciar sesión para ver tus pedidos.</p>
-                <button class="state-action" onclick="abrirModalLogin()">Iniciar Sesión</button>
-            </div>`;
-        $("#resultsText").textContent = "Sin sesión activa";
-        pagination.hidden = true;
-    }
-});
+        showToast("Actualizando pedidos...");
+      }
+    });
 
-const chipActivo = document.querySelector(".games-menu a.active");
-if(chipActivo) chipActivo.scrollIntoView({inline:"center",block:"nearest"});
-</script>
+    ordersList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-copy]");
+      if (!button) return;
+      copyText(button.dataset.copy, button);
+    });
+
+    window.addEventListener("beforeunload", () => {
+      unsubscribeCurrentListener();
+    });
+  </script>
 </body>
 </html>
