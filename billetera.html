@@ -6,327 +6,293 @@
 <meta name="theme-color" content="#080b14">
 <title>RECARGASGAMES - Mi Billetera</title>
 
-<!-- SDK de Firebase Compat (Versión 9) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-:root {
-    --oro: #d4af37;
-    --oro-claro: #ffe58a;
-    --fondo: #080b14;
-    --gris: #94a3b8;
-    --verde: #22c55e;
-    --rojo: #ef4444;
+:root{
+    --color-dorado:#d4af37;--color-dorado-claro:#f5d76e;
+    --color-exito:#22c55e;--color-error:#ef4444;--color-azul:#3b82f6;
+    --alto-nav:64px;
 }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#000;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));overflow-x:hidden;min-height:100vh;position:relative;}
+.video-fondo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;opacity:0.85;filter:brightness(1.1);}
+.video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,14,26,0.15) 0%,rgba(10,14,26,0.35) 60%,rgba(10,14,26,0.6) 100%);z-index:-1;pointer-events:none;}
+body::before{content:'';position:fixed;top:-30%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.12),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-30%;left:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(212,175,55,0.1),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+.main{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:20px;padding-top:30px;}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(5,8,16,0.85);border-bottom:1px solid transparent;border-image:linear-gradient(90deg,transparent,rgba(212,175,55,0.4),rgba(59,130,246,0.4),transparent) 1;box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.header{padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.05);}
+.brand img{height:55px;width:auto;border-radius:12px;filter:drop-shadow(0 0 10px rgba(212,175,55,0.4));}
 
-body {
-    min-height: 100vh;
-    padding-top: 85px;
-    padding-bottom: 35px;
-    background: #000;
-    color: #fff;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    overflow-x: hidden;
-}
+/* ESTILOS DE PERFIL (IGUAL A NETFLIX) */
+.header-right{display:flex;align-items:center;gap:12px}
+.btn-perfil{background:transparent;border:none;color:white;cursor:pointer;padding:0;display:flex;align-items:center;gap:8px;transition:all 0.3s;position:relative;margin-top:8px;}
+.btn-perfil .avatar-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;color:white;transition:all 0.3s;border:2px solid rgba(255,255,255,0.2);position:relative;overflow:hidden;}
+.btn-perfil .avatar-circle img{width:100%;height:100%;object-fit:cover}
+.btn-perfil .avatar-circle .online-dot{position:absolute;bottom:0;right:0;width:12px;height:12px;background:#22c55e;border-radius:50%;border:2px solid #0b1220;}
+.btn-perfil .perfil-nombre{font-size:14px;font-weight:500;color:white;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-perfil .perfil-flecha{font-size:12px;color:#9ca3af;transition:transform 0.3s}
+.btn-perfil .perfil-flecha.abierta{transform:rotate(180deg)}
+.menu-perfil{position:absolute;top:75px;right:0;background:rgba(10,14,26,0.98);border:1px solid rgba(212,175,55,0.3);border-radius:16px;min-width:260px;box-shadow:0 20px 50px rgba(0,0,0,0.6);opacity:0;visibility:hidden;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;z-index:1000;overflow:hidden;}
+.menu-perfil.activo{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.menu-perfil-header{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(212,175,55,0.08),rgba(59,130,246,0.05));}
+.menu-perfil-header .avatar-grande{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#3b82f6);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid rgba(212,175,55,0.4);}
+.menu-perfil-header .avatar-grande img{width:100%;height:100%;object-fit:cover}
+.menu-perfil-header .info h4{color:white;font-size:15px;font-weight:600}
+.menu-perfil-header .info p{color:#9ca3af;font-size:12px}
+.menu-perfil-opcion{display:flex;align-items:center;gap:12px;padding:12px 20px;color:#e5e7eb;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;}
+.menu-perfil-opcion:last-child{border-bottom:none}
+.menu-perfil-opcion:hover{background:linear-gradient(90deg,rgba(212,175,55,0.1),transparent);color:var(--color-dorado-claro);padding-left:26px;border-left:3px solid var(--color-dorado);}
+.menu-perfil-opcion.danger{color:#ef4444}
+.menu-hamburguesa{background:transparent;border:none;color:white;font-size:28px;cursor:pointer;padding:5px 8px;transition:all 0.3s;line-height:1;margin-top:8px;}
+.menu-hamburguesa:hover{transform:scale(1.1);color:var(--color-dorado);}
 
-.video-fondo { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; opacity: .25; pointer-events: none; }
-.video-overlay { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at top, rgba(212,175,55,.12), transparent 40%), linear-gradient(180deg, rgba(5,8,16,.88), rgba(5,8,16,.98)); }
+/* BOTONES Y CAJAS */
+.btn-volver{display:inline-block;padding:10px 16px;margin-bottom:15px;border:1px solid rgba(212,175,55,0.4);border-radius:10px;color:var(--color-dorado-claro);text-decoration:none;font-size:13px;font-weight:800;background:rgba(212,175,55,0.1);}
+.btn-volver:hover{background:rgba(212,175,55,0.2);}
+.pagina-titulo{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:10px 0 20px;}
+.pagina-titulo h1{font-size:22px;font-weight:900;background:linear-gradient(135deg,#ffffff 0%,#d4af37 60%,#ffffff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.chip-entrega{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:14px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.4);color:#86efac;font-size:12px;font-weight:700;}
+.chip-entrega::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.8);}
 
-.barra-superior { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(5,8,16,.96); border-bottom: 1px solid rgba(212,175,55,.35); backdrop-filter: blur(15px); box-shadow: 0 5px 25px rgba(0,0,0,.4); }
-.header { max-width: 700px; margin: auto; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
-.brand img { height: 48px; max-width: 170px; object-fit: contain; border-radius: 10px; }
-.btn-volver { padding: 10px 16px; border: 1px solid rgba(212,175,55,.5); border-radius: 10px; color: var(--oro-claro); background: rgba(212,175,55,.12); text-decoration: none; font-size: 13px; font-weight: 800; }
+.card-panel{background:linear-gradient(135deg,rgba(20,30,55,0.5),rgba(10,14,26,0.65));border:1px solid rgba(212,175,55,0.25);border-radius:20px;padding:22px 18px 20px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.panel-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800;margin:0 0 16px;color:var(--color-dorado-claro);position:relative;z-index:1;letter-spacing:0.5px;text-transform:uppercase;}
+.paso-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;font-size:13px;font-weight:800;}
+.form-group{margin-bottom:16px;position:relative;z-index:1}
+.form-group:last-child{margin-bottom:0}
+.form-group label{display:block;margin-bottom:8px;color:#cbd5e1;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input{width:100%;height:50px;border-radius:14px;background:rgba(0,0,0,0.3);color:#fff;padding:12px 16px;border:1px solid rgba(255,255,255,0.18);font-size:16px;position:relative;z-index:1;transition:border-color 0.3s;font-family:inherit;}
+.form-input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
 
-.main { width: 100%; max-width: 580px; margin: auto; padding: 18px; }
+/* DATOS PAGO (ESTILO NETFLIX) */
+.datos-pago-box{background:linear-gradient(135deg,rgba(20,30,55,0.55),rgba(10,14,26,0.7));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:20px;margin:15px 0;box-shadow:0 15px 40px rgba(0,0,0,0.35);}
+.titulo-seccion{font-size:16px;font-weight:800;margin-bottom:18px;text-align:center;color:var(--color-dorado-claro);letter-spacing:0.5px;text-transform:uppercase;}
+.dato-line{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,0.3);border-radius:12px;margin-bottom:10px;border:1px solid rgba(212,175,55,0.1);gap:10px;}
+.dato-line:last-child{margin-bottom:0}
+.dato-texto{flex:1;min-width:0;}
+.dato-texto strong{color:#cbd5e1;display:inline-block;width:82px;font-size:14px;}
+.dato-texto span{color:#fff;font-weight:600;word-break:break-all;font-size:14px;}
+.copiar-btn{width:44px;height:44px;border-radius:10px;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);color:var(--color-dorado-claro);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;padding:0;}
+.copiar-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;opacity:0.9;}
+.copiar-btn:hover{background:rgba(212,175,55,0.25);transform:scale(1.05);}
+.copiar-btn.copiado{background:rgba(34,197,94,0.2);color:#4ade80;border-color:rgba(34,197,94,0.5);}
+.copiar-btn.copiado svg{display:none}
+.copiar-btn.copiado::after{content:'✓';font-size:20px;font-weight:bold;}
+.copiar-todo-btn{width:100%;padding:13px;margin-top:14px;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(59,130,246,0.1));border:1px solid rgba(212,175,55,0.4);border-radius:12px;color:var(--color-dorado-claro);font-size:14px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;letter-spacing:0.5px;font-family:inherit;}
 
-/* ═══════════ SALDO ═══════════ */
-.saldo-card { position: relative; padding: 22px 18px; margin-bottom: 18px; border-radius: 19px; background: linear-gradient(145deg, rgba(212,175,55,.22), rgba(8,13,26,.95)); border: 1px solid rgba(212,175,55,.55); box-shadow: 0 15px 40px rgba(212,175,55,.15), 0 0 30px rgba(212,175,55,.1); text-align: center; overflow: hidden; }
-.saldo-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--oro-claro), transparent); }
-.saldo-label { color: var(--oro-claro); font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-.saldo-valor { color: #fff; font-size: clamp(38px, 10vw, 52px); font-weight: 950; line-height: 1; text-shadow: 0 4px 20px rgba(212,175,55,.5); display: flex; align-items: center; justify-content: center; gap: 4px; }
-.saldo-valor .moneda { color: var(--oro-claro); font-size: .55em; font-weight: 900; }
-.saldo-info { margin-top: 8px; color: #c9d4e6; font-size: 11px; line-height: 1.5; }
-.saldo-info strong { color: var(--oro-claro); }
+/* SALDO Y HISTORIAL */
+.saldo-box{background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(20,30,55,0.6));border:2px solid rgba(34,197,94,0.4);border-radius:20px;padding:22px 20px;margin-bottom:20px;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,0.3);}
+.saldo-label{font-size:12px;font-weight:800;color:#86efac;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+.saldo-valor{font-size:42px;font-weight:900;color:#fff;line-height:1;text-shadow:0 4px 20px rgba(34,197,94,0.3);}
+.saldo-valor span{font-size:22px;color:#86efac;}
+.saldo-info{font-size:12px;color:#cbd5e1;margin-top:8px;}
 
-.hero { text-align: center; margin-bottom: 25px; padding: 20px 10px 15px; }
-.hero-icon { width: 82px; height: 82px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; border-radius: 25px; font-size: 42px; background: linear-gradient(145deg, #3c3011, #111827); border: 1px solid rgba(255,215,100,.6); box-shadow: 0 0 35px rgba(212,175,55,.2); }
-.hero h1 { font-size: clamp(25px, 6vw, 32px); font-weight: 900; background: linear-gradient(135deg, #fff, var(--oro), var(--oro-claro)); background-clip: text; -webkit-background-clip: text; color: transparent; margin-bottom: 10px; }
-.hero p { max-width: 420px; margin: auto; color: #b9c3d4; font-size: 14px; line-height: 1.6; }
+.historial-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
+.historial-titulo{font-size:16px;font-weight:800;color:var(--color-dorado-claro);text-transform:uppercase;}
+.historial-item{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--color-dorado);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.historial-item.acreditada{border-left-color:var(--color-exito);}
+.historial-item.rechazada{border-left-color:var(--color-error);opacity:0.7;}
+.historial-monto{font-size:18px;font-weight:900;color:#fff;}
+.historial-monto.acreditada{color:#4ade80;}
+.historial-monto.rechazada{color:#fca5a5;}
+.historial-estado{font-size:10px;font-weight:900;padding:4px 8px;border-radius:6px;text-transform:uppercase;}
+.historial-estado.pendiente{background:rgba(245,158,11,0.2);color:#fbbf24;}
+.historial-estado.acreditada{background:rgba(34,197,94,0.2);color:#4ade80;}
+.historial-estado.rechazada{background:rgba(239,68,68,0.2);color:#fca5a5;}
+.historial-detalle{font-size:11px;color:#94a3b8;margin-top:4px;}
 
-.progreso { display: flex; align-items: center; justify-content: center; gap: 9px; margin-bottom: 22px; }
-.progreso-item { display: flex; align-items: center; gap: 6px; color: #aab4c4; font-size: 11px; font-weight: 700; }
-.progreso-numero { width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111; background: linear-gradient(135deg, var(--oro), var(--oro-claro)); font-weight: 900; }
-.progreso-linea { width: 22px; height: 2px; background: rgba(212,175,55,.4); }
+.btn-accion{width:100%;padding:16px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);background-size:200% 200%;color:#0a0e1a;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;transition:.3s;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(212,175,55,0.4);font-family:inherit;}
+.btn-accion:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,175,55,0.6);}
+.btn-accion:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 
-.card { position: relative; overflow: hidden; padding: 21px 18px; margin-bottom: 18px; border-radius: 19px; border: 1px solid rgba(212,175,55,.24); background: linear-gradient(145deg, rgba(22,32,54,.96), rgba(8,13,26,.97)); box-shadow: 0 15px 35px rgba(0,0,0,.3); }
-.card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--oro), transparent); }
-.card-title { display: flex; align-items: center; gap: 11px; margin-bottom: 19px; color: var(--oro-claro); font-size: 14px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; }
-.paso { width: 29px; height: 29px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 9px; color: #101522; background: linear-gradient(135deg, var(--oro), var(--oro-claro)); font-weight: 900; }
+.alerta-box{display:none;margin-top:15px;padding:15px;border-radius:12px;font-size:14px;font-weight:600;text-align:center;}
+.alerta-box.exito{display:block;background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);color:#86efac;}
+.alerta-box.error{display:block;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;}
 
-.form-group { margin-bottom: 17px; }
-.form-group:last-child { margin-bottom: 0; }
-.form-group label { display: block; margin-bottom: 8px; color: #dce3ee; font-size: 12px; font-weight: 800; text-transform: uppercase; }
-.form-input { width: 100%; height: 52px; padding: 12px 15px; border: 1px solid rgba(255,255,255,.13); border-radius: 12px; outline: none; background: rgba(0,0,0,.35); color: #fff; font-size: 16px; transition: .2s; }
-.form-input:focus { border-color: var(--oro); box-shadow: 0 0 0 3px rgba(212,175,55,.12); }
-.form-input::placeholder { color: #64748b; }
+/* MODAL LOGIN */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;justify-content:center;align-items:center;padding:20px;}
+.modal-overlay.activo{display:flex}
+.modal-box{background:linear-gradient(135deg,rgba(20,30,55,0.98),rgba(10,14,26,0.98));border:1px solid rgba(212,175,55,0.3);border-radius:24px;max-width:420px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,0.7);}
+.modal-header{padding:22px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(59,130,246,0.05));}
+.modal-header .icono-grande{font-size:44px;margin-bottom:8px}
+.modal-header h2{font-size:20px;font-weight:800;color:var(--color-dorado-claro);letter-spacing:1px;text-transform:uppercase;}
+.modal-body{padding:22px 20px}
+.modal-footer{padding:0 20px 20px;display:flex;gap:10px}
+.modal-btn{flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;border:none;transition:0.3s;text-transform:uppercase;font-family:inherit;}
+.modal-btn.cancelar{background:rgba(71,85,105,0.3);color:#94a3b8;border:1px solid rgba(71,85,105,0.5);}
+.modal-btn.continuar{background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;}
 
-.ayuda { margin-top: 7px; color: var(--gris); font-size: 11px; line-height: 1.5; }
-
-.montos-rapidos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 11px; }
-.btn-monto { padding: 10px 4px; border: 1px solid rgba(212,175,55,.35); border-radius: 9px; background: rgba(212,175,55,.08); color: var(--oro-claro); font-weight: 800; font-size: 13px; cursor: pointer; }
-.btn-monto.activo { background: linear-gradient(135deg, var(--oro), var(--oro-claro)); color: #111827; }
-
-.total-box { margin-top: 16px; padding: 16px; border: 1px solid rgba(212,175,55,.3); border-radius: 13px; background: rgba(0,0,0,.3); text-align: center; }
-.total-label { color: var(--gris); font-size: 11px; font-weight: 700; text-transform: uppercase; }
-.total-valor { display: block; margin-top: 5px; color: var(--oro-claro); font-size: 26px; font-weight: 900; overflow-wrap: anywhere; }
-.tasa-info { margin-top: 8px; color: #94a3b8; font-size: 11px; }
-
-.datos-pago { padding: 13px 15px; border: 1px solid rgba(255,255,255,.07); border-radius: 14px; background: rgba(0,0,0,.3); }
-.dato { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
-.dato:last-child { border-bottom: none; }
-.dato-info { min-width: 0; }
-.dato strong { display: block; margin-bottom: 4px; color: #9caabd; font-size: 11px; text-transform: uppercase; }
-.dato span { color: #fff; font-size: 14px; font-weight: 800; overflow-wrap: anywhere; }
-.btn-copiar { flex-shrink: 0; padding: 9px 11px; border: 1px solid rgba(212,175,55,.35); border-radius: 9px; background: rgba(212,175,55,.12); color: var(--oro-claro); font-size: 11px; font-weight: 800; cursor: pointer; }
-.btn-copiar-todos { width: 100%; margin-top: 13px; padding: 12px; border: 1px solid rgba(212,175,55,.4); border-radius: 10px; background: rgba(212,175,55,.12); color: var(--oro-claro); font-size: 12px; font-weight: 800; cursor: pointer; }
-.aviso-pago { margin-top: 13px; padding: 12px; border-radius: 10px; background: rgba(212,175,55,.08); color: #e7d69c; font-size: 11px; line-height: 1.5; }
-
-.btn-accion { width: 100%; min-height: 55px; margin-top: 16px; padding: 15px; border: none; border-radius: 13px; background: linear-gradient(135deg, #c69b25, #ffe58a, #d4af37); color: #101522; font-size: 14px; font-weight: 950; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; box-shadow: 0 7px 25px rgba(212,175,55,.22); transition: .2s; }
-.btn-accion:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-
-.alert { display: none; margin-top: 16px; padding: 16px; border: 1px solid rgba(34,197,94,.45); border-radius: 13px; background: rgba(34,197,94,.12); color: #86efac; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
-.alert.error { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.12); color: #fca5a5; display: block; }
-.alert.visible { display: block; }
-
-.seguridad { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 23px 5px 5px; color: #94a3b8; font-size: 11px; line-height: 1.5; text-align: center; }
-
-.historial-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
-.historial-titulo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 900; color: var(--oro-claro); text-transform: uppercase; letter-spacing: .5px; }
-.historial-filtros { display: flex; gap: 6px; flex-wrap: wrap; }
-.filtro-btn { padding: 7px 12px; border: 1px solid rgba(212,175,55,.25); border-radius: 8px; background: rgba(0,0,0,.3); color: #94a3b8; font-size: 11px; font-weight: 700; cursor: pointer; transition: .2s; }
-.filtro-btn.activo { background: linear-gradient(135deg, rgba(212,175,55,.3), rgba(212,175,55,.15)); border-color: var(--oro); color: var(--oro-claro); }
-
-.recarga-item { padding: 14px 15px; margin-bottom: 10px; border-radius: 13px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.08); border-left: 3px solid var(--oro); transition: .2s; }
-.recarga-item.acreditada { border-left-color: var(--verde); }
-.recarga-item.rechazada { border-left-color: var(--rojo); opacity: .75; }
-.recarga-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-.recarga-monto { font-size: 18px; font-weight: 950; color: var(--oro-claro); font-family: 'Courier New', monospace; }
-.recarga-monto.acreditada { color: #4ade80; }
-.recarga-monto.rechazada { color: #fca5a5; }
-.recarga-estado { padding: 4px 9px; border-radius: 8px; font-size: 9px; font-weight: 900; letter-spacing: .5px; text-transform: uppercase; white-space: nowrap; }
-.recarga-estado.pendiente { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.4); }
-.recarga-estado.acreditada { background: rgba(34,197,94,.15); color: #4ade80; border: 1px solid rgba(34,197,94,.4); }
-.recarga-estado.rechazada { background: rgba(239,68,68,.15); color: #fca5a5; border: 1px solid rgba(239,68,68,.4); }
-.recarga-detalle { font-size: 11.5px; line-height: 1.7; color: #94a3b8; }
-.recarga-detalle strong { color: #cbd5e1; }
-.recarga-detalle .referencia { font-family: 'Courier New', monospace; color: var(--oro-claro); font-weight: 800; }
-
-.historial-vacio { padding: 30px 15px; text-align: center; color: #64748b; font-size: 13px; background: rgba(0,0,0,.25); border-radius: 13px; border: 1px dashed rgba(255,255,255,.1); }
-.historial-vacio .icono { font-size: 40px; display: block; margin-bottom: 10px; opacity: .6; }
-
-.loading-overlay { position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5,8,16,.96); backdrop-filter: blur(10px); transition: opacity .3s; }
-.loading-overlay.oculto { opacity: 0; pointer-events: none; }
-.loading-spinner { width: 55px; height: 55px; border: 3px solid rgba(212,175,55,.15); border-top-color: var(--oro); border-radius: 50%; animation: girar 1s linear infinite; }
-@keyframes girar { to { transform: rotate(360deg); } }
-.loading-texto { margin-top: 18px; color: var(--oro-claro); font-size: 13px; font-weight: 700; letter-spacing: 1px; }
-
-@media(max-width:380px) {
-    .main { padding: 12px; }
-    .card { padding: 18px 14px; }
-    .progreso-item { font-size: 9px; }
-    .progreso { gap: 5px; }
-    .progreso-linea { width: 12px; }
-    .saldo-valor { font-size: 40px; }
+@media(max-width:500px){
+    .main{padding:15px;}
+    .saldo-valor{font-size:36px;}
+    .btn-perfil .perfil-nombre{display:none}
+    .btn-perfil .perfil-flecha{display:none}
+    .menu-perfil{right:0;min-width:230px}
 }
 </style>
 </head>
-
-<body>
+<body onclick="cerrarTodosLosMenus(event)">
 
 <video autoplay muted loop playsinline class="video-fondo">
     <source src="fondo.mp4" type="video/mp4">
 </video>
-
 <div class="video-overlay"></div>
 
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-texto">Cargando tu billetera...</div>
+<!-- HEADER -->
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
+        <div class="header-right">
+            <div id="perfilContainer" style="position:relative;display:none;">
+                <button class="btn-perfil" id="btnPerfil" onclick="event.stopPropagation(); toggleMenuPerfil()">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <img src="logo.png" alt="Logo" id="avatarLogo">
+                        <span class="online-dot"></span>
+                    </div>
+                    <span class="perfil-nombre" id="perfilNombre">Usuario</span>
+                    <span class="perfil-flecha" id="perfilFlecha">▼</span>
+                </button>
+                <div class="menu-perfil" id="menuPerfil" onclick="event.stopPropagation()">
+                    <div class="menu-perfil-header">
+                        <div class="avatar-grande" id="avatarGrande"><img src="logo.png" alt="Logo"></div>
+                        <div class="info">
+                            <h4 id="nombreCompleto">Usuario</h4>
+                            <p id="emailUsuario">usuario@email.com</p>
+                        </div>
+                    </div>
+                    <a href="dashboard.html" class="menu-perfil-opcion"><span class="icono">📊</span> Mi Panel</a>
+                    <a href="pedidos.html" class="menu-perfil-opcion"><span class="icono">📦</span> Mis Pedidos</a>
+                    <div style="border-top:1px solid rgba(212,175,55,0.15);margin:5px 0;"></div>
+                    <a href="#" class="menu-perfil-opcion danger" id="btnCerrarSesion"><span class="icono">🚪</span> Cerrar Sesión</a>
+                </div>
+            </div>
+            <button class="menu-hamburguesa" id="btnMenu" onclick="event.stopPropagation(); alternarMenu()">☰</button>
+        </div>
+    </div>
 </div>
 
-<header class="barra-superior">
-    <div class="header">
-        <a href="index.html" class="brand">
-            <img src="logo.png" alt="Recargas Games">
-        </a>
-        <a href="index.html" class="btn-volver">← Volver</a>
-    </div>
-</header>
-
-<main class="main">
-
-    <section class="saldo-card">
-        <div class="saldo-label">💰 Tu saldo disponible</div>
-        <div class="saldo-valor" id="saldoActual">
-            <span class="moneda">$</span><span id="saldoNumero">0.00</span>
+<!-- MODAL LOGIN (igual a Netflix) -->
+<div class="modal-overlay" id="modalLogin">
+    <div class="modal-box">
+        <div class="modal-header">
+            <div class="icono-grande">🔑</div>
+            <h2>Iniciar Sesión</h2>
         </div>
-        <div class="saldo-info">
-            <strong id="saldoInfoCuenta">—</strong>
+        <div class="modal-body">
+            <form id="loginForm">
+                <div style="margin-bottom:20px;">
+                    <label for="loginEmail" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">📧 Correo</label>
+                    <input type="email" id="loginEmail" placeholder="tu@email.com" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label for="loginPassword" style="color:#cbd5e1;display:block;margin-bottom:8px;font-size:13px;font-weight:600;text-transform:uppercase;">🔑 Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required style="width:100%;padding:13px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.3);color:white;font-size:15px;">
+                </div>
+                <button type="submit" id="loginBtn" class="modal-btn continuar" style="width:100%;">Ingresar</button>
+            </form>
+            <div id="loginMessage" style="text-align:center;margin-top:15px;padding:10px;border-radius:8px;display:none;font-size:14px;"></div>
+            <div style="text-align:center;margin-top:20px;font-size:14px;color:#9ca3af;">
+                <p>¿No tienes cuenta? <a href="register.html" style="color:#f5d76e;text-decoration:none;font-weight:600;">Regístrate aquí</a></p>
+            </div>
         </div>
-    </section>
-
-    <section class="hero">
-        <div class="hero-icon">💰</div>
-        <h1>Recarga tu Billetera</h1>
-        <p>
-            Agrega saldo a tu cuenta de RECARGASGAMES.
-            Realiza tu Pago Móvil y recibe tu saldo después de verificar el pago.
-        </p>
-    </section>
-
-    <div class="progreso">
-        <div class="progreso-item">
-            <span class="progreso-numero">1</span>
-            <span>Monto</span>
-        </div>
-        <div class="progreso-linea"></div>
-        <div class="progreso-item">
-            <span class="progreso-numero">2</span>
-            <span>Pago</span>
-        </div>
-        <div class="progreso-linea"></div>
-        <div class="progreso-item">
-            <span class="progreso-numero">3</span>
-            <span>Enviar</span>
+        <div class="modal-footer">
+            <button class="modal-btn cancelar" onclick="cerrarModalLogin()">Cerrar</button>
         </div>
     </div>
+</div>
 
-    <section class="card">
-        <div class="card-title">
-            <span class="paso">1</span>
-            Monto a recargar
-        </div>
+<!-- CONTENIDO PRINCIPAL -->
+<div class="main" id="contenidoBilletera" style="display:none;">
+    
+    <a href="index.html" class="btn-volver">← Volver al inicio</a>
 
+    <div class="pagina-titulo">
+        <h1>💰 Mi Billetera</h1>
+        <span class="chip-entrega">Verificación segura</span>
+    </div>
+
+    <!-- SALDO -->
+    <div class="saldo-box">
+        <div class="saldo-label">Tu saldo disponible</div>
+        <div class="saldo-valor"><span>$</span><span id="saldoNumero">0.00</span></div>
+        <div class="saldo-info" id="saldoInfoCuenta">Cargando...</div>
+    </div>
+
+    <!-- PASO 1: MONTO -->
+    <div class="card-panel">
+        <div class="panel-title"><span class="paso-num">1</span> Monto a recargar</div>
         <div class="form-group">
-            <label for="montoRecarga">Monto que deseas recargar (USD)</label>
+            <label for="montoRecarga">Monto en Dólares (USD)</label>
             <input type="number" id="montoRecarga" class="form-input" placeholder="Ej: 5.00" min="0.01" max="500" step="0.01" inputmode="decimal">
-            <div class="montos-rapidos">
-                <button type="button" class="btn-monto" data-monto="1">$1</button>
-                <button type="button" class="btn-monto" data-monto="5">$5</button>
-                <button type="button" class="btn-monto" data-monto="10">$10</button>
-                <button type="button" class="btn-monto" data-monto="20">$20</button>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;">
+                <button type="button" class="btn-monto-op" data-monto="1" style="padding:10px;border:1px solid rgba(212,175,55,0.35);border-radius:9px;background:rgba(212,175,55,0.08);color:#f5d76e;font-weight:800;cursor:pointer;">$1</button>
+                <button type="button" class="btn-monto-op" data-monto="5" style="padding:10px;border:1px solid rgba(212,175,55,0.35);border-radius:9px;background:rgba(212,175,55,0.08);color:#f5d76e;font-weight:800;cursor:pointer;">$5</button>
+                <button type="button" class="btn-monto-op" data-monto="10" style="padding:10px;border:1px solid rgba(212,175,55,0.35);border-radius:9px;background:rgba(212,175,55,0.08);color:#f5d76e;font-weight:800;cursor:pointer;">$10</button>
+                <button type="button" class="btn-monto-op" data-monto="20" style="padding:10px;border:1px solid rgba(212,175,55,0.35);border-radius:9px;background:rgba(212,175,55,0.08);color:#f5d76e;font-weight:800;cursor:pointer;">$20</button>
             </div>
-            <p class="ayuda">También puedes escribir cualquier otro monto hasta $500.</p>
+            <div class="tasa-info" id="tasaInfo" style="font-size:12px;color:#94a3b8;margin-top:12px;text-align:right;">Cargando tasa...</div>
         </div>
+    </div>
 
-        <div class="total-box">
-            <span class="total-label">Total que debes pagar</span>
-            <strong class="total-valor" id="montoBs">— Bs</strong>
-            <div class="tasa-info" id="tasaInfo">Cargando tasa de cambio...</div>
+    <!-- PASO 2: PAGO MÓVIL (ESTILO NETFLIX) -->
+    <div class="datos-pago-box">
+        <h3 class="titulo-seccion">🏦 Datos de Pago Móvil</h3>
+        <div class="dato-line">
+            <div class="dato-texto"><strong>Banco:</strong> <span>(0102) BDV</span></div>
+            <button class="copiar-btn" onclick="copiarTexto('(0102) BDV', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
         </div>
-    </section>
-
-    <section class="card">
-        <div class="card-title">
-            <span class="paso">2</span>
-            Datos para Pago Móvil
+        <div class="dato-line">
+            <div class="dato-texto"><strong>Cédula:</strong> <span>32824869</span></div>
+            <button class="copiar-btn" onclick="copiarTexto('32824869', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
         </div>
-
-        <div class="datos-pago">
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Banco</strong>
-                    <span>(0102) Banco de Venezuela</span>
-                </div>
-                <button type="button" class="btn-copiar" data-copiar="0102">📋 Copiar</button>
-            </div>
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Cédula</strong>
-                    <span>32824869</span>
-                </div>
-                <button type="button" class="btn-copiar" data-copiar="32824869">📋 Copiar</button>
-            </div>
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Teléfono</strong>
-                    <span>04228242411</span>
-                </div>
-                <button type="button" class="btn-copiar" data-copiar="04228242411">📋 Copiar</button>
-            </div>
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Monto en bolívares</strong>
-                    <span id="montoBsCopiar">— Bs</span>
-                </div>
-                <button type="button" class="btn-copiar" id="copiarMonto">📋 Copiar</button>
-            </div>
-            <button type="button" class="btn-copiar-todos" id="copiarTodos">
-                📋 COPIAR TODOS LOS DATOS
-            </button>
+        <div class="dato-line">
+            <div class="dato-texto"><strong>Teléfono:</strong> <span>04228242411</span></div>
+            <button class="copiar-btn" onclick="copiarTexto('04228242411', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
         </div>
-
-        <div class="aviso-pago">
-            ⚠️ Verifica que los datos bancarios sean correctos antes de realizar el pago.
-            El monto debe coincidir exactamente con el indicado arriba.
+        <div class="dato-line">
+            <div class="dato-texto"><strong>Monto Bs:</strong> <span id="montoBsMostrar">- Bs</span></div>
+            <button class="copiar-btn" onclick="copiarTexto(document.getElementById('montoBsMostrar').textContent, this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
         </div>
-    </section>
+        <button class="copiar-todo-btn" onclick="copiarTodosLosDatos(this)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copiar todos los datos
+        </button>
+    </div>
 
-    <section class="card">
-        <div class="card-title">
-            <span class="paso">3</span>
-            Enviar comprobante
-        </div>
-
+    <!-- PASO 3: ENVIAR COMPROBANTE -->
+    <div class="card-panel">
+        <div class="panel-title"><span class="paso-num">2</span> Enviar comprobante</div>
         <div class="form-group">
             <label for="referenciaPago">Número de referencia del pago</label>
             <input type="text" id="referenciaPago" class="form-input" placeholder="Ej: 0050943851750" maxlength="40" autocomplete="off">
-            <p class="ayuda">
-                Escribe la referencia exacta que aparece en tu banco.
-            </p>
         </div>
-
-        <button type="button" class="btn-accion" id="btnEnviar">
-            📤 Enviar recarga
-        </button>
-
-        <div class="alert" id="resultado" role="status" aria-live="polite"></div>
-    </section>
-
-    <section class="card">
-        <div class="historial-header">
-            <div class="historial-titulo">📋 Historial de recargas</div>
-            <div class="historial-filtros">
-                <button class="filtro-btn activo" data-filtro="todas">Todas</button>
-                <button class="filtro-btn" data-filtro="pendientes">⏳</button>
-                <button class="filtro-btn" data-filtro="acreditadas">✅</button>
-            </div>
-        </div>
-        <div id="listaHistorial">
-            <div class="historial-vacio">
-                <span class="icono">📭</span>
-                Cargando historial...
-            </div>
-        </div>
-    </section>
-
-    <div class="seguridad">
-        <span style="font-size:24px;">🛡️</span>
-        <span>
-            Tu solicitud será registrada para revisión.
-            El saldo se acreditará después de verificar el pago.
-        </span>
+        <button class="btn-accion" id="btnEnviar" onclick="enviarRecarga()">📤 Enviar recarga</button>
+        <div class="alerta-box" id="resultado"></div>
     </div>
 
-</main>
+    <!-- HISTORIAL -->
+    <div class="card-panel">
+        <div class="historial-header">
+            <div class="historial-titulo">📋 Historial de recargas</div>
+        </div>
+        <div id="listaHistorial">
+            <div style="text-align:center;padding:20px;color:#64748b;">Cargando historial...</div>
+        </div>
+    </div>
+
+    <div style="text-align:center;color:#94a3b8;font-size:11px;margin-top:20px;line-height:1.5;">
+        🛡️ Tu solicitud será registrada para revisión. El saldo se acreditará después de verificar el pago.
+    </div>
+
+</div>
 
 <script>
-// 1. CONFIGURACIÓN E INICIALIZACIÓN DIRECTA DE FIREBASE
+// 1. CONFIGURACIÓN FIREBASE (Igual a Netflix)
 const firebaseConfig = {
     apiKey: "AIzaSyAARiBZAruTMx2anf6qCn61SKhXYsyL5w",
     authDomain: "free-52119.firebaseapp.com",
@@ -336,298 +302,228 @@ const firebaseConfig = {
     messagingSenderId: "632240144599",
     appId: "1:632240144599:web:e31c25665ffe19c194b092"
 };
-
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-let tasa = 940;
+let tasa = 930;
 let usuarioActual = null;
-let misRecargas = [];
-let filtroActual = "todas";
+let enviando = false;
 
-// Ocultar pantalla de carga por si acaso a los 3.5 segundos
-setTimeout(() => {
-    const overlay = document.getElementById("loadingOverlay");
-    if(overlay) overlay.classList.add("oculto");
-}, 3500);
+// ELEMENTOS
+const modalLogin = document.getElementById('modalLogin');
+const loginForm = document.getElementById('loginForm');
+const perfilContainer = document.getElementById('perfilContainer');
+const perfilNombre = document.getElementById('perfilNombre');
+const nombreCompleto = document.getElementById('nombreCompleto');
+const emailUsuario = document.getElementById('emailUsuario');
+const contenidoBilletera = document.getElementById('contenidoBilletera');
 
-// 2. VERIFICAR SESIÓN
+// 2. VERIFICAR SESIÓN (IGUAL A NETFLIX)
 auth.onAuthStateChanged((user) => {
-    const overlay = document.getElementById("loadingOverlay");
-    if(overlay) overlay.classList.add("oculto");
-
+    usuarioActual = user;
+    
     if (!user) {
-        document.getElementById("saldoInfoCuenta").innerHTML = "<span style='color:#ef4444'>⚠️ Sin sesión. Por favor inicia sesión.</span>";
-        const res = document.getElementById("resultado");
-        res.className = "alert error visible";
-        res.textContent = "Debes iniciar sesión en el inicio para poder recargar.";
+        // Sin sesión: mostrar modal de login y ocultar billetera
+        modalLogin.classList.add('activo');
+        contenidoBilletera.style.display = 'none';
+        if (perfilContainer) perfilContainer.style.display = 'none';
         return;
     }
     
-    usuarioActual = user;
-    document.getElementById("saldoInfoCuenta").textContent = "👤 " + (user.email || "Usuario");
+    // Con sesión: cerrar modal, mostrar datos y cargar saldo
+    modalLogin.classList.remove('activo');
+    contenidoBilletera.style.display = 'block';
     
-    // 3. CARGAR SALDO EN TIEMPO REAL
+    const nombre = user.displayName || 'Usuario';
+    const email = user.email || 'usuario@email.com';
+    
+    if (perfilContainer) perfilContainer.style.display = 'block';
+    if (perfilNombre) perfilNombre.textContent = nombre.length > 12 ? nombre.substring(0, 12) + '...' : nombre;
+    if (nombreCompleto) nombreCompleto.textContent = nombre;
+    if (emailUsuario) emailUsuario.textContent = email;
+    
+    document.getElementById('saldoInfoCuenta').textContent = "👤 " + email;
+    
+    // Cargar saldo en tiempo real
     db.ref("usuarios/" + user.uid + "/saldo_billetera").on("value", (snap) => {
         const saldo = Number(snap.val()) || 0;
-        document.getElementById("saldoNumero").textContent = saldo.toFixed(2);
+        document.getElementById('saldoNumero').textContent = saldo.toFixed(2);
     });
-
-    // 4. CARGAR HISTORIAL
-    cargarHistorialRecargas();
+    
+    // Cargar historial
+    cargarHistorial(user);
 });
 
-function cargarHistorialRecargas() {
+// 3. LOGIN DESDE EL MODAL
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const btn = document.getElementById('loginBtn');
+        const msg = document.getElementById('loginMessage');
+        
+        btn.disabled = true; btn.textContent = 'Ingresando...'; msg.style.display = 'none';
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            msg.style.background = 'rgba(34,197,94,0.15)';
+            msg.style.color = '#86efac';
+            msg.textContent = '✅ ¡Bienvenido!';
+            msg.style.display = 'block';
+            setTimeout(() => { 
+                modalLogin.classList.remove('activo');
+                window.location.reload(); 
+            }, 800);
+        } catch (error) {
+            msg.style.background = 'rgba(239,68,68,0.15)';
+            msg.style.color = '#fca5a5';
+            msg.textContent = '❌ Correo o contraseña incorrectos';
+            msg.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Ingresar';
+        }
+    });
+}
+
+function cerrarModalLogin() {
+    modalLogin.classList.remove('activo');
+    window.location.href = 'index.html';
+}
+
+// 4. HISTORIAL
+function cargarHistorial(user) {
     db.ref("recargas_billetera").orderByChild("fecha").on("value", (snap) => {
         const datos = snap.val() || {};
-        misRecargas = Object.entries(datos)
+        const misRecargas = Object.entries(datos)
             .map(([key, r]) => ({ ...r, key }))
             .filter(r => {
                 return (
-                    r.uid === usuarioActual.uid ||
-                    r.id_cliente === usuarioActual.uid ||
-                    r.id_cliente === (usuarioActual.email || "")
+                    r.uid === user.uid ||
+                    r.id_cliente === user.uid ||
+                    r.id_cliente === (user.email || "")
                 );
             })
             .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
 
-        renderizarHistorial();
+        renderizarHistorial(misRecargas);
     });
 }
 
-function renderizarHistorial() {
-    let filtradas = [...misRecargas];
-
-    if (filtroActual === "pendientes") {
-        filtradas = filtradas.filter(r => r.estado === "PENDIENTE_VERIFICACION");
-    } else if (filtroActual === "acreditadas") {
-        filtradas = filtradas.filter(r => r.estado === "ACREDITADA");
-    }
-
-    const listaHistorial = document.getElementById("listaHistorial");
-
-    if (filtradas.length === 0) {
-        const mensaje = misRecargas.length === 0
-            ? "Aún no tienes recargas registradas"
-            : "No hay recargas con ese filtro";
-        listaHistorial.innerHTML = `
-            <div class="historial-vacio">
-                <span class="icono">📭</span>
-                ${mensaje}
-            </div>`;
+function renderizarHistorial(recargas) {
+    const lista = document.getElementById('listaHistorial');
+    if (recargas.length === 0) {
+        lista.innerHTML = `<div style="text-align:center;padding:20px;color:#64748b;">Aún no tienes recargas registradas</div>`;
         return;
     }
 
-    listaHistorial.innerHTML = filtradas.map(r => {
+    lista.innerHTML = recargas.map(r => {
         const monto = Number(r.monto_usd || 0).toFixed(2);
         const montoBs = Number(r.monto_bs || 0).toLocaleString("es-VE");
-
-        let estadoClase, estadoTexto;
-        if (r.estado === "ACREDITADA") {
-            estadoClase = "acreditada";
-            estadoTexto = "✅ Acreditada";
-        } else if (r.estado === "RECHAZADA") {
-            estadoClase = "rechazada";
-            estadoTexto = "❌ Rechazada";
-        } else {
-            estadoClase = "pendiente";
-            estadoTexto = "⏳ Pendiente";
-        }
-
+        let clase = r.estado === "ACREDITADA" ? "acreditada" : (r.estado === "RECHAZADA" ? "rechazada" : "pendiente");
+        let texto = r.estado === "ACREDITADA" ? "✅ Acreditada" : (r.estado === "RECHAZADA" ? "❌ Rechazada" : "⏳ Pendiente");
         const fecha = r.fecha_legible || new Date(r.fecha).toLocaleString("es-VE");
 
         return `
-            <div class="recarga-item ${estadoClase}">
-                <div class="recarga-header">
-                    <div class="recarga-monto ${estadoClase}">$${monto}</div>
-                    <div class="recarga-estado ${estadoClase}">${estadoTexto}</div>
+            <div class="historial-item ${clase}">
+                <div>
+                    <div class="historial-monto ${clase}">$${monto}</div>
+                    <div class="historial-detalle">💵 ${montoBs} Bs · 📅 ${fecha}<br>🔢 Ref: ${r.referencia || '—'}</div>
                 </div>
-                <div class="recarga-detalle">
-                    💵 <strong>${montoBs} Bs</strong> · 📅 ${fecha}<br>
-                    🔢 Ref: <span class="referencia">${r.referencia || "—"}</span>
-                </div>
+                <div class="historial-estado ${clase}">${texto}</div>
             </div>
         `;
     }).join("");
 }
 
-// FILTROS
-document.querySelectorAll(".filtro-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("activo"));
-        btn.classList.add("activo");
-        filtroActual = btn.dataset.filtro;
-        renderizarHistorial();
-    });
+// 5. TASA DE CAMBIO
+fetch("/api/tasa").then(r => r.json()).then(d => {
+    if(d.ok) { 
+        tasa = d.tasa_usdt; 
+        document.getElementById("tasaInfo").textContent = "Tasa actual: " + tasa.toLocaleString("es-VE") + " Bs"; 
+    }
+}).catch(() => {
+    document.getElementById("tasaInfo").textContent = "Tasa de respaldo: " + tasa + " Bs";
 });
 
-// 5. CARGAR TASA
-async function cargarTasa() {
-    try {
-        const respuesta = await fetch("/api/tasa", { cache: "no-store" });
-        if (!respuesta.ok) throw new Error("No se pudo obtener la tasa");
-        const data = await respuesta.json();
-        const valor = Number(data.tasa_usdt);
-        if (data.ok && Number.isFinite(valor) && valor > 0) {
-            tasa = valor;
-            document.getElementById("tasaInfo").textContent = "Tasa actual: " + tasa.toLocaleString("es-VE") + " Bs por USD";
-        } else {
-            throw new Error("Tasa inválida");
-        }
-    } catch (error) {
-        document.getElementById("tasaInfo").textContent = "Tasa de respaldo: " + tasa.toLocaleString("es-VE") + " Bs por USD";
-        console.warn("Tasa:", error);
-    }
-    calcularMonto();
-}
+// 6. CALCULAR MONTO
+const inputMonto = document.getElementById('montoRecarga');
+const montoBsMostrar = document.getElementById('montoBsMostrar');
 
-// 6. CÁLCULOS
-const inputMonto = document.getElementById("montoRecarga");
-const montoBsElemento = document.getElementById("montoBs");
-const montoBsCopiar = document.getElementById("montoBsCopiar");
-
-function calcularMonto() {
+inputMonto.addEventListener('input', () => {
     const usd = Number(inputMonto.value);
-    if (!Number.isFinite(usd) || usd <= 0) {
-        montoBsElemento.textContent = "— Bs";
-        montoBsCopiar.textContent = "— Bs";
-        return;
+    if (usd > 0) {
+        const bs = Math.round(usd * tasa).toLocaleString("es-VE") + " Bs";
+        montoBsMostrar.textContent = bs;
+    } else {
+        montoBsMostrar.textContent = "- Bs";
     }
-    const bs = Math.round(usd * tasa);
-    const formato = bs.toLocaleString("es-VE") + " Bs";
-    montoBsElemento.textContent = formato;
-    montoBsCopiar.textContent = formato;
-}
-
-inputMonto.addEventListener("input", () => {
-    document.querySelectorAll(".btn-monto").forEach(b => {
-        b.classList.toggle("activo", Number(b.dataset.monto) === Number(inputMonto.value));
-    });
-    calcularMonto();
 });
 
-document.querySelectorAll(".btn-monto").forEach(boton => {
-    boton.addEventListener("click", () => {
-        inputMonto.value = boton.dataset.monto;
-        document.querySelectorAll(".btn-monto").forEach(b => b.classList.remove("activo"));
-        boton.classList.add("activo");
-        calcularMonto();
+// Botones de monto rápido
+document.querySelectorAll('.btn-monto-op').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.btn-monto-op').forEach(btn => btn.style.background = 'rgba(212,175,55,0.08)');
+        b.style.background = 'linear-gradient(135deg, #d4af37, #f5d76e)';
+        b.style.color = '#000';
+        inputMonto.value = b.dataset.monto;
+        inputMonto.dispatchEvent(new Event('input'));
     });
 });
 
 // 7. COPIAR AL PORTAPAPELES
-function mostrarMensaje(mensaje, error = false) {
-    const resultado = document.getElementById("resultado");
-    resultado.className = error ? "alert error visible" : "alert visible";
-    resultado.textContent = mensaje;
+function copiarTexto(texto, boton) {
+    navigator.clipboard.writeText(texto).then(() => {
+        boton.classList.add('copiado');
+        setTimeout(() => boton.classList.remove('copiado'), 2000);
+    }).catch(() => alert("Copia manual: " + texto));
 }
 
-function limpiarMensaje() {
-    const resultado = document.getElementById("resultado");
-    resultado.className = "alert";
-    resultado.textContent = "";
+function copiarTodosLosDatos(boton) {
+    const texto = `Banco: (0102) BDV\nCédula: 32824869\nTeléfono: 04228242411\nMonto: ${montoBsMostrar.textContent}`;
+    navigator.clipboard.writeText(texto).then(() => {
+        const orig = boton.innerHTML;
+        boton.innerHTML = `✓ Copiado`;
+        setTimeout(() => { boton.innerHTML = orig; }, 2500);
+    }).catch(() => alert("Copia manual: " + texto));
 }
-
-async function copiar(texto) {
-    try {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(texto);
-        } else {
-            const auxiliar = document.createElement("textarea");
-            auxiliar.value = texto;
-            auxiliar.style.position = "fixed";
-            auxiliar.style.opacity = "0";
-            document.body.appendChild(auxiliar);
-            auxiliar.select();
-            const copiado = document.execCommand("copy");
-            auxiliar.remove();
-            if (!copiado) throw new Error("No se pudo copiar");
-        }
-        mostrarMensaje("✅ Copiado correctamente: " + texto);
-    } catch (error) {
-        mostrarMensaje("Copia manualmente: " + texto, true);
-    }
-}
-
-document.querySelectorAll("[data-copiar]").forEach(boton => {
-    boton.addEventListener("click", () => copiar(boton.dataset.copiar));
-});
-
-document.getElementById("copiarMonto").addEventListener("click", () => {
-    const valor = montoBsCopiar.textContent;
-    if (valor === "— Bs") { mostrarMensaje("Primero introduce un monto.", true); return; }
-    copiar(valor);
-});
-
-document.getElementById("copiarTodos").addEventListener("click", () => {
-    const texto = "Banco: 0102 Banco de Venezuela\n" +
-                  "Cédula: 32824869\n" +
-                  "Teléfono: 04228242411\n" +
-                  "Monto: " + montoBsCopiar.textContent;
-    if (montoBsCopiar.textContent === "— Bs") {
-        mostrarMensaje("Primero introduce el monto de tu recarga.", true);
-        return;
-    }
-    copiar(texto);
-});
 
 // 8. ENVIAR RECARGA
-document.getElementById("btnEnviar").addEventListener("click", async () => {
-    const btnEnviar = document.getElementById("btnEnviar");
-    
+async function enviarRecarga() {
     if (!usuarioActual) {
-        mostrarMensaje("❌ Debes iniciar sesión.", true);
+        alert("Debes iniciar sesión.");
         return;
     }
+    if (enviando) return;
 
-    limpiarMensaje();
-
+    const btn = document.getElementById('btnEnviar');
+    const res = document.getElementById('resultado');
     const montoUsd = Number(inputMonto.value);
-    const referencia = document.getElementById("referenciaPago").value.trim().toUpperCase();
+    const referencia = document.getElementById('referenciaPago').value.trim().toUpperCase();
 
     if (!Number.isFinite(montoUsd) || montoUsd < 0.01 || montoUsd > 500) {
-        mostrarMensaje("❌ Ingresa un monto entre $0.01 y $500.", true);
-        inputMonto.focus();
+        res.className = "alerta-box error";
+        res.textContent = "❌ Ingresa un monto entre $0.01 y $500.";
         return;
     }
 
     if (!/^[A-Z0-9]{6,40}$/.test(referencia)) {
-        mostrarMensaje("❌ La referencia debe tener entre 6 y 40 caracteres alfanuméricos.", true);
-        document.getElementById("referenciaPago").focus();
+        res.className = "alerta-box error";
+        res.textContent = "❌ La referencia debe tener entre 6 y 40 caracteres.";
         return;
     }
 
     const montoBs = Math.round(montoUsd * tasa);
-    if (montoBs <= 0) {
-        mostrarMensaje("❌ No se pudo calcular el monto en bolívares.", true);
-        return;
-    }
-
-    btnEnviar.disabled = true;
-    btnEnviar.textContent = "⏳ Verificando...";
+    
+    enviando = true;
+    btn.disabled = true;
+    btn.textContent = "⏳ Enviando...";
+    res.className = "alerta-box";
+    res.textContent = "";
 
     try {
-        // Validar duplicados
-        const dupSnap = await db.ref("recargas_billetera").orderByChild("referencia").equalTo(referencia).once("value");
-        if (dupSnap.exists()) {
-            const existentes = dupSnap.val();
-            const yaUsada = Object.values(existentes).some(r => r.estado === "PENDIENTE_VERIFICACION" || r.estado === "ACREDITADA");
-            if (yaUsada) {
-                mostrarMensaje("❌ Esta referencia ya fue registrada. Contacta al administrador si es un error.", true);
-                btnEnviar.disabled = false;
-                btnEnviar.textContent = "📤 Enviar recarga";
-                return;
-            }
-        }
-
-        btnEnviar.textContent = "⏳ Enviando...";
-
-        const ahora = new Date();
-        const recargaData = {
+        // Guardar en Firebase (igual que el admin espera)
+        const data = {
             uid: usuarioActual.uid,
             email: usuarioActual.email || "",
             id_cliente: usuarioActual.uid,
@@ -637,13 +533,13 @@ document.getElementById("btnEnviar").addEventListener("click", async () => {
             referencia: referencia,
             metodo: "PAGO MOVIL",
             estado: "PENDIENTE_VERIFICACION",
-            fecha: ahora.toISOString(),
-            fecha_legible: ahora.toLocaleString("es-VE"),
+            fecha: new Date().toISOString(),
+            fecha_legible: new Date().toLocaleString("es-VE"),
             origen: "billetera"
         };
-
-        const nuevaRecarga = db.ref("recargas_billetera").push();
-        await nuevaRecarga.set(recargaData);
+        
+        const nuevaRef = db.ref("recargas_billetera").push();
+        await nuevaRef.set(data);
 
         // Notificar a Telegram
         const montoFormateado = "$" + montoUsd.toFixed(2) + " USD (" + montoBs.toLocaleString("es-VE") + " Bs)";
@@ -652,9 +548,9 @@ document.getElementById("btnEnviar").addEventListener("click", async () => {
             "<b>👤 Cliente:</b> <code>" + (usuarioActual.email || usuarioActual.uid) + "</code>\n" +
             "<b>💵 Monto:</b> " + montoFormateado + "\n" +
             "<b>🔢 Referencia:</b> <code>" + referencia + "</code>\n" +
-            "<b>📅 Fecha:</b> " + recargaData.fecha_legible + "\n\n" +
+            "<b>📅 Fecha:</b> " + data.fecha_legible + "\n\n" +
             "⚠️ Verifica el pago en tu banco y acredita manualmente.\n" +
-            "📋 Recarga ID: <code>" + nuevaRecarga.key + "</code>";
+            "📋 Recarga ID: <code>" + nuevaRef.key + "</code>";
 
         try {
             await fetch("/api/notificar-telegram", {
@@ -664,41 +560,64 @@ document.getElementById("btnEnviar").addEventListener("click", async () => {
             });
         } catch (e) { console.warn("Telegram:", e); }
 
-        // Mensaje de éxito
-        const resultado = document.getElementById("resultado");
-        resultado.className = "alert visible";
-        resultado.replaceChildren();
-        const titulo = document.createElement("strong");
-        titulo.textContent = "✅ ¡Recarga enviada con éxito!";
-        const detalle = document.createElement("p");
-        detalle.style.marginTop = "10px";
-        detalle.textContent = "Tu recarga de " + montoFormateado + " está pendiente de verificación.";
-        const nota = document.createElement("p");
-        nota.style.marginTop = "10px";
-        nota.textContent = "Una vez confirmado el pago, tu saldo se actualizará automáticamente.";
-        const id = document.createElement("small");
-        id.style.display = "block";
-        id.style.marginTop = "12px";
-        id.textContent = "Recarga ID: " + nuevaRecarga.key;
-        resultado.append(titulo, detalle, nota, id);
+        // Mensaje de éxito al cliente (sin decir que es manual)
+        res.className = "alerta-box exito";
+        res.innerHTML = `
+            ✅ <b>¡Recarga enviada con éxito!</b><br><br>
+            Tu recarga de <strong>${montoFormateado}</strong> está pendiente de verificación.<br><br>
+            Una vez confirmado el pago, tu saldo se actualizará automáticamente.<br><br>
+            <small style="color:#86efac">ID: ${nuevaRef.key}</small>
+        `;
 
         // Limpiar formulario
         inputMonto.value = "";
-        document.getElementById("referenciaPago").value = "";
-        document.querySelectorAll(".btn-monto").forEach(b => b.classList.remove("activo"));
-        calcularMonto();
+        document.getElementById('referenciaPago').value = "";
+        montoBsMostrar.textContent = "- Bs";
 
     } catch (error) {
         console.error("Error:", error);
-        mostrarMensaje("❌ No se pudo registrar tu recarga. Revisa tu conexión e inténtalo nuevamente.", true);
+        res.className = "alerta-box error";
+        res.textContent = "❌ No se pudo registrar tu recarga. Revisa tu conexión.";
     } finally {
-        btnEnviar.disabled = false;
-        btnEnviar.textContent = "📤 Enviar recarga";
+        enviando = false;
+        btn.disabled = false;
+        btn.textContent = "📤 Enviar recarga";
     }
-});
+}
 
-// Iniciar
-cargarTasa();
+// 9. MENÚS (Igual a Netflix)
+window.alternarMenu = function() {
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    if (mf) mf.classList.toggle('activo');
+    if (mp) mp.classList.remove('activo');
+};
+window.toggleMenuPerfil = function() {
+    const mf = document.getElementById('menuFlotante');
+    const mp = document.getElementById('menuPerfil');
+    if (mp) mp.classList.toggle('activo');
+    if (mf) mf.classList.remove('activo');
+};
+window.cerrarTodosLosMenus = function(e) {
+    const menuFlotante = document.getElementById('menuFlotante');
+    const menuPerfil = document.getElementById('menuPerfil');
+    const btnMenu = document.getElementById('btnMenu');
+    const btnPerfil = document.getElementById('btnPerfil');
+    if (btnMenu && menuFlotante && !menuFlotante.contains(e.target) && !btnMenu.contains(e.target)) menuFlotante.classList.remove('activo');
+    if (btnPerfil && menuPerfil && !menuPerfil.contains(e.target) && !btnPerfil.contains(e.target)) menuPerfil.classList.remove('activo');
+};
+
+// Cerrar sesión
+const btnCerrarSesionEl = document.getElementById('btnCerrarSesion');
+if (btnCerrarSesionEl) {
+    btnCerrarSesionEl.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (confirm('¿Cerrar sesión?')) { 
+            await auth.signOut(); 
+            window.location.href = 'index.html'; 
+        }
+    });
+}
 </script>
 
 </body>
