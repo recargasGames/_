@@ -428,7 +428,6 @@ body {
     opacity: .6;
 }
 
-/* ═══════════ LOADING ═══════════ */
 .loading-overlay {
     position: fixed; inset: 0; z-index: 9999;
     display: flex; flex-direction: column;
@@ -474,7 +473,6 @@ body {
 
 <div class="video-overlay"></div>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner"></div>
     <div class="loading-texto">Cargando tu billetera...</div>
@@ -491,7 +489,6 @@ body {
 
 <main class="main">
 
-    <!-- SALDO ACTUAL -->
     <section class="saldo-card">
         <div class="saldo-label">💰 Tu saldo disponible</div>
         <div class="saldo-valor" id="saldoActual">
@@ -528,7 +525,6 @@ body {
         </div>
     </div>
 
-    <!-- PASO 1: MONTO -->
     <section class="card">
         <div class="card-title">
             <span class="paso">1</span>
@@ -563,7 +559,6 @@ body {
         </div>
     </section>
 
-    <!-- PASO 2: PAGO -->
     <section class="card">
         <div class="card-title">
             <span class="paso">2</span>
@@ -610,7 +605,6 @@ body {
         </div>
     </section>
 
-    <!-- PASO 3: ENVIAR -->
     <section class="card">
         <div class="card-title">
             <span class="paso">3</span>
@@ -639,7 +633,6 @@ body {
         <div class="alert" id="resultado" role="status" aria-live="polite"></div>
     </section>
 
-    <!-- HISTORIAL -->
     <section class="card">
         <div class="historial-header">
             <div class="historial-titulo">📋 Historial de recargas</div>
@@ -668,9 +661,6 @@ body {
 </main>
 
 <script>
-// ═══════════════════════════════════════════════
-// FIREBASE
-// ═══════════════════════════════════════════════
 const firebaseConfig = {
     apiKey: "AIzaSyAARiBZAruTMx2anf6qCn61SKhXYsyL5w",
     authDomain: "free-52119.firebaseapp.com",
@@ -696,9 +686,6 @@ let filtroActual = "todas";
 let unsubscribeRecargas = null;
 let unsubscribeUsuario = null;
 
-// ═══════════════════════════════════════════════
-// ELEMENTOS
-// ═══════════════════════════════════════════════
 const inputMonto = document.getElementById("montoRecarga");
 const inputReferencia = document.getElementById("referenciaPago");
 const montoBsElemento = document.getElementById("montoBs");
@@ -712,28 +699,25 @@ const listaHistorial = document.getElementById("listaHistorial");
 const loadingOverlay = document.getElementById("loadingOverlay");
 
 // ═══════════════════════════════════════════════
-// AUTH — LOGIN OBLIGATORIO
+// AUTH — ESPERAR A QUE FIREBASE CARGUE
 // ═══════════════════════════════════════════════
 auth.onAuthStateChanged((user) => {
     if (!user) {
-        // Si no hay sesión, redirige al index para que haga login
-        window.location.href = "index.html?login=1";
+        // Esperar 800ms por si Firebase aún está cargando la sesión
+        setTimeout(() => {
+            if (!auth.currentUser) {
+                window.location.href = "index.html";
+            }
+        }, 800);
         return;
     }
 
     usuarioActual = user;
-
-    // Mostrar info de cuenta
     const nombre = user.displayName || user.email || "Usuario";
     saldoInfoCuenta.textContent = "👤 " + nombre;
 
-    // Cargar saldo en tiempo real
     cargarSaldoUsuario();
-
-    // Cargar historial de recargas
     cargarHistorialRecargas();
-
-    // Ocultar loading
     loadingOverlay.classList.add("oculto");
 });
 
@@ -759,7 +743,6 @@ function cargarSaldoUsuario() {
 function cargarHistorialRecargas() {
     if (unsubscribeRecargas) unsubscribeRecargas.off();
 
-    // Buscar recargas por uid, por email, o por WhatsApp
     const email = usuarioActual.email || "";
     const ref = db.ref("recargas_billetera").orderByChild("fecha");
 
@@ -768,7 +751,6 @@ function cargarHistorialRecargas() {
         misRecargas = Object.entries(datos)
             .map(([key, r]) => ({ ...r, key }))
             .filter(r => {
-                // Filtrar las recargas de este usuario
                 return (
                     r.uid === usuarioActual.uid ||
                     r.id_cliente === usuarioActual.uid ||
@@ -826,12 +808,11 @@ function renderizarHistorial() {
         }
 
         const fecha = r.fecha_legible || new Date(r.fecha).toLocaleString("es-VE");
-        const montoClase = estadoClase;
 
         return `
             <div class="recarga-item ${estadoClase}">
                 <div class="recarga-header">
-                    <div class="recarga-monto ${montoClase}">$${monto}</div>
+                    <div class="recarga-monto ${estadoClase}">$${monto}</div>
                     <div class="recarga-estado ${estadoClase}">${estadoTexto}</div>
                 </div>
                 <div class="recarga-detalle">
@@ -843,7 +824,6 @@ function renderizarHistorial() {
     }).join("");
 }
 
-// Filtros
 document.querySelectorAll(".filtro-btn").forEach(btn => {
     btn.addEventListener("click", () => {
         document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("activo"));
@@ -854,7 +834,7 @@ document.querySelectorAll(".filtro-btn").forEach(btn => {
 });
 
 // ═══════════════════════════════════════════════
-// TASA DE CAMBIO
+// TASA
 // ═══════════════════════════════════════════════
 async function cargarTasa() {
     try {
@@ -875,9 +855,6 @@ async function cargarTasa() {
     calcularMonto();
 }
 
-// ═══════════════════════════════════════════════
-// CÁLCULO
-// ═══════════════════════════════════════════════
 function calcularMonto() {
     const usd = Number(inputMonto.value);
     if (!Number.isFinite(usd) || usd <= 0) {
@@ -953,9 +930,6 @@ document.getElementById("copiarTodos").addEventListener("click", () => {
     copiar(texto);
 });
 
-// ═══════════════════════════════════════════════
-// MENSAJES
-// ═══════════════════════════════════════════════
 function mostrarMensaje(mensaje, error = false) {
     resultado.className = error ? "alert error visible" : "alert visible";
     resultado.textContent = mensaje;
@@ -981,7 +955,6 @@ async function enviarRecarga() {
     const montoUsd = Number(inputMonto.value);
     const referencia = inputReferencia.value.trim().toUpperCase();
 
-    // Validaciones
     if (!Number.isFinite(montoUsd) || montoUsd < 0.01 || montoUsd > 500) {
         mostrarMensaje("❌ Ingresa un monto entre $0.01 y $500.", true);
         inputMonto.focus();
@@ -1005,7 +978,6 @@ async function enviarRecarga() {
     btnEnviar.textContent = "⏳ Verificando...";
 
     try {
-        // 1) Anti-duplicados: verificar que la referencia no exista
         const dupSnap = await db.ref("recargas_billetera")
             .orderByChild("referencia")
             .equalTo(referencia)
@@ -1025,7 +997,6 @@ async function enviarRecarga() {
             }
         }
 
-        // 2) Límite de 3 recargas pendientes
         const pendientesSnap = await db.ref("recargas_billetera")
             .orderByChild("uid")
             .equalTo(usuarioActual.uid)
@@ -1061,13 +1032,11 @@ async function enviarRecarga() {
             origen: "billetera"
         };
 
-        // 3) Guardar en Firebase
         const nuevaRecarga = db.ref("recargas_billetera").push();
         await nuevaRecarga.set(recargaData);
 
         const montoFormateado = "$" + montoUsd.toFixed(2) + " USD (" + montoBs.toLocaleString("es-VE") + " Bs)";
 
-        // 4) Notificar al admin por Telegram
         const mensajeTelegram =
             "💰 <b>NUEVA RECARGA DE BILLETERA</b>\n\n" +
             "<b>👤 Cliente:</b> <code>" + (usuarioActual.email || usuarioActual.uid) + "</code>\n" +
@@ -1087,7 +1056,6 @@ async function enviarRecarga() {
             console.warn("Telegram:", e);
         }
 
-        // 5) Confirmación al cliente
         resultado.className = "alert visible";
         resultado.replaceChildren();
 
@@ -1109,7 +1077,6 @@ async function enviarRecarga() {
 
         resultado.append(titulo, detalle, nota, id);
 
-        // Limpiar
         inputMonto.value = "";
         inputReferencia.value = "";
         document.querySelectorAll(".btn-monto").forEach(b => b.classList.remove("activo"));
@@ -1127,12 +1094,8 @@ async function enviarRecarga() {
 
 btnEnviar.addEventListener("click", enviarRecarga);
 
-// ═══════════════════════════════════════════════
-// INICIAR
-// ═══════════════════════════════════════════════
 cargarTasa();
 
-// Safety: si en 5 segundos no cargó el auth, ocultar loading
 setTimeout(() => {
     loadingOverlay.classList.add("oculto");
 }, 5000);
