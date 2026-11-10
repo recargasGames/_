@@ -6,20 +6,8 @@
 <meta name="theme-color" content="#080b14">
 <title>RECARGASGAMES - Mi Billetera</title>
 
-<!-- Firebase Compat (Igual que Netflix) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <style>
-:root {
-    --oro: #d4af37;
-    --oro-claro: #ffe58a;
-    --fondo: #080b14;
-    --gris: #94a3b8;
-    --verde: #22c55e;
-    --rojo: #ef4444;
-}
+:root { --oro: #d4af37; --oro-claro: #ffe58a; --gris: #94a3b8; --verde: #22c55e; --rojo: #ef4444; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { min-height: 100vh; padding-top: 85px; padding-bottom: 35px; background: #000; color: #fff; font-family: 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
 .video-fondo { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; opacity: .25; pointer-events: none; }
@@ -29,17 +17,14 @@ body { min-height: 100vh; padding-top: 85px; padding-bottom: 35px; background: #
 .header { max-width: 700px; margin: auto; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
 .brand img { height: 48px; max-width: 170px; object-fit: contain; border-radius: 10px; }
 .btn-volver { padding: 10px 16px; border: 1px solid rgba(212,175,55,.5); border-radius: 10px; color: var(--oro-claro); background: rgba(212,175,55,.12); text-decoration: none; font-size: 13px; font-weight: 800; }
-
 .main { width: 100%; max-width: 580px; margin: auto; padding: 18px; }
 
-/* SALDO */
 .saldo-card { padding: 22px 18px; margin-bottom: 18px; border-radius: 19px; background: linear-gradient(145deg, rgba(212,175,55,.22), rgba(8,13,26,.95)); border: 1px solid rgba(212,175,55,.55); text-align: center; }
 .saldo-label { color: var(--oro-claro); font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
 .saldo-valor { font-size: clamp(38px, 10vw, 52px); font-weight: 950; line-height: 1; }
 .saldo-valor .moneda { color: var(--oro-claro); font-size: .55em; }
 .saldo-info { margin-top: 8px; color: #c9d4e6; font-size: 11px; }
 
-/* TARJETAS Y CAMPOS */
 .card { padding: 21px 18px; margin-bottom: 18px; border-radius: 19px; border: 1px solid rgba(212,175,55,.24); background: linear-gradient(145deg, rgba(22,32,54,.96), rgba(8,13,26,.97)); }
 .card-title { display: flex; align-items: center; gap: 11px; margin-bottom: 19px; color: var(--oro-claro); font-size: 14px; font-weight: 900; text-transform: uppercase; }
 .paso { width: 29px; height: 29px; display: flex; align-items: center; justify-content: center; border-radius: 9px; color: #101522; background: linear-gradient(135deg, var(--oro), var(--oro-claro)); font-weight: 900; }
@@ -58,7 +43,6 @@ body { min-height: 100vh; padding-top: 85px; padding-bottom: 35px; background: #
 .total-valor { display: block; margin-top: 5px; color: var(--oro-claro); font-size: 26px; font-weight: 900; }
 .tasa-info { margin-top: 8px; color: #94a3b8; font-size: 11px; }
 
-/* DATOS DE PAGO */
 .datos-pago { padding: 13px 15px; border: 1px solid rgba(255,255,255,.07); border-radius: 14px; background: rgba(0,0,0,.3); }
 .dato { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
 .dato:last-child { border-bottom: none; }
@@ -136,144 +120,127 @@ body { min-height: 100vh; padding-top: 85px; padding-bottom: 35px; background: #
     </section>
 </main>
 
-<script>
-// 1. INICIALIZACIÓN DIRECTA (Igual que Netflix)
-const firebaseConfig = {
-    apiKey: "AIzaSyAARiBZAruTMx2anf6qCn61SKhXYsyL5w",
-    authDomain: "free-52119.firebaseapp.com",
-    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "free-52119",
-    storageBucket: "free-52119.firebasestorage.app",
-    messagingSenderId: "632240144599",
-    appId: "1:632240144599:web:e31c25665ffe19c194b092"
-};
+<!-- ⚠️ AQUÍ CONECTAMOS CON TU FIREBASE REAL (IGUAL QUE EL INDEX) -->
+<script type="module">
+    import { auth } from './firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+    const db = getDatabase();
+    let tasa = 940;
+    let usuarioActual = null;
 
-const auth = firebase.auth();
-const db = firebase.database();
-let tasa = 940;
-let usuarioActual = null;
-
-// 2. VERIFICAR SESIÓN (Sin redirecciones raras)
-auth.onAuthStateChanged((user) => {
-    if (!user) {
-        // Si no hay sesión, lo mandamos al index a loguearse
-        document.getElementById("saldoInfoCuenta").textContent = "⚠️ Inicia sesión en el inicio para recargar.";
-        setTimeout(() => { window.location.href = "index.html"; }, 1500);
-        return;
-    }
-    
-    usuarioActual = user;
-    document.getElementById("saldoInfoCuenta").textContent = "👤 " + (user.email || "Usuario");
-    
-    // Escuchar saldo en tiempo real
-    db.ref("usuarios/" + user.uid + "/saldo_billetera").on("value", (snap) => {
-        document.getElementById("saldoNumero").textContent = (Number(snap.val()) || 0).toFixed(2);
-    });
-});
-
-// 3. TASA DE CAMBIO
-fetch("/api/tasa").then(r => r.json()).then(d => {
-    if(d.ok) { 
-        tasa = d.tasa_usdt; 
-        document.getElementById("tasaInfo").textContent = "Tasa: " + tasa + " Bs"; 
-    }
-}).catch(() => {});
-
-// 4. CALCULAR MONTO
-const inputMonto = document.getElementById("montoRecarga");
-const montoBsEl = document.getElementById("montoBs");
-const montoBsCopiar = document.getElementById("montoBsCopiar");
-
-inputMonto.addEventListener("input", () => {
-    const usd = Number(inputMonto.value);
-    if (usd > 0) {
-        const bs = Math.round(usd * tasa).toLocaleString("es-VE") + " Bs";
-        montoBsEl.textContent = bs;
-        montoBsCopiar.textContent = bs;
-    } else {
-        montoBsEl.textContent = "— Bs";
-        montoBsCopiar.textContent = "— Bs";
-    }
-});
-
-// Botones de monto rápido
-document.querySelectorAll(".btn-monto").forEach(b => {
-    b.addEventListener("click", () => {
-        document.querySelectorAll(".btn-monto").forEach(btn => btn.classList.remove("activo"));
-        b.classList.add("activo");
-        inputMonto.value = b.dataset.monto;
-        inputMonto.dispatchEvent(new Event("input"));
-    });
-});
-
-// 5. COPIAR DATOS
-document.querySelectorAll("[data-copiar]").forEach(b => {
-    b.addEventListener("click", () => {
-        navigator.clipboard.writeText(b.dataset.copiar);
-        alert("✅ Copiado: " + b.dataset.copiar);
-    });
-});
-
-document.getElementById("copiarMonto").addEventListener("click", () => {
-    if(montoBsCopiar.textContent !== "— Bs") {
-        navigator.clipboard.writeText(montoBsCopiar.textContent);
-        alert("✅ Copiado: " + montoBsCopiar.textContent);
-    }
-});
-
-// 6. ENVIAR RECARGA
-document.getElementById("btnEnviar").addEventListener("click", async () => {
-    if (!usuarioActual) return alert("Debes iniciar sesión.");
-    
-    const btn = document.getElementById("btnEnviar");
-    const res = document.getElementById("resultado");
-    const monto = Number(inputMonto.value);
-    const refCode = document.getElementById("referenciaPago").value.trim().toUpperCase();
-
-    if (monto < 0.01 || !refCode) {
-        res.className = "alert error";
-        res.textContent = "❌ Ingresa un monto válido y una referencia.";
-        return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = "⏳ Enviando...";
-
-    try {
-        const data = {
-            uid: usuarioActual.uid,
-            email: usuarioActual.email,
-            id_cliente: usuarioActual.uid,
-            monto_usd: monto,
-            monto_bs: Math.round(monto * tasa),
-            referencia: refCode,
-            metodo: "PAGO MOVIL",
-            estado: "PENDIENTE_VERIFICACION",
-            fecha: new Date().toISOString(),
-            fecha_legible: new Date().toLocaleString("es-VE")
-        };
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            document.getElementById("saldoInfoCuenta").textContent = "⚠️ No has iniciado sesión.";
+            // Si no hay sesión, lo mandamos al index a loguearse
+            window.location.href = "index.html";
+            return;
+        }
         
-        await db.ref("recargas_billetera").push(data);
-
-        res.className = "alert success";
-        res.innerHTML = `✅ <b>¡Recarga enviada!</b><br>Tu saldo se acreditará después de verificar el pago.`;
+        usuarioActual = user;
+        document.getElementById("saldoInfoCuenta").textContent = "👤 " + (user.email || "Usuario");
         
-        inputMonto.value = "";
-        document.getElementById("referenciaPago").value = "";
-        inputMonto.dispatchEvent(new Event("input"));
-    } catch (e) {
-        res.className = "alert error";
-        res.textContent = "❌ Error al guardar. Revisa tu conexión.";
-        console.error(e);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = "📤 Enviar recarga";
-    }
-});
+        // Cargar saldo
+        const saldoRef = ref(db, "usuarios/" + user.uid + "/saldo_billetera");
+        onValue(saldoRef, (snap) => {
+            document.getElementById("saldoNumero").textContent = (Number(snap.val()) || 0).toFixed(2);
+        });
+    });
+
+    // Tasa
+    fetch("/api/tasa").then(r => r.json()).then(d => {
+        if(d.ok) { 
+            tasa = d.tasa_usdt; 
+            document.getElementById("tasaInfo").textContent = "Tasa actual: " + tasa + " Bs"; 
+        }
+    }).catch(() => {});
+
+    const inputMonto = document.getElementById("montoRecarga");
+    const montoBsEl = document.getElementById("montoBs");
+    const montoBsCopiar = document.getElementById("montoBsCopiar");
+
+    inputMonto.addEventListener("input", () => {
+        const usd = Number(inputMonto.value);
+        if (usd > 0) {
+            const bs = Math.round(usd * tasa).toLocaleString("es-VE") + " Bs";
+            montoBsEl.textContent = bs;
+            montoBsCopiar.textContent = bs;
+        } else {
+            montoBsEl.textContent = "— Bs";
+            montoBsCopiar.textContent = "— Bs";
+        }
+    });
+
+    document.querySelectorAll(".btn-monto").forEach(b => {
+        b.addEventListener("click", () => {
+            document.querySelectorAll(".btn-monto").forEach(btn => btn.classList.remove("activo"));
+            b.classList.add("activo");
+            inputMonto.value = b.dataset.monto;
+            inputMonto.dispatchEvent(new Event("input"));
+        });
+    });
+
+    document.querySelectorAll("[data-copiar]").forEach(b => {
+        b.addEventListener("click", () => {
+            navigator.clipboard.writeText(b.dataset.copiar);
+            alert("✅ Copiado: " + b.dataset.copiar);
+        });
+    });
+
+    document.getElementById("copiarMonto").addEventListener("click", () => {
+        if(montoBsCopiar.textContent !== "— Bs") {
+            navigator.clipboard.writeText(montoBsCopiar.textContent);
+            alert("✅ Copiado: " + montoBsCopiar.textContent);
+        }
+    });
+
+    document.getElementById("btnEnviar").addEventListener("click", async () => {
+        if (!usuarioActual) return alert("No has iniciado sesión.");
+        const btn = document.getElementById("btnEnviar");
+        const res = document.getElementById("resultado");
+        const monto = Number(inputMonto.value);
+        const refCode = document.getElementById("referenciaPago").value.trim().toUpperCase();
+
+        if (monto < 0.01 || !refCode) {
+            res.className = "alert error";
+            res.textContent = "❌ Ingresa un monto válido y una referencia.";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "⏳ Enviando...";
+
+        try {
+            const data = {
+                uid: usuarioActual.uid,
+                email: usuarioActual.email,
+                id_cliente: usuarioActual.uid,
+                monto_usd: monto,
+                monto_bs: Math.round(monto * tasa),
+                referencia: refCode,
+                metodo: "PAGO MOVIL",
+                estado: "PENDIENTE_VERIFICACION",
+                fecha: new Date().toISOString(),
+                fecha_legible: new Date().toLocaleString("es-VE")
+            };
+            const nuevaRef = push(ref(db, "recargas_billetera"));
+            await set(nuevaRef, data);
+
+            res.className = "alert success";
+            res.textContent = "✅ Recarga enviada. El administrador la verificará pronto.";
+            inputMonto.value = "";
+            document.getElementById("referenciaPago").value = "";
+            inputMonto.dispatchEvent(new Event("input"));
+        } catch (e) {
+            res.className = "alert error";
+            res.textContent = "❌ Error al guardar. Revisa tu conexión.";
+            console.error(e);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "📤 Enviar recarga";
+        }
+    });
 </script>
 
 </body>
