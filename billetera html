@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>RECARGASGAMES - Recarga de Billetera</title>
+<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+:root{
+    --color-dorado:#d4af37;--color-dorado-claro:#f5d76e;
+    --color-negro:#0a0e1a;--color-error:#ef4444;--color-exito:#22c55e;
+    --alto-nav:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#000;color:#fff;font-family:'Segoe UI',sans-serif;padding-top:110px;padding-bottom:30px;overflow-x:hidden;min-height:100vh;position:relative;}
+body.con-nav{padding-bottom:calc(var(--alto-nav) + 24px + env(safe-area-inset-bottom));}
+.video-fondo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none;opacity:0.4;}
+.video-overlay{position:fixed;inset:0;background:linear-gradient(180deg,rgba(10,14,26,0.8),rgba(10,14,26,0.95));z-index:-1;}
+.main{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:20px}
+
+.barra-superior{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(5,8,16,0.95);border-bottom:1px solid rgba(212,175,55,0.3);box-shadow:0 4px 20px rgba(0,0,0,0.5);}
+.header{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}
+.brand img{height:50px;border-radius:12px;}
+.btn-volver{background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.4);color:var(--color-dorado-claro);padding:8px 16px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;}
+
+.pagina-titulo{text-align:center;margin-bottom:24px;}
+.pagina-titulo h1{font-size:24px;font-weight:900;background:linear-gradient(135deg,#fff,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.pagina-titulo p{color:#cbd5e1;font-size:14px;line-height:1.5;}
+
+.card{background:linear-gradient(135deg,rgba(20,30,55,0.9),rgba(10,14,26,0.95));border:1px solid rgba(212,175,55,0.25);border-radius:18px;padding:22px 18px;margin-bottom:20px;box-shadow:0 15px 40px rgba(0,0,0,0.4);}
+.card-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800;color:var(--color-dorado-claro);margin-bottom:16px;text-transform:uppercase;}
+.paso{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#f5d76e);color:#0a0e1a;font-size:13px;font-weight:800;}
+
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;margin-bottom:8px;color:#cbd5e1;font-size:13px;font-weight:600;text-transform:uppercase;}
+.form-input{width:100%;height:50px;border-radius:14px;background:rgba(0,0,0,0.35);color:#fff;padding:12px 16px;border:1px solid rgba(255,255,255,0.15);font-size:16px;}
+.form-input:focus{outline:none;border-color:var(--color-dorado);box-shadow:0 0 0 3px rgba(212,175,55,0.15);}
+
+.datos-pago{background:rgba(0,0,0,0.3);border-radius:14px;padding:16px;margin-top:12px;}
+.dato{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:14px;gap:10px;}
+.dato:last-child{border-bottom:none;}
+.dato strong{color:#cbd5e1;}
+.dato span{color:#fff;font-weight:700;word-break:break-all;text-align:right;}
+.btn-copiar{background:rgba(212,175,55,0.2);border:1px solid rgba(212,175,55,0.4);color:var(--color-dorado-claro);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;}
+
+.btn-accion{width:100%;padding:16px;background:linear-gradient(135deg,#d4af37,#f5d76e,#d4af37);color:#0a0e1a;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:1px;margin-top:16px;box-shadow:0 6px 20px rgba(212,175,55,0.4);transition:0.3s;}
+.btn-accion:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(212,175,55,0.6);}
+.btn-accion:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+.alert{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.5);color:#86efac;padding:16px;border-radius:14px;text-align:center;font-size:14px;line-height:1.5;margin-top:16px;display:none;}
+.alert.error{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.5);color:#fca5a5;}
+.alert.visible{display:block;}
+</style>
+</head>
+<body class="con-nav">
+
+<video autoplay muted loop playsinline class="video-fondo">
+    <source src="fondo.mp4" type="video/mp4">
+</video>
+<div class="video-overlay"></div>
+
+<div class="barra-superior">
+    <div class="header">
+        <a href="index.html" class="brand"><img src="logo.png" alt="Recargas Games"></a>
+        <a href="index.html" class="btn-volver">← Volver</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="pagina-titulo">
+        <h1>💰 Recarga tu Billetera</h1>
+        <p>Recarga saldo a tu cuenta de RecargasGames sin montos mínimos. Paga por Pago Móvil y te acreditamos en minutos.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><span class="paso">1</span> Tus Datos</div>
+        <div class="form-group">
+            <label>Tu ID de Cliente o WhatsApp</label>
+            <input type="text" id="idCliente" class="form-input" placeholder="Ej: 584228242411 o tu ID de cliente">
+            <p style="font-size:12px;color:#94a3b8;margin-top:6px;">Usaremos esto para identificar tu recarga.</p>
+        </div>
+        <div class="form-group">
+            <label>Monto a Recargar (USD)</label>
+            <input type="number" id="montoRecarga" class="form-input" placeholder="Ej: 5.00" step="0.01" min="0.01">
+            <p style="font-size:12px;color:#94a3b8;margin-top:6px;">Puedes recargar cualquier monto en dólares.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><span class="paso">2</span> Datos para Pago Móvil</div>
+        <div class="datos-pago">
+            <div class="dato"><strong>Banco:</strong> <span>(0102) BDV</span> <button class="btn-copiar" onclick="copiar('(0102) BDV')">📋</button></div>
+            <div class="dato"><strong>Cédula:</strong> <span>32824869</span> <button class="btn-copiar" onclick="copiar('32824869')">📋</button></div>
+            <div class="dato"><strong>Teléfono:</strong> <span>04228242411</span> <button class="btn-copiar" onclick="copiar('04228242411')">📋</button></div>
+            <div class="dato"><strong>Monto Bs:</strong> <span id="montoBs">— Bs</span> <button class="btn-copiar" onclick="copiar(document.getElementById('montoBs').textContent)">📋</button></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><span class="paso">3</span> Enviar Comprobante</div>
+        <div class="form-group">
+            <label>Número de Referencia del Pago</label>
+            <input type="text" id="referenciaPago" class="form-input" placeholder="Ej: 0050943851750">
+            <p style="font-size:12px;color:#94a3b8;margin-top:6px;">Escribe la referencia exacta que te dio tu banco.</p>
+        </div>
+        <button class="btn-accion" id="btnEnviar" onclick="enviarRecarga()">📤 Enviar Recarga para Verificación</button>
+        <div class="alert" id="resultado"></div>
+    </div>
+</div>
+
+<script>
+// Configuración Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyAARiBZAruTMx2anfq6nCn61SKhXYsyL5w",
+    authDomain: "free-52119.firebaseapp.com",
+    databaseURL: "https://free-52119-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "free-52119",
+    storageBucket: "free-52119.firebasestorage.app",
+    messagingSenderId: "632240144599",
+    appId: "1:632240144599:web:e31c25665ffe19c194b092"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const URL_TELEGRAM = '/api/notificar-telegram';
+
+let tasa = 940;
+
+async function cargarTasa() {
+    try {
+        const res = await fetch('/api/tasa');
+        const data = await res.json();
+        if (data.ok && data.tasa_usdt) {
+            tasa = Math.round(data.tasa_usdt);
+        }
+    } catch (e) {}
+}
+cargarTasa();
+
+document.getElementById('montoRecarga').addEventListener('input', function() {
+    const usd = parseFloat(this.value) || 0;
+    const bs = Math.round(usd * tasa);
+    document.getElementById('montoBs').textContent = bs.toLocaleString('es-VE') + ' Bs';
+});
+
+function copiar(texto) {
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('✅ Copiado: ' + texto);
+    }).catch(() => alert('Copia manualmente: ' + texto));
+}
+
+async function enviarRecarga() {
+    const idCliente = document.getElementById('idCliente').value.trim();
+    const montoUsd = parseFloat(document.getElementById('montoRecarga').value);
+    const referencia = document.getElementById('referenciaPago').value.trim().toUpperCase();
+    const btn = document.getElementById('btnEnviar');
+    const resultado = document.getElementById('resultado');
+
+    // Validaciones
+    if (!idCliente) {
+        resultado.className = 'alert error visible';
+        resultado.textContent = '❌ Escribe tu ID de cliente o WhatsApp.';
+        return;
+    }
+    if (!montoUsd || montoUsd <= 0) {
+        resultado.className = 'alert error visible';
+        resultado.textContent = '❌ Ingresa un monto válido mayor a 0.';
+        return;
+    }
+    if (!referencia || referencia.length < 6) {
+        resultado.className = 'alert error visible';
+        resultado.textContent = '❌ Escribe la referencia completa del pago (mínimo 6 dígitos).';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Enviando...';
+
+    try {
+        const montoBs = Math.round(montoUsd * tasa);
+        const montoFormateado = `$${montoUsd.toFixed(2)} USD (${montoBs.toLocaleString('es-VE')} Bs)`;
+
+        // Guardar la recarga pendiente en Firebase
+        const recargaData = {
+            id_cliente: idCliente,
+            monto_usd: montoUsd,
+            monto_bs: montoBs,
+            tasa: tasa,
+            referencia: referencia,
+            metodo: 'PAGO MOVIL',
+            estado: 'PENDIENTE_VERIFICACION',
+            fecha: new Date().toISOString(),
+            fecha_legible: new Date().toLocaleString('es-VE'),
+            origen: 'billetera'
+        };
+
+        const nuevaRecarga = db.ref('recargas_billetera').push();
+        await nuevaRecarga.set(recargaData);
+
+        // Notificar al admin por Telegram
+        const mensajeTelegram = 
+            `💰 <b>NUEVA RECARGA DE BILLETERA</b>\n\n` +
+            `<b>👤 Cliente:</b> <code>${idCliente}</code>\n` +
+            `<b>💵 Monto:</b> ${montoFormateado}\n` +
+            `<b>🔢 Referencia:</b> <code>${referencia}</code>\n` +
+            `<b>📅 Fecha:</b> ${recargaData.fecha_legible}\n\n` +
+            `⚠️ <b>Verifica el pago en tu banco y acredita manualmente.</b>\n` +
+            `📋 Recarga ID: <code>${nuevaRecarga.key}</code>`;
+
+        fetch(URL_TELEGRAM, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensaje: mensajeTelegram })
+        }).catch(e => console.warn('Telegram:', e));
+
+        // Mostrar mensaje al cliente
+        resultado.className = 'alert visible';
+        resultado.innerHTML = `
+            ✅ <strong>¡Recarga enviada con éxito!</strong><br><br>
+            Tu recarga de <strong>${montoFormateado}</strong> está siendo verificada por nuestro equipo.<br><br>
+            📱 Te notificaremos por WhatsApp en los próximos minutos cuando sea aprobada.<br><br>
+            <small>Recarga ID: ${nuevaRecarga.key}</small>
+        `;
+
+        // Limpiar formulario
+        document.getElementById('idCliente').value = '';
+        document.getElementById('montoRecarga').value = '';
+        document.getElementById('referenciaPago').value = '';
+        document.getElementById('montoBs').textContent = '— Bs';
+
+    } catch (error) {
+        console.error(error);
+        resultado.className = 'alert error visible';
+        resultado.textContent = '❌ Error al enviar la recarga. Intenta de nuevo.';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '📤 Enviar Recarga para Verificación';
+    }
+}
+</script>
+</body>
+</html>
