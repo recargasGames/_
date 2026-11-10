@@ -95,7 +95,7 @@ body {
 .btn-accion:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 
 .alert { display: none; margin-top: 16px; padding: 16px; border: 1px solid rgba(34,197,94,.45); border-radius: 13px; background: rgba(34,197,94,.12); color: #86efac; font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
-.alert.error { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.12); color: #fca5a5; }
+.alert.error { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.12); color: #fca5a5; display: block; }
 .alert.visible { display: block; }
 
 .seguridad { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 23px 5px 5px; color: #94a3b8; font-size: 11px; line-height: 1.5; text-align: center; }
@@ -209,16 +209,7 @@ body {
 
         <div class="form-group">
             <label for="montoRecarga">Monto que deseas recargar (USD)</label>
-            <input
-                type="number"
-                id="montoRecarga"
-                class="form-input"
-                placeholder="Ej: 5.00"
-                min="0.01"
-                max="500"
-                step="0.01"
-                inputmode="decimal"
-            >
+            <input type="number" id="montoRecarga" class="form-input" placeholder="Ej: 5.00" min="0.01" max="500" step="0.01" inputmode="decimal">
             <div class="montos-rapidos">
                 <button type="button" class="btn-monto" data-monto="1">$1</button>
                 <button type="button" class="btn-monto" data-monto="5">$5</button>
@@ -289,14 +280,7 @@ body {
 
         <div class="form-group">
             <label for="referenciaPago">Número de referencia del pago</label>
-            <input
-                type="text"
-                id="referenciaPago"
-                class="form-input"
-                placeholder="Ej: 0050943851750"
-                maxlength="40"
-                autocomplete="off"
-            >
+            <input type="text" id="referenciaPago" class="form-input" placeholder="Ej: 0050943851750" maxlength="40" autocomplete="off">
             <p class="ayuda">
                 Escribe la referencia exacta que aparece en tu banco.
             </p>
@@ -336,58 +320,47 @@ body {
 
 </main>
 
-<!-- ⚠️ IMPORTANTE: AQUÍ CONECTAMOS CON TU FIREBASE REAL -->
 <script type="module">
-    // Importamos exactamente lo mismo que usa tu index.html
     import { auth } from './firebase-config.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
     import { getDatabase, ref, onValue, push, set, query, orderByChild, equalTo, get } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-    // Inicializamos la base de datos
     const db = getDatabase();
     const URL_TELEGRAM = "/api/notificar-telegram";
-
     let tasa = 940;
-    let enviando = false;
     let usuarioActual = null;
     let misRecargas = [];
     let filtroActual = "todas";
 
-    const inputMonto = document.getElementById("montoRecarga");
-    const inputReferencia = document.getElementById("referenciaPago");
-    const montoBsElemento = document.getElementById("montoBs");
-    const montoBsCopiar = document.getElementById("montoBsCopiar");
-    const tasaInfo = document.getElementById("tasaInfo");
-    const resultado = document.getElementById("resultado");
-    const btnEnviar = document.getElementById("btnEnviar");
-    const saldoNumero = document.getElementById("saldoNumero");
-    const saldoInfoCuenta = document.getElementById("saldoInfoCuenta");
-    const listaHistorial = document.getElementById("listaHistorial");
-    const loadingOverlay = document.getElementById("loadingOverlay");
+    // Forzar a quitar la pantalla de carga después de 3.5 segundos
+    const timeoutCarga = setTimeout(() => {
+        const overlay = document.getElementById("loadingOverlay");
+        if(overlay) overlay.classList.add("oculto");
+    }, 3500);
 
-    // 1. VERIFICAR SESIÓN
     onAuthStateChanged(auth, (user) => {
+        clearTimeout(timeoutCarga);
+        const overlay = document.getElementById("loadingOverlay");
+        if(overlay) overlay.classList.add("oculto");
+
         if (!user) {
-            saldoInfoCuenta.innerHTML = "<span style='color:#ef4444'>⚠️ Sin sesión. Por favor inicia sesión.</span>";
-            resultado.className = "alert error visible";
-            resultado.textContent = "Debes iniciar sesión en el inicio para poder recargar.";
-            loadingOverlay.classList.add("oculto");
+            document.getElementById("saldoInfoCuenta").innerHTML = "<span style='color:#ef4444'>⚠️ Sin sesión. Por favor inicia sesión.</span>";
+            const res = document.getElementById("resultado");
+            res.className = "alert error visible";
+            res.textContent = "Debes iniciar sesión en el inicio para poder recargar.";
             return;
         }
         
         usuarioActual = user;
-        saldoInfoCuenta.textContent = "👤 " + (user.email || "Usuario");
+        document.getElementById("saldoInfoCuenta").textContent = "👤 " + (user.email || "Usuario");
         
-        // Cargar saldo
         const saldoRef = ref(db, "usuarios/" + user.uid + "/saldo_billetera");
         onValue(saldoRef, (snap) => {
             const saldo = Number(snap.val()) || 0;
-            saldoNumero.textContent = saldo.toFixed(2);
+            document.getElementById("saldoNumero").textContent = saldo.toFixed(2);
         });
 
-        // Cargar historial
         cargarHistorialRecargas();
-        loadingOverlay.classList.add("oculto");
     });
 
     function cargarHistorialRecargas() {
@@ -411,41 +384,22 @@ body {
 
     function renderizarHistorial() {
         let filtradas = [...misRecargas];
+        if (filtroActual === "pendientes") filtradas = filtradas.filter(r => r.estado === "PENDIENTE_VERIFICACION");
+        else if (filtroActual === "acreditadas") filtradas = filtradas.filter(r => r.estado === "ACREDITADA");
 
-        if (filtroActual === "pendientes") {
-            filtradas = filtradas.filter(r => r.estado === "PENDIENTE_VERIFICACION");
-        } else if (filtroActual === "acreditadas") {
-            filtradas = filtradas.filter(r => r.estado === "ACREDITADA");
-        }
+        const listaHistorial = document.getElementById("listaHistorial");
 
         if (filtradas.length === 0) {
-            const mensaje = misRecargas.length === 0
-                ? "Aún no tienes recargas registradas"
-                : "No hay recargas con ese filtro";
-            listaHistorial.innerHTML = `
-                <div class="historial-vacio">
-                    <span class="icono">📭</span>
-                    ${mensaje}
-                </div>`;
+            const mensaje = misRecargas.length === 0 ? "Aún no tienes recargas registradas" : "No hay recargas con ese filtro";
+            listaHistorial.innerHTML = `<div class="historial-vacio"><span class="icono">📭</span>${mensaje}</div>`;
             return;
         }
 
         listaHistorial.innerHTML = filtradas.map(r => {
             const monto = Number(r.monto_usd || 0).toFixed(2);
             const montoBs = Number(r.monto_bs || 0).toLocaleString("es-VE");
-
-            let estadoClase, estadoTexto;
-            if (r.estado === "ACREDITADA") {
-                estadoClase = "acreditada";
-                estadoTexto = "✅ Acreditada";
-            } else if (r.estado === "RECHAZADA") {
-                estadoClase = "rechazada";
-                estadoTexto = "❌ Rechazada";
-            } else {
-                estadoClase = "pendiente";
-                estadoTexto = "⏳ Pendiente";
-            }
-
+            let estadoClase = r.estado === "ACREDITADA" ? "acreditada" : (r.estado === "RECHAZADA" ? "rechazada" : "pendiente");
+            let estadoTexto = r.estado === "ACREDITADA" ? "✅ Acreditada" : (r.estado === "RECHAZADA" ? "❌ Rechazada" : "⏳ Pendiente");
             const fecha = r.fecha_legible || new Date(r.fecha).toLocaleString("es-VE");
 
             return `
@@ -472,249 +426,102 @@ body {
         });
     });
 
-    // 2. TASA
-    async function cargarTasa() {
-        try {
-            const respuesta = await fetch("/api/tasa", { cache: "no-store" });
-            if (!respuesta.ok) throw new Error("No se pudo obtener la tasa");
-            const data = await respuesta.json();
-            const valor = Number(data.tasa_usdt);
-            if (data.ok && Number.isFinite(valor) && valor > 0) {
-                tasa = valor;
-                tasaInfo.textContent = "Tasa actual: " + tasa.toLocaleString("es-VE") + " Bs por USD";
-            } else {
-                throw new Error("Tasa inválida");
-            }
-        } catch (error) {
-            tasaInfo.textContent = "Tasa de respaldo: " + tasa.toLocaleString("es-VE") + " Bs por USD";
-            console.warn("Tasa:", error);
+    fetch("/api/tasa").then(r => r.json()).then(d => {
+        if(d.ok) { 
+            tasa = d.tasa_usdt; 
+            document.getElementById("tasaInfo").textContent = "Tasa actual: " + tasa.toLocaleString("es-VE") + " Bs"; 
         }
-        calcularMonto();
-    }
+    }).catch(() => {
+        document.getElementById("tasaInfo").textContent = "Tasa de respaldo: " + tasa + " Bs";
+    });
 
-    function calcularMonto() {
-        const usd = Number(inputMonto.value);
-        if (!Number.isFinite(usd) || usd <= 0) {
-            montoBsElemento.textContent = "— Bs";
-            montoBsCopiar.textContent = "— Bs";
-            return;
-        }
-        const bs = Math.round(usd * tasa);
-        const formato = bs.toLocaleString("es-VE") + " Bs";
-        montoBsElemento.textContent = formato;
-        montoBsCopiar.textContent = formato;
-    }
+    const inputMonto = document.getElementById("montoRecarga");
+    const montoBsEl = document.getElementById("montoBs");
+    const montoBsCopiar = document.getElementById("montoBsCopiar");
 
     inputMonto.addEventListener("input", () => {
-        document.querySelectorAll(".btn-monto").forEach(b => {
-            b.classList.toggle("activo", Number(b.dataset.monto) === Number(inputMonto.value));
+        const usd = Number(inputMonto.value);
+        if (usd > 0) {
+            const bs = Math.round(usd * tasa).toLocaleString("es-VE") + " Bs";
+            montoBsEl.textContent = bs;
+            montoBsCopiar.textContent = bs;
+        } else {
+            montoBsEl.textContent = "— Bs";
+            montoBsCopiar.textContent = "— Bs";
+        }
+    });
+
+    document.querySelectorAll(".btn-monto").forEach(b => {
+        b.addEventListener("click", () => {
+            document.querySelectorAll(".btn-monto").forEach(btn => btn.classList.remove("activo"));
+            b.classList.add("activo");
+            inputMonto.value = b.dataset.monto;
+            inputMonto.dispatchEvent(new Event("input"));
         });
-        calcularMonto();
     });
 
-    document.querySelectorAll(".btn-monto").forEach(boton => {
-        boton.addEventListener("click", () => {
-            inputMonto.value = boton.dataset.monto;
-            document.querySelectorAll(".btn-monto").forEach(b => b.classList.remove("activo"));
-            boton.classList.add("activo");
-            calcularMonto();
+    document.querySelectorAll("[data-copiar]").forEach(b => {
+        b.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(b.dataset.copiar);
+                const res = document.getElementById("resultado");
+                res.className = "alert visible";
+                res.textContent = "✅ Copiado: " + b.dataset.copiar;
+                setTimeout(() => res.className = "alert", 2000);
+            } catch(e) {}
         });
     });
 
-    // 3. COPIAR
-    async function copiar(texto) {
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(texto);
-            } else {
-                const auxiliar = document.createElement("textarea");
-                auxiliar.value = texto;
-                auxiliar.style.position = "fixed";
-                auxiliar.style.opacity = "0";
-                document.body.appendChild(auxiliar);
-                auxiliar.select();
-                const copiado = document.execCommand("copy");
-                auxiliar.remove();
-                if (!copiado) throw new Error("No se pudo copiar");
-            }
-            mostrarMensaje("✅ Copiado correctamente: " + texto);
-        } catch (error) {
-            mostrarMensaje("Copia manualmente: " + texto, true);
-        }
-    }
+    document.getElementById("btnEnviar").addEventListener("click", async () => {
+        if (!usuarioActual) return alert("No has iniciado sesión.");
+        const btn = document.getElementById("btnEnviar");
+        const res = document.getElementById("resultado");
+        const monto = Number(inputMonto.value);
+        const refCode = document.getElementById("referenciaPago").value.trim().toUpperCase();
 
-    document.querySelectorAll("[data-copiar]").forEach(boton => {
-        boton.addEventListener("click", () => copiar(boton.dataset.copiar));
-    });
-
-    document.getElementById("copiarMonto").addEventListener("click", () => {
-        const valor = montoBsCopiar.textContent;
-        if (valor === "— Bs") { mostrarMensaje("Primero introduce un monto.", true); return; }
-        copiar(valor);
-    });
-
-    document.getElementById("copiarTodos").addEventListener("click", () => {
-        const texto = "Banco: 0102 Banco de Venezuela\n" +
-                      "Cédula: 32824869\n" +
-                      "Teléfono: 04228242411\n" +
-                      "Monto: " + montoBsCopiar.textContent;
-        if (montoBsCopiar.textContent === "— Bs") {
-            mostrarMensaje("Primero introduce el monto de tu recarga.", true);
-            return;
-        }
-        copiar(texto);
-    });
-
-    function mostrarMensaje(mensaje, error = false) {
-        resultado.className = error ? "alert error visible" : "alert visible";
-        resultado.textContent = mensaje;
-    }
-
-    function limpiarMensaje() {
-        resultado.className = "alert";
-        resultado.textContent = "";
-    }
-
-    // 4. ENVIAR RECARGA
-    async function enviarRecarga() {
-        if (enviando) return;
-        if (!usuarioActual) {
-            mostrarMensaje("❌ Debes iniciar sesión.", true);
+        if (monto < 0.01 || !refCode) {
+            res.className = "alert error visible";
+            res.textContent = "❌ Ingresa un monto válido y una referencia.";
             return;
         }
 
-        limpiarMensaje();
-
-        const montoUsd = Number(inputMonto.value);
-        const referencia = inputReferencia.value.trim().toUpperCase();
-
-        if (!Number.isFinite(montoUsd) || montoUsd < 0.01 || montoUsd > 500) {
-            mostrarMensaje("❌ Ingresa un monto entre $0.01 y $500.", true);
-            inputMonto.focus();
-            return;
-        }
-
-        if (!/^[A-Z0-9]{6,40}$/.test(referencia)) {
-            mostrarMensaje("❌ La referencia debe tener entre 6 y 40 caracteres alfanuméricos.", true);
-            inputReferencia.focus();
-            return;
-        }
-
-        const montoBs = Math.round(montoUsd * tasa);
-        if (montoBs <= 0) {
-            mostrarMensaje("❌ No se pudo calcular el monto en bolívares.", true);
-            return;
-        }
-
-        enviando = true;
-        btnEnviar.disabled = true;
-        btnEnviar.textContent = "⏳ Verificando...";
+        btn.disabled = true;
+        btn.textContent = "⏳ Enviando...";
 
         try {
-            // Buscar duplicados
-            const dupRef = query(ref(db, "recargas_billetera"), orderByChild("referencia"), equalTo(referencia));
-            const dupSnap = await get(dupRef);
-
-            if (dupSnap.exists()) {
-                const existentes = dupSnap.val();
-                const yaUsada = Object.values(existentes).some(r =>
-                    r.estado === "PENDIENTE_VERIFICACION" || r.estado === "ACREDITADA"
-                );
-                if (yaUsada) {
-                    mostrarMensaje("❌ Esta referencia ya fue registrada. Contacta al administrador si es un error.", true);
-                    btnEnviar.disabled = false;
-                    btnEnviar.textContent = "📤 Enviar recarga";
-                    enviando = false;
-                    return;
-                }
-            }
-
-            btnEnviar.textContent = "⏳ Enviando...";
-
-            const ahora = new Date();
-            const recargaData = {
+            const data = {
                 uid: usuarioActual.uid,
-                email: usuarioActual.email || "",
+                email: usuarioActual.email,
                 id_cliente: usuarioActual.uid,
-                monto_usd: Number(montoUsd.toFixed(2)),
-                monto_bs: montoBs,
-                tasa: tasa,
-                referencia: referencia,
+                monto_usd: monto,
+                monto_bs: Math.round(monto * tasa),
+                referencia: refCode,
                 metodo: "PAGO MOVIL",
                 estado: "PENDIENTE_VERIFICACION",
-                fecha: ahora.toISOString(),
-                fecha_legible: ahora.toLocaleString("es-VE"),
-                origen: "billetera"
+                fecha: new Date().toISOString(),
+                fecha_legible: new Date().toLocaleString("es-VE")
             };
+            const nuevaRef = push(ref(db, "recargas_billetera"));
+            await set(nuevaRef, data);
 
-            const nuevaRecargaRef = push(ref(db, "recargas_billetera"));
-            await set(nuevaRecargaRef, recargaData);
-
-            const montoFormateado = "$" + montoUsd.toFixed(2) + " USD (" + montoBs.toLocaleString("es-VE") + " Bs)";
-
-            const mensajeTelegram =
-                "💰 <b>NUEVA RECARGA DE BILLETERA</b>\n\n" +
-                "<b>👤 Cliente:</b> <code>" + (usuarioActual.email || usuarioActual.uid) + "</code>\n" +
-                "<b>💵 Monto:</b> " + montoFormateado + "\n" +
-                "<b>🔢 Referencia:</b> <code>" + referencia + "</code>\n" +
-                "<b>📅 Fecha:</b> " + recargaData.fecha_legible + "\n\n" +
-                "⚠️ Verifica el pago en tu banco y acredita manualmente.\n" +
-                "📋 Recarga ID: <code>" + nuevaRecargaRef.key + "</code>";
-
-            try {
-                await fetch(URL_TELEGRAM, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ mensaje: mensajeTelegram })
-                });
-            } catch (e) {
-                console.warn("Telegram:", e);
-            }
-
-            resultado.className = "alert visible";
-            resultado.replaceChildren();
-
-            const titulo = document.createElement("strong");
-            titulo.textContent = "✅ ¡Recarga enviada con éxito!";
-
-            const detalle = document.createElement("p");
-            detalle.style.marginTop = "10px";
-            detalle.textContent = "Tu recarga de " + montoFormateado + " está pendiente de verificación.";
-
-            const nota = document.createElement("p");
-            nota.style.marginTop = "10px";
-            nota.textContent = "Una vez confirmado el pago, tu saldo se actualizará automáticamente.";
-
-            const id = document.createElement("small");
-            id.style.display = "block";
-            id.style.marginTop = "12px";
-            id.textContent = "Recarga ID: " + nuevaRecargaRef.key;
-
-            resultado.append(titulo, detalle, nota, id);
+            res.className = "alert visible";
+            res.style.background = "rgba(34,197,94,.2)";
+            res.style.borderColor = "#22c55e";
+            res.style.color = "#4ade80";
+            res.textContent = "✅ Recarga enviada. El administrador la verificará pronto.";
 
             inputMonto.value = "";
-            inputReferencia.value = "";
-            document.querySelectorAll(".btn-monto").forEach(b => b.classList.remove("activo"));
-            calcularMonto();
-
-        } catch (error) {
-            console.error("Error:", error);
-            mostrarMensaje("❌ No se pudo registrar tu recarga. Revisa tu conexión e inténtalo nuevamente.", true);
+            document.getElementById("referenciaPago").value = "";
+            inputMonto.dispatchEvent(new Event("input"));
+        } catch (e) {
+            console.error(e);
+            res.className = "alert error visible";
+            res.textContent = "❌ Error al guardar. Revisa tu conexión o las reglas de Firebase.";
         } finally {
-            enviando = false;
-            btnEnviar.disabled = false;
-            btnEnviar.textContent = "📤 Enviar recarga";
+            btn.disabled = false;
+            btn.textContent = "📤 Enviar recarga";
         }
-    }
-
-    btnEnviar.addEventListener("click", enviarRecarga);
-
-    cargarTasa();
-
-    setTimeout(() => {
-        loadingOverlay.classList.add("oculto");
-    }, 5000);
+    });
 </script>
-
 </body>
 </html>
