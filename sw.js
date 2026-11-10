@@ -1,4 +1,4 @@
-const CACHE_NAME = 'recargasgames-v1';
+const CACHE_NAME = 'recargasgames-v2';
 
 const ARCHIVOS = [
     '/',
@@ -11,6 +11,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ARCHIVOS))
+            .catch((err) => console.warn('SW: error en install', err))
     );
 
     self.skipWaiting();
@@ -31,16 +32,33 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+    // Solo procesar GET
     if (event.request.method !== 'GET') return;
+
+    // ⚠️ NO cachear videos ni respuestas con Range (status 206)
+    const url = event.request.url.toLowerCase();
+    const esVideo = url.endsWith('.mp4') || url.endsWith('.webm') || url.includes('/video');
+    const tieneRange = event.request.headers.get('range');
+
+    if (esVideo || tieneRange) {
+        // Dejar que el navegador lo maneje directo, sin caché
+        return;
+    }
 
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                if (response.ok) {
+                // Solo cachear respuestas válidas y completas
+                if (
+                    response &&
+                    response.status === 200 &&
+                    response.type === 'basic' &&
+                    !response.headers.get('range')
+                ) {
                     const copia = response.clone();
 
                     caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, copia);
+                        cache.put(event.request, copia).catch(() => {});
                     });
                 }
 
