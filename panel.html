@@ -199,7 +199,6 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .pedido-accion-btn.eliminar { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
 .pedido-accion-btn.eliminar:hover { background: rgba(239,68,68,0.3); color: #fff; transform: translateY(-2px); }
 
-/* 🪄 BOTÓN MÁGICO */
 .pedido-accion-btn.enviar-datos {
     background: linear-gradient(135deg, #25d366, #128c7e);
     color: #fff;
@@ -462,6 +461,31 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
 .chat-input-area button:hover:not(:disabled){transform:scale(1.05);box-shadow:0 4px 15px rgba(37,211,102,0.4)}
 .chat-input-area button:disabled{background:#2a3942;color:#8696a0;cursor:not-allowed}
 
+/* ═══ BILLETERA ═══ */
+.billetera-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:22px}
+.recarga-card{background:linear-gradient(135deg,rgba(20,30,55,0.85),rgba(10,14,26,0.95));border:1px solid rgba(245,158,11,0.5);border-radius:16px;padding:18px;margin-bottom:14px}
+.recarga-card.acreditada{border-color:rgba(16,185,129,0.5)}
+.recarga-card.rechazada{border-color:rgba(239,68,68,0.5);opacity:0.7}
+.recarga-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.recarga-id{font-size:16px;font-weight:900;color:var(--color-dorado-claro);word-break:break-all}
+.recarga-fecha{font-size:11px;color:#8899b0;margin-top:3px}
+.recarga-estado{padding:5px 12px;border-radius:20px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap}
+.recarga-estado.pendiente{background:rgba(245,158,11,0.2);color:#fbbf24;border:1px solid rgba(245,158,11,0.5)}
+.recarga-estado.acreditada{background:rgba(16,185,129,0.2);color:#6ee7b7;border:1px solid rgba(16,185,129,0.5)}
+.recarga-estado.rechazada{background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid rgba(239,68,68,0.5)}
+.recarga-info{background:rgba(0,0,0,0.3);border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;line-height:1.8;color:#cbd5e1}
+.recarga-info strong{color:#fff}
+.recarga-info .monto-destacado{font-size:20px;font-weight:900;color:#f5d76e;font-family:'Courier New',monospace}
+.recarga-info .referencia-destacada{font-family:'Courier New',monospace;font-weight:900;color:#f5d76e;background:rgba(212,175,55,0.15);padding:3px 8px;border-radius:6px;letter-spacing:1px}
+.recarga-acciones{display:flex;gap:8px;flex-wrap:wrap}
+.recarga-btn{flex:1;min-width:120px;padding:12px 14px;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;border:none;font-family:inherit;text-transform:uppercase;letter-spacing:0.5px;transition:.2s}
+.recarga-btn.acreditar{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 4px 15px rgba(16,185,129,0.3)}
+.recarga-btn.acreditar:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(16,185,129,0.5)}
+.recarga-btn.rechazar{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.4)}
+.recarga-btn.rechazar:hover{background:rgba(239,68,68,0.3);color:#fff}
+.recarga-btn.verificar-banco{background:rgba(59,130,246,0.15);color:#93c5fd;border:1px solid rgba(59,130,246,0.4);text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px}
+.recarga-btn.verificar-banco:hover{background:rgba(59,130,246,0.3);color:#fff}
+
 @media (max-width:700px){
     .panel-header{flex-direction:column;align-items:flex-start;padding:18px}
     .panel-titulo{font-size:18px}
@@ -532,10 +556,44 @@ body{color:var(--color-texto);font-family:'Segoe UI',-apple-system,BlinkMacSyste
         <div class="tab activa" onclick="cambiarTab('pedidos', event)">
             📋 Pedidos <span class="badge-pendiente-tab" id="badgePendientes" style="display:none;">0</span>
         </div>
+        <div class="tab" onclick="cambiarTab('billetera', event)">
+            💰 Billetera <span class="badge-pendiente-tab" id="badgeBilletera" style="display:none;">0</span>
+        </div>
         <div class="tab" onclick="cambiarTab('cuentas', event)">📺 Cuentas Streaming</div>
         <div class="tab" onclick="cambiarTab('codigos', event)">🎲 Códigos</div>
         <div class="tab" onclick="cambiarTab('usuarios', event)">👤 Usuarios</div>
         <div class="tab" onclick="cambiarTab('vencimientos', event)">📅 Vencimientos</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- TAB BILLETERA (NUEVO) -->
+    <!-- ═══════════════════════════════════════ -->
+    <div id="tab-billetera" class="contenido-tab oculto">
+        <div class="tarjeta">
+            <h3 class="tarjeta-titulo">💰 Resumen Billetera</h3>
+            <div class="billetera-stats">
+                <div class="cuenta-stat"><div class="cuenta-stat-numero" id="bsPendientes" style="color:#fbbf24">0</div><div class="cuenta-stat-label">Pendientes</div></div>
+                <div class="cuenta-stat"><div class="cuenta-stat-numero" id="bsMontoPendiente" style="color:#f5d76e">$0</div><div class="cuenta-stat-label">Monto Pendiente</div></div>
+                <div class="cuenta-stat"><div class="cuenta-stat-numero" id="bsAcreditadasHoy" style="color:#4ade80">0</div><div class="cuenta-stat-label">Acreditadas Hoy</div></div>
+                <div class="cuenta-stat"><div class="cuenta-stat-numero" id="bsMontoAcreditado" style="color:#4ade80">$0</div><div class="cuenta-stat-label">Total Acreditado Hoy</div></div>
+            </div>
+        </div>
+
+        <div class="tarjeta" style="padding-bottom:0">
+            <h3 class="tarjeta-titulo">⏳ Recargas Pendientes de Verificación</h3>
+            <div class="busqueda-container">
+                <input type="text" id="buscarRecargas" placeholder="🔍 Buscar por ID cliente, WhatsApp, referencia o monto..." oninput="renderizarRecargasBilletera()">
+                <select class="filtro-select" id="filtroRecargas" onchange="renderizarRecargasBilletera()">
+                    <option value="pendientes">⏳ Solo Pendientes</option>
+                    <option value="acreditadas">✅ Acreditadas (hoy)</option>
+                    <option value="rechazadas">❌ Rechazadas</option>
+                    <option value="todas">📋 Todas</option>
+                </select>
+            </div>
+            <div id="listaRecargasBilletera" style="padding-bottom:20px">
+                <div class="lista-vacia"><div class="icono">💰</div>Cargando recargas...</div>
+            </div>
+        </div>
     </div>
 
     <!-- TAB CUENTAS STREAMING -->
@@ -782,6 +840,7 @@ const refCodigosRG = db.ref("codigos_rg");
 const refCodigosTEST = db.ref("codigos_test");
 const refCuentasStreaming = db.ref("cuentas_streaming");
 const refCodigosRenovacion = db.ref("codigos_renovacion");
+const refRecargasBilletera = db.ref("recargas_billetera");
 
 let sesionActiva = false;
 let deferredPrompt = null;
@@ -796,10 +855,14 @@ let pedidosPorPagina = 10;
 let cuentasStreamingCache = {};
 let tasaCodigosActual = 940;
 
+let todasLasRecargasBilletera = [];
+let recargasBilleteraUnsubscribe = null;
+
 let cacheUsuarios = {};
 
+const URL_TELEGRAM = '/api/notificar-telegram';
+
 const PRODUCTOS_JUEGOS = {
-    // FREE FIRE LATAM
     'ff_110':  { producto: '110 Diamantes Free Fire (LATAM)',  juego: 'FREE FIRE', paquete: '110',  usd: 0.81,  tipo: 'central_one' },
     'ff_220':  { producto: '220 Diamantes Free Fire (LATAM)',  juego: 'FREE FIRE', paquete: '110_x2', usd: 1.62,  tipo: 'central_one' },
     'ff_341':  { producto: '341 Diamantes Free Fire (LATAM)',  juego: 'FREE FIRE', paquete: '341',  usd: 2.60,  tipo: 'central_one' },
@@ -816,8 +879,6 @@ const PRODUCTOS_JUEGOS = {
     'ff_nivel_20': { producto: 'Nivel 20 FF (LATAM)', juego: 'FREE FIRE', paquete: 'nivel_20', usd: 0.88, tipo: 'central_one' },
     'ff_nivel_25': { producto: 'Nivel 25 FF (LATAM)', juego: 'FREE FIRE', paquete: 'nivel_25', usd: 0.88, tipo: 'central_one' },
     'ff_nivel_30': { producto: 'Nivel 30 FF (LATAM)', juego: 'FREE FIRE', paquete: 'nivel_30', usd: 1.32, tipo: 'central_one' },
-
-    // 🔥 FREE FIRE BRASIL (NUEVOS)
     'ff_br_110':   { producto: '110 Diamantes Free Fire BR',   juego: 'FREE FIRE BR', paquete: '110',  usd: 0.98,  tipo: 'central_one' },
     'ff_br_341':   { producto: '341 Diamantes Free Fire BR',   juego: 'FREE FIRE BR', paquete: '341',  usd: 3.03,  tipo: 'central_one' },
     'ff_br_572':   { producto: '572 Diamantes Free Fire BR',   juego: 'FREE FIRE BR', paquete: '572',  usd: 4.38,  tipo: 'central_one' },
@@ -839,8 +900,6 @@ const PRODUCTOS_JUEGOS = {
     'ff_br_nivel_20': { producto: 'Nivel 20 FF BR', juego: 'FREE FIRE BR', paquete: 'nivel_20', usd: 0.58, tipo: 'central_one' },
     'ff_br_nivel_25': { producto: 'Nivel 25 FF BR', juego: 'FREE FIRE BR', paquete: 'nivel_25', usd: 0.58, tipo: 'central_one' },
     'ff_br_nivel_30': { producto: 'Nivel 30 FF BR', juego: 'FREE FIRE BR', paquete: 'nivel_30', usd: 0.94, tipo: 'central_one' },
-
-    // RACING MASTER
     'rm_novice': { producto: 'Racing Master Novice Pack', juego: 'RACING MASTER', paquete: 'novice', usd: 0.22, tipo: 'central_one' },
     'rm_70': { producto: 'Racing Master 70', juego: 'RACING MASTER', paquete: '70', usd: 0.65, tipo: 'central_one' },
     'rm_outfit': { producto: 'Racing Master Outfit', juego: 'RACING MASTER', paquete: 'outfit', usd: 0.81, tipo: 'central_one' },
@@ -853,8 +912,6 @@ const PRODUCTOS_JUEGOS = {
     'rm_2100': { producto: 'Racing Master 2100', juego: 'RACING MASTER', paquete: '2100', usd: 19.30, tipo: 'central_one' },
     'rm_3400': { producto: 'Racing Master 3400', juego: 'RACING MASTER', paquete: '3400', usd: 30.60, tipo: 'central_one' },
     'rm_6600': { producto: 'Racing Master 6600', juego: 'RACING MASTER', paquete: '6600', usd: 58.61, tipo: 'central_one' },
-
-    // SUPER SUS
     'ss_100': { producto: 'Super Sus 100', juego: 'SUPER SUS', paquete: '100', usd: 0.77, tipo: 'central_one' },
     'ss_128': { producto: 'Super Sus 128', juego: 'SUPER SUS', paquete: '128', usd: 0.82, tipo: 'central_one' },
     'ss_weekly': { producto: 'Super Sus Weekly', juego: 'SUPER SUS', paquete: 'weekly', usd: 0.97, tipo: 'central_one' },
@@ -873,8 +930,6 @@ const PRODUCTOS_JUEGOS = {
     'ss_2760': { producto: 'Super Sus 2760', juego: 'SUPER SUS', paquete: '2760', usd: 16.26, tipo: 'central_one' },
     'ss_7000': { producto: 'Super Sus 7000', juego: 'SUPER SUS', paquete: '7000', usd: 40.67, tipo: 'central_one' },
     'ss_5600': { producto: 'Super Sus 5600', juego: 'SUPER SUS', paquete: '5600', usd: 41.27, tipo: 'central_one' },
-
-    // MARVEL RIVALS
     'mr_100': { producto: 'Marvel Rivals 100', juego: 'MARVEL RIVALS', paquete: '100', usd: 1.06, tipo: 'central_one' },
     'mr_pickup': { producto: 'Marvel Rivals Pick-Up Bundle', juego: 'MARVEL RIVALS', paquete: 'pickup', usd: 3.25, tipo: 'central_one' },
     'mr_500': { producto: 'Marvel Rivals 500', juego: 'MARVEL RIVALS', paquete: '500', usd: 5.35, tipo: 'central_one' },
@@ -882,8 +937,6 @@ const PRODUCTOS_JUEGOS = {
     'mr_2180': { producto: 'Marvel Rivals 2180', juego: 'MARVEL RIVALS', paquete: '2180', usd: 21.37, tipo: 'central_one' },
     'mr_5680': { producto: 'Marvel Rivals 5680', juego: 'MARVEL RIVALS', paquete: '5680', usd: 53.43, tipo: 'central_one' },
     'mr_11680': { producto: 'Marvel Rivals 11680', juego: 'MARVEL RIVALS', paquete: '11680', usd: 106.87, tipo: 'central_one' },
-
-    // HONOR OF KINGS
     'hok_16': { producto: 'Honor of Kings 16', juego: 'HONOR OF KINGS', paquete: '16', usd: 0.19, tipo: 'central_one' },
     'hok_double_lucky': { producto: 'HOK Double Token Lucky Bag', juego: 'HONOR OF KINGS', paquete: 'double_lucky', usd: 0.31, tipo: 'central_one' },
     'hok_80': { producto: 'Honor of Kings 80', juego: 'HONOR OF KINGS', paquete: '80', usd: 0.99, tipo: 'central_one' },
@@ -901,61 +954,45 @@ const PRODUCTOS_JUEGOS = {
     'hok_2508': { producto: 'Honor of Kings 2508', juego: 'HONOR OF KINGS', paquete: '2508', usd: 29.70, tipo: 'central_one' },
     'hok_4180': { producto: 'Honor of Kings 4180', juego: 'HONOR OF KINGS', paquete: '4180', usd: 49.50, tipo: 'central_one' },
     'hok_8360': { producto: 'Honor of Kings 8360', juego: 'HONOR OF KINGS', paquete: '8360', usd: 98.99, tipo: 'central_one' },
-
-    // BLOOD STRIKE
     'bs_105':  { producto: '105 Diamantes Blood Strike',  juego: 'BLOOD STRIKE', paquete: '105',  usd: 1.00,  tipo: 'central_one' },
     'bs_320':  { producto: '320 Diamantes Blood Strike',  juego: 'BLOOD STRIKE', paquete: '320',  usd: 2.80,  tipo: 'central_one' },
     'bs_540':  { producto: '540 Diamantes Blood Strike',  juego: 'BLOOD STRIKE', paquete: '540',  usd: 4.50,  tipo: 'central_one' },
     'bs_1100': { producto: '1100 Diamantes Blood Strike', juego: 'BLOOD STRIKE', paquete: '1100', usd: 8.80,  tipo: 'central_one' },
     'bs_2260': { producto: '2260 Diamantes Blood Strike', juego: 'BLOOD STRIKE', paquete: '2260', usd: 17.00, tipo: 'central_one' },
     'bs_5800': { producto: '5800 Diamantes Blood Strike', juego: 'BLOOD STRIKE', paquete: '5800', usd: 42.00, tipo: 'central_one' },
-
-    // PUBG MOBILE
     'pubg_60':   { producto: '60 UC PUBG',   juego: 'PUBG MOBILE', paquete: '60',   usd: 1.00,  tipo: 'central_one' },
     'pubg_325':  { producto: '325 UC PUBG',  juego: 'PUBG MOBILE', paquete: '325',  usd: 5.00,  tipo: 'central_one' },
     'pubg_660':  { producto: '660 UC PUBG',  juego: 'PUBG MOBILE', paquete: '660',  usd: 10.00, tipo: 'central_one' },
     'pubg_1800': { producto: '1800 UC PUBG', juego: 'PUBG MOBILE', paquete: '1800', usd: 25.00, tipo: 'central_one' },
     'pubg_3850': { producto: '3850 UC PUBG', juego: 'PUBG MOBILE', paquete: '3850', usd: 50.00, tipo: 'central_one' },
     'pubg_8100': { producto: '8100 UC PUBG', juego: 'PUBG MOBILE', paquete: '8100', usd: 100.00, tipo: 'central_one' },
-
-    // MOBILE LEGENDS
     'ml_55':   { producto: '55 Diamantes ML',   juego: 'MOBILE LEGENDS', paquete: '55',   usd: 1.00,  tipo: 'central_one' },
     'ml_86':   { producto: '86 Diamantes ML',   juego: 'MOBILE LEGENDS', paquete: '86',   usd: 1.50,  tipo: 'central_one' },
     'ml_172':  { producto: '172 Diamantes ML',  juego: 'MOBILE LEGENDS', paquete: '172',  usd: 3.00,  tipo: 'central_one' },
     'ml_257':  { producto: '257 Diamantes ML',  juego: 'MOBILE LEGENDS', paquete: '257',  usd: 4.50,  tipo: 'central_one' },
     'ml_706':  { producto: '706 Diamantes ML',  juego: 'MOBILE LEGENDS', paquete: '706',  usd: 12.00, tipo: 'central_one' },
     'ml_1050': { producto: '1050 Diamantes ML', juego: 'MOBILE LEGENDS', paquete: '1050', usd: 18.00, tipo: 'central_one' },
-
-    // COD
     'cod_115':   { producto: '115 CP COD',   juego: 'CALL OF DUTY', paquete: '115',   usd: 1.00,  tipo: 'central_one' },
     'cod_253':   { producto: '253 CP COD',   juego: 'CALL OF DUTY', paquete: '253',   usd: 2.20,  tipo: 'central_one' },
     'cod_529':   { producto: '529 CP COD',   juego: 'CALL OF DUTY', paquete: '529',   usd: 4.50,  tipo: 'central_one' },
     'cod_1053':  { producto: '1053 CP COD',  juego: 'CALL OF DUTY', paquete: '1053',  usd: 9.00,  tipo: 'central_one' },
     'cod_2760':  { producto: '2760 CP COD',  juego: 'CALL OF DUTY', paquete: '2760',  usd: 23.00, tipo: 'central_one' },
     'cod_9200':  { producto: '9200 CP COD',  juego: 'CALL OF DUTY', paquete: '9200',  usd: 75.00, tipo: 'central_one' },
-
-    // ARENA BREAKOUT
     'ab_66':    { producto: '66 Coins Arena Breakout',   juego: 'ARENA BREAKOUT', paquete: '66',    usd: 1.00,  tipo: 'central_one' },
     'ab_335':   { producto: '335 Coins Arena Breakout',  juego: 'ARENA BREAKOUT', paquete: '335',   usd: 4.50,  tipo: 'central_one' },
     'ab_675':   { producto: '675 Coins Arena Breakout',  juego: 'ARENA BREAKOUT', paquete: '675',   usd: 9.00,  tipo: 'central_one' },
     'ab_1690':  { producto: '1690 Coins Arena Breakout', juego: 'ARENA BREAKOUT', paquete: '1690',  usd: 22.00, tipo: 'central_one' },
     'ab_3400':  { producto: '3400 Coins Arena Breakout', juego: 'ARENA BREAKOUT', paquete: '3400',  usd: 44.00, tipo: 'central_one' },
-
-    // DELTA FORCE
     'df_60':    { producto: '60 Coins Delta Force',   juego: 'DELTA FORCE', paquete: '60',    usd: 1.00,  tipo: 'central_one' },
     'df_320':   { producto: '320 Coins Delta Force',  juego: 'DELTA FORCE', paquete: '320',   usd: 4.50,  tipo: 'central_one' },
     'df_750':   { producto: '750 Coins Delta Force',  juego: 'DELTA FORCE', paquete: '750',   usd: 10.00, tipo: 'central_one' },
     'df_1480':  { producto: '1480 Coins Delta Force', juego: 'DELTA FORCE', paquete: '1480',  usd: 20.00, tipo: 'central_one' },
     'df_3950':  { producto: '3950 Coins Delta Force', juego: 'DELTA FORCE', paquete: '3950',  usd: 50.00, tipo: 'central_one' },
     'df_8100':  { producto: '8100 Coins Delta Force', juego: 'DELTA FORCE', paquete: '8100',  usd: 100.00, tipo: 'central_one' },
-
-    // BIGO
     'bigo_100':   { producto: '100 Diamantes Bigo',   juego: 'BIGO LIVE', paquete: '100',   usd: 1.00,  tipo: 'central_one' },
     'bigo_500':   { producto: '500 Diamantes Bigo',   juego: 'BIGO LIVE', paquete: '500',   usd: 5.00,  tipo: 'central_one' },
     'bigo_1000':  { producto: '1000 Diamantes Bigo',  juego: 'BIGO LIVE', paquete: '1000',  usd: 10.00, tipo: 'central_one' },
     'bigo_10000': { producto: '10000 Diamantes Bigo', juego: 'BIGO LIVE', paquete: '10000', usd: 95.00, tipo: 'central_one' },
-
-    // GIFT CARDS
     'psn_1':   { producto: 'PSN $1',   juego: 'PLAYSTATION', paquete: '1',   usd: 1.50,  tipo: 'central_one' },
     'psn_5':   { producto: 'PSN $5',   juego: 'PLAYSTATION', paquete: '5',   usd: 6.50,  tipo: 'central_one' },
     'psn_10':  { producto: 'PSN $10',  juego: 'PLAYSTATION', paquete: '10',  usd: 12.50, tipo: 'central_one' },
@@ -1094,6 +1131,7 @@ async function iniciarSesion() {
 }
 
 async function cerrarSesion() {
+    if (recargasBilleteraUnsubscribe) { recargasBilleteraUnsubscribe.off(); recargasBilleteraUnsubscribe = null; }
     await auth.signOut();
     sesionActiva = false;
     document.getElementById('panelPrincipal').style.display = 'none';
@@ -1114,6 +1152,282 @@ function cambiarTab(nombre, event) {
     if (nombre === 'pedidos') renderizarPedidos();
     if (nombre === 'usuarios') { if (todosLosUsuarios.length === 0) cargarUsuarios(); else renderizarUsuarios(); }
     if (nombre === 'cuentas') cargarCuentasStreaming();
+    if (nombre === 'billetera') cargarRecargasBilletera();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BILLETERA (RECARGAS MANUALES)
+// ═══════════════════════════════════════════════════════════
+function cargarRecargasBilletera() {
+    const contenedor = document.getElementById('listaRecargasBilletera');
+    if (!contenedor) return;
+    if (recargasBilleteraUnsubscribe) { recargasBilleteraUnsubscribe.off(); }
+
+    recargasBilleteraUnsubscribe = refRecargasBilletera.orderByChild('fecha').on('value', (snap) => {
+        const datos = snap.val() || {};
+        todasLasRecargasBilletera = Object.entries(datos)
+            .map(([key, r]) => ({ ...r, key }))
+            .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
+        actualizarStatsBilletera();
+        actualizarBadgeBilletera();
+        renderizarRecargasBilletera();
+    }, (error) => {
+        console.error('Error cargando recargas:', error);
+        contenedor.innerHTML = '<div class="lista-vacia"><div class="icono">⚠️</div>Error al cargar: ' + esc(error.message) + '</div>';
+    });
+}
+
+function actualizarStatsBilletera() {
+    const pendientes = todasLasRecargasBilletera.filter(r => r.estado === 'PENDIENTE_VERIFICACION');
+    const montoPendiente = pendientes.reduce((sum, r) => sum + (Number(r.monto_usd) || 0), 0);
+
+    const hoy = new Date().toISOString().slice(0, 10);
+    const acreditadasHoy = todasLasRecargasBilletera.filter(r =>
+        r.estado === 'ACREDITADA' && r.fecha_acreditacion && r.fecha_acreditacion.startsWith(hoy)
+    );
+    const montoAcreditadoHoy = acreditadasHoy.reduce((sum, r) => sum + (Number(r.monto_usd) || 0), 0);
+
+    document.getElementById('bsPendientes').textContent = pendientes.length;
+    document.getElementById('bsMontoPendiente').textContent = '$' + montoPendiente.toFixed(2);
+    document.getElementById('bsAcreditadasHoy').textContent = acreditadasHoy.length;
+    document.getElementById('bsMontoAcreditado').textContent = '$' + montoAcreditadoHoy.toFixed(2);
+}
+
+function actualizarBadgeBilletera() {
+    const badge = document.getElementById('badgeBilletera');
+    if (!badge) return;
+    const pendientes = todasLasRecargasBilletera.filter(r => r.estado === 'PENDIENTE_VERIFICACION').length;
+    if (pendientes > 0) { badge.textContent = pendientes; badge.style.display = 'inline-block'; }
+    else badge.style.display = 'none';
+}
+
+function renderizarRecargasBilletera() {
+    const contenedor = document.getElementById('listaRecargasBilletera');
+    if (!contenedor) return;
+
+    const filtro = document.getElementById('filtroRecargas').value;
+    const buscar = document.getElementById('buscarRecargas').value.trim().toLowerCase();
+    const hoy = new Date().toISOString().slice(0, 10);
+
+    let lista = [...todasLasRecargasBilletera];
+
+    if (filtro === 'pendientes') lista = lista.filter(r => r.estado === 'PENDIENTE_VERIFICACION');
+    else if (filtro === 'acreditadas') lista = lista.filter(r => r.estado === 'ACREDITADA' && r.fecha_acreditacion && r.fecha_acreditacion.startsWith(hoy));
+    else if (filtro === 'rechazadas') lista = lista.filter(r => r.estado === 'RECHAZADA');
+
+    if (buscar) {
+        lista = lista.filter(r =>
+            String(r.id_cliente || '').toLowerCase().includes(buscar) ||
+            String(r.referencia || '').toLowerCase().includes(buscar) ||
+            String(r.monto_usd || '').includes(buscar)
+        );
+    }
+
+    if (lista.length === 0) {
+        const msj = filtro === 'pendientes' ? 'No hay recargas pendientes ✅' : 'No hay recargas con ese filtro';
+        contenedor.innerHTML = `<div class="lista-vacia"><div class="icono">✅</div>${msj}</div>`;
+        return;
+    }
+
+    contenedor.innerHTML = lista.slice(0, 50).map(r => renderizarTarjetaRecarga(r)).join('');
+}
+
+function renderizarTarjetaRecarga(r) {
+    const estadoClase = r.estado === 'ACREDITADA' ? 'acreditada' : r.estado === 'RECHAZADA' ? 'rechazada' : '';
+    const estadoBadge = r.estado === 'ACREDITADA' ? 'acreditada' : r.estado === 'RECHAZADA' ? 'rechazada' : 'pendiente';
+    const estadoTexto = r.estado === 'PENDIENTE_VERIFICACION' ? '⏳ PENDIENTE' : r.estado === 'ACREDITADA' ? '✅ ACREDITADA' : '❌ RECHAZADA';
+    const monto = Number(r.monto_usd || 0).toFixed(2);
+    const montoBs = Number(r.monto_bs || 0).toLocaleString('es-VE');
+
+    const acciones = r.estado === 'PENDIENTE_VERIFICACION' ? `
+        <button class="recarga-btn acreditar" onclick='acreditarSaldo(${JSON.stringify(r.key)}, ${JSON.stringify(r.id_cliente)}, ${Number(r.monto_usd)})'>✅ Acreditar Saldo</button>
+        <button class="recarga-btn rechazar" onclick='rechazarRecarga(${JSON.stringify(r.key)}, ${JSON.stringify(r.id_cliente)})'>❌ Rechazar</button>
+    ` : '';
+
+    const infoExtra = r.estado === 'ACREDITADA' ? `
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:#6ee7b7;">
+            ✅ Acreditada el ${esc(r.fecha_acreditacion ? new Date(r.fecha_acreditacion).toLocaleString('es-VE') : '—')}
+            ${r.acreditado_por ? `<br>👤 Por: ${esc(r.acreditado_por)}` : ''}
+            ${r.saldo_nuevo !== undefined ? `<br>💰 Saldo nuevo: $${Number(r.saldo_nuevo).toFixed(2)}` : ''}
+        </div>` : '';
+
+    return `
+        <div class="recarga-card ${estadoClase}">
+            <div class="recarga-header">
+                <div>
+                    <div class="recarga-id">👤 ${esc(r.id_cliente)}</div>
+                    <div class="recarga-fecha">📅 ${esc(r.fecha_legible || r.fecha)}</div>
+                </div>
+                <div class="recarga-estado ${estadoBadge}">${estadoTexto}</div>
+            </div>
+            <div class="recarga-info">
+                💵 <strong>Monto:</strong> <span class="monto-destacado">$${monto}</span> USD
+                <span style="color:#8899b0">(${montoBs} Bs)</span><br>
+                🔢 <strong>Referencia:</strong> <span class="referencia-destacada">${esc(r.referencia)}</span><br>
+                📊 <strong>Método:</strong> ${esc(r.metodo || 'PAGO MOVIL')} · 📈 <strong>Tasa:</strong> ${esc(String(r.tasa || '—'))}
+            </div>
+            <div class="recarga-acciones">${acciones}</div>
+            ${infoExtra}
+        </div>`;
+}
+
+async function acreditarSaldo(recargaKey, idCliente, montoUsd) {
+    mostrarMensaje(
+        '✅ ¿Acreditar saldo?',
+        `Se acreditarán $${Number(montoUsd).toFixed(2)} al cliente ${idCliente}.\n\n⚠️ Verifica PRIMERO en tu banco que el pago llegó.`,
+        'advertencia',
+        [
+            { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
+            { clase: '', texto: '✅ Sí, acreditar', onclick: `confirmarAcreditar(${JSON.stringify(recargaKey)}, ${JSON.stringify(idCliente)}, ${Number(montoUsd)})` }
+        ]
+    );
+}
+
+async function confirmarAcreditar(recargaKey, idCliente, montoUsd) {
+    cerrarMensaje();
+    try {
+        // 1) Buscar usuario por id_cliente, whatsapp, correo o uid
+        const usuariosSnap = await db.ref('usuarios').once('value');
+        const usuarios = usuariosSnap.val() || {};
+        let uidEncontrado = null;
+        let usuarioData = null;
+
+        // A) Primero, intentar si el idCliente ES un UID directo
+        if (usuarios[idCliente]) {
+            uidEncontrado = idCliente;
+            usuarioData = usuarios[idCliente];
+        } else {
+            // B) Buscar por campos
+            for (const [uid, u] of Object.entries(usuarios)) {
+                if (
+                    u.id_cliente === idCliente ||
+                    u.whatsapp === idCliente ||
+                    u.email === idCliente ||
+                    u.correo === idCliente
+                ) {
+                    uidEncontrado = uid;
+                    usuarioData = u;
+                    break;
+                }
+            }
+        }
+
+        if (!uidEncontrado) {
+            mostrarMensaje(
+                '⚠️ Cliente no encontrado',
+                `No se encontró ningún usuario con:\n\n` +
+                `ID: ${idCliente}\n\n` +
+                `Posibles causas:\n` +
+                `• El cliente escribió mal su ID\n` +
+                `• Es un cliente nuevo sin registro\n\n` +
+                `Opciones:\n` +
+                `1. Pídele el correo o WhatsApp exacto con el que se registró\n` +
+                `2. Acredita manualmente en Firebase → usuarios → [uid] → saldo_billetera`,
+                'advertencia'
+            );
+            return;
+        }
+
+        const saldoActual = Number(usuarioData.saldo_billetera) || 0;
+
+        // 2) Sumar saldo con transacción atómica (evita condición de carrera)
+        const userSaldoRef = db.ref('usuarios/' + uidEncontrado + '/saldo_billetera');
+        let nuevoSaldo = 0;
+        const resultado = await userSaldoRef.transaction((actual) => {
+            const actualNum = Number(actual) || 0;
+            nuevoSaldo = actualNum + montoUsd;
+            return nuevoSaldo;
+        });
+
+        if (!resultado.committed) {
+            mostrarMensaje('Error', 'No se pudo acreditar el saldo. Intenta de nuevo.', 'error');
+            return;
+        }
+
+        // 3) Marcar la recarga como acreditada
+        await refRecargasBilletera.child(recargaKey).update({
+            estado: 'ACREDITADA',
+            fecha_acreditacion: new Date().toISOString(),
+            acreditado_por: auth.currentUser ? auth.currentUser.email : 'admin',
+            uid_acreditado: uidEncontrado,
+            saldo_anterior: saldoActual,
+            saldo_nuevo: nuevoSaldo
+        });
+
+        // 4) Log de auditoría
+        await refRecargasBilletera.child(recargaKey).child('logs').push({
+            accion: 'ACREDITADA',
+            por: auth.currentUser ? auth.currentUser.email : 'admin',
+            fecha: new Date().toISOString(),
+            monto: montoUsd,
+            saldo_anterior: saldoActual,
+            saldo_nuevo: nuevoSaldo,
+            uid_acreditado: uidEncontrado
+        });
+
+        // 5) Notificar al cliente por Telegram (opcional)
+        try {
+            fetch(URL_TELEGRAM, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mensaje: `✅ <b>RECARGA ACREDITADA</b>\n\n👤 Cliente: <code>${idCliente}</code>\n💵 Monto: $${Number(montoUsd).toFixed(2)}\n💰 Saldo nuevo: $${nuevoSaldo.toFixed(2)}\n\n¡Gracias por tu compra!`
+                })
+            }).catch(() => { });
+        } catch (e) { }
+
+        mostrarMensaje(
+            '✅ Saldo acreditado',
+            `Se acreditaron $${Number(montoUsd).toFixed(2)} a ${idCliente}.\n\n` +
+            `💰 Saldo anterior: $${saldoActual.toFixed(2)}\n` +
+            `💰 Saldo nuevo: $${nuevoSaldo.toFixed(2)}`,
+            'exito'
+        );
+
+        // Refrescar cache
+        if (cacheUsuarios[uidEncontrado]) {
+            cacheUsuarios[uidEncontrado] = { ...cacheUsuarios[uidEncontrado], saldo_billetera: nuevoSaldo };
+        }
+        if (todosLosUsuarios.length > 0) {
+            const u = todosLosUsuarios.find(x => x.uid === uidEncontrado);
+            if (u) u.saldo_billetera = nuevoSaldo;
+        }
+    } catch (e) {
+        console.error('Error acreditando:', e);
+        mostrarMensaje('Error', e.message, 'error');
+    }
+}
+
+async function rechazarRecarga(recargaKey, idCliente) {
+    mostrarMensaje(
+        '❌ ¿Rechazar recarga?',
+        `Se rechazará la recarga del cliente ${idCliente}.\n\nLa recarga NO se acreditará y quedará marcada como RECHAZADA.\n\n¿Continuar?`,
+        'advertencia',
+        [
+            { clase: 'secundario', texto: 'Cancelar', onclick: 'cerrarMensaje()' },
+            { clase: 'peligro', texto: '❌ Sí, rechazar', onclick: `confirmarRechazar(${JSON.stringify(recargaKey)}, ${JSON.stringify(idCliente)})` }
+        ]
+    );
+}
+
+async function confirmarRechazar(recargaKey, idCliente) {
+    cerrarMensaje();
+    try {
+        await refRecargasBilletera.child(recargaKey).update({
+            estado: 'RECHAZADA',
+            fecha_rechazo: new Date().toISOString(),
+            rechazado_por: auth.currentUser ? auth.currentUser.email : 'admin'
+        });
+        await refRecargasBilletera.child(recargaKey).child('logs').push({
+            accion: 'RECHAZADA',
+            por: auth.currentUser ? auth.currentUser.email : 'admin',
+            fecha: new Date().toISOString(),
+            id_cliente: idCliente
+        });
+        mostrarMensaje('Recarga rechazada', `La recarga del cliente ${idCliente} fue rechazada.`, 'exito');
+    } catch (e) {
+        mostrarMensaje('Error', e.message, 'error');
+    }
 }
 
 // CUENTAS STREAMING
@@ -1149,13 +1463,8 @@ async function agregarCuentaStreaming() {
 
     try {
         const codigoRenovacion = await generarCodigo6DigitosUnico();
-        console.log('🔢 Código de renovación generado:', codigoRenovacion);
-
         await refCuentasStreaming.child(servicio).child(id).set({
-            id,
-            servicio,
-            correo,
-            clave,
+            id, servicio, correo, clave,
             precio_perfil: precio,
             codigo_renovacion: codigoRenovacion,
             fecha_compra: ahora.toISOString().split('T')[0],
@@ -1163,36 +1472,19 @@ async function agregarCuentaStreaming() {
             estado: 'activa',
             perfiles
         });
-
         await refCodigosRenovacion.child(codigoRenovacion).set({
-            codigo: codigoRenovacion,
-            servicio: servicio,
-            cuenta_id: id,
-            correo: correo,
-            clave: clave,
+            codigo: codigoRenovacion, servicio, cuenta_id: id, correo, clave,
             fecha_creacion: ahora.toISOString(),
-            activo: true,
-            veces_usado: 0,
+            activo: true, veces_usado: 0,
             creado_por: auth.currentUser ? auth.currentUser.email : 'admin'
         });
-
-        console.log('✅ Cuenta + código guardados');
-
-        mostrarMensaje(
-            '✅ Cuenta agregada',
-            `📧 ${correo}\n` +
-            `👥 ${cantidad} perfiles\n\n` +
-            `🔢 CÓDIGO DE RENOVACIÓN:\n${codigoRenovacion}\n\n` +
-            `Guárdalo. Es el código que recibirán los clientes de esta cuenta.`,
-            'exito'
-        );
-
+        mostrarMensaje('✅ Cuenta agregada',
+            `📧 ${correo}\n👥 ${cantidad} perfiles\n\n🔢 CÓDIGO DE RENOVACIÓN:\n${codigoRenovacion}\n\nGuárdalo.`,
+            'exito');
         document.getElementById('nuevoCorreo').value = '';
         document.getElementById('nuevaClave').value = '';
         document.querySelectorAll('.pin-input-admin').forEach(inp => inp.value = '');
-
     } catch (e) {
-        console.error(e);
         mostrarMensaje('Error', e.message, 'error');
     }
 }
@@ -1315,9 +1607,9 @@ async function eliminarCuentaStreaming(servicio, cuentaId) {
 
 function copiarCodigoCuenta(codigo) {
     navigator.clipboard.writeText(codigo).then(() => {
-        mostrarMensaje('✅ Copiado', 'Código ' + codigo + ' copiado al portapapeles', 'exito');
+        mostrarMensaje('✅ Copiado', 'Código ' + codigo + ' copiado', 'exito');
     }).catch(() => {
-        mostrarMensaje('Copia manual', 'Copia este código: ' + codigo, 'info');
+        mostrarMensaje('Copia manual', 'Copia: ' + codigo, 'info');
     });
 }
 
@@ -1325,42 +1617,19 @@ async function regenerarCodigoRenovacion(servicio, cuentaId) {
     const cuenta = cuentasStreamingCache[servicio]?.[cuentaId];
     if (!cuenta) return;
     const codigoAnterior = cuenta.codigo_renovacion || '—';
-
-    if (!confirm(`¿Regenerar el código de renovación?\n\nCódigo actual: ${codigoAnterior}\n\n⚠️ El código anterior dejará de funcionar.`)) return;
-
+    if (!confirm(`¿Regenerar el código de renovación?\n\nCódigo actual: ${codigoAnterior}\n\n⚠️ El anterior dejará de funcionar.`)) return;
     try {
         const nuevoCodigo = await generarCodigo6DigitosUnico();
-        console.log('🔄 Nuevo código generado:', nuevoCodigo);
-
-        if (codigoAnterior && codigoAnterior !== '—') {
-            await refCodigosRenovacion.child(codigoAnterior).remove();
-        }
-
-        await refCuentasStreaming.child(servicio).child(cuentaId).update({
-            codigo_renovacion: nuevoCodigo
-        });
-
+        if (codigoAnterior && codigoAnterior !== '—') await refCodigosRenovacion.child(codigoAnterior).remove();
+        await refCuentasStreaming.child(servicio).child(cuentaId).update({ codigo_renovacion: nuevoCodigo });
         await refCodigosRenovacion.child(nuevoCodigo).set({
-            codigo: nuevoCodigo,
-            servicio: servicio,
-            cuenta_id: cuentaId,
-            correo: cuenta.correo,
-            clave: cuenta.clave,
-            fecha_creacion: new Date().toISOString(),
-            activo: true,
-            veces_usado: 0,
+            codigo: nuevoCodigo, servicio, cuenta_id: cuentaId, correo: cuenta.correo, clave: cuenta.clave,
+            fecha_creacion: new Date().toISOString(), activo: true, veces_usado: 0,
             creado_por: auth.currentUser ? auth.currentUser.email : 'admin',
-            regenerado: true,
-            codigo_anterior: codigoAnterior
+            regenerado: true, codigo_anterior: codigoAnterior
         });
-
-        mostrarMensaje(
-            '🔄 Código regenerado',
-            `Nuevo código: ${nuevoCodigo}\n\nAnterior: ${codigoAnterior}`,
-            'exito'
-        );
+        mostrarMensaje('🔄 Código regenerado', `Nuevo: ${nuevoCodigo}\nAnterior: ${codigoAnterior}`, 'exito');
     } catch (e) {
-        console.error(e);
         mostrarMensaje('Error', e.message, 'error');
     }
 }
@@ -1578,6 +1847,7 @@ async function cargarDatosPanel() {
     try { await cargarCodigos(); } catch (e) { }
     try { await cargarConversaciones(); } catch (e) { }
     try { cargarCuentasStreaming(); } catch (e) { }
+    try { cargarRecargasBilletera(); } catch (e) { }
 }
 
 function formatearFecha(iso) {
@@ -1640,12 +1910,9 @@ async function obtenerDatosUsuario(uid) {
 async function precargarDatosUsuarios() {
     const uidsUnicos = new Set();
     todosLosPedidos.forEach(p => {
-        if (esUsuarioRegistrado(p.uid) && !cacheUsuarios[p.uid]) {
-            uidsUnicos.add(p.uid);
-        }
+        if (esUsuarioRegistrado(p.uid) && !cacheUsuarios[p.uid]) uidsUnicos.add(p.uid);
     });
-    const promesas = Array.from(uidsUnicos).map(uid => obtenerDatosUsuario(uid));
-    await Promise.all(promesas);
+    await Promise.all(Array.from(uidsUnicos).map(uid => obtenerDatosUsuario(uid)));
 }
 
 async function cargarPedidosAdmin() {
@@ -1784,17 +2051,13 @@ function construirMensajeCliente(pedido) {
         msg += `━━━━━━━━━━━━━━━━━━━━\n🔐 *DATOS DE ACCESO*\n━━━━━━━━━━━━━━━━━━━━\n\n`;
         if (datos.correo) msg += `📧 *Correo:* ${datos.correo}\n`;
         if (datos.clave) msg += `🔑 *Clave:* ${datos.clave}\n`;
-
         if (Array.isArray(datos.pines) && datos.pines.length > 1) {
             msg += `\n🎟️ *PINs de cada perfil:*\n`;
-            datos.pines.forEach(p => {
-                msg += `   • Perfil ${p.numero}: *${p.pin || '—'}*\n`;
-            });
+            datos.pines.forEach(p => { msg += `   • Perfil ${p.numero}: *${p.pin || '—'}*\n`; });
         } else {
             if (datos.perfil) msg += `👤 *Perfil:* ${datos.perfil}\n`;
             if (datos.pin_perfil) msg += `🔢 *PIN:* ${datos.pin_perfil}\n`;
         }
-
         if (datos.fecha_vencimiento) msg += `📅 *Vence:* ${datos.fecha_vencimiento}\n`;
     }
     if (codigoRenov) {
@@ -1830,13 +2093,8 @@ async function enviarDatosPorWhatsApp(pedidoKey) {
         p.datos_enviados_al_cliente = true;
         p.fecha_envio_datos = new Date().toISOString();
         renderizarPedidos();
-        mostrarMensaje(
-            '✅ Datos enviados',
-            `Se abrió WhatsApp con el mensaje pre-armado.\n\nSolo dale ENVIAR en WhatsApp.\n\nAl confirmar, el pedido queda marcado como "Datos enviados".`,
-            'exito'
-        );
+        mostrarMensaje('✅ Datos enviados', `Se abrió WhatsApp con el mensaje pre-armado.`, 'exito');
     } catch (e) {
-        console.error('Error marcando como enviado:', e);
         mostrarMensaje('Error', 'No se pudo marcar el pedido como enviado: ' + e.message, 'error');
     }
 }
@@ -2099,6 +2357,7 @@ function renderizarTarjetaUsuario(u) {
     const idJugador = u.id_jugador || u.whatsapp || '—';
     const idCliente = u.id_cliente || null;
     const totalPedidos = u.totalPedidos || 0;
+    const saldo = Number(u.saldo_billetera) || 0;
     return `
         <div class="usuario-card">
             <div class="usuario-header">
@@ -2115,6 +2374,7 @@ function renderizarTarjetaUsuario(u) {
                 ${idCliente ? `<span>⭐ ID Cliente: <strong class="id-cliente-admin">${esc(idCliente)}</strong></span>` : ''}
                 <span>🆔 <strong>ID Jugador:</strong> ${esc(idJugador)}</span>
                 <span>📦 Pedidos: <span class="pedidos-count">${totalPedidos}</span></span>
+                <span>💰 Saldo: <strong style="color:#4ade80;">$${saldo.toFixed(2)}</strong></span>
             </div>
             <div class="usuario-acciones">
                 ${bloqueado ? `<button class="usuario-btn activar" onclick="desbloquearUsuario('${u.uid}')">✅ Activar</button>` : `<button class="usuario-btn bloquear" onclick="bloquearUsuario('${u.uid}')">🚫 Bloquear</button>`}
