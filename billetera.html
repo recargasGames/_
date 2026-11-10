@@ -3,661 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#080b14">
 <title>RECARGASGAMES - Mi Billetera</title>
-
-<link rel="preload" href="fondo.mp4" as="video" type="video/mp4">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
-:root {
-    --oro: #d4af37;
-    --oro-claro: #ffe58a;
-    --fondo: #080b14;
-    --gris: #94a3b8;
-    --verde: #22c55e;
-    --rojo: #ef4444;
-}
-
+:root { --oro: #d4af37; --oro-claro: #ffe58a; --gris: #94a3b8; --verde: #22c55e; --rojo: #ef4444; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+body { min-height: 100vh; padding-top: 80px; background: #000; color: #fff; font-family: Arial, sans-serif; }
+.barra-superior { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: #050810; border-bottom: 1px solid rgba(212,175,55,.35); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; }
+.brand img { height: 45px; }
+.btn-volver { padding: 10px 16px; border: 1px solid var(--oro); border-radius: 10px; color: var(--oro-claro); text-decoration: none; font-weight: 800; font-size: 13px; }
+.main { max-width: 580px; margin: auto; padding: 18px; }
 
-body {
-    min-height: 100vh;
-    padding-top: 85px;
-    padding-bottom: 35px;
-    background: #000;
-    color: #fff;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    overflow-x: hidden;
-}
+.saldo-card { padding: 22px; margin-bottom: 18px; border-radius: 19px; background: rgba(212,175,55,.15); border: 1px solid var(--oro); text-align: center; }
+.saldo-label { color: var(--oro-claro); font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+.saldo-valor { font-size: 48px; font-weight: 900; color: #fff; }
+.saldo-valor span { color: var(--oro-claro); font-size: 24px; }
+.saldo-info { margin-top: 8px; font-size: 12px; color: #ccc; }
 
-.video-fondo {
-    position: fixed; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; z-index: -2; opacity: .25; pointer-events: none;
-}
+.card { padding: 20px; margin-bottom: 18px; border-radius: 19px; border: 1px solid rgba(212,175,55,.3); background: #0d1421; }
+.card-title { font-size: 15px; font-weight: 900; color: var(--oro-claro); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+.paso { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--oro); color: #000; font-weight: 900; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 12px; font-weight: 800; margin-bottom: 5px; color: #dce3ee; }
+.form-input { width: 100%; height: 50px; padding: 0 15px; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-size: 16px; }
+.form-input:focus { border-color: var(--oro); outline: none; }
 
-.video-overlay {
-    position: fixed; inset: 0; z-index: -1;
-    background:
-        radial-gradient(circle at top, rgba(212,175,55,.12), transparent 40%),
-        linear-gradient(180deg, rgba(5,8,16,.88), rgba(5,8,16,.98));
-}
+.montos-rapidos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+.btn-monto { padding: 10px; border: 1px solid rgba(212,175,55,.4); border-radius: 8px; background: rgba(212,175,55,.1); color: var(--oro-claro); font-weight: bold; cursor: pointer; }
+.btn-monto.activo { background: var(--oro); color: #000; }
 
-.barra-superior {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    background: rgba(5,8,16,.96);
-    border-bottom: 1px solid rgba(212,175,55,.35);
-    backdrop-filter: blur(15px);
-    box-shadow: 0 5px 25px rgba(0,0,0,.4);
-}
+.total-box { margin-top: 15px; padding: 15px; background: rgba(0,0,0,.4); border: 1px solid rgba(212,175,55,.2); border-radius: 10px; text-align: center; }
+.total-label { font-size: 11px; color: var(--gris); text-transform: uppercase; }
+.total-valor { display: block; margin-top: 5px; font-size: 24px; font-weight: 900; color: var(--oro-claro); }
+.tasa-info { font-size: 11px; color: var(--gris); margin-top: 5px; }
 
-.header {
-    max-width: 700px; margin: auto; padding: 12px 18px;
-    display: flex; justify-content: space-between; align-items: center;
-}
-
-.brand img {
-    height: 48px; max-width: 170px;
-    object-fit: contain; border-radius: 10px;
-}
-
-.btn-volver {
-    padding: 10px 16px;
-    border: 1px solid rgba(212,175,55,.5);
-    border-radius: 10px;
-    color: var(--oro-claro);
-    background: rgba(212,175,55,.12);
-    text-decoration: none;
-    font-size: 13px; font-weight: 800;
-}
-
-.main { width: 100%; max-width: 580px; margin: auto; padding: 18px; }
-
-/* ═══════════ SALDO ═══════════ */
-.saldo-card {
-    position: relative;
-    padding: 22px 18px;
-    margin-bottom: 18px;
-    border-radius: 19px;
-    background: linear-gradient(145deg, rgba(212,175,55,.22), rgba(8,13,26,.95));
-    border: 1px solid rgba(212,175,55,.55);
-    box-shadow: 0 15px 40px rgba(212,175,55,.15), 0 0 30px rgba(212,175,55,.1);
-    text-align: center;
-    overflow: hidden;
-}
-.saldo-card::before {
-    content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--oro-claro), transparent);
-}
-.saldo-label {
-    color: var(--oro-claro);
-    font-size: 11px; font-weight: 800;
-    letter-spacing: 2px; text-transform: uppercase;
-    margin-bottom: 8px;
-}
-.saldo-valor {
-    color: #fff;
-    font-size: clamp(38px, 10vw, 52px);
-    font-weight: 950; line-height: 1;
-    text-shadow: 0 4px 20px rgba(212,175,55,.5);
-    display: flex; align-items: center; justify-content: center; gap: 4px;
-}
-.saldo-valor .moneda { color: var(--oro-claro); font-size: .55em; font-weight: 900; }
-.saldo-info {
-    margin-top: 8px;
-    color: #c9d4e6; font-size: 11px; line-height: 1.5;
-}
-.saldo-info strong { color: var(--oro-claro); }
-
-.hero {
-    text-align: center; margin-bottom: 25px; padding: 20px 10px 15px;
-}
-.hero-icon {
-    width: 82px; height: 82px;
-    margin: 0 auto 16px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 25px; font-size: 42px;
-    background: linear-gradient(145deg, #3c3011, #111827);
-    border: 1px solid rgba(255,215,100,.6);
-    box-shadow: 0 0 35px rgba(212,175,55,.2);
-}
-.hero h1 {
-    font-size: clamp(25px, 6vw, 32px);
-    font-weight: 900;
-    background: linear-gradient(135deg, #fff, var(--oro), var(--oro-claro));
-    background-clip: text; -webkit-background-clip: text;
-    color: transparent; margin-bottom: 10px;
-}
-.hero p {
-    max-width: 420px; margin: auto;
-    color: #b9c3d4; font-size: 14px; line-height: 1.6;
-}
-
-.progreso {
-    display: flex; align-items: center; justify-content: center;
-    gap: 9px; margin-bottom: 22px;
-}
-.progreso-item {
-    display: flex; align-items: center; gap: 6px;
-    color: #aab4c4; font-size: 11px; font-weight: 700;
-}
-.progreso-numero {
-    width: 25px; height: 25px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: #111;
-    background: linear-gradient(135deg, var(--oro), var(--oro-claro));
-    font-weight: 900;
-}
-.progreso-linea { width: 22px; height: 2px; background: rgba(212,175,55,.4); }
-
-.card {
-    position: relative; overflow: hidden;
-    padding: 21px 18px; margin-bottom: 18px;
-    border-radius: 19px;
-    border: 1px solid rgba(212,175,55,.24);
-    background: linear-gradient(145deg, rgba(22,32,54,.96), rgba(8,13,26,.97));
-    box-shadow: 0 15px 35px rgba(0,0,0,.3);
-}
-.card::before {
-    content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--oro), transparent);
-}
-.card-title {
-    display: flex; align-items: center; gap: 11px;
-    margin-bottom: 19px;
-    color: var(--oro-claro);
-    font-size: 14px; font-weight: 900;
-    letter-spacing: .5px; text-transform: uppercase;
-}
-.paso {
-    width: 29px; height: 29px;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; border-radius: 9px;
-    color: #101522;
-    background: linear-gradient(135deg, var(--oro), var(--oro-claro));
-    font-weight: 900;
-}
-
-.form-group { margin-bottom: 17px; }
-.form-group:last-child { margin-bottom: 0; }
-.form-group label {
-    display: block; margin-bottom: 8px;
-    color: #dce3ee; font-size: 12px; font-weight: 800;
-    text-transform: uppercase;
-}
-.form-input {
-    width: 100%; height: 52px; padding: 12px 15px;
-    border: 1px solid rgba(255,255,255,.13);
-    border-radius: 12px; outline: none;
-    background: rgba(0,0,0,.35); color: #fff;
-    font-size: 16px; transition: .2s;
-}
-.form-input:focus {
-    border-color: var(--oro);
-    box-shadow: 0 0 0 3px rgba(212,175,55,.12);
-}
-.form-input::placeholder { color: #64748b; }
-.form-input:disabled {
-    opacity: .7; cursor: not-allowed; background: rgba(0,0,0,.5);
-}
-
-.ayuda { margin-top: 7px; color: var(--gris); font-size: 11px; line-height: 1.5; }
-
-.montos-rapidos {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 8px; margin-top: 11px;
-}
-.btn-monto {
-    padding: 10px 4px;
-    border: 1px solid rgba(212,175,55,.35);
-    border-radius: 9px;
-    background: rgba(212,175,55,.08);
-    color: var(--oro-claro);
-    font-weight: 800; font-size: 13px; cursor: pointer;
-}
-.btn-monto.activo {
-    background: linear-gradient(135deg, var(--oro), var(--oro-claro));
-    color: #111827;
-}
-
-.total-box {
-    margin-top: 16px; padding: 16px;
-    border: 1px solid rgba(212,175,55,.3);
-    border-radius: 13px; background: rgba(0,0,0,.3);
-    text-align: center;
-}
-.total-label {
-    color: var(--gris); font-size: 11px; font-weight: 700;
-    text-transform: uppercase;
-}
-.total-valor {
-    display: block; margin-top: 5px;
-    color: var(--oro-claro); font-size: 26px; font-weight: 900;
-    overflow-wrap: anywhere;
-}
-.tasa-info { margin-top: 8px; color: #94a3b8; font-size: 11px; }
-
-.datos-pago {
-    padding: 13px 15px;
-    border: 1px solid rgba(255,255,255,.07);
-    border-radius: 14px; background: rgba(0,0,0,.3);
-}
-.dato {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 8px; padding: 13px 0;
-    border-bottom: 1px solid rgba(255,255,255,.07);
-}
+.datos-pago { padding: 15px; background: #000; border: 1px solid #222; border-radius: 10px; }
+.dato { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; }
 .dato:last-child { border-bottom: none; }
-.dato-info { min-width: 0; }
-.dato strong {
-    display: block; margin-bottom: 4px;
-    color: #9caabd; font-size: 11px; text-transform: uppercase;
-}
-.dato span {
-    color: #fff; font-size: 14px; font-weight: 800;
-    overflow-wrap: anywhere;
-}
-.btn-copiar {
-    flex-shrink: 0; padding: 9px 11px;
-    border: 1px solid rgba(212,175,55,.35);
-    border-radius: 9px;
-    background: rgba(212,175,55,.12);
-    color: var(--oro-claro);
-    font-size: 11px; font-weight: 800; cursor: pointer;
-}
-.btn-copiar-todos {
-    width: 100%; margin-top: 13px; padding: 12px;
-    border: 1px solid rgba(212,175,55,.4);
-    border-radius: 10px;
-    background: rgba(212,175,55,.12);
-    color: var(--oro-claro);
-    font-size: 12px; font-weight: 800; cursor: pointer;
-}
-.aviso-pago {
-    margin-top: 13px; padding: 12px;
-    border-radius: 10px;
-    background: rgba(212,175,55,.08);
-    color: #e7d69c;
-    font-size: 11px; line-height: 1.5;
-}
-
-.btn-accion {
-    width: 100%; min-height: 55px;
-    margin-top: 16px; padding: 15px;
-    border: none; border-radius: 13px;
-    background: linear-gradient(135deg, #c69b25, #ffe58a, #d4af37);
-    color: #101522;
-    font-size: 14px; font-weight: 950;
-    letter-spacing: .5px; text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: 0 7px 25px rgba(212,175,55,.22);
-    transition: .2s;
-}
-.btn-accion:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(212,175,55,.4);
-}
-.btn-accion:disabled {
-    opacity: .55; cursor: not-allowed; transform: none;
-}
-
-.alert {
-    display: none; margin-top: 16px; padding: 16px;
-    border: 1px solid rgba(34,197,94,.45);
-    border-radius: 13px;
-    background: rgba(34,197,94,.12);
-    color: #86efac;
-    font-size: 13px; line-height: 1.7;
-    overflow-wrap: anywhere;
-}
-.alert.error {
-    border-color: rgba(239,68,68,.5);
-    background: rgba(239,68,68,.12);
-    color: #fca5a5;
-}
-.alert.visible { display: block; }
-
-.seguridad {
-    display: flex; align-items: center; justify-content: center;
-    gap: 10px; margin: 23px 5px 5px;
-    color: #94a3b8; font-size: 11px;
-    line-height: 1.5; text-align: center;
-}
-
-/* ═══════════ HISTORIAL ═══════════ */
-.historial-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px; gap: 10px; flex-wrap: wrap;
-}
-.historial-titulo {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 15px; font-weight: 900; color: var(--oro-claro);
-    text-transform: uppercase; letter-spacing: .5px;
-}
-.historial-filtros {
-    display: flex; gap: 6px; flex-wrap: wrap;
-}
-.filtro-btn {
-    padding: 7px 12px;
-    border: 1px solid rgba(212,175,55,.25);
-    border-radius: 8px;
-    background: rgba(0,0,0,.3);
-    color: #94a3b8;
-    font-size: 11px; font-weight: 700;
-    cursor: pointer; transition: .2s;
-}
-.filtro-btn.activo {
-    background: linear-gradient(135deg, rgba(212,175,55,.3), rgba(212,175,55,.15));
-    border-color: var(--oro);
-    color: var(--oro-claro);
-}
-
-.recarga-item {
-    padding: 14px 15px;
-    margin-bottom: 10px;
-    border-radius: 13px;
-    background: rgba(0,0,0,.35);
-    border: 1px solid rgba(255,255,255,.08);
-    border-left: 3px solid var(--oro);
-    transition: .2s;
-}
-.recarga-item.acreditada { border-left-color: var(--verde); }
-.recarga-item.rechazada { border-left-color: var(--rojo); opacity: .75; }
-
-.recarga-header {
-    display: flex; justify-content: space-between;
-    align-items: flex-start; gap: 8px;
-    margin-bottom: 8px;
-}
-.recarga-monto {
-    font-size: 18px; font-weight: 950; color: var(--oro-claro);
-    font-family: 'Courier New', monospace;
-}
-.recarga-monto.acreditada { color: #4ade80; }
-.recarga-monto.rechazada { color: #fca5a5; }
-
-.recarga-estado {
-    padding: 4px 9px; border-radius: 8px;
-    font-size: 9px; font-weight: 900;
-    letter-spacing: .5px; text-transform: uppercase;
-    white-space: nowrap;
-}
-.recarga-estado.pendiente {
-    background: rgba(245,158,11,.15);
-    color: #fbbf24;
-    border: 1px solid rgba(245,158,11,.4);
-}
-.recarga-estado.acreditada {
-    background: rgba(34,197,94,.15);
-    color: #4ade80;
-    border: 1px solid rgba(34,197,94,.4);
-}
-.recarga-estado.rechazada {
-    background: rgba(239,68,68,.15);
-    color: #fca5a5;
-    border: 1px solid rgba(239,68,68,.4);
-}
-
-.recarga-detalle {
-    font-size: 11.5px; line-height: 1.7; color: #94a3b8;
-}
-.recarga-detalle strong { color: #cbd5e1; }
-.recarga-detalle .referencia {
-    font-family: 'Courier New', monospace;
-    color: var(--oro-claro);
-    font-weight: 800;
-}
-
-.historial-vacio {
-    padding: 30px 15px;
-    text-align: center;
-    color: #64748b;
-    font-size: 13px;
-    background: rgba(0,0,0,.25);
-    border-radius: 13px;
-    border: 1px dashed rgba(255,255,255,.1);
-}
-.historial-vacio .icono {
-    font-size: 40px;
-    display: block;
-    margin-bottom: 10px;
-    opacity: .6;
-}
-
-.loading-overlay {
-    position: fixed; inset: 0; z-index: 9999;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: rgba(5,8,16,.96);
-    backdrop-filter: blur(10px);
-    transition: opacity .3s;
-}
-.loading-overlay.oculto {
-    opacity: 0; pointer-events: none;
-}
-.loading-spinner {
-    width: 55px; height: 55px;
-    border: 3px solid rgba(212,175,55,.15);
-    border-top-color: var(--oro);
-    border-radius: 50%;
-    animation: girar 1s linear infinite;
-}
-@keyframes girar { to { transform: rotate(360deg); } }
-.loading-texto {
-    margin-top: 18px;
-    color: var(--oro-claro);
-    font-size: 13px; font-weight: 700;
-    letter-spacing: 1px;
-}
-
-@media(max-width:380px) {
-    .main { padding: 12px; }
-    .card { padding: 18px 14px; }
-    .progreso-item { font-size: 9px; }
-    .progreso { gap: 5px; }
-    .progreso-linea { width: 12px; }
-    .saldo-valor { font-size: 40px; }
-}
+.dato strong { display: block; font-size: 11px; color: var(--gris); }
+.dato span { font-size: 14px; font-weight: bold; }
+.btn-copiar { padding: 8px 12px; border: 1px solid var(--oro); border-radius: 8px; background: rgba(212,175,55,.1); color: var(--oro-claro); cursor: pointer; }
+.btn-accion { width: 100%; height: 55px; margin-top: 15px; border: none; border-radius: 12px; background: var(--oro); color: #000; font-size: 15px; font-weight: 900; cursor: pointer; }
+.alert { display: none; margin-top: 15px; padding: 15px; border-radius: 10px; background: rgba(34,197,94,.1); border: 1px solid var(--verde); color: #4ade80; font-size: 13px; }
+.alert.error { background: rgba(239,68,68,.1); border-color: var(--rojo); color: #fca5a5; display: block; }
 </style>
 </head>
-
 <body>
 
-<video autoplay muted loop playsinline class="video-fondo">
-    <source src="fondo.mp4" type="video/mp4">
-</video>
-
-<div class="video-overlay"></div>
-
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-texto">Cargando tu billetera...</div>
-</div>
-
 <header class="barra-superior">
-    <div class="header">
-        <a href="index.html" class="brand">
-            <img src="logo.png" alt="Recargas Games">
-        </a>
-        <a href="index.html" class="btn-volver">← Volver</a>
-    </div>
+    <a href="index.html" class="brand"><img src="logo.png"></a>
+    <a href="index.html" class="btn-volver">← Volver</a>
 </header>
 
 <main class="main">
-
     <section class="saldo-card">
         <div class="saldo-label">💰 Tu saldo disponible</div>
-        <div class="saldo-valor" id="saldoActual">
-            <span class="moneda">$</span><span id="saldoNumero">0.00</span>
-        </div>
-        <div class="saldo-info">
-            <strong id="saldoInfoCuenta">—</strong>
-        </div>
+        <div class="saldo-valor"><span>$</span><span id="saldoNumero">0.00</span></div>
+        <div class="saldo-info" id="saldoInfoCuenta">Cargando usuario...</div>
     </section>
-
-    <section class="hero">
-        <div class="hero-icon">💰</div>
-        <h1>Recarga tu Billetera</h1>
-        <p>
-            Agrega saldo a tu cuenta de RECARGASGAMES.
-            Realiza tu Pago Móvil y recibe tu saldo después de verificar el pago.
-        </p>
-    </section>
-
-    <div class="progreso">
-        <div class="progreso-item">
-            <span class="progreso-numero">1</span>
-            <span>Monto</span>
-        </div>
-        <div class="progreso-linea"></div>
-        <div class="progreso-item">
-            <span class="progreso-numero">2</span>
-            <span>Pago</span>
-        </div>
-        <div class="progreso-linea"></div>
-        <div class="progreso-item">
-            <span class="progreso-numero">3</span>
-            <span>Enviar</span>
-        </div>
-    </div>
 
     <section class="card">
-        <div class="card-title">
-            <span class="paso">1</span>
-            Monto a recargar
-        </div>
-
+        <div class="card-title"><span class="paso">1</span> Monto a recargar</div>
         <div class="form-group">
-            <label for="montoRecarga">Monto que deseas recargar (USD)</label>
-            <input
-                type="number"
-                id="montoRecarga"
-                class="form-input"
-                placeholder="Ej: 5.00"
-                min="0.01"
-                max="500"
-                step="0.01"
-                inputmode="decimal"
-            >
+            <label>Monto (USD)</label>
+            <input type="number" id="montoRecarga" class="form-input" placeholder="Ej: 5.00" min="0.01" max="500">
             <div class="montos-rapidos">
-                <button type="button" class="btn-monto" data-monto="1">$1</button>
-                <button type="button" class="btn-monto" data-monto="5">$5</button>
-                <button type="button" class="btn-monto" data-monto="10">$10</button>
-                <button type="button" class="btn-monto" data-monto="20">$20</button>
+                <button class="btn-monto" data-monto="1">$1</button>
+                <button class="btn-monto" data-monto="5">$5</button>
+                <button class="btn-monto" data-monto="10">$10</button>
+                <button class="btn-monto" data-monto="20">$20</button>
             </div>
-            <p class="ayuda">También puedes escribir cualquier otro monto hasta $500.</p>
         </div>
-
         <div class="total-box">
-            <span class="total-label">Total que debes pagar</span>
+            <span class="total-label">Total a pagar en Bs</span>
             <strong class="total-valor" id="montoBs">— Bs</strong>
-            <div class="tasa-info" id="tasaInfo">Cargando tasa de cambio...</div>
+            <div class="tasa-info" id="tasaInfo">Cargando tasa...</div>
         </div>
     </section>
 
     <section class="card">
-        <div class="card-title">
-            <span class="paso">2</span>
-            Datos para Pago Móvil
-        </div>
-
+        <div class="card-title"><span class="paso">2</span> Pago Móvil</div>
         <div class="datos-pago">
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Banco</strong>
-                    <span>(0102) Banco de Venezuela</span>
-                </div>
-                <button type="button" class="btn-copiar" data-copiar="0102">📋 Copiar</button>
-            </div>
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Cédula</strong>
-                    <span>32824869</span>
-                </div>
-                <button type="button" class="btn-copiar" data-copiar="32824869">📋 Copiar</button>
-            </div>
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Teléfono</strong>
-                    <span>04228242411</span>
-                </div>
-                <button type="button" class="btn-copiar" data-copiar="04228242411">📋 Copiar</button>
-            </div>
-            <div class="dato">
-                <div class="dato-info">
-                    <strong>Monto en bolívares</strong>
-                    <span id="montoBsCopiar">— Bs</span>
-                </div>
-                <button type="button" class="btn-copiar" id="copiarMonto">📋 Copiar</button>
-            </div>
-            <button type="button" class="btn-copiar-todos" id="copiarTodos">
-                📋 COPIAR TODOS LOS DATOS
-            </button>
-        </div>
-
-        <div class="aviso-pago">
-            ⚠️ Verifica que los datos bancarios sean correctos antes de realizar el pago.
-            El monto debe coincidir exactamente con el indicado arriba.
+            <div class="dato"><div><strong>Banco</strong><span>0102 - BDV</span></div><button class="btn-copiar" data-copiar="0102">📋</button></div>
+            <div class="dato"><div><strong>Cédula</strong><span>32824869</span></div><button class="btn-copiar" data-copiar="32824869">📋</button></div>
+            <div class="dato"><div><strong>Teléfono</strong><span>04228242411</span></div><button class="btn-copiar" data-copiar="04228242411">📋</button></div>
+            <div class="dato"><div><strong>Monto</strong><span id="montoBsCopiar">— Bs</span></div><button class="btn-copiar" id="copiarMonto">📋</button></div>
         </div>
     </section>
 
     <section class="card">
-        <div class="card-title">
-            <span class="paso">3</span>
-            Enviar comprobante
-        </div>
-
+        <div class="card-title"><span class="paso">3</span> Enviar comprobante</div>
         <div class="form-group">
-            <label for="referenciaPago">Número de referencia del pago</label>
-            <input
-                type="text"
-                id="referenciaPago"
-                class="form-input"
-                placeholder="Ej: 0050943851750"
-                maxlength="40"
-                autocomplete="off"
-            >
-            <p class="ayuda">
-                Escribe la referencia exacta que aparece en tu banco.
-            </p>
+            <label>Número de Referencia</label>
+            <input type="text" id="referenciaPago" class="form-input" placeholder="Ej: 005094...">
         </div>
-
-        <button type="button" class="btn-accion" id="btnEnviar">
-            📤 Enviar recarga
-        </button>
-
-        <div class="alert" id="resultado" role="status" aria-live="polite"></div>
+        <button class="btn-accion" id="btnEnviar">📤 Enviar recarga</button>
+        <div class="alert" id="resultado"></div>
     </section>
-
-    <section class="card">
-        <div class="historial-header">
-            <div class="historial-titulo">📋 Historial de recargas</div>
-            <div class="historial-filtros">
-                <button class="filtro-btn activo" data-filtro="todas">Todas</button>
-                <button class="filtro-btn" data-filtro="pendientes">⏳</button>
-                <button class="filtro-btn" data-filtro="acreditadas">✅</button>
-            </div>
-        </div>
-        <div id="listaHistorial">
-            <div class="historial-vacio">
-                <span class="icono">📭</span>
-                Cargando historial...
-            </div>
-        </div>
-    </section>
-
-    <div class="seguridad">
-        <span style="font-size:24px;">🛡️</span>
-        <span>
-            Tu solicitud será registrada para revisión.
-            El saldo se acreditará después de verificar el pago.
-        </span>
-    </div>
-
 </main>
 
 <script>
@@ -670,436 +116,125 @@ const firebaseConfig = {
     messagingSenderId: "632240144599",
     appId: "1:632240144599:web:e31c25665ffe19c194b092"
 };
-
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.database();
-const URL_TELEGRAM = "/api/notificar-telegram";
 
 let tasa = 940;
-let enviando = false;
 let usuarioActual = null;
-let saldoActual = 0;
-let misRecargas = [];
-let filtroActual = "todas";
-let unsubscribeRecargas = null;
-let unsubscribeUsuario = null;
 
-const inputMonto = document.getElementById("montoRecarga");
-const inputReferencia = document.getElementById("referenciaPago");
-const montoBsElemento = document.getElementById("montoBs");
-const montoBsCopiar = document.getElementById("montoBsCopiar");
-const tasaInfo = document.getElementById("tasaInfo");
-const resultado = document.getElementById("resultado");
-const btnEnviar = document.getElementById("btnEnviar");
-const saldoNumero = document.getElementById("saldoNumero");
-const saldoInfoCuenta = document.getElementById("saldoInfoCuenta");
-const listaHistorial = document.getElementById("listaHistorial");
-const loadingOverlay = document.getElementById("loadingOverlay");
-
-// ═══════════════════════════════════════════════
-// AUTH — ESPERAR A QUE FIREBASE CARGUE
-// ═══════════════════════════════════════════════
+// AQUÍ ESTÁ LA MAGIA: NO REDIRIGE.
 auth.onAuthStateChanged((user) => {
     if (!user) {
-        // Esperar 800ms por si Firebase aún está cargando la sesión
-        setTimeout(() => {
-            if (!auth.currentUser) {
-                window.location.href = "index.html";
-            }
-        }, 800);
+        document.getElementById("saldoInfoCuenta").innerHTML = "<span style='color:#ef4444'>⚠️ Sin sesión iniciada</span>";
+        document.getElementById("resultado").className = "alert error";
+        document.getElementById("resultado").textContent = "Debes iniciar sesión en la página principal primero.";
         return;
     }
-
+    
     usuarioActual = user;
-    const nombre = user.displayName || user.email || "Usuario";
-    saldoInfoCuenta.textContent = "👤 " + nombre;
-
-    cargarSaldoUsuario();
-    cargarHistorialRecargas();
-    loadingOverlay.classList.add("oculto");
-});
-
-// ═══════════════════════════════════════════════
-// CARGAR SALDO
-// ═══════════════════════════════════════════════
-function cargarSaldoUsuario() {
-    if (unsubscribeUsuario) unsubscribeUsuario.off();
-
-    const ref = db.ref("usuarios/" + usuarioActual.uid + "/saldo_billetera");
-    unsubscribeUsuario = ref.on("value", (snap) => {
-        saldoActual = Number(snap.val()) || 0;
-        saldoNumero.textContent = saldoActual.toFixed(2);
-    }, (error) => {
-        console.error("Error cargando saldo:", error);
-        saldoNumero.textContent = "0.00";
-    });
-}
-
-// ═══════════════════════════════════════════════
-// CARGAR HISTORIAL
-// ═══════════════════════════════════════════════
-function cargarHistorialRecargas() {
-    if (unsubscribeRecargas) unsubscribeRecargas.off();
-
-    const email = usuarioActual.email || "";
-    const ref = db.ref("recargas_billetera").orderByChild("fecha");
-
-    unsubscribeRecargas = ref.on("value", (snap) => {
-        const datos = snap.val() || {};
-        misRecargas = Object.entries(datos)
-            .map(([key, r]) => ({ ...r, key }))
-            .filter(r => {
-                return (
-                    r.uid === usuarioActual.uid ||
-                    r.id_cliente === usuarioActual.uid ||
-                    r.id_cliente === email
-                );
-            })
-            .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0));
-
-        renderizarHistorial();
-    }, (error) => {
-        console.error("Error cargando historial:", error);
-        listaHistorial.innerHTML = `
-            <div class="historial-vacio">
-                <span class="icono">⚠️</span>
-                No se pudo cargar el historial
-            </div>`;
-    });
-}
-
-function renderizarHistorial() {
-    let filtradas = [...misRecargas];
-
-    if (filtroActual === "pendientes") {
-        filtradas = filtradas.filter(r => r.estado === "PENDIENTE_VERIFICACION");
-    } else if (filtroActual === "acreditadas") {
-        filtradas = filtradas.filter(r => r.estado === "ACREDITADA");
-    }
-
-    if (filtradas.length === 0) {
-        const mensaje = misRecargas.length === 0
-            ? "Aún no tienes recargas registradas"
-            : "No hay recargas con ese filtro";
-        listaHistorial.innerHTML = `
-            <div class="historial-vacio">
-                <span class="icono">📭</span>
-                ${mensaje}
-            </div>`;
-        return;
-    }
-
-    listaHistorial.innerHTML = filtradas.map(r => {
-        const monto = Number(r.monto_usd || 0).toFixed(2);
-        const montoBs = Number(r.monto_bs || 0).toLocaleString("es-VE");
-
-        let estadoClase, estadoTexto;
-        if (r.estado === "ACREDITADA") {
-            estadoClase = "acreditada";
-            estadoTexto = "✅ Acreditada";
-        } else if (r.estado === "RECHAZADA") {
-            estadoClase = "rechazada";
-            estadoTexto = "❌ Rechazada";
-        } else {
-            estadoClase = "pendiente";
-            estadoTexto = "⏳ Pendiente";
-        }
-
-        const fecha = r.fecha_legible || new Date(r.fecha).toLocaleString("es-VE");
-
-        return `
-            <div class="recarga-item ${estadoClase}">
-                <div class="recarga-header">
-                    <div class="recarga-monto ${estadoClase}">$${monto}</div>
-                    <div class="recarga-estado ${estadoClase}">${estadoTexto}</div>
-                </div>
-                <div class="recarga-detalle">
-                    💵 <strong>${montoBs} Bs</strong> · 📅 ${fecha}<br>
-                    🔢 Ref: <span class="referencia">${r.referencia || "—"}</span>
-                </div>
-            </div>
-        `;
-    }).join("");
-}
-
-document.querySelectorAll(".filtro-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("activo"));
-        btn.classList.add("activo");
-        filtroActual = btn.dataset.filtro;
-        renderizarHistorial();
+    document.getElementById("saldoInfoCuenta").textContent = "👤 " + (user.email || "Usuario");
+    
+    // Escuchar saldo en tiempo real
+    db.ref("usuarios/" + user.uid + "/saldo_billetera").on("value", (snap) => {
+        document.getElementById("saldoNumero").textContent = (Number(snap.val()) || 0).toFixed(2);
     });
 });
 
-// ═══════════════════════════════════════════════
-// TASA
-// ═══════════════════════════════════════════════
-async function cargarTasa() {
-    try {
-        const respuesta = await fetch("/api/tasa", { cache: "no-store" });
-        if (!respuesta.ok) throw new Error("No se pudo obtener la tasa");
-        const data = await respuesta.json();
-        const valor = Number(data.tasa_usdt);
-        if (data.ok && Number.isFinite(valor) && valor > 0) {
-            tasa = valor;
-            tasaInfo.textContent = "Tasa actual: " + tasa.toLocaleString("es-VE") + " Bs por USD";
-        } else {
-            throw new Error("Tasa inválida");
-        }
-    } catch (error) {
-        tasaInfo.textContent = "Tasa de respaldo: " + tasa.toLocaleString("es-VE") + " Bs por USD";
-        console.warn("Tasa:", error);
+// Cargar tasa
+fetch("/api/tasa").then(r => r.json()).then(d => {
+    if(d.ok) {
+        tasa = d.tasa_usdt;
+        document.getElementById("tasaInfo").textContent = "Tasa: " + tasa + " Bs";
     }
-    calcularMonto();
-}
+}).catch(() => {});
 
-function calcularMonto() {
-    const usd = Number(inputMonto.value);
-    if (!Number.isFinite(usd) || usd <= 0) {
-        montoBsElemento.textContent = "— Bs";
-        montoBsCopiar.textContent = "— Bs";
-        return;
+// Calcular monto
+document.getElementById("montoRecarga").addEventListener("input", (e) => {
+    const usd = Number(e.target.value);
+    if(usd > 0) {
+        const bs = Math.round(usd * tasa).toLocaleString("es-VE");
+        document.getElementById("montoBs").textContent = bs + " Bs";
+        document.getElementById("montoBsCopiar").textContent = bs + " Bs";
+    } else {
+        document.getElementById("montoBs").textContent = "— Bs";
+        document.getElementById("montoBsCopiar").textContent = "— Bs";
     }
-    const bs = Math.round(usd * tasa);
-    const formato = bs.toLocaleString("es-VE") + " Bs";
-    montoBsElemento.textContent = formato;
-    montoBsCopiar.textContent = formato;
-}
-
-inputMonto.addEventListener("input", () => {
-    document.querySelectorAll(".btn-monto").forEach(b => {
-        b.classList.toggle("activo", Number(b.dataset.monto) === Number(inputMonto.value));
-    });
-    calcularMonto();
 });
 
-document.querySelectorAll(".btn-monto").forEach(boton => {
-    boton.addEventListener("click", () => {
-        inputMonto.value = boton.dataset.monto;
-        document.querySelectorAll(".btn-monto").forEach(b => b.classList.remove("activo"));
-        boton.classList.add("activo");
-        calcularMonto();
+// Botones de monto rápido
+document.querySelectorAll(".btn-monto").forEach(b => {
+    b.addEventListener("click", () => {
+        document.querySelectorAll(".btn-monto").forEach(btn => btn.classList.remove("activo"));
+        b.classList.add("activo");
+        document.getElementById("montoRecarga").value = b.dataset.monto;
+        document.getElementById("montoRecarga").dispatchEvent(new Event("input"));
     });
 });
 
-// ═══════════════════════════════════════════════
-// COPIAR
-// ═══════════════════════════════════════════════
-async function copiar(texto) {
-    try {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(texto);
-        } else {
-            const auxiliar = document.createElement("textarea");
-            auxiliar.value = texto;
-            auxiliar.style.position = "fixed";
-            auxiliar.style.opacity = "0";
-            document.body.appendChild(auxiliar);
-            auxiliar.select();
-            const copiado = document.execCommand("copy");
-            auxiliar.remove();
-            if (!copiado) throw new Error("No se pudo copiar");
-        }
-        mostrarMensaje("✅ Copiado correctamente: " + texto);
-    } catch (error) {
-        mostrarMensaje("Copia manualmente: " + texto, true);
-    }
-}
-
-document.querySelectorAll("[data-copiar]").forEach(boton => {
-    boton.addEventListener("click", () => copiar(boton.dataset.copiar));
+// Copiar
+document.querySelectorAll("[data-copiar]").forEach(b => {
+    b.addEventListener("click", () => {
+        navigator.clipboard.writeText(b.dataset.copiar);
+        alert("Copiado: " + b.dataset.copiar);
+    });
 });
 
-document.getElementById("copiarMonto").addEventListener("click", () => {
-    const valor = montoBsCopiar.textContent;
-    if (valor === "— Bs") { mostrarMensaje("Primero introduce un monto.", true); return; }
-    copiar(valor);
-});
+// Enviar recarga
+document.getElementById("btnEnviar").addEventListener("click", async () => {
+    if (!usuarioActual) return alert("No has iniciado sesión.");
+    
+    const monto = Number(document.getElementById("montoRecarga").value);
+    const ref = document.getElementById("referenciaPago").value.trim().toUpperCase();
+    const btn = document.getElementById("btnEnviar");
+    const res = document.getElementById("resultado");
 
-document.getElementById("copiarTodos").addEventListener("click", () => {
-    const texto = "Banco: 0102 Banco de Venezuela\n" +
-                  "Cédula: 32824869\n" +
-                  "Teléfono: 04228242411\n" +
-                  "Monto: " + montoBsCopiar.textContent;
-    if (montoBsCopiar.textContent === "— Bs") {
-        mostrarMensaje("Primero introduce el monto de tu recarga.", true);
-        return;
-    }
-    copiar(texto);
-});
-
-function mostrarMensaje(mensaje, error = false) {
-    resultado.className = error ? "alert error visible" : "alert visible";
-    resultado.textContent = mensaje;
-}
-
-function limpiarMensaje() {
-    resultado.className = "alert";
-    resultado.textContent = "";
-}
-
-// ═══════════════════════════════════════════════
-// ENVIAR RECARGA
-// ═══════════════════════════════════════════════
-async function enviarRecarga() {
-    if (enviando) return;
-    if (!usuarioActual) {
-        mostrarMensaje("❌ Debes iniciar sesión.", true);
+    if (monto < 0.01 || !ref) {
+        res.className = "alert error";
+        res.textContent = "❌ Ingresa un monto válido y una referencia.";
         return;
     }
 
-    limpiarMensaje();
-
-    const montoUsd = Number(inputMonto.value);
-    const referencia = inputReferencia.value.trim().toUpperCase();
-
-    if (!Number.isFinite(montoUsd) || montoUsd < 0.01 || montoUsd > 500) {
-        mostrarMensaje("❌ Ingresa un monto entre $0.01 y $500.", true);
-        inputMonto.focus();
-        return;
-    }
-
-    if (!/^[A-Z0-9]{6,40}$/.test(referencia)) {
-        mostrarMensaje("❌ La referencia debe tener entre 6 y 40 caracteres alfanuméricos.", true);
-        inputReferencia.focus();
-        return;
-    }
-
-    const montoBs = Math.round(montoUsd * tasa);
-    if (montoBs <= 0) {
-        mostrarMensaje("❌ No se pudo calcular el monto en bolívares.", true);
-        return;
-    }
-
-    enviando = true;
-    btnEnviar.disabled = true;
-    btnEnviar.textContent = "⏳ Verificando...";
+    btn.disabled = true;
+    btn.textContent = "⏳ Enviando...";
 
     try {
-        const dupSnap = await db.ref("recargas_billetera")
-            .orderByChild("referencia")
-            .equalTo(referencia)
-            .once("value");
-
-        if (dupSnap.exists()) {
-            const existentes = dupSnap.val();
-            const yaUsada = Object.values(existentes).some(r =>
-                r.estado === "PENDIENTE_VERIFICACION" || r.estado === "ACREDITADA"
-            );
-            if (yaUsada) {
-                mostrarMensaje("❌ Esta referencia ya fue registrada. Si crees que es un error, contacta al administrador.", true);
-                btnEnviar.disabled = false;
-                btnEnviar.textContent = "📤 Enviar recarga";
-                enviando = false;
-                return;
-            }
-        }
-
-        const pendientesSnap = await db.ref("recargas_billetera")
-            .orderByChild("uid")
-            .equalTo(usuarioActual.uid)
-            .once("value");
-
-        if (pendientesSnap.exists()) {
-            const pendientes = Object.values(pendientesSnap.val())
-                .filter(r => r.estado === "PENDIENTE_VERIFICACION");
-            if (pendientes.length >= 3) {
-                mostrarMensaje("❌ Ya tienes 3 recargas pendientes. Espera a que se procesen antes de crear otra.", true);
-                btnEnviar.disabled = false;
-                btnEnviar.textContent = "📤 Enviar recarga";
-                enviando = false;
-                return;
-            }
-        }
-
-        btnEnviar.textContent = "⏳ Enviando...";
-
-        const ahora = new Date();
-        const recargaData = {
+        const data = {
             uid: usuarioActual.uid,
-            email: usuarioActual.email || "",
+            email: usuarioActual.email,
             id_cliente: usuarioActual.uid,
-            monto_usd: Number(montoUsd.toFixed(2)),
-            monto_bs: montoBs,
-            tasa: tasa,
-            referencia: referencia,
+            monto_usd: monto,
+            monto_bs: Math.round(monto * tasa),
+            referencia: ref,
             metodo: "PAGO MOVIL",
             estado: "PENDIENTE_VERIFICACION",
-            fecha: ahora.toISOString(),
-            fecha_legible: ahora.toLocaleString("es-VE"),
-            origen: "billetera"
+            fecha: new Date().toISOString(),
+            fecha_legible: new Date().toLocaleString("es-VE")
         };
 
-        const nuevaRecarga = db.ref("recargas_billetera").push();
-        await nuevaRecarga.set(recargaData);
+        await db.ref("recargas_billetera").push(data);
 
-        const montoFormateado = "$" + montoUsd.toFixed(2) + " USD (" + montoBs.toLocaleString("es-VE") + " Bs)";
+        res.className = "alert";
+        res.style.display = "block";
+        res.style.background = "rgba(34,197,94,.2)";
+        res.style.borderColor = "#22c55e";
+        res.style.color = "#4ade80";
+        res.textContent = "✅ Recarga enviada. El administrador la verificará pronto.";
 
-        const mensajeTelegram =
-            "💰 <b>NUEVA RECARGA DE BILLETERA</b>\n\n" +
-            "<b>👤 Cliente:</b> <code>" + (usuarioActual.email || usuarioActual.uid) + "</code>\n" +
-            "<b>💵 Monto:</b> " + montoFormateado + "\n" +
-            "<b>🔢 Referencia:</b> <code>" + referencia + "</code>\n" +
-            "<b>📅 Fecha:</b> " + recargaData.fecha_legible + "\n\n" +
-            "⚠️ Verifica el pago en tu banco y acredita manualmente.\n" +
-            "📋 Recarga ID: <code>" + nuevaRecarga.key + "</code>";
+        document.getElementById("montoRecarga").value = "";
+        document.getElementById("referenciaPago").value = "";
+        document.getElementById("montoBs").textContent = "— Bs";
+        document.getElementById("montoBsCopiar").textContent = "— Bs";
 
-        try {
-            await fetch(URL_TELEGRAM, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ mensaje: mensajeTelegram })
-            });
-        } catch (e) {
-            console.warn("Telegram:", e);
-        }
-
-        resultado.className = "alert visible";
-        resultado.replaceChildren();
-
-        const titulo = document.createElement("strong");
-        titulo.textContent = "✅ ¡Recarga enviada con éxito!";
-
-        const detalle = document.createElement("p");
-        detalle.style.marginTop = "10px";
-        detalle.textContent = "Tu recarga de " + montoFormateado + " está pendiente de verificación.";
-
-        const nota = document.createElement("p");
-        nota.style.marginTop = "10px";
-        nota.textContent = "Una vez confirmado el pago, tu saldo se actualizará automáticamente.";
-
-        const id = document.createElement("small");
-        id.style.display = "block";
-        id.style.marginTop = "12px";
-        id.textContent = "Recarga ID: " + nuevaRecarga.key;
-
-        resultado.append(titulo, detalle, nota, id);
-
-        inputMonto.value = "";
-        inputReferencia.value = "";
-        document.querySelectorAll(".btn-monto").forEach(b => b.classList.remove("activo"));
-        calcularMonto();
-
-    } catch (error) {
-        console.error("Error:", error);
-        mostrarMensaje("❌ No se pudo registrar tu recarga. Revisa tu conexión e inténtalo nuevamente.", true);
+    } catch (e) {
+        res.className = "alert error";
+        res.textContent = "❌ Error al guardar. Revisa las reglas de Firebase.";
+        console.error(e);
     } finally {
-        enviando = false;
-        btnEnviar.disabled = false;
-        btnEnviar.textContent = "📤 Enviar recarga";
+        btn.disabled = false;
+        btn.textContent = "📤 Enviar recarga";
     }
-}
-
-btnEnviar.addEventListener("click", enviarRecarga);
-
-cargarTasa();
-
-setTimeout(() => {
-    loadingOverlay.classList.add("oculto");
-}, 5000);
+});
 </script>
-
 </body>
 </html>
