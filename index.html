@@ -133,6 +133,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .menu-perfil-opcion:active,.menu-opcion:active{background:linear-gradient(90deg,rgba(37,135,255,.14),rgba(212,175,55,.08));color:var(--gold-2);}
 .menu-perfil-opcion.danger{color:#f87171;}
 .menu-divider{height:1px;background:rgba(212,175,55,.14);}
+/* NUEVO: Opción billetera destacada */
+.menu-perfil-opcion.billetera,.menu-opcion.billetera{background:linear-gradient(90deg,rgba(212,175,55,.15),rgba(212,175,55,.05));border-left:3px solid var(--gold);color:var(--gold-2);font-weight:800;}
+.menu-perfil-opcion.billetera:active,.menu-opcion.billetera:active{background:linear-gradient(90deg,rgba(212,175,55,.25),rgba(212,175,55,.1));}
 
 /* ===== TABS ===== */
 .games-menu{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 12px 10px;height:var(--tabs);-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
@@ -169,6 +172,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .qa-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:11px 3px 9px;border-radius:13px;background:linear-gradient(180deg,rgba(13,20,33,.85),rgba(8,12,20,.9));border:1px solid var(--stroke);color:#dbe4f0;font-size:9.5px;font-weight:700;text-align:center;line-height:1.15;transition:.15s;}
 .qa-item:active{transform:scale(.94);border-color:rgba(37,135,255,.4);}
 .qa-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:linear-gradient(135deg,rgba(37,135,255,.2),rgba(212,175,55,.1));border:1px solid rgba(37,135,255,.3);box-shadow:0 0 14px rgba(37,135,255,.14);}
+/* NUEVO: Botón billetera destacado */
+.qa-item.billetera{border-color:rgba(212,175,55,.4);background:linear-gradient(180deg,rgba(212,175,55,.12),rgba(13,20,33,.9));}
+.qa-item.billetera .qa-icon{background:linear-gradient(135deg,rgba(212,175,55,.3),rgba(212,175,55,.15));border-color:rgba(212,175,55,.5);box-shadow:0 0 14px rgba(212,175,55,.25);}
 
 /* ===== SECCIONES ===== */
 .seccion{scroll-margin-top:calc(var(--header) + var(--tabs) + 10px);margin-bottom:22px;}
@@ -191,13 +197,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     }
 }
 
-/* Ajustes para que se vea bien en 3 columnas */
 .grid-juegos .prod-nombre { font-size: 10px; }
 .grid-juegos .prod-meta { font-size: 8px; }
 .grid-juegos .prod-info { padding: 6px 5px 8px; }
 .grid-juegos .prod-badge { font-size: 6.5px; padding: 2px 5px; }
 
-/* ===== TARJETAS DE PRODUCTO (Estilo General) ===== */
+/* ===== TARJETAS DE PRODUCTO ===== */
 .prod-card{
     border-radius:13px;
     overflow:hidden;
@@ -269,7 +274,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     animation:none;
 }
 
-/* ===== RAIL HORIZONTAL (Solo para Gift Cards y Streaming) ===== */
+/* ===== RAIL HORIZONTAL ===== */
 .rail{
     display:flex;gap:9px;
     overflow-x:auto;
@@ -454,6 +459,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
                 </div>
             </div>
             <a href="dashboard.html" class="menu-perfil-opcion">📊 Mi Panel</a>
+            <!-- NUEVO: Opción Mi Billetera -->
+            <a href="mibilletera.html" class="menu-perfil-opcion billetera">💰 Mi Billetera</a>
             <a href="perfil.html" class="menu-perfil-opcion">👤 Editar Perfil</a>
             <a href="pedidos.html" class="menu-perfil-opcion">📦 Mis Pedidos</a>
             <div class="menu-divider"></div>
@@ -484,6 +491,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
         <div class="menu-divider"></div>
         <a href="dashboard.html" class="menu-opcion" id="menuHamburguesaDashboard" style="display:none;">
             📊 Mi Panel
+        </a>
+        <!-- NUEVO: Billetera en menú hamburguesa -->
+        <a href="mibilletera.html" class="menu-opcion billetera" id="menuHamburguesaBilletera" style="display:none;">
+            💰 Mi Billetera
         </a>
         <a href="#" class="menu-opcion" id="menuHamburguesaLogout" style="display:none;color:#ef4444;">
             🚪 Cerrar Sesión
@@ -588,8 +599,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 
 <!-- QUICK ACTIONS -->
 <section class="quick-actions" aria-label="Accesos rápidos">
-    <a href="#juegos" class="qa-item">
-        <span class="qa-icon">🎮</span>
+    <!-- NUEVO: Botón de recargar billetera (destacado) -->
+    <a href="billetera.html" class="qa-item billetera" id="qaBilletera">
+        <span class="qa-icon">💰</span>
         Recargar
     </a>
     <a href="#giftcards" class="qa-item">
@@ -612,7 +624,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
         <div class="titulo-principal">🎮 Videojuegos</div>
     </div>
 
-    <!-- CUADRÍCULA DE 3 COLUMNAS -->
     <div class="grid-juegos" id="railJuegos">
 
         <a href="freefire.html" class="prod-card game-link" data-nombre="free fire diamantes latam">
@@ -1091,6 +1102,7 @@ const menuFlotante = document.getElementById("menuFlotante");
 const menuHamburguesaLogin = document.getElementById("menuHamburguesaLogin");
 const menuHamburguesaRegister = document.getElementById("menuHamburguesaRegister");
 const menuHamburguesaDashboard = document.getElementById("menuHamburguesaDashboard");
+const menuHamburguesaBilletera = document.getElementById("menuHamburguesaBilletera");
 const menuHamburguesaLogout = document.getElementById("menuHamburguesaLogout");
 const modalLogin = document.getElementById("modalLogin");
 const loginForm = document.getElementById("loginForm");
@@ -1203,6 +1215,8 @@ function actualizarUI(user){
         menuHamburguesaLogin.style.display="none";
         menuHamburguesaRegister.style.display="none";
         menuHamburguesaDashboard.style.display="flex";
+        // NUEVO: Mostrar billetera en menú hamburguesa cuando está logueado
+        if(menuHamburguesaBilletera) menuHamburguesaBilletera.style.display="flex";
         menuHamburguesaLogout.style.display="flex";
 
         navPedidos.classList.add("tiene-pedido");
@@ -1212,6 +1226,8 @@ function actualizarUI(user){
         menuHamburguesaLogin.style.display="flex";
         menuHamburguesaRegister.style.display="flex";
         menuHamburguesaDashboard.style.display="none";
+        // NUEVO: Ocultar billetera si no está logueado
+        if(menuHamburguesaBilletera) menuHamburguesaBilletera.style.display="none";
         menuHamburguesaLogout.style.display="none";
         navPedidos.classList.remove("tiene-pedido");
     }
@@ -1339,6 +1355,24 @@ if(qaPedidos){
         if(!usuarioActual){ e.preventDefault(); abrirModalLogin(); }
     });
 }
+
+/* ========== BILLETERA ========== */
+
+// Si el usuario no está logueado y hace clic en "Recargar billetera",
+// lo mandamos al login
+const qaBilletera = document.getElementById("qaBilletera");
+if(qaBilletera){
+    qaBilletera.addEventListener("click",(e)=>{
+        if(!usuarioActual){ e.preventDefault(); abrirModalLogin(); }
+    });
+}
+
+// Lo mismo para el enlace del menú de perfil (por si acaso)
+document.querySelectorAll('a[href="mibilletera.html"]').forEach(link => {
+    link.addEventListener("click", (e) => {
+        if(!usuarioActual){ e.preventDefault(); abrirModalLogin(); }
+    });
+});
 
 /* ========== BUSCADOR ========== */
 
